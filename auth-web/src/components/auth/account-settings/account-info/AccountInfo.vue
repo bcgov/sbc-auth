@@ -16,21 +16,6 @@
               <div class="value__title">{{ currentOrganization.name }}</div>
             </div>
           </div>
-          <div class="nv-list-item mb-10">
-            <div class="name" id="accountStatus">Status</div>
-            <div class="value" aria-labelledby="accountStatus">
-              <div class="value__title">
-                <v-chip
-                  small
-                  label
-                  class="font-weight-bold"
-                  :color="getStatusColor(currentOrganization.orgStatus)"
-                >
-                  {{ getStatusText(currentOrganization.orgStatus) }}
-                </v-chip>
-              </div>
-            </div>
-          </div>
         </div>
 
         <template v-show="!anonAccount">
@@ -173,19 +158,21 @@
       </template>
       <template v-slot:text>
         <p class="px-10">{{ dialogText }}<br/></p>
-        <v-select
-          class="px-10"
-          filled
-          label="Reason for Suspension"
-          req
-          :rules="suspensionSelectRules"
-          :items="suspensionReasonCodes"
-          item-text="desc"
-          item-value="code"
-          v-model="selectedSuspensionReasonCode"
-          v-if="isAccountStatusActive"
-          data-test='select-suspend-account-reason'
-        />
+        <v-form ref="suspensionReasonForm" id="suspensionReasonForm">
+          <v-select
+            class="px-10"
+            filled
+            label="Reason for Suspension"
+            req
+            :rules="suspensionSelectRules"
+            :items="suspensionReasonCodes"
+            item-text="desc"
+            item-value="code"
+            v-model="selectedSuspensionReasonCode"
+            v-if="isAccountStatusActive"
+            data-test='select-suspend-account-reason'
+          />
+        </v-form>
       </template>
       <template v-slot:actions>
         <v-btn
@@ -194,7 +181,6 @@
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
           data-test='btn-suspend-dialog'
           @click="confirmSuspendAccount()"
-          :disabled="isConfirmSuspendButtonDisabled"
         >
           {{ isAccountStatusActive ? 'Suspend' : 'Unsuspend' }}
         </v-btn>
@@ -298,6 +284,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private dialogText: string = ''
   private selectedSuspensionReasonCode: string = ''
   private suspensionCompleteDialogText: string = ''
+  private isSuspensionReasonFormValid: boolean = false
 
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
@@ -317,7 +304,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     editAccountForm: HTMLFormElement,
     mailingAddress:HTMLFormElement,
     suspendAccountDialog:ModalDialog,
-    suspensionCompleteDialog:ModalDialog
+    suspensionCompleteDialog:ModalDialog,
+    suspensionReasonForm: HTMLFormElement
   }
 
   private isFormValid (): boolean {
@@ -330,10 +318,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   private get isSuspendButtonVisible (): boolean {
     return (this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED) && this.currentUser.roles.includes(Role.StaffSuspendAccounts)
-  }
-
-  private get isConfirmSuspendButtonDisabled (): boolean {
-    return this.currentOrganization.statusCode === AccountStatus.ACTIVE && this.selectedSuspensionReasonCode.length === 0
   }
 
   get editAccountUrl () {
@@ -388,11 +372,14 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async confirmSuspendAccount (): Promise<void> {
-    await this.suspendOrganization(this.selectedSuspensionReasonCode)
-    this.$refs.suspendAccountDialog.close()
-    if (this.currentOrganization.statusCode === AccountStatus.SUSPENDED) {
-      this.suspensionCompleteDialogText = `The account ${this.currentOrganization.name} has been suspended.`
-      this.$refs.suspensionCompleteDialog.open()
+    this.isSuspensionReasonFormValid = this.$refs.suspensionReasonForm?.validate()
+    if (this.isSuspensionReasonFormValid) {
+      await this.suspendOrganization(this.selectedSuspensionReasonCode)
+      this.$refs.suspendAccountDialog.close()
+      if (this.currentOrganization.statusCode === AccountStatus.SUSPENDED) {
+        this.suspensionCompleteDialogText = `The account ${this.currentOrganization.name} has been suspended.`
+        this.$refs.suspensionCompleteDialog.open()
+      }
     }
   }
 
