@@ -12,7 +12,7 @@
           {{suspendedDate}}
         </div>
         <div v-else class="d-flex flex-column ml-7">
-          <div class="title font-weight-bold">Account Suspended</div>
+          <div class="title font-weight-bold">Account Suspended ({{ suspendedReason() }})</div>
           <div class="d-flex">
             <span>Date Suspended: {{ suspendedDate }}<span class="vertical-line"></span> Suspended by: {{ suspendedBy }}</span>
           </div>
@@ -26,16 +26,19 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { AccountStatus } from '@/util/constants'
+import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
+const CodesModule = namespace('codes')
 
 @Component
 export default class AccountSuspendAlert extends Vue {
   @OrgModule.Action('calculateFailedInvoices') private calculateFailedInvoices!: () => FailedInvoice
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
   private formatDate = CommonUtils.formatDisplayDate
 
   private totalTransactionAmount = 0
@@ -52,6 +55,10 @@ export default class AccountSuspendAlert extends Vue {
 
   private get suspendedBy (): string {
     return this.currentOrganization?.decisionMadeBy
+  }
+
+  private suspendedReason (): string {
+    return this.suspensionReasonCodes?.find(suspensionReasonCode => suspensionReasonCode?.code === this.currentOrganization?.suspensionReasonCode)?.desc
   }
 
   async mounted () {
