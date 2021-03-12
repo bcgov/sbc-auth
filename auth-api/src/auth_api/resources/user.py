@@ -106,10 +106,11 @@ class Users(Resource):
 
             user = UserService.save_from_jwt_token(token, request_json)
             response, status = user.as_dict(), http_status.HTTP_201_CREATED
+            # Add the user to public_users group if the user doesn't have public_user group
+            KeycloakService.join_users_group(token)
             # For anonymous users, there are no invitation process for members,
             # so whenever they login perform this check and add them to corresponding groups
             if token.get('loginSource', '') == LoginSource.BCROS.value:
-                KeycloakService.join_users_group(token)
                 if len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
                     KeycloakService.join_account_holders_group()
 
