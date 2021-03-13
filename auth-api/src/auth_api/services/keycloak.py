@@ -179,7 +179,8 @@ class KeycloakService:
         # Cannot check the group from token, so check if the role 'edit' is already present.
         if login_source in (LoginSource.BCEID.value, LoginSource.BCSC.value) and Role.PUBLIC_USER.value not in roles:
             group_name = GROUP_PUBLIC_USERS
-        elif login_source == LoginSource.STAFF.value and Role.GOV_ACCOUNT_USER.value not in roles:
+        elif login_source == LoginSource.STAFF.value \
+                and Role.GOV_ACCOUNT_USER.value not in roles and Role.STAFF.value not in roles:
             group_name = GROUP_GOV_ACCOUNT_USERS
         elif login_source == LoginSource.BCROS.value and Role.ANONYMOUS_USER.value not in roles:
             group_name = GROUP_ANONYMOUS_USERS
