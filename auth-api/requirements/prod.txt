@@ -26,3 +26,4 @@ sqlalchemy-utils
 Flask-Caching
 asyncio-nats-client
 asyncio-nats-streaming
+sqlalchemy<1.4
