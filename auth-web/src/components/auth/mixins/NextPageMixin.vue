@@ -115,7 +115,7 @@ export default class NextPageMixin extends Vue {
           } else {
             bceidNextStep = Pages.CHOOSE_AUTH_METHOD
           }
-        } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW) {
+        } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`

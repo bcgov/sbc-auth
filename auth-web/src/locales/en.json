@@ -108,6 +108,9 @@
   "unsuspendAccountText": "Are you sure you want to unsuspend access to this account?",
   "suspendAccountConfirmTitle": "Account has been suspended",
   "inviteUsersFormText": "Enter an email address and select a role to invite a new team members to this account.",
-  "inviteUsersFormTextGovM": "Enter team member's IDIR email and select a role. Team members would be able to access this account with thier IDIR username and password."
+  "inviteUsersFormTextGovM": "Enter team member's IDIR email and select a role. Team members would be able to access this account with thier IDIR username and password.",
+  "removeBusinessOptionModalSubTitle": "Please select one of the two choices below to remove this business from the account",
+  "removeBusinessOptionModalResetPasscode": "<li>Business will be removed from this account</li><li>New business passcode will be generated and will cancel the old business passcode</li><li>New business passcode will be sent through email to the person who will be responsible for managing this business moving forward</li>",
+  "removeBusinessOptionModalDonotResetPasscode": "<li>Business will be removed from this account</li><li>The current passcode for this business will be cancelled</li><li>You will not be able to add this business back to your account without a new passcode</li>"
 
 }

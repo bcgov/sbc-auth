@@ -79,6 +79,7 @@ export interface UpdateMemberPayload {
 export interface RemoveBusinessPayload {
   orgIdentifier: number
   business: Business
+  passcodeResetEmail?: string
 }
 
 export interface Member {
