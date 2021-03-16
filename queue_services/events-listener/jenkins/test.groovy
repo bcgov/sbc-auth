@@ -26,14 +26,14 @@ def APP_NAME = 'events-listener'
 def DESTINATION_TAG = 'test'
 def TOOLS_TAG = 'tools'
 
-def NAMESPACE_APP = '1rdehl'
+def NAMESPACE_APP = '6e0e49'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
 def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
-def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
+def ROCKETCHAT_DEVELOPER_CHANNEL='#registries-bot'
 
-// post a notify to rocketchat
-def rocketChatNotificaiton(token, channel, comments) {
+// post a notification to rocketchat
+def rocketChatNotification(token, channel, comments) {
   def payload = JsonOutput.toJson([text: comments, channel: channel])
   def rocketChatUrl = "https://chat.developer.gov.bc.ca/hooks/" + "${token}"
 
@@ -107,12 +107,11 @@ node {
             currentBuild.result = "SUCCESS"
         } else {
             currentBuild.result = "FAILURE"
-        }
-
-        ROCKETCHAT_TOKEN = sh (
-                script: """oc get secret/apitest-secrets -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
+            ROCKETCHAT_TOKEN = sh (
+                script: """oc get secret/rocketchat-secret -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
                     returnStdout: true).trim()
 
-        rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+            rocketChatNotification("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+        }
     }
 }
