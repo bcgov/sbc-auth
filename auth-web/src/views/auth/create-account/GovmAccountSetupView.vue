@@ -122,6 +122,7 @@ export default class GovmAccountSetupView extends Vue {
       // await this.syncMembership(organization.id)
       // this.$store.commit('updateHeader')
       // this.$router.push('/setup-account-success')
+      this.isLoading = false
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
