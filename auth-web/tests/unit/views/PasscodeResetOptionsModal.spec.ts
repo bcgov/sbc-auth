@@ -1,5 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -68,21 +69,12 @@ describe('PasscodeResetOptionsModal.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('boilerplate validation', () => {
-    wrapper.vm.isDialogOpen = true
-
-    expect(wrapper.find("[data-test='dialog-remove-business-options']").exists()).toBe(true)
-    expect(wrapper.find("[data-test='text-donot-reset-passcode-summary']").exists()).toBe(true)
-    expect(wrapper.find("[data-test='text-reset-passcode-summary']").exists()).toBe(true)
-    expect(wrapper.vm.isResetPasscode).toBeFalsy()
-  })
-
   it('Donot reset passcode emits remove-business event', () => {
     wrapper.vm.isDialogOpen = true
     wrapper.vm.isResetPasscode = false
     const spy = jest.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
 
-    wrapper.find("[data-test='btn-reset-passcode']").trigger('click')
+    wrapper.vm.confirmPasscodeResetOptions()
     expect(spy).toBeCalled()
     const donotResetEvent = wrapper.emitted('confirm-passcode-reset-options')
     expect(donotResetEvent).toBeTruthy()
@@ -111,7 +103,7 @@ describe('PasscodeResetOptionsModal.vue', () => {
     wrapper.setMethods({ isFormValid: stub })
     const spy = jest.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
 
-    wrapper.find("[data-test='btn-reset-passcode']").trigger('click')
+    wrapper.vm.confirmPasscodeResetOptions()
     expect(spy).toBeCalled()
     const resetEvent = wrapper.emitted('confirm-passcode-reset-options')
     expect(resetEvent).toBeTruthy()
