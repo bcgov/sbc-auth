@@ -207,3 +207,11 @@ export interface CFSAccountDetails {
   cfsSiteNumber: string
   status: string
 }
+
+export interface GLInfo {
+  clientCode: string;
+  resposiblityCenter: string;
+  accountNumber: string;
+  standardObject: string;
+  project: string;
+}
