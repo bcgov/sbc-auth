@@ -115,6 +115,6 @@ describe('PasscodeResetOptionsModal.vue', () => {
     expect(spy).toBeCalled()
     const resetEvent = wrapper.emitted('confirm-passcode-reset-options')
     expect(resetEvent).toBeTruthy()
-    expect(resetEvent[0]).toEqual(['test1@gmail.com'])
+    expect(resetEvent[0]).toEqual([emailValue])
   })
 })
