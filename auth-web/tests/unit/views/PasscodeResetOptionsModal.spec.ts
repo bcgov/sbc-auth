@@ -7,27 +7,26 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 const mockSession = {
-  'NRO_URL': 'Mock NRO URL',
-  'NAME_REQUEST_URL': 'Mock Name Request URL'
+  'NAME_REQUEST_URL': 'Mock Name Request URL',
+  'NRO_URL': 'Mock NRO URL'
 }
+document.body.setAttribute('data-app', 'true')
+const vuetify = new Vuetify({})
+const router = new VueRouter()
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-document.body.setAttribute('data-app', 'true')
-
-const router = new VueRouter()
-const vuetify = new Vuetify({})
 
 describe('PasscodeResetOptionsModal.vue', () => {
   let wrapper: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    const localVue = createLocalVue()
-    localVue.use(Vuex)
     const MyStub = {
       template: '<div />'
     }
+    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    const localVue = createLocalVue()
+    localVue.use(Vuex)
 
     wrapper = mount(PasscodeResetOptionsModal, {
       localVue,
@@ -37,11 +36,17 @@ describe('PasscodeResetOptionsModal.vue', () => {
         $t: (msg) => {
           switch (msg) {
             case 'removeBusinessOptionModalResetPasscode':
-              return '<li>Business will be removed from this account</li><li>New business passcode will be generated and will cancel the old business passcode</li><li>New business passcode will be sent through email to the person who will be responsible for managing this business moving forward</li>'
+              return '<li>Business will be removed from this account</li>' +
+              '<li>New business passcode will be generated and will cancel the old business passcode</li>' +
+              '<li>New business passcode will be sent through email to the person who will be responsible for managing this business moving forward</li>'
             case 'removeBusinessOptionModalDonotResetPasscode':
-              return '<li>Business will be removed from this account</li><li>The current passcode for this business will be cancelled</li><li>You will not be able to add this business back to your account without a new passcode</li>'
+              return '<li>Business will be removed from this account</li>' +
+              '<li>The current passcode for this business will be cancelled</li><li>You will not be able to add this' +
+              'business back to your account without a new passcode</li>'
             case 'removeBusinessOptionModalSubTitle':
               return 'Please select one of the two choices below to remove this business from the account'
+            default:
+              return ''
           }
         }
       },
@@ -79,32 +84,37 @@ describe('PasscodeResetOptionsModal.vue', () => {
 
     wrapper.find("[data-test='btn-reset-passcode']").trigger('click')
     expect(spy).toBeCalled()
-    expect(wrapper.emitted('confirm-passcode-reset-options')).toBeTruthy()
-    expect(wrapper.emitted('confirm-passcode-reset-options')[0]).toEqual([null])
+    const donotResetEvent = wrapper.emitted('confirm-passcode-reset-options')
+    expect(donotResetEvent).toBeTruthy()
+    expect(donotResetEvent[0]).toEqual([null])
   })
 
   it('Reset passcode validations', () => {
     wrapper.vm.isDialogOpen = true
     wrapper.vm.isResetPasscode = false
-    wrapper.vm.emailAddress = 'test1@gmail.com'
-    wrapper.vm.confirmedEmailAddress = 'test2@gmail.com'
+    wrapper.vm.emailAddress = 'test3@gmail.com'
+    wrapper.vm.confirmedEmailAddress = 'test22@gmail.com'
     const result = wrapper.vm.emailMustMatch()
     expect(result).toEqual('Email addresses must match')
   })
 
   it('Reset passcode emits remove-business event', () => {
+    const emailValue = 'test1@gmail.com'
     wrapper.vm.isDialogOpen = true
     wrapper.vm.isResetPasscode = true
-    wrapper.vm.emailAddress = 'test1@gmail.com'
-    wrapper.vm.confirmedEmailAddress = 'test1@gmail.com'
+    wrapper.vm.emailAddress = emailValue
+    wrapper.vm.confirmedEmailAddress = emailValue
 
-    const stub = jest.fn().mockImplementation(() => { return true })
+    const stub = jest.fn().mockImplementation(() => {
+      return true
+    })
     wrapper.setMethods({ isFormValid: stub })
     const spy = jest.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
 
     wrapper.find("[data-test='btn-reset-passcode']").trigger('click')
     expect(spy).toBeCalled()
-    expect(wrapper.emitted('confirm-passcode-reset-options')).toBeTruthy()
-    expect(wrapper.emitted('confirm-passcode-reset-options')[0]).toEqual(['test1@gmail.com'])
+    const resetEvent = wrapper.emitted('confirm-passcode-reset-options')
+    expect(resetEvent).toBeTruthy()
+    expect(resetEvent[0]).toEqual(['test1@gmail.com'])
   })
 })
