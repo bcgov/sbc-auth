@@ -109,7 +109,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
+            org.status_code = OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
 
@@ -737,8 +737,8 @@ class Org:  # pylint: disable=too-many-public-methods
         # Current User
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
 
-        # If status is PENDING_STAFF_REVIEW handle affidavit approve process, else raise error
-        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value:
+        # If status is PENDING_AFFIDAVIT_REVIEW handle affidavit approve process, else raise error
+        if org.status_code == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value:
             AffidavitService.approve_or_reject(org_id, is_approved, user)
         else:
             raise BusinessException(Error.INVALID_INPUT, None)

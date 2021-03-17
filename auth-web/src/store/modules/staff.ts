@@ -200,7 +200,7 @@ export default class StaffModule extends VuexModule {
 
   @Action({ commit: 'setPendingStaffOrgs', rawError: true })
   public async syncPendingStaffOrgs () {
-    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_STAFF_REVIEW)
+    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_AFFIDAVIT_REVIEW)
     return response?.data?.orgs || []
   }
 

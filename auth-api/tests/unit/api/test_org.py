@@ -173,19 +173,19 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
     orgs = json.loads(rv.data)
     assert orgs.get('total') == 2
 
-    rv = client.get('/api/v1/orgs?status=ACTIVE&status=SUSPENDED&status=PENDING_STAFF_REVIEW',
+    rv = client.get('/api/v1/orgs?status=ACTIVE&status=SUSPENDED&status=PENDING_AFFIDAVIT_REVIEW',
                     headers=headers, content_type='application/json')
 
     orgs = json.loads(rv.data)
     assert orgs.get('total') == 3
 
-    rv = client.get('/api/v1/orgs?status=ACTIVE&status=SUSPENDED&status=PENDING_STAFF_REVIEW&status=ABCS',
+    rv = client.get('/api/v1/orgs?status=ACTIVE&status=SUSPENDED&status=PENDING_AFFIDAVIT_REVIEW&status=ABCS',
                     headers=headers, content_type='application/json')
 
     orgs = json.loads(rv.data)
     assert orgs.get('total') == 3
 
-    rv = client.get('/api/v1/orgs?status=PENDING_STAFF_REVIEW',
+    rv = client.get('/api/v1/orgs?status=PENDING_AFFIDAVIT_REVIEW',
                     headers=headers, content_type='application/json')
 
     orgs = json.loads(rv.data)
@@ -1532,7 +1532,7 @@ def test_search_orgs_with_pending_affidavits(client, jwt, session, keycloak_mock
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
-    org_search_response = client.get('/api/v1/orgs?status=PENDING_STAFF_REVIEW',
+    org_search_response = client.get('/api/v1/orgs?status=PENDING_AFFIDAVIT_REVIEW',
                                      headers=headers, content_type='application/json')
 
     assert len(org_search_response.json.get('orgs')) == 1
