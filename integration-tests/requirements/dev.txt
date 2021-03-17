@@ -1,0 +1,13 @@
+# Everything the developer needs in addition to the production requirements
+-r prod.txt
+
+flake8
+flake8-blind-except
+flake8-debugger
+flake8-docstrings
+flake8-isort
+flake8-quotes
+autopep8
+pydocstyle
+FreezeGun
+pylint

@@ -48,13 +48,7 @@
 
       <AffiliatedEntityList
         @add-business="showAddBusinessModal()"
-        @remove-business="showPasscodeResetOptionsModal($event)"
-      />
-
-      <PasscodeResetOptionsModal
-      ref="passcodeResetOptionsModal"
-      data-test="dialog-passcode-reset-options"
-      @confirm-passcode-reset-options="remove($event)"
+        @remove-business="showConfirmRemoveModal($event)"
       />
 
       <!-- Add Business Dialog -->
@@ -134,7 +128,7 @@
       </ModalDialog>
 
       <!-- Dialog for confirming business removal -->
-<!--       <ModalDialog
+      <ModalDialog
         ref="confirmDeleteDialog"
         :title="dialogTitle"
         :text="dialogText"
@@ -148,7 +142,7 @@
           <v-btn large color="primary" @click="remove()" data-test="dialog-remove-button">Remove</v-btn>
           <v-btn large color="default" @click="cancelConfirmDelete()" data-test="dialog-cancel-button">Cancel</v-btn>
         </template>
-      </ModalDialog> -->
+      </ModalDialog>
     </v-container>
   </div>
 </template>
@@ -168,7 +162,6 @@ import { Business } from '@/models/business'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import i18n from '@/plugins/i18n'
 
 @Component({
@@ -176,8 +169,7 @@ import i18n from '@/plugins/i18n'
     AddBusinessForm,
     AddNameRequestForm,
     AffiliatedEntityList,
-    ModalDialog,
-    PasscodeResetOptionsModal
+    ModalDialog
   },
   computed: {
     ...mapState('org', [
@@ -197,7 +189,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private dialogText = ''
   private messageTextList = i18n.messages[i18n.locale]
   private isLoading = true
-  private resetPasscodeEmail: string = null
 
   protected readonly currentAccountSettings!: AccountSettings
   private readonly syncBusinesses!: () => Promise<Business[]>
@@ -209,9 +200,9 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
+    confirmDeleteDialog: ModalDialog
     addBusinessDialog: ModalDialog
     addNRDialog: ModalDialog
-    passcodeResetOptionsModal: PasscodeResetOptionsModal
   }
 
   private async mounted () {
@@ -328,9 +319,15 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.open()
   }
 
-  showPasscodeResetOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
+  showConfirmRemoveModal (removeBusinessPayload: RemoveBusinessPayload) {
     this.removeBusinessPayload = removeBusinessPayload
-    this.$refs.passcodeResetOptionsModal.open()
+    this.dialogTitle = 'Confirm Remove Business'
+    this.dialogText = 'Are you sure you wish to remove this business?'
+    this.$refs.confirmDeleteDialog.open()
+  }
+
+  cancelConfirmDelete () {
+    this.$refs.confirmDeleteDialog.close()
   }
 
   cancelAddBusiness () {
@@ -341,16 +338,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.close()
   }
 
-  async remove (resetPasscodeEmail: string) {
-    try {
-      this.removeBusinessPayload.resetPasscodeEmail = resetPasscodeEmail
-      this.$refs.passcodeResetOptionsModal.close()
-      await this.removeBusiness(this.removeBusinessPayload)
-      await this.syncBusinesses()
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.log('Error during remove business event !')
-    }
+  async remove () {
+    this.$refs.confirmDeleteDialog.close()
+    await this.removeBusiness(this.removeBusinessPayload)
+    await this.syncBusinesses()
   }
 
   close () {

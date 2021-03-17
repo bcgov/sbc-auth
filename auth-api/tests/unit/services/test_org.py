@@ -733,7 +733,7 @@ def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unu
         assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
-        assert dictionary['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+        assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         assert dictionary['access_type'] == AccessType.EXTRA_PROVINCIAL.value
         mock_notify.assert_called()
 
@@ -748,7 +748,7 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint
         assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
-        assert dictionary['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+        assert dictionary['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         assert dictionary['access_type'] == AccessType.REGULAR_BCEID.value
         mock_notify.assert_called()
 
@@ -777,7 +777,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:di
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
         org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
         org_dict = org.as_dict()
-        assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+        assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         org = OrgService.approve_or_reject(org_dict['id'], is_approved=True, token_info=token_info)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.ACTIVE.value
@@ -795,7 +795,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
     # 1. Create a pending affidavit
     # 2. Create org
     # 3. Reject Org, which will mark the affidavit as rejected
-    # 4. Same user create new org, which should be PENDING_STAFF_REVIEW.
+    # 4. Same user create new org, which should be PENDING_AFFIDAVIT_REVIEW.
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -804,7 +804,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
         org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
         org_dict = org.as_dict()
-        assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+        assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         org = OrgService.approve_or_reject(org_dict['id'], is_approved=False, token_info=token_info)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.REJECTED.value
@@ -812,7 +812,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
         org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
                                     token_info=token_info)
         org_dict = org.as_dict()
-        assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+        assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
         mock_notify.assert_called()
 
 

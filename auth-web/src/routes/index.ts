@@ -117,7 +117,7 @@ router.beforeEach((to, from, next) => {
         } else {
           return next({ path: `/${Pages.ACCOUNT_FREEZE}` })
         }
-      } else if (currentOrganization?.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
+      } else if (currentOrganization?.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${currentAccountSettings?.label}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
       } else if (currentAccountSettings && currentMembership?.membershipStatus === MembershipStatus.Pending) {
