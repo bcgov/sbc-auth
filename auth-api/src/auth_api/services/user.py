@@ -464,7 +464,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
 
     @classmethod
-    def find_by_jwt_token(cls, token: dict = None):
+    def find_by_jwt_token(cls, include_tos=False, token: dict = None):
         """Find user from database by user token."""
         if not token:
             return None
@@ -476,7 +476,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
         # If terms accepted , double check if there is a new TOS in place. If so, update the flag to false.
-        if user_model.is_terms_of_use_accepted:
+        if user_model.is_terms_of_use_accepted and include_tos:
             document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
                 else DocumentType.TERMS_OF_USE.value
             # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison

@@ -245,7 +245,8 @@ class User(Resource):
         """Return the user profile associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
         try:
-            response, status = UserService.find_by_jwt_token(token).as_dict(), http_status.HTTP_200_OK
+            response, status = UserService.find_by_jwt_token(include_tos=True,
+                                                             token=token).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
