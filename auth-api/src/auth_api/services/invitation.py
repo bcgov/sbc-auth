@@ -104,7 +104,7 @@ class Invitation:
         # notify admin if staff adds team members
         is_staff_access = token_info and 'staff' in token_info.get('realm_access', {}).get('roles', None)
         if is_staff_access and invitation_type == InvitationType.STANDARD.value:
-            publish_to_mailer('teamMemberInvited', org_id)
+            publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
         return Invitation(invitation)
 
     @staticmethod
