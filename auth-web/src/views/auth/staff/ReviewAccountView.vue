@@ -257,7 +257,7 @@ export default class ReviewAccountView extends Vue {
   private readonly accountStatusEnum = AccountStatus
 
   private get canSelect (): boolean {
-    return this.accountUnderReview.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW
+    return this.accountUnderReview.statusCode === AccountStatus.PENDING_STAFF_REVIEW
   }
 
   private get statusLabel (): string {
@@ -266,7 +266,7 @@ export default class ReviewAccountView extends Vue {
         return 'Approved'
       case AccountStatus.REJECTED:
         return 'Rejected'
-      case AccountStatus.PENDING_AFFIDAVIT_REVIEW:
+      case AccountStatus.PENDING_STAFF_REVIEW:
         return 'Pending'
       default:
         return ''
@@ -274,7 +274,7 @@ export default class ReviewAccountView extends Vue {
   }
 
   private get isPendingReviewPage () {
-    return this.accountUnderReview?.statusCode === AccountStatus.PENDING_AFFIDAVIT_REVIEW
+    return this.accountUnderReview?.statusCode === AccountStatus.PENDING_STAFF_REVIEW
   }
 
   private formatDate (date: Date): string {

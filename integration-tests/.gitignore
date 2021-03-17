@@ -1,7 +1,0 @@
-**.env
-
-.vscode
-.history
-.pytest_cache
-venv
-**test_results/

@@ -275,7 +275,10 @@ export default class OrgModule extends VuexModule {
       response = await UserService.getMembership(orgId)
       membership = response?.data
       const org: Organization = this.context.state['currentOrganization']
-      const res = await PermissionService.getPermissions(org?.statusCode, membership?.membershipTypeCode)
+      const currentAccountSettings = this.context.state['currentAccountSettings']
+      const statusCode = org && org.statusCode ? org?.statusCode : currentAccountSettings.accountStatus
+      // to fix permission issue. check currentOrganization account , if its not set take status from currentAccountSettings
+      const res = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode)
       permissions = res?.data
     } else {
       // Check for better approach
