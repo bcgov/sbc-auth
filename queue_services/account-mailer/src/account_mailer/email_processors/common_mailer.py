@@ -27,20 +27,25 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
     """Build the email for Account notification."""
     logger.debug('account  notification: %s', org_id)
 
-    org: OrgModel = OrgModel.find_by_id(org_id)
+    account_name: str = None
+    if org_id:
+        org: OrgModel = OrgModel.find_by_id(org_id)
+        account_name = org.name
+
     # fill in template
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name)
     current_time = datetime.now()
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     jinja_kwargs = {
-        'account_name': org.name,
+        'account_name': account_name,
         'url': get_login_url(),
         'today': current_time.strftime('%m-%d-%Y'),
         'logo_url': logo_url,
         **kwargs
     }
     html_out = jnja_template.render(jinja_kwargs)
+
     return {
         'recipients': recipients,
         'content': {
