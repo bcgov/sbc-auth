@@ -186,7 +186,7 @@ def test_accept_gov_account_invitation(client, jwt, session):  # pylint:disable=
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
-    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='IDIR'))
+    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.get_test_user(user_id, source='IDIR', roles=[]))
     client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
     rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token), headers=headers_invitee,
                     content_type='application/json')

@@ -20,16 +20,22 @@ from auth_api.services.queue_publisher import publish_response
 CONFIG = get_named_config()
 
 
-def publish_to_mailer(notification_type, org_id, data=None):
+def publish_to_mailer(notification_type, org_id: str = None, data=None, business_identifier: str = None):
     """Publish from auth to mailer."""
     if data is None:
         data = {
             'accountId': org_id,
         }
+    source: str = None
+    if org_id:
+        source = f'https://api.auth.bcregistry.gov.bc.ca/v1/accounts/{org_id}'
+    elif business_identifier:
+        source = f'https://api.auth.bcregistry.gov.bc.ca/v1/entities/{business_identifier}'
+
     payload = {
         'specversion': '1.x-wip',
         'type': f'bc.registry.auth.{notification_type}',
-        'source': f'https://api.auth.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
+        'source': source,
         'id': org_id,
         'time': f'{datetime.now()}',
         'datacontenttype': 'application/json',

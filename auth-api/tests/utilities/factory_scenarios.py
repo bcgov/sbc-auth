@@ -379,7 +379,7 @@ class TestJwtClaims(dict, Enum):
         }
 
     @staticmethod
-    def get_test_user(sub, source: str = 'PASSCODE'):
+    def get_test_user(sub, source: str = 'PASSCODE', roles=['edit', 'staff', 'tester']):
         """Return test user with subject from argument."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
@@ -389,11 +389,9 @@ class TestJwtClaims(dict, Enum):
             'preferred_username': 'CP1234567',
             'username': 'CP1234567',
             'realm_access': {
-                'roles': [
-                    'edit', 'uma_authorization', 'staff', 'tester'
-                ]
+                'roles': roles
             },
-            'roles': ['edit', 'uma_authorization', 'staff', 'tester'],
+            'roles': roles,
             'loginSource': source
         }
 
