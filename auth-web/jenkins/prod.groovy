@@ -27,54 +27,11 @@ def SOURCE_TAG = 'test'
 def DESTINATION_TAG = 'prod'
 def TOOLS_TAG = 'tools'
 
-def NAMESPACE_APP = '1rdehl'
+def NAMESPACE_APP = '3b2420'
 def NAMESPACE_BUILD = "${NAMESPACE_APP}"  + '-' + "${TOOLS_TAG}"
 def NAMESPACE_DEPLOY = "${NAMESPACE_APP}" + '-' + "${DESTINATION_TAG}"
 
-def ROCKETCHAT_DEVELOPER_CHANNEL='#relationship-developers'
-
-// post a notification to rocketchat
-def rocketChatNotificaiton(token, channel, comments) {
-  def payload = JsonOutput.toJson([text: comments, channel: channel])
-  def rocketChatUrl = "https://chat.developer.gov.bc.ca/hooks/" + "${token}"
-
-  sh(returnStdout: true,
-     script: "curl -X POST -H 'Content-Type: application/json' --data \'${payload}\' ${rocketChatUrl}")
-}
-
-
-@NonCPS
-boolean triggerBuild(String contextDirectory) {
-    // Determine if code has changed within the source context directory.
-    def changeLogSets = currentBuild.changeSets
-    def filesChangeCnt = 0
-    for (int i = 0; i < changeLogSets.size(); i++) {
-        def entries = changeLogSets[i].items
-        for (int j = 0; j < entries.length; j++) {
-            def entry = entries[j]
-            //echo "${entry.commitId} by ${entry.author} on ${new Date(entry.timestamp)}: ${entry.msg}"
-            def files = new ArrayList(entry.affectedFiles)
-            for (int k = 0; k < files.size(); k++) {
-                def file = files[k]
-                def filePath = file.path
-                //echo ">> ${file.path}"
-                if (filePath.contains(contextDirectory)) {
-                    filesChangeCnt = 1
-                    k = files.size()
-                    j = entries.length
-                }
-            }
-        }
-    }
-
-    if ( filesChangeCnt < 1 ) {
-        echo('The changes do not require a build.')
-        return false
-    } else {
-        echo('The changes require a build.')
-        return true
-    }
-}
+def ROCKETCHAT_DEVELOPER_CHANNEL='#registries-bot'
 
 // Get an image's hash tag
 String getImageTagHash(String imageName, String tag = "") {
@@ -85,6 +42,15 @@ String getImageTagHash(String imageName, String tag = "") {
 
     def istag = openshift.raw("get istag ${imageName}:${tag} -o template --template='{{.image.dockerImageReference}}'")
     return istag.out.tokenize('@')[1].trim()
+}
+
+// post a notification to rocketchat
+def rocketChatNotification(token, channel, comments) {
+  def payload = JsonOutput.toJson([text: comments, channel: channel])
+  def rocketChatUrl = "https://chat.developer.gov.bc.ca/hooks/" + "${token}"
+
+  sh(returnStdout: true,
+     script: "curl -X POST -H 'Content-Type: application/json' --data \'${payload}\' ${rocketChatUrl}")
 }
 
 node {
@@ -160,12 +126,11 @@ node {
             currentBuild.result = "SUCCESS"
         } else {
             currentBuild.result = "FAILURE"
-        }
-
-        ROCKETCHAT_TOKEN = sh (
-                script: """oc get secret/apitest-secrets -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
+            ROCKETCHAT_TOKEN = sh (
+                script: """oc get secret/rocketchat-secret -n ${NAMESPACE_BUILD} -o template --template="{{.data.ROCKETCHAT_TOKEN}}" | base64 --decode""",
                     returnStdout: true).trim()
 
-        rocketChatNotificaiton("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+            rocketChatNotification("${ROCKETCHAT_TOKEN}", "${ROCKETCHAT_DEVELOPER_CHANNEL}", "${APP_NAME} build and deploy to ${DESTINATION_TAG} ${currentBuild.result}!")
+        }
     }
 }
