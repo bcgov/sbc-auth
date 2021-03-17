@@ -56,10 +56,6 @@ describe('GeneratePasscodeView.vue', () => {
     expect(wrapper.find('[data-test="text-confirm-email-address"]')).toBeTruthy()
   })
 
-  it('match snapshot', () => {
-    expect(wrapper.html()).toMatchSnapshot()
-  })
-
   it('email Rules', () => {
     wrapper.vm.isResetPasscode = false
     wrapper.vm.emailAddress = 'test3@gmail.com'
