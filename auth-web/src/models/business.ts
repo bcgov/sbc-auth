@@ -30,10 +30,11 @@ export interface BusinessSearchResultDto {
     businessIdentifier: string
     businessNumber?: string
     name?: string
-    accessType?: string;
-    orgType?: string;
+    accessType?: string
+    orgType?: string
     statusCode?:string
-    account: string;
+    account: string
+    entity?: string
 }
 
 export interface Businesses {

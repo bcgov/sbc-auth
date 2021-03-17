@@ -1,113 +1,85 @@
 <template>
- <v-dialog v-model="isDialogOpen" max-width="800" :persistent="true" data-test="dialog-generate-passcode">
-    <v-card>
-      <v-card-title data-test="title-generate-passcode">Generate Passcode
-        <v-btn
-        icon
-        @click="close()"
-        data-test="btn-close-generate-passcode-dialog-title"
+  <ModalDialog
+  max-width="680"
+  :isPersistent="true"
+  ref="generatePasscodeModal"
+  :showCloseIcon="true"
+  :showIcon="false"
+  title="Generate Passcode"
+  data-test="dialog-generate-passcode">
+    <template v-slot:text>
+      <p class="mb-7 mr-7">{{ $t('generatePasscodeText') }}</p>
+      <v-form ref="generatePasscodeForm" id="generatePasscodeForm">
+        <v-text-field
+        filled
+        label="Email Address"
+        req
+        persistent-hint
+        :rules="emailRules"
+        v-model="emailAddress"
+        data-test="text-email-address"
+        class="generate-passcode-input"
         >
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-card-title>
-      <v-card-text data-test="text-generate-passcode" class="d-flex flex-column">
-        <div class="flex-grow-0 flex-shrink-1" style="min-height: 5em">
-         <p class="mb-7">{{ $t('generatePasscodeText') }}:</p>
-         <ul class="mb-7">
-            <li>{{ $t('generatePasscodeSummaryFirstLine') }}</li>
-            <li>{{ $t('generatePasscodeSummarySecondLine') }}</li>
-            <li>{{ $t('generatePasscodeSummaryThirdLine') }}</li>
-         </ul>
-         <p>The new passcode will be sent to the email below:</p>
-        </div>
-        <v-form class="d-flex flex-column flex-grow-1 flex-shrink-0" style="min-height: 5em; max-height: 100%;" ref="generatePasscodeForm" id="generatePasscodeForm">
-          <div v-for="(emailAddress, index) in emailAddresses" :key="index">
-            <v-text-field
-            filled
-            label="Email Address"
-            dense
-            req
-            :rules="emailRules"
-            v-model="emailAddress.value"
-            :id="getIndexedTag('emailAddress', index)"
-            :data-test="getIndexedTag('input-passcode-emailAddress', index)"
-            class="generate-passcode-input"
-            >
-            </v-text-field>
-            <v-btn
-            v-show="index > 0"
-            icon
-            class="mt-3 ml-1 remove-btn"
-            @click="removeEmailAddress(index)"
-            :data-test="getIndexedTag('btn-remove-passcode-emailAddress', index)"
-            >
-              <v-icon>mdi-close</v-icon>
-            </v-btn>
-          </div>
-        </v-form>
-        <div>
-          <v-btn text color="primary" @click="addEmailAddress()">
-            <v-icon class="ml-n2">mdi-plus-box</v-icon>
-            <span>Add another</span>
-          </v-btn>
-        </div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn large color="primary" :disabled="!isFormValid()" type="submit" form="generatePasscodeForm" data-test="btn-generate-passcode-send">Send</v-btn>
-        <v-btn large @click="close()" data-test="btn-close-generate-passcode-dialog">Close</v-btn>
-      </v-card-actions>
-    </v-card>
- </v-dialog>
+        </v-text-field>
+        <v-text-field
+        filled
+        label="Confirm Email Address"
+        req
+        persistent-hint
+        :error-messages="emailMustMatch()"
+        v-model="confirmedEmailAddress"
+        data-test="text-confirm-email-address"
+        class="generate-passcode-input"
+        >
+        </v-text-field>
+      </v-form>
+    </template>
+    <template v-slot:actions>
+      <v-spacer></v-spacer>
+      <v-btn large @click="generate()" color="primary" data-test="btn-generate-passcode">Generate</v-btn>
+      <v-btn large @click="close()" data-test="btn-close-generate-passcode-dialog">Close</v-btn>
+    </template>
+  </ModalDialog>
 </template>
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 @Component({
+  components: {
+    ModalDialog
+  }
 })
 export default class GeneratePasscodeView extends Vue {
-  private isDialogOpen: boolean = false
-  private emailAddresses: any[] = [{
-    value: ''
-  }]
+  private emailAddress = ''
+  private confirmedEmailAddress = ''
   private emailRules = CommonUtils.emailRules()
 
   $refs: {
-    generatePasscodeForm: HTMLFormElement
+    generatePasscodeForm: HTMLFormElement,
+    generatePasscodeModal: ModalDialog
   }
 
   public open () {
-    this.isDialogOpen = true
+    this.$refs.generatePasscodeModal.open()
   }
 
-  private get isThereEmailsToSend (): boolean {
-    return !!this.emailAddresses.find(address => address.value !== '')
+  private emailMustMatch (): string {
+    return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
   }
 
   private isFormValid (): boolean {
-    return !!this.isThereEmailsToSend && this.$refs.generatePasscodeForm.validate()
+    return this.$refs.generatePasscodeForm?.validate() && !this.emailMustMatch()
   }
 
   public close () {
-    this.isDialogOpen = false
+    this.$refs.generatePasscodeModal.close()
   }
 
-  private addEmailAddress () {
-    this.emailAddresses.push({
-      value: ''
-    })
-  }
-
-  private removeEmailAddress (index: number) {
-    this.emailAddresses.splice(index, 1)
-  }
-
-  private getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  private send () {
+  private generate () {
+    if (this.isFormValid()) {
+    }
   }
 }
 </script>
@@ -115,7 +87,7 @@ export default class GeneratePasscodeView extends Vue {
 @import '@/assets/scss/theme.scss';
 .generate-passcode-input{
     display: inline-block;
-    width: 20rem;
+    width: 30rem;
 }
 
 .remove-btn {
