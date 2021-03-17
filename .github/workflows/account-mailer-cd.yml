@@ -5,6 +5,7 @@ on:
     branches:
       - development
       - master
+      - main
     paths:
       - "queue_services/account-mailer/**"
   workflow_dispatch:

@@ -1,0 +1,24 @@
+[
+    {
+        "vault": "shared",
+        "application": [
+            "address-key",
+            "api-endpoints",
+            "web-urls"
+        ]
+    },
+    {
+        "vault": "keycloak",
+        "application": [
+            "base",
+            "web-base",
+            "account-web"
+        ]
+    },
+    {
+        "vault": "relationship",
+        "application": [
+            "auth-web"
+        ]
+    }
+]
