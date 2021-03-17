@@ -42,12 +42,12 @@ jobs:
           SKIP_OP: "true"
           DEPLOYMENT: "true"
           OP_PARAMETERS: ""
-          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT4_LOGIN_REGISTRY }}
-          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT4_DOCKER_REGISTRY }}
-          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT4_SA_NAME }}
-          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT4_SA_TOKEN }}
-          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_FRONTEND_REPOSITORY }}
-          OPENSHIFT_REPOSITORY_DEPLOYMENT: ${{ secrets.OPENSHIFT4_FRONTEND_REPOSITORY }}
+          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
+          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
+          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
+          OPENSHIFT_REPOSITORY_DEPLOYMENT: ${{ secrets.OPENSHIFT_REPOSITORY }}
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master

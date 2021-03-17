@@ -104,7 +104,7 @@ export default class IncorporationSearchResultView extends Vue {
         }
       ]
     } else {
-      return [
+      /*  return [
         { title: 'Entity Dashboard',
           icon: 'mdi-view-dashboard',
           event: this.entityDashboardEvent
@@ -112,6 +112,12 @@ export default class IncorporationSearchResultView extends Vue {
         { title: 'Generate Passcode',
           icon: 'mdi-lock-outline',
           event: this.generatePasscodeEvent
+        }
+      ] */
+      return [
+        { title: 'Entity Dashboard',
+          icon: 'mdi-view-dashboard',
+          event: this.entityDashboardEvent
         }
       ]
     }
