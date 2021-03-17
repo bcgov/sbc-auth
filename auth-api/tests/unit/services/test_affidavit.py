@@ -60,7 +60,7 @@ def test_approve_org(session, keycloak_mock):  # pylint:disable=unused-argument
 
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
     org_dict = org.as_dict()
-    assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
     org = OrgService.approve_or_reject(org_dict['id'], is_approved=True, token_info=token_info)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.ACTIVE.value
@@ -78,7 +78,7 @@ def test_reject_org(session, keycloak_mock):  # pylint:disable=unused-argument
 
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
     org_dict = org.as_dict()
-    assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+    assert org_dict['org_status'] == OrgStatus.PENDING_AFFIDAVIT_REVIEW.value
     org = OrgService.approve_or_reject(org_dict['id'], is_approved=False, token_info=token_info)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.REJECTED.value

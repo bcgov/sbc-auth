@@ -1,0 +1,10 @@
+pandas
+pytest
+pydantic[dotenv]
+pyleniumio
+lovely-pytest-docker
+pytest-custom_exit_code
+zxing
+pyotp
+junitparser
+pandas
