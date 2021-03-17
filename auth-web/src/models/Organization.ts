@@ -210,7 +210,7 @@ export interface CFSAccountDetails {
 
 export interface GLInfo {
   clientCode: string;
-  resposiblityCenter: string;
+  responsiblityCenter: string;
   accountNumber: string;
   standardObject: string;
   project: string;

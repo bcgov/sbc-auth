@@ -17,7 +17,6 @@
           label="Email Address"
           req
           persistent-hint
-          :rules="emailRules"
           v-model="emailAddress"
           data-test="email"
           readonly
@@ -33,7 +32,6 @@
           label="Confirm Email Address"
           req
           persistent-hint
-          :error-messages="emailMustMatch()"
           v-model="confirmedEmailAddress"
           data-test="confirm-email"
           readonly
@@ -66,7 +64,6 @@
         >
           <span>
             Create Account
-            <!-- <v-icon class="ml-2">mdi-arrow-right</v-icon>s -->
           </span>
         </v-btn>
         <ConfirmCancelButton
@@ -83,7 +80,6 @@
 <script lang="ts">
 
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
@@ -106,12 +102,6 @@ export default class GovmContactInfoForm extends Mixins(NextPageMixin, Steppable
 
   $refs: {
     form: HTMLFormElement
-  }
-
-  public emailRules = CommonUtils.emailRules()
-
-  public emailMustMatch (): string {
-    return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
   }
 
   public async mounted () {

@@ -27,15 +27,15 @@
           </v-col>
           <v-col cols="4" class="py-0">
             <v-text-field
-              label="Resposiblity Center"
+              label="Responsibility Center"
               filled
               hint="5 characters"
               persistent-hint
-              :rules="resposiblityCenterRules"
-              v-model="resposiblityCenter"
+              :rules="responsiblityCenterRules"
+              v-model="responsiblityCenter"
               @change="emitGLInfo"
               v-mask="'#####'"
-              data-test="input-resposiblityCenter"
+              data-test="input-responsiblityCenter"
             ></v-text-field>
           </v-col>
             <v-col cols="4" class="py-0">
@@ -104,7 +104,7 @@ export default class GLPaymentForm extends Vue {
 
   @Prop({ default: () => ({} as GLInfo) }) glInformation: any
   private clientCode: string = ''
-  private resposiblityCenter: string = ''
+  private responsiblityCenter: string = ''
   private accountNumber: string = ''
   private standardObject: string = ''
   private project: string = ''
@@ -118,9 +118,9 @@ export default class GLPaymentForm extends Vue {
     v => (v.length >= 3) || 'Client Code should be of 3 digits'
   ]
 
-  public resposiblityCenterRules = [
-    v => !!v || 'Resposiblity Center is required',
-    v => (v.length === 5) || 'Resposiblity Center should be 5 digits'
+  public responsiblityCenterRules = [
+    v => !!v || 'Responsibility Center is required',
+    v => (v.length === 5) || 'Responsibility Center should be 5 digits'
   ]
 
   public accountNumberRules = [
@@ -141,7 +141,7 @@ export default class GLPaymentForm extends Vue {
   public mounted () {
     const glInfo: GLInfo = (Object.keys(this.glInformation).length) ? this.glInformation : this.currentOrgGLInfo
     this.clientCode = glInfo?.clientCode || ''
-    this.resposiblityCenter = glInfo?.resposiblityCenter || ''
+    this.responsiblityCenter = glInfo?.responsiblityCenter || ''
     this.accountNumber = glInfo?.accountNumber || ''
     this.standardObject = glInfo?.standardObject || ''
     this.project = glInfo?.project || ''
@@ -153,7 +153,7 @@ export default class GLPaymentForm extends Vue {
   public async emitGLInfo () {
     const glInfo: GLInfo = {
       clientCode: this.clientCode,
-      resposiblityCenter: this.resposiblityCenter,
+      responsiblityCenter: this.responsiblityCenter,
       accountNumber: this.accountNumber,
       standardObject: this.standardObject,
       project: this.project
