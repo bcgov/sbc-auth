@@ -14,6 +14,8 @@
 """Service for managing Entity data."""
 
 from typing import Dict, Tuple
+import string
+import random
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -45,6 +47,11 @@ class Entity:
     def identifier(self):
         """Return the unique identifier for this entity."""
         return self._model.id
+
+    @property
+    def business_identifier(self):
+        """Return the business identifier for this entity."""
+        return self._model.business_identifier
 
     @property
     def pass_code(self):
@@ -151,8 +158,11 @@ class Entity:
         """Reset the entity passcode and send email."""
         check_auth(token_info, one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
-        # TODO generate passcoe and set
-        new_pass_code: str = None  # TODO
+        # generate passcode and set
+        new_pass_code = ''.join(random.choices(string.digits, k=9))
+        entity.pass_code = passcode_hash(new_pass_code)
+        entity.pass_code_claimed = False
+        entity.save()
 
         if email_addresses:
             mailer_payload = dict(
