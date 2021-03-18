@@ -70,8 +70,8 @@ export default class OrgService {
     return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations?newBusiness=true`, affiliation)
   }
 
-  static async removeAffiliation (orgIdentifier: number, incorporationNumber: string): Promise<AxiosResponse<void>> {
-    return axios.delete(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`)
+  static async removeAffiliation (orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, passcodeResetFlag?: boolean): Promise<AxiosResponse<void>> {
+    return axios.delete(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`, { data: { passcodeResetEmail: passcodeResetEmail, passcodeResetFlag: passcodeResetFlag } })
   }
 
   static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
