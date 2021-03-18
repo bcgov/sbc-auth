@@ -508,7 +508,7 @@ def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock):  #
 
     assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
 
-    AffiliationService.delete_affiliation(org_id, business_identifier,
+    AffiliationService.delete_affiliation(org_id, business_identifier, None,
                                           TestEntityInfo.entity_lear_mock['passCode'])
     OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.public_user_role)
     org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])
