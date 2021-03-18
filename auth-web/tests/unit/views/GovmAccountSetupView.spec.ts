@@ -17,36 +17,17 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-const mockSession = {
-  'NRO_URL': 'Mock NRO URL',
-  'NAME_REQUEST_URL': 'Mock Name Request URL'
-}
-
 describe('GovmAccountSetupView.vue', () => {
   let wrapper: any
   let userModule: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
-
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {}
-      },
-      actions: {
-        getUserProfile: jest.fn()
-      }
-    }
 
     const orgModule = {
       namespaced: true,
       state: {
-        // currentOrganization: {
-        //   statusCode: AccountStatus.NSF_SUSPENDED
-        // }
       }
     }
 
@@ -54,7 +35,6 @@ describe('GovmAccountSetupView.vue', () => {
       state: {},
       strict: false,
       modules: {
-        user: userModule,
         org: orgModule
       }
     })
@@ -66,9 +46,6 @@ describe('GovmAccountSetupView.vue', () => {
       vuetify,
       mocks: {
         $t: (mock) => mock
-      },
-      computed: {
-        isAccountStatusNsfSuspended: Boolean
       }
     })
   })
@@ -78,11 +55,11 @@ describe('GovmAccountSetupView.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('is a Vue instance', () => {
+  it('GovmAccountSetupView is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('should render page title', () => {
+  it('should render with h1', () => {
     expect(wrapper.find('h1').text()).toBe('Create a Ministry Account')
   })
 

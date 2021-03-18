@@ -151,7 +151,6 @@ export default class GovmAccountSetupView extends Vue {
       this.$refs.errorDialog.open()
     }
   }
-
   public closeError () {
     this.$refs.errorDialog.close()
   }
