@@ -50,6 +50,7 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
     GLPaymentForm
   }
 })
+// GovmPaymentMethodSelector
 export default class GovmPaymentMethodSelector extends Mixins(Steppable) {
   public isGLValid: boolean = false
 
