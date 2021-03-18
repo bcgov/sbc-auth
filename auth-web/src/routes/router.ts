@@ -526,7 +526,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
     {
-      path: '/staff-setup-account-success/:accountName?',
+      path: '/staff-setup-account-success/:accountType?/:accountName?',
       name: 'staffsetupaccountsuccess',
       component: SetupAccountSuccessView,
       props: true,
