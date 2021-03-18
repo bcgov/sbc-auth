@@ -7,6 +7,7 @@ import {
   BulkUsersSuccess,
   CreateRequestBody as CreateOrgRequestBody,
   CreateRequestBody,
+  GLInfo,
   Member,
   MembershipStatus,
   MembershipType,
@@ -65,6 +66,7 @@ export default class OrgModule extends VuexModule {
   permissions: string[] = []
   accessType: string
   memberLoginOption = ''
+  currentOrgGLInfo: GLInfo = undefined
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
@@ -223,6 +225,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganizationPADInfo (padInfo: PADInfo) {
     this.currentOrgPADInfo = padInfo
+  }
+
+  @Mutation
+  public setCurrentOrganizationGLInfo (glInfo: GLInfo) {
+    this.currentOrgGLInfo = glInfo
   }
 
   @Action({ rawError: true })

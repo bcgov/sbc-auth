@@ -1,7 +1,9 @@
 <template>
   <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
     <fieldset>
-      <legend class="mb-3">Enter an Account Name</legend>
+
+      <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
+       <legend class="mb-3"  v-else>Enter an Account Name</legend>
       <v-slide-y-transition>
         <div v-show="errorMessage">
           <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
@@ -9,11 +11,19 @@
       </v-slide-y-transition>
       <v-text-field
         filled
-        label="Account Name"
+        :label="govmAccount ? 'Ministry Name' : 'Account Name'"
         v-model.trim="orgName"
         :rules="orgNameRules"
         :disabled="saving"
         data-test="input-org-name"
+      />
+       <v-text-field
+        filled
+        label="Branch/Division (If applicable)"
+        v-model.trim="branchName"
+        :disabled="saving"
+        data-test="input-branch-name"
+        v-if="govmAccount"
       />
     </fieldset>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
@@ -113,8 +123,11 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
   private orgName: string = ''
+  private branchName: string = ''
+
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
+  @Prop({ default: false }) govmAccount: boolean
   private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
