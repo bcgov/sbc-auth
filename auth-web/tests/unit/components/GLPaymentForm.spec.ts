@@ -1,5 +1,4 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import { Account } from '@/util/constants'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
