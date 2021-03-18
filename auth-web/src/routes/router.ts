@@ -24,6 +24,7 @@ import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
+import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
@@ -212,6 +213,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-non-bcsc-account',
       name: 'setup-non-bcsc-account',
       component: NonBcscAccountSetupView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/setup-govm-account',
+      name: 'setupaccount',
+      component: GovmAccountSetupView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },
@@ -518,7 +526,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
     {
-      path: '/staff-setup-account-success/:accountName?',
+      path: '/staff-setup-account-success/:accountType?/:accountName?',
       name: 'staffsetupaccountsuccess',
       component: SetupAccountSuccessView,
       props: true,

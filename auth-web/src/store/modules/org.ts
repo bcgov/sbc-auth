@@ -7,6 +7,7 @@ import {
   BulkUsersSuccess,
   CreateRequestBody as CreateOrgRequestBody,
   CreateRequestBody,
+  GLInfo,
   Member,
   MembershipStatus,
   MembershipType,
@@ -65,6 +66,7 @@ export default class OrgModule extends VuexModule {
   permissions: string[] = []
   accessType: string
   memberLoginOption = ''
+  currentOrgGLInfo: GLInfo = undefined
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
@@ -225,6 +227,11 @@ export default class OrgModule extends VuexModule {
     this.currentOrgPADInfo = padInfo
   }
 
+  @Mutation
+  public setCurrentOrganizationGLInfo (glInfo: GLInfo) {
+    this.currentOrgGLInfo = glInfo
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
@@ -274,10 +281,11 @@ export default class OrgModule extends VuexModule {
     if (!kcUserProfile.roles.includes(Role.Staff)) {
       response = await UserService.getMembership(orgId)
       membership = response?.data
-      const org: Organization = this.context.state['currentOrganization']
+      // const org: Organization = this.context.state['currentOrganization']
       const currentAccountSettings = this.context.state['currentAccountSettings']
-      const statusCode = org && org.statusCode ? org?.statusCode : currentAccountSettings.accountStatus
-      // to fix permission issue. check currentOrganization account , if its not set take status from currentAccountSettings
+      // const statusCode = org && org.statusCode ? org?.statusCode : currentAccountSettings.accountStatus
+      const statusCode = currentAccountSettings.accountStatus
+      // to fix permission issue. take status from currentAccountSettings
       const res = await PermissionService.getPermissions(statusCode, membership?.membershipTypeCode)
       permissions = res?.data
     } else {
