@@ -15,7 +15,7 @@
 
 from typing import Dict, Tuple
 import string
-import random
+import secrets
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -159,7 +159,8 @@ class Entity:
         check_auth(token_info, one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
-        new_pass_code = ''.join(random.choices(string.digits, k=9))
+        new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))
+
         entity.pass_code = passcode_hash(new_pass_code)
         entity.pass_code_claimed = False
         entity.save()
