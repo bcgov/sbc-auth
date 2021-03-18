@@ -1,90 +1,84 @@
 {
-  "definitions": {},
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org",
-  "type": "object",
-  "title": "Org",
-  "additionalProperties": false,
-  "required": [
-  ],
-  "dependencies": {
-    "bcOnlineCredential": {
-      "required": [
-        "mailingAddress"
-      ]
-    }
-  },
-  "properties": {
-    "name": {
-      "$id": "#/properties/name",
-      "type": "string",
-      "title": "Organization Name",
-      "default": "",
-      "examples": [
-        "Foobar Inc."
-      ],
-      "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org",
+    "type": "object",
+    "title": "Org",
+    "additionalProperties": false,
+    "required": [
+    ],
+    "dependencies": {
+      "bcOnlineCredential": { "required": ["mailingAddress"] }
     },
-    "branchName": {
-      "$id": "#/properties/branchName",
-      "type": "string",
-      "title": "Organization Branch Name",
-      "default": "",
-      "examples": [
-        "Foobar Branch."
-      ],
-      "maxLength": 100
-    },
-    "typeCode": {
-      "$id": "#/properties/orgType",
-      "type": "string",
-      "title": "Organizational Type",
-      "default": "BASIC",
-      "examples": [
-        "BASIC",
-        "PREMIUM"
-      ],
-      "enum": [
-        "BASIC",
-        "PREMIUM"
-      ],
-      "pattern": "^(.*)$"
-    },
-    "accessType": {
-      "$id": "#/properties/accessType",
-      "type": "string",
-      "title": "Access Type",
-      "examples": [
-        "ANONYMOUS",
-        "EXTRA_PROVINCIAL"
-      ],
-      "pattern": "^(.*)$"
-    },
-    "bcOnlineCredential": {
-      "oneOf": [
-        {
-          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/bconline_credential"
-        }
-      ]
-    },
-    "mailingAddress": {
-      "oneOf": [
-        {
-          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/mailing_address"
-        }
-      ]
-    },
-    "paymentInfo": {
-      "oneOf": [
-        {
-          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/payment_info"
-        }
-      ]
-    },
-    "productSubscriptions": {
+    "properties": {
+      "name": {
+        "$id": "#/properties/name",
+        "type": "string",
+        "title": "Organization Name",
+        "default": "",
+        "examples": [
+          "Foobar Inc."
+        ],
+        "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
+      },
+      "branchName": {
+        "$id": "#/properties/branchName",
+        "type": "string",
+        "title": "Organization Branch Name",
+        "default": "",
+        "examples": [
+          "Foobar Branch."
+        ],
+        "maxLength": 100
+      },
+      "typeCode": {
+        "$id": "#/properties/orgType",
+        "type": "string",
+        "title": "Organizational Type",
+        "default": "BASIC",
+        "examples": [
+          "BASIC", "PREMIUM"
+        ],
+        "enum": ["BASIC", "PREMIUM"],
+        "pattern": "^(.*)$"
+      },
+      "accessType": {
+        "$id": "#/properties/accessType",
+        "type": "string",
+        "title": "Access Type",
+        "examples": [
+          "ANONYMOUS", "EXTRA_PROVINCIAL"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "bcOnlineCredential": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/bconline_credential"
+          }
+        ]
+      },
+      "mailingAddress": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/mailing_address"
+          }
+        ]
+      },
+      "paymentInfo": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/payment_info"
+          }
+        ]
+      },
+      "productSubscriptions": {
       "type": "array",
-      "title": "The Subscriptions Array"
+      "title": "The Subscriptions Array",
+      "items": {
+        "$ref": "#/definitions/productSubscriptions"
+      }
+    }
     }
   }
-}
   

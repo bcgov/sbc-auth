@@ -40,6 +40,13 @@
       "type": "string",
       "title": "Bank Account Number",
       "pattern": "^(.*)$"
+    },
+    "revenueAccount": {
+      "oneOf": [
+        {
+          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/distribution_code"
+        }
+      ]
     }
   },
   "revenueAccount": {
