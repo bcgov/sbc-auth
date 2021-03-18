@@ -24,7 +24,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import Affiliation as AffiliationService
-from tests.utilities.factory_scenarios import TestEntityInfo, TestOrgTypeInfo
+from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgTypeInfo
 from tests.utilities.factory_utils import factory_entity_service, factory_org_service
 
 
@@ -215,7 +215,8 @@ def test_delete_affiliation(session, auth_mock):  # pylint:disable=unused-argume
                                                         TestEntityInfo.entity_lear_mock['passCode'],
                                                         {})
 
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier)
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
+                                          email_addresses=None, token_info=TestJwtClaims.user_test)
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None
@@ -237,7 +238,8 @@ def test_delete_affiliation_no_org(session, auth_mock):  # pylint:disable=unused
                                           {})
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.delete_affiliation(org_id=None, business_identifier=business_identifier)
+        AffiliationService.delete_affiliation(org_id=None, business_identifier=business_identifier,
+                                              email_addresses=None, token_info=TestJwtClaims.user_test)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -258,7 +260,8 @@ def test_delete_affiliation_no_entity(session, auth_mock):  # pylint:disable=unu
                                           {})
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=None)
+        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=None,
+                                              email_addresses=None, token_info=TestJwtClaims.user_test)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -277,10 +280,12 @@ def test_delete_affiliation_no_affiliation(session, auth_mock):  # pylint:disabl
                                           business_identifier,
                                           TestEntityInfo.entity_lear_mock['passCode'],
                                           {})
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier)
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
+                                          email_addresses=None, token_info=TestJwtClaims.user_test)
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier)
+        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
+                                              email_addresses=None, token_info=TestJwtClaims.user_test)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -300,7 +305,8 @@ def test_delete_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
                                                         TestEntityInfo.entity_lear_mock['passCode'],
                                                         {})
 
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier)
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
+                                          email_addresses=None, token_info=TestJwtClaims.user_test)
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None
@@ -376,7 +382,8 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock):  # pyl
     assert len(affiliated_entities) == 1
     assert affiliated_entities[0]['business_identifier'] == business_identifier2
 
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2)
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2,
+                                          email_addresses=None, token_info=TestJwtClaims.user_test)
 
     affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
 

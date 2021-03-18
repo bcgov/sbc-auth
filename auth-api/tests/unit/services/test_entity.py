@@ -347,3 +347,16 @@ def test_delete_entity(app, session):  # pylint:disable=unused-argument
     entity = EntityService.find_by_entity_id(entity.identifier)
 
     assert entity is None
+
+
+def test_reset_pass_code(app, session):  # pylint:disable=unused-argument
+    """Assert that the new passcode in not the same as old passcode."""
+    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_passcode)
+
+    entity = EntityService(entity_model)
+    old_passcode = entity.pass_code
+
+    entity.reset_passcode(entity.business_identifier, '', TestJwtClaims.user_test)
+    new_passcode = entity.pass_code
+
+    assert old_passcode != new_passcode
