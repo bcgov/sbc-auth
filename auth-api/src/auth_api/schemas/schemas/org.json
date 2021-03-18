@@ -71,7 +71,14 @@
             "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/payment_info"
           }
         ]
+      },
+      "productSubscriptions": {
+      "type": "array",
+      "title": "The Subscriptions Array",
+      "items": {
+        "$ref": "#/definitions/productSubscriptions"
       }
+    }
     }
   }
   

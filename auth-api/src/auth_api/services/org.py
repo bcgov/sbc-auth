@@ -34,7 +34,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, Status, PaymentAccountStatus)
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF
+from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
@@ -123,7 +123,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
-        ProductService.create_default_product_subscriptions(org)
+        ProductService.create_default_product_subscriptions(org, is_new_transaction=False)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
                                                               access_type=access_type)
 
@@ -241,6 +241,9 @@ class Org:  # pylint: disable=too-many-public-methods
         if org_model.bcol_account_id:
             pay_request['bcolAccountNumber'] = org_model.bcol_account_id
             pay_request['bcolUserId'] = org_model.bcol_user_id
+
+        if revenue_account := payment_info.get('revenueAccount') is not None:
+            pay_request['paymentInfo']['revenueAccount'] = revenue_account
 
         if payment_method == PaymentMethod.PAD.value:  # PAD has bank related details
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
@@ -369,6 +372,12 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<update_org ')
 
         has_org_updates: bool = False  # update the org table if this variable is set true
+        has_status_changing: bool = False
+
+        org_model: OrgModel = self._model
+        # to enforce necessary details for govm account creation
+        is_govm_account_creation = org_model.access_type == AccessType.GOVM.value and \
+            org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
         is_name_getting_updated = 'name' in org_info
         if is_name_getting_updated:
@@ -384,8 +393,24 @@ class Org:  # pylint: disable=too-many-public-methods
             Org._map_response_to_org(bcol_response, org_info)
             has_org_updates = True
 
+        product_subscriptions = org_info.pop('productSubscriptions', None)
+        mailing_address = org_info.pop('mailingAddress', None)
+        payment_info = org_info.pop('paymentInfo', {})
+        if is_govm_account_creation and (
+                product_subscriptions is None or mailing_address is None or payment_info.get('revenueAccount') is None):
+            raise BusinessException(Error.GOVM_ACCOUNT_DATA_MISSING, None)
+
+        if is_govm_account_creation:
+            has_org_updates = True
+            org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
+            has_status_changing = True
+
+        if product_subscriptions is not None:
+            subscription_data = {'subscriptions': product_subscriptions}
+            ProductService.create_product_subscription(self._model, subscription_data=subscription_data)
+
         # Update mailing address Or create new one
-        if mailing_address := org_info.pop('mailingAddress', None):
+        if mailing_address:
             contacts = self._model.contacts
             if len(contacts) > 0:
                 contact = self._model.contacts[0].contact
@@ -395,9 +420,10 @@ class Org:  # pylint: disable=too-many-public-methods
                 Org.add_contact_to_org(mailing_address, self._model)
 
         if has_org_updates:
-            self._model.update_org_from_dict(camelback2snake(org_info))
+            excluded = ('type_code',) if has_status_changing else EXCLUDED_FIELDS
+            self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
 
-        if payment_info := org_info.pop('paymentInfo', {}):
+        if payment_info:
             selected_payment_method = payment_info.get('paymentMethod', None)
             payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code])
             user: UserModel = UserModel.find_by_jwt_token(token=token_info)
