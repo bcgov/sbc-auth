@@ -14,16 +14,18 @@
         :label="govmAccount ? 'Ministry Name' : 'Account Name'"
         v-model.trim="orgName"
         :rules="orgNameRules"
-        :disabled="saving || govmAccount"
+        :disabled="saving"
         data-test="input-org-name"
+        :readonly="govmAccount"
       />
        <v-text-field
         filled
         label="Branch/Division (If applicable)"
         v-model.trim="branchName"
-        :disabled="saving || govmAccount"
+        :disabled="saving"
         data-test="input-branch-name"
         v-if="govmAccount"
+        :readonly="govmAccount"
       />
     </fieldset>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
