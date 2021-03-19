@@ -48,6 +48,7 @@ import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaymentMethodSelector.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { Pages } from '@/util/constants'
 import ProductPackages from '@/components/auth/create-account/ProductPackages.vue'
 import { namespace } from 'vuex-class'
 const OrgModule = namespace('org')
@@ -68,8 +69,8 @@ export default class GovmAccountSetupView extends Vue {
   @OrgModule.Action('createGovmOrg') private createGovmOrg!: () => void
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @OrgModule.State('currentOrgAddress') private currentOrgAddress!: Address
-  @OrgModule.State('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.State('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
+  @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
+  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
 
   public errorTitle = 'Account creation failed'
   public errorText = ''
@@ -123,7 +124,7 @@ export default class GovmAccountSetupView extends Vue {
       await this.syncOrganization(organization.id)
       await this.syncMembership(organization.id)
       this.$store.commit('updateHeader')
-      this.$router.push('/setup-account-success')
+      this.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
       this.isLoading = false
     } catch (err) {
       // eslint-disable-next-line no-console

@@ -20,7 +20,6 @@
           v-model="emailAddress"
           data-test="email"
           readonly
-          disabled
         >
         </v-text-field>
       </v-col>
@@ -35,7 +34,6 @@
           v-model="confirmedEmailAddress"
           data-test="confirm-email"
           readonly
-          disabled
         >
         </v-text-field>
       </v-col>

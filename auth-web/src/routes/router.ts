@@ -24,6 +24,7 @@ import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
+import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAccountCreationSuccessView.vue'
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
@@ -253,6 +254,12 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account-success',
       name: 'setup-account-success',
       component: AccountCreationSuccessView,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/setup-govm-account-success',
+      name: 'setup-govm-account-success',
+      component: GovmAccountCreationSuccessView,
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
