@@ -1634,7 +1634,7 @@ def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # 
                        content_type='application/json')
     assert da.status_code == http_status.HTTP_200_OK
 
-    
+
 def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an affiliation for an org can be removed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
