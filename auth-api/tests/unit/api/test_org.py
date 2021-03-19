@@ -1724,4 +1724,3 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
                        data=json.dumps(DeleteAffiliationPayload.delete_affiliation2),
                        content_type='application/json')
     assert da.status_code == http_status.HTTP_200_OK
-
