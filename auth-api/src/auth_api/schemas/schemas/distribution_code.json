@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/distribution_code",
+  "type": "object",
+  "title": "Fee distribution schema",
+  "description": "Fee distribution schema.",
+  "default": {},
+  "examples": [
+    {
+      "client": "100",
+      "projectCode": "1111111",
+      "responsibilityCentre": "22222",
+      "serviceLine": "1111111",
+      "stob": "9000"
+    }
+  ],
+  "required": [
+    "client",
+    "projectCode",
+    "responsibilityCentre",
+    "serviceLine",
+    "stob"
+  ],
+  "properties": {
+    "client": {
+      "$id": "#/properties/client",
+      "type": "string",
+      "title": "client",
+      "description": "GL code client value.",
+      "default": "",
+      "examples": [
+        "100"
+      ]
+    },
+    "distributionCodeId": {
+      "$id": "#/properties/distributionCodeId",
+      "type": "integer",
+      "title": "distributionCodeId",
+      "description": "Unique identifier for distribution code.",
+      "default": 0,
+      "examples": [
+        1,
+        2
+      ]
+    },
+    "projectCode": {
+      "$id": "#/properties/projectCode",
+      "type": "string",
+      "title": "projectCode",
+      "description": "Distribution project code.",
+      "default": "",
+      "examples": [
+        "P10000"
+      ]
+    },
+    "responsibilityCentre": {
+      "$id": "#/properties/responsibilityCentre",
+      "type": "string",
+      "title": "responsibilityCentre",
+      "description": "Distribution responsibility centre.",
+      "default": "",
+      "examples": [
+        "R10000"
+      ]
+    },
+    "serviceLine": {
+      "$id": "#/properties/serviceLine",
+      "type": "string",
+      "title": "The serviceLine schema",
+      "description": "Service line for the distribution.",
+      "default": "",
+      "examples": [
+        "S10000"
+      ]
+    },
+    "startDate": {
+      "$id": "#/properties/startDate",
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "The startDate schema",
+      "description": "Effective start date for the distribution.",
+      "default": "",
+      "examples": [
+        "2020-07-27"
+      ]
+    },
+    "stob": {
+      "$id": "#/properties/stob",
+      "type": "string",
+      "title": "The stob schema",
+      "description": "STOB value for distribution.",
+      "default": "",
+      "examples": [
+        "ST10000"
+      ]
+    },
+    "additionalProperties": true
+  }
+}

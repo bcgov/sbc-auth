@@ -134,21 +134,21 @@
       </ModalDialog>
 
       <!-- Dialog for confirming business removal -->
-<!--       <ModalDialog
-        ref="confirmDeleteDialog"
-        :title="dialogTitle"
-        :text="dialogText"
-        dialog-class="notify-dialog"
-        max-width="640"
+      <ModalDialog
+      ref="removedBusinessSuccessDialog"
+      title="Remove Business"
+      :text="$t('removedBusinessSuccessText')"
+      dialog-class="notify-dialog"
+      max-width="640"
+      :isPersistent="true"
       >
         <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+          <v-icon large color="primary">mdi-check</v-icon>
         </template>
         <template v-slot:actions>
-          <v-btn large color="primary" @click="remove()" data-test="dialog-remove-button">Remove</v-btn>
-          <v-btn large color="default" @click="cancelConfirmDelete()" data-test="dialog-cancel-button">Cancel</v-btn>
+          <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
-      </ModalDialog> -->
+      </ModalDialog>
     </v-container>
   </div>
 </template>
@@ -156,7 +156,7 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages } from '@/util/constants'
-import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
@@ -211,7 +211,8 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     errorDialog: ModalDialog
     addBusinessDialog: ModalDialog
     addNRDialog: ModalDialog
-    passcodeResetOptionsModal: PasscodeResetOptionsModal
+    passcodeResetOptionsModal: PasscodeResetOptionsModal,
+    removedBusinessSuccessDialog: ModalDialog
   }
 
   private async mounted () {
@@ -343,14 +344,20 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   async remove (resetPasscodeEmail: string) {
     try {
-      this.removeBusinessPayload.resetPasscodeEmail = resetPasscodeEmail
+      this.removeBusinessPayload.passcodeResetEmail = resetPasscodeEmail
+      this.removeBusinessPayload.resetPasscode = true
       this.$refs.passcodeResetOptionsModal.close()
       await this.removeBusiness(this.removeBusinessPayload)
       await this.syncBusinesses()
+      this.$refs.removedBusinessSuccessDialog.open()
     } catch (ex) {
       // eslint-disable-next-line no-console
-      console.log('Error during remove business event !')
+      console.log('Error during remove organization affiliations event !')
     }
+  }
+
+  removedBusinessSuccessClose () {
+    this.$refs.removedBusinessSuccessDialog.close()
   }
 
   close () {

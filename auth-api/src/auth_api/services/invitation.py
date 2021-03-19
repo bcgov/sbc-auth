@@ -375,7 +375,10 @@ class Invitation:
                 membership_model.status = Invitation._get_status_based_on_org(org_model)
                 membership_model.save()
                 try:
-                    Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
+                    # skip notifying admin if it auto approved
+                    # for now , auto approval happens for GOVM.If more auto approval comes , just check if its GOVM
+                    if membership_model.status != Status.ACTIVE.value:
+                        Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
                 except BusinessException as exception:
                     current_app.logger.error('<send_notification_to_admin failed', exception.message)
         invitation.accepted_date = datetime.now()

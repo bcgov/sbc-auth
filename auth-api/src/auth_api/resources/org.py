@@ -139,7 +139,7 @@ class Org(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles(
-        [Role.SYSTEM.value, Role.PUBLIC_USER.value])
+        [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value])
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
@@ -161,7 +161,7 @@ class Org(Resource):
                     response, status = org.change_org_ype(request_json, action,
                                                           bearer_token).as_dict(), http_status.HTTP_200_OK
                 else:
-                    response, status = org.update_org(request_json, toke_info, bearer_token).as_dict(),\
+                    response, status = org.update_org(request_json, toke_info, bearer_token).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
@@ -363,10 +363,12 @@ class OrgAffiliation(Resource):
     @cors.crossdomain(origin='*')
     def delete(org_id, business_identifier):
         """Delete an affiliation between an org and an entity."""
-        request_json = request.get_json()
-        email_addresses = request_json.get('passcodeResetEmail')
+        request_json = request.get_json(silent=True)
+        email_addresses = request_json.get('passcodeResetEmail') if request_json else None
+        reset_passcode = request_json.get('resetPasscode') if request_json else False
         try:
-            AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses, g.jwt_oidc_token_info)
+            AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
+                                                  reset_passcode, g.jwt_oidc_token_info)
             response, status = {}, http_status.HTTP_200_OK
 
         except BusinessException as exception:
@@ -546,7 +548,7 @@ class OrgStatus(Resource):
 
                 if not _JWT.validate_roles([Role.STAFF_SUSPEND_ACCOUNTS.value]):
                     return {'message': 'Not authorized to perform this action'}, \
-                                       http_status.HTTP_401_UNAUTHORIZED
+                           http_status.HTTP_401_UNAUTHORIZED
 
                 response, status = OrgService.change_org_status(org_id=org_id, status_code=status_code,
                                                                 token_info=token,

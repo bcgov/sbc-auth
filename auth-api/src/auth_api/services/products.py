@@ -80,7 +80,7 @@ class Product:
         return subscriptions_model_list
 
     @staticmethod
-    def create_default_product_subscriptions(org: OrgModel):
+    def create_default_product_subscriptions(org: OrgModel, is_new_transaction: bool = True):
         """Create default product subscriptions for the account."""
         internal_product_codes = ProductCodeModel.find_by_type_code(type_code=ProductTypeCode.INTERNAL.value)
         for product_code in internal_product_codes:
@@ -90,8 +90,8 @@ class Product:
                     ProductSubscriptionModel(org_id=org.id, product_code=product_code.code).flush()
             else:
                 ProductSubscriptionModel(org_id=org.id, product_code=product_code.code).flush()
-
-        db.session.commit()
+        if is_new_transaction:  # Commit the transaction if it's a new transaction
+            db.session.commit()
 
     @staticmethod
     def get_products():

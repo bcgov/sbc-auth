@@ -51,45 +51,20 @@ describe('GeneratePasscodeView.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('remove email address', () => {
-    wrapper.vm.isDialogOpen = true
-    const stub = jest.fn()
-    wrapper.setMethods({ removeEmailAddress: stub })
-    wrapper.find('[data-test="btn-remove-passcode-emailAddress-0"').trigger('click')
-    expect(wrapper.vm.removeEmailAddress).toBeCalled()
-  })
-
-  it('contains title', () => {
-    wrapper.vm.isDialogOpen = true
-    expect(wrapper.find('[data-test="title-generate-passcode"]')).toBeTruthy()
-    expect(wrapper.find('[data-test="title-generate-passcode"]').text()).toEqual('Generate Passcode')
-  })
-
   it('contains email address input to send', () => {
-    wrapper.vm.isDialogOpen = true
-    expect(wrapper.find('[data-test="input-passcode-emailAddress-0"]')).toBeTruthy()
-  })
-
-  it('close/cancel calls the close() button', () => {
-    wrapper.vm.isDialogOpen = true
-    const stub = jest.fn()
-    wrapper.setMethods({ close: stub })
-    wrapper.find('[data-test="btn-close-generate-passcode-dialog-title"]').trigger('click')
-    expect(wrapper.vm.close).toBeCalled()
-    wrapper.find('[data-test="btn-close-generate-passcode-dialog"]').trigger('click')
-    expect(wrapper.vm.close).toBeCalled()
+    expect(wrapper.find('[data-test="text-email-address"]')).toBeTruthy()
+    expect(wrapper.find('[data-test="text-confirm-email-address"]')).toBeTruthy()
   })
 
   it('email Rules', () => {
-    wrapper.vm.isDialogOpen = true
-    wrapper.vm.emailAddresses = [{
-      value: '12345'
-    }]
-    expect(wrapper.vm.isFormValid()).toBeFalsy()
-    expect(wrapper.find('[data-test="btn-generate-passcode-send"]').element.disabled).toBeTruthy()
-    wrapper.vm.emailAddresses = [{
-      value: 'test@dal.ca'
-    }]
-    expect(wrapper.vm.isFormValid()).toBeTruthy()
+    wrapper.vm.isResetPasscode = false
+    wrapper.vm.emailAddress = 'test3@gmail.com'
+    wrapper.vm.confirmedEmailAddress = 'test22@gmail.com'
+    let result = wrapper.vm.emailMustMatch()
+    expect(result).toEqual('Email addresses must match')
+    wrapper.vm.emailAddress = 'test@gmail.com'
+    wrapper.vm.confirmedEmailAddress = 'test@gmail.com'
+    result = wrapper.vm.emailMustMatch()
+    expect(result).toEqual('')
   })
 })

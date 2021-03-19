@@ -41,16 +41,16 @@
 <script lang="ts">
 
 import { Component, Vue } from 'vue-property-decorator'
+import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
+import { Address } from '@/models/address'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
 import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaymentMethodSelector.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-// import { Organization } from '@/models/Organization'
 import ProductPackages from '@/components/auth/create-account/ProductPackages.vue'
-
-// import { namespace } from 'vuex-class'
-// const OrgModule = namespace('org')
+import { namespace } from 'vuex-class'
+const OrgModule = namespace('org')
 
 @Component({
   components: {
@@ -65,7 +65,11 @@ import ProductPackages from '@/components/auth/create-account/ProductPackages.vu
 })
 export default class GovmAccountSetupView extends Vue {
   // private readonly createOrg!: () => Promise<Organization>
-  // @OrgModule.Action('createOrg') private createOrg!: (glInfo: Organization) => void
+  @OrgModule.Action('createGovmOrg') private createGovmOrg!: () => void
+  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @OrgModule.State('currentOrgAddress') private currentOrgAddress!: Address
+  @OrgModule.State('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
+  @OrgModule.State('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
 
   public errorTitle = 'Account creation failed'
   public errorText = ''
@@ -115,13 +119,11 @@ export default class GovmAccountSetupView extends Vue {
     this.isLoading = true
     try {
       // save or from here
-      // eslint-disable-next-line no-console
-      console.log('create org will coming soon')
-      // const organization = await this.createOrg() // create govm account
-      // await this.syncOrganization(organization.id)
-      // await this.syncMembership(organization.id)
-      // this.$store.commit('updateHeader')
-      // this.$router.push('/setup-account-success')
+      const organization: any = await this.createGovmOrg() // create govm account
+      await this.syncOrganization(organization.id)
+      await this.syncMembership(organization.id)
+      this.$store.commit('updateHeader')
+      this.$router.push('/setup-account-success')
       this.isLoading = false
     } catch (err) {
       // eslint-disable-next-line no-console

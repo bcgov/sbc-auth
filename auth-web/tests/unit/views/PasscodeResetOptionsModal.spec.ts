@@ -70,7 +70,6 @@ describe('PasscodeResetOptionsModal.vue', () => {
   })
 
   it('Donot reset passcode emits remove-business event', () => {
-    wrapper.vm.isDialogOpen = true
     wrapper.vm.isResetPasscode = false
     const spy = jest.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
 
@@ -78,11 +77,9 @@ describe('PasscodeResetOptionsModal.vue', () => {
     expect(spy).toBeCalled()
     const donotResetEvent = wrapper.emitted('confirm-passcode-reset-options')
     expect(donotResetEvent).toBeTruthy()
-    expect(donotResetEvent[0]).toEqual([null])
   })
 
   it('Reset passcode validations', () => {
-    wrapper.vm.isDialogOpen = true
     wrapper.vm.isResetPasscode = false
     wrapper.vm.emailAddress = 'test3@gmail.com'
     wrapper.vm.confirmedEmailAddress = 'test22@gmail.com'
@@ -92,7 +89,6 @@ describe('PasscodeResetOptionsModal.vue', () => {
 
   it('Reset passcode emits remove-business event', () => {
     const emailValue = 'test1@gmail.com'
-    wrapper.vm.isDialogOpen = true
     wrapper.vm.isResetPasscode = true
     wrapper.vm.emailAddress = emailValue
     wrapper.vm.confirmedEmailAddress = emailValue
