@@ -13,7 +13,7 @@ export interface CreateRequestBody {
   mailingAddress?:Address
   paymentInfo?: PaymentInfo | RevenueAccount | any // need to fix since payment info is taking directly
   branchName?: string
-  productSubscriptions: any
+  productSubscriptions?: []
 }
 
 export interface PaymentInfo {
