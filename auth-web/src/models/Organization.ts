@@ -82,6 +82,7 @@ export interface RemoveBusinessPayload {
   orgIdentifier: number
   business: Business
   passcodeResetEmail?: string
+  resetPasscode?: boolean
 }
 
 export interface Member {

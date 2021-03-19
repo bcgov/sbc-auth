@@ -363,10 +363,12 @@ class OrgAffiliation(Resource):
     @cors.crossdomain(origin='*')
     def delete(org_id, business_identifier):
         """Delete an affiliation between an org and an entity."""
-        request_json = request.get_json()
-        email_addresses = request_json.get('passcodeResetEmail')
+        request_json = request.get_json(silent=True)
+        email_addresses = request_json.get('passcodeResetEmail') if request_json else None
+        reset_passcode = request_json.get('resetPasscode') if request_json else False
         try:
-            AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses, g.jwt_oidc_token_info)
+            AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
+                                                  reset_passcode, g.jwt_oidc_token_info)
             response, status = {}, http_status.HTTP_200_OK
 
         except BusinessException as exception:

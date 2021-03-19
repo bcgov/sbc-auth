@@ -80,7 +80,7 @@ export default class BusinessModule extends VuexModule {
       // delete the created affiliation if the update failed for avoiding orphan records
       // unable to do these from backend, since it causes a circular dependency
       const orgId = this.context.rootState.org.currentOrganization?.id
-      await OrgService.removeAffiliation(orgId, businessNumber)
+      await OrgService.removeAffiliation(orgId, businessNumber, undefined, false)
       return {
         errorMsg: 'Cannot add business due to some technical reasons'
       }
@@ -106,7 +106,7 @@ export default class BusinessModule extends VuexModule {
       // unable to do these from backend, since it causes a circular dependency
       const orgId = filingBody?.filing?.header?.accountId
       const nrNumber = filingBody?.filing?.incorporationApplication?.nameRequest?.nrNumber
-      await OrgService.removeAffiliation(orgId, nrNumber)
+      await OrgService.removeAffiliation(orgId, nrNumber, undefined, false)
       return {
         errorMsg: 'Cannot add business due to some technical reasons'
       }
@@ -171,12 +171,12 @@ export default class BusinessModule extends VuexModule {
         if (filingId) {
           await BusinessService.deleteBusinessFiling(payload.business.businessIdentifier, filingId)
         } else {
-          await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
+          await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier, payload.passcodeResetEmail, payload.resetPasscode)
         }
       }
     } else {
       // Remove an affiliation between the given business and each specified org
-      await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier)
+      await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier, payload.passcodeResetEmail, payload.resetPasscode)
     }
   }
 

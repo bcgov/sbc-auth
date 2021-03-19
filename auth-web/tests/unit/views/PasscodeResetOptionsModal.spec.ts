@@ -77,7 +77,6 @@ describe('PasscodeResetOptionsModal.vue', () => {
     expect(spy).toBeCalled()
     const donotResetEvent = wrapper.emitted('confirm-passcode-reset-options')
     expect(donotResetEvent).toBeTruthy()
-    expect(donotResetEvent[0]).toEqual([null])
   })
 
   it('Reset passcode validations', () => {

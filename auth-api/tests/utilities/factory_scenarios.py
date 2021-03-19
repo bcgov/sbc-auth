@@ -283,6 +283,10 @@ class TestJwtClaims(dict, Enum):
                 'system'
             ]
         },
+        'roles': [
+            'staff',
+            'system'
+        ],
         'loginSource': 'PASSCODE',
         'product_code': ProductCode.BUSINESS.value
     }
@@ -613,7 +617,7 @@ class TestEntityInfo(dict, Enum):
 
 
 class TestAffliationInfo(dict, Enum):
-    """Test scenarios of affliation."""
+    """Test scenarios of affiliation."""
 
     affliation1 = {'businessIdentifier': 'CP1234567'}
     affliation2 = {'businessIdentifier': 'CP1234568'}
@@ -621,6 +625,13 @@ class TestAffliationInfo(dict, Enum):
     affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
     nr_affiliation = {'businessIdentifier': 'NR 1234567', 'phone': '1112223333'}
     invalid = {'name': 'CP1234567'}
+
+
+class DeleteAffiliationPayload(dict, Enum):
+    """Test scenarios of delete affiliation."""
+
+    delete_affiliation1 = {'passcodeResetEmail': 'test@gmail.com', 'resetPasscode': True}
+    delete_affiliation2 = {'resetPasscode': False}
 
 
 class TestContactInfo(dict, Enum):
