@@ -29,6 +29,7 @@ from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode, AccessType
+from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestPaymentMethodInfo)
@@ -244,6 +245,80 @@ def test_add_govm_org_staff_admin(client, jwt, session, keycloak_mock):  # pylin
     assert dictionary['orgType'] == OrgType.PREMIUM.value
     assert dictionary['orgStatus'] == OrgStatus.PENDING_INVITE_ACCEPT.value
     assert schema_utils.validate(rv.json, 'org_response')[0]
+
+
+def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_govm),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert dictionary.get('branchName') == TestOrgInfo.org_govm.get('branchName')
+    org_id = dictionary['id']
+    # Invite a user to the org
+    rv = client.post('/api/v1/invitations',
+                     data=json.dumps(factory_invitation(org_id, 'abc123@email.com', membership_type=ADMIN)),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    invitation_id = dictionary['id']
+    invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
+
+    # Get pending members for the org as invitee and assert length of 1
+    rv = client.get('/api/v1/orgs/{}/members?status=ACTIVE'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert not dictionary
+
+    # Create/login as invited user
+    headers_invited = factory_auth_header(jwt=jwt, claims=TestJwtClaims.gov_account_holder_user)
+    rv = client.post('/api/v1/users', headers=headers_invited, content_type='application/json')
+
+    # Accept invite as invited user
+    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
+                    headers=headers_invited, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['status'] == 'ACCEPTED'
+
+    # Get ACTIVE members for the org as invitee and assert length of 1
+    rv = client.get('/api/v1/orgs/{}/members?status=ACTIVE'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['members']
+    assert len(dictionary['members']) == 1
+
+    update_org_payload = {
+        'name': 'dsdss',
+        'mailingAddress': {
+            'city': 'Innisfail',
+            'country': 'CA',
+            'region': 'AB',
+            'postalCode': 'T4G 1P5',
+            'street': 'D-4619 45 Ave',
+            'streetAdditional': ''
+        },
+        'paymentInfo': {
+            'revenueAccount': {
+                'projectCode': '100',
+                'responsibilityCentre': '100',
+                'serviceLine': '100',
+                'stob': '100'
+            }
+        },
+        'productSubscriptions': [
+            {
+                'productCode': 'PPR'
+            },
+            {
+                'productCode': 'DIR_SEARCH'
+            }
+        ]
+    }
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(update_org_payload),
+                    headers=headers_invited, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
 
 
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
