@@ -417,6 +417,18 @@ class TestPaymentMethodInfo(dict, Enum):
         """Return payment info payload."""
         return {'paymentInfo': {'paymentMethod': payment_method.value}}
 
+    @staticmethod
+    def get_payment_method_input_with_revenue(payment_method: PaymentMethod = PaymentMethod.EJV):
+        """Return payment info payload."""
+        revenue_account_details = {
+            'client': '100',
+            'projectCode': 1111111,
+            'responsibilityCentre': '22222',
+            'serviceLine': '1111111',
+            'stob': '9000'
+        }
+        return {'paymentInfo': {'paymentMethod': payment_method.value, 'revenueAccount': revenue_account_details}}
+
 
 class TestAnonymousMembership(dict, Enum):
     """Test scenarios of org status."""
@@ -471,14 +483,19 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': {
-                'street': '1234 Abcd Street',
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            },
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
             'typeCode': OrgType.PREMIUM.value
+        }
+
+    @staticmethod
+    def get_mailing_address():
+        """Return mailing Address."""
+        return {
+            'street': '1234 Abcd Street',
+            'city': 'Test',
+            'region': 'BC',
+            'postalCode': 'T1T1T1',
+            'country': 'CA'
         }
 
     @staticmethod
@@ -486,13 +503,7 @@ class TestOrgInfo(dict, Enum):
         """Return org info for bcol linked info."""
         return {
             'name': name,
-            'mailingAddress': {
-                'street': '1234 Abcd Street',
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            }
+            'mailingAddress': TestOrgInfo.get_mailing_address()
         }
 
     @staticmethod
@@ -504,12 +515,7 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': {
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            }
+            'mailingAddress': TestOrgInfo.get_mailing_address()
         }
 
     @staticmethod
@@ -521,13 +527,7 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': {
-                'street': '1234 Abcd Street',
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            },
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
             'typeCode': OrgType.PREMIUM.value
         }
 
