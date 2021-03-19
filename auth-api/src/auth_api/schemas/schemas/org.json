@@ -76,7 +76,7 @@
       "type": "array",
       "title": "The Subscriptions Array",
       "items": {
-        "$ref": "#/definitions/productSubscriptions"
+        "type": "object"
       }
     }
     }

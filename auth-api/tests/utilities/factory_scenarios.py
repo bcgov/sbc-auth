@@ -515,7 +515,7 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': TestOrgInfo.get_mailing_address()
+            'mailingAddress': TestOrgInfo.get_mailing_address().pop('street')
         }
 
     @staticmethod
