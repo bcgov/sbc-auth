@@ -11,8 +11,9 @@ export interface CreateRequestBody {
   accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
-  paymentInfo?: PaymentInfo
+  paymentInfo?: PaymentInfo | revenueAccount | any // need to fix since payment info is taking directly
   branchName?: string
+  productSubscriptions: []
 }
 
 export interface PaymentInfo {
@@ -48,6 +49,7 @@ export interface Organization {
   suspendedOn?: string
   accountStatus?: string
   suspensionReasonCode?: string
+  branchName?: string
 }
 
 export interface PADInfo {
@@ -210,9 +212,14 @@ export interface CFSAccountDetails {
 }
 
 export interface GLInfo {
-  clientCode: string;
-  responsiblityCenter: string;
-  accountNumber: string;
-  standardObject: string;
-  project: string;
+  client: string;
+  responsibilityCentre: string;
+  serviceLine: string;
+  stob: string;
+  projectCode: string;
+}
+
+export interface revenueAccount
+{
+  revenueAccount : any
 }
