@@ -20,7 +20,7 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, a
 from sqlalchemy.orm import contains_eager, relationship
 
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, OrgStatus as OrgStatusEnum
-from auth_api.utils.roles import VALID_STATUSES
+from auth_api.utils.roles import VALID_STATUSES, EXCLUDED_FIELDS
 
 from .base_model import VersionedModel
 from .contact import Contact
@@ -178,7 +178,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return cls.query.filter(and_(Org.created_by_id == user_id, Org.status_code == 'ACTIVE')).with_entities(
             func.count()).scalar()
 
-    def update_org_from_dict(self, org_info: dict, exclude=('status_code', 'type_code')):
+    def update_org_from_dict(self, org_info: dict, exclude=EXCLUDED_FIELDS):
         """Update this org with the provided dictionary."""
         # Update from provided dictionary, but specify additional fields not to update.
         self.update_from_dict(**org_info, _exclude=exclude)
