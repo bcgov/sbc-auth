@@ -31,7 +31,7 @@ from auth_api.services import User as UserService
 from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode, AccessType
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestPaymentMethodInfo)
+    TestPaymentMethodInfo, DeleteAffiliationPayload)
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
 
 
@@ -1599,3 +1599,129 @@ def test_search_org_invitations(client, jwt, session, keycloak_mock):  # pylint:
     orgs = json.loads(rv.data)
     assert len(orgs.get('orgs')) == 2
     assert len(orgs.get('orgs')[0].get('invitations')) == 1
+
+
+def test_delete_affiliation_no_payload(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an affiliation for an org can be removed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock2),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation3),
+                     headers=headers,
+                     content_type='application/json')
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation4),
+                     headers=headers,
+                     content_type='application/json')
+
+    rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'affiliations_response')[0]
+    affiliations = json.loads(rv.data)
+    # Result is sorted desc order of created date
+    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+
+    affiliation_id = affiliations['entities'][1]['businessIdentifier']
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    da = client.delete('/api/v1/orgs/{org_id}/affiliations/{affiliation_id}'.format(org_id=org_id,
+                                                                                    affiliation_id=affiliation_id),
+                       headers=headers,
+                       content_type='application/json')
+    assert da.status_code == http_status.HTTP_200_OK
+
+
+def test_delete_affiliation_payload(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an affiliation for an org can be removed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock2),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation3),
+                     headers=headers,
+                     content_type='application/json')
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation4),
+                     headers=headers,
+                     content_type='application/json')
+
+    rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'affiliations_response')[0]
+    affiliations = json.loads(rv.data)
+    # Result is sorted desc order of created date
+    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+
+    affiliation_id = affiliations['entities'][1]['businessIdentifier']
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    da = client.delete('/api/v1/orgs/{org_id}/affiliations/{affiliation_id}'.format(org_id=org_id,
+                                                                                    affiliation_id=affiliation_id),
+                       headers=headers,
+                       data=json.dumps(DeleteAffiliationPayload.delete_affiliation1),
+                       content_type='application/json')
+    assert da.status_code == http_status.HTTP_200_OK
+
+
+def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an affiliation for an org can be removed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock2),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation3),
+                     headers=headers,
+                     content_type='application/json')
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.affiliation4),
+                     headers=headers,
+                     content_type='application/json')
+
+    rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'affiliations_response')[0]
+    affiliations = json.loads(rv.data)
+    # Result is sorted desc order of created date
+    assert affiliations['entities'][1]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
+    assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock2['businessIdentifier']
+
+    affiliation_id = affiliations['entities'][1]['businessIdentifier']
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    da = client.delete('/api/v1/orgs/{org_id}/affiliations/{affiliation_id}'.format(org_id=org_id,
+                                                                                    affiliation_id=affiliation_id),
+                       headers=headers,
+                       data=json.dumps(DeleteAffiliationPayload.delete_affiliation2),
+                       content_type='application/json')
+    assert da.status_code == http_status.HTTP_200_OK
+

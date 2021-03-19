@@ -171,12 +171,12 @@ export default class BusinessModule extends VuexModule {
         if (filingId) {
           await BusinessService.deleteBusinessFiling(payload.business.businessIdentifier, filingId)
         } else {
-          await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier, payload.passcodeResetEmail, payload.passcodeResetFlag)
+          await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier, payload.passcodeResetEmail, payload.resetPasscode)
         }
       }
     } else {
       // Remove an affiliation between the given business and each specified org
-      await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier, payload.passcodeResetEmail, payload.passcodeResetFlag)
+      await OrgService.removeAffiliation(payload.orgIdentifier, payload.business.businessIdentifier, payload.passcodeResetEmail, payload.resetPasscode)
     }
   }
 

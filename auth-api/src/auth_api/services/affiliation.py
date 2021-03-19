@@ -240,7 +240,7 @@ class Affiliation:
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, email_addresses: str = None,
-                           should_passcode_reset: bool = False, token_info: Dict = None):
+                           reset_passcode: bool = False, token_info: Dict = None):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
@@ -259,7 +259,7 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         affiliation.delete()
-        if should_passcode_reset:
+        if reset_passcode:
             entity.reset_passcode(entity.business_identifier, email_addresses, token_info)
 
         entity.set_pass_code_claimed(False)

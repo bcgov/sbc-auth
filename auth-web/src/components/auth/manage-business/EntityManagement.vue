@@ -345,7 +345,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   async remove (resetPasscodeEmail: string) {
     try {
       this.removeBusinessPayload.passcodeResetEmail = resetPasscodeEmail
-      this.removeBusinessPayload.passcodeResetFlag = true
+      this.removeBusinessPayload.resetPasscode = true
       this.$refs.passcodeResetOptionsModal.close()
       await this.removeBusiness(this.removeBusinessPayload)
       await this.syncBusinesses()
