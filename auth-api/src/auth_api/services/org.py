@@ -378,7 +378,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # to enforce necessary details for govm account creation
         is_govm_account = org_model.access_type == AccessType.GOVM.value
         is_govm_account_creation = is_govm_account and \
-                                   org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
+            org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # govm name is not being updated now
         is_name_getting_updated = 'name' in org_info and not is_govm_account
