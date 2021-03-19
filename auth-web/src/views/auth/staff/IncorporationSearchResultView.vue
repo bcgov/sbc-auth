@@ -137,7 +137,7 @@ export default class IncorporationSearchResultView extends Vue {
       width: '25%'
     },
     {
-      text: 'Number',
+      text: 'Entity#',
       align: 'left',
       sortable: false,
       value: 'businessIdentifier',
