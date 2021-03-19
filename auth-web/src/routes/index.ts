@@ -107,8 +107,9 @@ router.beforeEach((to, from, next) => {
         return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
       }
     }
-
-    if (to.matched.some(record => record.meta.requiresActiveAccount) && (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID)) {
+    // need to check for govm account also. so we are checking roles
+    if (to.matched.some(record => record.meta.requiresActiveAccount) &&
+        (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID || currentUser.roles.includes(Role.GOVMAccountUser))) {
       // if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
       if ([AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED].some(status => status === currentOrganization?.statusCode)) {
         console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')

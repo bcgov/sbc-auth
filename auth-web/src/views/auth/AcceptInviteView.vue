@@ -6,9 +6,9 @@
 </template>
 
 <script lang="ts">
+import { AccessType, Pages, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
-import { Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -34,6 +34,7 @@ import { getModule } from 'vuex-module-decorators'
 export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private readonly acceptInvitation!: (token: string) => Promise<Invitation>
   private readonly getUserProfile!: (identifier: string) => Promise<User>
+
   protected readonly userContact!: Contact
   protected readonly userProfile!: User
 
@@ -61,7 +62,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
       } else {
         const invitation = await this.acceptInvitation(this.token)
         // ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id, label: invitation.membership[0].org.name }))
-        const invitingOrg = invitation.membership[0].org
+        const invitingOrg = invitation?.membership[0]?.org
         this.setCurrentAccountSettings({
           id: invitingOrg.id,
           label: invitingOrg.name,
@@ -69,6 +70,11 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
           urlpath: '',
           urlorigin: ''
         })
+
+        // sync org since govm account is already approved
+        if (invitingOrg?.accessType === AccessType.GOVM) {
+          this.syncOrganization(invitation?.membership[0]?.org?.id)
+        }
         await this.syncMembership(invitation?.membership[0]?.org?.id)
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())

@@ -7,20 +7,21 @@ import { User } from '@/models/user'
 
 export interface CreateRequestBody {
   name?: string,
+  branchName?: string
   typeCode?: string
   accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
-  paymentInfo?: PaymentInfo | RevenueAccount | any // need to fix since payment info is taking directly
-  branchName?: string
+  paymentInfo?: PaymentInfo
   productSubscriptions?: []
 }
 
 export interface PaymentInfo {
-  paymentMethod: string
+  paymentMethod?: string
   bankTransitNumber?: string
   bankInstitutionNumber?: string
   bankAccountNumber?: string
+  revenueAccount?: GLInfo
 }
 
 export interface Organizations
@@ -218,9 +219,4 @@ export interface GLInfo {
   serviceLine: string;
   stob: string;
   projectCode: string;
-}
-
-export interface RevenueAccount
-{
-  revenueAccount : any
 }
