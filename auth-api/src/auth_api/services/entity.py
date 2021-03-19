@@ -163,7 +163,7 @@ class Entity:
 
         entity.pass_code = passcode_hash(new_pass_code)
         entity.pass_code_claimed = False
-        entity.commit()
+        entity.save()
 
         if email_addresses:
             mailer_payload = dict(
