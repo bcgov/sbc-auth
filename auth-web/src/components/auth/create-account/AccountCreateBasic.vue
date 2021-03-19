@@ -147,6 +147,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private async mounted () {
     if (this.currentOrganization) {
       this.orgName = this.currentOrganization.name
+      this.branchName = this.currentOrganization.branchName
     }
     if (this.enablePaymentMethodSelectorStep) {
       this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
@@ -203,7 +204,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           this.errorMessage = 'An error occurred while attempting to create your account.'
         }
       } else {
-        const org: Organization = { name: this.orgName, orgType: orgType }
+        const org: Organization = { name: this.orgName, orgType: orgType, branchName: this.branchName }
         this.setCurrentOrganization(org)
         // check if the name is avaialble
         this.stepForward()

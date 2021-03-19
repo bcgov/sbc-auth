@@ -390,6 +390,33 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async createGovmOrg (): Promise<Organization> {
+    const org: Organization = this.context.state['currentOrganization']
+    const address = this.context.state['currentOrgAddress']
+    const revenueAccount: GLInfo = this.context.state['currentOrgGLInfo']
+
+    const createRequestBody: CreateRequestBody = {
+      name: org.name,
+      branchName: org.branchName, // if not neede can remove
+      paymentInfo: {
+        revenueAccount
+      },
+      productSubscriptions: []
+    }
+
+    if (address) {
+      createRequestBody.mailingAddress = address
+    }
+
+    // need to get org id from state
+    const response = await OrgService.updateOrg(org.id, createRequestBody)
+    const organization = response?.data
+    this.context.commit('setCurrentOrganization', organization)
+    await this.addOrgSettings(organization)
+    return response?.data
+  }
+
+  @Action({ rawError: true })
   public async validatePADInfo (): Promise<PADInfoValidation> {
     const padInfo: PADInfo = { ...this.context.state['currentOrgPADInfo'] }
     delete padInfo.isTOSAccepted

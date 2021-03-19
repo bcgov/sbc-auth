@@ -18,8 +18,8 @@
               filled
               hint="3 characters"
               persistent-hint
-              :rules="clientCodeRules"
-              v-model="clientCode"
+              :rules="clientRules"
+              v-model="client"
               @change="emitGLInfo"
               v-mask="'###'"
               data-test="input-client-code"
@@ -31,11 +31,11 @@
               filled
               hint="5 characters"
               persistent-hint
-              :rules="responsiblityCenterRules"
-              v-model="responsiblityCenter"
+              :rules="responsibilityCentreRules"
+              v-model="responsibilityCentre"
               @change="emitGLInfo"
               v-mask="'#####'"
-              data-test="input-responsiblityCenter"
+              data-test="input-responsibilityCentre"
             ></v-text-field>
           </v-col>
             <v-col cols="4" class="py-0">
@@ -44,10 +44,10 @@
               filled
               hint="5 characters"
               persistent-hint
-              :rules="accountNumberRules"
-              v-model="accountNumber"
+              :rules="serviceLineRules"
+              v-model="serviceLine"
               @change="emitGLInfo"
-              data-test="input-accountNumber"
+              data-test="input-serviceLine"
               v-mask="'#####'"
             ></v-text-field>
           </v-col>
@@ -57,9 +57,9 @@
               filled
               hint="4 characters"
               persistent-hint
-              :rules="standardObjectRules"
-              v-model="standardObject"
-              data-test="input-standardObject"
+              :rules="stobRules"
+              v-model="stob"
+              data-test="input-stob"
               v-mask="'####'"
               @change="emitGLInfo"
               >
@@ -71,10 +71,10 @@
               filled
               hint="7 characters"
               persistent-hint
-              :rules="projectRules"
-              v-model="project"
+              :rules="projectCodeRules"
+              v-model="projectCode"
               @change="emitGLInfo"
-              data-test="input-project"
+              data-test="input-projectCode"
               v-mask="'#######'"
               >
             ></v-text-field>
@@ -103,36 +103,36 @@ export default class GLPaymentForm extends Vue {
   @OrgModule.Mutation('setCurrentOrganizationGLInfo') private setCurrentOrganizationGLInfo!: (glInfo: GLInfo) => void
 
   @Prop({ default: () => ({} as GLInfo) }) glInformation: any
-  private clientCode: string = ''
-  private responsiblityCenter: string = ''
-  private accountNumber: string = ''
-  private standardObject: string = ''
-  private project: string = ''
+  private client: string = ''
+  private responsibilityCentre: string = ''
+  private serviceLine: string = ''
+  private stob: string = ''
+  private projectCode: string = ''
 
   $refs: {
     GlInfoForm: HTMLFormElement,
   }
 
-  public clientCodeRules = [
+  public clientRules = [
     v => !!v || 'Client Code is required',
     v => (v.length >= 3) || 'Client Code should be of 3 digits'
   ]
 
-  public responsiblityCenterRules = [
+  public responsibilityCentreRules = [
     v => !!v || 'Responsibility Center is required',
     v => (v.length === 5) || 'Responsibility Center should be 5 digits'
   ]
 
-  public accountNumberRules = [
+  public serviceLineRules = [
     v => !!v || 'Account Number is required',
     v => (v.length === 5) || 'Account Number should be 5 digits'
   ]
 
-  public standardObjectRules = [
+  public stobRules = [
     v => !!v || 'Standard Object is required',
     v => (v.length === 4) || 'Standard Object should be 4 digits'
   ]
-  public projectRules = [
+  public projectCodeRules = [
     v => !!v || 'Project is required',
     v => (v.length === 7) || 'Project should be 7 digits'
   ]
@@ -140,11 +140,11 @@ export default class GLPaymentForm extends Vue {
   // setup basic details on mount
   public mounted () {
     const glInfo: GLInfo = (Object.keys(this.glInformation).length) ? this.glInformation : this.currentOrgGLInfo
-    this.clientCode = glInfo?.clientCode || ''
-    this.responsiblityCenter = glInfo?.responsiblityCenter || ''
-    this.accountNumber = glInfo?.accountNumber || ''
-    this.standardObject = glInfo?.standardObject || ''
-    this.project = glInfo?.project || ''
+    this.client = glInfo?.client || ''
+    this.responsibilityCentre = glInfo?.responsibilityCentre || ''
+    this.serviceLine = glInfo?.serviceLine || ''
+    this.stob = glInfo?.stob || ''
+    this.projectCode = glInfo?.projectCode || ''
     // this.isGlInfoFormValid()
   }
 
@@ -152,11 +152,11 @@ export default class GLPaymentForm extends Vue {
   // @Emit()
   public async emitGLInfo () {
     const glInfo: GLInfo = {
-      clientCode: this.clientCode,
-      responsiblityCenter: this.responsiblityCenter,
-      accountNumber: this.accountNumber,
-      standardObject: this.standardObject,
-      project: this.project
+      client: this.client,
+      responsibilityCentre: this.responsibilityCentre,
+      serviceLine: this.serviceLine,
+      stob: this.stob,
+      projectCode: this.projectCode
     }
     this.isGlInfoFormValid()
     this.setCurrentOrganizationGLInfo(glInfo)
