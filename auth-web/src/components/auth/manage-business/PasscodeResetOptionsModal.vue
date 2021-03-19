@@ -76,7 +76,6 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 })
 export default class PasscodeResetOptionsModal extends Vue {
     private isResetPasscode: boolean = false
-    private isDialogOpen: boolean = false
     private emailAddress = ''
     private confirmedEmailAddress = ''
     private emailRules = CommonUtils.emailRules()
