@@ -125,4 +125,5 @@ if __name__ == '__main__':
     event_loop.run_until_complete(run(event_loop, payload, replace_payload))
 
 # Examples:
-# python3 q_cli.py -p '{"type":"bc.registry.auth.resetPasscode", "data":{"emailAddresses": "test@test.com", "passCode":"1234", "businessIdentifier":"CP1234", "businessName": "TEST", "isStaffInitiated":true}}'
+# Reset passcode : python3 q_cli.py -p '{"type":"bc.registry.auth.resetPasscode", "data":{"emailAddresses": "test@test.com", "passCode":"1234", "businessIdentifier":"CP1234", "businessName": "TEST", "isStaffInitiated":true}}'
+# PAD Account create : python3 q_cli.py -p '{"type": "bc.registry.payment.padAccountCreate", "data": {"accountId": "1234", "accountName": "Test Account", "padTosAcceptedBy": "bcsc/rtyujkmnbv", "paymentInfo": {"bankInstitutionNumber": "001", "bankTransitNumber": "99000", "bankAccountNumber": "XXXX2345", "paymentStartDate": "2021-01-01", "bankName": "XXX"}}}'
