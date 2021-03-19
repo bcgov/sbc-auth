@@ -11,9 +11,9 @@ export interface CreateRequestBody {
   accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
-  paymentInfo?: PaymentInfo | revenueAccount | any // need to fix since payment info is taking directly
+  paymentInfo?: PaymentInfo | RevenueAccount | any // need to fix since payment info is taking directly
   branchName?: string
-  productSubscriptions: []
+  productSubscriptions: any
 }
 
 export interface PaymentInfo {
@@ -219,7 +219,7 @@ export interface GLInfo {
   projectCode: string;
 }
 
-export interface revenueAccount
+export interface RevenueAccount
 {
   revenueAccount : any
 }
