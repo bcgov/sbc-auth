@@ -630,7 +630,7 @@ class TestAffliationInfo(dict, Enum):
 class DeleteAffiliationPayload(dict, Enum):
     """Test scenarios of delete affiliation."""
 
-    delete_affiliation1 = {'passcodeResetEmail': 'test@test.com', 'resetPasscode': True}
+    delete_affiliation1 = {'passcodeResetEmail': 'test@gmail.com', 'resetPasscode': True}
     delete_affiliation2 = {'resetPasscode': False}
 
 
