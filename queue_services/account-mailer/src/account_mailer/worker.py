@@ -43,7 +43,7 @@ from account_mailer.email_processors import ejv_failures  # pylint: disable=wron
 from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
-from account_mailer.enums import MessageType, SubjectType, TemplateType
+from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 
@@ -55,7 +55,7 @@ FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
 
 
-# pylint: disable=too-many-statements, too-many-branches
+# pylint: disable=too-many-statements, too-many-branches, too-many-locals
 async def process_event(event_message: dict, flask_app):
     """Process the incoming queue event message."""
     if not flask_app:
@@ -183,6 +183,22 @@ async def process_event(event_message: dict, flask_app):
                                                **args)
         elif message_type == MessageType.EJV_FAILED.value:
             email_dict = ejv_failures.process(email_msg)
+        elif message_type == MessageType.RESET_PASSCODE.value:
+            template_name = TemplateType.RESET_PASSCODE_TEMPLATE_NAME.value
+
+            subject = SubjectType.RESET_PASSCODE.value
+            header: str = Constants.RESET_PASSCODE_CUSTOMER_HEADER.value
+            if email_msg.get('isStaffInitiated', False):
+                header = Constants.RESET_PASSCODE_STAFF_HEADER.value
+            email_msg.update({
+                'header': header
+            })
+
+            email_dict = common_mailer.process(
+                org_id=None,
+                recipients=email_msg.get('emailAddresses'),
+                template_name=template_name,
+                subject=subject, **email_msg)
 
         if email_dict:
             logger.debug('Extracted email msg Recipient: %s ', email_dict.get('recipients', ''))

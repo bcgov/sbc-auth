@@ -33,6 +33,7 @@ class MessageType(Enum):
     PAD_SETUP_FAILED = 'bc.registry.payment.PadSetupFailed'
     PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
     EJV_FAILED = 'bc.registry.payment.ejvFailed'
+    RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
 
 
 class SubjectType(Enum):
@@ -48,6 +49,7 @@ class SubjectType(Enum):
     PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
+    RESET_PASSCODE = 'Passcode reset'
 
 
 class TemplateType(Enum):
@@ -65,3 +67,11 @@ class TemplateType(Enum):
     PAD_SETUP_FAILED_TEMPLATE_NAME = 'pad_setup_failed'
     PAYMENT_PENDING_TEMPLATE_NAME = 'paymanet_pending'
     EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'
+    RESET_PASSCODE_TEMPLATE_NAME = 'reset_passcode'
+
+
+class Constants(Enum):
+    """Constants."""
+
+    RESET_PASSCODE_STAFF_HEADER = 'BC Registries staff have generated a new passcode for your business.'
+    RESET_PASSCODE_CUSTOMER_HEADER = 'BC Registries have generated a new passcode for your business.'
