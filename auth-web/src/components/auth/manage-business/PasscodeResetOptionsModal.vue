@@ -107,7 +107,7 @@ export default class PasscodeResetOptionsModal extends Vue {
           this.$emit('confirm-passcode-reset-options', this.emailAddress)
         }
       } else {
-        this.$emit('confirm-passcode-reset-options', null)
+        this.$emit('confirm-passcode-reset-options')
       }
     }
 }
