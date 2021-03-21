@@ -7,19 +7,21 @@ import { User } from '@/models/user'
 
 export interface CreateRequestBody {
   name?: string,
+  branchName?: string
   typeCode?: string
   accessType?: string
   bcOnlineCredential?:BcolProfile
   mailingAddress?:Address
   paymentInfo?: PaymentInfo
-  branchName?: string
+  productSubscriptions?: []
 }
 
 export interface PaymentInfo {
-  paymentMethod: string
+  paymentMethod?: string
   bankTransitNumber?: string
   bankInstitutionNumber?: string
   bankAccountNumber?: string
+  revenueAccount?: GLInfo
 }
 
 export interface Organizations
@@ -48,6 +50,7 @@ export interface Organization {
   suspendedOn?: string
   accountStatus?: string
   suspensionReasonCode?: string
+  branchName?: string
 }
 
 export interface PADInfo {
@@ -80,6 +83,7 @@ export interface RemoveBusinessPayload {
   orgIdentifier: number
   business: Business
   passcodeResetEmail?: string
+  resetPasscode?: boolean
 }
 
 export interface Member {
@@ -207,4 +211,12 @@ export interface CFSAccountDetails {
   cfsPartyNumber: string
   cfsSiteNumber: string
   status: string
+}
+
+export interface GLInfo {
+  client: string;
+  responsibilityCentre: string;
+  serviceLine: string;
+  stob: string;
+  projectCode: string;
 }

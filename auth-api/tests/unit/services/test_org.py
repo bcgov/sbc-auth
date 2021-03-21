@@ -174,6 +174,70 @@ def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
         assert expected_data == actual_data
 
 
+def test_create_basic_org_assert_pay_request_is_govm(session,
+                                                     keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
+                                             roles=['create_accounts'])
+    with patch.object(RestService, 'post') as mock_post:
+        org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id, token_info=token_info)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org_govm['name']
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
+            'paymentInfo': {
+                'methodOfPayment': PaymentMethod.EJV.value,
+                'billable': False
+            }
+
+        }
+        assert expected_data == actual_data
+
+
+def test_put_basic_org_assert_pay_request_is_govm(session,
+                                                  keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
+                                             roles=['create_accounts'])
+    user2 = factory_user_model(TestUserInfo.user2)
+    public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
+                                                    roles=['gov_account_user'])
+
+    org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id, token_info=token_info)
+    assert org
+    with patch.object(RestService, 'put') as mock_post:
+        payment_details = TestPaymentMethodInfo.get_payment_method_input_with_revenue()
+        org_body = {
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
+            **payment_details
+
+        }
+        org = OrgService.update_org(org, org_body, token_info=public_token_info)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org_govm['name']
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
+            'paymentInfo': {
+                'methodOfPayment': 'EJV',
+                'billable': False,
+                'revenueAccount': payment_details.get('paymentInfo').get('revenueAccount')
+            },
+            'contactInfo': TestOrgInfo.get_mailing_address()
+
+        }
+        assert expected_data == actual_data
+
+
 def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     bcol_response = Mock(spec=Response)
@@ -508,7 +572,7 @@ def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock):  #
 
     assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
 
-    AffiliationService.delete_affiliation(org_id, business_identifier,
+    AffiliationService.delete_affiliation(org_id, business_identifier, None,
                                           TestEntityInfo.entity_lear_mock['passCode'])
     OrgService.delete_org(org.as_dict()['id'], TestJwtClaims.public_user_role)
     org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])

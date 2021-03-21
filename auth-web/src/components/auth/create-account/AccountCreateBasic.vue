@@ -1,7 +1,9 @@
 <template>
   <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
     <fieldset>
-      <legend class="mb-3">Enter an Account Name</legend>
+
+      <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
+       <legend class="mb-3"  v-else>Enter an Account Name</legend>
       <v-slide-y-transition>
         <div v-show="errorMessage">
           <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
@@ -9,11 +11,21 @@
       </v-slide-y-transition>
       <v-text-field
         filled
-        label="Account Name"
+        :label="govmAccount ? 'Ministry Name' : 'Account Name'"
         v-model.trim="orgName"
         :rules="orgNameRules"
         :disabled="saving"
         data-test="input-org-name"
+        :readonly="govmAccount"
+      />
+       <v-text-field
+        filled
+        label="Branch/Division (If applicable)"
+        v-model.trim="branchName"
+        :disabled="saving"
+        data-test="input-branch-name"
+        v-if="govmAccount"
+        :readonly="govmAccount"
       />
     </fieldset>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
@@ -113,8 +125,11 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
   private orgName: string = ''
+  private branchName: string = ''
+
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
+  @Prop({ default: false }) govmAccount: boolean
   private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
@@ -134,6 +149,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private async mounted () {
     if (this.currentOrganization) {
       this.orgName = this.currentOrganization.name
+      this.branchName = this.currentOrganization.branchName
     }
     if (this.enablePaymentMethodSelectorStep) {
       this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
@@ -165,7 +181,8 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       // if its not account change , do check for duplicate
       // if its account change , check if user changed the already existing name
       const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization?.name)
-      if (checkNameAVailability) {
+      // no need to check name if govmAccount
+      if (checkNameAVailability && !this.govmAccount) {
         const available = await this.isOrgNameAvailable(this.orgName)
         if (!available) {
           this.errorMessage =
@@ -190,7 +207,11 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           this.errorMessage = 'An error occurred while attempting to create your account.'
         }
       } else {
-        const org: Organization = { name: this.orgName, orgType: orgType }
+        let org: Organization = { name: this.orgName, orgType: orgType }
+        if (this.govmAccount) {
+          org = { ...org, ...{ branchName: this.branchName, id: this.currentOrganization.id } }
+        }
+
         this.setCurrentOrganization(org)
         // check if the name is avaialble
         this.stepForward()

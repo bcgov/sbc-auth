@@ -36,9 +36,7 @@ from entity_queue_common.service_utils import error_cb, logger, signal_handler
 from account_mailer.enums import MessageType
 
 
-async def run(loop, mode, auth_account_id, auth_account_name, auth_username, bank_number, bank_branch_number,
-              bank_account_number, order_number, transaction_amount, transaction_id,
-              transaction_time, cfs_account_id):  # pylint: disable=too-many-locals
+async def run(loop, payload: dict, is_replace: bool = False):  # pylint: disable=too-many-locals
     """Run the main application loop for the service.
 
     This runs the main top level service functions for working with the Queue.
@@ -85,133 +83,21 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
             loop.add_signal_handler(getattr(signal, sig),
                                     functools.partial(signal_handler, sig_loop=loop, sig_nc=nc, task=close)
                                     )
-        payload = None
-        if mode == 'pad':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': 'bc.registry.payment.padAccountCreate',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{pay_account.auth_account_id}',
-                'id': f'{auth_account_id}',
-                'time': f'{datetime.now()}',
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'accountName': auth_account_name,
-                    'padTosAcceptedBy': auth_username,
-                    'paymentInfo': {
-                        'bankInstitutionNumber': bank_number,
-                        'bankTransitNumber': bank_branch_number,
-                        'bankAccountNumber': bank_account_number,
-                        'paymentStartDate': '-----',
-                        'bankName': 'XXX'
-                    }
-                }
-            }
-        elif mode == 'refund':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': 'bc.registry.payment.refundRequest',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': transaction_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'identifier': auth_account_id,
-                    'orderNumber': order_number,
-                    'transactionDateTime': transaction_time,
-                    'transactionAmount': f'${transaction_amount}',
-                    'transactionId': transaction_id
-                }
-            }
-        elif mode == 'acc_lock':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.NSF_UNLOCK_ACCOUNT.value}',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'accountName': auth_account_name
-                }
-            }
-        elif mode == 'acc_unlock':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.NSF_LOCK_ACCOUNT.value}',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'accountName': auth_account_name
-                }
-            }
-        elif mode == 'conf_per':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value}',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'nsfFee': 30
-                }
-            }
-        elif mode == 'pad_invoice':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.PAD_INVOICE_CREATED.value}',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'nsfFee': 30,
-                    'invoice_total': 100
-                }
-            }
-        elif mode == 'admin_removed':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.ADMIN_REMOVED.value}',
-                'source': 'https://api.auth.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'recipientEmail': 'foo@bar.com'
-                }
-            }
-        elif mode == 'pad_setup_failed':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.PAD_SETUP_FAILED.value}',
-                'source': 'https://api.auth.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    # 'recipientEmail': 'foo@bar.com'
-                }
-            }
-        elif mode == 'payment_pending':
-            payload = {
-                'specversion': '1.x-wip',
-                'type': f'{MessageType.PAYMENT_PENDING.value}',
-                'source': 'https://api.auth.bcregistry.gov.bc.ca/v1/invoices/{invoice.id}',
-                'id': auth_account_id,
-                'datacontenttype': 'application/json',
-                'data': {
-                    'accountId': auth_account_id,
-                    'cfsAccountId': cfs_account_id,
-                    'transactionAmount': transaction_amount
-                    # 'recipientEmail': 'foo@bar.com'
-                }
-            }
+        payload_template: dict = {
+            'specversion': '1.x-wip',
+            'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/1',
+            'time': f'{datetime.now()}',
+            'datacontenttype': 'application/json'
+        }
+        if is_replace:
+            message_payload = payload
+        else:
+            message_payload = payload_template
+            message_payload.update(payload)
 
+        print('message_payload-->', message_payload)
         await sc.publish(subject=subscription_options().get('subject'),
-                         payload=json.dumps(payload).encode('utf-8'))
+                         payload=json.dumps(message_payload).encode('utf-8'))
 
     except Exception as e:  # pylint: disable=broad-except
         # TODO tighten this error and decide when to bail on the infinite reconnect
@@ -220,56 +106,24 @@ async def run(loop, mode, auth_account_id, auth_account_name, auth_username, ban
 
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hm:i:n:u:b:t:a:o:p:d:z:c",
-                                   ["mode=", "id=", "name=", "username=", "banknumber=", "transitnumber=",
-                                    "accountnumber=", "ordernumber=", "amount=", "transactionid=", "transactiontime=",'cfsaccountid='])
-    except getopt.GetoptError:
-        print('q_cli.py -o <old_identifier> -n <new_identifier>')
+        opts, args = getopt.getopt(sys.argv[1:], "hp:r", ["payload=", "replace="])
+    except getopt.GetoptError as e:
+        print(e)
         sys.exit(2)
 
-    auth_account_name = bank_number = bank_branch_number = \
-        bank_account_number = order_number = transaction_amount = transaction_id = auth_username = transaction_time = cfs_account_id = None
+    replace_payload: bool = False
 
     for opt, arg in opts:
         if opt == '-h':
-            print('q_cli.py -o <old_identifier> -n <new_identifier>')
             sys.exit()
-        elif opt in ("-m", "--mode"):
-            mode = arg  # pad confirmation - "pad", refund request - "refund", acc suspended - "acc_suspend", acc restored - "acc_restore"
-        elif opt in ("-i", "--id"):
-            auth_account_id = arg
-        elif opt in ("-n", "--name"):
-            auth_account_name = arg
-        elif opt in ("-u", "--username"):
-            auth_username = arg
-        elif opt in ("-b", "--banknumber"):
-            bank_number = arg
-        elif opt in ("-t", "--transitnumber"):
-            bank_branch_number = arg
-        elif opt in ("-a", "--accountnumber"):
-            bank_account_number = arg
-        elif opt in ("-o", "--ordernumber"):
-            order_number = arg
-        elif opt in ("-p", "--amount"):
-            transaction_amount = arg
-        elif opt in ("-d", "--transactionid"):
-            transaction_id = arg
-        elif opt in ("-z", "--transactiontime"):
-            transaction_time = arg
-        elif opt in ("-c", "--cfsaccountid"):
-            cfs_account_id = arg
+        elif opt in ("-p", "--payload"):
+            payload = json.loads(arg)
+        elif opt in ("-r", "--id"):
+            replace_payload = str(arg).lower() == 'true'
 
     event_loop = asyncio.get_event_loop()
-    event_loop.run_until_complete(
+    event_loop.run_until_complete(run(event_loop, payload, replace_payload))
 
-        run(event_loop, mode, auth_account_id, auth_account_name, auth_username, bank_number,
-            bank_branch_number, bank_account_number, order_number, transaction_amount, transaction_id,
-            transaction_time, cfs_account_id))
-
-# pad cmd --> python3 q_cli.py -m pad -i 10 -n TestAccount -b 088 -t 00277 -a 12874890
-# refund cmd --> python3 q_cli.py -m refund -i 10 -o 67892 -p 25.33 -d 988
-# account suspended cmd --> python3 q_cli.py -m acc_lock -i 4 -n SomeAccount
-# account restored cmd --> python3 q_cli.py -m acc_unlock -i 4 -n SomeAccount
-# account conf pver-- >  python3 q_cli.py -m conf_per -i 4
-# account conf pver-- >  python3 q_cli.py -m pad_invoice -i 4
-# account admin removal-- >  python3 q_cli.py -m admin_removed -i 4
+# Examples:
+# Reset passcode : python3 q_cli.py -p '{"type":"bc.registry.auth.resetPasscode", "data":{"emailAddresses": "test@test.com", "passCode":"1234", "businessIdentifier":"CP1234", "businessName": "TEST", "isStaffInitiated":true}}'
+# PAD Account create : python3 q_cli.py -p '{"type": "bc.registry.payment.padAccountCreate", "data": {"accountId": "1234", "accountName": "Test Account", "padTosAcceptedBy": "bcsc/rtyujkmnbv", "paymentInfo": {"bankInstitutionNumber": "001", "bankTransitNumber": "99000", "bankAccountNumber": "XXXX2345", "paymentStartDate": "2021-01-01", "bankName": "XXX"}}}'
