@@ -14,6 +14,8 @@
 """Service for managing Entity data."""
 
 from typing import Dict, Tuple
+import string
+import secrets
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -23,10 +25,10 @@ from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
+from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.passcode import passcode_hash
-from auth_api.utils.roles import Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, Role
 from auth_api.utils.util import camelback2snake
-
 from .authorization import check_auth
 
 
@@ -45,6 +47,11 @@ class Entity:
     def identifier(self):
         """Return the unique identifier for this entity."""
         return self._model.id
+
+    @property
+    def business_identifier(self):
+        """Return the business identifier for this entity."""
+        return self._model.business_identifier
 
     @property
     def pass_code(self):
@@ -145,6 +152,30 @@ class Entity:
 
         entity = Entity(entity)
         return entity
+
+    @staticmethod
+    def reset_passcode(business_identifier: str, email_addresses: str = None, token_info: Dict = None):
+        """Reset the entity passcode and send email."""
+        check_auth(token_info, one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
+        entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
+        # generate passcode and set
+        new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))
+
+        entity.pass_code = passcode_hash(new_pass_code)
+        entity.pass_code_claimed = False
+        entity.save()
+
+        if email_addresses:
+            mailer_payload = dict(
+                emailAddresses=email_addresses,
+                passCode=new_pass_code,
+                businessIdentifier=business_identifier,
+                businessName=entity.name,
+                isStaffInitiated=Role.STAFF.value in token_info.get('roles')
+            )
+            publish_to_mailer(
+                notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload
+            )
 
     def add_contact(self, contact_info: dict):
         """Add a business contact to this entity."""

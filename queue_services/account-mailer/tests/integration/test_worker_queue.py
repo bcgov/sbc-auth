@@ -511,3 +511,53 @@ async def test_ejv_failure_emails(app, session, stan_server, event_loop, client_
         mock_send.assert_called
         assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.EJV_FAILED.value
+
+
+@pytest.mark.asyncio
+async def test_passcode_reset_email(app, session, stan_server, event_loop, client_id, events_stan, future):
+    """Assert that events can be retrieved and decoded from the Queue."""
+    # Call back for the subscription
+    from account_mailer.worker import cb_subscription_handler
+
+    events_subject = 'test_subject'
+    events_queue = 'test_queue'
+    events_durable_name = 'test_durable'
+    with patch.object(notification_service, 'send_email', return_value=None) as mock_send:
+        # register the handler to test it
+        await subscribe_to_queue(events_stan,
+                                 events_subject,
+                                 events_queue,
+                                 events_durable_name,
+                                 cb_subscription_handler)
+
+        # add an event to queue - staff initiated reset
+        msg_payload = {
+            'emailAddresses': 'test@test.com',
+            'passCode': '1234',
+            'businessIdentifier': 'CP1234',
+            'businessName': 'TEST',
+            'isStaffInitiated': True
+        }
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.RESET_PASSCODE.value,
+                                        mail_details=msg_payload)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.RESET_PASSCODE.value
+
+        # add an event to queue - staff initiated reset
+        msg_payload = {
+            'emailAddresses': 'test@test.com',
+            'passCode': '1234',
+            'businessIdentifier': 'CP1234',
+            'businessName': 'TEST',
+            'isStaffInitiated': False
+        }
+        await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
+                                        msg_type=MessageType.RESET_PASSCODE.value,
+                                        mail_details=msg_payload)
+
+        mock_send.assert_called
+        assert mock_send.call_args.args[0].get('recipients') == 'test@test.com'
+        assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.RESET_PASSCODE.value

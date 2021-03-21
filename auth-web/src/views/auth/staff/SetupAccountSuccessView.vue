@@ -3,10 +3,15 @@
     <div class="view-container text-center">
       <article>
         <div class="group">
-          <v-icon size="48" class="mb-6">mdi-check</v-icon>
+          <v-icon size="48" class="mb-6" color="primary">mdi-check</v-icon>
         </div>
-        <h1 class="mb-5">Account successfully created</h1>
-        <p class="mb-9">
+        <h1 class="mb-10" v-if="isGovmAccount">Invitation has been successfully sent</h1>
+        <h1 class="mb-5" v-else>Account successfully created</h1>
+         <p  class="mb-9" v-if="isGovmAccount">
+          An invtation email will be sent to the BC Government Ministry account admin's email.<br>
+          The email will contatin a link for creating an account.
+        </p>
+        <p class="mb-9" v-else>
           The Director Search account <span class="font-italic">{{accountName}}</span> has successfully been created. <br>
           An email has been sent to <span class="font-italic">{{accountEmail}}</span> containing instructions <br>
           on how to access their new account.</p>
@@ -23,11 +28,11 @@
 </template>
 
 <script lang="ts">
+import { AccessType, Pages } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Invitation } from '@/models/Invitation'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
 import { getModule } from 'vuex-module-decorators'
 import { mapState } from 'vuex'
 
@@ -41,11 +46,13 @@ export default class SetupAccountSuccessView extends Vue {
   private readonly currentOrganization!: Organization
   private readonly sentInvitations!: Invitation[]
   private accountEmail: string = ''
-
+  private isGovmAccount: boolean = false
   @Prop({ default: '' }) accountName: string
+  @Prop({ default: '' }) accountType: string
 
   private async mounted () {
     this.accountEmail = (this.sentInvitations?.length && this.sentInvitations[this.sentInvitations.length - 1].recipientEmail) ? this.sentInvitations[this.sentInvitations.length - 1].recipientEmail : ''
+    this.isGovmAccount = this.accountType !== '' && this.accountType === AccessType.GOVM.toLowerCase()
   }
 
   goToDashboard () {

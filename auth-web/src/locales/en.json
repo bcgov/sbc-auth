@@ -84,10 +84,7 @@
   "extraProdOrgSuccessTitle": "Your BC Registries and Online Services account has been created and is being reviewed.",
   "extraProdOrgSuccessMessage": "Once your account has been reviewed and approved you will receive an email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
   "noPendingAccountsLabel": "No Pending Invitations",
-  "generatePasscodeText": "When you generate a new passcode, a new passcode will be assigned to this business. Once the new passcode is generated",
-  "generatePasscodeSummaryFirstLine": "You could setup the account for your cooperative",
-  "generatePasscodeSummarySecondLine": "You could add and remove users",
-  "generatePasscodeSummaryThirdLine": "You could provide the passcode and affiliate with other accounts",
+  "generatePasscodeText": "A new passcode will be generated and will be sent to the email address provided below:",
   "paymentErrorTitle": "Payment Error",
   "paymentErrorSubText": "Looks like we encountered an error. Your payment could not be processed.<br />Please try again or your transaction state will change to \"pending\" and saved as draft.",
   "paymentCancelTitle": "Payment Canceled",
@@ -111,6 +108,9 @@
   "inviteUsersFormTextGovM": "Enter team member's IDIR email and select a role. Team members would be able to access this account with thier IDIR username and password.",
   "removeBusinessOptionModalSubTitle": "Please select one of the two choices below to remove this business from the account",
   "removeBusinessOptionModalResetPasscode": "<li>Business will be removed from this account</li><li>New business passcode will be generated and will cancel the old business passcode</li><li>New business passcode will be sent through email to the person who will be responsible for managing this business moving forward</li>",
-  "removeBusinessOptionModalDonotResetPasscode": "<li>Business will be removed from this account</li><li>The current passcode for this business will be cancelled</li><li>You will not be able to add this business back to your account without a new passcode</li>"
+  "removeBusinessOptionModalDonotResetPasscode": "<li>Business will be removed from this account</li><li>The current passcode for this business will be cancelled</li><li>You will not be able to add this business back to your account without a new passcode</li>",
+  "govmAccountCreationSuccessTitle":"Your BC Registries & Online Services account has been requested",
+  "govmAAccountCreationSuccessSubtext":"Thank you for submitting your informtion. BC Registries staff will review your information and  notify you through email about your account approval status.",
+  "removedBusinessSuccessText": "Your business has been successfully removed from the account and the current passcode has been cancelled"
 
 }

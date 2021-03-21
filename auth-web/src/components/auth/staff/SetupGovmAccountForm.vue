@@ -183,7 +183,7 @@ export default class SetupAccountForm extends Vue {
         })
         this.saving = false
         this.loader = this.saving
-        this.$router.push({ path: `/staff-setup-account-success/${this.ministryName}` })
+        this.$router.push({ path: `/staff-setup-account-success/${AccessType.GOVM.toLowerCase()}/${this.ministryName}` })
       } catch (err) {
         this.saving = false
         switch (err.response.status) {

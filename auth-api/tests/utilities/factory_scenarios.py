@@ -283,6 +283,10 @@ class TestJwtClaims(dict, Enum):
                 'system'
             ]
         },
+        'roles': [
+            'staff',
+            'system'
+        ],
         'loginSource': 'PASSCODE',
         'product_code': ProductCode.BUSINESS.value
     }
@@ -379,7 +383,7 @@ class TestJwtClaims(dict, Enum):
         }
 
     @staticmethod
-    def get_test_user(sub, source: str = 'PASSCODE'):
+    def get_test_user(sub, source: str = 'PASSCODE', roles=['edit', 'staff', 'tester']):
         """Return test user with subject from argument."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
@@ -389,11 +393,9 @@ class TestJwtClaims(dict, Enum):
             'preferred_username': 'CP1234567',
             'username': 'CP1234567',
             'realm_access': {
-                'roles': [
-                    'edit', 'uma_authorization', 'staff', 'tester'
-                ]
+                'roles': roles
             },
-            'roles': ['edit', 'uma_authorization', 'staff', 'tester'],
+            'roles': roles,
             'loginSource': source
         }
 
@@ -418,6 +420,18 @@ class TestPaymentMethodInfo(dict, Enum):
     def get_payment_method_input(payment_method: PaymentMethod = PaymentMethod.CREDIT_CARD):
         """Return payment info payload."""
         return {'paymentInfo': {'paymentMethod': payment_method.value}}
+
+    @staticmethod
+    def get_payment_method_input_with_revenue(payment_method: PaymentMethod = PaymentMethod.EJV):
+        """Return payment info payload."""
+        revenue_account_details = {
+            'client': '100',
+            'projectCode': 1111111,
+            'responsibilityCentre': '22222',
+            'serviceLine': '1111111',
+            'stob': '9000'
+        }
+        return {'paymentInfo': {'paymentMethod': payment_method.value, 'revenueAccount': revenue_account_details}}
 
 
 class TestAnonymousMembership(dict, Enum):
@@ -473,14 +487,19 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': {
-                'street': '1234 Abcd Street',
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            },
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
             'typeCode': OrgType.PREMIUM.value
+        }
+
+    @staticmethod
+    def get_mailing_address():
+        """Return mailing Address."""
+        return {
+            'street': '1234 Abcd Street',
+            'city': 'Test',
+            'region': 'BC',
+            'postalCode': 'T1T1T1',
+            'country': 'CA'
         }
 
     @staticmethod
@@ -488,13 +507,7 @@ class TestOrgInfo(dict, Enum):
         """Return org info for bcol linked info."""
         return {
             'name': name,
-            'mailingAddress': {
-                'street': '1234 Abcd Street',
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            }
+            'mailingAddress': TestOrgInfo.get_mailing_address()
         }
 
     @staticmethod
@@ -506,12 +519,7 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': {
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            }
+            'mailingAddress': TestOrgInfo.get_mailing_address().pop('street')
         }
 
     @staticmethod
@@ -523,13 +531,7 @@ class TestOrgInfo(dict, Enum):
                 'userId': 'test',
                 'password': 'password'
             },
-            'mailingAddress': {
-                'street': '1234 Abcd Street',
-                'city': 'Test',
-                'region': 'BC',
-                'postalCode': 'T1T1T1',
-                'country': 'CA'
-            },
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
             'typeCode': OrgType.PREMIUM.value
         }
 
@@ -615,7 +617,7 @@ class TestEntityInfo(dict, Enum):
 
 
 class TestAffliationInfo(dict, Enum):
-    """Test scenarios of affliation."""
+    """Test scenarios of affiliation."""
 
     affliation1 = {'businessIdentifier': 'CP1234567'}
     affliation2 = {'businessIdentifier': 'CP1234568'}
@@ -623,6 +625,13 @@ class TestAffliationInfo(dict, Enum):
     affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
     nr_affiliation = {'businessIdentifier': 'NR 1234567', 'phone': '1112223333'}
     invalid = {'name': 'CP1234567'}
+
+
+class DeleteAffiliationPayload(dict, Enum):
+    """Test scenarios of delete affiliation."""
+
+    delete_affiliation1 = {'passcodeResetEmail': 'test@gmail.com', 'resetPasscode': True}
+    delete_affiliation2 = {'resetPasscode': False}
 
 
 class TestContactInfo(dict, Enum):
