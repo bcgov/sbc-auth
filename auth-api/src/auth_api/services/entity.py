@@ -177,6 +177,9 @@ class Entity:
                 notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload
             )
 
+        entity = Entity(entity)
+        return entity
+
     def add_contact(self, contact_info: dict):
         """Add a business contact to this entity."""
         # check for existing contact (we only want one contact per user)

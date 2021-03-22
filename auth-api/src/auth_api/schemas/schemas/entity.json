@@ -68,6 +68,25 @@
         "123456789"
       ],
       "pattern": "^(.*)$"
+    },
+    "resetPasscode": {
+      "$id": "#/properties/passcodeReset",
+      "type": "boolean",
+      "title": "Passcode Reset",
+      "default": "false",
+      "examples": [
+        true, false
+      ]
+    },
+    "passcodeResetEmail": {
+      "$id": "#/properties/passcodeResetEmail",
+      "type": "string",
+      "title": "Passcode Reset Email",
+      "default": "",
+      "examples": [
+        "abc123@mail.com"
+      ],
+      "pattern": "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
     }
   }
 }
