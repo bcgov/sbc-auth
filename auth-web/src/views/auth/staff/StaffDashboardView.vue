@@ -146,6 +146,7 @@ export default class StaffDashboardView extends Vue {
         this.searchedBusinessNumber = this.businessNumber
         this.resetCurrentBusiness()
         this.errorMessage = this.$t('noIncorporationNumberFound').toString()
+        this.canViewIncorporationSearchResult = false
       } finally {
         this.searchActive = false
       }

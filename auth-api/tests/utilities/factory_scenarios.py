@@ -575,6 +575,9 @@ class TestEntityInfo(dict, Enum):
                            'businessNumber': '791861078BC0003',
                            'name': 'BarFoo, Inc.4',
                            'passCode': '222222222', 'corpTypeCode': 'BC'}
+    entity_reset_passcode = {'businessIdentifier': 'CP1234567',
+                             'resetPasscode': True,
+                             'passcodeResetEmail': 'abc@test.com'}
 
     invalid = {'foo': 'bar'}
 
