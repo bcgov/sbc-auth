@@ -95,7 +95,7 @@ export default class AcceptInviteLandingView extends Vue {
   }
 
   private redirectToSignin (loginSourceUrl:string = 'bcsc') {
-    let redirectUrl = ConfigHelper.getSelfURL() + '/confirmtoken/' + this.token
+    let redirectUrl = `${ConfigHelper.getSelfURL()}/confirmtoken/${this.token}/${loginSourceUrl}`
     this.$router.push(`/signin/${loginSourceUrl}/${encodeURIComponent(redirectUrl)}`)
   }
 

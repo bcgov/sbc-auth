@@ -35,6 +35,7 @@ export enum Role {
 export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
+    CREATE_GOVM_ACCOUNT = 'setup-govm-account',
     CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
     CHOOSE_AUTH_METHOD = 'choose-authentication-method',
     PENDING_APPROVAL = 'pendingapproval',
@@ -66,6 +67,7 @@ export enum Pages {
     STAFF_DASHBOARD_SUSPENDED = '/staff/dashboard/suspended',
     MAKE_PAD_PAYMENT = '/make-cc-payment/',
     STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
+    SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success'
 
 }
 
@@ -83,7 +85,8 @@ export enum AccountStatus {
     PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
     PENDING_ACTIVATION = 'PENDING_ACTIVATION',
     NSF_SUSPENDED = 'NSF_SUSPENDED',
-    SUSPENDED = 'SUSPENDED'
+    SUSPENDED = 'SUSPENDED',
+    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
 }
 
 export enum IdpHint {

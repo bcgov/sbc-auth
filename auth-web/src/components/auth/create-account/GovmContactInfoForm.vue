@@ -20,7 +20,6 @@
           v-model="emailAddress"
           data-test="email"
           readonly
-          disabled
         >
         </v-text-field>
       </v-col>
@@ -35,7 +34,6 @@
           v-model="confirmedEmailAddress"
           data-test="confirm-email"
           readonly
-          disabled
         >
         </v-text-field>
       </v-col>
@@ -105,9 +103,7 @@ export default class GovmContactInfoForm extends Mixins(NextPageMixin, Steppable
   }
 
   public async mounted () {
-    if (!this.userProfile) {
-      await this.getUserProfile('@me')
-    }
+    await this.getUserProfile('@me')
     this.emailAddress = this.userProfile?.email || ''
     this.emailAddress = this.confirmedEmailAddress = this.userProfile?.email || ''
   }

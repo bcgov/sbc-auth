@@ -6,19 +6,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
-import { Pages, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapState } from 'vuex'
-import ConfigHelper from '@/util/config-helper'
+import { AccessType, IdpHint, LoginSource, Pages } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from '@/store/modules/org'
 import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
@@ -26,6 +23,9 @@ import { getModule } from 'vuex-module-decorators'
     ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
   },
   methods: {
+    ...mapMutations('org', [
+      'setCurrentOrganization', 'setCurrentMembership'
+    ]),
     ...mapActions('org', ['acceptInvitation']),
     ...mapActions('user', ['getUserProfile'])
   },
@@ -34,15 +34,26 @@ import { getModule } from 'vuex-module-decorators'
 export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private readonly acceptInvitation!: (token: string) => Promise<Invitation>
   private readonly getUserProfile!: (identifier: string) => Promise<User>
+  private readonly setCurrentOrganization!: (organization: Organization) => void
+  private readonly setCurrentMembership!: (membership: Member) => void
+
   protected readonly userContact!: Contact
   protected readonly userProfile!: User
 
   @Prop() token: string
   private inviteError: boolean = false
+  @Prop({ default: LoginSource.BCSC }) loginSource: string
 
   private async mounted () {
     await this.getUserProfile('@me')
     await this.accept()
+  }
+
+  private isProfileNeeded (): boolean {
+    return this.loginSource !== IdpHint.IDIR
+  }
+  private isTosAcceptanceNeeded (): boolean {
+    return this.loginSource !== IdpHint.IDIR
   }
 
   /**
@@ -52,16 +63,16 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
    */
   private async accept () {
     try {
-      if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
-        this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}`)
+      if (!this.userProfile.userTerms.isTermsOfUseAccepted && this.isTosAcceptanceNeeded()) {
+        await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}`)
         return
-      } else if (!this.userContact) {
-        this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+      } else if (!this.userContact && this.isProfileNeeded()) {
+        await this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
         return
       } else {
         const invitation = await this.acceptInvitation(this.token)
         // ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id, label: invitation.membership[0].org.name }))
-        const invitingOrg = invitation.membership[0].org
+        const invitingOrg = invitation?.membership[0]?.org
         this.setCurrentAccountSettings({
           id: invitingOrg.id,
           label: invitingOrg.name,
@@ -69,7 +80,21 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
           urlpath: '',
           urlorigin: ''
         })
-        await this.syncMembership(invitation?.membership[0]?.org?.id)
+        // sync org since govm account is already approved
+        if (invitingOrg?.accessType === AccessType.GOVM) {
+          await this.syncUserProfile()
+          this.setCurrentOrganization(invitation?.membership[0]?.org)
+          const membershipType: any = invitation?.membership[0]?.membershipType
+          const membership: Member = {
+            membershipTypeCode: membershipType,
+            id: null,
+            membershipStatus: MembershipStatus.Active,
+            user: null
+          }
+          this.setCurrentMembership(membership)
+        } else {
+          await this.syncMembership(invitation?.membership[0]?.org?.id)
+        }
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
         return

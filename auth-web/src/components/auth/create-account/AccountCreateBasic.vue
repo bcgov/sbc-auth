@@ -16,6 +16,7 @@
         :rules="orgNameRules"
         :disabled="saving"
         data-test="input-org-name"
+        :readonly="govmAccount"
       />
        <v-text-field
         filled
@@ -24,6 +25,7 @@
         :disabled="saving"
         data-test="input-branch-name"
         v-if="govmAccount"
+        :readonly="govmAccount"
       />
     </fieldset>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
@@ -179,7 +181,8 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       // if its not account change , do check for duplicate
       // if its account change , check if user changed the already existing name
       const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization?.name)
-      if (checkNameAVailability) {
+      // no need to check name if govmAccount
+      if (checkNameAVailability && !this.govmAccount) {
         const available = await this.isOrgNameAvailable(this.orgName)
         if (!available) {
           this.errorMessage =
@@ -204,7 +207,11 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           this.errorMessage = 'An error occurred while attempting to create your account.'
         }
       } else {
-        const org: Organization = { name: this.orgName, orgType: orgType, branchName: this.branchName }
+        let org: Organization = { name: this.orgName, orgType: orgType }
+        if (this.govmAccount) {
+          org = { ...org, ...{ branchName: this.branchName, id: this.currentOrganization.id } }
+        }
+
         this.setCurrentOrganization(org)
         // check if the name is avaialble
         this.stepForward()

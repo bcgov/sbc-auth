@@ -398,3 +398,26 @@ def test_add_entity_idempotent(client, jwt, session):  # pylint:disable=unused-a
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_202_ACCEPTED
     assert schema_utils.validate(rv.json, 'business')[0]
+
+
+def test_reset_passcode_success(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that an entity passcode can be reset."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1.get('businessIdentifier')),
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity1.get('businessIdentifier')),
+                      data=json.dumps(TestEntityInfo.entity_reset_passcode),
+                      headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'business')[0]
+
+    dictionary = json.loads(rv.data)
+
+    assert dictionary['businessIdentifier'] == TestEntityInfo.entity1['businessIdentifier']
+    assert dictionary['passCodeClaimed'] is False
