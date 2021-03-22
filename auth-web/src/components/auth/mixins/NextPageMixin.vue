@@ -53,24 +53,19 @@ export default class NextPageMixin extends Vue {
         // if the user is staff redirect to staff dashboard
         if (this.currentUser.roles.includes(Role.Staff)) {
           return `/${Pages.SEARCH_BUSINESS}`
-        } else if (this.currentUser.roles.includes(Role.GOVMAccountUser)) {
-          // if user is govn account check memebership status and redirect accordingly
-
-          if (this.currentMembership && this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-            return `/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
-            //  if account status pending invite accept need to send create account page w
-          } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_INVITE_ACCEPT) {
-            return `/${Pages.CREATE_GOVM_ACCOUNT}`
-            // waiting for staff approval
-          } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
-            // redirect to pending page
-            return `/${Pages.SETUP_GOVM_ACCOUNT_SUCCESS}`
-          } else {
-            // return `/${Pages.MAIN}/${this.currentOrganization.id}`
-            return `/${Pages.HOME}`
-          }
+        } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_INVITE_ACCEPT) {
+          return `/${Pages.CREATE_GOVM_ACCOUNT}`
+          // waiting for staff approval
+        } else if (this.currentMembership && this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+          return `/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+          //  if account status pending invite accept need to send create account page w
+        } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
+          // redirect to pending page
+          return `/${Pages.SETUP_GOVM_ACCOUNT_SUCCESS}`
+        } else {
+          // return `/${Pages.MAIN}/${this.currentOrganization.id}`
+          return `/${Pages.HOME}`
         }
-        break
       case LoginSource.BCROS:
         let bcrosNextStep = '/'
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
