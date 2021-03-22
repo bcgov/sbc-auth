@@ -1,4 +1,5 @@
-import { Business, BusinessRequest, FolioNumberload, UpdateBusinessNamePayload } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
+
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -45,5 +46,9 @@ export default class BusinessService {
 
   static async updateBusinessName (updatePayload: UpdateBusinessNamePayload): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${updatePayload.businessIdentifier}`, updatePayload)
+  }
+
+  static async resetBusinessPasscode (passcodeResetLoad: PasscodeResetLoad): Promise<AxiosResponse<any>> {
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${passcodeResetLoad.businessIdentifier}`, { businessIdentifier: passcodeResetLoad.businessIdentifier, passcodeResetEmail: passcodeResetLoad.passcodeResetEmail, resetPasscode: passcodeResetLoad.resetPasscode })
   }
 }
