@@ -54,7 +54,7 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
-    def create_product_subscription(org_id, subscription_data: Dict[str, Any]):
+    def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True):
         """Create product subscription for the user.
 
         create product subscription first
@@ -76,6 +76,8 @@ class Product:
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
 
+        if is_new_transaction:  # Commit the transaction if it's a new transaction
+            db.session.commit()
         # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
 
