@@ -51,6 +51,7 @@
         </v-menu>
         <GeneratePasscodeView
         ref="generatePasscodeDialog"
+        :businessIdentitifier="currentBusiness.businessIdentifier"
         >
         </GeneratePasscodeView>
       </template>
