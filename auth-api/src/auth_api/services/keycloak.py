@@ -14,7 +14,7 @@
 """Utils for keycloak administration."""
 
 import json
-from typing import Dict, List
+from typing import Dict
 
 import requests
 from flask import current_app, g
@@ -172,26 +172,23 @@ class KeycloakService:
     @staticmethod
     def join_users_group(token_info: Dict) -> str:
         """Add user to the group (public_users or anonymous_users) if the user is public."""
-        groups: List[str] = []
+        group_name: str = None
         login_source = token_info.get('loginSource', None)
         roles = token_info.get('realm_access').get('roles')
 
         # Cannot check the group from token, so check if the role 'edit' is already present.
         if login_source in (LoginSource.BCEID.value, LoginSource.BCSC.value) and Role.PUBLIC_USER.value not in roles:
-            groups.append(GROUP_PUBLIC_USERS)
+            group_name = GROUP_PUBLIC_USERS
         elif login_source == LoginSource.STAFF.value \
                 and Role.GOV_ACCOUNT_USER.value not in roles and Role.STAFF.value not in roles:
-            groups.append(GROUP_GOV_ACCOUNT_USERS)
-            # add public user as well
-            if Role.PUBLIC_USER.value not in roles:
-                groups.append(GROUP_PUBLIC_USERS)
+            group_name = GROUP_GOV_ACCOUNT_USERS
         elif login_source == LoginSource.BCROS.value and Role.ANONYMOUS_USER.value not in roles:
-            groups.append(GROUP_ANONYMOUS_USERS)
+            group_name = GROUP_ANONYMOUS_USERS
 
-        for group_name in groups:
+        if group_name:
             KeycloakService._add_user_to_group(token_info.get('sub'), group_name)
 
-        return groups
+        return group_name
 
     @staticmethod
     def join_account_holders_group(keycloak_guid: str = None):

@@ -14,7 +14,7 @@
 """Service for managing Invitation data."""
 
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict
 
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
@@ -387,10 +387,10 @@ class Invitation:
 
         # Call keycloak to add the user to the group.
         if user:
-            group_names: List[str] = KeycloakService.join_users_group(token_info)
+            group_name: str = KeycloakService.join_users_group(token_info)
             KeycloakService.join_account_holders_group(user.keycloak_guid)
 
-            if GROUP_GOV_ACCOUNT_USERS in group_names:
+            if group_name == GROUP_GOV_ACCOUNT_USERS:
                 # TODO Remove this if gov account users needs Terms of Use.
                 tos_document = DocumentsModel.fetch_latest_document_by_type(DocumentType.TERMS_OF_USE.value)
                 user.update_terms_of_use(token_info, True, tos_document.version_id)
