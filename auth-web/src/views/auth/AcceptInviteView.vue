@@ -84,8 +84,9 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         if (invitingOrg?.accessType === AccessType.GOVM) {
           await this.syncUserProfile()
           this.setCurrentOrganization(invitation?.membership[0]?.org)
+          const membershipType: any = invitation?.membership[0]?.membershipType
           const membership: Member = {
-            membershipTypeCode: MembershipType[invitation?.membership[0]?.membershipType],
+            membershipTypeCode: membershipType,
             id: null,
             membershipStatus: MembershipStatus.Active,
             user: null
