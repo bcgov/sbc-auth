@@ -98,18 +98,14 @@ class EntityResource(Resource):
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
-        passcode_reset = request_json.get('passcodeReset', False)
+        passcode_reset = request_json.get('resetPasscode', False)
         token = g.jwt_oidc_token_info
 
         try:
             if passcode_reset:
-                EntityService.reset_passcode(business_identifier,
-                                             email_addresses=request_json.get('passcodeResetEmail', None),
-                                             token_info=token)
-
-                entity = EntityService.find_by_business_identifier(business_identifier,
-                                                                   token_info=token,
-                                                                   allowed_roles=ALL_ALLOWED_ROLES)
+                entity = EntityService.reset_passcode(business_identifier,
+                                                      email_addresses=request_json.get('passcodeResetEmail', None),
+                                                      token_info=token)
             else:
                 entity = EntityService.update_entity(business_identifier, request_json,
                                                      token_info=token)
