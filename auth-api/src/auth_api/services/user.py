@@ -380,7 +380,7 @@ class User:  # pylint: disable=too-many-instance-attributes
                 'error': error.value[0]}
 
     @staticmethod
-    def add_contact(token, contact_info: dict):
+    def add_contact(token, contact_info: dict, throw_error_for_duplicates: bool = True):
         """Add contact information for an existing user."""
         current_app.logger.debug('add_contact')
         user = UserModel.find_by_jwt_token(token)
@@ -390,6 +390,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         # check for existing contact (we only want one contact per user)
         contact_link = ContactLinkModel.find_by_user_id(user.id)
         if contact_link is not None:
+            if not throw_error_for_duplicates:
+                return
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         contact = ContactModel(**camelback2snake(contact_info))

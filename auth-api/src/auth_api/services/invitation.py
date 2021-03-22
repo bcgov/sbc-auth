@@ -395,7 +395,7 @@ class Invitation:
                 tos_document = DocumentsModel.fetch_latest_document_by_type(DocumentType.TERMS_OF_USE.value)
                 user.update_terms_of_use(token_info, True, tos_document.version_id)
                 # Add contact to the user.
-                user.add_contact(token_info, dict(email=token_info.get('email', None)))
+                user.add_contact(token_info, dict(email=token_info.get('email', None)), throw_error_for_duplicates=False)
 
         current_app.logger.debug('<accept_invitation')
         return Invitation(invitation)
