@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, BusinessRequest, FolioNumberload, LoginPayload } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -203,5 +203,10 @@ export default class BusinessModule extends VuexModule {
   public async resetCurrentBusiness (): Promise<void> {
     this.context.commit('setCurrentBusiness', undefined)
     ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
+  }
+
+  @Action({ rawError: true })
+  public async resetBusinessPasscode (passCodeResetLoad: PasscodeResetLoad) {
+    await BusinessService.resetBusinessPasscode(passCodeResetLoad)
   }
 }

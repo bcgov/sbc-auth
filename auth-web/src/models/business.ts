@@ -66,3 +66,9 @@ export interface BusinessRequest {
         }
     }
 }
+
+export interface PasscodeResetLoad {
+    businessIdentifier: string,
+    passcodeResetEmail: string,
+    resetPasscode: boolean
+}
