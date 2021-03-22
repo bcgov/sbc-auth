@@ -103,9 +103,7 @@ export default class GovmContactInfoForm extends Mixins(NextPageMixin, Steppable
   }
 
   public async mounted () {
-    if (!this.userProfile) {
-      await this.getUserProfile('@me')
-    }
+    await this.getUserProfile('@me')
     this.emailAddress = this.userProfile?.email || ''
     this.emailAddress = this.confirmedEmailAddress = this.userProfile?.email || ''
   }
