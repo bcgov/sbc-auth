@@ -391,7 +391,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         contact_link = ContactLinkModel.find_by_user_id(user.id)
         if contact_link is not None:
             if not throw_error_for_duplicates:
-                return
+                # TODO may be throw whole object
+                return None
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         contact = ContactModel(**camelback2snake(contact_info))
