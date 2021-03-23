@@ -52,7 +52,6 @@ class Authorization(db.Model):
         """Return authorization view object."""
         auth = None
         if keycloak_guid and business_identifier:
-            current_app.logger.debug('authorization check keycloak_guid:{}'.format(keycloak_guid))
             auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
                                        business_identifier=business_identifier).one_or_none()
         if not keycloak_guid and business_identifier:

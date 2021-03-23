@@ -80,7 +80,7 @@ class Authorization:
         auth_response = {}
         auth = None
         token_roles = token_info.get('realm_access').get('roles')
-        current_app.logger.debug('check roles=:{}; token_info:{}'.format(token_roles, token_info))
+        current_app.logger.debug('check roles=:{}'.format(token_roles))
         if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
