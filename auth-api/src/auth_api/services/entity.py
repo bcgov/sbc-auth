@@ -17,6 +17,8 @@ from typing import Dict, Tuple
 import string
 import secrets
 
+from flask import current_app
+
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
@@ -156,11 +158,8 @@ class Entity:
     @staticmethod
     def reset_passcode(business_identifier: str, email_addresses: str = None, token_info: Dict = None):
         """Reset the entity passcode and send email."""
-        # comment out for demo, will check later
-        # check_auth(token_info, one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
-        current_app.logger.debug(
-                'reset passcode business_identifier:{}; token:{}'.format(token_info)
-            )
+        check_auth(token_info, one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
+        current_app.logger.debug('reset passcode identifier:{}; token:{}'.format(business_identifier, token_info))
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
         new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))
