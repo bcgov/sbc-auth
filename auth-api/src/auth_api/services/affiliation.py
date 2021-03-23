@@ -258,10 +258,9 @@ class Affiliation:
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        affiliation.delete()
         if reset_passcode:
             entity.reset_passcode(entity.business_identifier, email_addresses, token_info)
-
+        affiliation.delete()
         entity.set_pass_code_claimed(False)
 
     @staticmethod

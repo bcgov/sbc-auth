@@ -312,6 +312,29 @@ def test_delete_affiliation_implicit(session, auth_mock):  # pylint:disable=unus
     assert found_affiliation is None
 
 
+def test_delete_affiliation_reset_passcode(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an affiliation can be deleted."""
+    entity_service = factory_entity_service(TestEntityInfo.entity_lear_mock)
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['business_identifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    affiliation = AffiliationService.create_affiliation(org_id,
+                                                        business_identifier,
+                                                        TestEntityInfo.entity_lear_mock['passCode'],
+                                                        {})
+
+    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
+                                          email_addresses=None, reset_passcode=True,
+                                          token_info=TestJwtClaims.public_account_holder_user)
+
+    found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
+    assert found_affiliation is None
+
+
 def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unused-argument
     """Assert that an new business can be created."""
     org_service = factory_org_service()
