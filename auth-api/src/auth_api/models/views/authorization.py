@@ -17,7 +17,6 @@ Authorization view wraps details on the entities and membership through orgs and
 """
 
 import uuid
-from flask import current_app
 
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
