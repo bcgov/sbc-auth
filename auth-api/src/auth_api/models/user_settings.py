@@ -17,7 +17,7 @@ It defines the settings available for the user which can be displayed in the hea
 """
 
 
-class UserSettings():  # pylint: disable=too-few-public-methods
+class UserSettings():  # pylint: disable=too-few-public-methods, too-many-instance-attributes
     """
     This is the User Settings model.
 
@@ -27,7 +27,7 @@ class UserSettings():  # pylint: disable=too-few-public-methods
     """
 
     def __init__(self, id_, label, urlorigin, urlpath, type_, account_type=None,  # pylint: disable=too-many-arguments
-                 account_status=None):
+                 account_status=None, product_settings=None):
         """Return a usersettings."""
         self.id = id_
         self.label = label
@@ -36,3 +36,4 @@ class UserSettings():  # pylint: disable=too-few-public-methods
         self.type = type_
         self.account_type = account_type
         self.account_status = account_status
+        self.product_settings = product_settings
