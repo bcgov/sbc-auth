@@ -1736,7 +1736,7 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
     assert affiliations['entities'][0]['businessIdentifier'] == TestEntityInfo.entity_lear_mock['businessIdentifier']
 
     affiliation_id = affiliations['entities'][0]['businessIdentifier']
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     da = client.delete('/api/v1/orgs/{org_id}/affiliations/{affiliation_id}'.format(org_id=org_id,
                                                                                     affiliation_id=affiliation_id),
                        headers=headers,
