@@ -125,8 +125,8 @@ export default class InviteUsersForm extends TeamManagementMixin {
   }
 
   private invitations: InvitationInfo[] = []
-  private bcGovemailRules = CommonUtils.bcGovemailRules()
-  private emailRules = CommonUtils.emailRules()
+  private bcGovemailRules = CommonUtils.bcGovemailRules(true)
+  private emailRules = CommonUtils.emailRules(true)
 
   private roles: RoleInfo[] = []
 

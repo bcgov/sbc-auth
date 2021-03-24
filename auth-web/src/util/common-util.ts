@@ -192,23 +192,31 @@ export default class CommonUtils {
     }
   }
 
-  static emailRules () {
-    return [
-      v => !!v || 'Email address is required',
-      v => {
-        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        return pattern.test(v) || 'Valid email is required'
-      }
-    ]
+  static emailRules (isOptional: boolean = false) {
+    const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    if (isOptional) {
+      return [
+        v => !v || pattern.test(v) || 'Valid email is required'
+      ]
+    } else {
+      return [
+        v => !!v || 'Email address is required',
+        v => pattern.test(v) || 'Valid email is required'
+      ]
+    }
   }
 
-  static bcGovemailRules () {
-    return [
-      v => !!v || 'Email address is required',
-      v => {
-        const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)*gov\.bc\.ca))$/i
-        return pattern.test(v) || 'Valid IDIR email address is required'
-      }
-    ]
+  static bcGovemailRules (isOptional: boolean = false) {
+    const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)*gov\.bc\.ca))$/i
+    if (isOptional) {
+      return [
+        v => !v || pattern.test(v) || 'Enter an IDIR email address'
+      ]
+    } else {
+      return [
+        v => !!v || 'Email address is required',
+        v => pattern.test(v) || 'Enter an IDIR email address'
+      ]
+    }
   }
 }
