@@ -116,7 +116,7 @@ class Orgs(Resource):
 
 
 @cors_preflight('GET,PUT,OPTIONS,DELETE')
-@API.route('/<string:org_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+@API.route('/<int:org_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class Org(Resource):
     """Resource for managing a single org."""
 
@@ -186,7 +186,7 @@ class Org(Resource):
 
 
 @cors_preflight('GET,POST,PUT,OPTIONS')
-@API.route('/<string:org_id>/login-options', methods=['GET', 'POST', 'PUT', 'OPTIONS'])
+@API.route('/<int:org_id>/login-options', methods=['GET', 'POST', 'PUT', 'OPTIONS'])
 class OrgLoginOptions(Resource):
     """Resource for managing org login options."""
 
@@ -239,7 +239,7 @@ class OrgLoginOptions(Resource):
 
 
 @cors_preflight('GET,DELETE,POST,PUT,OPTIONS')
-@API.route('/<string:org_id>/contacts', methods=['GET', 'DELETE', 'POST', 'PUT', 'OPTIONS'])
+@API.route('/<int:org_id>/contacts', methods=['GET', 'DELETE', 'POST', 'PUT', 'OPTIONS'])
 class OrgContacts(Resource):
     """Resource for managing org contacts."""
 
@@ -302,7 +302,7 @@ class OrgContacts(Resource):
 
 
 @cors_preflight('GET,POST,OPTIONS')
-@API.route('/<string:org_id>/affiliations', methods=['GET', 'POST', 'OPTIONS'])
+@API.route('/<int:org_id>/affiliations', methods=['GET', 'POST', 'OPTIONS'])
 class OrgAffiliations(Resource):
     """Resource for managing affiliations for an org."""
 
@@ -353,7 +353,7 @@ class OrgAffiliations(Resource):
 
 
 @cors_preflight('DELETE,OPTIONS')
-@API.route('/<string:org_id>/affiliations/<string:business_identifier>', methods=['DELETE', 'OPTIONS'])
+@API.route('/<int:org_id>/affiliations/<string:business_identifier>', methods=['DELETE', 'OPTIONS'])
 class OrgAffiliation(Resource):
     """Resource for managing a single affiliation between an org and an entity."""
 
@@ -379,7 +379,7 @@ class OrgAffiliation(Resource):
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:org_id>/members', methods=['GET', 'OPTIONS'])
+@API.route('/<int:org_id>/members', methods=['GET', 'OPTIONS'])
 class OrgMembers(Resource):
     """Resource for managing a set of members for a single organization."""
 
@@ -410,7 +410,7 @@ class OrgMembers(Resource):
 
 
 @cors_preflight('DELETE,PATCH,OPTIONS')
-@API.route('/<string:org_id>/members/<string:membership_id>', methods=['DELETE', 'PATCH', 'OPTIONS'])
+@API.route('/<int:org_id>/members/<string:membership_id>', methods=['DELETE', 'PATCH', 'OPTIONS'])
 class OrgMember(Resource):
     """Resource for managing a single membership record between an org and a user."""
 
@@ -479,7 +479,7 @@ class OrgMember(Resource):
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:org_id>/invitations', methods=['GET', 'OPTIONS'])
+@API.route('/<int:org_id>/invitations', methods=['GET', 'OPTIONS'])
 class OrgInvitations(Resource):
     """Resource for managing a set of invitations for a single organization."""
 
@@ -504,7 +504,7 @@ class OrgInvitations(Resource):
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:org_id>/admins/affidavits', methods=['GET', 'PATCH', 'OPTIONS'])
+@API.route('/<int:org_id>/admins/affidavits', methods=['GET', 'PATCH', 'OPTIONS'])
 class OrgAdminAffidavits(Resource):
     """Resource for managing affidavits for the admins in an org."""
 
@@ -525,7 +525,7 @@ class OrgAdminAffidavits(Resource):
 
 
 @cors_preflight('PATCH,OPTIONS')
-@API.route('/<string:org_id>/status', methods=['PATCH', 'OPTIONS'])
+@API.route('/<int:org_id>/status', methods=['PATCH', 'OPTIONS'])
 class OrgStatus(Resource):
     """Resource for changing the status of org."""
 
@@ -568,7 +568,7 @@ class OrgStatus(Resource):
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:org_id>/payment_info', methods=['GET', 'OPTIONS'])
+@API.route('/<int:org_id>/payment_info', methods=['GET', 'OPTIONS'])
 class OrgPaymentSettings(Resource):
     """Resource for getting org payment info."""
 
