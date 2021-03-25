@@ -90,13 +90,13 @@
                   visit the Cooperative Associations information page
                 </a>.
               </p>
-              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
+              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/business-registry-faq"
                  target="_blank" rel="noopener noreferrer">
-                <span>Cooperatives Online Frequently Asked Questions</span>
+                <span>Business Registry Frequently Asked Questions</span>
               </a>
-              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please
+              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please visit the
                 <a :href="bcCompUrl" target="_blank" rel="noopener noreferrer">
-                  visit the Benefit Companies information page
+                   Benefit Companies information page
                 </a>.
               </p>
             </v-col>
