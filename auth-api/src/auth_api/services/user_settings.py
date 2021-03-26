@@ -36,7 +36,7 @@ class UserSettings:  # pylint: disable=too-few-public-methods
         for org in all_orgs:
             all_settings.append(
                 UserSettingsModel(org.id, org.name, url_origin, '/account/' + str(org.id) + '/settings', 'ACCOUNT',
-                                  org.type_code, org.status_code))
+                                  org.type_code, org.status_code, '/account/' + str(org.id) + '/product-settings'))
 
         all_settings.append(UserSettingsModel(user_id, 'USER PROFILE', url_origin, '/userprofile', 'USER_PROFILE'))
         all_settings.append(

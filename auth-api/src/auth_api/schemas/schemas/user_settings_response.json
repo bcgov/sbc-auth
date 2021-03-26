@@ -36,7 +36,6 @@
               "description": "An explanation about the purpose of this instance.",
               "default": {},
               "required": [
-                  "accountType",
                   "id",
                   "label",
                   "type",
@@ -98,6 +97,17 @@
                       "default": "",
                       "examples": [
                           "/account/1/settings"
+                      ],
+                      "pattern": "^(.*)$"
+                  },
+                  "productSettings": {
+                      "$id": "#/items/anyOf/0/properties/productSettings",
+                      "type": "string",
+                      "title": "URL Path",
+                      "description": "Product Settings relative URL",
+                      "default": "",
+                      "examples": [
+                          "/account/1/product-settings"
                       ],
                       "pattern": "^(.*)$"
                   }
