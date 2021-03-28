@@ -186,7 +186,7 @@ class KeycloakService:
             group_name = GROUP_ANONYMOUS_USERS
 
         if group_name:
-            KeycloakService._add_user_to_group(token_info.get('sub'), group_name)
+            KeycloakService.add_user_to_group(token_info.get('sub'), group_name)
 
         return group_name
 
@@ -201,7 +201,7 @@ class KeycloakService:
                 return
             keycloak_guid = token_info.get('sub')
 
-        KeycloakService._add_user_to_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
+        KeycloakService.add_user_to_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
     def remove_from_account_holders_group(keycloak_guid: str = None):
@@ -220,7 +220,7 @@ class KeycloakService:
         KeycloakService._reset_otp(keycloak_guid)
 
     @staticmethod
-    def _add_user_to_group(user_id: str, group_name: str):
+    def add_user_to_group(user_id: str, group_name: str):
         """Add user to the keycloak group."""
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
@@ -327,3 +327,41 @@ class KeycloakService:
                     delete_credential_url = f'{get_credentials_url}/{credential["id"]}'
                     response = requests.delete(delete_credential_url, headers=headers)
         response.raise_for_status()
+
+    @staticmethod
+    def create_client(client_representation: Dict[str, any]):
+        """Create a client in keycloak."""
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
+        admin_token = KeycloakService._get_admin_token()
+
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+
+        create_client_url = f'{base_url}/auth/admin/realms/{realm}/clients'
+        response = requests.post(create_client_url, data=json.dumps(client_representation), headers=headers)
+        response.raise_for_status()
+
+    @staticmethod
+    def get_service_account_user(client_identifier: str):
+        """Return service account user."""
+        config = current_app.config
+        base_url = config.get('KEYCLOAK_BASE_URL')
+        realm = config.get('KEYCLOAK_REALMNAME')
+        admin_token = KeycloakService._get_admin_token()
+
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+        print(f'{base_url}/auth/admin/realms/{realm}/clients/{client_identifier}/service-account-user')
+        print(admin_token)
+        response = requests.get(
+            f'{base_url}/auth/admin/realms/{realm}/clients/{client_identifier}/service-account-user',
+            headers=headers
+        )
+        response.raise_for_status()
+        return response.json()

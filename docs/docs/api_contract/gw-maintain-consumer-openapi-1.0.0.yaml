@@ -1,0 +1,1043 @@
+openapi: 3.0.0
+info:
+  title: Gateway Maintain Consumers API
+  description: |-
+    This Maintain Consumer API creates and maintains BC Registries API Gateway consumer accounts. It is provided to facilitate identity management service account set up for PRO Data user API access. This API creates an Apigee Developer and Developer App and maintains the gateway API keys and attributes associated with the Apigee Developer. All operations of this API require a gateway API key with the MaintainConsumer privilege. The Developer (consumer) email address is the identifier for all Maintain Consumer operations on an 
+    existing gateway consumer. Email addresses must be unique to all Apigee 
+    environments. <ul><li>This API is deployed to the Apigee dev, test, sandbox (UAT), and prod environments.
+    </li><li>When a consumer is created using a non-prod service endpoint, the API key is valid in all gateway non-prod environments.</li><li>When a new API key is generated using the prod service endpoint, the API key is only valid in the gatewway prod environment.</li><li>A consumer cannot be created with an email address that is identical to an existing consumer email address.</li><li>Keys for a consumer can be generated and revoked across multiple Apigee non-prod environments.</li><li>When attributes are added or updated the change applies to the Apigee environment the request is submitted in. In other words, an attribute added or updated using the sandbox service endpoint only applies to the sandbox environment.</li><li>When a gateway consumer is created, by default the client id and secret (used to generate a JWT on behalf of the consumer) are used in all gateway environments.</li><li>A gateway consumer may be configured to use different client id and secret values to request a JWT for different gateway environments with the /mc/v1/consumers/{emailId}/attributes endpoint.</li></ul>
+  version: 1.0.0
+  contact:
+    name: API Gateway Support
+    url: TBD
+    email: gateway-support@example.com
+servers:
+  - url: 'https://bcregistry-dev.apigee.net'
+    description: DEV
+  - url: 'https://bcregistry-test.apigee.net'
+    description: TEST
+  - url: 'https://bcregistry-sandbox.apigee.net'
+    description: Sandbox/UAT
+  - url: 'https://bcregistry-prod.apigee.net'
+    description: PROD
+paths:
+  /mc/v1/consumers:
+    post:
+      tags:
+        - consumers
+      summary: Create a new gateway B2B/PRO account consumer.
+      description: Create a new gateway business/PRO account partner consumer and consumer application. Return the gateway api key with the requested access and the consumer status.
+      operationId: post_new_consumer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/consumer'
+            examples:
+              all-api-access:
+                value:
+                  email: test4.pro.account@example.com
+                  firstName: Test4-B2B
+                  lastName: PRO ACCOUNT
+                  userName: PE999999
+                  clientId: registries-b2b-test
+                  clientSecret: aIKmOqao3oK6aKi12PVJlfrfoRfqxu6XHSgp
+                  apiAccess:
+                    - ALL_API
+                  apiKeyName: UAT API Key
+        description: New gateway consumer information
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/consumerResponse'
+              examples:
+                all-api-access:
+                  value:
+                    apiKey: 1sEQktplcAnIkbDFoCs70acPw2hCSCAe
+                    keyStatus: approved
+                    keyExpiryDate: Never
+                    consumerStatus: approved
+                    apiAccess:
+                      - ALL_API
+                    apiKeyName: UAT API Key
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: application/json
+    parameters: []
+  '/mc/v1/consumers/{emailId}':
+    parameters:
+      - name: emailId
+        in: path
+        required: true
+        description: The email address identifying the consumer.
+        schema:
+          type: string
+        example: jsmith@example.com
+    get:
+      tags:
+        - consumers
+      summary: Get consumer current API key information.
+      description: Find the consumer information including the gateway api keys belonging to the emailId parameter. The emailId is the consumer email address. The optional apiAccess parameter filters which keys to include in the response. The response includes a consumerKey apiKeyName if it exists.
+      operationId: get_api_key
+      parameters:
+        - name: Accept
+          schema:
+            type: string
+          in: header
+          description: application/json
+        - name: apiAccess
+          in: query
+          required: false
+          description: Optionally specify the access role for the key to return in the results. The default is ALL_API.
+          schema:
+            $ref: '#/components/schemas/apiAccess'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  consumer:
+                    $ref: '#/components/schemas/consumerKeyResponse'
+              examples:
+                get-api-key-response:
+                  value:
+                    consumer:
+                      consumerStatus: approved
+                      consumerKey:
+                        - apiKey: kmJCUpqNyGObkRcGG20ey1W4YBhKjyS6
+                          apiAccess:
+                            - ALL_API
+                          apiKeyName: UAT API Key
+                          keyStatus: approved
+                          keyExpiryDate: never
+                          environment: sandbox
+                        - apiKey: mTAhqwMY56GhvCX04eeH02nhTSr7DCH6
+                          apiAccess:
+                            - ALL_API
+                          keyStatus: revoked
+                          keyExpiryDate: never
+                          environment: non-prod
+                        - apiKey: SHLaVZ429kRFSKukFQehwC5nwkaKt4VL
+                          apiAccess:
+                            - PPR_API
+                          keyStatus: expired
+                          keyExpiryDate: '08-21-2020 14:31 PST'
+                          environment: non-prod
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    patch:
+      tags:
+        - consumers
+      summary: Enable or disable the gateway api consumer application and all keys belonging to the emailId.
+      description: Enable or disable the consumer application that corresponds to the emailId parameter. The emailId is the consumer application email address supplied when creating the consumer. Returns a success response if the consumer is already enabled or already disabled. When disabled a consumer is not authorized to submit gateway requests using any key associated with the consumer. The gateway status for an enabled consumer is 'approved'. For a disabled consumer the status is 'revoked'.
+      operationId: patch_consumer_status
+      responses:
+        '204':
+          description: Success no content
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - enable
+              - disable
+              - approve
+              - revoke
+          in: query
+          name: status
+          required: true
+          example: disable
+          description: Update consumer status and access to the gateway - enable/approve or disable/revoke.
+  '/mc/v1/consumers/{emailId}/apikeys':
+    parameters:
+      - name: emailId
+        in: path
+        required: true
+        description: The email address identifying the consumer.
+        schema:
+          type: string
+        example: jsmith@example.com
+    post:
+      tags:
+        - consumers
+      summary: 'Request a new gateway api key for the consumer application belonging to the emailId, which is the consumer email address.'
+      description: 'Request a new gateway API key for the consumer application that corresponds to the emailId parameter. The emailId is the consumer application email address supplied when creating the consumer. If the existing consumer api key with the same access has not expired then it may still be used after the new key is created (the consumer can use both keys). There is no limit on the number of API keys a consumer may have. '
+      operationId: post_generate_apikey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apiAccess:
+                  type: array
+                  description: The API access roles associated with the API key.
+                  items:
+                    $ref: '#/components/schemas/apiAccess'
+                apiKeyName:
+                  $ref: '#/components/schemas/apiKeyName'
+            examples:
+              all-api-access:
+                value:
+                  apiAccess:
+                    - ALL_API
+                  apiKeyName: UAT API Key
+              PPR-api-access:
+                value:
+                  apiAccess:
+                    - PPR_API
+              LEAR-api-access:
+                value:
+                  apiAccess:
+                    - LEAR_API
+              multiple-api-access:
+                value:
+                  apiAccess:
+                    - PPR_API
+                    - LEAR_API
+        description: Specify the access for the new consumer api key.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/consumerResponse'
+              examples:
+                all-api-key-response:
+                  value:
+                    apiKey: 1sEQktplcAnIkbDFoCs70acPw2hCSCAe
+                    keyStatus: approved
+                    keyExpiryDate: Never
+                    consumerStatus: approved
+                    apiAccess:
+                      - ALL_API
+                    apiKeyName: UAT API Key
+                PPR-api-key-response:
+                  value:
+                    apiKey: 7SmDGL4233wnp2dyXGSGGq7xutYlTzIN
+                    keyStatus: approved
+                    keyExpiryDate: Never
+                    consumerStatus: approved
+                    apiAccess:
+                      - ALL_API
+                    apiKeyName: ''
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: application/json
+  '/mc/v1/consumers/{emailId}/apikeys/{key}':
+    parameters:
+      - name: emailId
+        in: path
+        required: true
+        description: The email address identifying the consumer.
+        schema:
+          type: string
+        example: jsmith@example.com
+      - name: key
+        in: path
+        required: true
+        description: The API key to update.
+        schema:
+          type: string
+    patch:
+      tags:
+        - consumers
+      summary: Revoke (logically delete) an existing consumer API key belonging to the emailId.
+      description: '<p>This endpoint updates an API key depending on the action query parameter value. This endpoint can:</p> <ul><li>Revoke or suspend access on an active key.</li><li>Approve or reactivate access on a previously revoked key.</li><li>Add access to one API.</li><li>Remove access to one API.</li></ul> <p>The existing consumer API key belongs to the consumer identified by the emailId parameter. The emailId is the consumer application email address supplied when creating the consumer.</p> <p>A request submitted with a revoked API key will result in a gateway authorization failure.</p><p>addAccess on an already added API returns a 200 response.</p><p>removeAccess on an already removed or non-exsting API returns a 500 response.</p>'
+      operationId: patch_update_api_key
+      requestBody:
+        description: Required if the action is addAccess or removeAccess. The apiAccess value specifies the API to be added or removed.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                apiAccess:
+                  $ref: '#/components/schemas/apiAccess'
+            examples:
+              action=addAccess:
+                value:
+                  apiAccess: LEAR_API
+              action=removeAccess:
+                value:
+                  apiAccess: PPR_API
+      responses:
+        '200':
+          description: Success with content when the request action query parameter is "addAccess" or "removeAccess".
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Holds the current API access for the key.
+                properties:
+                  apiAccess:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/apiAccess'
+              examples:
+                addAccess-LEAR-response:
+                  value:
+                    apiAccess:
+                      - PPR_API
+                      - LEAR_API
+                removeAccess-PPR-response:
+                  value:
+                    apiAccess:
+                      - LEAR_API
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '204':
+          description: Success no content when request action query parameter is "revoke" or "approve".
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: application/json
+        - schema:
+            type: string
+            enum:
+              - revoke
+              - approve
+              - addAccess
+              - removeAccess
+          in: query
+          name: action
+          required: true
+          example: revoke
+          description: Update either the API key status or the set of APIs it can access.
+  '/mc/v1/consumers/{emailId}/attributes':
+    parameters:
+      - name: emailId
+        in: path
+        required: true
+        description: The email address identifying the consumer.
+        schema:
+          type: string
+        example: jsmith@example.com
+    get:
+      tags:
+        - consumers
+      summary: Return the consumer attributes.
+      description: '<p>List the consumer (Apigee Developer) custom attributes belonging to the emailId, which is the unique consumer email address. These Apigee Developer custom attributes include OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, LOG_ENABLED, API_ACCESS, and ADDITIONAL_ACCOUNTS. These attribute names hold the default values. Environment specific values which, if present, override the default values, have names which start with the Apigee environment in uppercase. For example, PROD_LOG_ENABLED or TEST_CLIENT_SECRET. Environment specific attributes are created with the POST method and updated with the PATCH method.</p><p>Any attribute with CLIENT_SECRET in the name is masked in the response as XXX.</p>'
+      operationId: get_attributes
+      parameters:
+        - name: Accept
+          schema:
+            type: string
+          in: header
+          description: application/json
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Holds the current Developer custom attributes.
+                properties:
+                  attribute:
+                    type: array
+                    description: This object holds the current Developer custom attributes.
+                    items:
+                      $ref: '#/components/schemas/consumerAttribute'
+              examples:
+                get-response:
+                  value:
+                    attribute:
+                      - name: OIDC_CLIENT_ID
+                        value: client-id-test
+                      - name: OIDC_CLIENT_SECRET
+                        value: XXX
+                      - name: LOG_ENABLED
+                        value: 'false'
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - consumers
+      summary: Create consumer custom attributes.
+      description: '<p>Create or add new custom attributes for the consumer identified by the emailId parameter. The emailId is the consumer application email address supplied when creating the consumer. If one or more of the request attributes already exists a 400 HTTP status code is returned. With the exception of apiAccess, created attributes are specific to the environment the request is submitted in and the attribute name has a prefix with the Apigee environment in uppercase. For example, the prod Apigee proxy will create a PROD_LOG_ENABLED attribute, and logging will be enabled for the B2B/PRO consumer in the Apigee prod environment. The apiAccess attribute is global across environments.<p><p>Any attribute with CLIENT_SECRET in the name is masked in the response as XXX.</p>'
+      operationId: post_attributes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/consumerRequestAttributes'
+            examples:
+              all-attributes:
+                value:
+                  additionalAccounts:
+                    - PS999999
+                    - PE999999
+                  clientId: client-id-test
+                  clientSecret: facafec1-187f-4f1f-a887-e606a59e44dc
+                  loggingEnabled: 'true'
+                  apiAccess:
+                    - PPR_API
+                    - LEAR_API
+        description: Specify the attributes to create.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Holds the current Developer custom attributes.
+                properties:
+                  attribute:
+                    type: array
+                    description: This object holds the current Developer custom attributes.
+                    items:
+                      $ref: '#/components/schemas/consumerAttribute'
+              examples:
+                all-attributes-response:
+                  value:
+                    attribute:
+                      - name: API_ACCESS
+                        value: 'PPR_API,LEAR_API'
+                      - name: OIDC_CLIENT_ID
+                        value: client-id-test
+                      - name: OIDC_CLIENT_SECRET
+                        value: XXX
+                      - name: LOG_ENABLED
+                        value: 'false'
+                      - name: TEST_CLIENT_ID
+                        value: client-id-test
+                      - name: TEST_CLIENT_SECRET
+                        value: XXX
+                      - name: TEST_ADDITIONAL_ACCOUNTS
+                        value: 'PS999912,PE999934'
+                      - name: TEST_LOG_ENABLED
+                        value: 'true'
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: application/json
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          description: application/json
+    patch:
+      tags:
+        - consumers
+      summary: Update consumer custom attributes.
+      description: '<p>Update one or more custom attributes for the consumer identified by the emailId parameter. The emailId is the consumer application email address supplied when creating the consumer. If one or more of the request attributes does not exist a 400 HTTP status code is returned. With the exception of apiAccess, updates are specific to the environment the request is submitted in. For example, a loggingEnabled request submitted to the test Apigee proxy will only update the test LOG_ENABLED attribute. The apiAccess attribute is global across environments.</p><p>Any attribute with CLIENT_SECRET in the name is masked in the response as XXX.</p>'
+      operationId: patch_attributes
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/consumerRequestAttributes'
+            examples:
+              loggingEnabled-attribute:
+                value:
+                  loggingEnabled: 'false'
+              clientSecret-attribute:
+                value:
+                  clientSecret: Z3q3T9i4fvwHfoIwLVhQxZ4FApC9a10Ba10B
+              apiAccess-attribute:
+                value:
+                  apiAccess:
+                    - ALL_API
+        description: Specify one or more custom attributes to update.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Holds the current Developer custom attributes.
+                properties:
+                  attribute:
+                    type: array
+                    description: This object holds the current Developer custom attributes.
+                    items:
+                      $ref: '#/components/schemas/consumerAttribute'
+              examples:
+                loggingEnabled-response:
+                  value:
+                    attribute:
+                      - name: API_ACCESS
+                        value: ALL_API
+                      - name: OIDC_CLIENT_ID
+                        value: client-id-test
+                      - name: OIDC_CLIENT_SECRET
+                        value: XXX
+                      - name: LOG_ENABLED
+                        value: 'false'
+                      - name: TEST_CLIENT_ID
+                        value: client-id-test
+                      - name: TEST_CLIENT_SECRET
+                        value: XXX
+                      - name: TEST_ADDITIONAL_ACCOUNTS
+                        value: 'PS999912,PE999934'
+                      - name: TEST_LOG_ENABLED
+                        value: 'false'
+                clientSecret-response:
+                  value:
+                    attribute:
+                      - name: OIDC_CLIENT_ID
+                        value: client-id-test
+                      - name: OIDC_CLIENT_SECRET
+                        value: XXX
+                      - name: LOG_ENABLED
+                        value: 'false'
+                      - name: TEST_CLIENT_ID
+                        value: client-id-test
+                      - name: TEST_CLIENT_SECRET
+                        value: XXX
+                      - name: TEST_ADDITIONAL_ACCOUNTS
+                        value: 'PS999912,PE999934'
+                      - name: TEST_LOG_ENABLED
+                        value: 'false'
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/AccessControlAllowOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/AccessControlAllowMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/AccessControlAllowHeaders'
+            Access-Control-Max-Age:
+              $ref: '#/components/headers/AccessControlMaxAge'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: Accept
+          description: application/json
+        - schema:
+            type: string
+          in: header
+          name: Content-Type
+          description: application/json
+components:
+  schemas:
+    apiAccess:
+      type: string
+      enum:
+        - ALL_API
+        - LEAR_API
+        - PPR_API
+      description: The API access for the consumer. The default is ALL_API. The format is the API short name appended with '_API' ALL_API grants access to all gateway externally published APIs. The set will expand over time as new APIs are added to the gateway.
+      default: ALL_API
+      example: PPR_API
+    apiKeyName:
+      type: string
+      description: An optional name or alias for an individual API key.
+      default: ''
+      example: UAT API Key
+    consumer:
+      title: consumer
+      type: object
+      description: Holds information used to create a new gateway consumer.
+      properties:
+        email:
+          type: string
+          description: Consumer application contact email address. Identity used for maintaining keys and status. Required.
+          default: ''
+          example: consumer-contact@example.com
+          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
+        firstName:
+          type: string
+          description: Consumer application contact first name. Required.
+          default: ''
+          example: Bob
+          pattern: ^(.*)$
+        lastName:
+          type: string
+          description: Consumer application contact last name. Required.
+          default: ''
+          example: Smith
+          pattern: ^(.*)$
+        userName:
+          type: string
+          description: Identity managment username or ID for the consumer. Used in logging and analytics reports to identify the source of requests. Required. This may be the consumer primary account ID if one or more gateway proxies validates request account IDs agains api key account IDs.
+          default: ''
+          example: PE999999
+          pattern: ^(.*)$
+        clientId:
+          type: string
+          description: The identity managment issued client ID for the consumer. Required to generate a JWT for the consumer.
+          default: ''
+          example: sbc-auth-web
+          pattern: ^(.*)$
+        clientSecret:
+          type: string
+          description: The identity managment issued client secret (key) for the consumer. Required to generate a JWT for the consumer.
+          default: ''
+          example: cfa2v9bc-953b-2187-8bc8-e76e853c37cb
+          pattern: ^(.*)$
+        apiAccess:
+          type: array
+          description: This object holds one or more api access roles.
+          items:
+            $ref: '#/components/schemas/apiAccess'
+        apiKeyName:
+          $ref: '#/components/schemas/apiKeyName'
+      required:
+        - email
+        - firstName
+        - lastName
+        - userName
+        - clientId
+        - clientSecret
+      x-examples:
+        consumer-ppr-lear-apis:
+          email: jsmith@example.com
+          firstName: James
+          lastName: Smith
+          userName: PE999999
+          clientId: sbc-auth-web
+          clientSecret: a8626cd0-09bd-4a7c-8454-481c04bcc3e0
+          apiAccess:
+            - PPR_API
+            - LEAR_API
+          apiKeyName: UAT API Key
+    errorResponse:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: Gateway message identifying the source of the error.
+        rootCause:
+          type: string
+          description: Details of the error condition from the component generating the error.
+      description: Object to hold a maintain consumer request error.
+      required:
+        - errorMessage
+        - rootCause
+      x-examples:
+        example-1:
+          errorMessage: API invalid JSON payload or required field missing.
+          rootCause:
+            fault:
+              faultstring: Invalid JSON path $.clientId in policy EV-request-create.
+              detail:
+                errorcode: steps.extractvariables.InvalidJSONPath
+    consumerAttribute:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the custom attribute.
+          default: ''
+          example: LOG_ENABLED
+        value:
+          type: string
+          description: The value of the custom attribute.
+          default: ''
+          example: 'false'
+      description: Object to hold a single Apigee Developer custom attribute.
+      required:
+        - name
+        - value
+      x-examples:
+        log_enabled_example:
+          name: LOG_ENABLED
+          value: false
+    consumerKey:
+      title: consumerKey
+      type: object
+      description: Holds information about an API key.
+      properties:
+        apiKey:
+          $ref: '#/components/schemas/consumerAPIKey'
+        apiAccess:
+          type: array
+          description: This object holds one or more api access roles.
+          items:
+            $ref: '#/components/schemas/apiAccess'
+        apiKeyName:
+          $ref: '#/components/schemas/apiKeyName'
+        keyStatus:
+          type: string
+          enum:
+            - approved
+            - revoked
+            - expired
+          description: The status of the key. It must be 'approved' to be used.
+          default: approved
+          example: approved
+        keyExpiryDate:
+          type: string
+          description: 'Either ''never'' or a timestamp in the format MM-DD-YYYY hh:mm PST.'
+          default: never
+          example: '12-09-2020 12:19 PST'
+        environment:
+          type: string
+          enum:
+            - dev
+            - test
+            - sandbox
+            - prod
+            - non-prod
+          description: 'The Apigee environment the key is valid in. Typically either non-prod, sandbox, or prod.'
+          default: non-prod
+          example: prod
+      required:
+        - apiKey
+        - apiAccess
+        - keyStatus
+        - keyExpiryDate
+        - environment
+      x-examples:
+        consumerKey-api-all:
+          apiKey: kmJCUpqNyGObkRcGG20ey1W4YBhKjyS6
+          apiAccess:
+            - ALL_API
+          apiKeyName: UAT API Key
+          keyStatus: approved
+          keyExpiryDate: never
+          environment: non-prod
+    consumerKeyResponse:
+      type: object
+      description: Object to hold get consumer key information response.
+      properties:
+        consumerStatus:
+          type: string
+          enum:
+            - approved
+            - revoked
+          description: Gateway status of the consumer application - approved or revoked. If revoked consumer is not authorized to submit gateway requests.
+          default: approved
+          example: revoked
+        consumerKey:
+          type: array
+          description: This object holds one or more API keys.
+          items:
+            $ref: '#/components/schemas/consumerKey'
+      required:
+        - consumerStatus
+        - consumerKey
+      x-examples:
+        consumer-key-response:
+          consumerStatus: approved
+          consumerKey:
+            - apiKey: kmJCUpqNyGObkRcGG20ey1W4YBhKjyS6
+              apiAccess:
+                - PPR_API
+              keyStatus: approved
+              keyExpiryDate: never
+              environment: non-prod
+            - apiKey: mTAhqwMY56GhvCX04eeH02nhTSr7DCH6
+              apiAccess:
+                - ALL_API
+              keyStatus: revoked
+              keyExpiryDate: never
+              environment: non-prod
+            - apiKey: SHLaVZ429kRFSKukFQehwC5nwkaKt4VL
+              apiAccess:
+                - PPR_API
+              keyStatus: expired
+              keyExpiryDate: '08-21-2020 14:31 PST'
+              environment: non-prod
+    consumerRequestAttributes:
+      type: object
+      description: Object to hold custom attributes for the gateway consumer (Apigee Developer).
+      properties:
+        additionalAccounts:
+          type: array
+          description: Additional account IDs used by the consumer. Provide if one or more gateway proxies validates a request account ID against api key account IDs.
+          items:
+            type: string
+            default: ''
+            example: PS999999
+        clientId:
+          type: string
+          description: The identity managment issued client ID for the consumer. Required to generate a JWT for the consumer.
+          default: ''
+          example: client-id-test
+        clientSecret:
+          type: string
+          description: The identity managment issued client secret (key) for the consumer. Required to generate a JWT for the consumer.
+          default: ''
+          example: cfa2v9bc-953b-2187-8bc8-e76e853c37cb
+        loggingEnabled:
+          type: string
+          description: Enable or disable message logging for the B2B/PRO account. The value may be true or false.
+          default: ''
+          example: 'false'
+        apiAccess:
+          type: array
+          description: This object holds one or more api access roles.
+          items:
+            $ref: '#/components/schemas/apiAccess'
+      x-examples:
+        all_attributes_example:
+          additionalAccounts:
+            - PS999999
+            - PE999999
+          clientId: client-id-test
+          clientSecret: aIKmOqao3oK6aKi12PVJlfrfoRfqxu6XHSgp
+          loggingEnabled: false
+          apiAccess:
+            - PPR_API
+            - LEAR_API
+    consumerResponse:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: Gateway API key belonging to the consumer.
+          default: ''
+          example: iFrrfzcGXyNnQd4NrliQSoyAHEsAC0nC
+        keyStatus:
+          type: string
+          description: 'Gateway status of the consumer API key - approved, revoked, or expired.'
+          default: ''
+          example: approved
+        keyExpiryDate:
+          type: string
+          description: Optional expiry date of the consumer API key. "Never" indicates the key never expires.
+          default: ''
+          example: 'Tue Feb 25 2020 23:46:16 GMT-0000 (UTC)'
+        consumerStatus:
+          type: string
+          description: Gateway status of the consumer application - approved or revoked. If revoked consumer is not authorized to submit gateway requests.
+          default: ''
+          example: approved
+        apiAccess:
+          type: array
+          description: This object holds one or more api access roles.
+          items:
+            $ref: '#/components/schemas/apiAccess'
+        apiKeyName:
+          $ref: '#/components/schemas/apiKeyName'
+      description: 'Object to hold a create consumer response and get consumer information response, including the gateway api key. The optional apiKeyName echoes back the request apiKeyName value.'
+      required:
+        - apiKey
+        - keyStatus
+        - consumerStatus
+      x-examples:
+        consumer-response-all-apis:
+          apiKey: iFrrfzcGXyNnQd4NrliQSoyAHEsAC0nC
+          keyStatus: approved
+          keyExpiryDate: Never
+          consumerStatus: approved
+          apiAccess:
+            - ALL_API
+          apiKeyName: UAT API Key
+    consumerAPIKey:
+      type: string
+      default: ''
+      description: Represents a gateway API key.
+      x-examples:
+        example-1:
+          apikey: GZTtwIe0y6nxvIPdu34jRpPlOhrftOS4
+  headers:
+    AccessControlAllowOrigin:
+      schema:
+        type: string
+        description: Access-Control-Allow-Origin
+        x-examples:
+          notify_1:
+            value: ''
+    AccessControlAllowMethods:
+      schema:
+        type: string
+        description: Access-Control-Allow-Methods
+        x-examples:
+          notify_1:
+            value: 'GET, PUT, POST, PATCH'
+    AccessControlAllowHeaders:
+      schema:
+        type: string
+        description: Access-Control-Allow-Headers
+        x-examples:
+          notify_1:
+            value: 'content-type, accept, x-apikey, authorization'
+    AccessControlMaxAge:
+      schema:
+        type: integer
+        description: Access-Control-Max-Age
+        x-examples:
+          notify_1:
+            value: 3628800
+  responses:
+    BadRequest:
+      description: 'The server cannot or will not process the request due to an apparent client error (e.g., malformed request syntax, size too large, invalid request message framing, or deceptive request routing).'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            example-1:
+              value:
+                errorMessage: API invalid JSON payload or required field missing.
+                rootCause: '{"fault":{"faultstring":"Failed to execute the ExtractVariables: EV-request-create","detail":{"errorcode":"steps.extractvariables.ExecutionFailed"}}}'
+    Unauthorized:
+      description: 'Similar to 403 Forbidden, but specifically for use when authentication is required and has failed or has not yet been provided. The user does not have valid authentication credentials for the target resource.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            example-1:
+              value:
+                errorMessage: 'API security error: API key check failed.'
+                rootCause: 'InvalidApiKey: Invalid ApiKey'
+    NotFound:
+      description: The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            example-1:
+              value:
+                errorMessage: API backend third party service error.
+                rootCause: '{"message": "User joe-smith does not exist."}'
+    InternalServerError:
+      description: 'A generic error message, given when an unexpected condition was encountered and no more specific message is suitable.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/errorResponse'
+          examples:
+            example-1:
+              value:
+                errorMessage: 'API unexpected error. If error persists, contact API support.'
+                rootCause: '{"fault":{"faultstring":"Execution of ServiceCallout SC-Request-JWT failed. Reason: ResponseCode 400 is treated as error","detail":{"errorcode":"steps.servicecallout.ExecutionFailed"}}}'
+  securitySchemes:
+    api_key:
+      type: apiKey
+      description: API Gateway assigned key for a consumer with the maintain API privilege.
+      name: x-apikey
+      in: header
+security:
+  - api_key: []
+tags:
+  - name: consumers
+    description: Endpoints for maintaining information about gateway consumers including gateway api keys.

@@ -164,6 +164,12 @@ class _Config():  # pylint: disable=too-few-public-methods
     # Config value to disable activity logs
     DISABLE_ACTIVITY_LOGS = os.getenv('DISABLE_ACTIVITY_LOGS', 'False').lower() == 'true'
 
+    # API gateway config
+    API_GW_CONSUMERS_API_URL = os.getenv('API_GW_CONSUMERS_API_URL', None)
+    API_GW_KEY = os.getenv('API_GW_KEY', None)
+    API_GW_NON_PROD_KEY = os.getenv('API_GW_NON_PROD_KEY', None)
+    API_GW_EMAIL_SUFFIX = os.getenv('API_GW_EMAIL_SUFFIX', None)
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Dev Config."""
@@ -294,6 +300,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     MINIO_SECURE = False
 
     STAFF_ADMIN_EMAIL = 'test@test.com'
+
+    API_GW_CONSUMERS_API_URL = 'http://localhost:8080/api-gw'
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

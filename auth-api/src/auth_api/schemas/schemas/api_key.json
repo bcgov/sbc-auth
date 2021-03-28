@@ -1,0 +1,31 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/api_key",
+    "type": "object",
+    "title": "API Key",
+    "additionalProperties": false,
+    "required": [
+      "keyName",
+      "environment"
+    ],
+    "properties": {
+      "keyName": {
+        "$id": "#/properties/keyName",
+        "type": "string",
+        "title": "Name of the key",
+        "default": "",
+        "examples": [
+          "TEST"
+        ],
+        "pattern": "^[^\\s]+(\\s+[^\\s]+)*$"
+      },
+      "environment": {
+        "$id": "#/properties/environment",
+        "type": "string",
+        "title": "API gateway Environment",
+        "pattern": "^(.*)$"
+      }
+    }
+  }
+  
