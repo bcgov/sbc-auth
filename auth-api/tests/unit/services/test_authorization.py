@@ -27,6 +27,7 @@ from auth_api.utils.roles import ADMIN, STAFF, USER
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
     factory_org_model, factory_product_model, factory_user_model)
+from tests.utilities.factory_scenarios import TestJwtClaims
 
 
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument
@@ -274,7 +275,7 @@ def test_get_account_authorizations_for_product(session):  # pylint:disable=unus
     factory_membership_model(user.id, org.id)
 
     authorization = Authorization.get_account_authorizations_for_product(
-        str(user.keycloak_guid),
+        TestJwtClaims.get_test_real_user(user.keycloak_guid),
         org.id,
         'PPR')
     assert authorization is not None
@@ -283,7 +284,7 @@ def test_get_account_authorizations_for_product(session):  # pylint:disable=unus
     # Now add some product subscription for the org
     factory_product_model(org.id)
     authorization = Authorization.get_account_authorizations_for_product(
-        str(user.keycloak_guid),
+        TestJwtClaims.get_test_real_user(user.keycloak_guid),
         org.id,
         'PPR')
     assert authorization is not None
@@ -294,7 +295,7 @@ def test_get_account_authorizations_for_product(session):  # pylint:disable=unus
                             payment_type_info=None)
     factory_membership_model(user.id, org.id)
     authorization = Authorization.get_account_authorizations_for_product(
-        str(user.keycloak_guid),
+        TestJwtClaims.get_test_real_user(user.keycloak_guid),
         org.id,
         'PPR')
     assert authorization is not None
@@ -302,7 +303,7 @@ def test_get_account_authorizations_for_product(session):  # pylint:disable=unus
 
     factory_product_model(org.id)
     authorization = Authorization.get_account_authorizations_for_product(
-        str(user.keycloak_guid),
+        TestJwtClaims.get_test_real_user(user.keycloak_guid),
         org.id,
         'PPR')
     assert authorization is not None

@@ -237,6 +237,15 @@
             "examples": [
                 "OWNER_CHANGE"
             ]
+        },
+        "hasApiAccess": {
+            "$id": "#/properties/hasApiAccess",
+            "type": "boolean",
+            "title": "API Access",
+            "default": false,
+            "examples": [
+                true
+            ]
         }
     },
     "additionalProperties": true
