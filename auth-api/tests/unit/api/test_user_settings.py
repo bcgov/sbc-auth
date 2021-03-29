@@ -17,15 +17,13 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
-import json
-
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_contact_model, factory_user_model
 
 from auth_api import status as http_status
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_auth_header, factory_contact_model, factory_user_model
 
 
 def test_get_user_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -45,8 +43,9 @@ def test_get_user_settings(client, jwt, session, keycloak_mock):  # pylint:disab
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.get(f'/api/v1/users/{kc_id}/settings', headers=headers, content_type='application/json')
-    item_list = json.loads(rv.data)
+    item_list = rv.json
     account = next(obj for obj in item_list if obj['type'] == 'ACCOUNT')
     assert account['accountType'] == 'BASIC'
     assert rv.status_code == http_status.HTTP_200_OK
-    assert schema_utils.validate(rv.json, 'user_settings_response')[0]
+    assert schema_utils.validate(item_list, 'user_settings_response')[0]
+    assert account['productSettings'] == f'/account/{account["id"]}/product-settings'

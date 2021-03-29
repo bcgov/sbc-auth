@@ -79,10 +79,11 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { Pages, Role, StaffCreateAccountsTypes } from '@/util/constants'
+import { LDFlags, Pages, Role, StaffCreateAccountsTypes } from '@/util/constants'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Code } from '@/models/Code'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
@@ -178,6 +179,10 @@ export default class StaffAccountManagement extends Vue {
     }
   ]
 
+  private get isGovmInviteEnable (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableGovmInvite) || false
+  }
+
   private async mounted () {
     await this.getCodes()
     await this.syncPendingStaffOrgs()
@@ -189,7 +194,11 @@ export default class StaffAccountManagement extends Vue {
   }
 
   openCreateAccount () {
-    this.$refs.staffCreateAccountDialog.open()
+    if (this.isGovmInviteEnable) {
+      this.$refs.staffCreateAccountDialog.open()
+    } else {
+      this.$router.push({ path: `/${Pages.STAFF_SETUP_ACCOUNT}` })
+    }
   }
 
   private get canManageAccounts () {
