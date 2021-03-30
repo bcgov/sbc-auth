@@ -163,7 +163,9 @@ export enum LDFlags {
     PaymentTypeAccountCreation = 'payment-type-in-account-creation',
     LinkToNewNameRequestApp ='link-to-new-name-request-app',
     EnableUpgradeDowngrade = 'enable-upgrade-downgrade-accounts',
-    EnableMandatoryAddress = 'enable-mandatory-address'
+    EnableMandatoryAddress = 'enable-mandatory-address',
+    EnableGovmInvite = 'enable-govm-account-invite'
+
 }
 
 export enum DateFilterCodes {
