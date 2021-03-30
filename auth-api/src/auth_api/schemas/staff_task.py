@@ -11,20 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affidavit import Affidavit
-from .affiliation import Affiliation
-from .codes import Codes
-from .contact import Contact
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .minio import MinioService
-from .org import Org
-from .permissions import Permissions
-from .products import Product
-from .reset import ResetTestData
-from .user import User
-from .user_settings import UserSettings
-from .staff_task import StaffTask
+"""Manager for staff tasks schema and export."""
+
+from auth_api.models import StaffTask as StaffTaskModel
+
+from .base_schema import BaseSchema
+
+
+class StaffTaskSchema(BaseSchema):
+    """This is the schema for the StaffTask model."""
+
+    class Meta:
+        """Maps all of the StaffTask fields to a default schema."""
+
+        model = StaffTaskModel
