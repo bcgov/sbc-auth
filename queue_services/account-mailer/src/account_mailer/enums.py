@@ -49,7 +49,7 @@ class SubjectType(Enum):
     PAD_SETUP_FAILED = '[BC Registries and Online Services] Your Account is Temporarily Suspended'
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
-    RESET_PASSCODE = 'Passcode reset'
+    RESET_PASSCODE = 'BC Registries Account Passcode Reset'
 
 
 class TemplateType(Enum):
@@ -73,5 +73,4 @@ class TemplateType(Enum):
 class Constants(Enum):
     """Constants."""
 
-    RESET_PASSCODE_STAFF_HEADER = 'BC Registries staff have generated a new passcode for your business.'
-    RESET_PASSCODE_CUSTOMER_HEADER = 'BC Registries have generated a new passcode for your business.'
+    RESET_PASSCODE_HEADER = 'BC Registries have generated a new passcode for your business.'
