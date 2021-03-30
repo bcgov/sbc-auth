@@ -27,4 +27,4 @@ from .products import Product
 from .reset import ResetTestData
 from .user import User
 from .user_settings import UserSettings
-from .staff_task import StaffTask
+from .task import Task

@@ -11,24 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Tests for the StaffTask service.
+"""Tests for the Task service.
 
-Test suite to ensure that the Staff Task service routines are working as expected.
+Test suite to ensure that the Task service routines are working as expected.
 """
 
-from auth_api.services import StaffTask as StaffTaskService
-from tests.utilities.factory_utils import factory_staff_task_service
+from auth_api.services import Task as TaskService
+from tests.utilities.factory_utils import factory_task_service
 
 
-def test_fetch_staff_tasks(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that staff tasks can be fetched."""
-    staff_task = factory_staff_task_service()
-    dictionary = staff_task.as_dict()
+def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that tasks can be fetched."""
+    task = factory_task_service()
+    dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_staff_task = StaffTaskService.fetch_staff_tasks()
+    fetched_task = TaskService.fetch_tasks()
 
-    assert fetched_staff_task
-    assert fetched_staff_task
-    for item in fetched_staff_task:
+    assert fetched_task
+    assert fetched_task
+    for item in fetched_task:
         assert item['name'] == name

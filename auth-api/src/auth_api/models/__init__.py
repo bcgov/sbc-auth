@@ -51,7 +51,7 @@ from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
 from .suspension_reason_code import SuspensionReasonCode
-from .staff_task import StaffTask
+from .task import Task
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

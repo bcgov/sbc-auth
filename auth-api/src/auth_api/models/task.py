@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""This model manages a Staff Task item in the Auth Service."""
+"""This model manages a Task item in the Auth Service."""
 
 from sqlalchemy import Column, DateTime, Integer, String
 from .db import db
 from .base_model import BaseModel
 
 
-class StaffTask(BaseModel):
-    """Model for a StaffTask record."""
+class Task(BaseModel):
+    """Model for a Task record."""
 
-    __tablename__ = 'staff_tasks'
+    __tablename__ = 'tasks'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
@@ -30,9 +30,10 @@ class StaffTask(BaseModel):
     relationship_id = Column(Integer, index=True, nullable=False)
     due_date = Column(DateTime)
     task_type = Column(String(50), nullable=False)
+    task_status = Column(String(50), nullable=False)
 
     @classmethod
-    def fetch_staff_tasks(cls):
-        """Find Org that matches the provided name and not in INACTIVE status."""
-        query = db.session.query(StaffTask)
+    def fetch_tasks(cls):
+        """Fetch all tasks."""
+        query = db.session.query(Task)
         return query.all()

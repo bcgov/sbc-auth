@@ -11,17 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Manager for staff tasks schema and export."""
+"""Manager for tasks schema and export."""
 
-from auth_api.models import StaffTask as StaffTaskModel
+from auth_api.models import Task as TaskModel
 
 from .base_schema import BaseSchema
 
 
-class StaffTaskSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the StaffTask model."""
+class TaskSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Task model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the StaffTask fields to a default schema."""
+        """Maps all of the Task fields to a default schema."""
 
-        model = StaffTaskModel
+        model = TaskModel

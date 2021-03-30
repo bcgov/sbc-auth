@@ -30,13 +30,13 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
-from auth_api.models import StaffTask as StaffTaskModel
+from auth_api.models import Task as TaskModel
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
-from auth_api.services import StaffTask as StaffTaskService
+from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import AccessType, InvitationType
 from auth_api.utils.roles import Role
@@ -243,22 +243,22 @@ def factory_product_model(org_id: str,
     return subscription
 
 
-def factory_staff_task_service():
-    """Produce a templated staff task service."""
-    staff_task_model = factory_staff_task_model()
-    staff_service = StaffTaskService(staff_task_model)
-    return staff_service
+def factory_task_service():
+    """Produce a templated task service."""
+    task_model = factory_task_model()
+    service = TaskService(task_model)
+    return service
 
 
-def factory_staff_task_model():
-    """Produce a StaffTask model."""
-    staff_task = StaffTaskModel(id=1,
-                                name='foo',
-                                date_submitted=datetime.datetime.now(),
-                                relationship_type='Org',
-                                relationship_id=1,
-                                task_type='Pending'
-                                )
+def factory_task_model():
+    """Produce a Task model."""
+    task = TaskModel(id=1,
+                     name='foo',
+                     date_submitted=datetime.datetime.now(),
+                     relationship_type='Org',
+                     relationship_id=1,
+                     task_type='Pending'
+                     )
 
-    staff_task.save()
-    return staff_task
+    task.save()
+    return task
