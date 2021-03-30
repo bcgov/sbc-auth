@@ -257,7 +257,8 @@ def factory_task_model():
                      date_submitted=datetime.datetime.now(),
                      relationship_type='Org',
                      relationship_id=1,
-                     task_type='Pending'
+                     task_type='Pending',
+                     task_status='Pending'
                      )
 
     task.save()

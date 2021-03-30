@@ -24,7 +24,7 @@ from auth_api.models import Task as TaskModel
 def test_task_model(session):
     """Assert that a task can be stored in the service."""
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type='Org',
-                     relationship_id=10, task_type='Pending Review')
+                     relationship_id=10, task_type='Pending Review', task_status='Pending')
 
     session.add(task)
     session.commit()
@@ -35,7 +35,7 @@ def test_task_model(session):
 def test_task_model_with_due_date(session):
     """Assert that a task can be stored in the service."""
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type='Org',
-                     relationship_id=10, task_type='Pending Review', due_date=datetime.now())
+                     relationship_id=10, task_type='Pending Review', due_date=datetime.now(), task_status='Pending')
 
     session.add(task)
     session.commit()
@@ -47,7 +47,7 @@ def test_task_model_with_due_date(session):
 def test_fetch_tasks(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type='Org',
-                     relationship_id=10, task_type='Pending Review', due_date=datetime.now())
+                     relationship_id=10, task_type='Pending Review', due_date=datetime.now(), task_status='Pending')
     session.add(task)
     session.commit()
 

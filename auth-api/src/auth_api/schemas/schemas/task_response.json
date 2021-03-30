@@ -82,6 +82,15 @@
             "examples": [
                 "Pending"
             ]
+        },
+        "taskStatus": {
+            "$id": "#/properties/taskType",
+            "type": "string",
+            "title": "Task Type",
+            "default": "",
+            "examples": [
+                "Pending"
+            ]
         }
     },
     "additionalProperties": true
