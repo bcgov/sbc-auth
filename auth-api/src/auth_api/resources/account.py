@@ -30,7 +30,7 @@ _JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
-@API.route('/<string:account_id>/products/<string:product_code>/authorizations', methods=['GET', 'OPTIONS'])
+@API.route('/<int:account_id>/products/<string:product_code>/authorizations', methods=['GET', 'OPTIONS'])
 class AccountAuthorizations(Resource):
     """Resource for returning authorizations for a product in an account."""
 
