@@ -79,6 +79,7 @@ export function getRoutes (): RouteConfig[] {
   const accountPaymentOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/payment/AccountPaymentMethods.vue')
   const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/statement/Statements.vue')
+  const productPackage = () => import(/* webpackChunkName: "product-package" */ '../components/auth/account-settings/product/ProductPackage.vue')
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
     {
@@ -187,6 +188,11 @@ export function getRoutes (): RouteConfig[] {
           meta: {
             isPremiumOnly: true
           }
+        },
+        {
+          path: 'product-package',
+          name: 'product-package',
+          component: productPackage
         }
       ]
     },

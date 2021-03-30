@@ -206,3 +206,10 @@ export enum StaffCreateAccountsTypes {
     DIRECTOR_SEARCH = 'DIRECTOR_SEARCH',
     GOVM_BUSINESS = 'GOVM_BUSINESS'
 }
+
+export enum productStatus {
+    REQUEST = 'REQUEST',
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+}
