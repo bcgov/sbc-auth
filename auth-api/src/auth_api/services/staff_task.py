@@ -16,16 +16,12 @@
 This module manages the staff tasks.
 """
 
-from typing import Dict, List
-
 from flask import current_app
-from requests import HTTPError
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import StaffTask as StaffTaskModel
 from auth_api.schemas import StaffTaskSchema
-from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 

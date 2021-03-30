@@ -13,7 +13,6 @@
 # limitations under the License.
 """This model manages a Staff Task item in the Auth Service."""
 
-from flask import current_app
 from sqlalchemy import Column, DateTime, Integer, String
 from .db import db
 from .base_model import BaseModel

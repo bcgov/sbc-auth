@@ -40,10 +40,9 @@ class StaffTasks(Resource):
     @_JWT.has_one_of_roles(
         [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
-        """fetch staff tasks."""
+        """Fetch staff tasks."""
         try:
             response, status = json.dumps(StaffTaskService.fetch_staff_tasks()), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
-

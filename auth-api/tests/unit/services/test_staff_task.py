@@ -15,9 +15,9 @@
 
 Test suite to ensure that the Staff Task service routines are working as expected.
 """
+
 from auth_api.services import StaffTask as StaffTaskService
-from tests.utilities.factory_utils import (factory_staff_task_model,
-                                           factory_staff_task_service)
+from tests.utilities.factory_utils import factory_staff_task_service
 
 
 def test_fetch_staff_tasks(session, auth_mock):  # pylint:disable=unused-argument

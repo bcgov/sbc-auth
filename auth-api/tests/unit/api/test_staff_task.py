@@ -16,10 +16,7 @@
 Test-Suite to ensure that the /staff-tasks endpoint is working as expected.
 """
 
-from unittest.mock import patch
-
 from auth_api import status as http_status
-from auth_api.schemas import utils as schema_utils
 from tests.utilities.factory_utils import factory_auth_header
 from tests.utilities.factory_scenarios import TestJwtClaims
 

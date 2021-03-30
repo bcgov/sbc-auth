@@ -16,7 +16,7 @@
 Test suite to ensure that the Staff Task model routines are working as expected.
 """
 
-from _datetime import datetime, timedelta
+from _datetime import datetime
 
 from auth_api.models import StaffTask as StaffTaskModel
 
