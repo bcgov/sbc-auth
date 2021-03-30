@@ -388,7 +388,7 @@ class UserOrgs(Resource):
 
 
 @cors_preflight('GET, OPTIONS')
-@API.route('/orgs/<string:org_id>/membership', methods=['GET', 'OPTIONS'])
+@API.route('/orgs/<int:org_id>/membership', methods=['GET', 'OPTIONS'])
 class MembershipResource(Resource):
     """Resource for managing a user's org membership."""
 

@@ -144,7 +144,7 @@ def client_id():
 @pytest.fixture(scope='session')
 def stan_server(docker_services):
     """Create the nats / stan services that the integration tests will use."""
-    if os.getenv('TEST_NATS_DOCKER'):
+    if os.getenv('USE_DOCKER_MOCK'):
         docker_services.start('nats')
         time.sleep(2)
 
