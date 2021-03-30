@@ -23,6 +23,6 @@ from tests.utilities.factory_scenarios import TestJwtClaims
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
