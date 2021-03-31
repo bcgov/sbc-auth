@@ -309,6 +309,7 @@ paths:
         description: The API key to update.
         schema:
           type: string
+        example: kmJCUpqNyGObkRcGG20ey1W4YBhKjyS6
     patch:
       tags:
         - consumers
