@@ -165,7 +165,18 @@ class OrgStatus(Enum):
     NSF_SUSPENDED = 'NSF_SUSPENDED'
     SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
     PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'  # staff invited user and waiting for account creation from user.
-    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'   # user created , staff need to approve.
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'  # user created , staff need to approve.
+
+
+class ProductSubscriptionStatus(Enum):
+    """User Membership status."""
+
+    ACTIVE = 'ACTIVE'
+    INACTIVE = 'INACTIVE'
+    REJECTED = 'REJECTED'
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'
+    NOT_SUBSCRIBED = 'NOT_SUBSCRIBED'
+    SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
 
 
 class SuspensionReasonCode(Enum):
