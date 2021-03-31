@@ -1,6 +1,4 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import { Account } from '@/util/constants'
-import OrgModule from '@/store/modules/org'
 import SingleProduct from '@/components/auth/common/SingleProduct.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'

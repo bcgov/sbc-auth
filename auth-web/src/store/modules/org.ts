@@ -876,16 +876,12 @@ export default class OrgModule extends VuexModule {
   @Action({ commit: 'setOrgProducts', rawError: true })
   public async getOrgProducts (orgId:number): Promise<OrgProduct[]> {
     const response = await OrgService.getProducts(orgId)
-    if (response && response.data && response.status === 200) {
-      return response.data
-    }
+    return response?.data
   }
 
   @Action({ rawError: true })
   public async addOrgProducts (orgId:number, productsRequestBody: OrgProductsRequestBody): Promise<OrgProduct> {
     const response = await OrgService.addProducts(orgId, productsRequestBody)
-    if (response && response.data && response.status === 200) {
-      return response?.data
-    }
+    return response?.data
   }
 }
