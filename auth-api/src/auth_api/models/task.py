@@ -23,7 +23,7 @@ class Task(BaseModel):
 
     __tablename__ = 'tasks'
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, index=True, primary_key=True)
     name = Column(String(250), nullable=False)
     date_submitted = Column(DateTime)
     relationship_type = Column(String(50), nullable=False)

@@ -13,15 +13,15 @@
 # limitations under the License.
 """API endpoints for managing a Task resource."""
 
-import json
 from flask_restplus import Namespace, Resource, cors
 from auth_api.tracer import Tracer
 from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.utils.util import cors_preflight
 from auth_api.utils.roles import Role
-from auth_api.services import Task as StaffTaskService
+from auth_api.services import Task as TaskService
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
+from auth_api.schemas import TaskSchema
 
 
 API = Namespace('tasks', description='Endpoints for tasks management')
@@ -42,7 +42,8 @@ class Tasks(Resource):
     def get():
         """Fetch tasks."""
         try:
-            response, status = json.dumps(StaffTaskService.fetch_tasks()), http_status.HTTP_200_OK
+            tasks = TaskService.fetch_tasks()
+            response, status = {'tasks': TaskSchema().dump(tasks, many=True)}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

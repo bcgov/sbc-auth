@@ -17,12 +17,17 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 
 from auth_api import status as http_status
-from tests.utilities.factory_utils import factory_auth_header
+from tests.utilities.factory_utils import (factory_auth_header,
+                                           factory_task_service)
 from tests.utilities.factory_scenarios import TestJwtClaims
+from auth_api.schemas import utils as schema_utils
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
+    task = factory_task_service()
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'task_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK

@@ -59,7 +59,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Create a new task record."""
         current_app.logger.debug('<create_staff_task ')
 
-        task_model.add_to_session()
         task_model.save()
 
         return Task(task_model)
@@ -71,6 +70,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         tasks_response = []
 
         for task in tasks:
-            tasks_response.append(Task(task).as_dict())
+            tasks_response.append(task)
 
         return tasks_response
