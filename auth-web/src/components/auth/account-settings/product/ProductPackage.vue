@@ -10,16 +10,19 @@
       </p>
       <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
-    <SingleProduct
-      :productDetails="productDetails"
-      @set-selected-product="setSelectedProduct"
-      :userName="currentUser.fullName"
-      :orgName="currentOrganization.name"
-    ></SingleProduct>
-    <SingleProduct
-      :productDetails="productDetails"
-      @set-selected-product="setSelectedProduct"
-    ></SingleProduct>
+    <template v-if="productsLoaded">
+      <div v-for="product in productDetails" :key="product.code">
+        <SingleProduct
+          :productDetails="product"
+          @set-selected-product="setSelectedProduct"
+          :userName="currentUser.fullName"
+          :orgName="currentOrganization.name"
+        ></SingleProduct>
+      </div>
+    </template>
+    <template v-else>
+      <div>No Products are available...</div>
+    </template>
 
         <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -49,10 +52,10 @@
 <script lang="ts">
 
 import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { OrgProduct, OrgProductCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Organization } from '@/models/Organization'
 import SingleProduct from '@/components/auth/common/SingleProduct.vue'
 import { namespace } from 'vuex-class'
 import { productStatus } from '@/util/constants'
@@ -69,33 +72,52 @@ const userModule = namespace('user')
 export default class ProductPackage extends Mixins(AccountChangeMixin) {
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
+  @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
+  @OrgModule.Action('addOrgProducts') public addOrgProducts!:(orgId: number, product:OrgProductsRequestBody) =>Promise<OrgProduct>
 
   public isBtnSaved = false
   public disableSaveBtn = false
   public isLoading: boolean = false
-  public errorTitle = 'Payment Update Failed'
+  public errorTitle = 'Product Request Failed'
   public errorText = ''
+  public productDetails:any =[]
+  public productsLoaded:boolean = null
+  public productsAddSuccess:boolean = false
 
   $refs: {
       errorDialog: ModalDialog
   }
 
-  public productDetails: any = {
-    title: 'Wills Registry',
-    subtitle: 'Registration and search for wills',
-    status: productStatus.REQUEST
-  }
-
-  public setSelectedProduct (product) {
+  public async setSelectedProduct (product) {
     // set product and save call come here
-    // eslint-disable-next-line no-console
-    console.log('selectedproduct', product)
-    // open when error
-    // this.$refs.errorDialog.open()
+    if (product && product.code) {
+      try {
+        const productsSelected: OrgProductCode[] = [{
+          productCode: product.code
+        }]
+
+        const addProductsRequestBody: OrgProductsRequestBody = {
+          subscriptions: productsSelected
+        }
+        const addProd = await this.addOrgProducts(this.currentOrganization.id, addProductsRequestBody)
+        this.productsAddSuccess = true
+      } catch {
+        // open when error
+        this.$refs.errorDialog.open()
+      }
+    }
   }
 
-  private async mounted () {
+  public async mounted () {
     // make call to get all products here
+    try {
+      const orgProducts = await this.getOrgProducts(this.currentOrganization.id)
+      this.productDetails = orgProducts
+      this.productsLoaded = true
+    } catch {
+      this.productsLoaded = false
+      this.productDetails = []
+    }
   }
   private closeError () {
     this.$refs.errorDialog.close()

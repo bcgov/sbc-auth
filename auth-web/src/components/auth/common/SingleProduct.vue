@@ -14,8 +14,8 @@
               <v-icon meduim color="primary">{{icon}}</v-icon>
             </div>
             <div class="pr-8 ">
-              <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.title}}</h3>
-              <div>{{productDetails.subtitle}}</div>
+              <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.name}}</h3>
+              <div>{{productSubTitle}}</div>
             </div>
             <v-icon large v-if="isRequestNow"
             class="ml-auto"
@@ -28,8 +28,8 @@
               width="120"
               class="font-weight-bold ml-auto"
               :outlined="!isApproved"
-              :aria-label="`Select  ${productDetails.title}`"
-              :data-test="`btn-productDetails-${productDetails.title}`"
+              :aria-label="`Select  ${productDetails.name}`"
+              :data-test="`btn-productDetails-${productDetails.name}`"
               @click="requestNow()"
             >
               <span>{{label}}</span>
@@ -42,11 +42,11 @@
                 <div class="pt-7 mb-7" >
                   <v-divider class="mb-7"></v-divider>
                   <p class="mb-7">The search and registration products are intended for the exclusive use of solicitors and notaries only.
-                    Title Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.
+                    name Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.
                   </p>
                   <h4>Terms of Service</h4>
                   <p> I confirm, I <strong>{{userName}}</strong> am an authorized prime admin for this account.<br />
-                    I declare that this account <strong>{{orgName}}</strong> and all team members act as a solicitor, or title search company approved by the Vital Statistics agency.</p>
+                    I declare that this account <strong>{{orgName}}</strong> and all team members act as a solicitor, or name search company approved by the Vital Statistics agency.</p>
                 </div>
                 <v-checkbox
                 color="primary"
@@ -55,6 +55,7 @@
                 v-model="termsAccepted"
                 required
                 data-test="check-termsAccepted"
+                @change="tosChanged"
                 >
                   <template v-slot:label>
                     <span class="label-color ml-2">I have read, understood and agree to the
@@ -63,7 +64,7 @@
                     </span>
                 </template>
                 </v-checkbox>
-
+                <div class="terms-error mt-2" v-if="istosAccepted!== null && !istosAccepted"><v-icon class="error-color mr-1">mdi-alert-circle</v-icon> Confirm to the terms to request</div>
                 <v-divider class="my-7"></v-divider>
                 <div class="form__btns d-flex">
                   <v-btn
@@ -109,37 +110,43 @@ export default class SingleProduct extends Vue {
   private termsAccepted: boolean = false
   public isLoading : boolean = false
   public label = 'Reqeust'
+  public productSubTitle = ''
   public icon = ''
   public isApproved = false
   public isPending = false
   public isRejected = false
   public isRRequesting = false
+  public istosAccepted: boolean = null
 
   @Watch('productDetails')
-  onProductChange (newProd:any, oldProd:any) {
+  onProductChange (newProd:any) {
     this.setupProductDetails(newProd)
   }
   get isDisableSaveBtn () {
-    return false
+    return !this.isFormvalid()
   }
 
   setupProductDetails (productDetails) {
-    const { status } = productDetails
+    const { subscriptionStatus, name, description } = productDetails
 
-    if (status === productStatus.PENDING) {
+    if (subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
       this.label = 'Pending'
       this.icon = 'mdi-clock-outline'
       this.isPending = true
-    } else if (status === productStatus.REJECTED) {
+      this.productSubTitle = 'Your request is under review (pending)'
+    } else if (subscriptionStatus === productStatus.REJECTED) {
       this.label = 'Rejected'
       this.icon = 'mdi-clock-outline'
+      this.productSubTitle = 'Your request is rejected (rejected)'
       this.isRejected = true
-    } else if (status === productStatus.APPROVED) {
+    } else if (subscriptionStatus === productStatus.ACTIVE) {
       this.label = 'Approved'
       this.icon = 'mdi-check-circle'
       this.isApproved = true
+      this.productSubTitle = `This account have access to ${name}`
     } else {
       this.isRRequesting = true
+      this.productSubTitle = description
     }
   }
 
@@ -148,16 +155,27 @@ export default class SingleProduct extends Vue {
   }
 
   public requestNow () {
-    const { status } = this.productDetails
+    const { subscriptionStatus } = this.productDetails
     // need to expand only if not already requested
-    if (status === '' || status === productStatus.REQUEST) {
+    if (subscriptionStatus === '' || subscriptionStatus === productStatus.NOT_SUBSCRIBED) {
       this.isRequestNow = !this.isRequestNow
     }
   }
 
+  public tosChanged () {
+    this.istosAccepted = this.termsAccepted
+  }
+
   @Emit('set-selected-product')
   public requestProduct () {
-    return { product: this.productDetails, termsAccepted: this.termsAccepted }
+    this.tosChanged()
+    if (this.isFormvalid()) {
+      return this.productDetails
+    }
+    return false
+  }
+  public isFormvalid () {
+    return this.termsAccepted
   }
   cancel () {
     this.requestNow()
@@ -206,5 +224,13 @@ export default class SingleProduct extends Vue {
 }
 .pad-form-container {
   max-width: 75ch;
+}
+.terms-error{
+  color: #d3272c;
+  font-size: 16px;
+  font-weight: bold;
+}
+.error-color{
+  color: #d3272c;
 }
 </style>

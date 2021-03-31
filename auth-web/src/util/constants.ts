@@ -208,8 +208,8 @@ export enum StaffCreateAccountsTypes {
 }
 
 export enum productStatus {
-    REQUEST = 'REQUEST',
-    PENDING = 'PENDING',
-    APPROVED = 'APPROVED',
+    NOT_SUBSCRIBED = 'NOT_SUBSCRIBED',
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
+    ACTIVE = 'ACTIVE',
     REJECTED = 'REJECTED',
 }
