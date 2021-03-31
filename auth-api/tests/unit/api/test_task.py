@@ -25,7 +25,7 @@ from auth_api.schemas import utils as schema_utils
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
-    task = factory_task_service()
+    factory_task_service()
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     item_list = rv.json
