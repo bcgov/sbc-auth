@@ -11,20 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affidavit import Affidavit
-from .affiliation import Affiliation
-from .codes import Codes
-from .contact import Contact
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .minio import MinioService
-from .org import Org
-from .permissions import Permissions
-from .products import Product
-from .reset import ResetTestData
-from .user import User
-from .user_settings import UserSettings
-from .task import Task
+"""Tests for the Task service.
+
+Test suite to ensure that the Task service routines are working as expected.
+"""
+
+from auth_api.services import Task as TaskService
+from tests.utilities.factory_utils import factory_task_service
+
+
+def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that tasks can be fetched."""
+    task = factory_task_service()
+    dictionary = task.as_dict()
+    name = dictionary['name']
+
+    fetched_task = TaskService.fetch_tasks()
+
+    assert fetched_task
+    for item in fetched_task:
+        assert item.name == name
