@@ -540,8 +540,8 @@ class TestOrgProductsInfo(dict, Enum):
     """Test scenarios of attaching products to org."""
 
     org_products1 = {'subscriptions': [{'productCode': 'PPR'}]}
-    org_products2 = {'subscriptions': [{'productCode': 'PPR', 'productRoles': ['search', 'File']},
-                                       {'productCode': 'DIR_SEARCH', 'productRoles': ['search']}]}
+    org_products2 = {'subscriptions': [{'productCode': 'VS'},
+                                       {'productCode': 'BCA'}]}
 
 
 class TestEntityInfo(dict, Enum):
