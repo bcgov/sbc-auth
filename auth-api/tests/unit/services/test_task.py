@@ -29,6 +29,5 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     fetched_task = TaskService.fetch_tasks()
 
     assert fetched_task
-    assert fetched_task
     for item in fetched_task:
-        assert item['name'] == name
+        assert item.name == name
