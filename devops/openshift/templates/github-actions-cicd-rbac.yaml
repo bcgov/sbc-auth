@@ -59,6 +59,7 @@ objects:
         resources:
           - deploymentconfigs/log
           - deploymentconfigs/status
+
   - apiVersion: authorization.openshift.io/v1
     kind: RoleBinding
     metadata:
