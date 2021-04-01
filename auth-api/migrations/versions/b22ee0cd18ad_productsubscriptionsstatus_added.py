@@ -45,15 +45,13 @@ def upgrade():
     op.bulk_insert(
         product_subscriptions_statuses_table,
         [
-            {'code': 'REJECTED', 'description': 'Status for a rejected account',
+            {'code': 'REJECTED', 'description': 'Status for a rejected product subscription',
              'default': False},
-            {'code': 'ACTIVE', 'description': 'Status for a active account',
+            {'code': 'ACTIVE', 'description': 'Status for a active product subscription',
              'default': True},
-            {'code': 'PENDING_STAFF_REVIEW', 'description': 'Status for a PENDING_STAFF_REVIEW account',
+            {'code': 'PENDING_STAFF_REVIEW', 'description': 'Status for a PENDING_STAFF_REVIEW product subscription',
              'default': False},
-            {'code': 'INACTIVE', 'description': 'Status for a inactive account',
-             'default': False},
-            {'code': 'SUSPENDED', 'description': 'Status for a SUSPENDED account',
+            {'code': 'INACTIVE', 'description': 'Status for a inactive product subscription',
              'default': False}
         ]
     )
