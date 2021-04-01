@@ -3,15 +3,6 @@
     <v-form ref="addNRForm" lazy-validation>
       <fieldset>
         <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
-        <v-expand-transition>
-          <div class="add-namerequest-form__alert-container" v-show="validationError">
-            <v-alert
-              :value="true"
-              color="error"
-              icon="warning"
-            >{{validationError}}</v-alert>
-          </div>
-        </v-expand-transition>
         <v-text-field
           filled
           label="Enter a Name Request Number"
@@ -31,7 +22,7 @@
           :rules="applicantPhoneNumberRules"
           v-model="applicantPhoneNumber"
           type="tel"
-          data-test="applicant-phonenumber"
+          data-test="applicant-phone-number"
         />
         <div class="font-weight-bold ml-3 mb-2">or</div>
         <v-text-field
@@ -48,8 +39,8 @@
       <div class="form__btns mt-8">
         <v-btn
           large text
-          class="pl-2 pr-2 lost-passcode-btn"
-          data-test="forgot-passcode-button"
+          class="pl-2 pr-2 forgot-btn"
+          data-test="forgot-button"
           @click.stop="openHelp()"
         >
           <v-icon>mdi-help-circle-outline</v-icon>
@@ -69,7 +60,7 @@
           color="default"
           class="ml-2"
           data-test="cancel-button"
-          @click="cancel()"
+          @click="$emit('on-cancel')"
         >
           <span>Cancel</span>
         </v-btn>
@@ -77,14 +68,14 @@
     </v-form>
 
     <HelpDialog
-      :helpDialogFor="'Name Request (NR) Number'"
+      :helpDialogBlurb="helpDialogBlurb"
       ref="helpDialog"
     />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import { FilingTypes, LegalTypes } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import { BusinessRequest } from '@/models/business'
@@ -92,6 +83,7 @@ import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
+import { StatusCodes } from 'http-status-codes'
 
 @Component({
   components: {
@@ -111,14 +103,17 @@ export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
   private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
-  private validationError = ''
+
+  private helpDialogBlurb = 'If you have lost your receipt and name results email and ' +
+    'need assistance finding your Name Request (NR) Number, please contact use at:'
+
   private nrNumberRules = [
     v => !!v || 'Name Request Number is required',
     v => CommonUtils.validateNameRequestNumber(v) || 'Name Request Number is invalid'
   ]
   private applicantPhoneNumberRules = [
     v => this.isInputEntered(v, 'phone') || 'Phone number is required',
-    v => !(v.length > 12) || 'Phone number is invalid'
+    v => CommonUtils.validatePhoneNumber(v) || 'Phone number is invalid'
   ]
   private applicantEmailRules = [
     v => this.isInputEntered(v, 'email') || 'Email is required',
@@ -189,9 +184,9 @@ export default class AddNameRequestForm extends Vue {
           }
         }
       } catch (exception) {
-        if (exception.response && exception.response.status === 400) {
+        if (exception.response?.status === StatusCodes.BAD_REQUEST) {
           this.$emit('add-failed-show-msg', exception.response?.data?.message || '')
-        } else if (exception.response && exception.response.status === 404) {
+        } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
           this.$emit('add-failed-no-entity')
         } else {
           this.$emit('add-unknown-error')
@@ -201,9 +196,6 @@ export default class AddNameRequestForm extends Vue {
       }
     }
   }
-
-  @Emit()
-  private cancel (): void {}
 
   private resetForm (): void {
     this.nrNumber = ''
@@ -226,7 +218,7 @@ export default class AddNameRequestForm extends Vue {
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
-.lost-passcode-btn {
+.forgot-btn {
   margin-right: auto;
 }
 

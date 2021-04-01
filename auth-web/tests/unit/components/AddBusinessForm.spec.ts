@@ -1,8 +1,8 @@
+import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import { shallowMount } from '@vue/test-utils'
-import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
-import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 
 Vue.use(Vuetify)
 
@@ -27,12 +27,12 @@ describe('Add Business Form', () => {
     expect(wrapper.find('.add-business-form__alert-container').isVisible()).toBe(false)
 
     // verify input fields
-    expect(wrapper.find('[data-test="incorp-num"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="business-identifier"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="passcode"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="folionumber"]').exists()).toBe(true)
 
     // verify buttons
-    expect(wrapper.find('[data-test="forgot-passcode-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="forgot-button"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="add-button"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="add-button"]').attributes('disabled')).toBeDefined()
     expect(wrapper.find('[data-test="cancel-button"]').exists()).toBe(true)
