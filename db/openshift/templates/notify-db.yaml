@@ -12,8 +12,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
       generation: 1
     spec:
@@ -37,13 +37,14 @@ objects:
       replicas: 1
       test: false
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
       template:
         metadata:
           name: ${NAME}-${TAG}
           labels:
-            name: ${NAME}-${TAG}
-            app: ${NAME}
+            name: ${NAME}
+            environment: ${TAG}
             role: ${ROLE}
         spec:
           volumes:
@@ -125,8 +126,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
     spec:
       storageClassName: ${PERSISTENT_VOLUME_CLASS}
@@ -141,8 +142,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}-secret
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
     stringData:
       database-name: ${POSTGRESQL_DATABASE_NAME}
@@ -156,8 +157,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
       annotations:
         template.openshift.io/expose-uri: postgres://{.spec.clusterIP}:{.spec.ports[?(.name==postgresql)].port}
@@ -168,7 +169,8 @@ objects:
           port: 5432
           targetPort: 5432
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
       type: ClusterIP
       sessionAffinity: None
 
