@@ -63,11 +63,9 @@ class Product:
         create product subscription first
         create the product role next if roles are given
         """
-        print('----------token_info--', token_info)
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        print('--------------skip_auth-----------------',org_id)
         # Check authorization for the user
         if not skip_auth:
             check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
