@@ -294,6 +294,22 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
     assert len(subscriptions) == 1
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
 
+def test_create_product_single_subscription_duplicate_error(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an Org can be created."""
+    user = factory_user_model()
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org1['name']
+    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1,
+                                                               skip_auth=True)
+    assert len(subscriptions) == 1
+    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
+    with pytest.raises(BusinessException) as exception:
+        ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1,
+                                                   skip_auth=True)
+    assert exception.value.code == Error.PRODUCT_SUBSCRIPTION_EXISTS.name
+
 
 def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
