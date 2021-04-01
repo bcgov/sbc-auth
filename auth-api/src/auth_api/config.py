@@ -281,6 +281,13 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
             'description': 'Information for companies, firms & societies. '
                            'Most filings for BC & Extraprovincial companies can be done in the Business Registry.',
             'mdiIcon': 'mdi-image-outline'
+        },
+        'VS': {
+            'url': 'https://www2.gov.bc.ca/gov/content/family-social-supports/seniors/health-safety/health-care'
+                   '-programs-and-services/vital-statistics',
+            'description': 'The Vital Statistics Agency registers all births, marriages, deaths, and changes of name '
+                           'that occur in British Columbia.',
+            'mdiIcon': 'mdi-image-outline'
         }
     }
 
