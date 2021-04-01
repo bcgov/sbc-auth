@@ -41,8 +41,7 @@
               <div v-if="isRequestNow">
                 <div class="pt-7 mb-7" >
                   <v-divider class="mb-7"></v-divider>
-                  <p class="mb-7">The search and registration products are intended for the exclusive use of solicitors and notaries only.
-                    name Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.
+                  <p class="mb-7">{{$t('willsRegistryTosSubtext')}}
                   </p>
                   <h4>Terms of Service</h4>
                   <p> I confirm, I <strong>{{userName}}</strong> am an authorized prime admin for this account.<br />
@@ -58,10 +57,8 @@
                 @change="tosChanged"
                 >
                   <template v-slot:label>
-                    <span class="label-color ml-2">I have read, understood and agree to the
-                      I confirm that the informtion above is all correct and this account act as a solicitor,
-                      notary or title search company approved by the Vital Statistics agency.
-                    </span>
+                    <span class="label-color ml-2">{{$t('willsRegistryTosIagree')}}</span>
+
                 </template>
                 </v-checkbox>
                 <div class="terms-error mt-2" color="error" v-if="istosAccepted!== null && !istosAccepted">
