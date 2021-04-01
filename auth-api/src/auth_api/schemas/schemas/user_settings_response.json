@@ -36,11 +36,9 @@
               "description": "An explanation about the purpose of this instance.",
               "default": {},
               "required": [
-                  "accountType",
                   "id",
                   "label",
                   "type",
-                  "urlorigin",
                   "urlpath"
               ],
               "properties": {
@@ -98,6 +96,27 @@
                       "default": "",
                       "examples": [
                           "/account/1/settings"
+                      ],
+                      "pattern": "^(.*)$"
+                  },
+                  "accountStatus": {
+                      "$id": "#/items/anyOf/0/properties/accountStatus",
+                      "type": "string",
+                      "title": "URL Path",
+                      "description": "Account Status",
+                      "default": "",
+                      "examples": [
+                          "ACTIVE"
+                      ]
+                  },
+                  "productSettings": {
+                      "$id": "#/items/anyOf/0/properties/productSettings",
+                      "type": "string",
+                      "title": "URL Path",
+                      "description": "Product Settings relative URL",
+                      "default": "",
+                      "examples": [
+                          "/account/1/product-settings"
                       ],
                       "pattern": "^(.*)$"
                   }

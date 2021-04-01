@@ -11,21 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
-from .affidavit import Affidavit
-from .affiliation import Affiliation
-from .codes import Codes
-from .contact import Contact
-from .documents import Documents
-from .entity import Entity
-from .invitation import Invitation
-from .membership import Membership
-from .minio import MinioService
-from .org import Org
-from .permissions import Permissions
-from .products import Product
-from .reset import ResetTestData
-from .user import User
-from .user_settings import UserSettings
-from .api_gateway import ApiGateway
-from .task import Task
+"""Manager for tasks schema and export."""
+
+from auth_api.models import Task as TaskModel
+
+from .base_schema import BaseSchema
+
+
+class TaskSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+    """This is the schema for the Task model."""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps all of the Task fields to a default schema."""
+
+        model = TaskModel

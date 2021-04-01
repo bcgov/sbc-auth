@@ -348,7 +348,7 @@ export function getRoutes (): RouteConfig[] {
       redirect: '/undefined/validatetoken/BCSC/:token'
     },
     {
-      path: '/confirmtoken/:token/:loginSource',
+      path: '/confirmtoken/:token/:loginSource?',
       name: 'confirmtoken',
       component: AcceptInviteView,
       props: true,
