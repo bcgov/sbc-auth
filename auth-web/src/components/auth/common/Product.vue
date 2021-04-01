@@ -5,12 +5,12 @@
         outlined
         hover
         class="product-card py-8 px-5 mb-4 elevation-1"
-        :class="[{'px-8': icon === ''}, {'processing-card' : !isRRequesting}]"
+        :class="[{'px-8': icon === ''}, {'processing-card' : !isRequesting}]"
         :data-test="`div-product-${productDetails.title}`"
       >
         <div>
           <header class="d-flex align-center">
-            <div class="product-icon-container mt-n2 mr-2" v-if="!isRRequesting">
+            <div class="product-icon-container mt-n2 mr-2" v-if="!isRequesting">
               <v-icon meduim color="primary">{{icon}}</v-icon>
             </div>
             <div class="pr-8 ">
@@ -64,7 +64,10 @@
                     </span>
                 </template>
                 </v-checkbox>
-                <div class="terms-error mt-2" v-if="istosAccepted!== null && !istosAccepted"><v-icon class="error-color mr-1">mdi-alert-circle</v-icon> Confirm to the terms to request</div>
+                <div class="terms-error mt-2" color="error" v-if="istosAccepted!== null && !istosAccepted">
+                  <v-icon color="error" class="error-color mr-1">mdi-alert-circle</v-icon>
+                  <span> Confirm to the terms to request</span>
+                </div>
                 <v-divider class="my-7"></v-divider>
                 <div class="form__btns d-flex">
                   <v-btn
@@ -102,7 +105,7 @@ import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { productStatus } from '@/util/constants'
 
 @Component
-export default class SingleProduct extends Vue {
+export default class Product extends Vue {
   @Prop({ default: undefined }) productDetails: any
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
@@ -115,7 +118,7 @@ export default class SingleProduct extends Vue {
   public isApproved = false
   public isPending = false
   public isRejected = false
-  public isRRequesting = false
+  public isRequesting = false
   public istosAccepted: boolean = null
 
   @Watch('productDetails')
@@ -128,6 +131,8 @@ export default class SingleProduct extends Vue {
 
   setupProductDetails (productDetails) {
     const { subscriptionStatus, name, description } = productDetails
+    // eslint-disable-next-line no-console
+    console.log('subscriptionStatus', subscriptionStatus)
 
     if (subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
       this.label = 'Pending'
@@ -145,7 +150,7 @@ export default class SingleProduct extends Vue {
       this.isApproved = true
       this.productSubTitle = `This account have access to ${name}`
     } else {
-      this.isRRequesting = true
+      this.isRequesting = true
       this.productSubTitle = description
     }
   }
@@ -226,11 +231,12 @@ export default class SingleProduct extends Vue {
   max-width: 75ch;
 }
 .terms-error{
-  color: #d3272c;
+  color: var(--v-error-base) !important;
   font-size: 16px;
   font-weight: bold;
+  display: flex;
 }
 .error-color{
-  color: #d3272c;
+  color: var(--v-error-base) !important;
 }
 </style>

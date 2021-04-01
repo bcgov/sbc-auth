@@ -125,12 +125,13 @@
                 <v-list-item-title>Payment Methods</v-list-item-title>
               </v-list-item>
               <v-list-item
+                v-if="!hideProductPackage"
                 dense
                 class="py-1 px-4"
                 aria-label="Product Package"
                 role="listitem"
-                :to="getUrl('product-package')"
-                v-can:VIEW_PAYMENT_METHODS.hide
+                :to="getUrl('product-settings')"
+                v-can:REQUEST_PRODUCT_PACKAGE.hide
                 data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-apps</v-icon>
@@ -139,7 +140,6 @@
               </v-list-item>
             </v-list-item-group>
           </v-list>
-
           <!-- Account Activity -->
           <v-list
             role="navigation"
@@ -267,6 +267,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
+  private get hideProductPackage (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.HideProductPackage) || false
+  }
+
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
     return this.isStaff && (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED || this.currentOrganization?.statusCode === AccountStatus.SUSPENDED)

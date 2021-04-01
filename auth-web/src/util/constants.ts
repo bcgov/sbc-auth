@@ -164,7 +164,8 @@ export enum LDFlags {
     LinkToNewNameRequestApp ='link-to-new-name-request-app',
     EnableUpgradeDowngrade = 'enable-upgrade-downgrade-accounts',
     EnableMandatoryAddress = 'enable-mandatory-address',
-    EnableGovmInvite = 'enable-govm-account-invite'
+    EnableGovmInvite = 'enable-govm-account-invite',
+    HideProductPackage = 'hide-product-packages'
 
 }
 

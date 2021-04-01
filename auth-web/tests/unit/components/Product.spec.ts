@@ -1,12 +1,12 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import SingleProduct from '@/components/auth/common/SingleProduct.vue'
+import Product from '@/components/auth/common/Product.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 
-describe('SingleProduct.vue', () => {
+describe('Product.vue', () => {
   let wrapperFactory: any
   let wrapper: any
   const config = {
@@ -29,7 +29,7 @@ describe('SingleProduct.vue', () => {
 
     })
     wrapperFactory = (propsData) => {
-      return shallowMount(SingleProduct, {
+      return shallowMount(Product, {
         localVue,
         store,
         vuetify,

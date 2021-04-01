@@ -2,22 +2,21 @@
   <v-container class="view-container">
     <div class="view-header flex-column mb-6">
       <h2 class="view-header__title" data-test="account-settings-title">
-        Product Packges
+        Products and Services
       </h2>
       <p class="mt-3 payment-page-sub">
-        Select multiple additional products this account require access. By default the account will have
-        access to adipiscing elit. Aliquam at porttitor sem.  Aliquam erat volutpat. Donec placerat.
+        Select additional products or services you wish to access through your account.
       </p>
       <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
     <template v-if="productsLoaded">
       <div v-for="product in productDetails" :key="product.code">
-        <SingleProduct
+        <Product
           :productDetails="product"
           @set-selected-product="setSelectedProduct"
           :userName="currentUser.fullName"
           :orgName="currentOrganization.name"
-        ></SingleProduct>
+        ></Product>
       </div>
     </template>
     <template v-else>
@@ -56,7 +55,7 @@ import { OrgProduct, OrgProductCode, OrgProductsRequestBody, Organization } from
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import SingleProduct from '@/components/auth/common/SingleProduct.vue'
+import Product from '@/components/auth/common/Product.vue'
 import { namespace } from 'vuex-class'
 import { productStatus } from '@/util/constants'
 
@@ -65,7 +64,7 @@ const userModule = namespace('user')
 
 @Component({
   components: {
-    SingleProduct,
+    Product,
     ModalDialog
   }
 })
