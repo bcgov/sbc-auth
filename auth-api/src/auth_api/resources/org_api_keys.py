@@ -33,7 +33,7 @@ _JWT = JWTWrapper.get_instance()
 @cors_preflight('POST,GET,OPTIONS')
 @API.route('', methods=['POST', 'GET', 'OPTIONS'])
 class OrgKeys(Resource):
-    """Resource for managing a single org."""
+    """Resource for managing API gw keys."""
 
     @staticmethod
     @TRACER.trace()
@@ -48,7 +48,7 @@ class OrgKeys(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles([Role.SYSTEM.value])
     def post(org_id):
-        """Update the org specified by the provided id with the request body."""
+        """Create new api key for the org."""
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'api_key')
 
@@ -64,16 +64,17 @@ class OrgKeys(Resource):
 @cors_preflight('DELETE,OPTIONS')
 @API.route('/<string:key>', methods=['DELETE', 'OPTIONS'])
 class OrgKey(Resource):
-    """Resource for managing org login options."""
+    """Resource for managing API gateway key."""
 
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles([Role.SYSTEM.value])
-    def post(org_id, key):
-        """Update the org specified by the provided id with the request body."""
+    def delete(org_id, key):
+        """Revoke API Key."""
         try:
-            response, status = ApiGatewayService.revoke_key(org_id, key), http_status.HTTP_201_CREATED
+            ApiGatewayService.revoke_key(org_id, key)
+            response, status = {}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

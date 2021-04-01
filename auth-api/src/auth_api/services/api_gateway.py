@@ -41,14 +41,12 @@ class ApiGateway:
             'API_GW_NON_PROD_KEY')
         email = cls._get_email_id(org_id)
 
-        if not org.has_api_access:
-            client_rep = generate_client_representation(org_id)
+        if not org.has_api_access:  # If the account doesn't have api access, add it
+            client_rep = generate_client_representation(org_id, current_app.config.get('API_GW_KC_CLIENT_ID_PATTERN'))
             KeycloakService.create_client(client_rep)
             service_account = KeycloakService.get_service_account_user(client_rep.get('id'))
             KeycloakService.add_user_to_group(service_account.get('id'), GROUP_API_GW_USERS)
             KeycloakService.add_user_to_group(service_account.get('id'), GROUP_ACCOUNT_HOLDERS)
-
-            # TODO Create details in pay-api sandbox.
 
             # Create a consumer with the keycloak client id and secret
             create_consumer_payload = dict(email=email,
@@ -68,7 +66,7 @@ class ApiGateway:
             org.has_api_access = True
             org.save()
         else:
-            # Create additional API Key
+            # Create additional API Key if a consumer exists
             api_key_response = RestService.post(
                 f'{consumer_endpoint}/mc/v1/consumers/{email}/apikeys',
                 additional_headers={'x-apikey': gw_api_key},
@@ -82,36 +80,19 @@ class ApiGateway:
         return api_key_response.json()
 
     @classmethod
-    def revoke_key(cls, org_id: int, api_key: str) -> bool:
+    def revoke_key(cls, org_id: int, api_key: str):
         """Revoke api key."""
         current_app.logger.debug('<revoke_key ')
-        # First get all API Keys for PROD and match with key name.
         consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
         gw_api_key: str = current_app.config.get('API_GW_KEY')
-
         email_id = cls._get_email_id(org_id)
 
-        consumers_response = RestService.get(
-            f'{consumer_endpoint}/mc/v1/consumers/{email_id}',
-            additional_headers={'x-apikey': gw_api_key}
+        RestService.patch(
+            f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apiKeys/{api_key}?action=removeAccess',
+            additional_headers={'x-apikey': gw_api_key},
+            data=dict(apiAccess='ALL_API'),
+            generate_token=False
         )
-        # Revoke key
-        if consumers_response:
-            consumer_key = consumers_response.json()['consumer']['consumerKey']
-            # As per spec it should return a list, but is returning dict instead. A fail-safe check
-            if isinstance(consumer_key, dict):
-                consumer_key = [consumer_key]
-
-            for key in consumer_key:
-                if api_key == key['apiKey']:
-                    RestService.patch(
-                        f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apiKeys/{api_key}?action=removeAccess',
-                        additional_headers={'x-apikey': gw_api_key},
-                        data=dict(apiAccess='ALL_API'),
-                        generate_token=False
-                    )
-                    return True
-        return False
 
     @classmethod
     def get_api_keys(cls, org_id: int) -> List[Dict[str, any]]:
@@ -137,6 +118,9 @@ class ApiGateway:
 
     @classmethod
     def _get_email_id(cls, org_id) -> str:
+        if current_app.config.get('API_GW_CONSUMER_EMAIL', None):
+            return current_app.config.get('API_GW_CONSUMER_EMAIL')
+
         api_gw_email_suffix: str = current_app.config.get('API_GW_EMAIL_SUFFIX')
         email_id = f'{org_id}@{api_gw_email_suffix}'
         return email_id
