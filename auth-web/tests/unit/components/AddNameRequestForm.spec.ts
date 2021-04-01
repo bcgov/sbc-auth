@@ -1,8 +1,8 @@
+import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import { shallowMount } from '@vue/test-utils'
-import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
-import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 
 Vue.use(Vuetify)
 
@@ -28,11 +28,11 @@ describe('Add Name Request Form', () => {
 
     // verify input fields
     expect(wrapper.find('[data-test="nr-number"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="applicant-phonenumber"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="applicant-phone-number"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="applicant-email"]').exists()).toBe(true)
 
     // verify buttons
-    expect(wrapper.find('[data-test="forgot-passcode-button"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="forgot-button"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="add-button"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="add-button"]').attributes('disabled')).toBeDefined()
     expect(wrapper.find('[data-test="cancel-button"]').exists()).toBe(true)

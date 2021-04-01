@@ -68,16 +68,19 @@
         data-test-tag="add-business"
       >
         <template v-slot:text>
-          <p>Add an existing business by entering the Incorporation Number <span class="wb">and associated Passcode.</span></p>
+          <p>
+            Add an existing business by entering the Incorporation Number <span class="wb">and associated
+            {{CommonUtils.isCooperativeNumber(businessIdentifier) ? 'Passcode' : 'Password'}}.</span>
+          </p>
           <AddBusinessForm
             class="mt-9"
-            @close-add-business-modal="closeAddBusinessModal()"
             @add-success="showAddSuccessModal()"
             @add-failed-invalid-code="showInvalidCodeModal()"
             @add-failed-no-entity="showEntityNotFoundModal()"
             @add-failed-passcode-claimed="showPasscodeClaimedModal()"
             @add-unknown-error="showUnknownErrorModal('business')"
-            @cancel="cancelAddBusiness()"
+            @on-cancel="cancelAddBusiness()"
+            @on-business-identifier="businessIdentifier = $event"
           />
         </template>
       </ModalDialog>
@@ -94,7 +97,8 @@
       >
         <template v-slot:text>
           <p>
-            Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone  number OR applicant email that were used when the name was requested.
+            Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone number
+            OR applicant email that were used when the name was requested.
           </p>
           <AddNameRequestForm
             class="mt-9"
@@ -103,7 +107,7 @@
             @add-failed-show-msg="showNRErrorModal"
             @add-failed-no-entity="showNRNotFoundModal()"
             @add-unknown-error="showUnknownErrorModal('nr')"
-            @cancel="cancelAddNameRequest()"
+            @on-cancel="cancelAddNameRequest()"
           />
         </template>
       </ModalDialog>
@@ -154,7 +158,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
@@ -165,6 +169,7 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import { Address } from '@/models/address'
 import AffiliatedEntityList from '@/components/auth/manage-business/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
+import CommonUtils from '@/util/common-util'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -191,6 +196,8 @@ import i18n from '@/plugins/i18n'
   }
 })
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
+  readonly CommonUtils = CommonUtils
+
   @Prop({ default: '' }) private orgId: string;
   private removeBusinessPayload = null
   private dialogTitle = ''
@@ -198,6 +205,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private messageTextList = i18n.messages[i18n.locale]
   private isLoading = true
   private resetPasscodeEmail: string = null
+  businessIdentifier: string = null
 
   protected readonly currentAccountSettings!: AccountSettings
   private readonly syncBusinesses!: () => Promise<Business[]>
@@ -320,7 +328,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   showAddBusinessModal () {
-    this.dialogTitle = 'Add Existing Business'
+    this.dialogTitle = 'Add an Existing Business'
     this.$refs.addBusinessDialog.open()
   }
 
@@ -362,10 +370,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   close () {
     this.$refs.errorDialog.close()
-  }
-
-  private closeAddBusinessModal () {
-    this.$refs.addBusinessDialog.close()
   }
 }
 </script>

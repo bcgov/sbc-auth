@@ -1,25 +1,29 @@
 <template>
-  <v-dialog v-model="isDialogOpen" max-width="640">
+  <v-dialog v-model="isDialogOpen" max-width="45rem">
     <v-card>
       <v-card-title>Need Assistance?</v-card-title>
       <v-card-text>
-        <p class="mb-7">If you have not received your Access Letter from BC Registries, or have lost your {{helpDialogFor}},
-          <span>please contact us at:</span>
-        </p>
+        <p class="mb-7" v-html="helpDialogBlurb" />
+
         <ul class="contact-info__list mb-7">
           <li>
-            <span>Toll Free:</span>&nbsp;&nbsp;{{ $t('techSupportTollFree') }}
+            <span>{{ $t('labelTollFree') }}</span>
+            <a :href="`tel:+${$t('maximusSupportTollFree')}`">{{ $t('maximusSupportTollFree') }}</a>
           </li>
           <li>
-            <span>Phone:</span>&nbsp;&nbsp;{{ $t('techSupportPhone') }}
+            <span>{{ $t('labelVictoriaOffice') }}</span>
+            <a :href="`tel:+${$t('maximusSupportPhone')}`">{{ $t('maximusSupportPhone') }}</a>
           </li>
           <li>
-            <span>Email:</span>&nbsp;&nbsp;<a v-bind:href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
+            <span>{{ $t('labelEmail') }}</span>
+            <a :href="'mailto:' + $t('maximusSupportEmail') + '?subject=' + $t('maximusSupportEmailSubject')">{{ $t('maximusSupportEmail') }}</a>
           </li>
         </ul>
-        <div>
-          <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
-        </div>
+
+        <p class="mb-0">
+          <strong>{{ $t('labelHoursOfOperation') }}</strong><br>
+          {{ $t('hoursOfOperation') }}
+        </p>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -36,7 +40,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 export default class HelpDialog extends Vue {
   private isDialogOpen = false
 
-  @Prop({ default: '' }) private helpDialogFor: string
+  @Prop({ default: '' }) readonly helpDialogBlurb: string
 
   public open () {
     this.isDialogOpen = true
