@@ -77,7 +77,7 @@ class OrgProducts(Resource):
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
-                response, status = json.dumps(products), http_status.HTTP_201_CREATED
+                response, status = json.dumps(products), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

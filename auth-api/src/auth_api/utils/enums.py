@@ -169,7 +169,7 @@ class OrgStatus(Enum):
 
 
 class ProductSubscriptionStatus(Enum):
-    """User Membership status."""
+    """Product Subscription status."""
 
     ACTIVE = 'ACTIVE'
     INACTIVE = 'INACTIVE'

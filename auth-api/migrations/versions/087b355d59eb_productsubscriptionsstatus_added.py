@@ -51,6 +51,8 @@ def upgrade():
             {'code': 'PENDING_STAFF_REVIEW', 'description': 'Status for a PENDING_STAFF_REVIEW account',
              'default': False},
             {'code': 'INACTIVE', 'description': 'Status for a inactive account',
+             'default': False},
+            {'code': 'SUSPENDED', 'description': 'Status for a SUSPENDED account',
              'default': False}
         ]
     )

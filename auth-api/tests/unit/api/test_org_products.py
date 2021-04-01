@@ -54,3 +54,27 @@ def test_add_single_org_product(client, jwt, session, keycloak_mock):  # pylint:
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+
+def test_add_single_org_product_vs(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(TestOrgProductsInfo.org_products_vs),
+                              headers=headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    print('json.loads(rv_products.data)', json.loads(rv_products.data))
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products?includeInternal=false", headers=headers,
+                             content_type='application/json')
+    list_products = json.loads(rv_products.data)
+    print('list_products', list_products)
+    assert len(list_products) == 1
+    assert list_products[0].get('code') == 'VS'
+    assert list_products[0].get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'

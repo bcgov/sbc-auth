@@ -27,7 +27,7 @@ from auth_api.models import db
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, ProductSubscriptionStatus
 from .authorization import check_auth
 from ..utils.cache import cache
-from ..utils.roles import ADMIN, STAFF
+from ..utils.roles import ADMIN, STAFF, CLIENT_ADMIN_ROLES
 
 
 class Product:
@@ -63,13 +63,14 @@ class Product:
         create product subscription first
         create the product role next if roles are given
         """
+        print('----------token_info--', token_info)
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-
+        print('--------------skip_auth-----------------',org_id)
         # Check authorization for the user
         if not skip_auth:
-            check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
+            check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get('subscriptions')
         # just used for returning all the models.. not ideal..
@@ -79,7 +80,7 @@ class Product:
             product_code = subscription.get('productCode')
             existing_product_subscriptions = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
             if existing_product_subscriptions:
-                raise BusinessException(Error.DATA_CONFLICT, None)
+                raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
             product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
             if product_model:
                 product_subscription = ProductSubscriptionModel(org_id=org_id,
@@ -135,11 +136,10 @@ class Product:
 
     @staticmethod
     def get_all_product_subscription(org_id, include_internal_products=True, token_info: Dict = None, skip_auth=False):
-        """Get a list of all products."""
+        """Get a list of all products with their subscription details."""
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-
         # Check authorization for the user
         if not skip_auth:
             check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
