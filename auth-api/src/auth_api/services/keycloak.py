@@ -357,8 +357,6 @@ class KeycloakService:
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
-        print(f'{base_url}/auth/admin/realms/{realm}/clients/{client_identifier}/service-account-user')
-        print(admin_token)
         response = requests.get(
             f'{base_url}/auth/admin/realms/{realm}/clients/{client_identifier}/service-account-user',
             headers=headers
