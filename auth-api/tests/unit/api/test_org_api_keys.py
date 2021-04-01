@@ -50,8 +50,8 @@ def test_create_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable
     assert rv.json.get('hasApiAccess')
 
 
-def test_add_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that api keys can be added."""
+def test_list_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that api keys can be listed."""
     # First create an account
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -73,6 +73,29 @@ def test_add_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=un
                          'keyName': 'TEST 2'
                      }))
 
+    rv = client.get(f'/api/v1/orgs/{org_id}/api-keys', headers=headers, content_type='application/json')
+    assert rv.json['consumer']['consumerKey']
+
+
+def test_revoke_api_key(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that api keys can be revoked."""
+    # First create an account
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get(f'/api/v1/orgs/{org_id}', headers=headers, content_type='application/json')
-    assert rv.json.get('hasApiAccess')
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1), headers=headers,
+                     content_type='application/json')
+    org_id = rv.json.get('id')
+
+    # Create a system token and create an API key for this account.
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post(f'/api/v1/orgs/{org_id}/api-keys', headers=headers, content_type='application/json',
+                     data=json.dumps({
+                         'environment': 'dev',
+                         'keyName': 'TEST'
+                     }))
+
+    rv = client.get(f'/api/v1/orgs/{org_id}/api-keys', headers=headers, content_type='application/json')
+    key = '7SmDGL4233wnp2dyXGSGGq7xutYlTzIN'  # from mock
+
+    rv = client.delete(f'/api/v1/orgs/{org_id}/api-keys/{key}', headers=headers, content_type='application/json')
+    assert rv.status_code == 200

@@ -55,19 +55,16 @@ class Orgs(Resource):
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
-        print(valid_format, errors)
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
             user = UserService.find_by_jwt_token(token)
-            print(user)
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
             bearer_token = request.headers['Authorization'].replace('Bearer ', '')
             origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
-            print(bearer_token, origin_url)
             response, status = OrgService.create_org(request_json, user.identifier, token,
                                                      bearer_token=bearer_token,
                                                      origin_url=origin_url).as_dict(), http_status.HTTP_201_CREATED
