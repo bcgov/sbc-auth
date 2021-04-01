@@ -30,11 +30,13 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
+from auth_api.models import Task as TaskModel
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
+from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import AccessType, InvitationType
 from auth_api.utils.roles import Role
@@ -239,3 +241,25 @@ def factory_product_model(org_id: str,
     subscription.save()
 
     return subscription
+
+
+def factory_task_service():
+    """Produce a templated task service."""
+    task_model = factory_task_model()
+    service = TaskService(task_model)
+    return service
+
+
+def factory_task_model():
+    """Produce a Task model."""
+    task = TaskModel(id=1,
+                     name='foo',
+                     date_submitted=datetime.datetime.now(),
+                     relationship_type='Org',
+                     relationship_id=1,
+                     task_type='Pending',
+                     task_status='Pending'
+                     )
+
+    task.save()
+    return task

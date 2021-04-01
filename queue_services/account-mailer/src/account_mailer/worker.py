@@ -187,11 +187,8 @@ async def process_event(event_message: dict, flask_app):
             template_name = TemplateType.RESET_PASSCODE_TEMPLATE_NAME.value
 
             subject = SubjectType.RESET_PASSCODE.value
-            header: str = Constants.RESET_PASSCODE_CUSTOMER_HEADER.value
-            if email_msg.get('isStaffInitiated', False):
-                header = Constants.RESET_PASSCODE_STAFF_HEADER.value
             email_msg.update({
-                'header': header
+                'header': Constants.RESET_PASSCODE_HEADER.value
             })
 
             email_dict = common_mailer.process(

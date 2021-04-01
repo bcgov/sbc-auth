@@ -410,7 +410,7 @@ class OrgMembers(Resource):
 
 
 @cors_preflight('DELETE,PATCH,OPTIONS')
-@API.route('/<int:org_id>/members/<string:membership_id>', methods=['DELETE', 'PATCH', 'OPTIONS'])
+@API.route('/<int:org_id>/members/<int:membership_id>', methods=['DELETE', 'PATCH', 'OPTIONS'])
 class OrgMember(Resource):
     """Resource for managing a single membership record between an org and a user."""
 

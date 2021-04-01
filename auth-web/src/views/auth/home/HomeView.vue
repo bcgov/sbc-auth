@@ -17,7 +17,7 @@
       <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
         <v-container>
           <h1>Start a Benefit Company and Keep <br>Cooperatives Records up to date</h1>
-          <p class="mt-7 mb-11">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
+          <p class="mt-7 mb-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns mb-2">
             <!-- Authenticated -->
@@ -36,14 +36,39 @@
                 Manage an Existing Business
               </v-btn>
             </div>
+
             <!-- Non-authenticated -->
             <div v-else>
-              <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3"
-                to="/choose-authentication-method"
-              >
-                Create a BC Registries Account
-              </v-btn>
-              <name-request-button />
+              <div>
+                <!-- Login Menu -->
+                <v-menu
+                  bottom
+                  width="330"
+                  transition="slide-y-transition"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                      large
+                      color="bcgovgold"
+                      class="hero-banner-login-btn mr-4 font-weight-bold"
+                      aria-label="log in"
+                      id="loginBtn"
+                      v-on="on">
+                      <span>Log in to my BC Registries Account</span>
+                      <v-icon class="mr-n1 ml-2">mdi-menu-down</v-icon>
+                    </v-btn>
+                  </template>
+                  <sbc-auth-menu />
+                </v-menu>
+                <name-request-button />
+              </div>
+              <div d-flex class="mt-8">
+                <span class="body-1">New to BC Registries?</span>
+                <router-link class="ml-2 body-1 font-weight-bold"
+                  to="/choose-authentication-method"
+                >Create a BC Registries Account
+                </router-link>
+              </div>
             </div>
           </div>
 
@@ -90,13 +115,13 @@
                   visit the Cooperative Associations information page
                 </a>.
               </p>
-              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card"
+              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/business-registry-faq"
                  target="_blank" rel="noopener noreferrer">
-                <span>Cooperatives Online Frequently Asked Questions</span>
+                <span>Business Registry Frequently Asked Questions</span>
               </a>
-              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please
+              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please visit the
                 <a :href="bcCompUrl" target="_blank" rel="noopener noreferrer">
-                  visit the Benefit Companies information page
+                   Benefit Companies information page
                 </a>.
               </p>
             </v-col>
@@ -120,7 +145,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
+import { IdpHint, LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -129,6 +154,7 @@ import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/home/LoginBCSC.vue'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
+import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import { User } from '@/models/user'
 
@@ -139,6 +165,7 @@ import { User } from '@/models/user'
     BcscPanel,
     InfoStepper,
     LoginBCSC,
+    SbcAuthMenu,
     TestimonialQuotes
   },
   computed: {
@@ -349,15 +376,6 @@ export default class HomeView extends Vue {
         margin-bottom: 13px;
       }
     }
-
-    .create-account-link {
-      font-size: 1rem;
-      color: $BCgoveBueText1 !important;
-
-      :hover {
-        color: $BCgoveBueText2 !important;
-      }
-    }
   }
 
   // How to Section
@@ -561,6 +579,10 @@ export default class HomeView extends Vue {
 
   .v-list {
     background-color: transparent;
+  }
+
+  .hero-banner-login-btn {
+    color: #003366 !important;
   }
 
 </style>
