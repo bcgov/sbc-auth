@@ -118,7 +118,7 @@ class ApiGateway:
 
     @classmethod
     def _get_email_id(cls, org_id) -> str:
-        if current_app.config.get('API_GW_CONSUMER_EMAIL', None):
+        if current_app.config.get('API_GW_CONSUMER_EMAIL', None) is not None:
             return current_app.config.get('API_GW_CONSUMER_EMAIL')
 
         api_gw_email_suffix: str = current_app.config.get('API_GW_EMAIL_SUFFIX')
