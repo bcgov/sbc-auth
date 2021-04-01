@@ -74,7 +74,11 @@ def test_add_single_org_product_vs(client, jwt, session, keycloak_mock):  # pyli
     rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products?includeInternal=false", headers=headers,
                              content_type='application/json')
     list_products = json.loads(rv_products.data)
-    print('list_products', list_products)
     assert len(list_products) == 1
-    assert list_products[0].get('code') == 'VS'
+    assert list_products[0].get('code') == 'VS', 'only one external product'
     assert list_products[0].get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'
+
+    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products", headers=headers,
+                             content_type='application/json')
+    list_products = json.loads(rv_products.data)
+    assert len(list_products) == 2, 'total 2 products'
