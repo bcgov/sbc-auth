@@ -1,8 +1,8 @@
 """ProductSubscriptionsStatus added
 
-Revision ID: 087b355d59eb
-Revises: 2d71e7d7cc18
-Create Date: 2021-03-31 06:46:14.391613
+Revision ID: b22ee0cd18ad
+Revises: 379f1d6b24d4
+Create Date: 2021-04-01 00:58:21.842283
 
 """
 import sqlalchemy as sa
@@ -10,9 +10,10 @@ from alembic import op
 from sqlalchemy.sql import column, table
 from sqlalchemy import Boolean, String
 
+
 # revision identifiers, used by Alembic.
-revision = '087b355d59eb'
-down_revision = '2d71e7d7cc18'
+revision = 'b22ee0cd18ad'
+down_revision = '379f1d6b24d4'
 branch_labels = None
 depends_on = None
 
@@ -84,3 +85,4 @@ def downgrade():
     op.drop_table('product_subscriptions_statuses')
     op.drop_column('product_codes', 'default_subscription_status')
     # ### end Alembic commands ###
+

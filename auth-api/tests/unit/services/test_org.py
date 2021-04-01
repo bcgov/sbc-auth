@@ -294,6 +294,7 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
     assert len(subscriptions) == 1
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
 
+
 def test_create_product_single_subscription_duplicate_error(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
