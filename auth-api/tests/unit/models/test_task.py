@@ -51,7 +51,6 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
                      relationship_id=10, task_type='Pending Review', due_date=datetime.now(), task_status='Pending')
     session.add(task)
     session.commit()
-
     found_tasks = TaskModel.fetch_tasks(task_relationship_type=TaskType.PENDING_STAFF_REVIEW.value)
     assert found_tasks
 

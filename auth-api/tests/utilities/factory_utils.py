@@ -238,7 +238,8 @@ def factory_document_model(version_id, doc_type, content, content_type='text/htm
 def factory_product_model(org_id: str,
                           product_code: str = 'PPR'):
     """Produce a templated product model."""
-    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code)
+    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code,
+                                            status_code=ProductSubscriptionStatus.ACTIVE.value)
     subscription.save()
 
     return subscription

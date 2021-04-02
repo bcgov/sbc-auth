@@ -22,7 +22,6 @@ from flask import current_app
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
-from auth_api.services.products import Product as ProductService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 
@@ -164,8 +163,11 @@ class Authorization:
 
     @staticmethod
     def _is_product_based_auth(product_code):
+
         check_product_based_auth = False
         if product_code:
+            from auth_api.services.products import \
+                Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
             product_type: str = ProductService.find_product_type_by_code(product_code)
             # TODO should we reject if the product code is unknown??
             if product_type == ProductTypeCodeEnum.PARTNER.value:  # PARTNERS needs product based auth
