@@ -16,10 +16,11 @@
 The ProductSubscription object connects Org models to one or more ProductSubscription models.
 """
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, and_
 from sqlalchemy.orm import relationship
 
 from .base_model import VersionedModel
+from ..utils.roles import VALID_SUBSCRIPTION_STATUSES
 
 
 class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-methods
@@ -32,3 +33,18 @@ class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-met
     product_code = Column(ForeignKey('product_codes.code'), nullable=False)
 
     product = relationship('ProductCode', foreign_keys=[product_code], lazy='select')
+    status_code = Column(ForeignKey('product_subscriptions_statuses.code'), nullable=False)
+    product_subscriptions_status = relationship('ProductSubscriptionsStatus')
+
+    @classmethod
+    def find_by_org_id(cls, org_id, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
+        """Find an product subscription instance that matches the provided id."""
+        return cls.query.filter(
+            and_(ProductSubscription.org_id == org_id, ProductSubscription.status_code.in_(valid_statuses))).all()
+
+    @classmethod
+    def find_by_org_id_product_code(cls, org_id, product_code, valid_statuses=VALID_SUBSCRIPTION_STATUSES):
+        """Find an product subscription instance that matches the provided id."""
+        return cls.query.filter(
+            and_(ProductSubscription.org_id == org_id, ProductSubscription.product_code == product_code,
+                 ProductSubscription.status_code.in_(valid_statuses))).all()

@@ -408,7 +408,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
-            ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data)
+            ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
+                                                       skip_auth=True)
 
         # Update mailing address Or create new one
         if mailing_address:
