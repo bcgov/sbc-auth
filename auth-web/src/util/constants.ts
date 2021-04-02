@@ -164,7 +164,8 @@ export enum LDFlags {
     LinkToNewNameRequestApp ='link-to-new-name-request-app',
     EnableUpgradeDowngrade = 'enable-upgrade-downgrade-accounts',
     EnableMandatoryAddress = 'enable-mandatory-address',
-    EnableGovmInvite = 'enable-govm-account-invite'
+    EnableGovmInvite = 'enable-govm-account-invite',
+    HideProductPackage = 'hide-product-packages'
 
 }
 
@@ -205,4 +206,11 @@ export enum paymentErrorType {
 export enum StaffCreateAccountsTypes {
     DIRECTOR_SEARCH = 'DIRECTOR_SEARCH',
     GOVM_BUSINESS = 'GOVM_BUSINESS'
+}
+
+export enum productStatus {
+    NOT_SUBSCRIBED = 'NOT_SUBSCRIBED',
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
+    ACTIVE = 'ACTIVE',
+    REJECTED = 'REJECTED',
 }

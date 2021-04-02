@@ -12,6 +12,8 @@ import {
   MembershipStatus,
   MembershipType,
   OrgPaymentDetails,
+  OrgProduct,
+  OrgProductsRequestBody,
   Organization,
   PADInfo,
   PADInfoValidation,
@@ -67,6 +69,7 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
   currentOrgGLInfo: GLInfo = undefined
+  orgProducts: OrgProduct[] =[]
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
@@ -225,6 +228,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganizationPADInfo (padInfo: PADInfo) {
     this.currentOrgPADInfo = padInfo
+  }
+
+  @Mutation
+  public setOrgProducts (products: OrgProduct[]) {
+    this.orgProducts = products
   }
 
   @Mutation
@@ -863,5 +871,17 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.getOrgForAffiliate(businessIdentifier)
     const organization = response?.data?.orgs[0]
     return organization
+  }
+
+  @Action({ commit: 'setOrgProducts', rawError: true })
+  public async getOrgProducts (orgId:number): Promise<OrgProduct[]> {
+    const response = await OrgService.getProducts(orgId)
+    return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async addOrgProducts (orgId:number, productsRequestBody: OrgProductsRequestBody): Promise<OrgProduct> {
+    const response = await OrgService.addProducts(orgId, productsRequestBody)
+    return response?.data
   }
 }
