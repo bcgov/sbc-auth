@@ -33,7 +33,8 @@ from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, Status, PaymentAccountStatus)
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
+    Status, PaymentAccountStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -43,6 +44,7 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .products import Product as ProductService
 from .rest_service import RestService
+from .task import Task as TaskService
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -112,6 +114,13 @@ class Org:  # pylint: disable=too-many-public-methods
             org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
+            # create a staff review task for this account
+            task_info = ({
+                    'relationshipName': org.name,
+                    'relationshipId': org.id,
+                    'relatedTo': user.id
+                })
+            TaskService.create_task(task_info)
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
@@ -404,6 +413,8 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_govm_account_creation:
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
+            # Check if there is a Task record for this org then update the status else create one
+
             has_status_changing = True
 
         if product_subscriptions is not None:

@@ -29,8 +29,8 @@ TRACER = Tracer.get_instance()
 _JWT = JWTWrapper.get_instance()
 
 
-@cors_preflight('GET,POST,OPTIONS')
-@API.route('', methods=['GET', 'POST', 'OPTIONS'])
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:task_relationship_type>', methods=['GET', 'POST', 'OPTIONS'])
 class Tasks(Resource):
     """Resource for managing tasks."""
 
@@ -39,11 +39,35 @@ class Tasks(Resource):
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles(
         [Role.STAFF.value])
-    def get():
+    def get(task_relationship_type):
         """Fetch tasks."""
         try:
-            tasks = TaskService.fetch_tasks()
+            tasks = TaskService.fetch_tasks(task_relationship_type=task_relationship_type)
             response, status = {'tasks': TaskSchema().dump(tasks, many=True)}, http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('PATCH,OPTIONS')
+@API.route('/<int:task_id>', methods=['PATCH', 'OPTIONS'])
+class Task(Resource):
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles([Role.STAFF.value])
+    def patch(task_id):
+        """Update the invitation specified by the provided id as retried."""
+        token = g.jwt_oidc_token_info
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
+        try:
+            invitation = InvitationService.find_invitation_by_id(invitation_id, token)
+            if invitation is None:
+                response, status = {'message': 'The requested invitation could not be found.'}, \
+                                   http_status.HTTP_404_NOT_FOUND
+            else:
+                user = UserService.find_by_jwt_token(token)
+                response, status = invitation.update_invitation(user, token, origin).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

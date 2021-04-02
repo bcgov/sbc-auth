@@ -15,6 +15,7 @@
 
 This module manages the tasks.
 """
+from datetime import datetime
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -22,6 +23,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.models import Task as TaskModel
 from auth_api.schemas import TaskSchema
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, OrgStatus, TaskType
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -55,18 +57,27 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_task(task_model: TaskModel):
+    def create_task(org_info: dict):
         """Create a new task record."""
         current_app.logger.debug('<create_staff_task ')
-
+        task_model = TaskModel(name=org_info.get('relationshipName'),
+                               date_submitted=datetime.today(),
+                               relationship_type=TaskRelationshipType.ORG.value,
+                               relationship_id=org_info.get('relationshipId'),
+                               task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                               task_status=TaskStatus.OPEN.value,
+                               task_related_to=org_info.get('relatedTo'))
         task_model.save()
-
         return Task(task_model)
 
     @staticmethod
-    def fetch_tasks():
+    def fetch_tasks(task_relationship_type: str):
         """Fetch all tasks."""
-        tasks = TaskModel.fetch_tasks()
+        if not any(e.value == task_relationship_type for e in TaskRelationshipType):
+            return []
+
+        current_app.logger.debug('<fetch_staff_tasks ')
+        tasks = TaskModel.fetch_tasks(task_relationship_type)
         tasks_response = []
 
         for task in tasks:

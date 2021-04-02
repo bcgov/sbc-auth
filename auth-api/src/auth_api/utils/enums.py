@@ -218,3 +218,23 @@ class ProductCode(Enum):
     PPR = 'PPR'
     DIR_SEARCH = 'DIR_SEARCH'
     NAMES_REQUEST = 'NRO'
+
+
+class TaskRelationshipType(Enum):
+    """Task relationship type."""
+
+    ORG = 'ORG'     # Task related to Org staff review
+    AFFIDAVIT = 'AFFIDAVIT'
+
+
+class TaskStatus(Enum):
+    """Task relationship type."""
+
+    OPEN = 'OPEN'     # Open Task - needs to be taken action
+    CLOSE = 'CLOSE'   # Task has been acted upon
+
+
+class TaskType(Enum):
+    """Task type."""
+
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'   # user created , staff need to approve.

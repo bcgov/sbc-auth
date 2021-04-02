@@ -17,17 +17,32 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from auth_api.services import Task as TaskService
-from tests.utilities.factory_utils import factory_task_service
+from auth_api.utils.enums import TaskRelationshipType
+from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model
 
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that tasks can be fetched."""
-    task = factory_task_service()
+    user = factory_user_model()
+    task = factory_task_service(user.id)
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks()
+    fetched_task = TaskService.fetch_tasks(task_relationship_type=TaskRelationshipType.ORG.value)
 
     assert fetched_task
     for item in fetched_task:
         assert item.name == name
+
+
+def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a task can be created."""
+    test_org = factory_org_model()
+    test_task_info = ({
+                    'relationshipName': test_org.name,
+                    'relationshipId': test_org.id
+    })
+    task = TaskService.create_task(test_task_info)
+    assert task
+    dictionary = task.as_dict()
+    assert dictionary['name'] == test_org.name

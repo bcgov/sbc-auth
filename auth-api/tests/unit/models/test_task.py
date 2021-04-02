@@ -19,6 +19,7 @@ Test suite to ensure that the Staff Task model routines are working as expected.
 from _datetime import datetime
 
 from auth_api.models import Task as TaskModel
+from auth_api.utils.enums import TaskType
 
 
 def test_task_model(session):
@@ -51,7 +52,7 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
     session.add(task)
     session.commit()
 
-    found_tasks = TaskModel.fetch_tasks()
+    found_tasks = TaskModel.fetch_tasks(task_relationship_type=TaskType.PENDING_STAFF_REVIEW.value)
     assert found_tasks
 
     for found_staff_task in found_tasks:

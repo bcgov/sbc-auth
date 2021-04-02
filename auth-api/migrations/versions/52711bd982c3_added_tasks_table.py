@@ -1,8 +1,8 @@
 """added tasks table
 
-Revision ID: 379f1d6b24d4
+Revision ID: 52711bd982c3
 Revises: 2d71e7d7cc18
-Create Date: 2021-03-31 11:53:00.954517
+Create Date: 2021-04-01 14:39:21.396693
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '379f1d6b24d4'
+revision = '52711bd982c3'
 down_revision = '2d71e7d7cc18'
 branch_labels = None
 depends_on = None
@@ -29,10 +29,12 @@ def upgrade():
     sa.Column('due_date', sa.DateTime(), nullable=True),
     sa.Column('task_type', sa.String(length=50), nullable=False),
     sa.Column('task_status', sa.String(length=50), nullable=False),
+    sa.Column('task_related_to', sa.Integer(), nullable=False),
     sa.Column('created_by_id', sa.Integer(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['modified_by_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['task_related_to'], ['users.id'], name='task_related_to_fkey', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_tasks_id'), 'tasks', ['id'], unique=False)
