@@ -44,3 +44,8 @@ class Task(BaseModel):
         query = db.session.query(Task).filter_by(relationship_type=task_relationship_type,
                                                  task_status=TaskStatus.OPEN.value)
         return query.all()
+
+    @classmethod
+    def find_by_task_id(cls, task_id):
+        """Find a task instance that matches the provided id."""
+        return cls.query.filter_by(id=task_id).first()

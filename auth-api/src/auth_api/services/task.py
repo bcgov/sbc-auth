@@ -16,12 +16,14 @@
 This module manages the tasks.
 """
 from datetime import datetime
-
+from typing import Dict
 from flask import current_app
+
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import Task as TaskModel
+from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
 from auth_api.utils.enums import TaskRelationshipType, TaskStatus, OrgStatus, TaskType
 
@@ -59,7 +61,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def create_task(org_info: dict):
         """Create a new task record."""
-        current_app.logger.debug('<create_staff_task ')
+        current_app.logger.debug('<create_task ')
         task_model = TaskModel(name=org_info.get('relationshipName'),
                                date_submitted=datetime.today(),
                                relationship_type=TaskRelationshipType.ORG.value,
@@ -71,12 +73,26 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return Task(task_model)
 
     @staticmethod
+    def update_task_status(task_id: int, task_status: str, token_info: Dict = None):
+        """Update a task record."""
+        current_app.logger.debug('<update_task_status ')
+        task_model = TaskModel.find_by_task_id(task_id)
+        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+
+        current_app.logger.debug('<setting task status to  ')
+        task_model.task_status = task_status
+        task_model.decision_made_by = user.username
+
+        task_model.save()
+        return Task(task_model)
+
+    @staticmethod
     def fetch_tasks(task_relationship_type: str):
         """Fetch all tasks."""
         if not any(e.value == task_relationship_type for e in TaskRelationshipType):
             return []
 
-        current_app.logger.debug('<fetch_staff_tasks ')
+        current_app.logger.debug('<fetch_tasks ')
         tasks = TaskModel.fetch_tasks(task_relationship_type)
         tasks_response = []
 
@@ -84,3 +100,4 @@ class Task:  # pylint: disable=too-many-instance-attributes
             tasks_response.append(task)
 
         return tasks_response
+
