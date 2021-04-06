@@ -72,7 +72,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
   @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
-  @OrgModule.Action('addOrgProducts') public addOrgProducts!:(orgId: number, product:OrgProductsRequestBody) =>Promise<OrgProduct>
+  @OrgModule.Action('addOrgProducts') public addOrgProducts!:(product:OrgProductsRequestBody) =>Promise<OrgProduct>
 
   public isBtnSaved = false
   public disableSaveBtn = false
@@ -98,7 +98,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
         const addProductsRequestBody: OrgProductsRequestBody = {
           subscriptions: productsSelected
         }
-        const addProd = await this.addOrgProducts(this.currentOrganization.id, addProductsRequestBody)
+        const addProd = await this.addOrgProducts(addProductsRequestBody)
         this.productsAddSuccess = true
       } catch {
         // open when error
