@@ -49,6 +49,11 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     bcol_user_id = Column(String(20))
     bcol_account_id = Column(String(20))
     bcol_account_name = Column(String(250))
+    suspended_on = Column(DateTime, nullable=True)
+    suspension_reason_code = Column(String(15), ForeignKey('suspension_reason_codes.code',
+                                                           ondelete='SET NULL',
+                                                           name='orgs_suspension_reason_code_fkey'), nullable=True)
+    has_api_access = Column('has_api_access', Boolean(), default=False, nullable=True)
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
@@ -60,11 +65,6 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     login_options = relationship('AccountLoginOptions', cascade='all,delete,delete-orphan',
                                  primaryjoin='and_(Org.id == AccountLoginOptions.org_id, '
                                              'AccountLoginOptions.is_active == True)', lazy='select')
-    suspended_on = Column(DateTime, nullable=True)
-    suspension_reason_code = Column(String(15), ForeignKey('suspension_reason_codes.code',
-                                                           ondelete='SET NULL',
-                                                           name='orgs_suspension_reason_code_fkey'),
-                                    nullable=True)
     suspension_reason = relationship('SuspensionReasonCode')
 
     @classmethod
