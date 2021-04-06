@@ -25,7 +25,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, OrgStatus, TaskType
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -100,4 +100,3 @@ class Task:  # pylint: disable=too-many-instance-attributes
             tasks_response.append(task)
 
         return tasks_response
-
