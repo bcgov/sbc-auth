@@ -115,11 +115,9 @@ class Org:  # pylint: disable=too-many-public-methods
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
             # create a staff review task for this account
-            task_info = ({
-                    'relationshipName': org.name,
-                    'relationshipId': org.id,
-                    'relatedTo': user.id
-                })
+            task_info = {'relationshipName': org.name,
+                         'relationshipId': org.id,
+                         'relatedTo': user.id}
             TaskService.create_task(task_info)
 
         if access_type == AccessType.GOVM.value:
@@ -387,7 +385,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # to enforce necessary details for govm account creation
         is_govm_account = org_model.access_type == AccessType.GOVM.value
         is_govm_account_creation = is_govm_account and \
-            org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
+                                   org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # govm name is not being updated now
         is_name_getting_updated = 'name' in org_info and not is_govm_account
