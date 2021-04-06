@@ -18,7 +18,7 @@ from sqlalchemy.orm import relationship
 
 from .db import db
 from .base_model import BaseModel
-from ..utils.enums import TaskStatus
+from ..utils.enums import TaskStatus, TaskType
 
 
 class Task(BaseModel):
@@ -32,20 +32,21 @@ class Task(BaseModel):
     relationship_type = Column(String(50), nullable=False)
     relationship_id = Column(Integer, index=True, nullable=False)
     due_date = Column(DateTime)
-    task_type = Column(String(50), nullable=False)
-    task_status = Column(String(50), nullable=False)
-    task_related_to = Column(ForeignKey('users.id', ondelete='SET NULL',
-                             name='task_related_to_fkey'), nullable=False)
-    user = relationship('User', foreign_keys=[task_related_to], lazy='select')
+    type = Column(String(50), nullable=False)
+    status = Column(String(50), nullable=False)
+    related_to = Column(ForeignKey('users.id', ondelete='SET NULL',
+                                   name='related_to_fkey'), nullable=False)
+    user = relationship('User', foreign_keys=[related_to], lazy='select')
 
     @classmethod
     def fetch_tasks(cls, task_relationship_type: str):
         """Fetch all tasks."""
         query = db.session.query(Task).filter_by(relationship_type=task_relationship_type,
-                                                 task_status=TaskStatus.OPEN.value)
+                                                 status=TaskStatus.OPEN.value,
+                                                 type=TaskType.PENDING_STAFF_REVIEW.value)
         return query.all()
 
     @classmethod
     def find_by_task_id(cls, task_id):
         """Find a task instance that matches the provided id."""
-        return cls.query.filter_by(id=task_id).first()
+        return db.session.query(Task).filter_by(id=task_id).first()

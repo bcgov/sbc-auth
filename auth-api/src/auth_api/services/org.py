@@ -413,8 +413,6 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_govm_account_creation:
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
-            # Check if there is a Task record for this org then update the status else create one
-
             has_status_changing = True
 
         if product_subscriptions is not None:

@@ -13,7 +13,7 @@
             "relationship_id": 12,
             "date_submitted": "2020-11-23T15:14:20.712096+00:00",
             "due_date": "2020-11-03T20:50:39.366030+00:00",
-            "task_type": "Pending"
+            "type": "PENDING_STAFF_REVIEW"
         },
         {
             "id": 125,
@@ -22,7 +22,7 @@
             "relationship_id": 12,
             "date_submitted": "2020-11-23T15:14:20.712096+00:00",
             "due_date": "2020-11-03T20:50:39.366030+00:00",
-            "task_type": "Pending"
+            "type": "PENDING_STAFF_REVIEW"
         }
     ],
     "properties": {
@@ -82,22 +82,22 @@
                 1
             ]
         },
-        "taskType": {
-            "$id": "#/properties/taskType",
+        "type": {
+            "$id": "#/properties/type",
             "type": "string",
             "title": "Task Type",
             "default": "",
             "examples": [
-                "Pending"
+                "PENDING_STAFF_REVIEW"
             ]
         },
-        "taskStatus": {
-            "$id": "#/properties/taskType",
+        "status": {
+            "$id": "#/properties/status",
             "type": "string",
-            "title": "Task Type",
+            "title": "Task Status",
             "default": "",
             "examples": [
-                "Pending"
+                "OPEN"
             ]
         }
     },

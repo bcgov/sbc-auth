@@ -66,9 +66,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
                                date_submitted=datetime.today(),
                                relationship_type=TaskRelationshipType.ORG.value,
                                relationship_id=org_info.get('relationshipId'),
-                               task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                               task_status=TaskStatus.OPEN.value,
-                               task_related_to=org_info.get('relatedTo'))
+                               type=TaskType.PENDING_STAFF_REVIEW.value,
+                               status=TaskStatus.OPEN.value,
+                               related_to=org_info.get('relatedTo'))
         task_model.save()
         return Task(task_model)
 
@@ -80,7 +80,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
 
         current_app.logger.debug('<setting task status to  ')
-        task_model.task_status = task_status
+        task_model.status = task_status
         task_model.decision_made_by = user.username
 
         task_model.save()

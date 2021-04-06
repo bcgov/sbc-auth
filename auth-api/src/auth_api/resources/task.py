@@ -51,7 +51,7 @@ class Tasks(Resource):
 
 @cors_preflight('PATCH,OPTIONS')
 @API.route('/<int:task_id>/status', methods=['PATCH', 'OPTIONS'])
-class Task(Resource):
+class TaskStatus(Resource):
     """Resource for managing tasks."""
 
     @staticmethod
@@ -65,10 +65,10 @@ class Task(Resource):
         token = g.jwt_oidc_token_info
 
         try:
-            task_status = request_json.get('taskStatus', None)
-            response, status = TaskService.change_org_status(task_id=task_id,
-                                                             task_status=task_status,
-                                                             token_info=token).as_dict(), http_status.HTTP_200_OK
+            task_status = request_json.get('taskStatus')
+            response, status = TaskService.update_task_status(task_id=task_id,
+                                                              task_status=task_status,
+                                                              token_info=token).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

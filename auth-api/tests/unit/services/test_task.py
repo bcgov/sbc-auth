@@ -17,7 +17,9 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from auth_api.services import Task as TaskService
-from auth_api.utils.enums import TaskRelationshipType
+from auth_api.models import Task as TaskModel
+from auth_api.utils.enums import TaskRelationshipType, LoginSource, TaskStatus
+from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model
 
 
@@ -46,3 +48,20 @@ def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
     assert task
     dictionary = task.as_dict()
     assert dictionary['name'] == test_org.name
+
+
+def test_update_task_status(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a task can be updated."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
+    task = factory_task_service(user.id)
+    dictionary = task.as_dict()
+    name = dictionary['name']
+    task_id = dictionary['id']
+
+    updated_task = TaskService.update_task_status(task_id=task_id,
+                                                  task_status=TaskStatus.CLOSE.value,
+                                                  token_info=token_info)
+    dictionary = updated_task.as_dict()
+    assert dictionary['name'] == name
+    assert dictionary['status'] == TaskStatus.CLOSE.value
