@@ -37,5 +37,11 @@
             "sentry",
             "jwt"
         ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "api_gw"
+        ]
     }
 ]

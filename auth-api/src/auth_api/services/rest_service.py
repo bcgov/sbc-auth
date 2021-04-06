@@ -14,13 +14,14 @@
 """Service to invoke Rest services."""
 import json
 from collections.abc import Iterable
+from typing import Dict
 
 import requests
 from flask import current_app, request
 from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
+from requests.exceptions import ConnectTimeout, HTTPError
 # pylint:disable=ungrouped-imports
 from requests.exceptions import ConnectionError as ReqConnectionError
-from requests.exceptions import ConnectTimeout, HTTPError
 from urllib3.util.retry import Retry
 
 from auth_api.exceptions import ServiceUnavailableException
@@ -36,18 +37,20 @@ class RestService:
     def _invoke(rest_method, endpoint, token=None,  # pylint: disable=too-many-arguments
                 auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
                 content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True,
-                additional_headers: dict = None):
+                additional_headers: dict = None, generate_token: bool = True):
         """Invoke different method depending on the input."""
         # just to avoid the duplicate code for PUT and POSt
         current_app.logger.debug(f'<_invoke-{rest_method}')
 
-        if not token:
-            token = _get_token()
-
         headers = {
-            'Authorization': auth_header_type.value.format(token),
             'Content-Type': content_type.value
         }
+
+        if not token and generate_token:
+            token = _get_token()
+
+        if token:
+            headers.update({'Authorization': auth_header_type.value.format(token)})
 
         if additional_headers:
             headers.update(additional_headers)
@@ -93,11 +96,11 @@ class RestService:
     def post(endpoint, token=None,  # pylint: disable=too-many-arguments
              auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
              content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True,
-             additional_headers: dict = None):
+             additional_headers: dict = None, generate_token: bool = True):
         """POST service."""
         current_app.logger.debug('<post')
         return RestService._invoke('post', endpoint, token, auth_header_type, content_type, data, raise_for_status,
-                                   additional_headers)
+                                   additional_headers, generate_token)
 
     @staticmethod
     def put(endpoint, token=None,  # pylint: disable=too-many-arguments
@@ -108,14 +111,28 @@ class RestService:
         return RestService._invoke('put', endpoint, token, auth_header_type, content_type, data, raise_for_status)
 
     @staticmethod
-    def get(endpoint, token=None, auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
-            content_type: ContentType = ContentType.JSON, retry_on_failure: bool = False):
+    def patch(endpoint, token=None,  # pylint: disable=too-many-arguments
+              auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+              content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True,
+              additional_headers: dict = None, generate_token=True):
+        """Patch service."""
+        current_app.logger.debug('<patch')
+        return RestService._invoke('patch', endpoint, token, auth_header_type, content_type, data, raise_for_status,
+                                   additional_headers, generate_token)
+
+    @staticmethod
+    def get(endpoint, token=None,  # pylint: disable=too-many-arguments
+            auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+            content_type: ContentType = ContentType.JSON, retry_on_failure: bool = False,
+            additional_headers: Dict = None):
         """GET service."""
         current_app.logger.debug('<GET')
 
         headers = {
             'Content-Type': content_type.value
         }
+        if additional_headers:
+            headers.update(additional_headers)
 
         if token:
             headers['Authorization'] = auth_header_type.value.format(token)
