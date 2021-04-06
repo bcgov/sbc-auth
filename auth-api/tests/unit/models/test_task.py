@@ -76,4 +76,3 @@ def test_find_task_by_id(session):  # pylint:disable=unused-argument
     found_task = TaskModel.find_by_task_id(task.id)
     assert found_task
     assert found_task.name == task.name
-

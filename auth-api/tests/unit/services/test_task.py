@@ -17,7 +17,6 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from auth_api.services import Task as TaskService
-from auth_api.models import Task as TaskModel
 from auth_api.utils.enums import TaskRelationshipType, LoginSource, TaskStatus
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model

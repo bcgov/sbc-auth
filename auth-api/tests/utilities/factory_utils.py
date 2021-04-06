@@ -39,7 +39,7 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import (AccessType, InvitationType,
-                                  TaskStatus, TaskRelationshipType, OrgStatus, TaskType, ProductSubscriptionStatus)
+                                  TaskStatus, TaskRelationshipType, TaskType, ProductSubscriptionStatus)
 from auth_api.utils.roles import Role
 
 
