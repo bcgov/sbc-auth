@@ -38,11 +38,13 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
 
 def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a task can be created."""
+    user = factory_user_model()
     test_org = factory_org_model()
-    test_task_info = ({
-                    'relationshipName': test_org.name,
-                    'relationshipId': test_org.id
-    })
+    test_task_info = {
+        'relationshipName': test_org.name,
+        'relationshipId': test_org.id,
+        'relatedTo': user.id
+    }
     task = TaskService.create_task(test_task_info)
     assert task
     dictionary = task.as_dict()
