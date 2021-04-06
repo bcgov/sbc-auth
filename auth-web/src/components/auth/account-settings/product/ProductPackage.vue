@@ -1,5 +1,6 @@
 <template>
   <v-container class="view-container">
+
     <div class="view-header flex-column mb-6">
       <h2 class="view-header__title" data-test="account-settings-title">
         Products and Services
@@ -9,18 +10,25 @@
       </p>
       <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
-    <template v-if="productsLoaded">
-      <div v-for="product in productDetails" :key="product.code">
-        <Product
-          :productDetails="product"
-          @set-selected-product="setSelectedProduct"
-          :userName="currentUser.fullName"
-          :orgName="currentOrganization.name"
-        ></Product>
-      </div>
+     <template v-if="isLoading">
+      <div v-if="isLoading" class="loading-inner-container">
+          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+        </div>
     </template>
     <template v-else>
-      <div>No Products are available...</div>
+      <template v-if="productsLoaded">
+        <div v-for="product in productDetails" :key="product.code">
+          <Product
+            :productDetails="product"
+            @set-selected-product="setSelectedProduct"
+            :userName="currentUser.fullName"
+            :orgName="currentOrganization.name"
+          ></Product>
+        </div>
+      </template>
+      <template v-else>
+        <div>No Products are available...</div>
+      </template>
     </template>
 
         <!-- Alert Dialog (Error) -->
@@ -98,7 +106,8 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
         const addProductsRequestBody: OrgProductsRequestBody = {
           subscriptions: productsSelected
         }
-        const addProd = await this.addOrgProducts(addProductsRequestBody)
+        await this.addOrgProducts(addProductsRequestBody)
+        this.loadProduct()
         this.productsAddSuccess = true
       } catch {
         // open when error
@@ -106,9 +115,18 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
       }
     }
   }
+  private async setup () {
+    this.isLoading = true
+    await this.loadProduct()
+    this.isLoading = false
+  }
 
   public async mounted () {
-    // make call to get all products here
+    this.setAccountChangedHandler(this.setup)
+    await this.setup()
+  }
+
+  public async loadProduct () {
     try {
       const orgProducts = await this.getOrgProducts(this.currentOrganization.id)
       this.productDetails = orgProducts
@@ -118,6 +136,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
       this.productDetails = []
     }
   }
+
   private closeError () {
     this.$refs.errorDialog.close()
   }
@@ -135,6 +154,10 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   .v-btn {
     width: 6rem;
   }
+}
+.loading-inner-container{
+  display: flex;
+  justify-content: center;
 }
 
 .save-btn.disabled {
