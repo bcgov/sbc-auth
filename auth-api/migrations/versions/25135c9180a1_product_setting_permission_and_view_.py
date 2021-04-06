@@ -40,8 +40,8 @@ authorizations_view = CustomSql('authorizations_view',
                                 'LEFT JOIN users u ON u.id = m.user_id '
                                 'LEFT JOIN affiliations a ON o.id = a.org_id '
                                 'LEFT JOIN entities e ON e.id = a.entity_id '
-                                'LEFT JOIN product_subscriptions ps ON ps.org_id = o.id '
-                                'WHERE m.status = 1 and ps.status_code = "ACTIVE";')
+                                'LEFT JOIN product_subscriptions ps ON ps.org_id = o.id AND ps.status_code = "ACTIVE" '
+                                'WHERE m.status = 1;')
 
 
 def upgrade():
