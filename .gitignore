@@ -117,4 +117,3 @@ node_modules/
 
 auth-api/tests/docker/somefolder/.minio.sys
 queue_services/account-mailer/FEEDBACK.*
-auth-web/package-lock.json
