@@ -226,6 +226,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
+        return
         pay_request = {
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
