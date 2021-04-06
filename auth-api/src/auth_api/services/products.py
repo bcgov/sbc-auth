@@ -27,7 +27,7 @@ from auth_api.models import db
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, ProductSubscriptionStatus
 from .authorization import check_auth
 from ..utils.cache import cache
-from ..utils.roles import ADMIN, STAFF, CLIENT_ADMIN_ROLES
+from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
 
 
 class Product:
@@ -140,7 +140,7 @@ class Product:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
         if not skip_auth:
-            check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
+            check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}

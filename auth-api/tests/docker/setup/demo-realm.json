@@ -307,7 +307,16 @@
         "public_user"
       ],
       "clientRoles": {},
-      "subGroups": []
+      "subGroups": [
+        {
+          "name": "api_gateway_users",
+          "path": "/public_users/api_gateway_users",
+          "attributes": {},
+          "realmRoles": [],
+          "clientRoles": {},
+          "subGroups": []
+        }
+      ]
     },
     {
       "name": "gov_account_users",
@@ -875,7 +884,9 @@
           "query-users",
           "view-authorization",
           "view-users",
-          "view-realm"
+          "view-realm",
+          "create-client",
+          "manage-clients"
         ],
         "account": [
           "view-profile",

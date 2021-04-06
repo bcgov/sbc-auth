@@ -218,6 +218,7 @@ class LoginSource(Enum):
     BCEID = 'BCEID'
     STAFF = 'IDIR'
     BCROS = 'BCROS'
+    API_GW = 'API_GW'
 
 
 class ProductCode(Enum):

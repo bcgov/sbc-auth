@@ -880,7 +880,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async addOrgProducts (orgId:number, productsRequestBody: OrgProductsRequestBody): Promise<OrgProduct> {
+  public async addOrgProducts (productsRequestBody: OrgProductsRequestBody): Promise<OrgProduct> {
+    const orgId = this.context.state['currentOrganization']?.id
     const response = await OrgService.addProducts(orgId, productsRequestBody)
     return response?.data
   }
