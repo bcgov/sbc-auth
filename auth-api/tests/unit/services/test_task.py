@@ -17,7 +17,7 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from auth_api.services import Task as TaskService
-from auth_api.utils.enums import TaskRelationshipType, LoginSource, TaskStatus
+from auth_api.utils.enums import LoginSource, TaskStatus, TaskType
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model
 
@@ -29,7 +29,7 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_relationship_type=TaskRelationshipType.ORG.value)
+    fetched_task = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value)
 
     assert fetched_task
     for item in fetched_task:
@@ -41,7 +41,7 @@ def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
     user = factory_user_model()
     test_org = factory_org_model()
     test_task_info = {
-        'relationshipName': test_org.name,
+        'name': test_org.name,
         'relationshipId': test_org.id,
         'relatedTo': user.id
     }
@@ -56,13 +56,12 @@ def test_update_task_status(session, keycloak_mock):  # pylint:disable=unused-ar
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     task = factory_task_service(user.id)
-    dictionary = task.as_dict()
-    name = dictionary['name']
-    task_id = dictionary['id']
+    task_info = task.as_dict()
+    task_info['name'] = 'bar'
+    task_info['status'] = TaskStatus.COMPLETED.value
 
-    updated_task = TaskService.update_task_status(task_id=task_id,
-                                                  task_status=TaskStatus.CLOSE.value,
-                                                  token_info=token_info)
-    dictionary = updated_task.as_dict()
-    assert dictionary['name'] == name
-    assert dictionary['status'] == TaskStatus.CLOSE.value
+    task.update_task(task_info=task_info,
+                     token_info=token_info)
+    dictionary = task.as_dict()
+    assert dictionary['name'] == 'bar'
+    assert dictionary['status'] == TaskStatus.COMPLETED.value

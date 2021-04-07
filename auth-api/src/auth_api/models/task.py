@@ -39,11 +39,10 @@ class Task(BaseModel):
     user = relationship('User', foreign_keys=[related_to], lazy='select')
 
     @classmethod
-    def fetch_tasks(cls, task_relationship_type: str):
+    def fetch_tasks(cls, task_type: str):
         """Fetch all tasks."""
-        query = db.session.query(Task).filter_by(relationship_type=task_relationship_type,
-                                                 status=TaskStatus.OPEN.value,
-                                                 type=TaskType.PENDING_STAFF_REVIEW.value)
+        query = db.session.query(Task).filter_by(type=task_type,
+                                                 status=TaskStatus.OPEN.value)
         return query.all()
 
     @classmethod

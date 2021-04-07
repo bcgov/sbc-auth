@@ -243,7 +243,7 @@ class TaskStatus(Enum):
     """Task relationship type."""
 
     OPEN = 'OPEN'     # Open Task - needs to be taken action
-    CLOSE = 'CLOSE'   # Task has been acted upon
+    COMPLETED = 'COMPLETED'   # Task has been acted upon
 
 
 class TaskType(Enum):

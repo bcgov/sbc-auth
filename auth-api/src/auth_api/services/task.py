@@ -18,14 +18,17 @@ This module manages the tasks.
 from datetime import datetime
 from typing import Dict
 from flask import current_app
+from auth_api.exceptions.errors import Error
 
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.exceptions import BusinessException
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
 from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType
+from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -40,7 +43,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     """
 
     def __init__(self, model):
-        """Return a Task object."""
+        """Return a Task service."""
         self._model: TaskModel = model
 
     @property
@@ -62,7 +65,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     def create_task(org_info: dict):
         """Create a new task record."""
         current_app.logger.debug('<create_task ')
-        task_model = TaskModel(name=org_info.get('relationshipName'),
+        task_model = TaskModel(name=org_info.get('name'),
                                date_submitted=datetime.today(),
                                relationship_type=TaskRelationshipType.ORG.value,
                                relationship_id=org_info.get('relationshipId'),
@@ -72,31 +75,44 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model.save()
         return Task(task_model)
 
-    @staticmethod
-    def update_task_status(task_id: int, task_status: str, token_info: Dict = None):
+    def update_task(self, task_info: Dict = None, token_info: Dict = None):
         """Update a task record."""
-        current_app.logger.debug('<update_task_status ')
-        task_model = TaskModel.find_by_task_id(task_id)
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        current_app.logger.debug('<update_task ')
+        task_model: TaskModel = self._model
 
-        current_app.logger.debug('<setting task status to  ')
-        task_model.status = task_status
+        if task_model is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        task_model.update_from_dict(**camelback2snake(task_info))
         task_model.decision_made_by = user.username
 
         task_model.save()
         return Task(task_model)
 
     @staticmethod
-    def fetch_tasks(task_relationship_type: str):
+    def fetch_tasks(task_type: str):
         """Fetch all tasks."""
-        if not any(e.value == task_relationship_type for e in TaskRelationshipType):
+        if not any(e.value == task_type for e in TaskType):
             return []
 
         current_app.logger.debug('<fetch_tasks ')
-        tasks = TaskModel.fetch_tasks(task_relationship_type)
+        tasks = TaskModel.fetch_tasks(task_type)
         tasks_response = []
 
         for task in tasks:
             tasks_response.append(task)
 
         return tasks_response
+
+    @staticmethod
+    def find_by_task_id(task_id):
+        """Find and return an existing task with the provided id."""
+        if task_id is None:
+            return None
+
+        task_model = TaskModel.find_by_task_id(task_id)
+        if not task_model:
+            return None
+
+        return Task(task_model)
