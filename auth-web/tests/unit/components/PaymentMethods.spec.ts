@@ -6,6 +6,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import can from '@/directives/can'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -23,6 +24,7 @@ describe('PaymentMethods.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.directive('can', can)
 
     const vuetify = new Vuetify({})
 

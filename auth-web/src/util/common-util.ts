@@ -15,6 +15,7 @@ export default class CommonUtils {
   }
   // formatting incorporation number according to the length of numbers
   static formatIncorporationNumber (incorpNum:string, isNR: boolean = false, numLength?:number):string {
+    if (!incorpNum) return null
     numLength = numLength || 7 // optional: go with '7' if nothing specified
     const numberFirstIndex = incorpNum.search(/[0-9]/i)
     if (numberFirstIndex > -1) {
@@ -36,16 +37,48 @@ export default class CommonUtils {
   }
   static validateIncorporationNumber (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(A|B|BC|C|CP|EPR|FM|FOR|LIC|LL|LLC|LP|MF|QA|QB|QC|QD|QE|REG|S|S-|S\/|XL|XP|XS|XS-|XS\/|CS|CS-|CS\/)?\d+$/)
-    return VALID_FORMAT.test(value.toUpperCase())
+    return VALID_FORMAT.test(value?.toUpperCase())
+  }
+  static isCooperativeNumber (value: string):boolean {
+    return value?.toUpperCase().startsWith('CP') || false
   }
   static validateNameRequestNumber (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(NR )?\d+$/)
-    return VALID_FORMAT.test(value.toUpperCase())
+    return VALID_FORMAT.test(value?.toUpperCase())
   }
   static validateEmailFormat (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
     return VALID_FORMAT.test(value)
   }
+  static validatePhoneNumber (value: string):boolean {
+    return value?.length <= 12 || false
+  }
+
+  /**
+   * Validates a cooperative passcode:
+   * - must be exactly 9 characters long
+   * - must be numeric (0-9)
+   * @param value the passcode to validate
+   * @returns True if the passcode is valid, else False
+   */
+  static validateCooperativePasscode (value: string):boolean {
+    const VALID_PASSWORD_FORMAT = new RegExp(/^\d{9}$/)
+    return VALID_PASSWORD_FORMAT.test(value)
+  }
+
+  /**
+   * Validates a corporate password:
+   * - must be 8 to 15 characters long
+   * - must be alphanumeric (a-z, A-Z, 0-9)
+   * - is case sensitive (ie, ABCDEF is not the same as abcdef)
+   * @param value the password to validate
+   * @returns True if the password is valid, else False
+   */
+  static validateCorporatePassword (value: string):boolean {
+    const VALID_PASSWORD_FORMAT = new RegExp(/^[a-z,A-Z,0-9]{8,15}$/)
+    return VALID_PASSWORD_FORMAT.test(value)
+  }
+
   // This will validate the password rules with the regex
   // atleast 1 number, 1 uppercase, 1 lowercase, 1 special character and minimum length is 8
   static validatePasswordRules (value: string):boolean {
