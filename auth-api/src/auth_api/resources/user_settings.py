@@ -19,7 +19,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import UserSettingsSchema
 from auth_api.services.user import User as UserService
 from auth_api.services.user_settings import UserSettings as UserSettingsService
@@ -29,7 +29,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('users', description='Endpoints for user settings management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET, OPTIONS')
@@ -40,7 +39,7 @@ class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get(user_id):
         """Get info related to the user.
 
