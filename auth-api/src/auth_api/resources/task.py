@@ -64,7 +64,7 @@ class TaskStatus(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def put(task_id):
-        """update a task."""
+        """Update a task."""
         request_json = request.get_json()
         token = g.jwt_oidc_token_info
 
