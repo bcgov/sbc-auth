@@ -57,7 +57,7 @@ objects:
       name: ${NAME}-${TAG}
       labels:
         name: ${NAME}
-        environment: ${TAG}}
+        environment: ${TAG}
         role: ${ROLE}
       annotations:
         description: Defines how to deploy the application server

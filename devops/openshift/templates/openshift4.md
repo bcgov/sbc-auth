@@ -3,7 +3,7 @@ Openshift 4 Migration:
 
 Pre:
 
-1. Modify dc.yaml, pipeline.yaml, bc.yaml and *.jenkins
+1. Modify dc.yaml, bc.yaml
 2. Copy configmap or secret from OCP3 to OCP4 for each application
 3. Create rocketchat secret in tools namepsace
 
@@ -11,15 +11,12 @@ Tools Namespace:
 
 1. Create artifactory creds through this https://github.com/BCDevOps/OpenShift4-Migration/issues/51
 
-2. Install Jenkins from Openshift Catalog;
-
-3. RBAC and Network Security Policies:
+2. RBAC and Network Security Policies:
     ```
 	cd devops
 	oc delete externalnetwork,networksecuritypolicy  -n 6e0e49-tools -l app=sbc-auth
 	oc process -f openshift/templates/tools-image-puller-rbac.yaml -o yaml | oc apply -f - -n 6e0e49-tools
-    oc process -f openshift/templates/tools-jenkins-rbac.yaml -o yaml | oc apply -f - -n 6e0e49-tools
-    oc process -f openshift/templates/tools-nsp.yaml -o yaml | oc apply -f - -n 6e0e49-tools
+    oc process -f openshift/templates/tools-knp.yaml -o yaml | oc apply -f - -n 6e0e49-tools
     ```
 
 4. BuildConfig, ImageStream and Pipeline for each application:
@@ -27,7 +24,6 @@ Tools Namespace:
 	cd `project folder`
 	oc delete dc,bc,is,networksecuritypolicy  -n 6e0e49-tools -l app=`application name`
 	oc process -f openshift/templates/bc.yaml -o yaml | oc apply -f - -n 6e0e49-tools
-	oc process -f openshift/templates/pipeline.yaml -p TAG=`env name dev/test/prod` -o yaml | oc apply -f - -n 6e0e49-tools
     ```
 
 Dev/Test/Prod Namespace:
@@ -48,9 +44,7 @@ Dev/Test/Prod Namespace:
 2. 	RBAC and Network Security Policies:
     ```
 	cd devops
-	oc delete externalnetwork,networksecuritypolicy  -n 6e0e49-dev -l app=sbc-auth
-    oc process -f openshift/templates/jenkins-edit-rbac.yaml -o yaml | oc apply -f - -n 6e0e49-dev
-	oc process -f openshift/templates/nsp.yaml -o yaml | oc apply -f - -n 6e0e49-dev
+	oc process -f openshift/templates/knp.yaml -o yaml | oc apply -f - -n 6e0e49-dev
     ```
 
 3. Keycloak

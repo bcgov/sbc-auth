@@ -7,6 +7,7 @@ MKFILE_PATH:=$(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_ABS_DIR:=$(patsubst %/,%,$(dir $(MKFILE_PATH)))
 
 PROJECT_NAME:=auth_api
+DOCKER_NAME:=auth-api
 
 #################################################################################
 # COMMANDS -- license                                                           #
@@ -41,30 +42,38 @@ clean-test: ## clean test files
 	rm -f .coverage
 	rm -fr htmlcov/
 
-install: clean ## Install python virtrual environment
-	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv
+build-req: clean ## Upgrade requirements
+	test -f venv/bin/activate || python3.8 -m venv  $(CURRENT_ABS_DIR)/venv ;\
 	. venv/bin/activate ;\
 	pip install --upgrade pip ;\
 	pip install -Ur requirements/prod.txt ;\
 	pip freeze | sort > requirements.txt ;\
 	cat requirements/repo-libraries.txt >> requirements.txt ;\
-	pip install -Ur requirements/repo-libraries.txt ;\
-	pip install -Ur requirements/dev.txt  ;\
-	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
+	pip install -Ur requirements/repo-libraries.txt
+
+install: clean ## Install python virtrual environment
+	test -f venv/bin/activate || python3 -m venv  $(CURRENT_ABS_DIR)/venv ;\
+	. venv/bin/activate ;\
+	pip install --upgrade pip ;\
+	pip install -Ur requirements.txt
 
 install-dev: ## Install local application
-	. venv/bin/activate && pip install -e .
+	. venv/bin/activate ; \
+	pip install -Ur requirements/dev.txt; \
+	pip install -e .
 
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
 ci: lint flake8 test ## CI flow
 
-lint: ## Linting with pylint
+pylint: ## Linting with pylint
 	. venv/bin/activate && pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
 
 flake8: ## Linting with flake8
 	. venv/bin/activate && flake8 src/$(PROJECT_NAME) tests
+
+lint: pylint flake8 ## run all lint type scripts
 
 test: ## Unit testing
 	. venv/bin/activate && pytest
@@ -73,15 +82,45 @@ mac-cov: local-test ## Run the coverage report and display in a browser window (
 	open -a "Google Chrome" htmlcov/index.html
 
 #################################################################################
-# COMMANDS - CD                                                               #
+# COMMANDS - CD
+# expects the terminal to be openshift login
+# expects export OPENSHIFT_DOCKER_REGISTRY=""
+# expects export OPENSHIFT_SA_NAME="$(oc whoami)"
+# expects export OPENSHIFT_SA_TOKEN="$(oc whoami -t)"
+# expects export OPENSHIFT_REPOSITORY=""
+# expects export TAG_NAME="dev/test"
+# expects export OP_PARAMETERS=""
+# expects export OPS_REPOSITORY=""                                                        #
 #################################################################################
-cd: build ## CD flow
+cd: build update-env tag ## CD flow
 
 build: ## Build the docker container
-	docker build -t $(PROJECT_NAME) .
+	docker build . -t $(DOCKER_NAME) \
+		--build-arg VCS_REF=$(shell git rev-parse --short HEAD) \
+		--build-arg BUILD_DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ") \
 
 build-nc: ## Build the docker container without caching
-	docker build --no-cache -t $(PROJECT_NAME) .
+	docker build --no-cache -t $(DOCKER_NAME) .
+
+REGISTRY_IMAGE=$(OPENSHIFT_DOCKER_REGISTRY)/$(OPENSHIFT_REPOSITORY)-tools/$(DOCKER_NAME)
+push: #build ## Push the docker container to the registry & tag latest
+	@echo "$(OPENSHIFT_SA_TOKEN)" | docker login $(OPENSHIFT_DOCKER_REGISTRY) -u $(OPENSHIFT_SA_NAME) --password-stdin ;\
+    docker tag $(DOCKER_NAME) $(REGISTRY_IMAGE):latest ;\
+    docker push $(REGISTRY_IMAGE):latest
+
+VAULTS=`cat devops/vaults.json`
+update-env: ## Update env from 1pass
+	oc -n "$(OPS_REPOSITORY)-tools" exec dc/bcros-cli -- ./scripts/1pass.sh \
+		-m "secret" \
+		-e "$(TAG_NAME)" \
+		-a "$(DOCKER_NAME)-$(TAG_NAME)" \
+		-n "$(OPENSHIFT_REPOSITORY)-$(TAG_NAME)" \
+		-v "$(VAULTS)" \
+		-r "true" \
+		-f "false"
+
+tag: push ## tag image
+	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):latest $(DOCKER_NAME):$(TAG_NAME)
 
 #################################################################################
 # COMMANDS - Local                                                              #
