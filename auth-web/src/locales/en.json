@@ -112,5 +112,8 @@
   "govmAccountCreationSuccessTitle":"Your BC Registries & Online Services account has been requested",
   "govmAAccountCreationSuccessSubtext":"Thank you for submitting your informtion. BC Registries staff will review your information and  notify you through email about your account approval status.",
   "removedBusinessSuccessText": "Your business has been successfully removed from the account and the current passcode has been cancelled",
-  "generatePasscodeSuccessText": "You have successfully generated a passcode. The new passcode has been emailed"
+  "generatePasscodeSuccessText": "You have successfully generated a passcode. The new passcode has been emailed",
+  "willsRegistryTosSubtext":"The search and registration products are intended for the exclusive use of solicitors and notaries only. Title Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.",
+  "willsRegistryTosIagree":"I confirm that the informtion above is all correct and this account act as a solicitor, notary or title search company approved by the Vital Statistics agency."
+
 }

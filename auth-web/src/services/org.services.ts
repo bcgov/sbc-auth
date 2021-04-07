@@ -1,6 +1,6 @@
 import { AccountStatus, Actions } from '@/util/constants'
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, OrgProduct, OrgProductsRequestBody, Organization, UpdateMemberPayload } from '@/models/Organization'
 
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
@@ -108,5 +108,13 @@ export default class OrgService {
 
   public static async getOrgForAffiliate (businessIdentifier: string): Promise<AxiosResponse<any>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs?affiliation=${businessIdentifier}`)
+  }
+
+  static async getProducts (orgIdentifier:number): Promise<AxiosResponse<OrgProduct[]>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products?includeInternal=false`)
+  }
+
+  public static async addProducts (orgIdentifier: number, productsRequestBody: OrgProductsRequestBody): Promise<AxiosResponse<OrgProduct>> {
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`, productsRequestBody)
   }
 }
