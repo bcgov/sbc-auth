@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.services import Membership as MembershipService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
@@ -27,7 +27,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('notifications', description='Endpoints for notification management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
@@ -38,7 +37,7 @@ class Notifications(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
     def get(user_id, org_id):  # pylint:disable=unused-argument
         """Find the count of notification remaining.If any details invalid, it returns zero."""
         try:

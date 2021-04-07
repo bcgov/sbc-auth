@@ -17,7 +17,7 @@ from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
@@ -26,7 +26,6 @@ from auth_api.utils.util import cors_preflight
 API = Namespace('accounts', description='Endpoints for accounts management')
 
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
@@ -35,7 +34,7 @@ class AccountAuthorizations(Resource):
     """Resource for returning authorizations for a product in an account."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get(account_id, product_code):

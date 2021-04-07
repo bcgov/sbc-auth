@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity import Entity as EntityService
@@ -29,7 +29,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('entities', description='Entities')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST,OPTIONS')
@@ -38,7 +37,7 @@ class EntityResources(Resource):
     """Resource for managing entities."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def post():
@@ -69,7 +68,7 @@ class EntityResource(Resource):
     """Resource for managing entities."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def get(business_identifier):
@@ -89,7 +88,7 @@ class EntityResource(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def patch(business_identifier):
         """Update an existing business by it's business number."""
         request_json = request.get_json()
@@ -120,7 +119,7 @@ class EntityResource(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def delete(business_identifier):
@@ -147,7 +146,7 @@ class ContactResource(Resource):
     """Resource for managing entity contacts."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def post(business_identifier):
         """Add a new contact for the Entity identified by the provided id."""
@@ -170,7 +169,7 @@ class ContactResource(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def put(business_identifier):
         """Update the business contact for the Entity identified by the provided id."""
@@ -193,7 +192,7 @@ class ContactResource(Resource):
         return response, status
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def delete(business_identifier):
         """Delete the business contact for the Entity identified by the provided id."""
@@ -216,7 +215,7 @@ class AuthorizationResource(Resource):
     """Resource for managing entity authorizations."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def get(business_identifier):
         """Return authorization for the user for the passed business identifier."""
