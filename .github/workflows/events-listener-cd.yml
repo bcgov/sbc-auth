@@ -31,9 +31,12 @@ jobs:
       - name: Set env by input
         run: |
           echo "TAG_NAME=${{ github.event.inputs.environement }}" >> $GITHUB_ENV
-
       - name: Set env by master branch
         if: env.TAG_NAME == '' && github.ref == 'refs/heads/master'
+        run: |
+          echo "TAG_NAME=test" >> $GITHUB_ENV
+      - name: Set env by development branch
+        if: env.TAG_NAME == '' && github.ref == 'refs/heads/development'
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
