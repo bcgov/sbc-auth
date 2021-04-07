@@ -34,7 +34,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
-    Status, PaymentAccountStatus)
+    Status, PaymentAccountStatus, TaskRelationshipType, TaskType, TaskStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -117,7 +117,12 @@ class Org:  # pylint: disable=too-many-public-methods
             # create a staff review task for this account
             task_info = {'name': org.name,
                          'relationshipId': org.id,
-                         'relatedTo': user.id}
+                         'relatedTo': user.id,
+                         'dateSubmitted': datetime.today(),
+                         'relationshipType': TaskRelationshipType.ORG.value,
+                         'type': TaskType.PENDING_STAFF_REVIEW.value,
+                         'status': TaskStatus.OPEN.value
+                         }
             TaskService.create_task(task_info)
 
         if access_type == AccessType.GOVM.value:

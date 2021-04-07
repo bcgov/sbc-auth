@@ -18,7 +18,6 @@ from sqlalchemy.orm import relationship
 
 from .db import db
 from .base_model import BaseModel
-from ..utils.enums import TaskStatus
 
 
 class Task(BaseModel):
@@ -27,22 +26,23 @@ class Task(BaseModel):
     __tablename__ = 'tasks'
 
     id = Column(Integer, index=True, primary_key=True)
-    name = Column(String(250), nullable=False)
-    date_submitted = Column(DateTime)
-    relationship_type = Column(String(50), nullable=False)
+    name = Column(String(250), nullable=False)  # Stores name of the relationship item. For eg, an org name
+    date_submitted = Column(DateTime)   # Instance when task is created
+    relationship_type = Column(String(50), nullable=False)  # That is to be acted up on. For eg, an org
     relationship_id = Column(Integer, index=True, nullable=False)
-    due_date = Column(DateTime)
-    type = Column(String(50), nullable=False)
-    status = Column(String(50), nullable=False)
+    due_date = Column(DateTime)     # Optional field
+    type = Column(String(50), nullable=False)   # type of the task. For eg, PENDING_STAFF_REVIEW
+    status = Column(String(50), nullable=False)     # task is acted or to be acted. can be open or completed
     related_to = Column(ForeignKey('users.id', ondelete='SET NULL',
                                    name='related_to_fkey'), nullable=False)
+    # task that is assigned to the particular user
     user = relationship('User', foreign_keys=[related_to], lazy='select')
 
     @classmethod
-    def fetch_tasks(cls, task_type: str):
+    def fetch_tasks(cls, task_type: str, task_status: str):
         """Fetch all tasks."""
         query = db.session.query(Task).filter_by(type=task_type,
-                                                 status=TaskStatus.OPEN.value)
+                                                 status=task_status)
         return query.all()
 
     @classmethod

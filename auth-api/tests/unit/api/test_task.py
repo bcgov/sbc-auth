@@ -38,6 +38,18 @@ def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     assert rv.status_code == http_status.HTTP_200_OK
 
 
+def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that the tasks can be fetched."""
+    user = factory_user_model()
+    factory_task_service(user.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks?type=ORG&status=OPEN', headers=headers, content_type='application/json')
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'task_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
 def test_put_task(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)

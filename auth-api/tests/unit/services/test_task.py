@@ -16,8 +16,9 @@
 Test suite to ensure that the Task service routines are working as expected.
 """
 
+from datetime import datetime
 from auth_api.services import Task as TaskService
-from auth_api.utils.enums import LoginSource, TaskStatus, TaskType
+from auth_api.utils.enums import LoginSource, TaskStatus, TaskType, TaskRelationshipType
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model
 
@@ -29,7 +30,8 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value)
+    fetched_task = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                                           task_status=TaskStatus.OPEN.value)
 
     assert fetched_task
     for item in fetched_task:
@@ -43,7 +45,11 @@ def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_org.id,
-        'relatedTo': user.id
+        'relatedTo': user.id,
+        'dateSubmitted': datetime.today(),
+        'relationshipType': TaskRelationshipType.ORG.value,
+        'type': TaskType.PENDING_STAFF_REVIEW.value,
+        'status': TaskStatus.OPEN.value
     }
     task = TaskService.create_task(test_task_info)
     assert task

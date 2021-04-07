@@ -15,7 +15,6 @@
 
 This module manages the tasks.
 """
-from datetime import datetime
 from typing import Dict
 from flask import current_app
 
@@ -25,7 +24,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType
+from auth_api.utils.enums import TaskType, TaskStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -60,16 +59,10 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_task(org_info: dict):
+    def create_task(task_info: dict):
         """Create a new task record."""
         current_app.logger.debug('<create_task ')
-        task_model = TaskModel(name=org_info.get('name'),
-                               date_submitted=datetime.today(),
-                               relationship_type=TaskRelationshipType.ORG.value,
-                               relationship_id=org_info.get('relationshipId'),
-                               type=TaskType.PENDING_STAFF_REVIEW.value,
-                               status=TaskStatus.OPEN.value,
-                               related_to=org_info.get('relatedTo'))
+        task_model = TaskModel(**camelback2snake(task_info))
         task_model.save()
         return Task(task_model)
 
@@ -86,28 +79,17 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return Task(task_model)
 
     @staticmethod
-    def fetch_tasks(task_type: str):
+    def fetch_tasks(task_type: str, task_status: str):
         """Fetch all tasks."""
         if not any(e.value == task_type for e in TaskType):
             return []
-
+        if not any(e.value == task_status for e in TaskStatus):
+            return []
         current_app.logger.debug('<fetch_tasks ')
-        tasks = TaskModel.fetch_tasks(task_type)
+        tasks = TaskModel.fetch_tasks(task_type, task_status)
         tasks_response = []
 
         for task in tasks:
             tasks_response.append(task)
 
         return tasks_response
-
-    @staticmethod
-    def find_by_task_id(task_id):
-        """Find and return an existing task with the provided id."""
-        if task_id is None:
-            return None
-
-        task_model = TaskModel.find_by_task_id(task_id)
-        if not task_model:
-            return None
-
-        return Task(task_model)

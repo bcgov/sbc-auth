@@ -58,7 +58,8 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
                      status=TaskStatus.OPEN.value, related_to=user.id)
     session.add(task)
     session.commit()
-    found_tasks = TaskModel.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value)
+    found_tasks = TaskModel.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                                        task_status=TaskStatus.OPEN.value)
     assert found_tasks
 
     for found_staff_task in found_tasks:

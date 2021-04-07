@@ -23,7 +23,9 @@ from auth_api.services import Task as TaskService
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import TaskSchema
+from auth_api.models import Task as TaskModel
 from auth_api.schemas import utils as schema_utils
+from auth_api.utils.enums import TaskStatus
 
 API = Namespace('tasks', description='Endpoints for tasks management')
 TRACER = Tracer.get_instance()
@@ -45,8 +47,9 @@ class Tasks(Resource):
         try:
             # Search based on request arguments
             task_type = request.args.get('type', None)
+            task_status = request.args.get('status', TaskStatus.OPEN.value)
 
-            tasks = TaskService.fetch_tasks(task_type=task_type)
+            tasks = TaskService.fetch_tasks(task_type=task_type, task_status=task_status)
             response, status = {'tasks': TaskSchema().dump(tasks, many=True)}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -55,7 +58,7 @@ class Tasks(Resource):
 
 @cors_preflight('PUT,OPTIONS')
 @API.route('/<int:task_id>', methods=['PUT', 'OPTIONS'])
-class TaskStatus(Resource):
+class Task(Resource):
     """Resource for updating a task."""
 
     @staticmethod
@@ -73,7 +76,7 @@ class TaskStatus(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            task = TaskService.find_by_task_id(task_id)
+            task = TaskService(TaskModel.find_by_task_id(task_id))
             if task:
                 response, status = task.update_task(task_info=request_json,
                                                     token_info=token).as_dict(), http_status.HTTP_200_OK
