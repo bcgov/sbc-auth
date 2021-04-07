@@ -8,14 +8,17 @@
         <ul class="contact-info__list mb-7">
           <li>
             <span>{{ $t('labelTollFree') }}</span>
+            &nbsp;
             <a :href="`tel:+${$t('maximusSupportTollFree')}`">{{ $t('maximusSupportTollFree') }}</a>
           </li>
           <li>
             <span>{{ $t('labelVictoriaOffice') }}</span>
+            &nbsp;
             <a :href="`tel:+${$t('maximusSupportPhone')}`">{{ $t('maximusSupportPhone') }}</a>
           </li>
           <li>
             <span>{{ $t('labelEmail') }}</span>
+            &nbsp;
             <a :href="'mailto:' + $t('maximusSupportEmail') + '?subject=' + $t('maximusSupportEmailSubject')">{{ $t('maximusSupportEmail') }}</a>
           </li>
         </ul>
