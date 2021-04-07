@@ -23,9 +23,6 @@ describe('Add Name Request Form', () => {
     expect(wrapper.find('.add-namerequest-form').isVisible()).toBe(true)
     expect(wrapper.find(HelpDialog).exists()).toBe(true)
 
-    // verify alert container
-    expect(wrapper.find('.add-namerequest-form__alert-container').isVisible()).toBe(false)
-
     // verify input fields
     expect(wrapper.find('[data-test="nr-number"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="applicant-phone-number"]').exists()).toBe(true)
