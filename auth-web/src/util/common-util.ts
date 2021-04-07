@@ -16,7 +16,7 @@ export default class CommonUtils {
   // formatting incorporation number according to the length of numbers
   static formatIncorporationNumber (incorpNum:string, isNR: boolean = false, numLength?:number):string {
     numLength = numLength || 7 // optional: go with '7' if nothing specified
-    const numberFirstIndex = incorpNum.search(/[0-9]/i)
+    const numberFirstIndex = incorpNum?.search(/[0-9]/i)
     if (numberFirstIndex > -1) {
       // cut,trim and replace special characters from the first part
       let businessIdentifierStr = incorpNum.substring(0, numberFirstIndex).trim()
@@ -36,11 +36,11 @@ export default class CommonUtils {
   }
   static validateIncorporationNumber (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(A|B|BC|C|CP|EPR|FM|FOR|LIC|LL|LLC|LP|MF|QA|QB|QC|QD|QE|REG|S|S-|S\/|XL|XP|XS|XS-|XS\/|CS|CS-|CS\/)?\d+$/)
-    return VALID_FORMAT.test(value.toUpperCase())
+    return VALID_FORMAT.test(value?.toUpperCase())
   }
   static validateNameRequestNumber (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(NR )?\d+$/)
-    return VALID_FORMAT.test(value.toUpperCase())
+    return VALID_FORMAT.test(value?.toUpperCase())
   }
   static validateEmailFormat (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
