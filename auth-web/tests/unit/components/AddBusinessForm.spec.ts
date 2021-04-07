@@ -23,13 +23,10 @@ describe('Add Business Form', () => {
     expect(wrapper.find('.add-business-form').isVisible()).toBe(true)
     expect(wrapper.find(HelpDialog).exists()).toBe(true)
 
-    // verify alert container
-    expect(wrapper.find('.add-business-form__alert-container').isVisible()).toBe(false)
-
     // verify input fields
     expect(wrapper.find('[data-test="business-identifier"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="passcode"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="folionumber"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="folio-number"]').exists()).toBe(true)
 
     // verify buttons
     expect(wrapper.find('[data-test="forgot-button"]').exists()).toBe(true)
