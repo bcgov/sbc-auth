@@ -31,9 +31,12 @@ jobs:
       - name: Set env by input
         run: |
           echo "TAG_NAME=${{ github.event.inputs.environement }}" >> $GITHUB_ENV
-
       - name: Set env by master branch
         if: env.TAG_NAME == '' && github.ref == 'refs/heads/master'
+        run: |
+          echo "TAG_NAME=test" >> $GITHUB_ENV
+      - name: Set env by development branch
+        if: env.TAG_NAME == '' && github.ref == 'refs/heads/development'
         run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
@@ -50,7 +53,7 @@ jobs:
           OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT4_DOCKER_REGISTRY }}
           OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT4_SA_NAME }}
           OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT4_SA_TOKEN }}
-          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_REPOSITORY }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_FRONTEND_REPOSITORY }}
           TAG_NAME: ${{ env.TAG_NAME }}
         run: |
           make cd
@@ -58,7 +61,7 @@ jobs:
       - name: Watch new rollout (trigger by image change in Openshift)
         shell: bash
         run: |
-          oc rollout status dc/${{ env.APP_NAME }}-${{ env.TAG_NAME }} -n ${{ secrets.OPENSHIFT4_REPOSITORY_DEPLOYMENT }}-${{ env.TAG_NAME }} -w
+          oc rollout status dc/${{ env.APP_NAME }}-${{ env.TAG_NAME }} -n ${{ secrets.OPENSHIFT4_FRONTEND_REPOSITORY }}-${{ env.TAG_NAME }} -w
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
