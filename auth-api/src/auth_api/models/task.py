@@ -18,7 +18,7 @@ from sqlalchemy.orm import relationship
 
 from .db import db
 from .base_model import BaseModel
-from ..utils.enums import TaskStatus, TaskType
+from ..utils.enums import TaskStatus
 
 
 class Task(BaseModel):

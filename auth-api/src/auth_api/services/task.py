@@ -18,12 +18,10 @@ This module manages the tasks.
 from datetime import datetime
 from typing import Dict
 from flask import current_app
-from auth_api.exceptions.errors import Error
 
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.exceptions import BusinessException
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
@@ -79,9 +77,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Update a task record."""
         current_app.logger.debug('<update_task ')
         task_model: TaskModel = self._model
-
-        if task_model is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         task_model.update_from_dict(**camelback2snake(task_info))
