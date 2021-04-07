@@ -75,6 +75,7 @@ class Error(Enum):
     ACCOUNT_CREATION_FAILED_IN_PAY = 'Account creation failed in Pay', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     GOVM_ACCOUNT_DATA_MISSING = 'GOVM account creation needs payment info , gl code and mailing address', \
                                 http_status.HTTP_400_BAD_REQUEST
+    PRODUCT_SUBSCRIPTION_EXISTS = 'Org has subscription to the product exists.', http_status.HTTP_409_CONFLICT
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

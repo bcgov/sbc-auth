@@ -220,3 +220,21 @@ export interface GLInfo {
   stob: string;
   projectCode: string;
 }
+
+export interface OrgProduct {
+  code: string;
+  name: string;
+  description: string;
+  url?: string;
+  type?: string;
+  mdiIcon?: string;
+  subscriptionStatus?: string;
+}
+
+export interface OrgProductsRequestBody {
+  subscriptions: OrgProductCode[],
+}
+
+export interface OrgProductCode {
+  productCode: string
+}

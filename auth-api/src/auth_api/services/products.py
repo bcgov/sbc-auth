@@ -24,8 +24,10 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
-from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType
+from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, ProductSubscriptionStatus
+from .authorization import check_auth
 from ..utils.cache import cache
+from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
 
 
 class Product:
@@ -54,7 +56,8 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
-    def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True):
+    def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True,
+                                    token_info: Dict = None, skip_auth=False):
         """Create product subscription for the user.
 
         create product subscription first
@@ -63,15 +66,25 @@ class Product:
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # Check authorization for the user
+        if not skip_auth:
+            check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+
         subscriptions_list = subscription_data.get('subscriptions')
         # just used for returning all the models.. not ideal..
         # todo remove this and may be return the subscriptions from db
         subscriptions_model_list = []
         for subscription in subscriptions_list:
             product_code = subscription.get('productCode')
-            product = ProductCodeModel.find_by_code(product_code)
-            if product:
-                product_subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code).flush()
+            existing_product_subscriptions = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
+            if existing_product_subscriptions:
+                raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
+            product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
+            if product_model:
+                product_subscription = ProductSubscriptionModel(org_id=org_id,
+                                                                product_code=product_code,
+                                                                status_code=product_model.default_subscription_status)\
+                    .flush()
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -89,9 +102,11 @@ class Product:
             # Add PPR only if the account is premium.
             if product_code.code == ProductCode.PPR.value:
                 if org.type_code == OrgType.PREMIUM.value:
-                    ProductSubscriptionModel(org_id=org.id, product_code=product_code.code).flush()
+                    ProductSubscriptionModel(org_id=org.id, product_code=product_code.code,
+                                             status_code=product_code.default_subscription_status).flush()
             else:
-                ProductSubscriptionModel(org_id=org.id, product_code=product_code.code).flush()
+                ProductSubscriptionModel(org_id=org.id, product_code=product_code.code,
+                                         status_code=product_code.default_subscription_status).flush()
         if is_new_transaction:  # Commit the transaction if it's a new transaction
             db.session.commit()
 
@@ -114,5 +129,41 @@ class Product:
                         'url': product_config.get('url'),
                         'type': product.type_code,
                         'mdiIcon': product_config.get('mdiIcon')
+                    })
+        return merged_product_infos
+
+    @staticmethod
+    def get_all_product_subscription(org_id, include_internal_products=True, token_info: Dict = None, skip_auth=False):
+        """Get a list of all products with their subscription details."""
+        org = OrgModel.find_by_org_id(org_id)
+        if not org:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # Check authorization for the user
+        if not skip_auth:
+            check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+
+        product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
+        subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
+
+        # We only want to return products that have content configured,
+        # so read configuration and merge
+        merged_product_infos = []
+        products_config = current_app.config.get('PRODUCT_CONFIG')
+        products: List[ProductCodeModel] = ProductCodeModel.get_all_products()
+        if products:
+            for product in products:
+                if not include_internal_products and product.type_code == ProductTypeCode.INTERNAL.value:
+                    continue
+                product_config = products_config.get(product.code)
+                if product_config:
+                    merged_product_infos.append({
+                        'code': product.code,
+                        'name': product.description,
+                        'description': product_config.get('description'),
+                        'url': product_config.get('url'),
+                        'type': product.type_code,
+                        'mdiIcon': product_config.get('mdiIcon'),
+                        'subscriptionStatus': subscriptions_dict.get(product.code,
+                                                                     ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
                     })
         return merged_product_infos
