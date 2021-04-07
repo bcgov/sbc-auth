@@ -1,93 +1,99 @@
 <template>
-  <div class="passcode-form">
+  <div class="add-namerequest-form">
     <v-form ref="addNRForm" lazy-validation>
       <fieldset>
+        <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
         <v-expand-transition>
-          <div class="passcode-form__alert-container" v-show="validationError">
+          <div class="add-namerequest-form__alert-container" v-show="validationError">
             <v-alert
               :value="true"
               color="error"
               icon="warning"
-            >{{validationError}}
-            </v-alert>
+            >{{validationError}}</v-alert>
           </div>
         </v-expand-transition>
-          <v-text-field
-            filled
-            label="Enter a Name Request Number"
-            hint="Example: NR 1234567"
-            req
-            persistent-hint
-            :rules="entityNumRules"
-            v-model="nameRequestNumber"
-            @blur="incorpNumFormat"
-            data-test="business-identifier"
-          ></v-text-field>
-          <v-text-field
-            filled
-            label="Enter the Applicant Phone Number"
-            hint="Example: 555-555-5555"
-            persistent-hint
-            :rules="entityPhoneNumberRules"
-            v-model="applicantPhoneNumber"
-            type="tel"
-            data-test="entity-phonenumber"
-          ></v-text-field>
-          <div class="font-weight-bold ml-3 mb-2">or</div>
-          <v-text-field
-            filled
-            label="Enter the Applicant Email Address"
-            hint="Example: name@email.com"
-            persistent-hint
-            :rules="entityEmailRules"
-            v-model="applicantEmail"
-            data-test="entity-email"
-          ></v-text-field>
+        <v-text-field
+          filled
+          label="Enter a Name Request Number"
+          hint="Example: NR 1234567"
+          req
+          persistent-hint
+          :rules="nrNumberRules"
+          v-model="nrNumber"
+          @blur="formatNrNumber()"
+          data-test="nr-number"
+        />
+        <v-text-field
+          filled
+          label="Enter the Applicant Phone Number"
+          hint="Example: 555-555-5555"
+          persistent-hint
+          :rules="applicantPhoneNumberRules"
+          v-model="applicantPhoneNumber"
+          type="tel"
+          data-test="applicant-phonenumber"
+        />
+        <div class="font-weight-bold ml-3 mb-2">or</div>
+        <v-text-field
+          filled
+          label="Enter the Applicant Email Address"
+          hint="Example: name@email.com"
+          persistent-hint
+          :rules="applicantEmailRules"
+          v-model="applicantEmail"
+          data-test="applicant-email"
+        />
       </fieldset>
+
       <div class="form__btns mt-8">
-        <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="openHelp()">
+        <v-btn
+          large text
+          class="pl-2 pr-2 lost-passcode-btn"
+          data-test="forgot-passcode-button"
+          @click.stop="openHelp()"
+        >
           <v-icon>mdi-help-circle-outline</v-icon>
           <span>I lost or forgot my Name Request (NR) Number</span>
         </v-btn>
         <v-btn
-          data-test="add-business-button"
+          data-test="add-button"
           large color="primary"
           :disabled="!isFormValid()"
-          @click="add"
+          @click="add()"
           :loading="isLoading"
         >
           <span>Add</span>
         </v-btn>
-        <v-btn large depressed color="default" class="ml-2" data-test="cancel-button" @click="cancel">
+        <v-btn
+          large depressed
+          color="default"
+          class="ml-2"
+          data-test="cancel-button"
+          @click="cancel()"
+        >
           <span>Cancel</span>
         </v-btn>
       </div>
     </v-form>
+
     <HelpDialog
       :helpDialogFor="'Name Request (NR) Number'"
       ref="helpDialog"
-    ></HelpDialog>
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Business, BusinessRequest, FolioNumberload, LoginPayload } from '@/models/business'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Vue } from 'vue-property-decorator'
 import { FilingTypes, LegalTypes } from '@/util/constants'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import BusinessModule from '@/store/modules/business'
+import { mapActions, mapState } from 'vuex'
+import { BusinessRequest } from '@/models/business'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
-import { getModule } from 'vuex-module-decorators'
-import { mask } from 'vue-the-mask'
 
 @Component({
-  directives: {
-    mask
-  },
   components: {
     HelpDialog
   },
@@ -97,35 +103,30 @@ import { mask } from 'vue-the-mask'
   methods: {
     ...mapActions('business', [
       'addNameRequest',
-      'createNamedBusiness',
-      'updateFolioNumber'
+      'createNamedBusiness'
     ])
   }
 })
 export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
-  private readonly addNameRequest!: (payload: CreateNRAffiliationRequestBody) => any
+  private readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
   private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
-  private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
-  private entityNumRules = [
+  private nrNumberRules = [
     v => !!v || 'Name Request Number is required',
     v => CommonUtils.validateNameRequestNumber(v) || 'Name Request Number is invalid'
   ]
-  private entityPhoneNumberRules = [
+  private applicantPhoneNumberRules = [
     v => this.isInputEntered(v, 'phone') || 'Phone number is required',
     v => !(v.length > 12) || 'Phone number is invalid'
   ]
-  private entityEmailRules = [
+  private applicantEmailRules = [
     v => this.isInputEntered(v, 'email') || 'Email is required',
     v => this.isValidateEmail(v) || 'Email is Invalid'
   ]
-  private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
-  private nameRequestNumber: string = ''
-  private applicantPhoneNumber: string = ''
-  private applicantEmail: string = ''
-  private passcode: string = ''
-  private folioNumber: string = ''
+  private nrNumber = ''
+  private applicantPhoneNumber = ''
+  private applicantEmail = ''
   private isLoading = false
 
   $refs: {
@@ -134,29 +135,31 @@ export default class AddNameRequestForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    return !!this.nameRequestNumber &&
+    return !!this.nrNumber &&
       (!!this.applicantPhoneNumber || !!this.applicantEmail)
   }
 
-  private isInputEntered (value: any, inputType: string) {
-    return (!!((inputType === 'email') ? this.applicantPhoneNumber : this.applicantEmail) || !!value)
+  private isInputEntered (value: any, inputType: string): boolean {
+    return (!!((inputType === 'email')
+      ? this.applicantPhoneNumber
+      : this.applicantEmail) || !!value)
   }
 
-  private isValidateEmail (value: any) {
-    return ((!!this.applicantPhoneNumber && !!value) || !!CommonUtils.validateEmailFormat(value))
+  private isValidateEmail (value: any): boolean {
+    return ((!!this.applicantPhoneNumber && !!value) ||
+      !!CommonUtils.validateEmailFormat(value))
   }
 
-  async add () {
+  private async add (): Promise<void> {
     if (this.isFormValid()) {
       this.isLoading = true
       try {
         // attempt to add business
         const nrResponse = await this.addNameRequest({
-          businessIdentifier: this.nameRequestNumber,
+          businessIdentifier: this.nrNumber,
           phone: this.applicantPhoneNumber.replace(/-/g, ''),
           email: this.applicantEmail
         })
-
         if (nrResponse?.status === 201) {
           // update the legal api if the status is success
           const filingBody: BusinessRequest = {
@@ -171,11 +174,12 @@ export default class AddNameRequestForm extends Vue {
               incorporationApplication: {
                 nameRequest: {
                   legalType: LegalTypes.BCOMP,
-                  nrNumber: this.nameRequestNumber
+                  nrNumber: this.nrNumber
                 }
               }
             }
           }
+
           const filingResponse = await this.createNamedBusiness(filingBody)
           if (filingResponse?.errorMsg) {
             this.$emit('add-unknown-error')
@@ -199,22 +203,21 @@ export default class AddNameRequestForm extends Vue {
   }
 
   @Emit()
-  cancel () {
-  }
+  private cancel (): void {}
 
-  resetForm () {
-    this.nameRequestNumber = ''
+  private resetForm (): void {
+    this.nrNumber = ''
     this.applicantEmail = ''
     this.applicantPhoneNumber = ''
     this.$refs.addNRForm.resetValidation()
     this.isLoading = false
   }
 
-  incorpNumFormat () {
-    this.nameRequestNumber = CommonUtils.formatIncorporationNumber(this.nameRequestNumber, true)
+  private formatNrNumber (): void {
+    this.nrNumber = CommonUtils.formatIncorporationNumber(this.nrNumber, true)
   }
 
-  openHelp () {
+  private openHelp (): void {
     this.$refs.helpDialog.open()
   }
 }
@@ -222,16 +225,17 @@ export default class AddNameRequestForm extends Vue {
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-  .lost-passcode-btn {
-    margin-right: auto;
-  }
 
-  .form__btns {
-    display: flex;
-    justify-content: flex-end;
+.lost-passcode-btn {
+  margin-right: auto;
+}
 
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
+.form__btns {
+  display: flex;
+  justify-content: flex-end;
+
+  .v-btn + .v-btn {
+    margin-left: 0.5rem;
   }
+}
 </style>

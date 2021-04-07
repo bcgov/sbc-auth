@@ -1,42 +1,41 @@
 <template>
-  <div class="passcode-form">
+  <div class="add-business-form">
     <v-form ref="addBusinessForm" lazy-validation>
       <fieldset>
-        <legend class="mb-4" hidden>Incorporation Number and Passcodes</legend>
+        <legend hidden>Incorporation Number and Passcodes</legend>
         <v-expand-transition>
-          <div class="passcode-form__alert-container" v-show="validationError">
+          <div class="add-business-form__alert-container" v-show="validationError">
             <v-alert
               :value="true"
               color="error"
               icon="warning"
-            >{{validationError}}
-            </v-alert>
+            >{{validationError}}</v-alert>
           </div>
         </v-expand-transition>
-          <v-text-field
-            filled
-            label="Enter your Incorporation Number"
-            hint="Example: CP1234567"
-            req
-            persistent-hint
-            :rules="entityNumRules"
-            v-model="businessIdentifier"
-            @blur="incorpNumFormat"
-            data-test="business-identifier"
-          ></v-text-field>
-          <v-text-field
-            filled
-            label="Enter your Passcode"
-            hint="Passcode must be exactly 9 digits"
-            persistent-hint
-            :rules="entityPasscodeRules"
-            :maxlength="9"
-            v-model="passcode"
-            autocomplete="off"
-            data-test="business-passcode"
-          ></v-text-field>
-
+        <v-text-field
+          filled
+          label="Enter your Incorporation Number"
+          hint="Example: CP1234567"
+          req
+          persistent-hint
+          :rules="incorpNumRules"
+          v-model="incorpNum"
+          @blur="formatIncorpNum()"
+          data-test="incorp-num"
+        />
+        <v-text-field
+          filled
+          label="Enter your Passcode"
+          hint="Passcode must be exactly 9 digits"
+          persistent-hint
+          :rules="passcodeRules"
+          :maxlength="9"
+          v-model="passcode"
+          autocomplete="off"
+          data-test="passcode"
+        />
       </fieldset>
+
       <fieldset class="mt-8">
         <legend class="mb-4">Folio / Reference Number (optional)</legend>
         <p class="mb-8">
@@ -46,48 +45,57 @@
           <v-text-field
             filled
             label="Folio or Reference Number"
-            persistent-hint
             :maxlength="50"
             v-model="folioNumber"
-          ></v-text-field>
+            data-test="folionumber"
+          />
         </div>
         <div class="form__btns mt-6">
-          <v-btn large text class="pl-2 pr-2 lost-passcode-btn" data-test="forgot-passcode-button" @click.stop="openHelp()">
+          <v-btn
+            large text
+            class="pl-2 pr-2 lost-passcode-btn"
+            data-test="forgot-passcode-button"
+            @click.stop="openHelp()"
+          >
             <v-icon>mdi-help-circle-outline</v-icon>
             <span>I lost or forgot my passcode</span>
           </v-btn>
           <v-btn
-            data-test="add-business-button"
+            data-test="add-button"
             large color="primary"
             :disabled="!isFormValid()"
-            @click="add"
+            @click="add()"
             :loading="isLoading"
           >
             <span>Add</span>
           </v-btn>
-          <v-btn large depressed color="default" class="ml-2" data-test="cancel-button" @click="cancel">
+          <v-btn
+            large depressed
+            color="default"
+            class="ml-2"
+            data-test="cancel-button"
+            @click="cancel()"
+          >
             <span>Cancel</span>
           </v-btn>
         </div>
       </fieldset>
     </v-form>
+
     <HelpDialog
       :helpDialogFor="'Passcode'"
       ref="helpDialog"
-    ></HelpDialog>
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Business, FolioNumberload, LoginPayload } from '@/models/business'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import BusinessModule from '@/store/modules/business'
+import { Component, Emit, Vue } from 'vue-property-decorator'
+import { FolioNumberload, LoginPayload } from '@/models/business'
+import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
@@ -107,21 +115,20 @@ import { getModule } from 'vuex-module-decorators'
 export default class AddBusinessForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addBusiness!: (loginPayload: LoginPayload) => any
-  private readonly updateBusinessName!: (businessIdentifier: string) => any
+  private readonly updateBusinessName!: (businessNumber: string) => any
   private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
   private validationError = ''
-  private entityNumRules = [
+  private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
     v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number is invalid'
   ]
-  private entityPasscodeRules = [
+  private passcodeRules = [
     v => !!v || 'Passcode is required',
-    v => v.length >= 9 || 'Passcode must be exactly 9 digits'
+    v => v?.length >= 9 || 'Passcode must be exactly 9 digits'
   ]
-  private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
-  private businessIdentifier: string = ''
-  private passcode: string = ''
-  private folioNumber: string = ''
+  private incorpNum = ''
+  private passcode = ''
+  private folioNumber = ''
   private isLoading = false
 
   $refs: {
@@ -130,27 +137,29 @@ export default class AddBusinessForm extends Vue {
   }
 
   private isFormValid (): boolean {
-    return !!this.businessIdentifier &&
+    return !!this.incorpNum &&
       !!this.passcode &&
       this.$refs.addBusinessForm.validate()
   }
 
-  private redirectToNext (): void {
-    this.$router.push(`/account/${this.currentOrganization.id}`)
-  }
-
-  async add () {
+  private async add (): Promise<void> {
     if (this.isFormValid()) {
       this.isLoading = true
       try {
         // attempt to add business
-        const addResponse = await this.addBusiness({ businessIdentifier: this.businessIdentifier, passCode: this.passcode })
-
+        const addResponse = await this.addBusiness({
+          businessIdentifier: this.incorpNum,
+          passCode: this.passcode
+        })
         if (addResponse?.status === 201) {
-          const businessResponse = await this.updateBusinessName(this.businessIdentifier)
+          const businessResponse = await this.updateBusinessName(this.incorpNum)
           if (businessResponse?.status === 200) {
             // update folio number if the business name updated successfully
-            await this.updateFolioNumber({ businessIdentifier: this.businessIdentifier, folioNumber: this.folioNumber })
+            await this.updateFolioNumber({
+              businessIdentifier: this.incorpNum,
+              folioNumber: this.folioNumber
+            })
+
             // emit event to let parent know business added
             this.$emit('add-success')
           } else {
@@ -174,20 +183,20 @@ export default class AddBusinessForm extends Vue {
   }
 
   @Emit()
-  cancel () {}
+  private cancel (): void {}
 
   resetForm () {
-    this.businessIdentifier = ''
+    this.incorpNum = ''
     this.passcode = ''
     this.$refs.addBusinessForm.resetValidation()
     this.isLoading = false
   }
 
-  incorpNumFormat () {
-    this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
+  private formatIncorpNum (): void {
+    this.incorpNum = CommonUtils.formatIncorporationNumber(this.incorpNum)
   }
 
-  openHelp () {
+  private openHelp (): void {
     this.$refs.helpDialog.open()
   }
 }
@@ -195,16 +204,17 @@ export default class AddBusinessForm extends Vue {
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-  .lost-passcode-btn {
-    margin-right: auto;
-  }
 
-  .form__btns {
-    display: flex;
-    justify-content: flex-end;
+.lost-passcode-btn {
+  margin-right: auto;
+}
 
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
+.form__btns {
+  display: flex;
+  justify-content: flex-end;
+
+  .v-btn + .v-btn {
+    margin-left: 0.5rem;
   }
+}
 </style>
