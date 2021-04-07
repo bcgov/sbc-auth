@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import ProductSubscriptionSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Product as ProductService
@@ -29,7 +29,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('products', description='Endpoints for products management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,POST,OPTIONS')
@@ -40,7 +39,7 @@ class OrgProducts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value])
+    @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value])
     def post(org_id):
         """Post a new product subscription to the org using the request body."""
         request_json = request.get_json()
