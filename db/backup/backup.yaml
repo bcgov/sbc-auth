@@ -12,14 +12,14 @@ objects:
     metadata:
       name: ${NAME}-${TAG}-config
       labels:
-        name: ${NAME}-${TAG}-config
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
     data:
       backup-file: |-
-        postgres=postgresql-dev:5432/auth-db
-        postgres=postgresql-notify-dev:5432/notify
-        postgres=postgresql-keycloak-dev:5432/keycloak
+        postgres=postgresql-${TAG}:5432/auth-db
+        postgres=postgresql-notify-${TAG}:5432/notify
+        postgres=postgresql-keycloak-${TAG}:5432/keycloak
 
         0 1 * * * default ./backup.sh -s
         0 4 * * * default ./backup.sh -s -v all
@@ -29,8 +29,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}-pvc
       labels:
-        name: ${NAME}-${TAG}-pvc
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
     spec:
       storageClassName: ${PERSISTENT_VOLUME_CLASS}
@@ -45,8 +45,8 @@ objects:
     metadata:
       name: ${NAME}-verification-${TAG}-pvc
       labels:
-        name: ${NAME}-verification-${TAG}-pvc
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
     spec:
       storageClassName: ${PERSISTENT_VERIFICATION_VOLUME_CLASS}
@@ -61,8 +61,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}-secret
       labels:
-        name: ${NAME}-${TAG}-secret
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
     stringData:
       webhook-url: ""
@@ -73,8 +73,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
       generation: 1
     spec:
@@ -98,12 +98,13 @@ objects:
       replicas: 1
       test: false
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
       template:
         metadata:
           labels:
-            name: ${NAME}-${TAG}
-            app: ${NAME}
+            name: ${NAME}
+            environment: ${TAG}
             role: ${ROLE}
           name: ${NAME}-${TAG}
         spec:

@@ -19,9 +19,13 @@ on:
 jobs:
   notify-api-cd:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./notify-api
 
     env:
-      IMAGE_NAME: notify-api
+      APP_NAME: "notify-api"
 
     if: github.repository == 'bcgov/sbc-auth'
     steps:
@@ -33,25 +37,30 @@ jobs:
       - name: Set env by master branch
         if: env.TAG_NAME == '' && github.ref == 'refs/heads/master'
         run: |
-          echo "TAG_NAME=test" >> $GITHUB_ENV
-
-      - name: Set env by development branch
-        if: env.TAG_NAME == '' && github.ref == 'refs/heads/development'
-        run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@vaults
-        with:
-          WORKING_DIRECTORY: "./notify-api"
-          APP_NAME: "notify-api"
-          SKIP_OP: "false"
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
+
+      - name: CD Flow (build/update env/push/tag)
+        shell: bash
+        env:
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
-          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
-          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
-          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
-          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
-          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
-          OPENSHIFT_REPOSITORY_DEPLOYMENT: ${{ secrets.OPENSHIFT_REPOSITORY }}
+          OPS_REPOSITORY: ${{ secrets.OPS_REPOSITORY }}
+          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT4_DOCKER_REGISTRY }}
+          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT4_SA_NAME }}
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT4_SA_TOKEN }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_REPOSITORY }}
+          TAG_NAME: ${{ env.TAG_NAME }}
+        run: |
+          make cd
+
+      - name: Watch new rollout (trigger by image change in Openshift)
+        shell: bash
+        run: |
+          oc rollout status dc/${{ env.APP_NAME }}-${{ env.TAG_NAME }} -n ${{ secrets.OPENSHIFT4_REPOSITORY_DEPLOYMENT }}-${{ env.TAG_NAME }} -w
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master
@@ -67,9 +76,13 @@ jobs:
   notify-queue-cd:
     needs: notify-api-cd
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./queue_services/notify-api
 
     env:
-      IMAGE_NAME: notify-queue
+      APP_NAME: "notify-queue"
 
     if: github.repository == 'bcgov/sbc-auth'
     steps:
@@ -81,26 +94,30 @@ jobs:
       - name: Set env by master branch
         if: env.TAG_NAME == '' && github.ref == 'refs/heads/master'
         run: |
-          echo "TAG_NAME=test" >> $GITHUB_ENV
-
-      - name: Set env by development branch
-        if: env.TAG_NAME == '' && github.ref == 'refs/heads/development'
-        run: |
           echo "TAG_NAME=dev" >> $GITHUB_ENV
 
-      - uses: pwei1018/bcrs-cd-action@vaults
-        with:
-          WORKING_DIRECTORY: "./queue_services/notify-queue"
-          APP_NAME: "notify-queue"
-          SKIP_OP: "false"
-          DEPLOYMENT: "true"
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
+
+      - name: CD Flow (build/update env/push/tag)
+        shell: bash
+        env:
           OP_PARAMETERS: ${{ secrets.OP_PARAMETERS }}
-          OPENSHIFT_LOGIN_REGISTRY: ${{ secrets.OPENSHIFT_LOGIN_REGISTRY }}
-          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT_DOCKER_REGISTRY }}
-          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT_SA_NAME }}
-          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT_SA_TOKEN }}
-          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT_REPOSITORY }}
-          OPENSHIFT_REPOSITORY_DEPLOYMENT: ${{ secrets.OPENSHIFT_REPOSITORY }}
+          OPS_REPOSITORY: ${{ secrets.OPS_REPOSITORY }}
+          OPENSHIFT_DOCKER_REGISTRY: ${{ secrets.OPENSHIFT4_DOCKER_REGISTRY }}
+          OPENSHIFT_SA_NAME: ${{ secrets.OPENSHIFT4_SA_NAME }}
+          OPENSHIFT_SA_TOKEN: ${{ secrets.OPENSHIFT4_SA_TOKEN }}
+          OPENSHIFT_REPOSITORY: ${{ secrets.OPENSHIFT4_REPOSITORY }}
+          TAG_NAME: ${{ env.TAG_NAME }}
+        run: |
+          make cd
+
+      - name: Watch new rollout (trigger by image change in Openshift)
+        shell: bash
+        run: |
+          oc rollout status dc/${{ env.APP_NAME }}-${{ env.TAG_NAME }} -n ${{ secrets.OPENSHIFT4_REPOSITORY_DEPLOYMENT }}-${{ env.TAG_NAME }} -w
 
       - name: Rocket.Chat Notification
         uses: RocketChat/Rocket.Chat.GitHub.Action.Notification@master

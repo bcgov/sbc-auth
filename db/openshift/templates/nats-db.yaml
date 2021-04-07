@@ -181,7 +181,7 @@ parameters:
       The name assigned to all of the OpenShift resources associated to the
       PostgreSQL instance.
     required: true
-    value: postgresql-keycloak
+    value: postgresql-nats
 
   - name: TAG
     displayName: Environment TAG name
@@ -211,13 +211,13 @@ parameters:
     displayName: PostgreSQL Database Name
     description: The name of the PostgreSQL database.
     required: true
-    value: keycloak
+    value: nats-db
 
   - name: POSTGRESQL_USER
     displayName: PostgreSQL Connection Username
     description: Username for PostgreSQL user that will be used for accessing the database.  Needs to be basee64 encoded/
     required: true
-    value: keycloak
+    value: usr7R7
 
   - name: POSTGRESQL_PASSWORD
     displayName: PostgreSQL Connection Password
