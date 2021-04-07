@@ -15,7 +15,7 @@
 
 from flask_restplus import Namespace, Resource, cors
 from auth_api.tracer import Tracer
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.utils.util import cors_preflight
 from auth_api.utils.roles import Role
 from auth_api.services import Task as TaskService
@@ -26,7 +26,6 @@ from auth_api.schemas import TaskSchema
 
 API = Namespace('tasks', description='Endpoints for tasks management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,POST,OPTIONS')
@@ -37,8 +36,7 @@ class Tasks(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles(
-        [Role.STAFF.value])
+    @_jwt.has_one_of_roles([Role.STAFF.value])
     def get():
         """Fetch tasks."""
         try:
