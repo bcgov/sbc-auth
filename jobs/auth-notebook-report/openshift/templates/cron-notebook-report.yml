@@ -1,0 +1,83 @@
+---
+kind: "Template"
+apiVersion: "v1"
+metadata:
+  name: "auth-notebook-report"
+  annotations:
+    description: "Scheduled Task to generate notebook report"
+    tags: "cronjob,notebook"
+objects:
+- kind: "CronJob"
+  apiVersion: "batch/v1beta1"
+  metadata:
+    name: "auth-notebook-report"
+  spec:
+    concurrencyPolicy: "Forbid"
+    schedule: "30 7 * * *"
+    suspend: false
+    jobTemplate:
+      spec:
+        template:
+          spec:
+            containers:
+            - name: "filings-notebook-report"
+              image: "docker-registry.default.svc:5000/1rdehl-tools/auth-notebook-report"
+              imagePullPolicy: Always
+              args:
+              - /bin/sh
+              - -c
+              - cd /opt/app-root; ./run.sh
+              env:
+                  - name: PG_USER
+                    valueFrom:
+                      secretKeyRef:
+                        key: DATABASE_USER
+                        name: auth-api-${ENV_TAG}-secret
+                  - name: PG_PASSWORD
+                    valueFrom:
+                      secretKeyRef:
+                        key: DATABASE_PASSWORD
+                        name: auth-api-${ENV_TAG}-secret
+                  - name: PG_DB_NAME
+                    valueFrom:                         
+                      secretKeyRef:
+                        key: DATABASE_NAME
+                        name: auth-api-${ENV_TAG}-secret
+                  - name: PG_HOST
+                    valueFrom:
+                      secretKeyRef:
+                        key: DATABASE_HOST
+                        name: auth-api-${ENV_TAG}-secret
+                  - name: PG_PORT
+                    value: '5432'      
+                  - name: APP_FILE
+                    value: 'notebookreport.py'                      
+                  - name: SENDER_EMAIL
+                    value: 'auth@noreply.github.com'
+                  - name: ERROR_EMAIL_RECIPIENTS
+                    value: '[sbc_itoperationssupport@gov.bc.ca, steven.chen@gov.bc.ca]'                  
+                  - name: AUTH_WEEKLY_REPORT_RECIPIENTS
+                    value: '[Jyoti.Kumar@gov.bc.ca, Kaine.Sparks@gov.bc.ca, Linda.McClung@gov.bc.ca, Trish.Reimer@gov.bc.ca, steven.chen@gov.bc.ca]'                  
+                  - name: AUTH_WEEKLY_REPORT_DATES
+                    value: '[0]'  
+                  - name: EMAIL_SMTP
+                    value: 'apps.smtp.gov.bc.ca'  
+                  - name: RETRY_TIMES
+                    value: '5'  
+                  - name: RETRY_INTERVAL
+                    value: '600'                      
+                  - name: ENVIRONMENT
+                    value: '${ENV_TAG}'  
+                  - name: DATA_DIR
+                    value: '/opt/app-root/data/'    
+            restartPolicy: "Never"
+            concurrencyPolicy: "Forbid"
+parameters: [
+        {
+          "name": "ENV_TAG",
+          "displayName": "ENV_TAG",
+          "description": "the tag for the environment that the job image runs from.",
+          "required": true,
+          "value": "dev"
+        },        
+]
