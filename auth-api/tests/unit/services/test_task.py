@@ -18,13 +18,8 @@ Test suite to ensure that the Task service routines are working as expected.
 
 from datetime import datetime
 from auth_api.services import Task as TaskService
-from auth_api.utils.enums import LoginSource, TaskStatus, TaskType, TaskRelationshipType, OrgStatus, AffidavitStatus
-from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo, TestAffidavit, TestOrgInfo
-from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
-    factory_user_model_with_contact
-from auth_api.services import Org as OrgService
-from auth_api.services import Affidavit as AffidavitService
-from auth_api.models import Task as TaskModel
+from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType
+from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model
 
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
