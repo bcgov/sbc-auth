@@ -19,12 +19,10 @@ import json
 
 from auth_api import status as http_status
 from tests.utilities.factory_utils import (factory_auth_header,
-                                           factory_task_service, factory_user_model, factory_user_model_with_contact)
-from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo, TestAffidavit, TestOrgInfo
+                                           factory_task_service, factory_user_model)
+from tests.utilities.factory_scenarios import TestJwtClaims
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskRelationshipType, TaskType, TaskStatus, OrgStatus, AffidavitStatus
-from auth_api.services import Org as OrgService
-from auth_api.services import Affidavit as AffidavitService
+from auth_api.utils.enums import TaskRelationshipType
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
