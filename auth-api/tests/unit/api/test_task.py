@@ -19,10 +19,12 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 import json
 from auth_api import status as http_status
 from tests.utilities.factory_utils import (factory_auth_header,
-                                           factory_task_service, factory_user_model)
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestContactInfo, TestAffidavit
+                                           factory_task_service, factory_user_model, factory_user_model_with_contact)
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestContactInfo, TestAffidavit, TestUserInfo
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType, AffidavitStatus, OrgStatus
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType, AffidavitStatus, OrgStatus, LoginSource
+from auth_api.services import Affidavit as AffidavitService
+from auth_api.services import Org as OrgService
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
@@ -58,25 +60,18 @@ def test_put_task(client, jwt, session, keycloak_mock):  # pylint:disable=unused
     # 4. Create Org
     # 5. Update the created task and the relationship
 
-    bc_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
-    client.post('/api/v1/users', headers=bc_headers, content_type='application/json')
-    # POST a contact to test user
-    client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact1),
-                headers=bc_headers, content_type='application/json')
+    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user = factory_user_model_with_contact(user_with_token)
 
-    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=bc_headers,
-                                    content_type='application/json')
-    doc_key = document_signature.json.get('key')
-    client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
-                headers=bc_headers,
-                data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
-                content_type='application/json')
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
 
-    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
-                               headers=bc_headers,
-                               content_type='application/json')
-    assert org_response.status_code == http_status.HTTP_201_CREATED
-    org_id = org_response.json.get('id')
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id,
+                                token_info=TestJwtClaims.public_bceid_user)
+    org_dict = org.as_dict()
+    assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+    org_id = org_dict['id']
 
     update_task_payload = {
         'id': 1,
