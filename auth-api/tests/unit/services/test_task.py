@@ -15,16 +15,15 @@
 
 Test suite to ensure that the Task service routines are working as expected.
 """
-import json
+
 from datetime import datetime
-from auth_api import status as http_status
 from auth_api.services import Task as TaskService
-from auth_api.services import Org as OrgService
+from auth_api.models import Task as TaskModel
 from auth_api.services import Affidavit as AffidavitService
-from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType, OrgStatus, AffidavitStatus
+from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType, OrgStatus, AffidavitStatus, LoginSource
 from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
-    factory_user_model_with_contact, factory_auth_header
+    factory_user_model_with_contact
 
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
@@ -61,14 +60,8 @@ def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
     assert dictionary['name'] == test_org.name
 
 
-def test_put_task(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that the task can be updated."""
-    # 1. Create User
-    # 2. Get document signed link
-    # 3. Create affidavit
-    # 4. Create Org
-    # 5. Update the created task and the relationship
-
+def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_staff_admin
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model_with_contact(user_with_token)
@@ -82,7 +75,10 @@ def test_put_task(client, jwt, session, keycloak_mock):  # pylint:disable=unused
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    update_task_payload = {
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
+
+    task_info = {
         'id': 1,
         'name': 'bar',
         'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
@@ -93,19 +89,10 @@ def test_put_task(client, jwt, session, keycloak_mock):  # pylint:disable=unused
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.put('/api/v1/tasks/{}'.format(1),
-                    data=json.dumps(update_task_payload),
-                    headers=headers, content_type='application/json')
+    task = TaskService(TaskModel.find_by_task_id(1))
 
-    dictionary = json.loads(rv.data)
-    assert rv.status_code == http_status.HTTP_200_OK
+    task.update_task(task_info=task_info,
+                     token_info=token_info)
+    dictionary = task.as_dict()
+    assert dictionary['name'] == 'bar'
     assert dictionary['status'] == TaskStatus.COMPLETED.value
-
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.get('/api/v1/orgs/{}'.format(org_id),
-                    headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-    assert dictionary['id'] == org_id
-    assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
