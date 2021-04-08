@@ -15,6 +15,7 @@
 
 This module manages the tasks.
 """
+from datetime import datetime
 from typing import Dict
 from flask import current_app
 
@@ -23,8 +24,10 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
+from auth_api.models import Org as OrgModel
+from auth_api.models import Affidavit as AffidavitModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskType, TaskStatus
+from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, OrgStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -64,9 +67,10 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('<create_task ')
         task_model = TaskModel(**camelback2snake(task_info))
         task_model.save()
+        current_app.logger.debug('>create_task ')
         return Task(task_model)
 
-    def update_task(self, task_info: Dict = None, token_info: Dict = None):
+    def update_task(self, task_info: Dict = None, token_info: Dict = None, origin_url: str = None):
         """Update a task record."""
         current_app.logger.debug('<update_task ')
         task_model: TaskModel = self._model
@@ -75,9 +79,56 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model.name = task_info.get('name')
         task_model.status = task_info.get('status')
         task_model.decision_made_by = user.username
+        task_model.decision_made_on = datetime.now()
         task_model.save()
 
+        # Update its relationship
+        task_relationship_status = task_info.pop('relationshipStatus')
+        self.update_relationship(task_relationship_status=task_relationship_status,
+                                 user_name=user.username,
+                                 origin_url=origin_url)
+        current_app.logger.debug('>update_task ')
+
         return Task(task_model)
+
+    def update_relationship(self, task_relationship_status: str, user_name: str, origin_url: str = None):
+        """Retrieve the relationship record and update the status."""
+        task_model: TaskModel = self._model
+        current_app.logger.debug('<update_task_relationship ')
+
+        if task_model.relationship_type == TaskRelationshipType.ORG.value:
+            # Update Org relationship
+            is_approved: bool = task_relationship_status == AffidavitStatus.APPROVED.value
+            org_id = task_model.relationship_id
+            self.update_org(is_approved=is_approved, org_id=org_id,
+                            user_name=user_name, origin_url=origin_url)
+        current_app.logger.debug('>update_task_relationship ')
+
+    @staticmethod
+    def update_org(is_approved: bool, org_id: int, user_name: str, origin_url: str = None):
+        """Approve/Reject Affidavit and Org."""
+        current_app.logger.debug('<update_task_org ')
+
+        # Approve/Reject Affidavit
+        affidavit: AffidavitModel = AffidavitModel.find_by_org_id(org_id)
+        affidavit.decision_made_by = user_name
+        affidavit.decision_made_on = datetime.now()
+        affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
+
+        # Approve/Reject Org
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        if is_approved:
+            org.status_code = OrgStatus.ACTIVE.value
+        else:
+            org.status_code = OrgStatus.REJECTED.value
+        org.decision_made_by = user_name
+        org.decision_made_on = datetime.now()
+        org.save()
+
+        # admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+        # OrgService.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
+
+        current_app.logger.debug('>update_task_org ')
 
     @staticmethod
     def fetch_tasks(task_type: str, task_status: str):
@@ -93,4 +144,5 @@ class Task:  # pylint: disable=too-many-instance-attributes
         for task in tasks:
             tasks_response.append(task)
 
+        current_app.logger.debug('>fetch_tasks ')
         return tasks_response

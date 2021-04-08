@@ -20,13 +20,12 @@ from auth_api.auth import jwt as _jwt
 from auth_api.utils.util import cors_preflight
 from auth_api.utils.roles import Role
 from auth_api.services import Task as TaskService
-from auth_api.services import Org as OrgService
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import TaskSchema
 from auth_api.models import Task as TaskModel
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskStatus, TaskRelationshipType, AffidavitStatus
+from auth_api.utils.enums import TaskStatus
 
 API = Namespace('tasks', description='Endpoints for tasks management')
 TRACER = Tracer.get_instance()
@@ -76,18 +75,11 @@ class TaskUpdate(Resource):
         try:
             task = TaskService(TaskModel.find_by_task_id(task_id))
             if task:
-                # Update task
+                # Update task and its relationships
                 origin = request.environ.get('HTTP_ORIGIN', 'localhost')
-                relationship_status = request_json.pop('relationshipStatus')
                 response, status = task.update_task(task_info=request_json,
-                                                    token_info=token).as_dict(), http_status.HTTP_200_OK
-
-                # Update relationships with the status
-                if request_json.get('relationshipType') == TaskRelationshipType.ORG.value:
-                    # Update Org
-                    is_approved: bool = relationship_status == AffidavitStatus.APPROVED.value
-                    OrgService.approve_or_reject(org_id=request_json.get('relationshipId'), is_approved=is_approved,
-                                                 token_info=token, origin_url=origin)
+                                                    token_info=token,
+                                                    origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
             else:
                 response, status = {'message': 'The requested task could not be found.'}, \
