@@ -65,13 +65,11 @@ class TaskUpdate(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles(
-        [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value])
+    @_JWT.has_one_of_roles([Role.STAFF.value])
     def put(task_id):
         """Update a task."""
         request_json = request.get_json()
         token = g.jwt_oidc_token_info
-        print(request_json)
 
         valid_format, errors = schema_utils.validate(request_json, 'task_request')
         if not valid_format:
