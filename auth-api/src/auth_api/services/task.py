@@ -105,7 +105,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
-    def update_org(is_approved: bool, org_id: int, user_name: str, origin_url: str = None):
+    def update_org(is_approved: bool, org_id: int, user_name: str,
+                   origin_url: str = None):  # pylint:disable=unused argument
         """Approve/Reject Affidavit and Org."""
         current_app.logger.debug('<update_task_org ')
 
