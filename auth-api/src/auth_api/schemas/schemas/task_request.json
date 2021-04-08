@@ -1,31 +1,21 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/task_response",
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/task_request",
     "type": "object",
-    "title": "Task Response",
-    "description": "The Task schema for response.",
-    "default": [],
-    "examples": [
-        {
-            "id": 123,
-            "name": "bar_task",
-            "relationship_type": "org",
-            "relationship_id": 12,
-            "date_submitted": "2020-11-23T15:14:20.712096+00:00",
-            "due_date": "2020-11-03T20:50:39.366030+00:00",
-            "type": "PENDING_STAFF_REVIEW"
-        },
-        {
-            "id": 125,
-            "name": "foo_task",
-            "relationship_type": "org",
-            "relationship_id": 12,
-            "date_submitted": "2020-11-23T15:14:20.712096+00:00",
-            "due_date": "2020-11-03T20:50:39.366030+00:00",
-            "type": "PENDING_STAFF_REVIEW"
-        }
+    "title": "Task",
+    "additionalProperties": true,
+    "required": [
+        "name",
+        "id",
+        "dateSubmitted",
+        "relationshipType",
+        "relationshipId",
+        "type",
+        "status",
+        "relationshipStatus"
     ],
-    "properties": {
+   "properties": {
         "name": {
             "$id": "#/properties/name",
             "type": "string",
@@ -59,7 +49,6 @@
             "type": "string",
             "title": "Due Date",
             "description": "Due Date for the staff task.",
-            "default": "",
             "examples": [
                 "2020-11-03T20:50:39.366030+00:00"
             ]
@@ -99,7 +88,15 @@
             "examples": [
                 "OPEN"
             ]
+        },
+        "relationshipStatus": {
+            "$id": "#/properties/relationshipStatus",
+            "type": "string",
+            "title": "Relationship Status",
+            "default": "",
+            "examples": [
+                "APPROVED"
+            ]
         }
-    },
-    "additionalProperties": true
+    }
 }

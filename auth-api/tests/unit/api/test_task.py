@@ -18,16 +18,32 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 
 from auth_api import status as http_status
 from tests.utilities.factory_utils import (factory_auth_header,
-                                           factory_task_service)
+                                           factory_task_service, factory_user_model)
 from tests.utilities.factory_scenarios import TestJwtClaims
 from auth_api.schemas import utils as schema_utils
+from auth_api.utils.enums import TaskRelationshipType
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
-    factory_task_service()
+    user = factory_user_model()
+    factory_task_service(user.id)
+    task_type = TaskRelationshipType.ORG.value
+
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/tasks?type={}'.format(task_type), headers=headers, content_type='application/json')
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'task_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that the tasks can be fetched."""
+    user = factory_user_model()
+    factory_task_service(user.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks?type=ORG&status=OPEN', headers=headers, content_type='application/json')
     item_list = rv.json
     assert schema_utils.validate(item_list, 'task_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
