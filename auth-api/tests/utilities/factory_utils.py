@@ -38,7 +38,8 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
-from auth_api.utils.enums import AccessType, InvitationType, ProductSubscriptionStatus
+from auth_api.utils.enums import (AccessType, InvitationType,
+                                  TaskStatus, TaskRelationshipType, TaskType, ProductSubscriptionStatus)
 from auth_api.utils.roles import Role
 
 
@@ -244,23 +245,23 @@ def factory_product_model(org_id: str,
     return subscription
 
 
-def factory_task_service():
+def factory_task_service(user_id: int = 1, org_id: int = 1):
     """Produce a templated task service."""
-    task_model = factory_task_model()
+    task_model = factory_task_model(user_id, org_id)
     service = TaskService(task_model)
     return service
 
 
-def factory_task_model():
+def factory_task_model(user_id: int = 1, org_id: int = 1):
     """Produce a Task model."""
     task = TaskModel(id=1,
                      name='foo',
                      date_submitted=datetime.datetime.now(),
-                     relationship_type='Org',
-                     relationship_id=1,
-                     task_type='Pending',
-                     task_status='Pending'
+                     relationship_type=TaskRelationshipType.ORG.value,
+                     relationship_id=org_id,
+                     type=TaskType.PENDING_STAFF_REVIEW.value,
+                     status=TaskStatus.OPEN.value,
+                     related_to=user_id
                      )
-
     task.save()
     return task
