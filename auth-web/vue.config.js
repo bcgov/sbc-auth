@@ -42,7 +42,9 @@ module.exports = {
     workboxPluginMode: 'InjectManifest',
     workboxOptions: {
       // swSrc is required in InjectManifest mode.
-      swSrc: 'src/service-worker.js'
+      swSrc: 'src/service-worker.js',
+      // skip precaching json files such as configs
+      exclude: [/\.json$/]
     }
   }
 }
