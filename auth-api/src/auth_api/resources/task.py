@@ -63,8 +63,7 @@ class TaskUpdate(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles(
-        [Role.STAFF.value])
+    @_jwt.has_one_of_roles([Role.STAFF.value])
     def put(task_id):
         """Update a task."""
 
