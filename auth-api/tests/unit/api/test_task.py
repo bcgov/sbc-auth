@@ -20,9 +20,9 @@ import json
 from auth_api import status as http_status
 from tests.utilities.factory_utils import (factory_auth_header,
                                            factory_task_service, factory_user_model, factory_user_model_with_contact)
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestContactInfo, TestAffidavit, TestUserInfo
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestAffidavit, TestUserInfo
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType, AffidavitStatus, OrgStatus, LoginSource
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType, AffidavitStatus, OrgStatus
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 
