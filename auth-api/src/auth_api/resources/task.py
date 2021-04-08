@@ -65,8 +65,6 @@ class Task(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles(
-        [Role.STAFF.value])
     def put(task_id):
         """Update a task."""
         request_json = request.get_json()
@@ -92,8 +90,6 @@ class Task(Resource):
                     is_approved: bool = relationship_status == AffidavitStatus.APPROVED.value
                     OrgService.approve_or_reject(org_id=request_json.get('relationshipId'), is_approved=is_approved,
                                                  token_info=token, origin_url=origin)
-
-                # TODO: Update product package, replace if with switch maybe
 
             else:
                 response, status = {'message': 'The requested task could not be found.'}, \
