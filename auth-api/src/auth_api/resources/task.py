@@ -61,11 +61,12 @@ class Tasks(Resource):
 @API.route('/<int:task_id>', methods=['PUT', 'OPTIONS'])
 class Task(Resource):
     """Resource for updating a task."""
+
     @staticmethod
-    @_JWT.has_one_of_roles(
-        [Role.STAFF.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
+    @_JWT.has_one_of_roles(
+        [Role.STAFF.value])
     def put(task_id):
         """Update a task."""
         request_json = request.get_json()
