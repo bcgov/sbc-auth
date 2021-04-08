@@ -59,7 +59,7 @@ class Tasks(Resource):
 
 @cors_preflight('PUT,OPTIONS')
 @API.route('/<int:task_id>', methods=['PUT', 'OPTIONS'])
-class Task(Resource):
+class TaskStatus(Resource):
     """Resource for updating a task."""
 
     @staticmethod
