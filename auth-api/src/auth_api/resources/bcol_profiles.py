@@ -17,7 +17,7 @@ from flask import request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.utils.roles import Role
 from auth_api.services.org import Org
 from auth_api.tracer import Tracer
@@ -27,7 +27,6 @@ from auth_api.utils.util import cors_preflight
 API = Namespace('BC Online Profiles', description='Endpoints for BC Online Profiles')
 
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST,OPTIONS')
@@ -36,7 +35,7 @@ class BcOnlineProfiles(Resource):
     """Resource for validating BC Online account."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     def post():

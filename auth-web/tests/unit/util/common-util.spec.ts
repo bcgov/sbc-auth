@@ -53,20 +53,33 @@ describe('Common Util Test', () => {
     expect(CommonUtil.isUrl('localhost:8080')).toBe(false)
   })
 
-  it('is formatIncorporationNumber returns correct CP Number', () => {
-    expect(CommonUtil.formatIncorporationNumber('CP33')).toBe('CP0000033')
+  it('formatIncorporationNumber returns null', () => {
+    expect(CommonUtil.formatIncorporationNumber(null)).toBeNull()
+    expect(CommonUtil.formatIncorporationNumber('')).toBeNull()
   })
 
-  it('is formatIncorporationNumber returns correct NR Number', () => {
+  it('formatIncorporationNumber returns correct NR Number', () => {
+    expect(CommonUtil.formatIncorporationNumber('CP33')).toBe('CP0000033')
     expect(CommonUtil.formatIncorporationNumber('NR77', true)).toBe('NR 0000077')
   })
 
-  it('is validating IncorporationNumber [positive]', () => {
-    expect(CommonUtil.validateIncorporationNumber('CP0000033')).toBe(true)
+  it('validateIncorporationNumber returns True with valid incorp number', () => {
+    expect(CommonUtil.validateIncorporationNumber('BC0000033')).toBe(true)
   })
 
-  it('is validating IncorporationNumber [negative]', () => {
+  it('validateIncorporationNumber returns False with invalid incorp number', () => {
+    expect(CommonUtil.validateIncorporationNumber(null)).toBe(false)
     expect(CommonUtil.validateIncorporationNumber('XX000033')).toBe(false)
+  })
+
+  it('isCooperativeNumber returns True with valid coop number', () => {
+    expect(CommonUtil.isCooperativeNumber('CP000033')).toBe(true)
+  })
+
+  it('isCooperativeNumber returns False with invalid coop number', () => {
+    expect(CommonUtil.isCooperativeNumber(null)).toBe(false)
+    expect(CommonUtil.isCooperativeNumber('')).toBe(false)
+    expect(CommonUtil.isCooperativeNumber('XX000033')).toBe(false)
   })
 
   it('is validating NameRequestNumber [positive]', () => {
@@ -84,6 +97,40 @@ describe('Common Util Test', () => {
 
   it('is validating email format [negative]', () => {
     expect(CommonUtil.validateEmailFormat('peterparker07$spider-man.com')).toBe(false)
+  })
+
+  it('validatePhoneNumber returns True with valid phone number', () => {
+    expect(CommonUtil.validateEmailFormat('123-456-7890')).toBe(false)
+  })
+
+  it('validatePhoneNumber returns False with invalid phone number', () => {
+    expect(CommonUtil.validateEmailFormat('1234567890123')).toBe(false)
+  })
+
+  it('validateCooperativePasscode returns True with valid passcode', () => {
+    expect(CommonUtil.validateCooperativePasscode('123456789')).toBe(true)
+  })
+
+  it('validateCooperativePasscode returns False with invalid passcode', () => {
+    expect(CommonUtil.validateCooperativePasscode(null)).toBe(false)
+    expect(CommonUtil.validateCooperativePasscode('')).toBe(false)
+    expect(CommonUtil.validateCooperativePasscode('12345678')).toBe(false)
+    expect(CommonUtil.validateCooperativePasscode('1234567890')).toBe(false)
+    expect(CommonUtil.validateCooperativePasscode('abcdefghi')).toBe(false)
+  })
+
+  it('validateCorporatePassword returns True with valid password', () => {
+    expect(CommonUtil.validateCorporatePassword('AAAAAAAA')).toBe(true)
+    expect(CommonUtil.validateCorporatePassword('ZZZZZZZZZZZZZZZ')).toBe(true)
+    expect(CommonUtil.validateCorporatePassword('12345678')).toBe(true)
+    expect(CommonUtil.validateCorporatePassword('123456789012345')).toBe(true)
+  })
+
+  it('validateCorporatePassword returns False with invalid password', () => {
+    expect(CommonUtil.validateCorporatePassword(null)).toBe(false)
+    expect(CommonUtil.validateCorporatePassword('')).toBe(false)
+    expect(CommonUtil.validateCorporatePassword('1234567')).toBe(false)
+    expect(CommonUtil.validateCorporatePassword('1234567890123456')).toBe(false)
   })
 
   it('is validating Password [positive]', () => {

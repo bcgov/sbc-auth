@@ -12,13 +12,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Install tools
-        run: |
-          ./scripts/install_tools.sh
-          oc version
-          op --version
       - name: Login Openshift and Restart mailhog
         run: |
-          oc ${{ secrets.oc_parameters }}
+          oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
           oc scale --replicas=0 deployment/mailhog -n ${{ secrets.OPENSHIFT4_REPOSITORY_DEV }}
           oc scale --replicas=1 deployment/mailhog -n ${{ secrets.OPENSHIFT4_REPOSITORY_DEV }}

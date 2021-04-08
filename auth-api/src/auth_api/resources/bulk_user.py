@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.user import User as UserService
 from auth_api.tracer import Tracer
@@ -27,7 +27,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('bulk users', description='Endpoints for bulk user profile management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST,OPTIONS')
@@ -38,7 +37,7 @@ class BulkUser(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def post():
         """Admin users can post multiple users to his org.Use it for anonymous purpose only."""
         try:

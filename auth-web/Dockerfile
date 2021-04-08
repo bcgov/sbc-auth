@@ -6,6 +6,16 @@ COPY . .
 RUN npm run build
 
 FROM nginx:1.18.0 as production-stage
+
+ARG VCS_REF="missing"
+ARG BUILD_DATE="missing"
+
+ENV VCS_REF=${VCS_REF}
+ENV BUILD_DATE=${BUILD_DATE}
+
+LABEL org.label-schema.vcs-ref=${VCS_REF} \
+    org.label-schema.build-date=${BUILD_DATE}
+
 RUN echo "hello1"
 COPY nginx.conf /etc/nginx/nginx.conf
 RUN echo "hello2"
