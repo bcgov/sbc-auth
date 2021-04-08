@@ -1,7 +1,7 @@
 {
     "definitions": {},
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/task",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/task_request",
     "type": "object",
     "title": "Task",
     "additionalProperties": true,
@@ -12,7 +12,8 @@
         "relationshipType",
         "relationshipId",
         "type",
-        "status"
+        "status",
+        "relationshipStatus"
     ],
    "properties": {
         "name": {
@@ -86,6 +87,15 @@
             "default": "",
             "examples": [
                 "OPEN"
+            ]
+        },
+        "relationshipStatus": {
+            "$id": "#/properties/relationshipStatus",
+            "type": "string",
+            "title": "Relationship Status",
+            "default": "",
+            "examples": [
+                "APPROVED"
             ]
         }
     }

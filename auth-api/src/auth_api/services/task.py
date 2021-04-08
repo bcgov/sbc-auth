@@ -74,8 +74,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         task_model.update_from_dict(**camelback2snake(task_info))
         task_model.decision_made_by = user.username
-
         task_model.save()
+
         return Task(task_model)
 
     @staticmethod

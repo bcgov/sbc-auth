@@ -20,9 +20,9 @@ import json
 from auth_api import status as http_status
 from tests.utilities.factory_utils import (factory_auth_header,
                                            factory_task_service, factory_user_model)
-from tests.utilities.factory_scenarios import TestJwtClaims
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestContactInfo, TestAffidavit
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskType, AffidavitStatus, OrgStatus
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
@@ -50,30 +50,58 @@ def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_put_task(client, jwt, session):  # pylint:disable=unused-argument
+def test_put_task(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
-    public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
-    rv = client.post('/api/v1/users', headers=public_headers, content_type='application/json')
-    dictionary = json.loads(rv.data)
-    task = factory_task_service(dictionary['id'])
-    task_info = task.as_dict()
-    task_id = task_info['id']
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Update the created task and the relationship
+
+    bc_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=bc_headers, content_type='application/json')
+    # POST a contact to test user
+    client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact1),
+                headers=bc_headers, content_type='application/json')
+
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=bc_headers,
+                                    content_type='application/json')
+    doc_key = document_signature.json.get('key')
+    client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
+                headers=bc_headers,
+                data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
+                content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
+                               headers=bc_headers,
+                               content_type='application/json')
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+    org_id = org_response.json.get('id')
 
     update_task_payload = {
-        'id': task_id,
+        'id': 1,
         'name': 'bar',
         'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
         'relationshipType': TaskRelationshipType.ORG.value,
-        'relationshipId': 1,
+        'relationshipId': org_id,
         'type': TaskType.PENDING_STAFF_REVIEW.value,
-        'status': TaskStatus.COMPLETED.value
+        'status': TaskStatus.COMPLETED.value,
+        'relationshipStatus': AffidavitStatus.APPROVED.value
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.put('/api/v1/tasks/{}'.format(task_id),
+    rv = client.put('/api/v1/tasks/{}'.format(1),
                     data=json.dumps(update_task_payload),
                     headers=headers, content_type='application/json')
 
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == TaskStatus.COMPLETED.value
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+    assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value

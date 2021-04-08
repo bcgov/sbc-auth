@@ -245,20 +245,20 @@ def factory_product_model(org_id: str,
     return subscription
 
 
-def factory_task_service(user_id: int = 1):
+def factory_task_service(user_id: int = 1, org_id: int = 1):
     """Produce a templated task service."""
-    task_model = factory_task_model(user_id)
+    task_model = factory_task_model(user_id, org_id)
     service = TaskService(task_model)
     return service
 
 
-def factory_task_model(user_id: int = 1):
+def factory_task_model(user_id: int = 1, org_id: int = 1):
     """Produce a Task model."""
     task = TaskModel(id=1,
                      name='foo',
                      date_submitted=datetime.datetime.now(),
                      relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=1,
+                     relationship_id=org_id,
                      type=TaskType.PENDING_STAFF_REVIEW.value,
                      status=TaskStatus.OPEN.value,
                      related_to=user_id
