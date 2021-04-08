@@ -59,14 +59,14 @@ class Tasks(Resource):
 
 @cors_preflight('PUT,OPTIONS')
 @API.route('/<int:task_id>', methods=['PUT', 'OPTIONS'])
-class TaskStatus(Resource):
+class TaskUpdate(Resource):
     """Resource for updating a task."""
 
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_JWT.has_one_of_roles(
-        [Role.STAFF.value])
+        [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value])
     def put(task_id):
         """Update a task."""
         request_json = request.get_json()
