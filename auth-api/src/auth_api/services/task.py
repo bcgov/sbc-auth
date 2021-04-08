@@ -70,7 +70,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>create_task ')
         return Task(task_model)
 
-    def update_task(self, task_info: Dict = None, token_info: Dict = None, origin_url: str = None):
+    def update_task(self, task_info: Dict = None, token_info: Dict = None):
         """Update a task record."""
         current_app.logger.debug('<update_task ')
         task_model: TaskModel = self._model
@@ -85,13 +85,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
         # Update its relationship
         task_relationship_status = task_info.pop('relationshipStatus')
         self.update_relationship(task_relationship_status=task_relationship_status,
-                                 user_name=user.username,
-                                 origin_url=origin_url)
+                                 user_name=user.username)
         current_app.logger.debug('>update_task ')
 
         return Task(task_model)
 
-    def update_relationship(self, task_relationship_status: str, user_name: str, origin_url: str = None):
+    def update_relationship(self, task_relationship_status: str, user_name: str):
         """Retrieve the relationship record and update the status."""
         task_model: TaskModel = self._model
         current_app.logger.debug('<update_task_relationship ')
@@ -101,12 +100,11 @@ class Task:  # pylint: disable=too-many-instance-attributes
             is_approved: bool = task_relationship_status == AffidavitStatus.APPROVED.value
             org_id = task_model.relationship_id
             self.update_org(is_approved=is_approved, org_id=org_id,
-                            user_name=user_name, origin_url=origin_url)
+                            user_name=user_name)
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
-    def update_org(is_approved: bool, org_id: int, user_name: str,
-                   origin_url: str = None):  # pylint:disable=unused argument
+    def update_org(is_approved: bool, org_id: int, user_name: str):
         """Approve/Reject Affidavit and Org."""
         current_app.logger.debug('<update_task_org ')
 
