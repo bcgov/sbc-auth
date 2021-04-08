@@ -22,7 +22,7 @@
 import groovy.json.*
 
 // define constants - values sent in as env vars from whatever calls this pipeline 
-def APP_NAME = 'pay-notebook-report'
+def APP_NAME = 'auth-notebook-report'
 def DESTINATION_TAG = 'dev'
 def TOOLS_TAG = 'tools'
 def NAMESPACE_APP = '1rdehl'
