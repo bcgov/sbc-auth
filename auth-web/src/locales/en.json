@@ -1,10 +1,20 @@
 {
   "message": "hello i18n !!",
   "loginFailedMessage": "Incorrect Incorporation Number or Passcode",
-  "techSupportPhone": "250 387-7848",
+  "labelTollFree": "Toll Free:",
+  "labelVictoriaOffice": "Victoria Office:",
+  "labelPhone": "Phone:",
+  "labelEmail": "Email:",
+  "techSupportPhone": "250-387-7848",
   "techSupportTollFree": "1-877-526-1526",
-  "techSupportEmail": "bcregistries@gov.bc.ca",
-  "techSupportEmailSubject": "Business Registry Support Request",
+  "techSupportEmail": "BCRegistries@gov.bc.ca",
+  "techSupportEmailSubject": "BC Registries - Business Registry Support Request",
+  "maximusSupportPhone": "1-250-370-1033",
+  "maximusSupportTollFree": "1-877-370-1033",
+  "maximusSupportEmail": "BCRegistries@gov.bc.ca",
+  "maximusSupportEmailSubject": "BC Registries and Online Services - Support Request",
+  "labelHoursOfOperation": "Hours of Operation:",
+  "hoursOfOperation": "Monday to Friday, 8:30am - 4:30pm Pacific Time",
   "payFailedMessage": "Payment Failed due to technical reasons. Please try again.",
   "downloadFailedMessage": "Download Invoice Failed due to technical reasons. Please try again.",
   "payFailedMessagePayBcDown": "Payment Failed due to technical reasons. Please use the below contacts.",
@@ -110,10 +120,10 @@
   "removeBusinessOptionModalResetPasscode": "<li>Business will be removed from this account</li><li>New business passcode will be generated and will cancel the old business passcode</li><li>New business passcode will be sent through email to the person who will be responsible for managing this business moving forward</li>",
   "removeBusinessOptionModalDonotResetPasscode": "<li>Business will be removed from this account</li><li>The current passcode for this business will be cancelled</li><li>You will not be able to add this business back to your account without a new passcode</li>",
   "govmAccountCreationSuccessTitle":"Your BC Registries & Online Services account has been requested",
-  "govmAAccountCreationSuccessSubtext":"Thank you for submitting your informtion. BC Registries staff will review your information and  notify you through email about your account approval status.",
+  "govmAAccountCreationSuccessSubtext":"Thank you for submitting your information. BC Registries staff will review your information and  notify you through email about your account approval status.",
   "removedBusinessSuccessText": "Your business has been successfully removed from the account and the current passcode has been cancelled",
   "generatePasscodeSuccessText": "You have successfully generated a passcode. The new passcode has been emailed",
   "willsRegistryTosSubtext":"The search and registration products are intended for the exclusive use of solicitors and notaries only. Title Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.",
-  "willsRegistryTosIagree":"I confirm that the informtion above is all correct and this account act as a solicitor, notary or title search company approved by the Vital Statistics agency."
+  "willsRegistryTosIagree":"I confirm that the information above is all correct and this account act as a solicitor, notary or title search company approved by the Vital Statistics agency."
 
 }

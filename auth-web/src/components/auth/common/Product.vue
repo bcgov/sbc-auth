@@ -99,11 +99,12 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { OrgProduct } from '@/models/Organization'
 import { productStatus } from '@/util/constants'
 
 @Component
 export default class Product extends Vue {
-  @Prop({ default: undefined }) productDetails: any
+  @Prop({ default: undefined }) productDetails: OrgProduct
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
   private isRequestNow: boolean = false
@@ -119,7 +120,10 @@ export default class Product extends Vue {
   public istosAccepted: boolean = null
 
   @Watch('productDetails')
-  onProductChange (newProd:any) {
+  onProductChange (newProd:OrgProduct, oldProduct:OrgProduct) {
+    if (newProd.subscriptionStatus !== oldProduct.subscriptionStatus) {
+      this.isRequestNow = false
+    }
     this.setupProductDetails(newProd)
   }
   get isDisableSaveBtn () {
@@ -128,8 +132,11 @@ export default class Product extends Vue {
 
   setupProductDetails (productDetails) {
     const { subscriptionStatus, name, description } = productDetails
-    // eslint-disable-next-line no-console
-    console.log('subscriptionStatus', subscriptionStatus)
+    // resetiing all values first
+    this.isApproved = false
+    this.isPending = false
+    this.isRejected = false
+    this.isRequesting = false
 
     if (subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
       this.label = 'Pending'

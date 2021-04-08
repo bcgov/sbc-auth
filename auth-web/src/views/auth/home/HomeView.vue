@@ -130,11 +130,23 @@
               <h3 class="mb-6">Contact Us</h3>
               <p class="mb-5">For support or questions about this application, contact us at:</p>
               <ul class="contact-info__list mb-5">
-                <li><span>Toll Free:</span><a :href="`tel:+${$t('techSupportTollFree')}`">{{ $t('techSupportTollFree') }}</a></li>
-                <li><span>Phone:</span> <a :href="`tel:+1${$t('techSupportPhone')}`">{{ $t('techSupportPhone') }}</a></li>
-                <li><span>Email:</span> <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries - Business Registry Support Request">bcregistries@gov.bc.ca</a></li>
+                <li>
+                  <span>{{ $t('labelTollFree') }}</span>
+                  <a :href="`tel:+${$t('techSupportTollFree')}`">{{ $t('techSupportTollFree') }}</a>
+                </li>
+                <li>
+                  <span>{{ $t('labelPhone') }}</span>
+                  <a :href="`tel:+1${$t('techSupportPhone')}`">{{ $t('techSupportPhone') }}</a>
+                </li>
+                <li>
+                  <span>{{ $t('labelEmail') }}</span>
+                  <a :href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
+                </li>
               </ul>
-              <p class="mb-0"><strong>Hours of Operation:</strong><br>Monday to Friday, 8:30am - 4:30pm <span title="Pacific Standard Time">PST</span></p>
+              <p class="mb-0">
+                <strong>{{ $t('labelHoursOfOperation') }}</strong><br>
+                {{ $t('hoursOfOperation') }}
+              </p>
             </v-col>
           </v-row>
         </v-container>

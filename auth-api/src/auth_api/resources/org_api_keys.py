@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import ApiGateway as ApiGatewayService
 from auth_api.tracer import Tracer
@@ -27,7 +27,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('keys', description='Endpoints for API Keys management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST,GET,OPTIONS')
@@ -38,7 +37,7 @@ class OrgKeys(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value])
     def get(org_id):
         """Get all API keys for the account."""
         return ApiGatewayService.get_api_keys(org_id), http_status.HTTP_200_OK
@@ -46,7 +45,7 @@ class OrgKeys(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value])
     def post(org_id):
         """Create new api key for the org."""
         request_json = request.get_json()
@@ -69,7 +68,7 @@ class OrgKey(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value])
     def delete(org_id, key):
         """Revoke API Key."""
         try:
