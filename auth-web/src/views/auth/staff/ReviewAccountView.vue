@@ -262,42 +262,6 @@ export default class ReviewAccountView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  // BC Online Account Information
-  // .bcol-acc__name {
-  //   font-size: 1.125rem;
-  //   font-weight: 700;
-  // }
-
-  // .bcol-acc__meta {
-  //   margin: 0;
-  //   padding: 0;
-  //   list-style-type: none;
-  //   font-size: .925rem;
-
-  //   li {
-  //     position: relative;
-  //     display: inline-block
-  //   }
-
-  //   li + li {
-  //     &:before {
-  //       content: ' | ';
-  //       display: inline-block;
-  //       position: relative;
-  //       top: -2px;
-  //       left: 2px;
-  //       width: 2rem;
-  //       vertical-align: top;
-  //       text-align: center;
-  //     }
-  //   }
-  // }
-
-  // .mailing-address {
-  //   list-style-type: none;
-  //   margin: 0;
-  //   padding: 0;
-  // }
 
   .select-button {
     width: 8.75rem;

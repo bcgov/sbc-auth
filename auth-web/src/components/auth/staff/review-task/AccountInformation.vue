@@ -97,22 +97,4 @@ export default class AccountInformation extends Vue {
     padding: 0;
   }
 
-  // .select-button {
-  //   width: 8.75rem;
-  // }
-
-  // .crumbs a {
-  //   font-size: 0.875rem;
-  //   text-decoration: none;
-
-  //   i {
-  //     margin-top: -2px;
-  //   }
-  // }
-
-  // .crumbs a:hover {
-  //   span {
-  //     text-decoration: underline;
-  //   }
-  // }
 </style>
