@@ -90,10 +90,11 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
 
-    task = TaskService(TaskModel.find_by_task_id(1))
+    task = TaskModel.find_by_task_id(1)
+    print(TaskService(task).as_dict())
 
-    task.update_task(task_info=task_info,
-                     token_info=token_info)
+    task = TaskService.update_task(TaskService(task), task_info=task_info,
+                                   token_info=token_info)
     dictionary = task.as_dict()
     assert dictionary['name'] == 'bar'
     assert dictionary['status'] == TaskStatus.COMPLETED.value
