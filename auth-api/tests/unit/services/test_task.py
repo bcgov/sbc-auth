@@ -78,8 +78,12 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
 
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
 
+    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                                    task_status=TaskStatus.OPEN.value)
+    fetched_task = tasks[0]
+
     task_info = {
-        'id': 1,
+        'id': fetched_task.id,
         'name': 'bar',
         'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
         'relationshipType': TaskRelationshipType.ORG.value,
@@ -89,7 +93,8 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
 
-    task = TaskModel.find_by_task_id(1)
+    print(fetched_task.id)
+    task: TaskModel = TaskModel.find_by_task_id(fetched_task.id)
 
     task = TaskService.update_task(TaskService(task), task_info=task_info,
                                    token_info=token_info)
