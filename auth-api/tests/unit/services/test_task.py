@@ -63,8 +63,8 @@ def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
 
 def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
-    user_with_token = TestUserInfo.user_staff_admin
-    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
     user = factory_user_model_with_contact(user_with_token)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
