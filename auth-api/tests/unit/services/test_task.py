@@ -91,7 +91,6 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
     }
 
     task = TaskModel.find_by_task_id(1)
-    print(TaskService(task).as_dict())
 
     task = TaskService.update_task(TaskService(task), task_info=task_info,
                                    token_info=token_info)
