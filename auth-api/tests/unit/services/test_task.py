@@ -20,6 +20,7 @@ from datetime import datetime
 from auth_api.services import Task as TaskService
 from auth_api.models import Task as TaskModel
 from auth_api.services import Affidavit as AffidavitService
+from auth_api.services import Org as OrgService
 from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType, OrgStatus, AffidavitStatus, LoginSource
 from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
