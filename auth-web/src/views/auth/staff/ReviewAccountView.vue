@@ -85,11 +85,13 @@ import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.
 
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
+import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
+
 // import OrgService from '@/services/org.services'
 import { Prop } from 'vue-property-decorator'
 import StaffModule from '@/store/modules/staff'
@@ -199,8 +201,21 @@ export default class ReviewAccountView extends Vue {
         accountNotaryName: this.accountNotaryName
       }
     }
+
     ]
   }
+  // needed for product approval
+  //  {
+  //     id: 'AgreementInformation',
+  //     component: AgreementInformation,
+  //     props: {
+  //       tabNumber: 5,
+  //       title: 'Agreement',
+  //       isTOSAlreadyAccepted: true,
+  //       orgName: this.accountUnderReview.name,
+  //       userName: `${this.accountUnderReviewAdmin.firstname} ${this.accountUnderReviewAdmin.lastname}`
+  //     }
+  //   }
 
   // private formatDate (date: Date): string {
   //   return moment(date).format('MMM DD, YYYY')
@@ -225,8 +240,6 @@ export default class ReviewAccountView extends Vue {
   }
 
   private async downloadAffidavit (): Promise<void> {
-    // eslint-disable-next-line no-console
-    console.log('coming iside download')
     // Invoke document service to get affidavit for current organization
     DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
