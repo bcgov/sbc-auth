@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
-
+import urllib
 from datetime import datetime
 from typing import Dict
 
@@ -227,7 +227,7 @@ class Invitation:
                                    template.render(invitation=invitation,
                                                    url=token_confirm_url,
                                                    user=user,
-                                                   org_name=org_name,
+                                                   org_name=urllib.parse.quote_plus(org_name),
                                                    logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
             invitation.invitation_status_code = 'FAILED'
