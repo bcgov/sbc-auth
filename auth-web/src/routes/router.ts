@@ -58,6 +58,7 @@ import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vu
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
+import org from '@/store/modules/org'
 
 function mapReturnPayVars (route: any) {
   let payResponseUrl = window.location.search
@@ -72,6 +73,13 @@ function mapReturnPayVars (route: any) {
 }
 
 function mapOrgDetails (route: any) {
+  let orgName = route.params.orgName
+  try {
+    orgName = window.atob(orgName)
+  } catch (e) {
+    // older invitations.Ignore.org name wont be base 64 for old invitations.
+  }
+
   return {
     token: route.params.token,
     loginSource: route.params.loginSource,
