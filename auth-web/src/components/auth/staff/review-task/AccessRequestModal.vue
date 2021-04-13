@@ -21,7 +21,9 @@
         <!-- <v-spacer></v-spacer> -->
         <v-btn large :color="modalData.color" @click="callAction()"
         class="font-weight-bold px-4"
-        data-test="btn-access-request">{{modalData.btnLabel}}</v-btn>
+        :loading="isSaving"
+        data-test="btn-access-request"
+        >{{modalData.btnLabel}}</v-btn>
         <v-btn large outlined color="primary" @click="close()" data-test="btn-close-access-request-dialog">Cancel</v-btn>
       </template>
     </ModalDialog>
@@ -37,6 +39,7 @@
       <template v-slot:icon>
         <v-icon large color="primary">mdi-check</v-icon>
       </template>
+
       <template v-slot:actions>
         <v-btn
           large
@@ -53,7 +56,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
@@ -65,20 +68,16 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 export default class AccessRequestModal extends Vue {
   @Prop({ default: false }) private isRejectModal: boolean
   @Prop({ default: false }) private isConfirmationModal: boolean
+  @Prop({ default: false }) private isSaving: boolean
+  @Prop({ default: '' }) private orgName: string
 
   $refs: {
     accessRequest: ModalDialog,
     accessRequestConfirmationDialog: ModalDialog,
   }
 
-  // private setupTitle (isRejectModal, isConfirmationModal) {
-  //    this.title = 'Approve Access Request?'
-  // this.subText = 'Approving the request will give this account access to Wills Registry'
-  // if (this.isRejectModal) {
-  //   this.title = 'Reject Access Request?'
-  //   this.subText = 'Rejecting the request will reject this account to access Wills Registry'
-  // }
   get modalData () {
+    // meed to change Wills Registry to product
     let title = 'Approve Access Request?'
     let text = 'Approving the request will give this account access to Wills Registry'
     let icon = 'mdi-check'
@@ -96,11 +95,12 @@ export default class AccessRequestModal extends Vue {
 
   get confirmModalData () {
     let title = 'Request has been Approved'
-    let text = 'The account Account Four has been approved to access Wills Registry'
+    let text = `The account <strong>${this.orgName}</strong> has been approved to access Wills Registry`
 
     if (this.isRejectModal) {
       title = 'Request has been Rejected'
-      text = 'The account Account Four has been rejected to access Wills Registry'
+      // eslint-disable-next-line no-irregular-whitespace
+      text = `The account <strong>${this.orgName}</strong> has been rejected to access Wills Registry`
     }
     return { title, text }
   }
@@ -129,12 +129,6 @@ export default class AccessRequestModal extends Vue {
  public callAction () {
    return this.isRejectModal
  }
-
-  mounted () {
-    // eslint-disable-next-line no-console
-    console.log('open modal')
-    // this.open()
-  }
 }
 </script>
 

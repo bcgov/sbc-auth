@@ -71,6 +71,8 @@
           ref="accessRequest"
           :isConfirmationModal="isConfirmationModal"
           :isRejectModal="isRejectModal"
+          :isSaving="isSaving"
+          :orgName="accountUnderReview.name"
           @approve-reject-action="saveSelection()"
           @after-confirm-action="goBack()"
           />
@@ -313,12 +315,14 @@ export default class ReviewAccountView extends Vue {
 
   private async saveSelection (): Promise<void> {
     this.isSaving = true
+
+    if (!this.isRejectModal) {
+      await this.approveAccountUnderReview()
+    } else {
+      await this.rejectAccountUnderReview()
+    }
+    this.isSaving = false
     this.openModal(this.isRejectModal, true)
-    // if (!this.isRejectModal) {
-    //   await this.approveAccountUnderReview()
-    // } else {
-    //   await this.rejectAccountUnderReview()
-    // }
     // this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
