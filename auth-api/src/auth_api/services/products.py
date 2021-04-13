@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Product and Product Subscription data."""
-
+from datetime import datetime
 from typing import Any, Dict, List
 
 from flask import current_app
@@ -21,10 +21,13 @@ from sqlalchemy.exc import SQLAlchemyError
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
+from auth_api.models import User as UserModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
-from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, ProductSubscriptionStatus
+from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
+                                 ProductSubscriptionStatus, TaskRelationshipType, TaskType, TaskStatus
+from .task import Task as TaskService
 from .authorization import check_auth
 from ..utils.cache import cache
 from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
@@ -85,6 +88,18 @@ class Product:
                                                                 product_code=product_code,
                                                                 status_code=product_model.default_subscription_status)\
                     .flush()
+                # create a staff review task for this product subscription
+                user = UserModel.find_by_jwt_token(token=token_info)
+                task_info = {'name': product_model.description,
+                             'relationshipId': product_subscription.id,
+                             'relatedTo': user.id,
+                             'dateSubmitted': datetime.today(),
+                             'relationshipType': TaskRelationshipType.PRODUCT.value,
+                             'type': TaskType.PENDING_STAFF_REVIEW.value,
+                             'status': TaskStatus.OPEN.value
+                             }
+                TaskService.create_task(task_info)
+
                 subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)

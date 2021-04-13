@@ -46,8 +46,11 @@ class Tasks(Resource):
             # Search based on request arguments
             task_type = request.args.get('type', None)
             task_status = request.args.get('status', TaskStatus.OPEN.value)
+            page = request.args.get('page', 1)
+            limit = request.args.get('limit', 10)
 
-            tasks = TaskService.fetch_tasks(task_type=task_type, task_status=task_status)
+            tasks = TaskService.fetch_tasks(task_type=task_type, task_status=task_status,
+                                            page=page, limit=limit)
             response, status = {'tasks': TaskSchema().dump(tasks, many=True)}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
