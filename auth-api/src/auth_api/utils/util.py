@@ -17,7 +17,10 @@
 A simple decorator to add the options method to a Request Class.
 """
 
+import base64
 import re
+import urllib
+
 from humps.main import camelize, decamelize
 
 
@@ -63,3 +66,10 @@ class Singleton(type):
 def digitify(payload: str) -> int:
     """Return the digits from the string."""
     return int(re.sub(r'\D', '', payload))
+
+
+def escape_wam_friendly_url(param):
+    """Return encoded/escaped url."""
+    base64_org_name = base64.b64encode(bytes(param, encoding='utf-8')).decode('utf-8')
+    encode_org_name = urllib.parse.quote(base64_org_name, safe='')
+    return encode_org_name
