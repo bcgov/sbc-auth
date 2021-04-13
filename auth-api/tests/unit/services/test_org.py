@@ -289,8 +289,10 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1,
-                                                               skip_auth=True)
+    subscriptions = ProductService.create_product_subscription(dictionary['id'],
+                                                               TestOrgProductsInfo.org_products1,
+                                                               skip_auth=True,
+                                                               token_info=TestJwtClaims.public_bceid_user)
     assert len(subscriptions) == 1
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
 
@@ -302,13 +304,17 @@ def test_create_product_single_subscription_duplicate_error(session, keycloak_mo
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1,
-                                                               skip_auth=True)
+    subscriptions = ProductService.create_product_subscription(dictionary['id'],
+                                                               TestOrgProductsInfo.org_products1,
+                                                               skip_auth=True,
+                                                               token_info=TestJwtClaims.public_bceid_user)
     assert len(subscriptions) == 1
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
     with pytest.raises(BusinessException) as exception:
-        ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products1,
-                                                   skip_auth=True)
+        ProductService.create_product_subscription(dictionary['id'],
+                                                   TestOrgProductsInfo.org_products1,
+                                                   skip_auth=True,
+                                                   token_info=TestJwtClaims.public_bceid_user)
     assert exception.value.code == Error.PRODUCT_SUBSCRIPTION_EXISTS.name
 
 
@@ -319,8 +325,10 @@ def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
-    subscriptions = ProductService.create_product_subscription(dictionary['id'], TestOrgProductsInfo.org_products2,
-                                                               skip_auth=True)
+    subscriptions = ProductService.create_product_subscription(dictionary['id'],
+                                                               TestOrgProductsInfo.org_products2,
+                                                               skip_auth=True,
+                                                               token_info=TestJwtClaims.public_bceid_user)
     assert len(subscriptions) == 2
     assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode']
     assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
