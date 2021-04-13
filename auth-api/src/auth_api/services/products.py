@@ -26,8 +26,8 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
 from .task import Task as TaskService
-from auth_api.utils.enums import (ProductTypeCode, ProductCode, OrgType,
-                                  ProductSubscriptionStatus, TaskRelationshipType, TaskType, TaskStatus)
+from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
+                                 ProductSubscriptionStatus, TaskRelationshipType, TaskType, TaskStatus
 from .authorization import check_auth
 from ..utils.cache import cache
 from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
