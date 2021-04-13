@@ -227,7 +227,7 @@ class Invitation:
                                    template.render(invitation=invitation,
                                                    url=token_confirm_url,
                                                    user=user,
-                                                   org_name=urllib.parse.quote_plus(org_name),
+                                                   org_name=org_name,
                                                    logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
             invitation.invitation_status_code = 'FAILED'
@@ -240,7 +240,7 @@ class Invitation:
     def _get_invitation_configs(org_name, login_source, org_status=None):
         """Get the config for different email types."""
         login_source = login_source or LoginSource.BCSC.value
-        token_confirm_path = f'{org_name}/validatetoken/{login_source}'
+        token_confirm_path = f'{urllib.parse.quote_plus(org_name)}/validatetoken/{login_source}'
         if login_source == LoginSource.STAFF.value:
             # for GOVM accounts , there are two kinda of invitation. Its same login source
             # if its first invitation to org , its an account set up invitation else normal joining invite
