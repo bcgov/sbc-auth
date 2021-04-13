@@ -45,7 +45,7 @@ export default class ProductTOS extends Vue {
   @Prop({ default: false }) isTOSAlreadyAccepted: boolean
   @Prop({ default: false }) isApprovalFlow: boolean
   private termsAccepted: boolean = false
-  public istosTouched: boolean = null
+  public istosTouched: boolean = false
 
   @Watch('isTOSAlreadyAccepted')
   onisTOSALreadyAcceptedChange (newTos:boolean, oldTos:boolean) {

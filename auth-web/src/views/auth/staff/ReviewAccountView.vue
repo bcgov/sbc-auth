@@ -26,20 +26,37 @@
 
           <!-- Components list will come here -->
           <v-col class="main-col col-12 col-md-8 pa-6 pa-md-8">
-            <template v-for="(component, idx) in componentList">
+            <template v-for="(component) in componentList">
               <component
                 :key="component.id"
                 :is="component.component"
                 v-bind="component.props"
                 v-on="component.events"
               />
-              <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`" v-if="componentList.length-1 !== idx"></v-divider>
+              <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`" ></v-divider>
+              <!-- v-if="componentList.length-1 !== idx" -->
             </template>
+
+             <!-- <v-container v-if="canSelect" > -->
+              <!-- <v-divider class="mb-10"></v-divider> -->
+              <div class="form-btns d-flex justify-end" v-if="canSelect" >
+                <div>
+                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()">
+                    <v-icon left class="mr-3" v-if="approveSelected">mdi-check</v-icon>
+                    <span>Approve</span>
+                  </v-btn>
+                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)">
+                    <v-icon left class="mr-3" v-if="rejectSelected">mdi-close</v-icon>
+                    <span>Reject</span>
+                  </v-btn>
+                </div>
+              </div>
+            <!-- </v-container> -->
           </v-col>
 
           <!-- Account Status Column -->
           <v-col class="col-12 col-md-4 pl-0 pt-8 pr-8 d-flex">
-            <v-divider vertical class="mb-4 mr-8"></v-divider>
+            <v-divider vertical class="mb-0 mr-8"></v-divider>
             <div class="flex-grow-1">
             <AccountStatusTab
               :accountUnderReview="accountUnderReview"
@@ -49,8 +66,15 @@
             </div>
           </v-col>
         </v-row>
-
-        <v-container v-if="canSelect" class="pa-8 pt-0">
+        <!-- approve / reject confirmation modals -->
+        <AccessRequestModal
+          ref="accessRequest"
+          :isConfirmationModal="isConfirmationModal"
+          :isRejectModal="isRejectModal"
+          @approve-reject-action="saveSelection()"
+          @after-confirm-action="goBack()"
+          />
+        <!-- <v-container v-if="canSelect" class="pa-8 pt-0">
           <v-divider class="mb-10"></v-divider>
           <div class="form-btns d-flex justify-space-between">
             <div>
@@ -68,7 +92,7 @@
               <v-btn large depressed :to=pagesEnum.STAFF_DASHBOARD>Cancel</v-btn>
             </div>
           </div>
-        </v-container>
+        </v-container> -->
 
       </v-card>
     </div>
@@ -79,6 +103,7 @@
 import { Account, AccountStatus, Pages } from '@/util/constants'
 import { MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
+import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
 import AccountInformation from '@/components/auth/staff/review-task/AccountInformation.vue'
 import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.vue'
@@ -106,7 +131,8 @@ import { getModule } from 'vuex-module-decorators'
     AccountInformation,
     AccountAdministrator,
     NotaryInformation,
-    AccountStatusTab
+    AccountStatusTab,
+    AccessRequestModal
   },
   computed: {
     ...mapState('staff', ['accountUnderReview', 'accountUnderReviewAddress', 'accountUnderReviewAdmin', 'accountUnderReviewAdminContact', 'accountUnderReviewAffidavitInfo']),
@@ -137,22 +163,29 @@ export default class ReviewAccountView extends Vue {
   private readonly pagesEnum = Pages
   private readonly accountStatusEnum = AccountStatus
 
+  private isConfirmationModal:boolean = false
+  private isRejectModal:boolean = false
+
+  $refs: {
+    accessRequest: AccessRequestModal,
+  }
+
   private get canSelect (): boolean {
     return this.accountUnderReview.statusCode === AccountStatus.PENDING_STAFF_REVIEW
   }
 
-  private get statusLabel (): string {
-    switch (this.accountUnderReview.statusCode) {
-      case AccountStatus.ACTIVE:
-        return 'Approved'
-      case AccountStatus.REJECTED:
-        return 'Rejected'
-      case AccountStatus.PENDING_STAFF_REVIEW:
-        return 'Pending'
-      default:
-        return ''
-    }
-  }
+  // private get statusLabel (): string {
+  //   switch (this.accountUnderReview.statusCode) {
+  //     case AccountStatus.ACTIVE:
+  //       return 'Approved'
+  //     case AccountStatus.REJECTED:
+  //       return 'Rejected'
+  //     case AccountStatus.PENDING_STAFF_REVIEW:
+  //       return 'Pending'
+  //     default:
+  //       return ''
+  //   }
+  // }
 
   private get isPendingReviewPage () {
     return this.accountUnderReview?.statusCode === AccountStatus.PENDING_STAFF_REVIEW
@@ -222,19 +255,20 @@ export default class ReviewAccountView extends Vue {
   // }
 
   private async mounted () {
+    // need to change call task api before
     await this.syncAccountUnderReview(this.orgId)
 
     // Set initial approved/rejected status based on current account
-    switch (this.accountUnderReview.statusCode) {
-      case AccountStatus.ACTIVE:
-        this.approveSelected = true
-        break
-      case AccountStatus.REJECTED:
-        this.rejectSelected = true
-        break
-      default:
-        break
-    }
+    // switch (this.accountUnderReview.statusCode) {
+    //   case AccountStatus.ACTIVE:
+    //     this.approveSelected = true
+    //     break
+    //   case AccountStatus.REJECTED:
+    //     this.rejectSelected = true
+    //     break
+    //   default:
+    //     break
+    // }
 
     this.isLoading = false
   }
@@ -244,28 +278,48 @@ export default class ReviewAccountView extends Vue {
     DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
-  private selectApprove (): void {
-    if (this.canSelect) {
-      this.approveSelected = true
-      this.rejectSelected = false
-    }
-  }
+  // private selectApprove (): void {
+  //   this.isConfirmationModal = false
+  //   this.isRejectModal = false
+  //   this.$refs.accessRequest.open()
+  //   // if (this.canSelect) {
+  //   //   this.approveSelected = true
+  //   //   this.rejectSelected = false
+  //   // }
+  // }
 
-  private selectReject (): void {
-    if (this.canSelect) {
-      this.approveSelected = false
-      this.rejectSelected = true
+  // private selectReject (): void {
+  //   this.isConfirmationModal = false
+  //   this.isRejectModal = true
+  //   this.$refs.accessRequest.open()
+  //   // if (this.canSelect) {
+  //   //   this.approveSelected = false
+  //   //   this.rejectSelected = true
+  //   // }
+  // }
+
+  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {
+    this.isConfirmationModal = isConfirmationModal
+    this.isRejectModal = isRejectModal
+
+    if (isConfirmationModal) {
+      this.$refs.accessRequest.close()
+      this.$refs.accessRequest.openConfirm()
+    } else {
+      this.$refs.accessRequest.open()
+      this.$refs.accessRequest.closeConfirm()
     }
   }
 
   private async saveSelection (): Promise<void> {
     this.isSaving = true
-    if (this.approveSelected) {
-      await this.approveAccountUnderReview()
-    } else if (this.rejectSelected) {
-      await this.rejectAccountUnderReview()
-    }
-    this.$router.push(Pages.STAFF_DASHBOARD)
+    this.openModal(this.isRejectModal, true)
+    // if (!this.isRejectModal) {
+    //   await this.approveAccountUnderReview()
+    // } else {
+    //   await this.rejectAccountUnderReview()
+    // }
+    // this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
   private goBack (): void {

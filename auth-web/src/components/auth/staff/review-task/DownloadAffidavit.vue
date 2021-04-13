@@ -18,13 +18,6 @@ export default class DownloadAffidavit extends Vue {
   @Prop({ default: 'Download Affidavit' }) private title: string
   @Prop({ default: 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.' }) private subTitle: string
   @Prop({ default: '' }) affidavitName: string
-
-  mounted () {
-    // eslint-disable-next-line no-console
-    console.log('this.emit', this.$emit.prototype)
-    // eslint-disable-next-line no-console
-    console.log('Vue', this.$listeners)
-  }
 }
 </script>
 
