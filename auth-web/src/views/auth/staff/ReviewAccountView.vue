@@ -149,8 +149,8 @@ export default class ReviewAccountView extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
   private isLoading = true
   private isSaving = false
-  private approveSelected = false
-  private rejectSelected = false
+  // private approveSelected = false
+  // private rejectSelected = false
   private readonly accountUnderReview!: Organization
   private readonly accountUnderReviewAddress!: Address
   private readonly accountUnderReviewAdmin!: User
@@ -175,19 +175,6 @@ export default class ReviewAccountView extends Vue {
   private get canSelect (): boolean {
     return this.accountUnderReview.statusCode === AccountStatus.PENDING_STAFF_REVIEW
   }
-
-  // private get statusLabel (): string {
-  //   switch (this.accountUnderReview.statusCode) {
-  //     case AccountStatus.ACTIVE:
-  //       return 'Approved'
-  //     case AccountStatus.REJECTED:
-  //       return 'Rejected'
-  //     case AccountStatus.PENDING_STAFF_REVIEW:
-  //       return 'Pending'
-  //     default:
-  //       return ''
-  //   }
-  // }
 
   private get isPendingReviewPage () {
     return this.accountUnderReview?.statusCode === AccountStatus.PENDING_STAFF_REVIEW
@@ -252,25 +239,9 @@ export default class ReviewAccountView extends Vue {
   //     }
   //   }
 
-  // private formatDate (date: Date): string {
-  //   return moment(date).format('MMM DD, YYYY')
-  // }
-
   private async mounted () {
     // need to change call task api before
     await this.syncAccountUnderReview(this.orgId)
-
-    // Set initial approved/rejected status based on current account
-    // switch (this.accountUnderReview.statusCode) {
-    //   case AccountStatus.ACTIVE:
-    //     this.approveSelected = true
-    //     break
-    //   case AccountStatus.REJECTED:
-    //     this.rejectSelected = true
-    //     break
-    //   default:
-    //     break
-    // }
 
     this.isLoading = false
   }
@@ -279,26 +250,6 @@ export default class ReviewAccountView extends Vue {
     // Invoke document service to get affidavit for current organization
     DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
-
-  // private selectApprove (): void {
-  //   this.isConfirmationModal = false
-  //   this.isRejectModal = false
-  //   this.$refs.accessRequest.open()
-  //   // if (this.canSelect) {
-  //   //   this.approveSelected = true
-  //   //   this.rejectSelected = false
-  //   // }
-  // }
-
-  // private selectReject (): void {
-  //   this.isConfirmationModal = false
-  //   this.isRejectModal = true
-  //   this.$refs.accessRequest.open()
-  //   // if (this.canSelect) {
-  //   //   this.approveSelected = false
-  //   //   this.rejectSelected = true
-  //   // }
-  // }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {
     this.isConfirmationModal = isConfirmationModal
