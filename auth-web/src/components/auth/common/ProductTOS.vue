@@ -1,8 +1,7 @@
 <template>
   <div>
     <template>
-      <div  >
-        <!-- class="pt-7 mb-7" -->
+      <div>
         <v-divider class="mb-7" v-if="!isApprovalFlow" ></v-divider>
         <p class="mb-7 mt-7" v-if="!isApprovalFlow" >{{$t('willsRegistryTosSubtext')}}
         </p>

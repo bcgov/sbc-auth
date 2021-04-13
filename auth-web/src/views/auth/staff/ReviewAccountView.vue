@@ -34,25 +34,19 @@
                 v-on="component.events"
               />
               <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`" ></v-divider>
-              <!-- v-if="componentList.length-1 !== idx" -->
             </template>
 
-             <!-- <v-container v-if="canSelect" > -->
-              <!-- <v-divider class="mb-10"></v-divider> -->
               <div class="form-btns d-flex justify-end" v-if="canSelect" >
                 <div>
                   <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()">
-                    <v-icon left class="mr-3" v-if="approveSelected">mdi-check</v-icon>
                     <span>Approve</span>
                   </v-btn>
                   <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)">
-                    <v-icon left class="mr-3" v-if="rejectSelected">mdi-close</v-icon>
                     <span>Reject</span>
                   </v-btn>
                 </div>
               </div>
-            <!-- </v-container> -->
-          </v-col>
+           </v-col>
 
           <!-- Account Status Column -->
           <v-col class="col-12 col-md-4 pl-0 pt-8 pr-8 d-flex">
@@ -76,25 +70,6 @@
           @approve-reject-action="saveSelection()"
           @after-confirm-action="goBack()"
           />
-        <!-- <v-container v-if="canSelect" class="pa-8 pt-0">
-          <v-divider class="mb-10"></v-divider>
-          <div class="form-btns d-flex justify-space-between">
-            <div>
-              <v-btn large :outlined="!approveSelected" color="success" class="font-weight-bold mr-2 select-button" @click="selectApprove()">
-                <v-icon left class="mr-3" v-if="approveSelected">mdi-check</v-icon>
-                <span>{{approveSelected ? 'Approved' : 'Approve'}}</span>
-              </v-btn>
-              <v-btn large :outlined="!rejectSelected" color="red" class="font-weight-bold white--text select-button" @click="selectReject()">
-                <v-icon left class="mr-3" v-if="rejectSelected">mdi-close</v-icon>
-                <span>{{rejectSelected ? 'Rejected' : 'Reject'}}</span>
-              </v-btn>
-            </div>
-            <div>
-              <v-btn large color="primary" class="font-weight-bold mr-2" :loading="isSaving" :disabled="!approveSelected && !rejectSelected" @click="saveSelection()">Save and exit</v-btn>
-              <v-btn large depressed :to=pagesEnum.STAFF_DASHBOARD>Cancel</v-btn>
-            </div>
-          </div>
-        </v-container> -->
 
       </v-card>
     </div>
@@ -112,20 +87,18 @@ import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.
 
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
-import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
+// import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 
-// import OrgService from '@/services/org.services'
 import { Prop } from 'vue-property-decorator'
 import StaffModule from '@/store/modules/staff'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
-// import moment from 'moment'
 
 @Component({
   components: {
@@ -149,8 +122,7 @@ export default class ReviewAccountView extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
   private isLoading = true
   private isSaving = false
-  // private approveSelected = false
-  // private rejectSelected = false
+
   private readonly accountUnderReview!: Organization
   private readonly accountUnderReviewAddress!: Address
   private readonly accountUnderReviewAdmin!: User

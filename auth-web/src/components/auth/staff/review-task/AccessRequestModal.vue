@@ -18,7 +18,6 @@
 
       </template>
       <template v-slot:actions>
-        <!-- <v-spacer></v-spacer> -->
         <v-btn large :color="modalData.color" @click="callAction()"
         class="font-weight-bold px-4"
         :loading="isSaving"
