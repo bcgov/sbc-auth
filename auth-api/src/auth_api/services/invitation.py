@@ -221,7 +221,6 @@ class Invitation:
         sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         token_confirm_url = '{}/{}/{}'.format(app_url, mail_configs.get('token_confirm_path'), invitation.token)
-        current_app.logger.debug('<token_confirm_url',token_confirm_url)
         template = ENV.get_template(f"email_templates/{mail_configs.get('template_name')}.html")
 
         sent_response = send_email(subject, sender, recipient,
