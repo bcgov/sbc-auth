@@ -17,6 +17,7 @@
 A simple decorator to add the options method to a Request Class.
 """
 
+import base64
 import re
 import urllib
 
@@ -67,8 +68,8 @@ def digitify(payload: str) -> int:
     return int(re.sub(r'\D', '', payload))
 
 
-def escape_wam_freindly_url(org_name):
+def escape_wam_friendly_url(param):
     """Return encoded/escaped url."""
-    encode_org_name = urllib.parse.quote(org_name)
-    replaced_dots = re.sub('.$', '%2E', encode_org_name)
-    return replaced_dots
+    base64_org_name = base64.b64encode(bytes(param, encoding='utf-8'))
+    encode_org_name = urllib.parse.quote(base64_org_name)
+    return encode_org_name
