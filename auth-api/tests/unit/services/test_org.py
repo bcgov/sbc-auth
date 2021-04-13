@@ -284,7 +284,9 @@ def test_create_org_assert_payment_types(session, keycloak_mock):  # pylint:disa
 
 def test_create_product_single_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user = factory_user_model()
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user = factory_user_model(user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -299,7 +301,9 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
 
 def test_create_product_single_subscription_duplicate_error(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user = factory_user_model()
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user = factory_user_model(user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -320,7 +324,9 @@ def test_create_product_single_subscription_duplicate_error(session, keycloak_mo
 
 def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
-    user = factory_user_model()
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user = factory_user_model(user_with_token)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
