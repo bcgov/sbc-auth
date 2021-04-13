@@ -241,7 +241,7 @@ class Invitation:
         """Get the config for different email types."""
         login_source = login_source or LoginSource.BCSC.value
         escape_url = escape_wam_freindly_url(org_name)
-        token_confirm_path = f'{urllib.parse.quote(escape_url)}/validatetoken/{login_source}'
+        token_confirm_path = f'{escape_url}/validatetoken/{login_source}'
         if login_source == LoginSource.STAFF.value:
             # for GOVM accounts , there are two kinda of invitation. Its same login source
             # if its first invitation to org , its an account set up invitation else normal joining invite
