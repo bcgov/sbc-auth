@@ -82,7 +82,7 @@ function mapOrgDetails (route: any) {
   return {
     token: route.params.token,
     loginSource: route.params.loginSource,
-    orgName: atob(route.params.orgName)
+    orgName: orgName
   }
 }
 
