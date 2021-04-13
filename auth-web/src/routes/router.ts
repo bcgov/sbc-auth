@@ -72,10 +72,6 @@ function mapReturnPayVars (route: any) {
 }
 
 function mapOrgDetails (route: any) {
-  let payResponseUrl = window.location.search
-  if (payResponseUrl && payResponseUrl.charAt(0) === '?') {
-    payResponseUrl = payResponseUrl.substr(1)
-  }
   return {
     token: route.params.token,
     loginSource: route.params.loginSource,
