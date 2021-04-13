@@ -265,3 +265,14 @@ def factory_task_model(user_id: int = 1, org_id: int = 1):
                      )
     task.save()
     return task
+
+
+def factory_task_models(count: int, user_id: int):
+    """Produce a collection of Task models."""
+    for i in range(0, count):
+        task = TaskModel(name='TEST {}'.format(i), date_submitted=datetime.datetime.now(),
+                         relationship_type=TaskRelationshipType.ORG.value,
+                         relationship_id=10, type=TaskType.PENDING_STAFF_REVIEW.value,
+                         status=TaskStatus.OPEN.value,
+                         related_to=user_id)
+        task.save()

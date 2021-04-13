@@ -23,11 +23,13 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import Task as TaskModel
+from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Affidavit as AffidavitModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, OrgStatus
+from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, OrgStatus, \
+    ProductSubscriptionStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -101,6 +103,15 @@ class Task:  # pylint: disable=too-many-instance-attributes
             org_id = task_model.relationship_id
             self.update_org(is_approved=is_approved, org_id=org_id,
                             user_name=user_name)
+
+        elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
+            # Update Product relationship
+            product_subscription_id = task_model.relationship_id
+            print(product_subscription_id)
+            is_approved: bool = task_relationship_status == ProductSubscriptionStatus.ACTIVE.value
+            self.update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id,
+                                             user_name=user_name)
+
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
@@ -130,14 +141,38 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_org ')
 
     @staticmethod
-    def fetch_tasks(task_type: str, task_status: str):
+    def update_product_subscription(is_approved: bool, product_subscription_id: int, user_name: str):
+        """Review Product Subscription."""
+        current_app.logger.debug('<update_task_product ')
+        # Approve/Reject Product subscription
+        product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
+        print(product_subscription.id)
+        if is_approved:
+            product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
+        else:
+            product_subscription.status_code = ProductSubscriptionStatus.REJECTED.value
+        product_subscription.save()
+        current_app.logger.debug('>update_task_product ')
+
+    @staticmethod
+    def fetch_tasks(**kwargs):
         """Fetch all tasks."""
+        task_type = kwargs.get('task_type')
+        task_status = kwargs.get('task_status')
         if not any(e.value == task_type for e in TaskType):
             return []
         if not any(e.value == task_status for e in TaskStatus):
             return []
+
+        page: int = int(kwargs.get('page'))
+        limit: int = int(kwargs.get('limit'))
+        search_args = (task_type,
+                       task_status,
+                       page,
+                       limit)
+
         current_app.logger.debug('<fetch_tasks ')
-        tasks = TaskModel.fetch_tasks(task_type, task_status)
+        tasks, count = TaskModel.fetch_tasks(*search_args)
         tasks_response = []
 
         for task in tasks:

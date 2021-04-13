@@ -48,3 +48,8 @@ class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-met
         return cls.query.filter(
             and_(ProductSubscription.org_id == org_id, ProductSubscription.product_code == product_code,
                  ProductSubscription.status_code.in_(valid_statuses))).all()
+
+    @classmethod
+    def find_by_id(cls, product_subscription_id):
+        """Find an product subscription instance by the provided id."""
+        return cls.query.filter(ProductSubscription.id == product_subscription_id).first()

@@ -35,7 +35,9 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     name = dictionary['name']
 
     fetched_task = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                           task_status=TaskStatus.OPEN.value)
+                                           task_status=TaskStatus.OPEN.value,
+                                           page=1,
+                                           limit=10)
 
     assert fetched_task
     for item in fetched_task:
