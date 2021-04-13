@@ -171,7 +171,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                        limit)
 
         current_app.logger.debug('<fetch_tasks ')
-        tasks, count = TaskModel.fetch_tasks(*search_args)
+        tasks, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
         tasks_response = []
 
         for task in tasks:
