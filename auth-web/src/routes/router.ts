@@ -58,6 +58,7 @@ import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vu
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
+import org from '@/store/modules/org'
 
 function mapReturnPayVars (route: any) {
   let payResponseUrl = window.location.search
