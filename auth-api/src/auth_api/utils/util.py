@@ -69,5 +69,5 @@ def digitify(payload: str) -> int:
 
 def escape_wam_freindly_url(org_name):
     """Return encoded/escaped url."""
-    encode_org_name = org_name.replace('.', '%2E')
-    return urllib.parse.quote(encode_org_name)
+    encode_org_name = urllib.parse.quote(org_name)
+    return encode_org_name.replace('.', '%2E')
