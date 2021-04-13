@@ -237,6 +237,7 @@ class TaskRelationshipType(Enum):
 
     ORG = 'ORG'     # Task related to Org staff review
     AFFIDAVIT = 'AFFIDAVIT'
+    PRODUCT = 'PRODUCT'
 
 
 class TaskStatus(Enum):

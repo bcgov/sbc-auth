@@ -20,7 +20,7 @@ from _datetime import datetime
 
 from auth_api.models import Task as TaskModel
 from auth_api.utils.enums import TaskType, TaskRelationshipType, TaskStatus
-from tests.utilities.factory_utils import factory_user_model
+from tests.utilities.factory_utils import factory_user_model, factory_task_models
 
 
 def test_task_model(session):
@@ -58,9 +58,10 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
                      status=TaskStatus.OPEN.value, related_to=user.id)
     session.add(task)
     session.commit()
-    found_tasks = TaskModel.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                        task_status=TaskStatus.OPEN.value)
+    found_tasks, count = TaskModel.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                                               task_status=TaskStatus.OPEN.value, page=1, limit=10)
     assert found_tasks
+    assert count == 1
 
     for found_staff_task in found_tasks:
         assert found_staff_task.name == task.name
@@ -77,3 +78,14 @@ def test_find_task_by_id(session):  # pylint:disable=unused-argument
     found_task = TaskModel.find_by_task_id(task.id)
     assert found_task
     assert found_task.name == task.name
+
+
+def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
+    """Assert that we can fetch all tasks."""
+    user = factory_user_model()
+    factory_task_models(6, user.id)
+
+    found_tasks, count = TaskModel.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                                               task_status=TaskStatus.OPEN.value, page=3, limit=2)
+    assert found_tasks
+    assert count == 6
