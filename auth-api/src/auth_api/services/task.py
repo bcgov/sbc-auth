@@ -107,7 +107,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
-            print(product_subscription_id)
             is_approved: bool = task_relationship_status == ProductSubscriptionStatus.ACTIVE.value
             self.update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id)
 
@@ -145,7 +144,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('<update_task_product ')
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
-        print(product_subscription.id)
         if is_approved:
             product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
         else:
