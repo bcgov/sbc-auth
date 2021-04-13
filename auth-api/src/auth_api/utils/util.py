@@ -70,6 +70,6 @@ def digitify(payload: str) -> int:
 
 def escape_wam_friendly_url(param):
     """Return encoded/escaped url."""
-    base64_org_name = base64.b64encode(bytes(param, encoding='utf-8'))
-    encode_org_name = urllib.parse.quote(base64_org_name)
+    base64_org_name = base64.b64encode(bytes(param, encoding='utf-8')).decode('utf-8')
+    encode_org_name = urllib.parse.quote(base64_org_name, safe='')
     return encode_org_name
