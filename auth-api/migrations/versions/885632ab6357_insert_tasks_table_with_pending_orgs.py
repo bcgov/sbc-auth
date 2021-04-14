@@ -53,6 +53,6 @@ def downgrade():
         org_id = org.id
 
         # Delete the tasks
-        op.execute(f"DELETE FROM tasks WHERE"
+        op.execute(f"DELETE FROM tasks WHERE "
                    f"relationship_id = {org_id}")
     pass
