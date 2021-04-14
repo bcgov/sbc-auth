@@ -45,6 +45,8 @@ from .products import API as PRODUCTS_API
 from .reset import API as RESET_API
 from .user import API as USER_API
 from .user_settings import API as USER_SETTINGS_API
+from .org_api_keys import API as ORG_API_KEYS_API
+from .task import API as TASKS_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -90,14 +92,15 @@ API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(DOCUMENTS_AFFIDAVIT_API, path='/documents/affidavit')
 API.add_namespace(CODES_API, path='/codes')
 API.add_namespace(ACCOUNTS_API, path='/accounts')
-API.add_namespace(ORG_PRODUCTS_API, path='/orgs/<string:org_id>/products')
+API.add_namespace(ORG_PRODUCTS_API, path='/orgs/<int:org_id>/products')
 API.add_namespace(PRODUCTS_API, path='/products')
-API.add_namespace(NOTIFICATIONS_API, path='/users/<string:user_id>/org/<string:org_id>/notifications')
+API.add_namespace(NOTIFICATIONS_API, path='/users/<string:user_id>/org/<int:org_id>/notifications')
 API.add_namespace(USER_API, path='/users/<string:invitation_token>')
 API.add_namespace(BCOL_PROFILE_API, path='/bcol-profiles')
 API.add_namespace(PERMISSIONS_API, path='/permissions')
-API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<string:org_id>/authorizations')
-
+API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<int:org_id>/authorizations')
+API.add_namespace(ORG_API_KEYS_API, path='/orgs/<int:org_id>/api-keys')
+API.add_namespace(TASKS_API, path='/tasks')
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 

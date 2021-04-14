@@ -30,13 +30,16 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
+from auth_api.models import Task as TaskModel
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
+from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
-from auth_api.utils.enums import AccessType, InvitationType
+from auth_api.utils.enums import (AccessType, InvitationType,
+                                  TaskStatus, TaskRelationshipType, TaskType, ProductSubscriptionStatus)
 from auth_api.utils.roles import Role
 
 
@@ -235,7 +238,41 @@ def factory_document_model(version_id, doc_type, content, content_type='text/htm
 def factory_product_model(org_id: str,
                           product_code: str = 'PPR'):
     """Produce a templated product model."""
-    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code)
+    subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code,
+                                            status_code=ProductSubscriptionStatus.ACTIVE.value)
     subscription.save()
 
     return subscription
+
+
+def factory_task_service(user_id: int = 1, org_id: int = 1):
+    """Produce a templated task service."""
+    task_model = factory_task_model(user_id, org_id)
+    service = TaskService(task_model)
+    return service
+
+
+def factory_task_model(user_id: int = 1, org_id: int = 1):
+    """Produce a Task model."""
+    task = TaskModel(id=1,
+                     name='foo',
+                     date_submitted=datetime.datetime.now(),
+                     relationship_type=TaskRelationshipType.ORG.value,
+                     relationship_id=org_id,
+                     type=TaskType.PENDING_STAFF_REVIEW.value,
+                     status=TaskStatus.OPEN.value,
+                     related_to=user_id
+                     )
+    task.save()
+    return task
+
+
+def factory_task_models(count: int, user_id: int):
+    """Produce a collection of Task models."""
+    for i in range(0, count):
+        task = TaskModel(name='TEST {}'.format(i), date_submitted=datetime.datetime.now(),
+                         relationship_type=TaskRelationshipType.ORG.value,
+                         relationship_id=10, type=TaskType.PENDING_STAFF_REVIEW.value,
+                         status=TaskStatus.OPEN.value,
+                         related_to=user_id)
+        task.save()

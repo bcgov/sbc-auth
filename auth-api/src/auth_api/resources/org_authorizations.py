@@ -17,14 +17,13 @@ from flask import g, request
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('permissions', description='Endpoints for permissions management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
@@ -33,7 +32,7 @@ class OrgAuthorizationResource(Resource):
     """Resource for managing entity authorizations."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def get(org_id):
         """Return authorization for the user for the passed business identifier."""

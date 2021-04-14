@@ -33,7 +33,8 @@ from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod, Status, PaymentAccountStatus)
+    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
+    Status, PaymentAccountStatus, TaskRelationshipType, TaskType, TaskStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -43,6 +44,7 @@ from .keycloak import KeycloakService
 from .notification import send_email
 from .products import Product as ProductService
 from .rest_service import RestService
+from .task import Task as TaskService
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -112,6 +114,16 @@ class Org:  # pylint: disable=too-many-public-methods
             org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
             user = UserModel.find_by_jwt_token(token=token_info)
             Org.send_staff_review_account_reminder(user, org.id, origin_url)
+            # create a staff review task for this account
+            task_info = {'name': org.name,
+                         'relationshipId': org.id,
+                         'relatedTo': user.id,
+                         'dateSubmitted': datetime.today(),
+                         'relationshipType': TaskRelationshipType.ORG.value,
+                         'type': TaskType.PENDING_STAFF_REVIEW.value,
+                         'status': TaskStatus.OPEN.value
+                         }
+            TaskService.create_task(task_info)
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
@@ -377,8 +389,8 @@ class Org:  # pylint: disable=too-many-public-methods
         org_model: OrgModel = self._model
         # to enforce necessary details for govm account creation
         is_govm_account = org_model.access_type == AccessType.GOVM.value
-        is_govm_account_creation = is_govm_account and \
-            org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
+        is_govm_account_creation = \
+            is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
         # govm name is not being updated now
         is_name_getting_updated = 'name' in org_info and not is_govm_account
@@ -408,7 +420,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
-            ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data)
+            ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
+                                                       skip_auth=True, token_info=token_info)
 
         # Update mailing address Or create new one
         if mailing_address:

@@ -68,42 +68,11 @@ objects:
           maxSurge: 25%
           maxUnavailable: 25%
           pre:
+            failurePolicy: Abort
             execNewPod:
               command:
                 - /opt/app-root/pre-hook-update-db.sh
               containerName: ${NAME}-${TAG}
-              env:
-                - name: DATABASE_ADMIN_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      key: DATABASE_ADMIN_PASSWORD
-                      name: ${NAME}-${TAG}-secret
-                - name: DATABASE_USERNAME
-                  valueFrom:
-                    secretKeyRef:
-                      key: DATABASE_USER
-                      name: ${NAME}-${TAG}-secret
-                - name: DATABASE_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      key: DATABASE_PASSWORD
-                      name: ${NAME}-${TAG}-secret
-                - name: DB_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      key: DB_NAME
-                      name: ${NAME}-${TAG}-secret
-                - name: DATABASE_HOST
-                  valueFrom:
-                    secretKeyRef:
-                      key: DATABASE_HOST
-                      name: ${NAME}-${TAG}-secret
-                - name: DATABASE_PORT
-                  valueFrom:
-                    secretKeyRef:
-                      key: DATABASE_PORT
-                      name: ${NAME}-${TAG}-secret
-            failurePolicy: Abort
           timeoutSeconds: 600
           updatePeriodSeconds: 1
         type: Rolling
@@ -199,12 +168,6 @@ parameters:
     required: true
     description: The image registry of the OpenShift project.
     value: image-registry.openshift-image-registry.svc:5000
-
-  - name: DB_NAME
-    displayName: Database Service Name
-    description: The name of the database server/service.
-    required: true
-    value: postgresql
 
   - name: APPLICATION_DOMAIN
     displayName: Application Domain

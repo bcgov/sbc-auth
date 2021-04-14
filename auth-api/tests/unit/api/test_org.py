@@ -309,10 +309,10 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
         },
         'productSubscriptions': [
             {
-                'productCode': 'PPR'
+                'productCode': 'VS'
             },
             {
-                'productCode': 'DIR_SEARCH'
+                'productCode': 'BCA'
             }
         ]
     }

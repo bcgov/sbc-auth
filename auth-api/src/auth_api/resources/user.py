@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import MembershipSchema, OrgSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -36,7 +36,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('users', description='Endpoints for user profile management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('POST,OPTIONS')
@@ -88,7 +87,7 @@ class Users(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def post():
         """Post a new user using the request body (which will contain a JWT).
 
@@ -122,7 +121,7 @@ class Users(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value])
+    @_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value])
     def get():
         """Return a set of users based on search query parameters (staff only)."""
         search_email = request.args.get('email', '')
@@ -146,7 +145,7 @@ class UserOtp(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
+    @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
     def delete(username):
         """Delete/Reset the OTP of user profile associated with the provided username."""
         try:
@@ -173,7 +172,7 @@ class UserStaff(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get(username):
         """Return the user profile associated with the provided username."""
         user = UserService.find_by_username(username)
@@ -186,7 +185,7 @@ class UserStaff(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def delete(username):
         """Delete the user profile associated with the provided username."""
         try:
@@ -206,7 +205,7 @@ class UserStaff(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def patch(username):
         """Patch the user profile associated with the provided username.
 
@@ -241,7 +240,7 @@ class User(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get():
         """Return the user profile associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
@@ -254,7 +253,7 @@ class User(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def patch():
         """Update terms of service for the user."""
         token = g.jwt_oidc_token_info
@@ -276,7 +275,7 @@ class User(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def delete():
         """Delete the user profile."""
         token = g.jwt_oidc_token_info
@@ -296,7 +295,7 @@ class UserContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get():
         """Retrieve the set of contacts asociated with the current user identifier by the JWT in the header."""
         token = g.jwt_oidc_token_info
@@ -312,7 +311,7 @@ class UserContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def post():
         """Create a new contact for the user associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
@@ -330,7 +329,7 @@ class UserContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def put():
         """Update an existing contact for the user associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
@@ -347,7 +346,7 @@ class UserContacts(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def delete():
         """Delete the contact info for the user associated with the JWT in the authorization header."""
         token = g.jwt_oidc_token_info
@@ -367,7 +366,7 @@ class UserOrgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Get a list of orgs that the current user is associated with."""
         token = g.jwt_oidc_token_info
@@ -388,12 +387,12 @@ class UserOrgs(Resource):
 
 
 @cors_preflight('GET, OPTIONS')
-@API.route('/orgs/<string:org_id>/membership', methods=['GET', 'OPTIONS'])
+@API.route('/orgs/<int:org_id>/membership', methods=['GET', 'OPTIONS'])
 class MembershipResource(Resource):
     """Resource for managing a user's org membership."""
 
     @staticmethod
-    @_JWT.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     @cors.crossdomain(origin='*')
     def get(org_id):
         """Get the membership for the given org and user."""
@@ -420,7 +419,7 @@ class UserAffidavit(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def post(user_guid):
         """Create affidavit record for the user."""
         token = g.jwt_oidc_token_info
@@ -445,7 +444,7 @@ class AuthorizationResource(Resource):
     """Resource for managing entity authorizations."""
 
     @staticmethod
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def get():
         """Add a new contact for the Entity identified by the provided id."""
