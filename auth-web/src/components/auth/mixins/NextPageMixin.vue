@@ -48,16 +48,18 @@ export default class NextPageMixin extends Vue {
   }
 
   protected getNextPageUrl (): string {
+    let orgName = ''
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
         // if the user is staff redirect to staff dashboard
+        orgName = encodeURIComponent(this.currentAccountSettings?.label)
         if (this.currentUser.roles.includes(Role.Staff)) {
           return `/${Pages.SEARCH_BUSINESS}`
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_INVITE_ACCEPT) {
           return `/${Pages.CREATE_GOVM_ACCOUNT}`
           // waiting for staff approval
         } else if (this.currentMembership && this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-          return `/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+          return `/${Pages.PENDING_APPROVAL}/${orgName}`
           //  if account status pending invite accept need to send create account page w
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
           // redirect to pending page
@@ -85,6 +87,7 @@ export default class NextPageMixin extends Vue {
         // for invited users , handle user profile
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
+        orgName = encodeURIComponent(this.currentAccountSettings?.label)
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           nextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
@@ -92,7 +95,7 @@ export default class NextPageMixin extends Vue {
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-          nextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+          nextStep = `${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
           nextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         }
@@ -105,6 +108,7 @@ export default class NextPageMixin extends Vue {
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
         let bceidNextStep = '/'
+        orgName = encodeURIComponent(this.currentAccountSettings?.label)
         let invToken = ConfigHelper.getFromSession(SessionStorageKeys.InvitationToken)
         if (invToken) {
           bceidNextStep = `${Pages.CONFIRM_TOKEN}/${invToken}`
@@ -119,11 +123,11 @@ export default class NextPageMixin extends Vue {
             bceidNextStep = Pages.CHOOSE_AUTH_METHOD
           }
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
-          bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}/true`
+          bceidNextStep = `${Pages.PENDING_APPROVAL}/${orgName}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-          bceidNextStep = `${Pages.PENDING_APPROVAL}/${this.currentAccountSettings?.label}`
+          bceidNextStep = `${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         }
