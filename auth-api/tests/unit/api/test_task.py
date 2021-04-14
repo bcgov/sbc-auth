@@ -156,3 +156,15 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == TaskStatus.COMPLETED.value
+
+
+def test_fetch_task(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that the task can be fetched by id."""
+    user = factory_user_model()
+    task = factory_task_service(user.id)
+    task_id = task._model.id
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks/{}'.format(task_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('name') == task._model.name

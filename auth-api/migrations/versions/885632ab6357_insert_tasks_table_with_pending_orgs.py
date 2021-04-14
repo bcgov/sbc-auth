@@ -1,0 +1,58 @@
+"""insert tasks table with pending orgs
+
+Revision ID: 885632ab6357
+Revises: d804bcead371
+Create Date: 2021-04-13 14:38:09.983595
+
+"""
+import datetime
+from typing import List
+from alembic import op
+from auth_api.models import Org
+from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType
+
+# revision identifiers, used by Alembic.
+
+revision = '885632ab6357'
+down_revision = 'd804bcead371'
+branch_labels = None
+depends_on = None
+
+
+def upgrade():
+    conn = op.get_bind()
+    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code = 'PENDING_STAFF_REVIEW';")
+    org_list: List[Org] = org_res.fetchall()
+
+    for org in org_list:
+        org_id = org.id
+        user_id = org.created_by_id
+        created_time = datetime.datetime.now()
+        date_submitted = org.created
+        name = org.name
+        status = TaskStatus.OPEN.value
+        task_type = TaskType.PENDING_STAFF_REVIEW.value
+        task_relationship_type = TaskRelationshipType.ORG.value
+
+        # Insert into tasks
+        op.execute(f"INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
+                   f"relationship_id, created_by_id, modified_by_id, related_to, status, type)"
+                   f"VALUES "
+                   f"('{created_time}', '{created_time}', '{name}', '{date_submitted}', '{task_relationship_type}',"
+                   f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}')")
+
+    pass
+
+
+def downgrade():
+    conn = op.get_bind()
+    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code = 'PENDING_STAFF_REVIEW';")
+    org_list: List[Org] = org_res.fetchall()
+
+    for org in org_list:
+        org_id = org.id
+
+        # Delete the tasks
+        op.execute(f"DELETE FROM tasks WHERE"
+                   f"relationship_id = {org_id}")
+    pass

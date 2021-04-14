@@ -57,8 +57,8 @@ class Tasks(Resource):
         return response, status
 
 
-@cors_preflight('PUT,OPTIONS')
-@API.route('/<int:task_id>', methods=['PUT', 'OPTIONS'])
+@cors_preflight('PUT,GET,OPTIONS')
+@API.route('/<int:task_id>', methods=['PUT', 'GET', 'OPTIONS'])
 class TaskUpdate(Resource):
     """Resource for updating a task."""
 
@@ -79,13 +79,27 @@ class TaskUpdate(Resource):
             task = TaskService(TaskModel.find_by_task_id(task_id))
             if task:
                 # Update task and its relationships
+                origin = request.environ.get('HTTP_ORIGIN', 'localhost')
                 response, status = task.update_task(task_info=request_json,
-                                                    token_info=token).as_dict(), http_status.HTTP_200_OK
+                                                    token_info=token, origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
             else:
                 response, status = {'message': 'The requested task could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
 
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.has_one_of_roles([Role.STAFF.value])
+    def get(task_id):
+        """Fetch task by id."""
+        try:
+            task = TaskService(TaskModel.find_by_task_id(task_id=task_id))
+            response, status = task.as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
