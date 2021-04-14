@@ -86,6 +86,20 @@ function mapOrgDetails (route: any) {
   }
 }
 
+function mapPendingDetails (route: any) {
+  let orgName = route.params.teamName
+  try {
+    orgName = window.atob(orgName)
+  } catch (e) {
+    // older invitations.Ignore.org name wont be base 64 for old invitations.
+  }
+
+  return {
+    teamName: orgName,
+    pendingAffidavit: route.params.pendingAffidavit
+  }
+}
+
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/account-info/AccountInfo.vue')
@@ -517,7 +531,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/pendingapproval/:teamName?/:pendingAffidavit?',
       name: 'pendingapproval',
       component: PendingApprovalView,
-      props: true,
+      props: mapPendingDetails,
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
