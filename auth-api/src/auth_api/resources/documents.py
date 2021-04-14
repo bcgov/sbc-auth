@@ -19,7 +19,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.services import Documents as DocumentService
 from auth_api.services.minio import MinioService
 from auth_api.tracer import Tracer
@@ -28,7 +28,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('documents', description='Endpoints for document management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')
@@ -39,7 +38,7 @@ class Documents(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get(document_type):
         """Return the latest terms of use."""
         try:
@@ -80,7 +79,7 @@ class DocumentSignature(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get(file_name: str):
         """Return the latest terms of use."""
         try:

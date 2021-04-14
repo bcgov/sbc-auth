@@ -22,7 +22,6 @@ from flask import current_app
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
-from auth_api.services.products import Product as ProductService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 
@@ -50,20 +49,28 @@ class Authorization:
         if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
-                auth = AuthorizationView.find_authorization_for_staff_by_org_id(account_id)
+                auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id)
                 auth_response = Authorization(auth).as_dict(expanded)
             auth_response['roles'] = token_roles
 
         else:
             keycloak_guid = token_info.get('sub', None)
+            account_id_claim = token_info.get('Account-Id', None)
             # check product based auth auth org based auth
             check_product_based_auth = Authorization._is_product_based_auth(corp_type_code)
 
             if check_product_based_auth:
-                auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
-                    keycloak_guid, account_id, corp_type_code)
+                if account_id_claim:
+                    auth = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id_claim,
+                                                                                              corp_type_code)
+                else:
+                    auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
+                        keycloak_guid, account_id, corp_type_code
+                    )
             else:
-                if account_id and keycloak_guid:
+                if account_id_claim:
+                    auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id_claim)
+                elif account_id and keycloak_guid:
                     auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
             auth_response['roles'] = []
             if auth:
@@ -101,7 +108,8 @@ class Authorization:
         else:
             keycloak_guid = token_info.get('sub', None)
             if business_identifier and keycloak_guid:
-                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, keycloak_guid)
+                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, keycloak_guid,
+                                                                                    token_info.get('Account-Id', None))
 
             if auth:
                 permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
@@ -122,12 +130,18 @@ class Authorization:
         return authorizations_response
 
     @staticmethod
-    def get_account_authorizations_for_product(keycloak_guid: str, account_id: str, product_code: str,
+    def get_account_authorizations_for_product(token_info: Dict, account_id: str, product_code: str,
                                                expanded: bool = False):
         """Get account authorizations for the product."""
-        auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
-            keycloak_guid, account_id, product_code
-        )
+        account_id_claim = token_info.get('Account-Id', None)
+        if account_id_claim:
+            auth = AuthorizationView.find_account_authorization_by_org_id_and_product(
+                account_id_claim, product_code
+            )
+        else:
+            auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
+                token_info.get('sub'), account_id, product_code
+            )
         auth_response = Authorization(auth).as_dict(expanded)
         auth_response['roles'] = []
         if auth:
@@ -164,8 +178,11 @@ class Authorization:
 
     @staticmethod
     def _is_product_based_auth(product_code):
+
         check_product_based_auth = False
         if product_code:
+            from auth_api.services.products import \
+                Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
             product_type: str = ProductService.find_product_type_by_code(product_code)
             # TODO should we reject if the product code is unknown??
             if product_type == ProductTypeCodeEnum.PARTNER.value:  # PARTNERS needs product based auth
@@ -189,7 +206,7 @@ def check_auth(token_info: Dict, **kwargs):
         if business_identifier:
             auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
         elif org_identifier:
-            auth = Authorization.get_account_authorizations_for_product(token_info.get('sub', None),
+            auth = Authorization.get_account_authorizations_for_product(token_info,
                                                                         org_identifier,
                                                                         product_code_in_jwt)
         if auth is None:
@@ -197,7 +214,7 @@ def check_auth(token_info: Dict, **kwargs):
         return
     else:
         business_identifier = kwargs.get('business_identifier', None)
-        org_identifier = kwargs.get('org_id', None)
+        org_identifier = kwargs.get('org_id', None) or token_info.get('Account-Id', None)
         if business_identifier:
             auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
         elif org_identifier:

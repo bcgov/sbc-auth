@@ -1,0 +1,102 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/task_request",
+    "type": "object",
+    "title": "Task",
+    "additionalProperties": true,
+    "required": [
+        "name",
+        "id",
+        "dateSubmitted",
+        "relationshipType",
+        "relationshipId",
+        "type",
+        "status",
+        "relationshipStatus"
+    ],
+   "properties": {
+        "name": {
+            "$id": "#/properties/name",
+            "type": "string",
+            "title": "name",
+            "default": "",
+            "examples": [
+                "test-task"
+            ]
+        },
+        "id": {
+            "$id": "#/properties/id",
+            "type": "integer",
+            "title": "ID",
+            "default": 0,
+            "examples": [
+                5389
+            ]
+        },
+        "dateSubmitted": {
+            "$id": "#/properties/dateSubmitted",
+            "type": "string",
+            "title": "Date Submitted",
+            "description": "Date submitted for the staff task.",
+            "default": "",
+            "examples": [
+                "2020-11-23T15:14:20.712096+00:00"
+            ]
+        },
+        "dueDate": {
+            "$id": "#/properties/dueDate",
+            "type": "string",
+            "title": "Due Date",
+            "description": "Due Date for the staff task.",
+            "examples": [
+                "2020-11-03T20:50:39.366030+00:00"
+            ]
+        },
+        "relationshipType": {
+            "$id": "#/properties/relationshipType",
+            "type": "string",
+            "title": "Relationship Type",
+            "default": "",
+            "examples": [
+                "Org"
+            ]
+        },
+        "relationshipId": {
+            "$id": "#/properties/relationshipId",
+            "type": "integer",
+            "title": "Relationship Id",
+            "default": 0,
+            "examples": [
+                1
+            ]
+        },
+        "type": {
+            "$id": "#/properties/type",
+            "type": "string",
+            "title": "Task Type",
+            "default": "",
+            "examples": [
+                "PENDING_STAFF_REVIEW"
+            ]
+        },
+        "status": {
+            "$id": "#/properties/status",
+            "type": "string",
+            "title": "Task Status",
+            "default": "",
+            "examples": [
+                "OPEN"
+            ]
+        },
+        "relationshipStatus": {
+            "$id": "#/properties/relationshipStatus",
+            "type": "string",
+            "title": "Relationship Status",
+            "default": "",
+            "examples": [
+                "APPROVED"
+            ]
+        }
+    }
+}

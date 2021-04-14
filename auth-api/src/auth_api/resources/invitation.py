@@ -18,7 +18,7 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import User as UserService
@@ -28,7 +28,6 @@ from auth_api.utils.util import cors_preflight
 
 API = Namespace('invitations', description='Endpoints for invitations management')
 TRACER = Tracer.get_instance()
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,POST,OPTIONS')
@@ -39,7 +38,7 @@ class Invitations(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles(
+    @_jwt.has_one_of_roles(
         [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
@@ -66,7 +65,7 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def get(invitation_id):
         """Get the invitation specified by the provided id."""
         token = g.jwt_oidc_token_info
@@ -81,7 +80,7 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def patch(invitation_id):
         """Update the invitation specified by the provided id as retried."""
         token = g.jwt_oidc_token_info
@@ -101,7 +100,7 @@ class Invitation(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.has_one_of_roles(
+    @_jwt.has_one_of_roles(
         [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(invitation_id):
         """Delete the specified invitation."""
@@ -134,7 +133,7 @@ class InvitationAction(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_JWT.requires_auth
+    @_jwt.requires_auth
     def put(invitation_token):
         """Check whether the passed token is valid and add user, role and org from invitation to membership."""
         token = g.jwt_oidc_token_info

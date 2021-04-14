@@ -14,8 +14,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
       annotations:
         description: Exposes and load balances the application pods
@@ -26,15 +26,16 @@ objects:
           port: 8080
           targetPort: 8080
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
 
   - kind: Route
     apiVersion: v1
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
       annotations:
         haproxy.router.openshift.io/ip_whitelist: ${ALLOW_LIST}
@@ -55,8 +56,8 @@ objects:
     metadata:
       name: ${NAME}-${TAG}
       labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
+        name: ${NAME}
+        environment: ${TAG}
         role: ${ROLE}
       annotations:
         description: Defines how to deploy the application server
@@ -81,13 +82,14 @@ objects:
               name: ${NAME}:${TAG}
       replicas: 1
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
       template:
         metadata:
           name: ${NAME}-${TAG}
           labels:
-            name: ${NAME}-${TAG}
-            app: ${NAME}
+            name: ${NAME}
+            environment: ${TAG}
             role: ${ROLE}
         spec:
           containers:

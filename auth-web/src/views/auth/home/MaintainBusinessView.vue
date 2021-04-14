@@ -24,8 +24,7 @@
         </v-list>
         <!-- Panel Btns -->
         <div class="incorporate-btns">
-          <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3" v-if="userProfile"
-            @click="emitManageBusinesses()">
+          <v-btn v-if="userProfile" large color="bcgovgold" class="cta-btn font-weight-bold mr-3" @click="emitManageBusinesses()">
             Manage an Existing Business
           </v-btn>
           <template v-else>
@@ -36,7 +35,8 @@
           <learn-more-button
            :redirect-url="learnMoreUrl"
           />
-          <p v-if="!userProfile" class="mt-5">Don't have your Cooperative Passcode?
+          <p v-if="!userProfile" class="mt-5">
+            Don't have your Cooperative Passcode?
             <v-menu top offset-y v-model="contactUsPopover" :close-on-content-click="false" attach="#maintain-info-container">
               <template v-slot:activator="{ on, attrs }">
                 <span v-bind="attrs" v-on="on" class="popover-activator">Contact Us</span>
@@ -44,27 +44,41 @@
               <v-card class="contact-popover">
                 <v-list class="pa-5" max-width="30rem">
                   <v-list-item class="pb-3">
-                    <v-list-item-title class="popover-title mt-5 font-weight-bold">Don't have a Passcode for your Cooperative<br>Association?</v-list-item-title>
+                    <v-list-item-title class="popover-title mt-5 font-weight-bold">
+                      Don't have a Passcode for your Cooperative<br>Association?
+                    </v-list-item-title>
                     <v-list-item-action class="mt-0">
                       <v-icon @click="contactUsPopover = false" color="bcgovblueLink">mdi-close</v-icon>
                     </v-list-item-action>
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-subtitle>If you have not recieved your Access Letter from BC Registries,<br>or have lost your Passcode, please contact us at:</v-list-item-subtitle>
+                      <v-list-item-subtitle>
+                        If you have not received your Access Letter from BC Registries,<br>
+                        or have lost your Passcode, please contact us at:
+                      </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-subtitle>Toll Free: <a :href="`tel:+${$t('techSupportTollFree')}`">{{ $t('techSupportTollFree') }}</a></v-list-item-subtitle>
-                      <v-list-item-subtitle class="my-1">Phone: <a :href="`tel:+1${$t('techSupportPhone')}`">{{ $t('techSupportPhone') }}</a></v-list-item-subtitle>
-                      <v-list-item-subtitle>Email: <a href="mailto:bcregistries@gov.bc.ca?subject=BC Registries and Online Services - Support Request">bcregistries@gov.bc.ca</a></v-list-item-subtitle>
+                      <v-list-item-subtitle>
+                        {{ $t('labelTollFree') }}
+                        <a :href="`tel:+${$t('maximusSupportTollFree')}`">{{ $t('maximusSupportTollFree') }}</a>
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle class="my-1">
+                        {{ $t('labelVictoriaOffice') }}
+                        <a :href="`tel:+${$t('maximusSupportPhone')}`">{{ $t('maximusSupportPhone') }}</a>
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle>
+                        {{ $t('labelEmail') }}
+                        <a :href="'mailto:' + $t('maximusSupportEmail') + '?subject=' + $t('maximusSupportEmailSubject')">{{ $t('maximusSupportEmail') }}</a>
+                      </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-subtitle>Hours of Operation:</v-list-item-subtitle>
-                      <v-list-item-subtitle class="my-1">Monday to Friday, 8:30am - 4:30pm PST</v-list-item-subtitle>
+                      <v-list-item-subtitle class="font-weight-bold">{{ $t('labelHoursOfOperation') }}</v-list-item-subtitle>
+                      <v-list-item-subtitle class="my-1">{{ $t('hoursOfOperation') }}</v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item>

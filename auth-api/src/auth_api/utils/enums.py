@@ -165,7 +165,18 @@ class OrgStatus(Enum):
     NSF_SUSPENDED = 'NSF_SUSPENDED'
     SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
     PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'  # staff invited user and waiting for account creation from user.
-    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'   # user created , staff need to approve.
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'  # user created , staff need to approve.
+
+
+class ProductSubscriptionStatus(Enum):
+    """Product Subscription status."""
+
+    ACTIVE = 'ACTIVE'
+    INACTIVE = 'INACTIVE'
+    REJECTED = 'REJECTED'
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'
+    NOT_SUBSCRIBED = 'NOT_SUBSCRIBED'
+    SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
 
 
 class SuspensionReasonCode(Enum):
@@ -207,6 +218,7 @@ class LoginSource(Enum):
     BCEID = 'BCEID'
     STAFF = 'IDIR'
     BCROS = 'BCROS'
+    API_GW = 'API_GW'
 
 
 class ProductCode(Enum):
@@ -218,3 +230,24 @@ class ProductCode(Enum):
     PPR = 'PPR'
     DIR_SEARCH = 'DIR_SEARCH'
     NAMES_REQUEST = 'NRO'
+
+
+class TaskRelationshipType(Enum):
+    """Task relationship type."""
+
+    ORG = 'ORG'     # Task related to Org staff review
+    AFFIDAVIT = 'AFFIDAVIT'
+    PRODUCT = 'PRODUCT'
+
+
+class TaskStatus(Enum):
+    """Task relationship type."""
+
+    OPEN = 'OPEN'     # Open Task - needs to be taken action
+    COMPLETED = 'COMPLETED'   # Task has been acted upon
+
+
+class TaskType(Enum):
+    """Task type."""
+
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'   # user created , staff need to approve.

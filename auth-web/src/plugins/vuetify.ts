@@ -53,7 +53,8 @@ export default new Vuetify({
         },
         navMenuBg: {
           base: '#26527d'
-        }
+        },
+        anchor: '#1A5A96'
       }
     }
   }

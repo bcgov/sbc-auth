@@ -27,6 +27,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
 
     __tablename__ = 'product_codes'
     type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
+    default_subscription_status = Column(ForeignKey('product_subscriptions_statuses.code'), nullable=False)
 
     @classmethod
     def find_by_code(cls, code):

@@ -8,7 +8,7 @@
         <h1 class="mb-10" v-if="isGovmAccount">Invitation has been successfully sent</h1>
         <h1 class="mb-5" v-else>Account successfully created</h1>
          <p  class="mb-9" v-if="isGovmAccount">
-          An invtation email will be sent to the BC Government Ministry account admin's email.<br>
+          An invitation email will be sent to the BC Government Ministry account admin's email.<br>
           The email will contatin a link for creating an account.
         </p>
         <p class="mb-9" v-else>

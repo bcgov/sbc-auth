@@ -17,13 +17,11 @@ from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.jwt_wrapper import JWTWrapper
 from auth_api.services import Codes as CodeService
 from auth_api.utils.util import cors_preflight
 
 
 API = Namespace('codes', description='Endpoints for get codes from database')
-_JWT = JWTWrapper.get_instance()
 
 
 @cors_preflight('GET,OPTIONS')

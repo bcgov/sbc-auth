@@ -27,3 +27,5 @@ from .products import Product
 from .reset import ResetTestData
 from .user import User
 from .user_settings import UserSettings
+from .api_gateway import ApiGateway
+from .task import Task

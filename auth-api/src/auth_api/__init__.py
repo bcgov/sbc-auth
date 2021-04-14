@@ -27,7 +27,7 @@ from sbc_common_components.exception_handling.exception_handler import Exception
 
 from auth_api import models
 from auth_api.extensions import mail
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt
 from auth_api.models import db, ma
 from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
@@ -36,8 +36,6 @@ import auth_api.config as config
 from auth_api.config import _Config
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
-
-JWT = JWTWrapper.get_instance()
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
@@ -66,7 +64,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         app.register_blueprint(TEST_BLUEPRINT)
 
     if os.getenv('FLASK_ENV', 'production') != 'testing':
-        setup_jwt_manager(app, JWT)
+        setup_jwt_manager(app, jwt)
 
     ExceptionHandler(app)
 
@@ -106,7 +104,7 @@ def register_shellcontext(app):
 
     def shell_context():
         """Shell context objects."""
-        return {'app': app, 'jwt': JWT, 'db': db, 'models': models}  # pragma: no cover
+        return {'app': app, 'jwt': jwt, 'db': db, 'models': models}  # pragma: no cover
 
     app.shell_context_processor(shell_context)
 

@@ -9,33 +9,15 @@ metadata:
     tags: keycloak
     version: 12.0.2
 objects:
-  - kind: NetworkSecurityPolicy
-    apiVersion: security.devops.gov.bc.ca/v1alpha1
-    metadata:
-      name: ${NAME}-to-db
-      labels:
-        name: ${NAME}-${TAG}
-        app: ${NAME}
-    spec:
-      description: |
-        Allow the application's API to talk to the database.
-      source:
-        - - role=${ROLE}
-          - app=${NAME}
-          - $namespace=${NAMESPACE}-${TAG}
-      destination:
-        - - role=db
-          - app=${DB_NAME}
-          - $namespace=${NAMESPACE}-${TAG}
-
   - apiVersion: v1
     kind: Service
     metadata:
       annotations:
         description: The web server's https port.
       labels:
-        app: ${NAME}
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
+        role: ${ROLE}
       name: ${NAME}-${TAG}
     spec:
       ports:
@@ -46,7 +28,8 @@ objects:
           port: 8443
           targetPort: 8443
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
 
   - apiVersion: v1
     id: ${NAME}-${TAG}
@@ -55,8 +38,9 @@ objects:
       annotations:
         description: Route for application's https service.
       labels:
-        app: ${NAME}
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
+        role: ${ROLE}
       name: ${NAME}-${TAG}
     spec:
       host: ${APPLICATION_DOMAIN}
@@ -72,8 +56,9 @@ objects:
     kind: Secret
     metadata:
       labels:
-        app: ${NAME}
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
+        role: ${ROLE}
       name: ${NAME}-${TAG}-secret
     stringData:
       KEYCLOAK_USER: ${KEYCLOAK_USER}
@@ -87,22 +72,23 @@ objects:
     kind: DeploymentConfig
     metadata:
       labels:
-        app: ${NAME}
-        name: ${NAME}-${TAG}
-        role: keycloak
+        name: ${NAME}
+        environment: ${TAG}
+        role: ${ROLE}
       name: ${NAME}-${TAG}
     spec:
       replicas: 1
       selector:
-        name: ${NAME}-${TAG}
+        name: ${NAME}
+        environment: ${TAG}
       strategy:
         type: Recreate
       template:
         metadata:
           labels:
-            app: ${NAME}
-            name: ${NAME}-${TAG}
-            role: keycloak
+            name: ${NAME}
+            environment: ${TAG}
+            role: ${ROLE}
           name: ${NAME}-${TAG}
         spec:
           initContainers:

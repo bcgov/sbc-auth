@@ -21,12 +21,10 @@ from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 
 from auth_api import create_app, setup_jwt_manager
-from auth_api.jwt_wrapper import JWTWrapper
+from auth_api.auth import jwt as _jwt
 from auth_api.models import db as _db
 from nats.aio.client import Client as Nats
 from stan.aio.client import Client as Stan
-
-_JWT = JWTWrapper.get_instance()
 
 
 @pytest.fixture(scope='session')
@@ -54,7 +52,7 @@ def client(app):  # pylint: disable=redefined-outer-name
 @pytest.fixture(scope='session')
 def jwt():
     """Return a session-wide jwt manager."""
-    return _JWT
+    return _jwt
 
 
 @pytest.fixture(scope='session')
@@ -144,7 +142,7 @@ def client_id():
 @pytest.fixture(scope='session')
 def stan_server(docker_services):
     """Create the nats / stan services that the integration tests will use."""
-    if os.getenv('TEST_NATS_DOCKER'):
+    if os.getenv('USE_DOCKER_MOCK'):
         docker_services.start('nats')
         time.sleep(2)
 
@@ -199,7 +197,7 @@ def auto(docker_services, app):
         docker_services.start('keycloak')
         docker_services.wait_for_service('keycloak', 8081)
 
-    setup_jwt_manager(app, _JWT)
+    setup_jwt_manager(app, _jwt)
 
     if app.config['USE_DOCKER_MOCK']:
         docker_services.start('minio')

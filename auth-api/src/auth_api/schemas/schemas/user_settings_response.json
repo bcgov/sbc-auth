@@ -39,7 +39,6 @@
                   "id",
                   "label",
                   "type",
-                  "urlorigin",
                   "urlpath"
               ],
               "properties": {
@@ -99,6 +98,16 @@
                           "/account/1/settings"
                       ],
                       "pattern": "^(.*)$"
+                  },
+                  "accountStatus": {
+                      "$id": "#/items/anyOf/0/properties/accountStatus",
+                      "type": "string",
+                      "title": "URL Path",
+                      "description": "Account Status",
+                      "default": "",
+                      "examples": [
+                          "ACTIVE"
+                      ]
                   },
                   "productSettings": {
                       "$id": "#/items/anyOf/0/properties/productSettings",
