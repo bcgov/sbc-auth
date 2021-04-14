@@ -16,13 +16,16 @@
 
 Test-Suite to ensure that the CORS decorator is working as expected.
 """
-from auth_api.utils.util import camelback2snake, snake2camelback
+import base64
+from urllib.parse import unquote
 
+import pytest
+
+from auth_api.utils.util import camelback2snake, snake2camelback, escape_wam_friendly_url
 
 TEST_CAMEL_DATA = {'loginSource': 'PASSCODE', 'userName': 'test name', 'realmAccess': {
     'roles': ['basic']
 }}
-
 
 TEST_SNAKE_DATA = {'login_source': 'PASSCODE', 'user_name': 'test name', 'realm_access': {
     'roles': ['basic']
@@ -41,3 +44,19 @@ def test_snake2camelback():
     camel = snake2camelback(TEST_SNAKE_DATA)
 
     assert camel['loginSource'] == TEST_CAMEL_DATA['loginSource']
+
+
+@pytest.mark.parametrize('test_input,expected', [('foo', 'Zm9v'), ('foo-bar', 'Zm9vLWJhcg%3D%3D'),
+                                                 ('foo bar.....', 'Zm9vIGJhci4uLi4u')])
+def test_escape_wam_friendly_url_multiple(test_input, expected):
+    """Assert manually calculated url encodings."""
+    assert escape_wam_friendly_url(test_input) == expected
+
+
+def test_escape_wam_friendly_url():
+    """Assert conversion back yields same string."""
+    org_name = 'foo-bar helo ..'
+    org_name_encoded = escape_wam_friendly_url(org_name)
+    param1 = unquote(org_name_encoded)
+    org_name_actual = base64.b64decode(bytes(param1, encoding='utf-8')).decode('utf-8')
+    assert org_name_actual == org_name

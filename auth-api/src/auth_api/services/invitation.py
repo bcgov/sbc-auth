@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
-
 from datetime import datetime
 from typing import Dict
 
@@ -41,6 +40,7 @@ from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
 from .notification import send_email
 from ..utils.account_mailer import publish_to_mailer
+from ..utils.util import escape_wam_friendly_url
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -240,7 +240,8 @@ class Invitation:
     def _get_invitation_configs(org_name, login_source, org_status=None):
         """Get the config for different email types."""
         login_source = login_source or LoginSource.BCSC.value
-        token_confirm_path = f'{org_name}/validatetoken/{login_source}'
+        escape_url = escape_wam_friendly_url(org_name)
+        token_confirm_path = f'{escape_url}/validatetoken/{login_source}'
         if login_source == LoginSource.STAFF.value:
             # for GOVM accounts , there are two kinda of invitation. Its same login source
             # if its first invitation to org , its an account set up invitation else normal joining invite
