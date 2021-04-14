@@ -42,8 +42,12 @@ class Task(BaseModel):
     def fetch_tasks(cls, task_type: str, task_status: str,
                     page: int, limit: int):
         """Fetch all tasks."""
-        query = db.session.query(Task).filter(Task.type == task_type,
-                                              Task.status == task_status)
+        query = db.session.query(Task)
+
+        if task_type:
+            query = query.filter(Task.type == task_type)
+        if task_status:
+            query = query.filter(Task.status == task_status)
 
         # Add pagination
         pagination = query.paginate(per_page=limit, page=page)
