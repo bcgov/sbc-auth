@@ -10,6 +10,7 @@ import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import StaffService from '@/services/staff.services'
+import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
 
@@ -175,19 +176,19 @@ export default class StaffModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async approveAccountUnderReview () {
+  public async approveAccountUnderReview (task:number) {
     const orgId = this.context.state['accountUnderReview']?.id
     if (orgId) {
-      await OrgService.approvePendingOrg(orgId)
+      await TaskService.approvePendingTask(task)
       await this.context.dispatch('syncAccountUnderReview', orgId)
     }
   }
 
   @Action({ rawError: true })
-  public async rejectAccountUnderReview () {
+  public async rejectAccountUnderReview (task:number) {
     const orgId = this.context.state['accountUnderReview']?.id
     if (orgId) {
-      await OrgService.rejectPendingOrg(orgId)
+      await TaskService.rejectPendingTask(task)
       await this.context.dispatch('syncAccountUnderReview', orgId)
     }
   }

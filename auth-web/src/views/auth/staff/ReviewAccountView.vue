@@ -77,9 +77,9 @@
 </template>
 
 <script lang="ts">
-import { Account, AccountStatus, Pages } from '@/util/constants'
+import { Account, AccountStatus, Pages, TaskRelationshipType } from '@/util/constants'
 import { MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapState } from 'vuex'
+// import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
 import AccountInformation from '@/components/auth/staff/review-task/AccountInformation.vue'
@@ -95,10 +95,16 @@ import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffid
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 
 import { Prop } from 'vue-property-decorator'
-import StaffModule from '@/store/modules/staff'
+// import StaffModule from '@/store/modules/staff'
 import { User } from '@/models/user'
 import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
+// import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+// eslint-disable-next-line sort-imports
+import { Task } from '@/models/task'
+
+const TaskModule = namespace('task')
+const StaffModule = namespace('staff')
 
 @Component({
   components: {
@@ -108,37 +114,56 @@ import { getModule } from 'vuex-module-decorators'
     NotaryInformation,
     AccountStatusTab,
     AccessRequestModal
-  },
-  computed: {
-    ...mapState('staff', ['accountUnderReview', 'accountUnderReviewAddress', 'accountUnderReviewAdmin', 'accountUnderReviewAdminContact', 'accountUnderReviewAffidavitInfo']),
-    ...mapGetters('staff', ['accountNotaryName', 'accountNotaryContact', 'affidavitDocumentUrl'])
-  },
-  methods: {
-    ...mapActions('staff', ['syncAccountUnderReview', 'approveAccountUnderReview', 'rejectAccountUnderReview'])
   }
+  // computed: {
+  //   ...mapState('staff', ['accountUnderReview', 'accountUnderReviewAddress', 'accountUnderReviewAdmin', 'accountUnderReviewAdminContact', 'accountUnderReviewAffidavitInfo']),
+  //   ...mapGetters('staff', ['accountNotaryName', 'accountNotaryContact', 'accountNotaryContact'])
+  // },
+  // methods: {
+  //   ...mapActions('staff', ['syncAccountUnderReview', 'approveAccountUnderReview', 'rejectAccountUnderReview'])
+  // }
 })
 export default class ReviewAccountView extends Vue {
-  @Prop() orgId: number
-  private staffStore = getModule(StaffModule, this.$store)
+  @Prop() orgId: number // chnage varible name to taskId
+
+  @TaskModule.Action('getTaskById') public getTaskById!:(orgId: number) =>Promise<Task>
+
+  @StaffModule.State('accountUnderReview') public accountUnderReview!: Organization
+  @StaffModule.State('accountUnderReviewAdmin') public accountUnderReviewAdmin!: User
+  @StaffModule.State('accountUnderReviewAddress') public accountUnderReviewAddress!: Address
+  @StaffModule.State('accountUnderReviewAdminContact') public accountUnderReviewAdminContact!: Contact
+  @StaffModule.State('accountUnderReviewAffidavitInfo') public accountUnderReviewAffidavitInfo!: AffidavitInformation
+
+  @StaffModule.Getter('accountNotaryName') public accountNotaryName!: string
+  @StaffModule.Getter('accountNotaryContact') public accountNotaryContact!: Contact
+  @StaffModule.Getter('affidavitDocumentUrl') public affidavitDocumentUrl!: string
+
+  @StaffModule.Action('syncAccountUnderReview') public syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
+  @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
+  @StaffModule.Action('rejectAccountUnderReview') public rejectAccountUnderReview!: (task:Task) => Promise<void>
+
+  // private staffStore = getModule(StaffModule, this.$store)
   private isLoading = true
   private isSaving = false
 
-  private readonly accountUnderReview!: Organization
-  private readonly accountUnderReviewAddress!: Address
-  private readonly accountUnderReviewAdmin!: User
-  private readonly accountUnderReviewAdminContact!: Contact
-  private readonly accountUnderReviewAffidavitInfo!: AffidavitInformation
-  private readonly accountNotaryName!: string
-  private readonly accountNotaryContact!: Contact
-  private readonly affidavitDocumentUrl!: string
-  private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
-  private readonly approveAccountUnderReview!: () => Promise<void>
-  private readonly rejectAccountUnderReview!: () => Promise<void>
+  // private readonly accountUnderReview!: Organization
+  // private readonly accountUnderReviewAddress!: Address
+  // private readonly accountUnderReviewAdmin!: User
+  // private readonly accountUnderReviewAdminContact!: Contact
+  // private readonly accountUnderReviewAffidavitInfo!: AffidavitInformation
+  // private readonly accountNotaryName!: string
+  // private readonly accountNotaryContact!: Contact
+  // private readonly affidavitDocumentUrl!: string
+  // private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
+  // private readonly approveAccountUnderReview!: (task:any) => Promise<void>
+  // private readonly rejectAccountUnderReview!: (task:any) => Promise<void>
   private readonly pagesEnum = Pages
   private readonly accountStatusEnum = AccountStatus
 
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
+  public task :Task
+  public taskrRelationshipType:string = ''
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -163,7 +188,6 @@ export default class ReviewAccountView extends Vue {
         affidavitName: this.accountUnderReview.name
       },
       events: { 'emit-download-affidavit': this.downloadAffidavit }
-
     },
     {
       id: 'AccountInformation',
@@ -213,7 +237,16 @@ export default class ReviewAccountView extends Vue {
 
   private async mounted () {
     // need to change call task api before
-    await this.syncAccountUnderReview(this.orgId)
+    // await this.syncAccountUnderReview(this.orgId)
+    this.task = await this.getTaskById(this.orgId)
+    this.taskrRelationshipType = this.task.relationshipType
+    const taskRelationshipId = this.task.relationshipId
+
+    if (this.taskrRelationshipType === TaskRelationshipType.ORG) {
+      await this.syncAccountUnderReview(taskRelationshipId)
+    } else if (this.taskrRelationshipType === TaskRelationshipType.PRODUCT) {
+
+    }
 
     this.isLoading = false
   }
@@ -240,9 +273,9 @@ export default class ReviewAccountView extends Vue {
     this.isSaving = true
 
     if (!this.isRejectModal) {
-      await this.approveAccountUnderReview()
+      await this.approveAccountUnderReview(this.task)
     } else {
-      await this.rejectAccountUnderReview()
+      await this.rejectAccountUnderReview(this.task)
     }
     this.isSaving = false
     this.openModal(this.isRejectModal, true)
