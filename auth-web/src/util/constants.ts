@@ -214,3 +214,8 @@ export enum productStatus {
     ACTIVE = 'ACTIVE',
     REJECTED = 'REJECTED',
 }
+
+export enum TaskRelationshipType {
+    ORG = 'ORG',
+    PRODUCT = 'PRODUCT',
+  }

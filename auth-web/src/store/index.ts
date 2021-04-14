@@ -5,6 +5,7 @@ import CodesModule from '@/store/modules/codes'
 import OrgModule from '@/store/modules/org'
 import { RootState } from './types'
 import StaffModule from '@/store/modules/staff'
+import TaskModule from '@/store/modules/task'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 
@@ -34,7 +35,8 @@ const storeOptions: StoreOptions<RootState> = {
     user: UserModule,
     org: OrgModule,
     staff: StaffModule,
-    codes: CodesModule
+    codes: CodesModule,
+    task: TaskModule
   }
 }
 

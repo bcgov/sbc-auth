@@ -77,7 +77,7 @@
 </template>
 
 <script lang="ts">
-import { Account, AccountStatus, Pages } from '@/util/constants'
+import { Account, AccountStatus, Pages, TaskRelationshipType } from '@/util/constants'
 import { MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -99,6 +99,11 @@ import StaffModule from '@/store/modules/staff'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+// eslint-disable-next-line sort-imports
+import { Task } from '@/models/task'
+
+const TaskModule = namespace('task')
 
 @Component({
   components: {
@@ -118,7 +123,10 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class ReviewAccountView extends Vue {
-  @Prop() orgId: number
+  @Prop() orgId: number // chnage varible name to taskId
+  // @TaskModule.State('currentUser') public currentUser!: KCUserProfile
+  @TaskModule.Action('getTaskById') public getTaskById!:(orgId: number) =>Promise<Task>
+
   private staffStore = getModule(StaffModule, this.$store)
   private isLoading = true
   private isSaving = false
@@ -132,13 +140,14 @@ export default class ReviewAccountView extends Vue {
   private readonly accountNotaryContact!: Contact
   private readonly affidavitDocumentUrl!: string
   private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
-  private readonly approveAccountUnderReview!: () => Promise<void>
-  private readonly rejectAccountUnderReview!: () => Promise<void>
+  private readonly approveAccountUnderReview!: (task:any) => Promise<void>
+  private readonly rejectAccountUnderReview!: (task:any) => Promise<void>
   private readonly pagesEnum = Pages
   private readonly accountStatusEnum = AccountStatus
 
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
+  public task :any ={}
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -213,7 +222,16 @@ export default class ReviewAccountView extends Vue {
 
   private async mounted () {
     // need to change call task api before
-    await this.syncAccountUnderReview(this.orgId)
+    // await this.syncAccountUnderReview(this.orgId)
+    this.task = await this.getTaskById(this.orgId)
+    const taskType = this.task.relationshipType
+    const taskRelationshipId = this.task.relationshipId
+
+    if (taskType === TaskRelationshipType.ORG) {
+      await this.syncAccountUnderReview(taskRelationshipId)
+    } else if (taskType === TaskRelationshipType.PRODUCT) {
+
+    }
 
     this.isLoading = false
   }
@@ -240,9 +258,9 @@ export default class ReviewAccountView extends Vue {
     this.isSaving = true
 
     if (!this.isRejectModal) {
-      await this.approveAccountUnderReview()
+      await this.approveAccountUnderReview(this.task)
     } else {
-      await this.rejectAccountUnderReview()
+      await this.rejectAccountUnderReview(this.task)
     }
     this.isSaving = false
     this.openModal(this.isRejectModal, true)
