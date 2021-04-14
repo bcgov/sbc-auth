@@ -27,7 +27,7 @@ def upgrade():
     for org in org_list:
         org_id = org.id
         user_id = org.created_by_id
-        created_time = datetime.datetime.now()
+        created_time = org.created
         date_submitted = org.created
         name = org.name
         status = TaskStatus.OPEN.value
@@ -45,14 +45,6 @@ def upgrade():
 
 
 def downgrade():
-    conn = op.get_bind()
-    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code = 'PENDING_STAFF_REVIEW';")
-    org_list: List[Org] = org_res.fetchall()
-
-    for org in org_list:
-        org_id = org.id
-
-        # Delete the tasks
-        op.execute(f"DELETE FROM tasks WHERE "
-                   f"relationship_id = {org_id}")
+    # Delete the tasks
+    op.execute(f"DELETE FROM tasks")
     pass
