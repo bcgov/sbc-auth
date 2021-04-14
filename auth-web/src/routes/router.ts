@@ -71,6 +71,21 @@ function mapReturnPayVars (route: any) {
   }
 }
 
+function mapOrgDetails (route: any) {
+  let orgName = route.params.orgName
+  try {
+    orgName = window.atob(orgName)
+  } catch (e) {
+    // older invitations.Ignore.org name wont be base 64 for old invitations.
+  }
+
+  return {
+    token: route.params.token,
+    loginSource: route.params.loginSource,
+    orgName: orgName
+  }
+}
+
 export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
   const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/account-info/AccountInfo.vue')
@@ -348,12 +363,6 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true }
     },
     {
-      path: '/validatetoken/:token',
-      name: 'validatetoken',
-      // to handle old invitation; removable this after a month of this release
-      redirect: '/undefined/validatetoken/BCSC/:token'
-    },
-    {
       path: '/confirmtoken/:token/:loginSource?',
       name: 'confirmtoken',
       component: AcceptInviteView,
@@ -361,15 +370,9 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
     },
     {
-      // to handle old invitation; removable this after a month of this release
-      path: '/:orgName/dirsearch/validatetoken/:token',
-      name: 'createuserprofile',
-      redirect: '/:orgName/validatetoken/BCROS/:token'
-    },
-    {
       path: '/:orgName/validatetoken/:loginSource/:token',
       component: AcceptInviteLandingView,
-      props: true,
+      props: mapOrgDetails,
       meta: { requiresAuth: false }
     },
     { path: '/signin/:idpHint',
