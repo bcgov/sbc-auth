@@ -81,7 +81,8 @@ class TaskUpdate(Resource):
                 # Update task and its relationships
                 origin = request.environ.get('HTTP_ORIGIN', 'localhost')
                 response, status = task.update_task(task_info=request_json,
-                                                    token_info=token, origin_url=origin).as_dict(), http_status.HTTP_200_OK
+                                                    token_info=token,
+                                                    origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
             else:
                 response, status = {'message': 'The requested task could not be found.'}, \
