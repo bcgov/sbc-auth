@@ -188,7 +188,7 @@ export default class StaffModule extends VuexModule {
   public async rejectAccountUnderReview (task:number) {
     const orgId = this.context.state['accountUnderReview']?.id
     if (orgId) {
-      await OrgService.rejectPendingOrg(task)
+      await TaskService.rejectPendingTask(task)
       await this.context.dispatch('syncAccountUnderReview', orgId)
     }
   }

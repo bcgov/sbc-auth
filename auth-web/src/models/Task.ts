@@ -1,19 +1,18 @@
-
 export interface Tasks {
     task : Task[]
 }
-
 export interface Task {
-    created?: string;
+    created?: Date;
     createdBy?: string;
-    dateSubmitted?: string;
+    dateSubmitted?: Date;
     id?: number;
-    modified?: string;
-    modifiedBy: string;
+    modified?: Date;
+    modifiedBy?: string;
     name?: string;
     relationshipId?: number;
     relationshipType?: string;
     status?: string;
-    type: string;
+    type?: string;
     user?: number;
+    dueDate?: Date
 }

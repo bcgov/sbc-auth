@@ -9,8 +9,8 @@ export default class TaskModule extends VuexModule {
     currentTask: Task
 
     @Mutation
-    public setCurrentTask (codes: Task) {
-      this.currentTask = codes
+    public setCurrentTask (task: Task) {
+      this.currentTask = task
     }
 
     @Action({ commit: 'setCurrentTask', rawError: true })
