@@ -25,10 +25,8 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api.models import Task as TaskModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
-from auth_api.models import Org as OrgModel
-from auth_api.models import Affidavit as AffidavitModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, OrgStatus, \
+from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, \
     ProductSubscriptionStatus
 from auth_api.utils.util import camelback2snake
 

@@ -38,33 +38,12 @@
 
           <div class="product-card-contents">
             <v-expand-transition>
-              <div v-if="isRequestNow">
-                <div class="pt-7 mb-7" >
-                  <v-divider class="mb-7"></v-divider>
-                  <p class="mb-7">{{$t('willsRegistryTosSubtext')}}
-                  </p>
-                  <h4>Terms of Service</h4>
-                  <p> I confirm, I <strong>{{userName}}</strong> am an authorized prime admin for this account.<br />
-                    I declare that this account <strong>{{orgName}}</strong> and all team members act as a solicitor, or name search company approved by the Vital Statistics agency.</p>
-                </div>
-                <v-checkbox
-                color="primary"
-                class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
-                hide-details
-                v-model="termsAccepted"
-                required
-                data-test="check-termsAccepted"
-                @change="tosChanged"
-                >
-                  <template v-slot:label>
-                    <span class="label-color ml-2">{{$t('willsRegistryTosIagree')}}</span>
-
-                </template>
-                </v-checkbox>
-                <div class="terms-error mt-2" color="error" v-if="istosAccepted!== null && !istosAccepted">
-                  <v-icon color="error" class="error-color mr-1">mdi-alert-circle</v-icon>
-                  <span> Confirm to the terms to request</span>
-                </div>
+              <div v-if="isRequestNow" class="pt-7">
+                <ProductTos
+                  :userName="userName"
+                  :orgName="orgName"
+                  @tos-status-changed="tosChanged"
+                />
                 <v-divider class="my-7"></v-divider>
                 <div class="form__btns d-flex">
                   <v-btn
@@ -100,9 +79,14 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgProduct } from '@/models/Organization'
+import ProductTos from '@/components/auth/common/ProductTOS.vue'
 import { productStatus } from '@/util/constants'
 
-@Component
+@Component({
+  components: {
+    ProductTos
+  }
+})
 export default class Product extends Vue {
   @Prop({ default: undefined }) productDetails: OrgProduct
   @Prop({ default: '' }) userName: string
@@ -117,7 +101,6 @@ export default class Product extends Vue {
   public isPending = false
   public isRejected = false
   public isRequesting = false
-  public istosAccepted: boolean = null
 
   @Watch('productDetails')
   onProductChange (newProd:OrgProduct, oldProduct:OrgProduct) {
@@ -171,13 +154,13 @@ export default class Product extends Vue {
     }
   }
 
-  public tosChanged () {
-    this.istosAccepted = this.termsAccepted
+  public tosChanged (termsAccepted:boolean) {
+    this.termsAccepted = termsAccepted
   }
 
   @Emit('set-selected-product')
   public requestProduct () {
-    this.tosChanged()
+    // this.tosChanged()
     if (this.isFormvalid()) {
       return this.productDetails
     }
