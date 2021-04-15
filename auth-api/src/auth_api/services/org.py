@@ -153,12 +153,13 @@ class Org:  # pylint: disable=too-many-public-methods
         user = UserModel.find_by_jwt_token(token=token_info)
         Org.send_staff_review_account_reminder(user, org.id, origin_url)
         # create a staff review task for this account
+        task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
         task_info = {'name': org.name,
                      'relationshipId': org.id,
                      'relatedTo': user.id,
                      'dateSubmitted': datetime.today(),
                      'relationshipType': TaskRelationshipType.ORG.value,
-                     'type': "NEW ACCOUNT",
+                     'type': task_type,
                      'status': TaskStatus.OPEN.value
                      }
         TaskService.create_task(task_info, do_commit=False)

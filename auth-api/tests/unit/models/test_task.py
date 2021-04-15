@@ -18,6 +18,8 @@ Test suite to ensure that the Staff Task model routines are working as expected.
 
 from _datetime import datetime
 
+from flask import current_app
+
 from auth_api.models import Task as TaskModel
 from auth_api.utils.enums import TaskRelationshipType, TaskStatus
 from tests.utilities.factory_utils import factory_user_model, factory_task_models
@@ -26,8 +28,9 @@ from tests.utilities.factory_utils import factory_user_model, factory_task_model
 def test_task_model(session):
     """Assert that a task can be stored in the service."""
     user = factory_user_model()
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type='NEW ACCOUNT', status=TaskStatus.OPEN.value,
+                     relationship_id=10, type=task_type, status=TaskStatus.OPEN.value,
                      related_to=user.id)
 
     session.add(task)
@@ -39,8 +42,9 @@ def test_task_model(session):
 def test_task_model_with_due_date(session):
     """Assert that a task can be stored in the service."""
     user = factory_user_model()
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type='NEW ACCOUNT', due_date=datetime.now(),
+                     relationship_id=10, type=task_type, due_date=datetime.now(),
                      status=TaskStatus.OPEN.value, related_to=user.id)
 
     session.add(task)
@@ -53,12 +57,13 @@ def test_task_model_with_due_date(session):
 def test_fetch_tasks(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type='NEW ACCOUNT', due_date=datetime.now(),
+                     relationship_id=10, type=task_type, due_date=datetime.now(),
                      status=TaskStatus.OPEN.value, related_to=user.id)
     session.add(task)
     session.commit()
-    found_tasks, count = TaskModel.fetch_tasks(task_type='NEW ACCOUNT',
+    found_tasks, count = TaskModel.fetch_tasks(task_type=task_type,
                                                task_status=TaskStatus.OPEN.value, page=1, limit=10)
     assert found_tasks
     assert count == 1
@@ -70,8 +75,9 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
 def test_find_task_by_id(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type='NEW ACCOUNT', due_date=datetime.now(),
+                     relationship_id=10, type=task_type, due_date=datetime.now(),
                      status=TaskStatus.OPEN.value, related_to=user.id)
     session.add(task)
     session.commit()
@@ -84,8 +90,9 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
     """Assert that we can fetch all tasks."""
     user = factory_user_model()
     factory_task_models(6, user.id)
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
 
-    found_tasks, count = TaskModel.fetch_tasks(task_type='NEW ACCOUNT',
+    found_tasks, count = TaskModel.fetch_tasks(task_type=task_type,
                                                task_status=TaskStatus.OPEN.value, page=3, limit=2)
     assert found_tasks
     assert count == 6
@@ -94,8 +101,9 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
 def test_task_model_account_id(session):
     """Assert that a task can be stored along with account id column."""
     user = factory_user_model()
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
-                     relationship_id=10, type='NEW ACCOUNT', status=TaskStatus.OPEN.value,
+                     relationship_id=10, type=task_type, status=TaskStatus.OPEN.value,
                      account_id=10, related_to=user.id)
 
     session.add(task)

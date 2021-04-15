@@ -17,6 +17,8 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
 
+from flask import current_app
+
 from auth_api import status as http_status
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.services import Org as OrgService
@@ -156,9 +158,10 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     # Assert task name
     product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
+    task_type_product = current_app.config.get('ACCESS_REQUEST_PRODUCT')
     org_name = dictionary['name']
     assert fetched_task['name'] == org_name
-    assert fetched_task['type'] == f'Access Request ( {product.description} )'
+    assert fetched_task['type'] == f'{task_type_product}({product.description})'
 
     # Assert the task can be updated and the product status is changed to active
     update_task_payload = {

@@ -17,6 +17,9 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from datetime import datetime
+
+from flask import current_app
+
 from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.services import Affidavit as AffidavitService
@@ -35,8 +38,7 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_type='NEW ACCOUNT',
-                                           task_status=TaskStatus.OPEN.value,
+    fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                            page=1,
                                            limit=10)
 
@@ -49,13 +51,14 @@ def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argum
     """Assert that a task can be created."""
     user = factory_user_model()
     test_org = factory_org_model()
+    task_type_new_account = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_org.id,
         'relatedTo': user.id,
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.ORG.value,
-        'type': 'NEW ACCOUNT',
+        'type': task_type_new_account,
         'status': TaskStatus.OPEN.value
     }
     task = TaskService.create_task(test_task_info)
@@ -70,13 +73,14 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     test_org = factory_org_model()
     test_product = factory_product_model(org_id=test_org.id)
     product: ProductCodeModel = ProductCodeModel.find_by_code(test_product.product_code)
+    task_type_product = current_app.config.get('ACCESS_REQUEST_PRODUCT')
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_product.id,
         'relatedTo': user.id,
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.PRODUCT.value,
-        'type': f'Access Request ( {product.description} )',
+        'type': f'{task_type_product}({product.description})',
         'status': TaskStatus.OPEN.value,
         'accountId': test_org.id
     }

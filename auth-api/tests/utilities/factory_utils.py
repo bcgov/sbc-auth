@@ -17,6 +17,8 @@ Test Utility for creating model factory.
 """
 import datetime
 
+from flask import current_app
+
 from tests.utilities.factory_scenarios import (
     JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo,
     TestPaymentTypeInfo, TestUserInfo)
@@ -254,12 +256,13 @@ def factory_task_service(user_id: int = 1, org_id: int = 1):
 
 def factory_task_model(user_id: int = 1, org_id: int = 1):
     """Produce a Task model."""
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     task = TaskModel(id=1,
                      name='foo',
                      date_submitted=datetime.datetime.now(),
                      relationship_type=TaskRelationshipType.ORG.value,
                      relationship_id=org_id,
-                     type='NEW ACCOUNT',
+                     type=task_type,
                      status=TaskStatus.OPEN.value,
                      related_to=user_id
                      )
@@ -269,10 +272,11 @@ def factory_task_model(user_id: int = 1, org_id: int = 1):
 
 def factory_task_models(count: int, user_id: int):
     """Produce a collection of Task models."""
+    task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     for i in range(0, count):
         task = TaskModel(name='TEST {}'.format(i), date_submitted=datetime.datetime.now(),
                          relationship_type=TaskRelationshipType.ORG.value,
-                         relationship_id=10, type='NEW ACCOUNT',
+                         relationship_id=10, type=task_type,
                          status=TaskStatus.OPEN.value,
                          related_to=user_id)
         task.save()

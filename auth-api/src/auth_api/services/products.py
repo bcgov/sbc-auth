@@ -93,12 +93,13 @@ class Product:
                 # create a staff review task for this product subscription if pending status
                 if product_model.default_subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
                     user = UserModel.find_by_jwt_token(token=token_info)
+                    task_type = current_app.config.get('ACCESS_REQUEST_PRODUCT')
                     task_info = {'name': org.name,
                                  'relationshipId': product_subscription.id,
                                  'relatedTo': user.id,
                                  'dateSubmitted': datetime.today(),
                                  'relationshipType': TaskRelationshipType.PRODUCT.value,
-                                 'type': f'Access Request ( {product_model.description} )',
+                                 'type': f'{task_type}({product_model.description})',
                                  'status': TaskStatus.OPEN.value,
                                  'accountId': org_id
                                  }
