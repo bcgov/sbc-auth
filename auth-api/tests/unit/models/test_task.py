@@ -89,3 +89,17 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
                                                task_status=TaskStatus.OPEN.value, page=3, limit=2)
     assert found_tasks
     assert count == 6
+
+
+def test_task_model_account_id(session):
+    """Assert that a task can be stored along with account id column."""
+    user = factory_user_model()
+    task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
+                     relationship_id=10, type=TaskType.PENDING_STAFF_REVIEW.value, status=TaskStatus.OPEN.value,
+                     account_id=10, related_to=user.id)
+
+    session.add(task)
+    session.commit()
+    assert task.id is not None
+    assert task.name == 'TEST'
+    assert task.account_id == 10

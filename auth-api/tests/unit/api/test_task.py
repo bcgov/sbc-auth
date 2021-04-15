@@ -18,6 +18,7 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 import json
 
 from auth_api import status as http_status
+from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import Affidavit as AffidavitService
@@ -44,7 +45,6 @@ def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
 
 def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the none can be fetched."""
-
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -90,12 +90,6 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     fetched_task = fetched_tasks[0]
 
     update_task_payload = {
-        'id': fetched_task['id'],
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.ORG.value,
-        'relationshipId': org_id,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
         'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
@@ -124,7 +118,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     # 4. Create Product subscription
     # 5. Update the created task and the relationship
 
-    """Assert that an org can be POSTed."""
+    # Post user, org and product subscription
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
@@ -144,17 +138,17 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
     assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value
+
     org_products = json.loads(rv_products.data)
     org_product = org_products.get('subscriptions')[0]
 
+    # Assert task name
+    product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
+    org_name = dictionary['name']
+    assert fetched_task['name'] == f'{org_name} - {product.description}'
+
+    # Assert the task can be updated and the product status is changed to active
     update_task_payload = {
-        'id': fetched_task['id'],
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.PRODUCT.value,
-        'relationshipId': org_product.get('id'),
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
-        'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': ProductSubscriptionStatus.ACTIVE.value
     }
 
