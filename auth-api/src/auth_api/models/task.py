@@ -33,6 +33,8 @@ class Task(BaseModel):
     due_date = Column(DateTime)  # Optional field
     type = Column(String(50), nullable=False)  # type of the task. For eg, PENDING_STAFF_REVIEW
     status = Column(String(50), nullable=False)  # task is acted or to be acted. can be open or completed
+    account_id = Column(Integer, nullable=True)  # account id related to task. Eg,
+    # org id for pending product subscriptions
     related_to = Column(ForeignKey('users.id', ondelete='SET NULL',
                                    name='related_to_fkey'), nullable=False)
     # task that is assigned to the particular user
@@ -42,8 +44,12 @@ class Task(BaseModel):
     def fetch_tasks(cls, task_type: str, task_status: str,
                     page: int, limit: int):
         """Fetch all tasks."""
-        query = db.session.query(Task).filter(Task.type == task_type,
-                                              Task.status == task_status)
+        query = db.session.query(Task)
+
+        if task_type:
+            query = query.filter(Task.type == task_type)
+        if task_status:
+            query = query.filter(Task.status == task_status)
 
         # Add pagination
         pagination = query.paginate(per_page=limit, page=page)

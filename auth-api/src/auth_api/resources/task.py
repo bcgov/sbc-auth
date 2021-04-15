@@ -22,7 +22,6 @@ from auth_api.utils.roles import Role
 from auth_api.services import Task as TaskService
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
-from auth_api.schemas import TaskSchema
 from auth_api.models import Task as TaskModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.utils.enums import TaskStatus
@@ -49,11 +48,11 @@ class Tasks(Resource):
             page = request.args.get('page', 1)
             limit = request.args.get('limit', 10)
 
-            tasks = TaskService.fetch_tasks(task_type=task_type, task_status=task_status,
-                                            page=page, limit=limit)
-            response, status = {'tasks': TaskSchema().dump(tasks, many=True)}, http_status.HTTP_200_OK
+            response, status = TaskService.fetch_tasks(task_type=task_type, task_status=task_status,
+                                                       page=page, limit=limit), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
         return response, status
 
 
