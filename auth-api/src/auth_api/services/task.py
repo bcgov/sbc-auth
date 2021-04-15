@@ -22,12 +22,12 @@ from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.models import db
 from auth_api.models import Task as TaskModel
-from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, \
-    ProductSubscriptionStatus
+from auth_api.utils.enums import TaskRelationshipType, AffidavitStatus, \
+    ProductSubscriptionStatus, TaskStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -62,11 +62,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_task(task_info: dict):
+    def create_task(task_info: dict, do_commit: bool = True):
         """Create a new task record."""
         current_app.logger.debug('<create_task ')
         task_model = TaskModel(**camelback2snake(task_info))
-        task_model.save()
+        task_model.flush()
+        if do_commit:  # Task mostly comes as a part of parent transaction.So do not commit unless asked.
+            db.session.commit()
         current_app.logger.debug('>create_task ')
         return Task(task_model)
 
@@ -76,22 +78,21 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model: TaskModel = self._model
 
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-        task_model.name = task_info.get('name')
-        task_model.status = task_info.get('status')
+        task_model.status = task_info.get('status', TaskStatus.COMPLETED.value)
         task_model.decision_made_by = user.username
         task_model.decision_made_on = datetime.now()
-        task_model.save()
+        task_model.flush()
 
         # Update its relationship
         task_relationship_status = task_info.pop('relationshipStatus')
-        self.update_relationship(task_relationship_status=task_relationship_status,
-                                 token_info=token_info,
-                                 origin_url=origin_url)
+        self._update_relationship(task_relationship_status=task_relationship_status,
+                                  token_info=token_info,
+                                  origin_url=origin_url)
         current_app.logger.debug('>update_task ')
-
+        db.session.commit()
         return Task(task_model)
 
-    def update_relationship(self, task_relationship_status: str, token_info: Dict = None, origin_url: str = None):
+    def _update_relationship(self, task_relationship_status: str, token_info: Dict = None, origin_url: str = None):
         """Retrieve the relationship record and update the status."""
         task_model: TaskModel = self._model
         current_app.logger.debug('<update_task_relationship ')
@@ -100,20 +101,20 @@ class Task:  # pylint: disable=too-many-instance-attributes
             # Update Org relationship
             is_approved: bool = task_relationship_status == AffidavitStatus.APPROVED.value
             org_id = task_model.relationship_id
-            self.update_org(is_approved=is_approved, org_id=org_id,
-                            token_info=token_info,
-                            origin_url=origin_url)
+            self._update_org(is_approved=is_approved, org_id=org_id,
+                             token_info=token_info,
+                             origin_url=origin_url)
 
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
             is_approved: bool = task_relationship_status == ProductSubscriptionStatus.ACTIVE.value
-            self.update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id)
+            self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id)
 
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
-    def update_org(is_approved: bool, org_id: int, token_info: Dict = None, origin_url: str = None):
+    def _update_org(is_approved: bool, org_id: int, token_info: Dict = None, origin_url: str = None):
         """Approve/Reject Affidavit and Org."""
         from auth_api.services import \
             Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
@@ -126,28 +127,22 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_org ')
 
     @staticmethod
-    def update_product_subscription(is_approved: bool, product_subscription_id: int):
+    def _update_product_subscription(is_approved: bool, product_subscription_id: int):
         """Review Product Subscription."""
-        current_app.logger.debug('<update_task_product ')
+        current_app.logger.debug('<_update_product_subscription ')
+        from auth_api.services import \
+            Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
         # Approve/Reject Product subscription
-        product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
-        if is_approved:
-            product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
-        else:
-            product_subscription.status_code = ProductSubscriptionStatus.REJECTED.value
-        product_subscription.save()
-        current_app.logger.debug('>update_task_product ')
+        ProductService.update_product_subscription(product_subscription_id, is_approved, is_new_transaction=False)
+        current_app.logger.debug('>_update_product_subscription ')
 
     @staticmethod
     def fetch_tasks(**kwargs):
-        """Fetch all tasks."""
+        """Search all tasks."""
         task_type = kwargs.get('task_type')
         task_status = kwargs.get('task_status')
-        if not any(e.value == task_type for e in TaskType):
-            return []
-        if not any(e.value == task_status for e in TaskStatus):
-            return []
 
+        tasks = {'tasks': []}
         page: int = int(kwargs.get('page'))
         limit: int = int(kwargs.get('limit'))
         search_args = (task_type,
@@ -156,11 +151,18 @@ class Task:  # pylint: disable=too-many-instance-attributes
                        limit)
 
         current_app.logger.debug('<fetch_tasks ')
-        tasks, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
-        tasks_response = []
+        task_models, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
 
-        for task in tasks:
-            tasks_response.append(task)
+        if not task_models:
+            return tasks
+
+        for task in task_models:
+            task_dict = Task(task).as_dict()
+            tasks['tasks'].append(task_dict)
+
+        tasks['total'] = count
+        tasks['page'] = page
+        tasks['limit'] = limit
 
         current_app.logger.debug('>fetch_tasks ')
-        return tasks_response
+        return tasks
