@@ -125,8 +125,23 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
+
+    product_which_doesnt_need_approval = TestOrgProductsInfo.org_products1
     rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
-                              data=json.dumps(TestOrgProductsInfo.org_products1),
+                              data=json.dumps(product_which_doesnt_need_approval),
+                              headers=headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
+                                    task_status=TaskStatus.OPEN.value,
+                                    page=1,
+                                    limit=10)
+    assert len(tasks['tasks']) == 0
+
+    product_which_needs_approval = TestOrgProductsInfo.org_products_vs
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(product_which_needs_approval),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
