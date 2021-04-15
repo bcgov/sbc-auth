@@ -101,7 +101,6 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
                                 token_info=TestJwtClaims.public_bceid_user)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
-    org_id = org_dict['id']
 
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
 
