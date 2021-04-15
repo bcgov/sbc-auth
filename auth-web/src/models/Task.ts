@@ -1,5 +1,5 @@
 export interface Tasks {
-    task : Task[]
+    tasks : Task[]
 }
 export interface Task {
     created?: Date;
@@ -15,4 +15,17 @@ export interface Task {
     type?: string;
     user?: number;
     dueDate?: Date
+}
+export interface TaskFilterParams {
+    status?: string;
+    type?: string;
+    pageNumber?: number;
+    pageLimit?: number;
+}
+
+export interface TaskList {
+    tasks: Task[]
+    limit: number
+    page: number
+    total: number
 }

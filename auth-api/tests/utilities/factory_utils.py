@@ -39,7 +39,7 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import (AccessType, InvitationType,
-                                  TaskStatus, TaskRelationshipType, TaskType, ProductSubscriptionStatus)
+                                  TaskStatus, TaskRelationshipType, ProductSubscriptionStatus)
 from auth_api.utils.roles import Role
 
 
@@ -259,7 +259,7 @@ def factory_task_model(user_id: int = 1, org_id: int = 1):
                      date_submitted=datetime.datetime.now(),
                      relationship_type=TaskRelationshipType.ORG.value,
                      relationship_id=org_id,
-                     type=TaskType.PENDING_STAFF_REVIEW.value,
+                     type='NEW ACCOUNT',
                      status=TaskStatus.OPEN.value,
                      related_to=user_id
                      )
@@ -272,7 +272,7 @@ def factory_task_models(count: int, user_id: int):
     for i in range(0, count):
         task = TaskModel(name='TEST {}'.format(i), date_submitted=datetime.datetime.now(),
                          relationship_type=TaskRelationshipType.ORG.value,
-                         relationship_id=10, type=TaskType.PENDING_STAFF_REVIEW.value,
+                         relationship_id=10, type='NEW ACCOUNT',
                          status=TaskStatus.OPEN.value,
                          related_to=user_id)
         task.save()

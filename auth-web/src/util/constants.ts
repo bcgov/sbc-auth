@@ -218,4 +218,9 @@ export enum productStatus {
 export enum TaskRelationshipType {
     ORG = 'ORG',
     PRODUCT = 'PRODUCT',
-  }
+}
+
+export enum TaskStatus {
+    OPEN = 'OPEN',
+    COMPLETED = 'COMPLETED'
+}

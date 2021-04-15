@@ -27,7 +27,7 @@ from tests.utilities.factory_utils import (factory_auth_header,
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo, TestAffidavit, TestOrgInfo, \
     TestOrgProductsInfo
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskRelationshipType, TaskType, TaskStatus, AffidavitStatus, OrgStatus, \
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, AffidavitStatus, OrgStatus, \
     ProductSubscriptionStatus
 
 
@@ -56,7 +56,7 @@ def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused
     factory_task_service(user.id)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?type=PENDING_STAFF_REVIEW&status=OPEN',
+    rv = client.get('/api/v1/tasks?status=OPEN',
                     headers=headers, content_type='application/json')
     item_list = rv.json
     assert schema_utils.validate(item_list, 'paged_response')[0]
@@ -84,8 +84,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value, page=1, limit=10)
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value, page=1, limit=10)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -133,8 +132,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
     assert len(tasks['tasks']) == 0
@@ -146,8 +144,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
@@ -160,7 +157,8 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     # Assert task name
     product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
     org_name = dictionary['name']
-    assert fetched_task['name'] == f'{org_name} - {product.description}'
+    assert fetched_task['name'] == org_name
+    assert fetched_task['type'] == f'Access Request ( {product.description} )'
 
     # Assert the task can be updated and the product status is changed to active
     update_task_payload = {

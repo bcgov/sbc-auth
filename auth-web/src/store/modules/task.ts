@@ -1,6 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-
-import { Task } from '@/models/task'
+import { Task, TaskFilterParams } from '@/models/Task'
 
 import TaskService from '@/services/task.services'
 
@@ -19,5 +18,19 @@ export default class TaskModule extends VuexModule {
       if (response && response.data && response.status === 200) {
         return response.data
       }
+    }
+
+    @Action({ rawError: true })
+    public async fetchTasks (filterParams: TaskFilterParams) {
+      const response = await TaskService.fetchTasks(filterParams)
+      if (response?.data) {
+        return {
+          limit: response.data.limit,
+          page: response.data.page,
+          total: response.data.total,
+          tasks: response.data.tasks
+        }
+      }
+      return {}
     }
 }

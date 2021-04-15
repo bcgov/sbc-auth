@@ -34,7 +34,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
-    Status, PaymentAccountStatus, TaskRelationshipType, TaskType, TaskStatus)
+    Status, PaymentAccountStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -158,7 +158,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'relatedTo': user.id,
                      'dateSubmitted': datetime.today(),
                      'relationshipType': TaskRelationshipType.ORG.value,
-                     'type': TaskType.PENDING_STAFF_REVIEW.value,
+                     'type': "NEW ACCOUNT",
                      'status': TaskStatus.OPEN.value
                      }
         TaskService.create_task(task_info, do_commit=False)
