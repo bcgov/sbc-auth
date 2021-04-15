@@ -52,7 +52,7 @@ export default class NextPageMixin extends Vue {
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
         // if the user is staff redirect to staff dashboard
-        orgName = encodeURIComponent(this.currentAccountSettings?.label)
+        orgName = encodeURIComponent(btoa(this.currentAccountSettings?.label))
         if (this.currentUser.roles.includes(Role.Staff)) {
           return `/${Pages.SEARCH_BUSINESS}`
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_INVITE_ACCEPT) {
@@ -87,7 +87,7 @@ export default class NextPageMixin extends Vue {
         // for invited users , handle user profile
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
-        orgName = encodeURIComponent(this.currentAccountSettings?.label)
+        orgName = encodeURIComponent(btoa(this.currentAccountSettings?.label))
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           nextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
@@ -108,7 +108,7 @@ export default class NextPageMixin extends Vue {
         // Redirect to create team if no orgs
         // Redirect to dashboard otherwise
         let bceidNextStep = '/'
-        orgName = encodeURIComponent(this.currentAccountSettings?.label)
+        orgName = encodeURIComponent(btoa(this.currentAccountSettings?.label))
         let invToken = ConfigHelper.getFromSession(SessionStorageKeys.InvitationToken)
         if (invToken) {
           bceidNextStep = `${Pages.CONFIRM_TOKEN}/${invToken}`
