@@ -114,11 +114,6 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
 
     task_info = {
         'id': fetched_task['id'],
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.ORG.value,
-        'relationshipId': org_id,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
         'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
@@ -127,5 +122,4 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
     task = TaskService.update_task(TaskService(task), task_info=task_info,
                                    token_info=token_info)
     dictionary = task.as_dict()
-    assert dictionary['name'] == 'bar'
     assert dictionary['status'] == TaskStatus.COMPLETED.value
