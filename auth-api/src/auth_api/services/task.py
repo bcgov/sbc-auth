@@ -26,7 +26,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskType, TaskStatus, TaskRelationshipType, AffidavitStatus, \
+from auth_api.utils.enums import TaskRelationshipType, AffidavitStatus, \
     ProductSubscriptionStatus
 from auth_api.utils.util import camelback2snake
 
@@ -140,14 +140,11 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def fetch_tasks(**kwargs):
-        """Fetch all tasks."""
+        """Search all tasks."""
         task_type = kwargs.get('task_type')
         task_status = kwargs.get('task_status')
-        if not any(e.value == task_type for e in TaskType):
-            return []
-        if not any(e.value == task_status for e in TaskStatus):
-            return []
 
+        tasks = {'tasks': []}
         page: int = int(kwargs.get('page'))
         limit: int = int(kwargs.get('limit'))
         search_args = (task_type,
@@ -156,11 +153,18 @@ class Task:  # pylint: disable=too-many-instance-attributes
                        limit)
 
         current_app.logger.debug('<fetch_tasks ')
-        tasks, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
-        tasks_response = []
+        task_models, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
 
-        for task in tasks:
-            tasks_response.append(task)
+        if not task_models:
+            return tasks
+
+        for task in task_models:
+            task_dict = Task(task).as_dict()
+            tasks['tasks'].append(task_dict)
+
+        tasks['total'] = count
+        tasks['page'] = page
+        tasks['limit'] = limit
 
         current_app.logger.debug('>fetch_tasks ')
-        return tasks_response
+        return tasks
