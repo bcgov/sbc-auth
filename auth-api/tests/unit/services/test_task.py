@@ -39,9 +39,9 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
                                            page=1,
                                            limit=10)
 
-    assert fetched_task
-    for item in fetched_task:
-        assert item.name == name
+    assert fetched_task['tasks']
+    for item in fetched_task['tasks']:
+        assert item['name'] == name
 
 
 def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -84,10 +84,11 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
                                     task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
-    fetched_task = tasks[0]
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
 
     task_info = {
-        'id': fetched_task.id,
+        'id': fetched_task['id'],
         'name': 'bar',
         'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
         'relationshipType': TaskRelationshipType.ORG.value,
@@ -96,7 +97,7 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
         'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
-    task: TaskModel = TaskModel.find_by_task_id(fetched_task.id)
+    task: TaskModel = TaskModel.find_by_task_id(fetched_task['id'])
 
     task = TaskService.update_task(TaskService(task), task_info=task_info,
                                    token_info=token_info)

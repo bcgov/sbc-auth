@@ -34,12 +34,19 @@ def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
     factory_task_service(user.id)
-    task_type = TaskRelationshipType.ORG.value
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?type={}'.format(task_type), headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     item_list = rv.json
-    assert schema_utils.validate(item_list, 'task_response')[0]
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that the none can be fetched."""
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
 
 
@@ -49,9 +56,10 @@ def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused
     factory_task_service(user.id)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?type=ORG&status=OPEN', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/tasks?type=PENDING_STAFF_REVIEW&status=OPEN',
+                    headers=headers, content_type='application/json')
     item_list = rv.json
-    assert schema_utils.validate(item_list, 'task_response')[0]
+    assert schema_utils.validate(item_list, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
 
@@ -78,10 +86,11 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
 
     tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
                                     task_status=TaskStatus.OPEN.value, page=1, limit=10)
-    fetched_task = tasks[0]
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
 
     update_task_payload = {
-        'id': fetched_task.id,
+        'id': fetched_task['id'],
         'name': 'bar',
         'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
         'relationshipType': TaskRelationshipType.ORG.value,
@@ -92,7 +101,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.put('/api/v1/tasks/{}'.format(fetched_task.id),
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
                     data=json.dumps(update_task_payload),
                     headers=headers, content_type='application/json')
 
@@ -132,13 +141,14 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
                                     task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
-    fetched_task = tasks[0]
-    assert fetched_task.relationship_type == TaskRelationshipType.PRODUCT.value
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
+    assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value
     org_products = json.loads(rv_products.data)
     org_product = org_products.get('subscriptions')[0]
 
     update_task_payload = {
-        'id': fetched_task.id,
+        'id': fetched_task['id'],
         'name': 'bar',
         'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
         'relationshipType': TaskRelationshipType.PRODUCT.value,
@@ -149,7 +159,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.put('/api/v1/tasks/{}'.format(fetched_task.id),
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
                     data=json.dumps(update_task_payload),
                     headers=headers, content_type='application/json')
 
