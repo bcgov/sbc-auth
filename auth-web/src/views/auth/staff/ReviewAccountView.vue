@@ -11,7 +11,7 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-          <router-link :to="accountUnderReview.statusCode === accountStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
+          <router-link :to="task.type === taskStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
             <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
             <span>Back to Staff Dashboard</span>
           </router-link>
@@ -76,14 +76,13 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages, TaskRelationshipType, TaskStatus } from '@/util/constants'
-import { MembershipType, Organization } from '@/models/Organization'
+import { Pages, TaskRelationshipType, TaskStatus } from '@/util/constants'
+
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
 import AccountInformation from '@/components/auth/staff/review-task/AccountInformation.vue'
 import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.vue'
-
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
@@ -92,17 +91,15 @@ import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
-
+import { Organization } from '@/models/Organization'
 import { Prop } from 'vue-property-decorator'
 import StaffModuleStore from '@/store/modules/staff'
+import { Task } from '@/models/task'
 import { User } from '@/models/user'
+
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
-// eslint-disable-next-line sort-imports
-import { Task } from '@/models/task'
-
-// import { compDownloadAffidavit } from './componentsList'
 
 const StaffModule = namespace('staff')
 const TaskModule = namespace('task')
@@ -116,13 +113,6 @@ const TaskModule = namespace('task')
     AccountStatusTab,
     AccessRequestModal
   }
-  // computed: {
-  //   ...mapState('staff', ['accountUnderReview', 'accountUnderReviewAddress', 'accountUnderReviewAdmin', 'accountUnderReviewAdminContact', 'accountUnderReviewAffidavitInfo']),
-  //   ...mapGetters('staff', ['accountNotaryName', 'accountNotaryContact', 'accountNotaryContact'])
-  // },
-  // methods: {
-  //   ...mapActions('staff', ['syncAccountUnderReview', 'approveAccountUnderReview', 'rejectAccountUnderReview'])
-  // }
 })
 export default class ReviewAccountView extends Vue {
   @Prop() orgId: number // chnage varible name to taskId
@@ -144,22 +134,11 @@ export default class ReviewAccountView extends Vue {
   @StaffModule.Action('rejectAccountUnderReview') public rejectAccountUnderReview!: (task:Task) => Promise<void>
 
   private staffStore = getModule(StaffModuleStore, this.$store)
-  private isLoading = true
-  private isSaving = false
+  public isLoading = true
+  public isSaving = false
 
-  // private readonly accountUnderReview!: Organization
-  // private readonly accountUnderReviewAddress!: Address
-  // private readonly accountUnderReviewAdmin!: User
-  // private readonly accountUnderReviewAdminContact!: Contact
-  // private readonly accountUnderReviewAffidavitInfo!: AffidavitInformation
-  // private readonly accountNotaryName!: string
-  // private readonly accountNotaryContact!: Contact
-  // private readonly affidavitDocumentUrl!: string
-  // private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
-  // private readonly approveAccountUnderReview!: (task:any) => Promise<void>
-  // private readonly rejectAccountUnderReview!: (task:any) => Promise<void>
   private readonly pagesEnum = Pages
-  private readonly accountStatusEnum = TaskStatus
+  private readonly taskStatusEnum = TaskStatus
 
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
@@ -196,18 +175,10 @@ export default class ReviewAccountView extends Vue {
 
   private async mounted () {
     // need to change call task api before
-    // await this.syncAccountUnderReview(this.orgId)
+
     this.task = await this.getTaskById(this.orgId)
     this.taskrRelationshipType = this.task.relationshipType
-    const taskRelationshipId = this.task.relationshipId
     await this.syncTaskUnderReview(this.task)
-    // if (this.taskrRelationshipType === TaskRelationshipType.ORG) {
-    //   // eslint-disable-next-line no-console
-    //   console.log('before this.task', this.task)
-    //   await this.syncTaskUnderReview(this.task)
-    // } else if (this.taskrRelationshipType === TaskRelationshipType.PRODUCT) {
-
-    // }
 
     this.isLoading = false
   }
