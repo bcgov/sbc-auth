@@ -53,8 +53,7 @@
             <v-divider vertical class="mb-0 mr-8"></v-divider>
             <div class="flex-grow-1">
             <AccountStatusTab
-              :accountUnderReview="accountUnderReview"
-              :accountUnderReviewAffidavitInfo="accountUnderReviewAffidavitInfo"
+              :taskDetails="task"
               :isPendingReviewPage="isPendingReviewPage"
             />
             </div>
@@ -77,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import { Account, AccountStatus, Pages, TaskRelationshipType } from '@/util/constants'
+import { Account, Pages, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { MembershipType, Organization } from '@/models/Organization'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -87,7 +86,7 @@ import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.
 
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
-// import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
+import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
@@ -95,16 +94,18 @@ import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffid
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 
 import { Prop } from 'vue-property-decorator'
-// import StaffModule from '@/store/modules/staff'
+import StaffModuleStore from '@/store/modules/staff'
 import { User } from '@/models/user'
 import Vue from 'vue'
-// import { getModule } from 'vuex-module-decorators'
+import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
 // eslint-disable-next-line sort-imports
 import { Task } from '@/models/task'
 
-const TaskModule = namespace('task')
+// import { compDownloadAffidavit } from './componentsList'
+
 const StaffModule = namespace('staff')
+const TaskModule = namespace('task')
 
 @Component({
   components: {
@@ -138,11 +139,11 @@ export default class ReviewAccountView extends Vue {
   @StaffModule.Getter('accountNotaryContact') public accountNotaryContact!: Contact
   @StaffModule.Getter('affidavitDocumentUrl') public affidavitDocumentUrl!: string
 
-  @StaffModule.Action('syncAccountUnderReview') public syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
+  @StaffModule.Action('syncTaskUnderReview') public syncTaskUnderReview!: (task:Task) => Promise<void>
   @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
   @StaffModule.Action('rejectAccountUnderReview') public rejectAccountUnderReview!: (task:Task) => Promise<void>
 
-  // private staffStore = getModule(StaffModule, this.$store)
+  private staffStore = getModule(StaffModuleStore, this.$store)
   private isLoading = true
   private isSaving = false
 
@@ -158,7 +159,7 @@ export default class ReviewAccountView extends Vue {
   // private readonly approveAccountUnderReview!: (task:any) => Promise<void>
   // private readonly rejectAccountUnderReview!: (task:any) => Promise<void>
   private readonly pagesEnum = Pages
-  private readonly accountStatusEnum = AccountStatus
+  private readonly accountStatusEnum = TaskStatus
 
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
@@ -170,70 +171,28 @@ export default class ReviewAccountView extends Vue {
   }
 
   private get canSelect (): boolean {
-    return this.accountUnderReview.statusCode === AccountStatus.PENDING_STAFF_REVIEW
+    return this.task.type === TaskStatus.PENDING_STAFF_REVIEW
   }
 
   private get isPendingReviewPage () {
-    return this.accountUnderReview?.statusCode === AccountStatus.PENDING_STAFF_REVIEW
+    return this.task.type === TaskStatus.PENDING_STAFF_REVIEW
   }
 
   get componentList () {
-    return [{
-      id: 'DownloadAffidavit',
-      component: DownloadAffidavit,
-      props: {
-        tabNumber: 1,
-        title: 'Download Affidavit',
-        subTitle: 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.',
-        affidavitName: this.accountUnderReview.name
-      },
-      events: { 'emit-download-affidavit': this.downloadAffidavit }
-    },
-    {
-      id: 'AccountInformation',
-      component: AccountInformation,
-      props: {
-        tabNumber: 2,
-        title: 'Account Information',
-        accountUnderReview: this.accountUnderReview,
-        accountUnderReviewAddress: this.accountUnderReviewAddress
-      }
-    },
-    {
-      id: 'AccountAdministrator',
-      component: AccountAdministrator,
-      props: {
-        tabNumber: 3,
-        title: 'Account Administrator',
-        accountUnderReviewAdmin: this.accountUnderReviewAdmin,
-        accountUnderReviewAdminContact: this.accountUnderReviewAdminContact
-      }
-    },
-    {
-      id: 'NotaryInformation',
-      component: NotaryInformation,
-      props: {
-        tabNumber: 4,
-        title: 'Notary Information',
-        accountNotaryContact: this.accountNotaryContact,
-        accountNotaryName: this.accountNotaryName
-      }
+    if (this.taskrRelationshipType === TaskRelationshipType.PRODUCT) {
+      return [
+        { ...this.componentAccountInformation(1) },
+        { ...this.componentAccountAdministrator(2) },
+        { ...this.componentAgreementInformation(3) }
+      ]
+    } else {
+      return [{ ...this.compDownloadAffidavit(1) },
+        { ...this.componentAccountInformation(2) },
+        { ...this.componentAccountAdministrator(3) },
+        { ...this.componentNotaryInformation(4) }
+      ]
     }
-
-    ]
   }
-  // needed for product approval
-  //  {
-  //     id: 'AgreementInformation',
-  //     component: AgreementInformation,
-  //     props: {
-  //       tabNumber: 5,
-  //       title: 'Agreement',
-  //       isTOSAlreadyAccepted: true,
-  //       orgName: this.accountUnderReview.name,
-  //       userName: `${this.accountUnderReviewAdmin.firstname} ${this.accountUnderReviewAdmin.lastname}`
-  //     }
-  //   }
 
   private async mounted () {
     // need to change call task api before
@@ -241,12 +200,14 @@ export default class ReviewAccountView extends Vue {
     this.task = await this.getTaskById(this.orgId)
     this.taskrRelationshipType = this.task.relationshipType
     const taskRelationshipId = this.task.relationshipId
+    await this.syncTaskUnderReview(this.task)
+    // if (this.taskrRelationshipType === TaskRelationshipType.ORG) {
+    //   // eslint-disable-next-line no-console
+    //   console.log('before this.task', this.task)
+    //   await this.syncTaskUnderReview(this.task)
+    // } else if (this.taskrRelationshipType === TaskRelationshipType.PRODUCT) {
 
-    if (this.taskrRelationshipType === TaskRelationshipType.ORG) {
-      await this.syncAccountUnderReview(taskRelationshipId)
-    } else if (this.taskrRelationshipType === TaskRelationshipType.PRODUCT) {
-
-    }
+    // }
 
     this.isLoading = false
   }
@@ -284,6 +245,84 @@ export default class ReviewAccountView extends Vue {
 
   private goBack (): void {
     this.$router.push(Pages.STAFF_DASHBOARD)
+  }
+
+  formattedComponent (tabNumber, id, component, props, event = null) {
+    return {
+      id: id,
+      component: component,
+      props: {
+        tabNumber: tabNumber,
+        ...props
+      },
+      events: { ...event }
+    }
+  }
+
+  // list of components
+  compDownloadAffidavit (tabNumber:number = 1) {
+    return this.formattedComponent(
+      tabNumber,
+      `download-affidavit-${tabNumber}`,
+      DownloadAffidavit,
+      {
+        title: 'Download Affidavit',
+        subTitle: 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.',
+        affidavitName: this.accountUnderReview.name
+      },
+      { 'emit-download-affidavit': this.downloadAffidavit }
+    )
+  }
+
+  componentAccountInformation (tabNumber:number = 1) {
+    return this.formattedComponent(
+      tabNumber,
+      `account-info-${tabNumber}`,
+      AccountInformation,
+      {
+        title: 'Account Information',
+        accountUnderReview: this.accountUnderReview,
+        accountUnderReviewAddress: this.accountUnderReviewAddress
+      },
+      null
+    )
+  }
+  componentAccountAdministrator (tabNumber:number = 1) {
+    return this.formattedComponent(
+      tabNumber,
+      `account-administration-${tabNumber}`,
+      AccountAdministrator,
+      {
+        title: 'Account Administrator',
+        accountUnderReviewAdmin: this.accountUnderReviewAdmin,
+        accountUnderReviewAdminContact: this.accountUnderReviewAdminContact
+      }
+
+    )
+  }
+
+  componentNotaryInformation (tabNumber:number = 1) {
+    return this.formattedComponent(tabNumber,
+      `notary-info-${tabNumber}`,
+      NotaryInformation,
+      {
+        title: 'Notary Information',
+        accountNotaryContact: this.accountNotaryContact,
+        accountNotaryName: this.accountNotaryName
+      }
+    )
+  }
+  componentAgreementInformation (tabNumber:number = 1) {
+    return this.formattedComponent(tabNumber,
+      `agreement-info-${tabNumber}`,
+      AgreementInformation,
+      {
+        title: 'Agreement',
+        isTOSAlreadyAccepted: true,
+        orgName: this.accountUnderReview.name,
+        userName: `${this.accountUnderReviewAdmin.firstname} ${this.accountUnderReviewAdmin.lastname}`
+      }
+    )
   }
 }
 </script>

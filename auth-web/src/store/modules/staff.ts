@@ -1,7 +1,9 @@
+import { AccountStatus, TaskRelationshipType } from '@/util/constants'
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
-import { AccountStatus } from '@/util/constants'
+
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { Contact } from '@/models/contact'
@@ -10,6 +12,7 @@ import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import StaffService from '@/services/staff.services'
+import { Task } from '@/models/task'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
@@ -168,28 +171,51 @@ export default class StaffModule extends VuexModule {
         }
       }
 
-      const affidavitResponse = await OrgService.getAffidavitInfo(organizationIdentifier)
-      if (affidavitResponse?.data && affidavitResponse?.status === 200) {
-        this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
-      }
+      // const affidavitResponse = await OrgService.getAffidavitInfo(organizationIdentifier)
+      // if (affidavitResponse?.data && affidavitResponse?.status === 200) {
+      //   this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
+      // }
     }
   }
 
   @Action({ rawError: true })
-  public async approveAccountUnderReview (task:number) {
-    const orgId = this.context.state['accountUnderReview']?.id
-    if (orgId) {
+  public async syncTaskUnderReview (task:any): Promise<void> {
+    const taskrRelationshipType = task.relationshipType
+    const taskRelationshipId = task.relationshipId
+    const taskAccountId = task.accountId
+
+    // if type is org need to set org details and affidavit details
+    if (taskrRelationshipType === TaskRelationshipType.ORG) {
+      await this.context.dispatch('syncAccountUnderReview', taskRelationshipId)
+      await this.context.dispatch('syncAccountAffidavit', taskRelationshipId)
+    } else if (taskrRelationshipType === TaskRelationshipType.PRODUCT) {
+      await this.context.dispatch('syncAccountUnderReview', taskAccountId)
+    }
+  }
+
+  @Action({ rawError: true })
+  public async syncAccountAffidavit (organizationIdentifier: number): Promise<void> {
+    const affidavitResponse = await OrgService.getAffidavitInfo(organizationIdentifier)
+    if (affidavitResponse?.data && affidavitResponse?.status === 200) {
+      this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
+    }
+  }
+
+  @Action({ rawError: true })
+  public async approveAccountUnderReview (task:Task) {
+    // const orgId = this.context.state['accountUnderReview']?.id
+    if (task) {
       await TaskService.approvePendingTask(task)
-      await this.context.dispatch('syncAccountUnderReview', orgId)
+      await this.context.dispatch('syncTaskUnderReview', task)
     }
   }
 
   @Action({ rawError: true })
-  public async rejectAccountUnderReview (task:number) {
-    const orgId = this.context.state['accountUnderReview']?.id
-    if (orgId) {
+  public async rejectAccountUnderReview (task:Task) {
+    // const orgId = this.context.state['accountUnderReview']?.id
+    if (task) {
       await TaskService.rejectPendingTask(task)
-      await this.context.dispatch('syncAccountUnderReview', orgId)
+      await this.context.dispatch('syncTaskUnderReview', task)
     }
   }
 
