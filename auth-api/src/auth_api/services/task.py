@@ -27,7 +27,7 @@ from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
 from auth_api.utils.enums import TaskRelationshipType, AffidavitStatus, \
-    ProductSubscriptionStatus
+    ProductSubscriptionStatus, TaskStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -76,8 +76,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model: TaskModel = self._model
 
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-        task_model.name = task_info.get('name')
-        task_model.status = task_info.get('status')
+        task_model.status = task_info.get('status', TaskStatus.COMPLETED.value)
         task_model.decision_made_by = user.username
         task_model.decision_made_on = datetime.now()
         task_model.save()

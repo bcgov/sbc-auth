@@ -90,13 +90,14 @@ class Product:
                     .flush()
                 # create a staff review task for this product subscription
                 user = UserModel.find_by_jwt_token(token=token_info)
-                task_info = {'name': product_model.description,
+                task_info = {'name': f'{org.name} - {product_model.description}',
                              'relationshipId': product_subscription.id,
                              'relatedTo': user.id,
                              'dateSubmitted': datetime.today(),
                              'relationshipType': TaskRelationshipType.PRODUCT.value,
                              'type': TaskType.PENDING_STAFF_REVIEW.value,
-                             'status': TaskStatus.OPEN.value
+                             'status': TaskStatus.OPEN.value,
+                             'accountId': org_id
                              }
                 TaskService.create_task(task_info)
 
