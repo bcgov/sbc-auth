@@ -90,12 +90,6 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     fetched_task = fetched_tasks[0]
 
     update_task_payload = {
-        'id': fetched_task['id'],
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.ORG.value,
-        'relationshipId': org_id,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
         'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
