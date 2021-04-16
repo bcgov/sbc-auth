@@ -15,7 +15,7 @@ export interface Task {
     status?: string;
     type?: string;
     user?: number;
-    dueDate?: Date
+    dueDate?: Date;
 }
 export interface TaskFilterParams {
     status?: string;
