@@ -218,9 +218,14 @@ export enum productStatus {
 export enum TaskRelationshipType {
     ORG = 'ORG',
     PRODUCT = 'PRODUCT',
-}
+  }
 
 export enum TaskStatus {
-    OPEN = 'OPEN',
-    COMPLETED = 'COMPLETED'
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    REJECTED = 'REJECTED',
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
+    PENDING_ACTIVATION = 'PENDING_ACTIVATION',
+    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
 }
+
