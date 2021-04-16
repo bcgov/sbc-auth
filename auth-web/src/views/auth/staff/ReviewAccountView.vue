@@ -18,7 +18,7 @@
         </div>
       </nav>
       <div class="view-header flex-column">
-        <h1 class="view-header__title">Review Account</h1>
+        <h1 class="view-header__title">{{title}}</h1>
         <p class="mt-2 mb-0">Review and verify details for this account.</p>
       </div>
       <v-card class="mt-8" flat>
@@ -26,17 +26,19 @@
 
           <!-- Components list will come here -->
           <v-col class="main-col col-12 col-md-8 pa-6 pa-md-8">
-            <template v-for="(component) in componentList">
+            <template v-for="(component, idx) in componentList">
               <component
                 :key="component.id"
                 :is="component.component"
                 v-bind="component.props"
                 v-on="component.events"
               />
-              <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`" ></v-divider>
+              <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
             </template>
+            <template v-if="canSelect" >
+              <v-divider class="mt-11 mb-8" ></v-divider>
+              <div class="form-btns d-flex justify-end" >
 
-              <div class="form-btns d-flex justify-end" v-if="canSelect" >
                 <div>
                   <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()">
                     <span>Approve</span>
@@ -46,6 +48,7 @@
                   </v-btn>
                 </div>
               </div>
+            </template>
            </v-col>
 
           <!-- Account Status Column -->
@@ -157,6 +160,13 @@ export default class ReviewAccountView extends Vue {
     return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
   }
 
+  get title () {
+    let title = 'Review Account'
+    if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
+      title = `Access Request (${this.task.type})`
+    }
+    return title
+  }
   get componentList () {
     if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
       return [
