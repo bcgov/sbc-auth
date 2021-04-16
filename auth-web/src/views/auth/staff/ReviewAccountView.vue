@@ -94,7 +94,7 @@ import NotaryInformation from '@/components/auth/staff/review-task/NotaryInforma
 import { Organization } from '@/models/Organization'
 import { Prop } from 'vue-property-decorator'
 import StaffModuleStore from '@/store/modules/staff'
-import { Task } from '@/models/task'
+import { Task } from '@/models/Task'
 import { User } from '@/models/user'
 
 import Vue from 'vue'

@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Task } from '@/models/task'
+import { Task } from '@/models/Task'
 import { TaskRelationshipStatus } from '@/util/constants'
 import moment from 'moment'
 

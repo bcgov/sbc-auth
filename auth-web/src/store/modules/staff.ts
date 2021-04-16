@@ -12,7 +12,7 @@ import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import StaffService from '@/services/staff.services'
-import { Task } from '@/models/task'
+import { Task } from '@/models/Task'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
@@ -166,11 +166,6 @@ export default class StaffModule extends VuexModule {
           }
         }
       }
-
-      // const affidavitResponse = await OrgService.getAffidavitInfo(organizationIdentifier)
-      // if (affidavitResponse?.data && affidavitResponse?.status === 200) {
-      //   this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
-      // }
     }
   }
 
@@ -199,7 +194,6 @@ export default class StaffModule extends VuexModule {
 
   @Action({ rawError: true })
   public async approveAccountUnderReview (task:Task) {
-    // const orgId = this.context.state['accountUnderReview']?.id
     if (task) {
       await TaskService.approvePendingTask(task)
       await this.context.dispatch('syncTaskUnderReview', task)
@@ -208,7 +202,6 @@ export default class StaffModule extends VuexModule {
 
   @Action({ rawError: true })
   public async rejectAccountUnderReview (task:Task) {
-    // const orgId = this.context.state['accountUnderReview']?.id
     if (task) {
       await TaskService.rejectPendingTask(task)
       await this.context.dispatch('syncTaskUnderReview', task)
