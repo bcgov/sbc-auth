@@ -16,8 +16,11 @@
     <template v-slot:loading>
       Loading...
     </template>
-    <template v-slot:[`item.dateSubmitted`]="{ item }">
+     <template v-slot:[`item.dateSubmitted`]="{ item }">
       {{formatDate(item.dateSubmitted, 'MMM DD, YYYY')}}
+    </template>
+    <template v-slot:[`item.type`]="{ item }">
+      {{item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ?  `Access Request (${item.type})` : item.type}}
     </template>
     <template v-slot:[`item.action`]="{ item }">
       <div class="btn-inline">
@@ -37,10 +40,10 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
+import { TaskRelationshipStatus, TaskRelationshipType } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { TaskRelationshipStatus } from '@/util/constants'
 import { namespace } from 'vuex-class'
 
 const TaskModule = namespace('task')
@@ -56,6 +59,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private columnSort = CommonUtils.customSort
   private tableDataOptions: Partial<DataOptions> = {}
   private isTableLoading: boolean = false
+  public TaskRelationshipTypeEnum = TaskRelationshipType
 
   private readonly headerAccounts = [
     {
