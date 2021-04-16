@@ -17,17 +17,16 @@ This module manages the tasks.
 """
 from datetime import datetime
 from typing import Dict
-from flask import current_app
 
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.models import db
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
+from auth_api.models import db
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskRelationshipType, AffidavitStatus, \
-    ProductSubscriptionStatus, TaskStatus, TaskRelationshipStatus
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)

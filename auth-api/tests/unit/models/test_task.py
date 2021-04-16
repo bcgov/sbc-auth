@@ -61,16 +61,15 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
     task = TaskModel(name='TEST', date_submitted=datetime.now(), relationship_type=TaskRelationshipType.ORG.value,
                      relationship_id=10, type=task_type, due_date=datetime.now(),
                      status=TaskStatus.OPEN.value, related_to=user.id,
-                     relationship_status=
-                     TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      )
     session.add(task)
     session.commit()
-    found_tasks, count = TaskModel.fetch_tasks(task_relationship_status=
-                                               TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-                                               task_type=task_type,
-                                               task_status=TaskStatus.OPEN.value,
-                                               page=1, limit=10)
+    found_tasks, count = TaskModel.fetch_tasks(
+        task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        task_type=task_type,
+        task_status=TaskStatus.OPEN.value,
+        page=1, limit=10)
     assert found_tasks
     assert count == 1
 
@@ -98,10 +97,10 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
     factory_task_models(6, user.id)
     task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
 
-    found_tasks, count = TaskModel.fetch_tasks(task_relationship_status=
-                                               TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-                                               task_type=task_type,
-                                               task_status=TaskStatus.OPEN.value, page=3, limit=2)
+    found_tasks, count = TaskModel.fetch_tasks(
+        task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        task_type=task_type,
+        task_status=TaskStatus.OPEN.value, page=3, limit=2)
     assert found_tasks
     assert count == 6
 

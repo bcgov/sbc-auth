@@ -30,7 +30,7 @@ class Task(BaseModel):
     date_submitted = Column(DateTime)  # Instance when task is created
     relationship_type = Column(String(50), nullable=False)  # That is to be acted up on. For eg, an org
     relationship_id = Column(Integer, index=True, nullable=False)
-    relationship_status = Column(String(100), nullable=True)   # Status of the related object. For eg,
+    relationship_status = Column(String(100), nullable=True)  # Status of the related object. For eg,
     # org_Status of an org
     due_date = Column(DateTime)  # Optional field
     type = Column(String(50), nullable=False)  # type of the task. For eg, PENDING_STAFF_REVIEW
@@ -43,7 +43,8 @@ class Task(BaseModel):
     user = relationship('User', foreign_keys=[related_to], lazy='select')
 
     @classmethod
-    def fetch_tasks(cls, task_type: str, task_status: str, task_relationship_status: str,
+    def fetch_tasks(cls, task_type: str, task_status: str,  # pylint:disable=too-many-arguments
+                    task_relationship_status: str,
                     page: int, limit: int):
         """Fetch all tasks."""
         query = db.session.query(Task)
