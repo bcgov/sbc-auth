@@ -8,8 +8,10 @@ Create Date: 2021-04-13 14:38:09.983595
 import datetime
 from typing import List
 from alembic import op
+from flask import current_app
+
 from auth_api.models import Org
-from auth_api.utils.enums import TaskStatus, TaskRelationshipType
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskRelationshipStatus
 
 # revision identifiers, used by Alembic.
 
@@ -31,15 +33,16 @@ def upgrade():
         date_submitted = org.created
         name = org.name
         status = TaskStatus.OPEN.value
-        task_type = "NEW ACCOUNT"
+        task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
+        relationship_status = TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
         task_relationship_type = TaskRelationshipType.ORG.value
 
         # Insert into tasks
         op.execute(f"INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
-                   f"relationship_id, created_by_id, modified_by_id, related_to, status, type)"
+                   f"relationship_id, created_by_id, modified_by_id, related_to, status, type, relationship_status)"
                    f"VALUES "
                    f"('{created_time}', '{created_time}', '{name}', '{date_submitted}', '{task_relationship_type}',"
-                   f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}')")
+                   f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}', '{relationship_status}')")
 
     pass
 

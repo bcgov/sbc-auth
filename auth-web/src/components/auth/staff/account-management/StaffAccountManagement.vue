@@ -36,13 +36,7 @@
 
       <template v-if="canManageAccounts">
         <v-tab data-test="pending-review-tab" :to=pagesEnum.STAFF_DASHBOARD_REVIEW>
-          <v-badge
-            inline
-            color="primary"
-            :content="totalStaffTasks"
-            :value="totalStaffTasks">
-            Pending Review
-          </v-badge>
+          Pending Review
         </v-tab>
         <v-tab data-test="rejected-tab" :to=pagesEnum.STAFF_DASHBOARD_REJECTED>
           <v-badge
@@ -138,7 +132,6 @@ export default class StaffAccountManagement extends Vue {
   private readonly syncPendingInvitationOrgs!: () => Organization[]
   private readonly syncSuspendedStaffOrgs!: () => Organization[]
   @CodesModule.Action('getCodes') private getCodes!: () => Promise<Code[]>
-  @TaskModule.State('totalStaffTasks') private totalStaffTasks!: number
 
   private readonly rejectedReviewCount!: number
   private readonly pendingInvitationsCount!: number

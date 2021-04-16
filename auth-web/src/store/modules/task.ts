@@ -6,16 +6,10 @@ import TaskService from '@/services/task.services'
 @Module({ namespaced: true })
 export default class TaskModule extends VuexModule {
     currentTask: Task
-    totalStaffTasks: number
 
     @Mutation
     public setCurrentTask (task: Task) {
       this.currentTask = task
-    }
-
-    @Mutation
-    public setTotalStaffTasks (totalStaffTasks: number) {
-      this.totalStaffTasks = totalStaffTasks
     }
 
     @Action({ commit: 'setCurrentTask', rawError: true })
@@ -30,7 +24,6 @@ export default class TaskModule extends VuexModule {
     public async fetchTasks (filterParams: TaskFilterParams) {
       const response = await TaskService.fetchTasks(filterParams)
       if (response?.data) {
-        this.context.commit('setTotalStaffTasks', response.data.total)
         return {
           limit: response.data.limit,
           page: response.data.page,
@@ -38,7 +31,6 @@ export default class TaskModule extends VuexModule {
           tasks: response.data.tasks
         }
       }
-      this.context.commit('setTotalStaffTasks', 0)
       return {}
     }
 }

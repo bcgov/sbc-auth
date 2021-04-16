@@ -27,7 +27,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.schemas import TaskSchema
 from auth_api.utils.enums import TaskRelationshipType, AffidavitStatus, \
-    ProductSubscriptionStatus, TaskStatus
+    ProductSubscriptionStatus, TaskStatus, TaskRelationshipStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -76,15 +76,17 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Update a task record."""
         current_app.logger.debug('<update_task ')
         task_model: TaskModel = self._model
+        task_relationship_status = task_info.get('relationshipStatus')
 
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
         task_model.status = task_info.get('status', TaskStatus.COMPLETED.value)
         task_model.decision_made_by = user.username
         task_model.decision_made_on = datetime.now()
+        task_model.relationship_status = task_relationship_status
         task_model.flush()
 
         # Update its relationship
-        task_relationship_status = task_info.pop('relationshipStatus')
+
         self._update_relationship(task_relationship_status=task_relationship_status,
                                   token_info=token_info,
                                   origin_url=origin_url)
@@ -96,10 +98,10 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Retrieve the relationship record and update the status."""
         task_model: TaskModel = self._model
         current_app.logger.debug('<update_task_relationship ')
+        is_approved: bool = task_relationship_status == TaskRelationshipStatus.ACTIVE.value
 
         if task_model.relationship_type == TaskRelationshipType.ORG.value:
             # Update Org relationship
-            is_approved: bool = task_relationship_status == AffidavitStatus.APPROVED.value
             org_id = task_model.relationship_id
             self._update_org(is_approved=is_approved, org_id=org_id,
                              token_info=token_info,
@@ -108,7 +110,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
-            is_approved: bool = task_relationship_status == ProductSubscriptionStatus.ACTIVE.value
             self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id)
 
         current_app.logger.debug('>update_task_relationship ')
@@ -141,12 +142,14 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Search all tasks."""
         task_type = kwargs.get('task_type')
         task_status = kwargs.get('task_status')
+        task_relationship_status = kwargs.get('task_relationship_status')
 
         tasks = {'tasks': []}
         page: int = int(kwargs.get('page'))
         limit: int = int(kwargs.get('limit'))
         search_args = (task_type,
                        task_status,
+                       task_relationship_status,
                        page,
                        limit)
 
