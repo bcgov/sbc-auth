@@ -9,7 +9,7 @@ import datetime
 from typing import List
 from alembic import op
 from auth_api.models import Org
-from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType
 
 # revision identifiers, used by Alembic.
 
@@ -31,7 +31,7 @@ def upgrade():
         date_submitted = org.created
         name = org.name
         status = TaskStatus.OPEN.value
-        task_type = TaskType.PENDING_STAFF_REVIEW.value
+        task_type = "NEW ACCOUNT"
         task_relationship_type = TaskRelationshipType.ORG.value
 
         # Insert into tasks

@@ -26,7 +26,7 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
-                                 ProductSubscriptionStatus, TaskRelationshipType, TaskType, TaskStatus
+    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus
 from .task import Task as TaskService
 from .authorization import check_auth
 from ..utils.cache import cache
@@ -59,7 +59,8 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
-    def create_product_subscription(org_id, subscription_data: Dict[str, Any], is_new_transaction: bool = True,
+    def create_product_subscription(org_id, subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
+                                    is_new_transaction: bool = True,
                                     token_info: Dict = None, skip_auth=False):
         """Create product subscription for the user.
 
@@ -86,19 +87,24 @@ class Product:
             if product_model:
                 product_subscription = ProductSubscriptionModel(org_id=org_id,
                                                                 product_code=product_code,
-                                                                status_code=product_model.default_subscription_status)\
+                                                                status_code=product_model.default_subscription_status) \
                     .flush()
-                # create a staff review task for this product subscription
-                user = UserModel.find_by_jwt_token(token=token_info)
-                task_info = {'name': product_model.description,
-                             'relationshipId': product_subscription.id,
-                             'relatedTo': user.id,
-                             'dateSubmitted': datetime.today(),
-                             'relationshipType': TaskRelationshipType.PRODUCT.value,
-                             'type': TaskType.PENDING_STAFF_REVIEW.value,
-                             'status': TaskStatus.OPEN.value
-                             }
-                TaskService.create_task(task_info)
+
+                # create a staff review task for this product subscription if pending status
+                if product_model.default_subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
+                    user = UserModel.find_by_jwt_token(token=token_info)
+                    task_type = current_app.config.get('ACCESS_REQUEST_PRODUCT')
+                    task_info = {'name': org.name,
+                                 'relationshipId': product_subscription.id,
+                                 'relatedTo': user.id,
+                                 'dateSubmitted': datetime.today(),
+                                 'relationshipType': TaskRelationshipType.PRODUCT.value,
+                                 'type': f'{task_type}({product_model.description})',
+                                 'status': TaskStatus.OPEN.value,
+                                 'accountId': org_id
+                                 }
+                    do_commit = False
+                    TaskService.create_task(task_info, do_commit)
 
                 subscriptions_model_list.append(product_subscription)
             else:
@@ -182,3 +188,18 @@ class Product:
                                                                      ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
                     })
         return merged_product_infos
+
+    @staticmethod
+    def update_product_subscription(product_subscription_id: int, is_approved: bool, is_new_transaction: bool = True):
+        """Update Product Subscription."""
+        current_app.logger.debug('<update_task_product ')
+        # Approve/Reject Product subscription
+        product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
+        if is_approved:
+            product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
+        else:
+            product_subscription.status_code = ProductSubscriptionStatus.REJECTED.value
+        product_subscription.flush()
+        if is_new_transaction:  # Commit the transaction if it's a new transaction
+            db.session.commit()
+        current_app.logger.debug('>update_task_product ')

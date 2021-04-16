@@ -17,14 +17,18 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from datetime import datetime
+
+from flask import current_app
+
 from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.models import Task as TaskModel
-from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType, OrgStatus, LoginSource, AffidavitStatus
+from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType, OrgStatus, LoginSource, AffidavitStatus
 from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
-    factory_user_model_with_contact
+    factory_user_model_with_contact, factory_product_model
 
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
@@ -34,33 +38,58 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                           task_status=TaskStatus.OPEN.value,
+    fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                            page=1,
                                            limit=10)
 
-    assert fetched_task
-    for item in fetched_task:
-        assert item.name == name
+    assert fetched_task['tasks']
+    for item in fetched_task['tasks']:
+        assert item['name'] == name
 
 
-def test_create_task(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a task can be created."""
     user = factory_user_model()
     test_org = factory_org_model()
+    task_type_new_account = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_org.id,
         'relatedTo': user.id,
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.ORG.value,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
+        'type': task_type_new_account,
         'status': TaskStatus.OPEN.value
     }
     task = TaskService.create_task(test_task_info)
     assert task
     dictionary = task.as_dict()
     assert dictionary['name'] == test_org.name
+
+
+def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a task can be created."""
+    user = factory_user_model()
+    test_org = factory_org_model()
+    test_product = factory_product_model(org_id=test_org.id)
+    product: ProductCodeModel = ProductCodeModel.find_by_code(test_product.product_code)
+    task_type_product = current_app.config.get('ACCESS_REQUEST_PRODUCT')
+    test_task_info = {
+        'name': test_org.name,
+        'relationshipId': test_product.id,
+        'relatedTo': user.id,
+        'dateSubmitted': datetime.today(),
+        'relationshipType': TaskRelationshipType.PRODUCT.value,
+        'type': f'{task_type_product}({product.description})',
+        'status': TaskStatus.OPEN.value,
+        'accountId': test_org.id
+    }
+    task = TaskService.create_task(test_task_info)
+    assert task
+    dictionary = task.as_dict()
+    assert dictionary['name'] == test_task_info['name']
+    assert dictionary['account_id'] == test_org.id
+    assert dictionary['relationship_type'] == TaskRelationshipType.PRODUCT.value
 
 
 def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -76,30 +105,23 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
                                 token_info=TestJwtClaims.public_bceid_user)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
-    org_id = org_dict['id']
 
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
-    fetched_task = tasks[0]
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
 
     task_info = {
-        'id': fetched_task.id,
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.ORG.value,
-        'relationshipId': org_id,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
+        'id': fetched_task['id'],
         'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
-    task: TaskModel = TaskModel.find_by_task_id(fetched_task.id)
+    task: TaskModel = TaskModel.find_by_task_id(fetched_task['id'])
 
     task = TaskService.update_task(TaskService(task), task_info=task_info,
                                    token_info=token_info)
     dictionary = task.as_dict()
-    assert dictionary['name'] == 'bar'
     assert dictionary['status'] == TaskStatus.COMPLETED.value

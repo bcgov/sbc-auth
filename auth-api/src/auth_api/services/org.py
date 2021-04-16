@@ -34,7 +34,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
-    Status, PaymentAccountStatus, TaskRelationshipType, TaskType, TaskStatus)
+    Status, PaymentAccountStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -111,19 +111,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
-            user = UserModel.find_by_jwt_token(token=token_info)
-            Org.send_staff_review_account_reminder(user, org.id, origin_url)
-            # create a staff review task for this account
-            task_info = {'name': org.name,
-                         'relationshipId': org.id,
-                         'relatedTo': user.id,
-                         'dateSubmitted': datetime.today(),
-                         'relationshipType': TaskRelationshipType.ORG.value,
-                         'type': TaskType.PENDING_STAFF_REVIEW.value,
-                         'status': TaskStatus.OPEN.value
-                         }
-            TaskService.create_task(task_info)
+            Org._handle_bceid_status_and_notification(org, origin_url, token_info)
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
@@ -135,7 +123,10 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
-        ProductService.create_default_product_subscriptions(org, is_new_transaction=False)
+        # dir search doesnt need default products
+
+        if access_type not in (AccessType.ANONYMOUS.value,):
+            ProductService.create_default_product_subscriptions(org, is_new_transaction=False)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
                                                               access_type=access_type)
 
@@ -155,6 +146,23 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
+
+    @staticmethod
+    def _handle_bceid_status_and_notification(org, origin_url, token_info):
+        org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
+        user = UserModel.find_by_jwt_token(token=token_info)
+        Org.send_staff_review_account_reminder(user, org.id, origin_url)
+        # create a staff review task for this account
+        task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
+        task_info = {'name': org.name,
+                     'relationshipId': org.id,
+                     'relatedTo': user.id,
+                     'dateSubmitted': datetime.today(),
+                     'relationshipType': TaskRelationshipType.ORG.value,
+                     'type': task_type,
+                     'status': TaskStatus.OPEN.value
+                     }
+        TaskService.create_task(task_info, do_commit=False)
 
     @staticmethod
     def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType, access_type=None) -> str:

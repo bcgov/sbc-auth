@@ -17,7 +17,10 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
 
+from flask import current_app
+
 from auth_api import status as http_status
+from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import Affidavit as AffidavitService
@@ -26,7 +29,7 @@ from tests.utilities.factory_utils import (factory_auth_header,
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo, TestAffidavit, TestOrgInfo, \
     TestOrgProductsInfo
 from auth_api.schemas import utils as schema_utils
-from auth_api.utils.enums import TaskRelationshipType, TaskType, TaskStatus, AffidavitStatus, OrgStatus, \
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, AffidavitStatus, OrgStatus, \
     ProductSubscriptionStatus
 
 
@@ -34,12 +37,18 @@ def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
     factory_task_service(user.id)
-    task_type = TaskRelationshipType.ORG.value
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?type={}'.format(task_type), headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     item_list = rv.json
-    assert schema_utils.validate(item_list, 'task_response')[0]
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-argument
+    """Assert that the none can be fetched."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
 
 
@@ -49,9 +58,10 @@ def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused
     factory_task_service(user.id)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?type=ORG&status=OPEN', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/tasks?status=OPEN',
+                    headers=headers, content_type='application/json')
     item_list = rv.json
-    assert schema_utils.validate(item_list, 'task_response')[0]
+    assert schema_utils.validate(item_list, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
 
@@ -76,23 +86,17 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value, page=1, limit=10)
-    fetched_task = tasks[0]
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value, page=1, limit=10)
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
 
     update_task_payload = {
-        'id': fetched_task.id,
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.ORG.value,
-        'relationshipId': org_id,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
         'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': AffidavitStatus.APPROVED.value
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.put('/api/v1/tasks/{}'.format(fetched_task.id),
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
                     data=json.dumps(update_task_payload),
                     headers=headers, content_type='application/json')
 
@@ -115,41 +119,57 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     # 4. Create Product subscription
     # 5. Update the created task and the relationship
 
-    """Assert that an org can be POSTed."""
+    # Post user, org and product subscription
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
+
+    product_which_doesnt_need_approval = TestOrgProductsInfo.org_products1
     rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
-                              data=json.dumps(TestOrgProductsInfo.org_products1),
+                              data=json.dumps(product_which_doesnt_need_approval),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
-    fetched_task = tasks[0]
-    assert fetched_task.relationship_type == TaskRelationshipType.PRODUCT.value
+    assert len(tasks['tasks']) == 0
+
+    product_which_needs_approval = TestOrgProductsInfo.org_products_vs
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(product_which_needs_approval),
+                              headers=headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+                                    page=1,
+                                    limit=10)
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
+    assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value
+
     org_products = json.loads(rv_products.data)
     org_product = org_products.get('subscriptions')[0]
 
+    # Assert task name
+    product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
+    task_type_product = current_app.config.get('ACCESS_REQUEST_PRODUCT')
+    org_name = dictionary['name']
+    assert fetched_task['name'] == org_name
+    assert fetched_task['type'] == f'{task_type_product}({product.description})'
+
+    # Assert the task can be updated and the product status is changed to active
     update_task_payload = {
-        'id': fetched_task.id,
-        'name': 'bar',
-        'dateSubmitted': '2020-11-23T15:14:20.712096+00:00',
-        'relationshipType': TaskRelationshipType.PRODUCT.value,
-        'relationshipId': org_product.get('id'),
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
-        'status': TaskStatus.COMPLETED.value,
         'relationshipStatus': ProductSubscriptionStatus.ACTIVE.value
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.put('/api/v1/tasks/{}'.format(fetched_task.id),
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
                     data=json.dumps(update_task_payload),
                     headers=headers, content_type='application/json')
 

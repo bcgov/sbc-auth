@@ -39,8 +39,8 @@
           <v-badge
             inline
             color="primary"
-            :content="pendingReviewCount"
-            :value="pendingReviewCount">
+            :content="totalStaffTasks"
+            :value="totalStaffTasks">
             Pending Review
           </v-badge>
         </v-tab>
@@ -104,6 +104,7 @@ enum TAB_CODE {
 }
 
 const CodesModule = namespace('codes')
+const TaskModule = namespace('task')
 
 @Component({
   components: {
@@ -115,7 +116,6 @@ const CodesModule = namespace('codes')
   },
   methods: {
     ...mapActions('staff', [
-      'syncPendingStaffOrgs',
       'syncRejectedStaffOrgs',
       'syncPendingInvitationOrgs',
       'syncSuspendedStaffOrgs'
@@ -124,7 +124,6 @@ const CodesModule = namespace('codes')
   computed: {
     ...mapState('user', ['currentUser']),
     ...mapGetters('staff', [
-      'pendingReviewCount',
       'rejectedReviewCount',
       'pendingInvitationsCount',
       'suspendedReviewCount'
@@ -135,13 +134,12 @@ export default class StaffAccountManagement extends Vue {
   private staffStore = getModule(StaffModule, this.$store)
   private tab = 0
   private readonly currentUser!: KCUserProfile
-  private readonly syncPendingStaffOrgs!: () => Organization[]
   private readonly syncRejectedStaffOrgs!: () => Organization[]
   private readonly syncPendingInvitationOrgs!: () => Organization[]
   private readonly syncSuspendedStaffOrgs!: () => Organization[]
   @CodesModule.Action('getCodes') private getCodes!: () => Promise<Code[]>
+  @TaskModule.State('totalStaffTasks') private totalStaffTasks!: number
 
-  private readonly pendingReviewCount!: number
   private readonly rejectedReviewCount!: number
   private readonly pendingInvitationsCount!: number
   private readonly suspendedReviewCount!: number
@@ -185,7 +183,6 @@ export default class StaffAccountManagement extends Vue {
 
   private async mounted () {
     await this.getCodes()
-    await this.syncPendingStaffOrgs()
     await this.syncRejectedStaffOrgs()
     await this.syncSuspendedStaffOrgs()
     if (this.canAdminAccounts) {
@@ -224,9 +221,6 @@ export default class StaffAccountManagement extends Vue {
   private async tabChange (tabIndex) {
     const selected = this.tabs.filter((tab) => (tab.id === tabIndex))
     switch (selected[0]?.code) {
-      case TAB_CODE.PendingReview:
-        await this.syncPendingStaffOrgs()
-        break
       case TAB_CODE.Rejected:
         await this.syncRejectedStaffOrgs()
         break

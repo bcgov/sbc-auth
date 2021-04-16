@@ -6,13 +6,6 @@
     "title": "Task",
     "additionalProperties": true,
     "required": [
-        "name",
-        "id",
-        "dateSubmitted",
-        "relationshipType",
-        "relationshipId",
-        "type",
-        "status",
         "relationshipStatus"
     ],
    "properties": {

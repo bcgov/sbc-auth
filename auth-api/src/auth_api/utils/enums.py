@@ -245,9 +245,3 @@ class TaskStatus(Enum):
 
     OPEN = 'OPEN'     # Open Task - needs to be taken action
     COMPLETED = 'COMPLETED'   # Task has been acted upon
-
-
-class TaskType(Enum):
-    """Task type."""
-
-    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'   # user created , staff need to approve.
