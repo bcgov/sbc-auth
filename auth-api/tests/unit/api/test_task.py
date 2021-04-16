@@ -30,7 +30,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo, TestA
     TestOrgProductsInfo
 from auth_api.schemas import utils as schema_utils
 from auth_api.utils.enums import TaskRelationshipType, TaskStatus, AffidavitStatus, OrgStatus, \
-    ProductSubscriptionStatus
+    ProductSubscriptionStatus, TaskRelationshipStatus
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
@@ -92,7 +92,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
 
     update_task_payload = {
         'status': TaskStatus.COMPLETED.value,
-        'relationshipStatus': AffidavitStatus.APPROVED.value
+        'relationshipStatus': TaskRelationshipStatus.ACTIVE.value
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
@@ -103,6 +103,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == TaskStatus.COMPLETED.value
+    assert dictionary['relationshipStatus'] == TaskRelationshipStatus.ACTIVE.value
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get('/api/v1/orgs/{}'.format(org_id),
@@ -176,6 +177,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     dictionary = json.loads(rv.data)
     assert rv.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == TaskStatus.COMPLETED.value
+    assert dictionary['relationshipStatus'] == TaskRelationshipStatus.ACTIVE.value
 
 
 def test_fetch_task(client, jwt, session):  # pylint:disable=unused-argument

@@ -26,7 +26,7 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
-    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus
+    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus
 from .task import Task as TaskService
 from .authorization import check_auth
 from ..utils.cache import cache
@@ -101,7 +101,8 @@ class Product:
                                  'relationshipType': TaskRelationshipType.PRODUCT.value,
                                  'type': f'{task_type}({product_model.description})',
                                  'status': TaskStatus.OPEN.value,
-                                 'accountId': org_id
+                                 'accountId': org_id,
+                                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                                  }
                     do_commit = False
                     TaskService.create_task(task_info, do_commit)
