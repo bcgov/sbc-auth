@@ -25,7 +25,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Task } from '@/models/task'
-import { TaskStatus } from '@/util/constants'
+import { TaskRelationshipStatus } from '@/util/constants'
 import moment from 'moment'
 
 @Component({})
@@ -36,12 +36,12 @@ export default class AccountStatusTab extends Vue {
   @Prop({ default: {} }) taskDetails: Task
 
   private get statusLabel (): string {
-    switch (this.taskDetails.type) {
-      case TaskStatus.ACTIVE:
+    switch (this.taskDetails.relationshipStatus) {
+      case TaskRelationshipStatus.ACTIVE:
         return 'Approved'
-      case TaskStatus.REJECTED:
+      case TaskRelationshipStatus.REJECTED:
         return 'Rejected'
-      case TaskStatus.PENDING_STAFF_REVIEW:
+      case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
         return 'Pending'
       default:
         return ''

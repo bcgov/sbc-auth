@@ -220,7 +220,7 @@ export enum TaskRelationshipType {
     PRODUCT = 'PRODUCT',
   }
 
-export enum TaskStatus {
+export enum TaskRelationshipStatus {
     ACTIVE = 'ACTIVE',
     INACTIVE = 'INACTIVE',
     REJECTED = 'REJECTED',
@@ -229,3 +229,7 @@ export enum TaskStatus {
     PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
 }
 
+export enum TaskStatus {
+    OPEN = 'OPEN',
+    COMPLETED = 'COMPLETED'
+}

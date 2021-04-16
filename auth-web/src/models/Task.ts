@@ -10,6 +10,7 @@ export interface Task {
     modifiedBy?: string;
     name?: string;
     relationshipId?: number;
+    relationshipStatus?: string;
     relationshipType?: string;
     status?: string;
     type?: string;

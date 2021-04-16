@@ -29,11 +29,11 @@ export default class TaskService {
 
   static async approvePendingTask (task:any): Promise<AxiosResponse> {
     const taskId = task.id
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { ...task, relationshipStatus: 'APPROVED' })
+    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: 'APPROVED' })
   }
 
   static async rejectPendingTask (task:any): Promise<AxiosResponse> {
     const taskId = task.id
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { ...task, relationshipStatus: 'REJECTED' })
+    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: 'REJECTED' })
   }
 }
