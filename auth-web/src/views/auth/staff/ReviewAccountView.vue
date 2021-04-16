@@ -11,7 +11,7 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-          <router-link :to="task.type === taskStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
+          <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
             <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
             <span>Back to Staff Dashboard</span>
           </router-link>
@@ -76,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import { Pages, TaskRelationshipType, TaskStatus } from '@/util/constants'
+import { Pages, TaskRelationshipStatus, TaskRelationshipType } from '@/util/constants'
 
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -138,7 +138,7 @@ export default class ReviewAccountView extends Vue {
   public isSaving = false
 
   private readonly pagesEnum = Pages
-  private readonly taskStatusEnum = TaskStatus
+  private readonly TaskRelationshipStatusEnum = TaskRelationshipStatus
 
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
@@ -150,11 +150,11 @@ export default class ReviewAccountView extends Vue {
   }
 
   private get canSelect (): boolean {
-    return this.task.type === TaskStatus.PENDING_STAFF_REVIEW
+    return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
   }
 
   private get isPendingReviewPage () {
-    return this.task.type === TaskStatus.PENDING_STAFF_REVIEW
+    return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
   }
 
   get componentList () {
