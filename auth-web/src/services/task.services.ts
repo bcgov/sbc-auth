@@ -2,8 +2,8 @@ import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { axios } from '@/util/http-util'
 import { TaskRelationshipStatus } from '@/util/constants'
+import { axios } from '@/util/http-util'
 
 export default class TaskService {
   public static async getTaskById (taskId: number): Promise<AxiosResponse<Task>> {
