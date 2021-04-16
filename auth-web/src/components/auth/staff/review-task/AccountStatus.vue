@@ -7,26 +7,25 @@
     </v-row>
     <v-row v-if="!isPendingReviewPage">
       <v-col class="col-12 col-sm-5 py-2">
-        <span v-if="accountUnderReview.statusCode === 'ACTIVE'">Approved By</span>
-        <span v-if="accountUnderReview.statusCode === 'REJECTED'">Rejected By</span>
+        <span v-if="taskDetails.type === 'ACTIVE'">Approved By</span>
+        <span v-if="taskDetails.type === 'REJECTED'">Rejected By</span>
       </v-col>
-      <v-col class="py-2">
-        {{ accountUnderReviewAffidavitInfo.decisionMadeBy }}<br/>
-        {{ formatDate(accountUnderReviewAffidavitInfo.decisionMadeOn) }}
+      <v-col class="py-2" v-if="!isPendingReviewPage">
+        {{ taskDetails.decisionMadeBy }}<br/>
+        {{ formatDate(taskDetails.decisionMadeOn) }}
       </v-col>
     </v-row>
     <v-row>
       <v-col class="col-12 col-sm-5 py-2">Created On</v-col>
-      <v-col class="py-2">{{ formatDate(accountUnderReview.created) }}</v-col>
+      <v-col class="py-2">{{ formatDate(taskDetails.created) }}</v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { AccountStatus } from '@/util/constants'
-import { AffidavitInformation } from '@/models/affidavit'
-import { Organization } from '@/models/Organization'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Task } from '@/models/Task'
+import { TaskRelationshipStatus } from '@/util/constants'
 import moment from 'moment'
 
 @Component({})
@@ -34,16 +33,15 @@ export default class AccountStatusTab extends Vue {
   @Prop({ default: null }) private tabNumber: number
   @Prop({ default: false }) private isPendingReviewPage: boolean
   @Prop({ default: 'Account Status' }) private title: string
-  @Prop({ default: {} }) accountUnderReview: Organization
-  @Prop({ default: {} }) accountUnderReviewAffidavitInfo: AffidavitInformation
+  @Prop({ default: {} }) taskDetails: Task
 
   private get statusLabel (): string {
-    switch (this.accountUnderReview.statusCode) {
-      case AccountStatus.ACTIVE:
+    switch (this.taskDetails.relationshipStatus) {
+      case TaskRelationshipStatus.ACTIVE:
         return 'Approved'
-      case AccountStatus.REJECTED:
+      case TaskRelationshipStatus.REJECTED:
         return 'Rejected'
-      case AccountStatus.PENDING_STAFF_REVIEW:
+      case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
         return 'Pending'
       default:
         return ''

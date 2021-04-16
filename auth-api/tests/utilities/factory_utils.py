@@ -39,7 +39,8 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import (AccessType, InvitationType,
-                                  TaskStatus, TaskRelationshipType, TaskType, ProductSubscriptionStatus)
+                                  TaskStatus, TaskRelationshipType, ProductSubscriptionStatus, TaskRelationshipStatus,
+                                  TaskTypePrefix)
 from auth_api.utils.roles import Role
 
 
@@ -254,14 +255,16 @@ def factory_task_service(user_id: int = 1, org_id: int = 1):
 
 def factory_task_model(user_id: int = 1, org_id: int = 1):
     """Produce a Task model."""
+    task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     task = TaskModel(id=1,
                      name='foo',
                      date_submitted=datetime.datetime.now(),
                      relationship_type=TaskRelationshipType.ORG.value,
                      relationship_id=org_id,
-                     type=TaskType.PENDING_STAFF_REVIEW.value,
+                     type=task_type,
                      status=TaskStatus.OPEN.value,
-                     related_to=user_id
+                     related_to=user_id,
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      )
     task.save()
     return task
@@ -269,10 +272,12 @@ def factory_task_model(user_id: int = 1, org_id: int = 1):
 
 def factory_task_models(count: int, user_id: int):
     """Produce a collection of Task models."""
+    task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     for i in range(0, count):
         task = TaskModel(name='TEST {}'.format(i), date_submitted=datetime.datetime.now(),
                          relationship_type=TaskRelationshipType.ORG.value,
-                         relationship_id=10, type=TaskType.PENDING_STAFF_REVIEW.value,
+                         relationship_id=10, type=task_type,
                          status=TaskStatus.OPEN.value,
-                         related_to=user_id)
+                         related_to=user_id,
+                         relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
         task.save()
