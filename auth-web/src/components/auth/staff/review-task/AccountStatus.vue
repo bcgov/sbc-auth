@@ -3,16 +3,18 @@
     <h2 class="mb-5">{{`${tabNumber !==null ?  `${tabNumber}.` : ''} ${title}`}}</h2>
     <v-row>
       <v-col class="col-12 col-sm-5 py-2">Status</v-col>
-      <v-col class="py-2">{{ statusLabel }}</v-col>
+      <v-col class="py-2"   :class="{'error--text font-weight-bold': (taskDetails.relationshipStatus===TaskRelationshipStatusEnum.REJECTED) }"
+          >{{ statusLabel }}
+          </v-col>
     </v-row>
     <v-row v-if="!isPendingReviewPage">
       <v-col class="col-12 col-sm-5 py-2">
-        <span v-if="taskDetails.type === 'ACTIVE'">Approved By</span>
-        <span v-if="taskDetails.type === 'REJECTED'">Rejected By</span>
+        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIV">Approved By</span>
+        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.REJECTED">Rejected By</span>
       </v-col>
       <v-col class="py-2" v-if="!isPendingReviewPage">
-        {{ taskDetails.decisionMadeBy }}<br/>
-        {{ formatDate(taskDetails.decisionMadeOn) }}
+        {{ taskDetails.modifiedBy }}<br/>
+        {{ formatDate(taskDetails.modified) }}
       </v-col>
     </v-row>
     <v-row>
@@ -34,6 +36,7 @@ export default class AccountStatusTab extends Vue {
   @Prop({ default: false }) private isPendingReviewPage: boolean
   @Prop({ default: 'Account Status' }) private title: string
   @Prop({ default: {} }) taskDetails: Task
+  public TaskRelationshipStatusEnum = TaskRelationshipStatus
 
   private get statusLabel (): string {
     switch (this.taskDetails.relationshipStatus) {
