@@ -160,10 +160,9 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     # Assert task name
     product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
-    task_type_product = TaskTypePrefix.ACCESS_REQUEST_PRODUCT.value
     org_name = dictionary['name']
     assert fetched_task['name'] == org_name
-    assert fetched_task['type'] == f'{task_type_product}({product.description})'
+    assert fetched_task['type'] == product.description
 
     # Assert the task can be updated and the product status is changed to active
     update_task_payload = {

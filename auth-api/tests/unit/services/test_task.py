@@ -73,14 +73,13 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     test_org = factory_org_model()
     test_product = factory_product_model(org_id=test_org.id)
     product: ProductCodeModel = ProductCodeModel.find_by_code(test_product.product_code)
-    task_type_product = TaskTypePrefix.ACCESS_REQUEST_PRODUCT.value
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_product.id,
         'relatedTo': user.id,
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.PRODUCT.value,
-        'type': f'{task_type_product}({product.description})',
+        'type': product.description,
         'status': TaskStatus.OPEN.value,
         'accountId': test_org.id,
         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value

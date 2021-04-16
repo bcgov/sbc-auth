@@ -12,6 +12,9 @@ export default class TaskService {
 
   public static async fetchTasks (taskFilter?: TaskFilterParams): Promise<AxiosResponse<TaskList>> {
     let params = new URLSearchParams()
+    if (taskFilter.relationshipStatus) {
+      params.append('relationshipStatus', taskFilter.relationshipStatus)
+    }
     if (taskFilter.status) {
       params.append('status', taskFilter.status)
     }

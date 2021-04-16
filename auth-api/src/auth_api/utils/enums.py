@@ -264,4 +264,3 @@ class TaskTypePrefix(Enum):
     """Task Type prefix to be appended to type column while saving a task."""
 
     NEW_ACCOUNT_STAFF_REVIEW = 'NEW ACCOUNT'
-    ACCESS_REQUEST_PRODUCT = 'ACCESS REQUEST'

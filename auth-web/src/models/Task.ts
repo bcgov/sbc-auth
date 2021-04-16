@@ -20,6 +20,7 @@ export interface Task {
 export interface TaskFilterParams {
     status?: string;
     type?: string;
+    relationshipStatus?: string;
     pageNumber?: number;
     pageLimit?: number;
 }
