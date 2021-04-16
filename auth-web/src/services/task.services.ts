@@ -3,6 +3,7 @@ import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { axios } from '@/util/http-util'
+import { TaskRelationshipStatus } from '@/util/constants'
 
 export default class TaskService {
   public static async getTaskById (taskId: number): Promise<AxiosResponse<Task>> {
@@ -29,11 +30,11 @@ export default class TaskService {
 
   static async approvePendingTask (task:any): Promise<AxiosResponse> {
     const taskId = task.id
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: 'ACTIVE' })
+    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.ACTIVE })
   }
 
   static async rejectPendingTask (task:any): Promise<AxiosResponse> {
     const taskId = task.id
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: 'REJECTED' })
+    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.REJECTED })
   }
 }

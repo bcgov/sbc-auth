@@ -143,7 +143,7 @@ export default class ReviewAccountView extends Vue {
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
   public task :Task
-  public taskrRelationshipType:string = ''
+  public taskRelationshipType:string = ''
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -158,7 +158,7 @@ export default class ReviewAccountView extends Vue {
   }
 
   get componentList () {
-    if (this.taskrRelationshipType === TaskRelationshipType.PRODUCT) {
+    if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
       return [
         { ...this.componentAccountInformation(1) },
         { ...this.componentAccountAdministrator(2) },
@@ -177,7 +177,7 @@ export default class ReviewAccountView extends Vue {
     // need to change call task api before
 
     this.task = await this.getTaskById(this.orgId)
-    this.taskrRelationshipType = this.task.relationshipType
+    this.taskRelationshipType = this.task.relationshipType
     await this.syncTaskUnderReview(this.task)
 
     this.isLoading = false
