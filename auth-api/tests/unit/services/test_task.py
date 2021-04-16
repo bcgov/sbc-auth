@@ -18,14 +18,13 @@ Test suite to ensure that the Task service routines are working as expected.
 
 from datetime import datetime
 
-from flask import current_app
-
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import Task as TaskModel
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
-from auth_api.utils.enums import TaskStatus, TaskRelationshipType, OrgStatus, LoginSource, TaskRelationshipStatus
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType, OrgStatus, LoginSource, TaskRelationshipStatus, \
+    TaskTypePrefix
 from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
     factory_user_model_with_contact, factory_product_model
@@ -51,7 +50,7 @@ def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argum
     """Assert that a task can be created."""
     user = factory_user_model()
     test_org = factory_org_model()
-    task_type_new_account = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
+    task_type_new_account = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_org.id,
@@ -74,7 +73,7 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     test_org = factory_org_model()
     test_product = factory_product_model(org_id=test_org.id)
     product: ProductCodeModel = ProductCodeModel.find_by_code(test_product.product_code)
-    task_type_product = current_app.config.get('ACCESS_REQUEST_PRODUCT')
+    task_type_product = TaskTypePrefix.ACCESS_REQUEST_PRODUCT.value
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_product.id,

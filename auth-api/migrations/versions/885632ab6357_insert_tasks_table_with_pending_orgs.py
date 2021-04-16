@@ -5,13 +5,11 @@ Revises: d804bcead371
 Create Date: 2021-04-13 14:38:09.983595
 
 """
-import datetime
 from typing import List
 from alembic import op
-from flask import current_app
 
 from auth_api.models import Org
-from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskRelationshipStatus
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskRelationshipStatus, TaskTypePrefix
 
 # revision identifiers, used by Alembic.
 
@@ -33,7 +31,7 @@ def upgrade():
         date_submitted = org.created
         name = org.name
         status = TaskStatus.OPEN.value
-        task_type = current_app.config.get('NEW_ACCOUNT_STAFF_REVIEW')
+        task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
         relationship_status = TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
         task_relationship_type = TaskRelationshipType.ORG.value
 

@@ -17,8 +17,6 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
 
-from flask import current_app
-
 from auth_api import status as http_status
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.schemas import utils as schema_utils
@@ -26,7 +24,7 @@ from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import TaskRelationshipType, TaskStatus, OrgStatus, \
-    ProductSubscriptionStatus, TaskRelationshipStatus
+    ProductSubscriptionStatus, TaskRelationshipStatus, TaskTypePrefix
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo, TestAffidavit, TestOrgInfo, \
     TestOrgProductsInfo
 from tests.utilities.factory_utils import (factory_auth_header,
@@ -89,6 +87,9 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value, page=1, limit=10)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
+
+    task_type_new_account = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+    assert fetched_task['type'] == task_type_new_account
 
     update_task_payload = {
         'status': TaskStatus.COMPLETED.value,
@@ -159,7 +160,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     # Assert task name
     product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
-    task_type_product = current_app.config.get('ACCESS_REQUEST_PRODUCT')
+    task_type_product = TaskTypePrefix.ACCESS_REQUEST_PRODUCT.value
     org_name = dictionary['name']
     assert fetched_task['name'] == org_name
     assert fetched_task['type'] == f'{task_type_product}({product.description})'

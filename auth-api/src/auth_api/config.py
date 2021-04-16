@@ -171,11 +171,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     API_GW_EMAIL_SUFFIX = os.getenv('API_GW_EMAIL_SUFFIX', None)
     API_GW_KC_CLIENT_ID_PATTERN = os.getenv('API_GW_KC_CLIENT_ID_PATTERN', 'api-key-account-{account_id}')
 
-    # Type column prefix text in Tasks table - "New Account" for approving affidavit &
-    # "Access request" for Product request
-    NEW_ACCOUNT_STAFF_REVIEW = 'NEW ACCOUNT'
-    ACCESS_REQUEST_PRODUCT = 'ACCESS REQUEST'
-
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Dev Config."""
