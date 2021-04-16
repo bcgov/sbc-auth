@@ -2,22 +2,22 @@
   <v-data-table
     class="user-list"
     :headers="headerAccounts"
-    :items="pendingStaffOrgs"
-    :items-per-page.sync="tableDataOptions.itemsPerPage"
-    :hide-default-footer="pendingStaffOrgs.length <= tableDataOptions.itemsPerPage"
-    :custom-sort="columnSort"
+    :items="staffTasks"
+    :server-items-length="totalStaffTasks"
     :no-data-text="$t('noActiveAccountsLabel')"
-    :footer-props="{
-        itemsPerPageOptions: getPaginationOptions
-      }"
     :options.sync="tableDataOptions"
+    :disable-sort="true"
+    :footer-props="{
+      itemsPerPageOptions: getPaginationOptions
+    }"
+    :loading="isTableLoading"
     @update:items-per-page="saveItemsPerPage"
   >
     <template v-slot:loading>
       Loading...
     </template>
-    <template v-slot:[`item.created`]="{ item }">
-      {{formatDate(item.created, 'MMM DD, YYYY')}}
+    <template v-slot:[`item.dateSubmitted`]="{ item }">
+      {{formatDate(item.dateSubmitted, 'MMM DD, YYYY')}}
     </template>
     <template v-slot:[`item.action`]="{ item }">
       <div class="btn-inline">
@@ -35,32 +35,33 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
-import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { mapState } from 'vuex'
+import { namespace } from 'vuex-class'
+
+const TaskModule = namespace('task')
 
 @Component({
-  computed: {
-    ...mapState('staff', [
-      'pendingStaffOrgs'
-    ])
-  }
 })
 export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
-  private readonly pendingStaffOrgs!: Organization[]
+  @TaskModule.Action('fetchTasks') private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
+  private staffTasks: Task[] = []
+  private taskFilter: TaskFilterParams
+  private totalStaffTasks = 0
 
   private columnSort = CommonUtils.customSort
   private tableDataOptions: Partial<DataOptions> = {}
+  private isTableLoading: boolean = false
 
   private readonly headerAccounts = [
     {
       text: 'Date Submittted',
       align: 'left',
       sortable: true,
-      value: 'created',
+      value: 'dateSubmitted',
       width: '150'
     },
     {
@@ -73,7 +74,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       text: 'Type',
       align: 'left',
       sortable: true,
-      value: 'orgType'
+      value: 'type'
     },
     {
       text: 'Actions',
@@ -86,6 +87,11 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
   private formatDate = CommonUtils.formatDisplayDate
 
+  @Watch('tableDataOptions', { deep: true })
+  async getStaffTasks (val, oldVal) {
+    await this.searchStaffTasks(val?.page, val?.itemsPerPage)
+  }
+
   mounted () {
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
     if (this.hasCachedPageInfo) {
@@ -95,6 +101,23 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
+  }
+
+  private async searchStaffTasks (page: number = 1, pageLimit: number = this.numberOfItems) {
+    // set this variable so that the chip is shown
+    try {
+      this.taskFilter = {
+        pageNumber: page,
+        pageLimit: pageLimit
+      }
+      const staffTasksResp = await this.fetchTasks(this.taskFilter)
+      this.staffTasks = staffTasksResp.tasks
+      this.totalStaffTasks = staffTasksResp?.total || 0
+    } catch (error) {
+      this.isTableLoading = false
+      // eslint-disable-next-line no-console
+      console.error(error)
+    }
   }
 
   private review (item) {
