@@ -9,7 +9,7 @@
     </v-row>
     <v-row v-if="!isPendingReviewPage">
       <v-col class="col-12 col-sm-5 py-2">
-        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIV">Approved By</span>
+        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIVE">Approved By</span>
         <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.REJECTED">Rejected By</span>
       </v-col>
       <v-col class="py-2" v-if="!isPendingReviewPage">
