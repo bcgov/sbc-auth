@@ -6,7 +6,7 @@
     :server-items-length="totalStaffTasks"
     :no-data-text="$t('noActiveAccountsLabel')"
     :options.sync="tableDataOptions"
-    :disable-sort="true"
+    :custom-sort="columnSort"
     :footer-props="{
       itemsPerPageOptions: getPaginationOptions
     }"
@@ -40,10 +40,10 @@
 <script lang="ts">
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
+import { TaskRelationshipStatus, TaskRelationshipType } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { TaskRelationshipType } from '@/util/constants'
 import { namespace } from 'vuex-class'
 
 const TaskModule = namespace('task')
@@ -112,6 +112,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     // set this variable so that the chip is shown
     try {
       this.taskFilter = {
+        relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
         pageNumber: page,
         pageLimit: pageLimit
       }

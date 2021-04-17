@@ -2,9 +2,8 @@
   <v-data-table
     class="user-list"
     :headers="headerAccounts"
-    :items="rejectedStaffOrgs"
+    :items="rejectedTasks"
     :items-per-page.sync="tableDataOptions.itemsPerPage"
-    :hide-default-footer="rejectedStaffOrgs.length <= tableDataOptions.itemsPerPage"
     :custom-sort="columnSort"
     :no-data-text="$t('noActiveAccountsLabel')"
     :footer-props="{
@@ -15,6 +14,9 @@
   >
     <template v-slot:loading>
       Loading...
+    </template>
+    <template v-slot:[`item.dateSubmitted`]="{ item }">
+      {{formatDate(item.dateSubmitted, 'MMM DD, YYYY')}}
     </template>
     <template v-slot:[`item.action`]="{ item }">
         <v-btn
@@ -31,56 +33,69 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Task, TaskFilterParams, TaskList } from '@/models/Task'
+import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
-import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { mapState } from 'vuex'
+import { namespace } from 'vuex-class'
+
+const TaskModule = namespace('task')
 
 @Component({
-  computed: {
-    ...mapState('staff', [
-      'rejectedStaffOrgs'
-    ])
-  }
 })
 export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) {
-  private readonly rejectedStaffOrgs!: Organization[]
+  @TaskModule.Action('fetchTasks') private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
+  private rejectedTasks: Task[] = []
+  private taskFilter: TaskFilterParams
+  private totalRejectedTasks = 0
 
   private columnSort = CommonUtils.customSort
-
   private tableDataOptions: Partial<DataOptions> = {}
+  private isTableLoading: boolean = false
 
-  private readonly headerAccounts = [
-    {
-      text: 'Name',
-      align: 'left',
-      sortable: true,
-      value: 'name'
-    },
-    {
-      text: 'Type',
-      align: 'left',
-      sortable: true,
-      value: 'orgType'
-    },
-    {
-      text: 'Rejected By',
-      align: 'left',
-      sortable: true,
-      value: 'decisionMadeBy'
-    },
-    {
-      text: 'Actions',
-      align: 'left',
-      value: 'action',
-      sortable: false,
-      width: '105'
-    }
-  ]
+ private readonly headerAccounts = [
+   {
+     text: 'Date Submittted',
+     align: 'left',
+     sortable: true,
+     value: 'dateSubmitted',
+     width: '150'
+   },
+   {
+     text: 'Name',
+     align: 'left',
+     sortable: true,
+     value: 'name'
+   },
+   {
+     text: 'Type',
+     align: 'left',
+     sortable: true,
+     value: 'type'
+   },
+   {
+     text: 'Rejected By',
+     align: 'left',
+     sortable: true,
+     value: 'modifiedBy'
+   },
+   {
+     text: 'Actions',
+     align: 'left',
+     value: 'action',
+     sortable: false,
+     width: '105'
+   }
+ ]
 
   private formatDate = CommonUtils.formatDisplayDate
+
+  @Watch('tableDataOptions', { deep: true })
+  async getStaffTasks (val, oldVal) {
+    await this.searchStaffTasks(val?.page, val?.itemsPerPage)
+  }
 
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
@@ -90,6 +105,25 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
+    }
+  }
+
+  private async searchStaffTasks (page: number = 1, pageLimit: number = this.numberOfItems) {
+    // set this variable so that the chip is shown
+    try {
+      this.taskFilter = {
+        relationshipStatus: TaskRelationshipStatus.REJECTED,
+        pageNumber: page,
+        pageLimit: pageLimit,
+        status: TaskStatus.COMPLETED
+      }
+      const rejectedTasksResp = await this.fetchTasks(this.taskFilter)
+      this.rejectedTasks = rejectedTasksResp.tasks
+      this.totalRejectedTasks = rejectedTasksResp?.total || 0
+    } catch (error) {
+      this.isTableLoading = false
+      // eslint-disable-next-line no-console
+      console.error(error)
     }
   }
 
