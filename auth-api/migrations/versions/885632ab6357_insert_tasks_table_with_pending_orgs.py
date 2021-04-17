@@ -21,6 +21,8 @@ depends_on = None
 
 def upgrade():
     conn = op.get_bind()
+
+    # Let us seed Tasks table with the existing pending staff review accounts
     org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code = 'PENDING_STAFF_REVIEW';")
     org_list: List[Org] = org_res.fetchall()
 
@@ -40,6 +42,28 @@ def upgrade():
                    f"VALUES "
                    f"('{created_time}', '{created_time}', '{name}', '{date_submitted}', '{task_relationship_type}',"
                    f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}')")
+
+    # Let us seed Tasks table with the existing rejected accounts
+    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code = 'REJECTED';")
+    org_list: List[Org] = org_res.fetchall()
+
+    for org in org_list:
+        org_id = org.id
+        user_id = org.created_by_id
+        created_time = org.created
+        date_submitted = org.created
+        name = org.name
+        status = TaskStatus.OPEN.value
+        task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+        relationship_status = TaskRelationshipStatus.REJECTED.value
+        task_relationship_type = TaskRelationshipType.ORG.value
+
+        # Insert into tasks
+        op.execute(f"INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
+                   f"relationship_id, created_by_id, modified_by_id, related_to, status, type, relationship_status)"
+                   f"VALUES "
+                   f"('{created_time}', '{created_time}', '{name}', '{date_submitted}', '{task_relationship_type}',"
+                   f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}', '{relationship_status}')")
 
     pass
 
