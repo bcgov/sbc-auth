@@ -69,10 +69,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
         if do_commit:  # Task mostly comes as a part of parent transaction.So do not commit unless asked.
             db.session.commit()
 
-        task_relationship_status = task_info.get('relationshipType')
-        if task_relationship_status == TaskRelationshipType.ORG.value:
-            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-            Org.send_staff_review_account_reminder(user, task_model.id, origin_url)
+        # Send task creation mail to staff for review
+        task_relationship_type = task_info.get('relationshipType')
+        if task_relationship_type == TaskRelationshipType.ORG.value:
+            from auth_api.services import \
+                Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+            OrgService.send_staff_review_account_reminder(user, task_model.id, origin_url)
 
         current_app.logger.debug('>create_task ')
         return Task(task_model)

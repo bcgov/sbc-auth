@@ -7,6 +7,7 @@ Create Date: 2021-04-13 14:38:09.983595
 """
 from typing import List
 from alembic import op
+from sqlalchemy import text
 
 from auth_api.models import Org
 from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskTypePrefix, TaskRelationshipStatus
@@ -37,11 +38,14 @@ def upgrade():
         task_relationship_type = TaskRelationshipType.ORG.value
 
         # Insert into tasks
-        op.execute(f"INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
-                   f"relationship_id, created_by_id, modified_by_id, related_to, status, type)"
-                   f"VALUES "
-                   f"('{created_time}', '{created_time}', '{name}', '{date_submitted}', '{task_relationship_type}',"
-                   f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}')")
+        insert_sql = text("INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
+                          "relationship_id, created_by_id, modified_by_id, related_to, status, type) "
+                          "VALUES (:created_time, :created_time, :name, :date_submitted, :task_relationship_type, "
+                          ":org_id, :user_id, :user_id, :user_id, :status, :task_type)").params(
+            created_time=created_time, name=name, date_submitted=date_submitted,
+            task_relationship_type=task_relationship_type, org_id=org_id, user_id=user_id, status=status,
+            task_type=task_type)
+        op.execute(insert_sql)
 
     # Let us seed Tasks table with the existing rejected accounts
     org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code = 'REJECTED';")
@@ -58,12 +62,14 @@ def upgrade():
         task_relationship_type = TaskRelationshipType.ORG.value
 
         # Insert into tasks
-        op.execute(f"INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
-                   f"relationship_id, created_by_id, modified_by_id, related_to, status, type)"
-                   f"VALUES "
-                   f"('{created_time}', '{created_time}', '{name}', '{date_submitted}', '{task_relationship_type}',"
-                   f" {org_id}, {user_id}, {user_id}, {user_id}, '{status}', '{task_type}')")
-
+        insert_sql = text("INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
+                          "relationship_id, created_by_id, modified_by_id, related_to, status, type) "
+                          "VALUES (:created_time, :created_time, :name, :date_submitted, :task_relationship_type, "
+                          ":org_id, :user_id, :user_id, :user_id, :status, :task_type)").params(
+            created_time=created_time, name=name, date_submitted=date_submitted,
+            task_relationship_type=task_relationship_type, org_id=org_id, user_id=user_id, status=status,
+            task_type=task_type)
+        op.execute(insert_sql)
     pass
 
 
