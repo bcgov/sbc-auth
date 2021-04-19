@@ -151,7 +151,7 @@ class Org:  # pylint: disable=too-many-public-methods
     def _handle_bceid_status_and_notification(org, origin_url, token_info):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
         user = UserModel.find_by_jwt_token(token=token_info)
-        Org.send_staff_review_account_reminder(user, org.id, origin_url)
+        # Org.send_staff_review_account_reminder(user, org.id, origin_url)
         # create a staff review task for this account
         task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
         task_info = {'name': org.name,
@@ -163,7 +163,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'status': TaskStatus.OPEN.value,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
-        TaskService.create_task(task_info, do_commit=False)
+        TaskService.create_task(task_info=task_info, user=user, origin_url=origin_url, do_commit=False)
 
     @staticmethod
     def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType, access_type=None) -> str:
