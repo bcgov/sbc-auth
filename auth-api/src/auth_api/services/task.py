@@ -61,13 +61,19 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_task(task_info: dict, do_commit: bool = True):
+    def create_task(task_info: dict, do_commit: bool = True, user: UserModel = None, origin_url: str = None):
         """Create a new task record."""
         current_app.logger.debug('<create_task ')
         task_model = TaskModel(**camelback2snake(task_info))
         task_model.flush()
         if do_commit:  # Task mostly comes as a part of parent transaction.So do not commit unless asked.
             db.session.commit()
+
+        task_relationship_status = task_info.get('relationshipType')
+        if task_relationship_status == TaskRelationshipType.ORG.value:
+            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+            Org.send_staff_review_account_reminder(user, task_model.id, origin_url)
+
         current_app.logger.debug('>create_task ')
         return Task(task_model)
 

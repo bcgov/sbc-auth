@@ -163,7 +163,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'status': TaskStatus.OPEN.value,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
-        TaskService.create_task(task_info, do_commit=False)
+        TaskService.create_task(task_info=task_info, token_info= do_commit=False)
 
     @staticmethod
     def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType, access_type=None) -> str:
