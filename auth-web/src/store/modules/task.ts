@@ -16,8 +16,6 @@ export default class TaskModule extends VuexModule {
 
     @Mutation
     public setPendingTasksCount (pendingTasksCount: number) {
-      // eslint-disable-next-line no-console
-      console.log(pendingTasksCount)
       this.pendingTasksCount = pendingTasksCount || 0
     }
 
