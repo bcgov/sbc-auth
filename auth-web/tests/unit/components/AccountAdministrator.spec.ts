@@ -36,31 +36,10 @@ describe('AccountAdministrator.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'test org'
-        },
-        currentOrgPaymentType: {
-        },
-        currentMembership: []
-      },
-      actions: {
-        validatePADInfo: jest.fn(),
-        getOrgPayments: jest.fn(),
-        updateOrg: jest.fn()
-      },
-      mutations: {
-        setCurrentOrganizationPaymentType: jest.fn()
-      }
-    }
 
     const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-      }
+      strict: false
+
     })
 
     wrapperFactory = (propsData) => {
