@@ -247,7 +247,20 @@ class TaskStatus(Enum):
     COMPLETED = 'COMPLETED'   # Task has been acted upon
 
 
-class TaskType(Enum):
-    """Task type."""
+class TaskRelationshipStatus(Enum):
+    """Task Relationship status."""
 
-    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'   # user created , staff need to approve.
+    ACTIVE = 'ACTIVE'
+    INACTIVE = 'INACTIVE'
+    REJECTED = 'REJECTED'
+    PENDING_ACTIVATION = 'PENDING_ACTIVATION'
+    NSF_SUSPENDED = 'NSF_SUSPENDED'
+    SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
+    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'  # staff invited user and waiting for account creation from user.
+    PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'  # user created , staff need to approve.
+
+
+class TaskTypePrefix(Enum):
+    """Task Type prefix to be appended to type column while saving a task."""
+
+    NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
