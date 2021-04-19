@@ -26,7 +26,7 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
-    ProductSubscriptionStatus, TaskRelationshipType, TaskType, TaskStatus
+    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus
 from .task import Task as TaskService
 from .authorization import check_auth
 from ..utils.cache import cache
@@ -93,14 +93,16 @@ class Product:
                 # create a staff review task for this product subscription if pending status
                 if product_model.default_subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
                     user = UserModel.find_by_jwt_token(token=token_info)
-                    task_info = {'name': f'{org.name} - {product_model.description}',
+                    task_type = product_model.description
+                    task_info = {'name': org.name,
                                  'relationshipId': product_subscription.id,
                                  'relatedTo': user.id,
                                  'dateSubmitted': datetime.today(),
                                  'relationshipType': TaskRelationshipType.PRODUCT.value,
-                                 'type': TaskType.PENDING_STAFF_REVIEW.value,
+                                 'type': task_type,
                                  'status': TaskStatus.OPEN.value,
-                                 'accountId': org_id
+                                 'accountId': org_id,
+                                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                                  }
                     do_commit = False
                     TaskService.create_task(task_info, do_commit)

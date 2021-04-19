@@ -17,12 +17,14 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from datetime import datetime
-from auth_api.services import Task as TaskService
-from auth_api.services import Org as OrgService
-from auth_api.services import Affidavit as AffidavitService
-from auth_api.models import Task as TaskModel
+
 from auth_api.models import ProductCode as ProductCodeModel
-from auth_api.utils.enums import TaskStatus, TaskType, TaskRelationshipType, OrgStatus, LoginSource, AffidavitStatus
+from auth_api.models import Task as TaskModel
+from auth_api.services import Affidavit as AffidavitService
+from auth_api.services import Org as OrgService
+from auth_api.services import Task as TaskService
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType, OrgStatus, LoginSource, TaskRelationshipStatus, \
+    TaskTypePrefix
 from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
     factory_user_model_with_contact, factory_product_model
@@ -35,8 +37,7 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                           task_status=TaskStatus.OPEN.value,
+    fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                            page=1,
                                            limit=10)
 
@@ -49,14 +50,16 @@ def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argum
     """Assert that a task can be created."""
     user = factory_user_model()
     test_org = factory_org_model()
+    task_type_new_account = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     test_task_info = {
         'name': test_org.name,
         'relationshipId': test_org.id,
         'relatedTo': user.id,
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.ORG.value,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
-        'status': TaskStatus.OPEN.value
+        'type': task_type_new_account,
+        'status': TaskStatus.OPEN.value,
+        'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     }
     task = TaskService.create_task(test_task_info)
     assert task
@@ -71,14 +74,15 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     test_product = factory_product_model(org_id=test_org.id)
     product: ProductCodeModel = ProductCodeModel.find_by_code(test_product.product_code)
     test_task_info = {
-        'name': f'{test_org.name} - {product.description}',
+        'name': test_org.name,
         'relationshipId': test_product.id,
         'relatedTo': user.id,
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.PRODUCT.value,
-        'type': TaskType.PENDING_STAFF_REVIEW.value,
+        'type': product.description,
         'status': TaskStatus.OPEN.value,
-        'accountId': test_org.id
+        'accountId': test_org.id,
+        'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     }
     task = TaskService.create_task(test_task_info)
     assert task
@@ -104,17 +108,14 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
 
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
 
-    tasks = TaskService.fetch_tasks(task_type=TaskType.PENDING_STAFF_REVIEW.value,
-                                    task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
     task_info = {
-        'id': fetched_task['id'],
-        'status': TaskStatus.COMPLETED.value,
-        'relationshipStatus': AffidavitStatus.APPROVED.value
+        'relationshipStatus': TaskRelationshipStatus.ACTIVE.value
     }
     task: TaskModel = TaskModel.find_by_task_id(fetched_task['id'])
 
@@ -122,3 +123,4 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
                                    token_info=token_info)
     dictionary = task.as_dict()
     assert dictionary['status'] == TaskStatus.COMPLETED.value
+    assert dictionary['relationship_status'] == TaskRelationshipStatus.ACTIVE.value

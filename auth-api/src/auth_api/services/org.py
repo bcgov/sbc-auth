@@ -34,7 +34,7 @@ from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
 from auth_api.utils.enums import (
     AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
-    Status, PaymentAccountStatus, TaskRelationshipType, TaskType, TaskStatus)
+    Status, PaymentAccountStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
 from auth_api.utils.util import camelback2snake
 from .affidavit import Affidavit as AffidavitService
@@ -153,13 +153,15 @@ class Org:  # pylint: disable=too-many-public-methods
         user = UserModel.find_by_jwt_token(token=token_info)
         Org.send_staff_review_account_reminder(user, org.id, origin_url)
         # create a staff review task for this account
+        task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
         task_info = {'name': org.name,
                      'relationshipId': org.id,
                      'relatedTo': user.id,
                      'dateSubmitted': datetime.today(),
                      'relationshipType': TaskRelationshipType.ORG.value,
-                     'type': TaskType.PENDING_STAFF_REVIEW.value,
-                     'status': TaskStatus.OPEN.value
+                     'type': task_type,
+                     'status': TaskStatus.OPEN.value,
+                     'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
         TaskService.create_task(task_info, do_commit=False)
 

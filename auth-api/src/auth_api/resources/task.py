@@ -44,11 +44,13 @@ class Tasks(Resource):
         try:
             # Search based on request arguments
             task_type = request.args.get('type', None)
+            task_relationship_status = request.args.get('relationshipStatus', None)
             task_status = request.args.get('status', TaskStatus.OPEN.value)
             page = request.args.get('page', 1)
             limit = request.args.get('limit', 10)
 
-            response, status = TaskService.fetch_tasks(task_type=task_type, task_status=task_status,
+            response, status = TaskService.fetch_tasks(task_relationship_status=task_relationship_status,
+                                                       task_type=task_type, task_status=task_status,
                                                        page=page, limit=limit), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
