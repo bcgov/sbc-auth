@@ -19,9 +19,7 @@ import time
 from contextlib import contextmanager
 
 import pytest
-from auth_api import JWTWrapper
 from auth_api import db as _db
-from auth_api import setup_jwt_manager
 from flask import Flask
 from flask_migrate import Migrate, upgrade
 from nats.aio.client import Client as Nats
@@ -29,9 +27,6 @@ from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
 
 from account_mailer.config import get_named_config
-
-
-_JWT = JWTWrapper.get_instance()
 
 
 @contextmanager
@@ -106,12 +101,6 @@ def client(app):  # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture(scope='session')
-def jwt():
-    """Return a session-wide jwt manager."""
-    return _JWT
-
-
-@pytest.fixture(scope='session')
 def client_ctx(app):  # pylint: disable=redefined-outer-name
     """Return session-wide Flask test client."""
     with app.test_client() as _client:
@@ -169,8 +158,6 @@ def auto(docker_services, app):
     if app.config['USE_TEST_KEYCLOAK_DOCKER']:
         docker_services.start('keycloak')
         docker_services.wait_for_service('keycloak', 8081)
-
-    setup_jwt_manager(app, _JWT)
 
     if app.config['USE_DOCKER_MOCK']:
         docker_services.start('notify')

@@ -125,7 +125,12 @@ class _Config():  # pylint: disable=too-few-public-methods
     MINIO_SECURE = os.getenv('MINIO_SECURE', 'true').lower() == 'true'
 
     REFUND_REQUEST = {
-        'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', ''),
+        'creditcard': {
+            'recipients': os.getenv('REFUND_REQUEST_RECIPIENTS', '')
+        },
+        'bcol': {
+            'recipients': os.getenv('BCOL_REFUND_REQUEST_RECIPIENTS', '')
+        }
     }
 
     # application setting

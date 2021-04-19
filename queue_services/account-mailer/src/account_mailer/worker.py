@@ -70,8 +70,8 @@ async def process_event(event_message: dict, flask_app):
         logger.debug('message_type recieved %s', message_type)
         if message_type == 'account.mailer':
             email_dict = payment_completed.process(email_msg)
-        elif message_type == MessageType.REFUND_REQUEST.value:
-            email_dict = refund_requested.process(email_msg)
+        elif message_type in ([MessageType.REFUND_DIRECT_PAY_REQUEST.value, MessageType.REFUND_DRAWDOWN_REQUEST.value]):
+            email_dict = refund_requested.process(event_message)
         elif message_type == MessageType.PAD_ACCOUNT_CREATE.value:
             email_msg['registry_logo_url'] = minio_service.MinioService.get_minio_public_url('bc_registry_logo_pdf.svg')
             email_dict = pad_confirmation.process(email_msg, token)
