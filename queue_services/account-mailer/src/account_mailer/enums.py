@@ -18,7 +18,8 @@ from enum import Enum
 class MessageType(Enum):
     """Event Types."""
 
-    REFUND_REQUEST = 'bc.registry.payment.refundRequest'
+    REFUND_DIRECT_PAY_REQUEST = 'bc.registry.payment.direct_pay.refundRequest'
+    REFUND_DRAWDOWN_REQUEST = 'bc.registry.payment.drawdown.refundRequest'
     PAD_ACCOUNT_CREATE = 'bc.registry.payment.padAccountCreate'
     NSF_LOCK_ACCOUNT = 'bc.registry.payment.lockAccount'
     NSF_UNLOCK_ACCOUNT = 'bc.registry.payment.unlockAccount'
