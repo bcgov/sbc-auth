@@ -264,3 +264,10 @@ class TaskTypePrefix(Enum):
     """Task Type prefix to be appended to type column while saving a task."""
 
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
+
+
+class ActivityAction(Enum):
+    """Different actions in an activity."""
+
+    REMOVE_AFFILIATION = 'Remove Affiliation'
+    RESET_PASSCODE = 'Reset Passcode'
