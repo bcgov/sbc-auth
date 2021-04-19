@@ -1,8 +1,9 @@
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import { shallowMount } from '@vue/test-utils'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 
@@ -12,8 +13,38 @@ const vuetify = new Vuetify({})
 document.body.setAttribute('data-app', 'true')
 
 describe('Add Business Form', () => {
+  const localVue = createLocalVue()
+  localVue.use(Vuex)
   it('renders the component properly', () => {
+    const orgModule = {
+      namespaced: true,
+      state: {
+        currentOrganization: {
+          name: 'new org'
+        }
+      }
+    }
+    const businessModule = {
+      namespaced: true,
+      state: {
+
+      },
+      action: {
+        addBusiness: jest.fn(),
+        updateBusinessName: jest.fn(),
+        updateFolioNumber: jest.fn()
+      }
+    }
+
+    const store = new Vuex.Store({
+      strict: false,
+      modules: {
+        org: orgModule,
+        business: businessModule
+      }
+    })
     const wrapper = shallowMount(AddBusinessForm, {
+      store,
       vuetify,
       propsData: { dialog: true }
     })
