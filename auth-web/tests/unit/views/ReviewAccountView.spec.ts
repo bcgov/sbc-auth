@@ -11,8 +11,8 @@ const vuetify = new Vuetify({})
 const router = new VueRouter()
 
 const mockSession = {
-  'NRO_URL': 'Mock URL NRO',
-  'NAME_REQUEST_URL': 'Mock Name URL'
+  'NRO_URL': 'NRO Mock URL ',
+  'NAME_REQUEST_URL': 'Name Request Mock URL'
 }
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
