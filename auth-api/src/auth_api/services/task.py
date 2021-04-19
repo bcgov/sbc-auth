@@ -61,13 +61,21 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_task(task_info: dict, do_commit: bool = True):
+    def create_task(task_info: dict, do_commit: bool = True, user: UserModel = None, origin_url: str = None):
         """Create a new task record."""
         current_app.logger.debug('<create_task ')
         task_model = TaskModel(**camelback2snake(task_info))
         task_model.flush()
         if do_commit:  # Task mostly comes as a part of parent transaction.So do not commit unless asked.
             db.session.commit()
+
+        # Send task creation mail to staff for review
+        task_relationship_type = task_info.get('relationshipType')
+        if task_relationship_type == TaskRelationshipType.ORG.value:
+            from auth_api.services import \
+                Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+            OrgService.send_staff_review_account_reminder(user, task_model.id, origin_url)
+
         current_app.logger.debug('>create_task ')
         return Task(task_model)
 
