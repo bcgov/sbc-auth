@@ -24,7 +24,7 @@ describe('NotaryInformation.vue', () => {
       'city': 'Langley',
       'country': 'CA',
       'created': '2020-10-13T16:52:24.867015+00:00',
-      'createdBy': 'BCREGTEST Ciara FIFTEEN',
+      'createdBy': 'staff user',
       'modified': '2020-10-13T16:52:24.867034+00:00',
       'postalCode': 'V3A 7E9',
       'region': 'BC',
