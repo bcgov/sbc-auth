@@ -9,7 +9,7 @@ from typing import List
 from alembic import op
 
 from auth_api.models import Org
-from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskTypePrefix
+from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskTypePrefix, TaskRelationshipStatus
 
 # revision identifiers, used by Alembic.
 
