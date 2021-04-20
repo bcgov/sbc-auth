@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import Product from '@/components/auth/common/Product.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -29,7 +29,7 @@ describe('Product.vue', () => {
 
     })
     wrapperFactory = (propsData) => {
-      return shallowMount(Product, {
+      return mount(Product, {
         localVue,
         store,
         vuetify,
