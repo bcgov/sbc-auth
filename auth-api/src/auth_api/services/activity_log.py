@@ -66,7 +66,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
                        limit)
 
         current_app.logger.debug('<fetch_activity logs ')
-        activity_logs_models, count = ActivityLogModel.fetch_activity_logs(*search_args)  # pylint: disable=unused-variable
+        activity_logs_models, count = ActivityLogModel.fetch_activity_logs(*search_args)
 
         if not activity_logs_models:
             return logs

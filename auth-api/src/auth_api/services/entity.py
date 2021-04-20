@@ -58,6 +58,11 @@ class Entity:
         return self._model.business_identifier
 
     @property
+    def name(self):
+        """Return the business identifier for this entity."""
+        return self._model.name
+
+    @property
     def pass_code(self):
         """Return the pass_code for this entity."""
         return self._model.pass_code
@@ -169,7 +174,7 @@ class Entity:
         entity.pass_code = passcode_hash(new_pass_code)
         entity.pass_code_claimed = False
         entity.save()
-
+        business_name = entity.name
         if email_addresses:
             mailer_payload = dict(
                 emailAddresses=email_addresses,
@@ -183,6 +188,7 @@ class Entity:
             )
 
         entity = Entity(entity)
+        publish_activity(ActivityAction.GENERATED_PASSCODE.value, 'BUSINESS', business_name, business_identifier)
         return entity
 
     def add_contact(self, contact_info: dict):
@@ -256,4 +262,4 @@ class Entity:
             self.delete_contact()
 
         self._model.delete()
-        publish_activity(ActivityAction.REMOVE_AFFILIATION.value, 'BUSINESS', self._model.business_identifier)
+        # publish_activity(ActivityAction.REMOVE_AFFILIATION.value, 'BUSINESS', self._model.business_identifier)

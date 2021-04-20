@@ -15,7 +15,8 @@
 import uuid
 from datetime import datetime
 
-from flask import g
+from flask import g, current_app
+from sentry_sdk import capture_message
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
 from auth_api.config import get_named_config
@@ -26,27 +27,30 @@ CONFIG = get_named_config()
 
 def publish_activity(action: str, item_type: str, item_name: str, item_id: str):  # pylint:disable=unused-argument
     """Publish the activity asynchronously, using the given details."""
+    try:
+        data = {
+            'action': action,
+            'itemType': item_type,
+            'itemName': item_name,
+            'itemId': item_id,
+            'actor': g.jwt_oidc_token_info.get('preferred_username',
+                                               None) if g and 'jwt_oidc_token_info' in g else None,
+            'remoteAddr': fetch_remote_addr()
 
-    data = {
-        'action': action,
-        'itemType': item_type,
-        'itemName': item_name,
-        'itemId': item_id,
-        'actor': g.jwt_oidc_token_info.get('preferred_username',
-                                           None) if g and 'jwt_oidc_token_info' in g else None,
-        'remoteAddr': fetch_remote_addr()
+        }
+        source = 'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
 
-    }
-    source = f'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
-
-    payload = {
-        'specversion': '1.x-wip',
-        'type': f'bc.registry.auth.activity',
-        'source': source,
-        'id': str(uuid.uuid1()),
-        'time': f'{datetime.now()}',
-        'datacontenttype': 'application/json',
-        'data': data
-    }
-    publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
-                     subject=CONFIG.NATS_ACTIVITY_SUBJECT)
+        payload = {
+            'specversion': '1.x-wip',
+            'type': 'bc.registry.auth.activity',
+            'source': source,
+            'id': str(uuid.uuid1()),
+            'time': f'{datetime.now()}',
+            'datacontenttype': 'application/json',
+            'data': data
+        }
+        publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
+                         subject=CONFIG.NATS_ACTIVITY_SUBJECT)
+    except Exception as err:  # noqa: B902 # pylint: disable=broad-except
+        capture_message('Activity Queue Publish Event Error:' + str(err), level='error')
+        current_app.logger.error('Activity Queue Publish Event Error:', exc_info=True)
