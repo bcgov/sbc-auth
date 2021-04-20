@@ -31,7 +31,7 @@ from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, Role
 from auth_api.utils.util import camelback2snake
-from .activity_stream_publisher import publish_activity
+from .activity_log_publisher import publish_activity
 from .authorization import check_auth
 from ..utils.enums import ActivityAction
 

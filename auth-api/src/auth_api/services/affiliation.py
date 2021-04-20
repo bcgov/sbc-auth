@@ -28,7 +28,7 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import CorpType, NRNameStatus, NRStatus, ActivityAction
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
-from .activity_stream_publisher import publish_activity
+from .activity_log_publisher import publish_activity
 from .rest_service import RestService
 
 

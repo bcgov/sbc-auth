@@ -28,7 +28,7 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     action = Column(String(250), index=True)  # Reset Passcode , Remove Affiliation etc
     item_type = Column(String(250), index=True)  # Org ,Business
     item_name = Column(String(250), index=True)  # UI needs to display this ;mostly org name/business name
-    item_id = Column(Integer)  # id of the entity
+    item_id = Column(String(250))  # id of the entity
     remote_addr = Column(String(250), index=False)
 
     @classmethod

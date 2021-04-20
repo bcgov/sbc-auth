@@ -15,6 +15,8 @@
 
 Test suite to ensure that the Entity service routines are working as expected.
 """
+from unittest.mock import patch
+
 import pytest
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
@@ -23,6 +25,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services import activity_log_publisher as activity_log_publisher
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -360,3 +363,19 @@ def test_reset_pass_code(app, session):  # pylint:disable=unused-argument
     new_passcode = entity.pass_code
 
     assert old_passcode != new_passcode
+
+
+def test_reset_pass_code_confirm_activity_log(app, session):  # pylint:disable=unused-argument
+    """Assert that the new passcode in not the same as old passcode."""
+    entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_passcode)
+
+    entity = EntityService(entity_model)
+    old_passcode = entity.pass_code
+
+    with patch.object(activity_log_publisher, 'publish_activity', return_value=None) as mock_send:
+        entity.reset_passcode(entity.business_identifier, '', TestJwtClaims.user_test)
+
+        new_passcode = entity.pass_code
+
+        assert old_passcode != new_passcode
+        mock_send.assert_called
