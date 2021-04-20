@@ -56,7 +56,7 @@ describe('AgreementInformation.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('renders the TOS components properly ', () => {
+  it('renders the AgreementInformation components properly ', () => {
     expect(wrapper.find(AgreementInformation).exists()).toBe(true)
   })
 
