@@ -26,7 +26,7 @@ def upgrade():
     sa.Column('action', sa.String(length=250), nullable=True),
     sa.Column('item_type', sa.String(length=250), nullable=True),
     sa.Column('item_name', sa.String(length=250), nullable=True),
-    sa.Column('item_id', sa.Integer(), nullable=True),
+    sa.Column('item_id', sa.String(length=250), nullable=True),
     sa.Column('remote_addr', sa.String(length=250), nullable=True),
     sa.Column('created_by_id', sa.Integer(), nullable=True),
     sa.Column('modified_by_id', sa.Integer(), nullable=True),
