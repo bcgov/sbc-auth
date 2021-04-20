@@ -94,7 +94,7 @@ export default class Product extends Vue {
   private isRequestNow: boolean = false
   private termsAccepted: boolean = false
   public isLoading : boolean = false
-  public label = 'Reqeust'
+  public label = 'Request'
   public productSubTitle = ''
   public icon = ''
   public isApproved = false

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <base href="/">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="origin-when-cross-origin"/>
+    <meta name="author" content="BC Registries and Online Services">
+    <title>BC Registries and Online Services Refunds for {{ refund_data.refundDate }}</title>
+    [[style.html]]
+</head>
+
+<body>
+<div>
+    <p>
+        {{ refund_data.bcolAccount }},&nbsp;{{ refund_data.bcolUser }},&nbsp;{{ refund_data.refundDate }},
+        &nbsp;{{ refund_data.filingDescription }},&nbsp;{{ refund_data.identifier }},&nbsp;{{ refund_data.transactionAmount }}
+    </p>
+</div>
+</body>
+</html>

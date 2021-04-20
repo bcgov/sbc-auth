@@ -1,6 +1,8 @@
+
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 
-import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
+import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
+
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -11,9 +13,14 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-describe('AccountPaymentMethods.vue', () => {
+describe('DownloadAffidavit.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  const props = {
+    tabNumber: 1,
+    title: 'Download Affidavit',
+    affidavitName: 'test affidavit'
+  }
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -21,11 +28,10 @@ describe('AccountPaymentMethods.vue', () => {
 
     const store = new Vuex.Store({
       strict: false
-
     })
 
     wrapperFactory = (propsData) => {
-      return shallowMount(AccountPaymentMethods, {
+      return shallowMount(DownloadAffidavit, {
         localVue,
         store,
         vuetify,
@@ -35,7 +41,7 @@ describe('AccountPaymentMethods.vue', () => {
       })
     }
 
-    wrapper = wrapperFactory({})
+    wrapper = wrapperFactory(props)
   })
 
   afterEach(() => {
@@ -47,15 +53,11 @@ describe('AccountPaymentMethods.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(AccountPaymentMethods).exists()).toBe(true)
+  it('renders the components properly ', () => {
+    expect(wrapper.find(DownloadAffidavit).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {
-    expect(wrapper.find('h2').text()).toBe('Payment Methods')
-  })
-
-  it('renders sub text content', () => {
-    expect(wrapper.find('p').text()).toBe('Manage your payment method for this account.')
+    expect(wrapper.find('h2').text()).toBe(`${props.tabNumber}. ${props.title}`)
   })
 })

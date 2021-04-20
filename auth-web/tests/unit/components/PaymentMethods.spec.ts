@@ -24,9 +24,9 @@ describe('PaymentMethods.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
-    localVue.directive('can', can)
 
     const vuetify = new Vuetify({})
+    localVue.directive('can', can)
 
     const orgModule = {
       namespaced: true,
