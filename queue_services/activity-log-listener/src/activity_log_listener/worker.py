@@ -29,7 +29,7 @@ import json
 import os
 
 import nats
-from auth_api.models import ActivityStream as ActivityStreamModel
+from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import db
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
@@ -37,15 +37,11 @@ from flask import Flask  # pylint: disable=wrong-import-order
 
 from activity_log_listener import config
 
-
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
 FLASK_APP.config.from_object(APP_CONFIG)
 db.init_app(FLASK_APP)
-
-UNLOCK_ACCOUNT_MESSAGE_TYPE = 'bc.registry.payment.unlockAccount'
-LOCK_ACCOUNT_MESSAGE_TYPE = 'bc.registry.payment.lockAccount'
 
 
 async def process_event(event_message, flask_app):
@@ -56,13 +52,13 @@ async def process_event(event_message, flask_app):
     with flask_app.app_context():
         data = event_message.get('data')
 
-        activity_model: ActivityStreamModel = ActivityStreamModel(actor=data.get('actor'),
-                                                                  action=data.get('action'),
-                                                                  item_type=data.get('itemType'),
-                                                                  item_name=data.get('itemName'),
-                                                                  item_id=data.get('itemId'),
-                                                                  remote_addr=data.get('remoteAddr')
-                                                                  )
+        activity_model: ActivityLogModel = ActivityLogModel(actor=data.get('actor'),
+                                                            action=data.get('action'),
+                                                            item_type=data.get('itemType'),
+                                                            item_name=data.get('itemName'),
+                                                            item_id=data.get('itemId'),
+                                                            remote_addr=data.get('remoteAddr')
+                                                            )
         activity_model.commit()
 
 
