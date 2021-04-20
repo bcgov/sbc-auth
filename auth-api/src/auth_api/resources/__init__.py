@@ -47,6 +47,7 @@ from .user import API as USER_API
 from .user_settings import API as USER_SETTINGS_API
 from .org_api_keys import API as ORG_API_KEYS_API
 from .task import API as TASKS_API
+from .acitivity_log import API as ACTIVITY_LOG_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -101,6 +102,7 @@ API.add_namespace(PERMISSIONS_API, path='/permissions')
 API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<int:org_id>/authorizations')
 API.add_namespace(ORG_API_KEYS_API, path='/orgs/<int:org_id>/api-keys')
 API.add_namespace(TASKS_API, path='/tasks')
+API.add_namespace(ACTIVITY_LOG_API, path='/activity-logs')
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 

@@ -125,6 +125,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     NATS_MAILER_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.mailer.worker')
     NATS_MAILER_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.mailer')
 
+    NATS_ACTIVITY_SUBJECT = os.getenv('NATS_MAILER_SUBJECT', 'account.activity.events')
+    NATS_ACTIVITY_CLIENT_NAME = os.getenv('NATS_MAILER_CLIENT_NAME', 'account.events.worker')
+
     # Minio configuration values
     MINIO_ENDPOINT = os.getenv('MINIO_ENDPOINT')
     MINIO_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')

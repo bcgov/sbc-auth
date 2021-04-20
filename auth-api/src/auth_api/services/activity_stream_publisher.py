@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for publishing the activity stream data."""
-import json
 import uuid
 from datetime import datetime
 
-from flask import current_app, g
+from flask import g
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
 from auth_api.config import get_named_config
@@ -30,12 +29,12 @@ def publish_activity(action: str, item_type: str, item_name: str, item_id: str):
 
     data = {
         'action': action,
-        'item_type': item_type,
-        'item_name': item_name,
-        'item_id': item_id,
+        'itemType': item_type,
+        'itemName': item_name,
+        'itemId': item_id,
         'actor': g.jwt_oidc_token_info.get('preferred_username',
                                            None) if g and 'jwt_oidc_token_info' in g else None,
-        'remote_addr': fetch_remote_addr()
+        'remoteAddr': fetch_remote_addr()
 
     }
     source = f'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
@@ -44,10 +43,10 @@ def publish_activity(action: str, item_type: str, item_name: str, item_id: str):
         'specversion': '1.x-wip',
         'type': f'bc.registry.auth.activity',
         'source': source,
-        'id': uuid.uuid1(),
+        'id': str(uuid.uuid1()),
         'time': f'{datetime.now()}',
         'datacontenttype': 'application/json',
         'data': data
     }
     publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
-                     subject=CONFIG.NATS_MAILER_SUBJECT)
+                     subject=CONFIG.NATS_ACTIVITY_SUBJECT)
