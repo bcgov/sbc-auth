@@ -37,6 +37,7 @@ from flask import Flask  # pylint: disable=wrong-import-order
 
 from activity_log_listener import config
 
+
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)

@@ -19,20 +19,15 @@ import stan
 
 async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
                                     subject: str,
-                                    org_id: str = '1',
-                                    action: str = 'unlock'):
+                                    event_details: dict = {}):
     """Add event to the Queue."""
     payload = {
         'specversion': '1.x-wip',
-        'type': 'bc.registry.payment.unlockAccount' if action == 'unlock' else 'bc.registry.payment.lockAccount',
-        'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{org_id}',
-        'id': f'{org_id}',
+        'type': 'bc.registry.auth.activity',
+        'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/',
         'time': '2020-08-28T17:37:34.651294+00:00',
         'datacontenttype': 'application/json',
-        'data': {
-            'accountId': org_id,
-            'accountName': 'DEV - PAD01'
-        }
+        'data': event_details
     }
 
     await stan_client.publish(subject=subject,
