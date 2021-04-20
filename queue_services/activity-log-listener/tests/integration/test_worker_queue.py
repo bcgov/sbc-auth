@@ -26,7 +26,7 @@ from .utils import helper_add_event_to_queue
 async def test_events_listener_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
     """Assert that events can be retrieved and decoded from the Queue."""
     # Call back for the subscription
-    from events_listener.worker import cb_subscription_handler
+    from activity_log_listener.worker import cb_subscription_handler
 
     # vars
     org_id = '1'
@@ -56,7 +56,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
 async def test_update_internal_payment(app, session, stan_server, event_loop, client_id, events_stan, future):
     """Assert that the update internal payment records works."""
     # Call back for the subscription
-    from events_listener.worker import cb_subscription_handler
+    from activity_log_listener.worker import cb_subscription_handler
 
     events_subject = 'test_subject'
     events_queue = 'test_queue'

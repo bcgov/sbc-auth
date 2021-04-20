@@ -18,7 +18,7 @@
 import asyncio
 import os
 
-from events_listener.worker import APP_CONFIG, cb_subscription_handler, qsm
+from activity_log_listener.worker import APP_CONFIG, cb_subscription_handler, qsm
 
 if __name__ == '__main__':
 
