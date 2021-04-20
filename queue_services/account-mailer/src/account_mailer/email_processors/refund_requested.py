@@ -13,20 +13,36 @@
 # limitations under the License.
 """Process an email for a refund request."""
 
+from datetime import datetime
 
 from entity_queue_common.service_utils import logger
 from flask import current_app
 from jinja2 import Template
 
 from account_mailer.email_processors import generate_template
+from account_mailer.enums import MessageType
 
 
-def process(email_msg: dict) -> dict:
+def process(event_message: dict) -> dict:
     """Build the email for Payment Completed notification."""
-    logger.debug('refund_request notification: %s', email_msg)
+    logger.debug('refund_request notification: %s', event_message)
+    email_msg = event_message.get('data')
+    message_type = event_message.get('type')
+    template_name = None
+    recepients = None
+    subject = None
+    if message_type == MessageType.REFUND_DIRECT_PAY_REQUEST.value:
+        template_name = 'creditcard_refund_request_email'
+        recepients = current_app.config.get('REFUND_REQUEST').get('creditcard').get('recipients')
+        subject = f'Refund Request for {email_msg.get("identifier")}'
+    elif message_type == MessageType.REFUND_DRAWDOWN_REQUEST.value:
+        template_name = 'bcol_refund_request_email'
+        recepients = current_app.config.get('REFUND_REQUEST').get('bcol').get('recipients')
+        refund_date = datetime.strptime(email_msg.get('refundDate'), '%Y%m%d').strftime('%Y-%m-%d')
+        subject = f'BC Registries and Online Services Refunds for {refund_date}'
 
     # fill in template
-    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), 'refund_request_email')
+    filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name)
 
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
@@ -35,9 +51,9 @@ def process(email_msg: dict) -> dict:
         logo_url=email_msg.get('logo_url')
     )
     return {
-        'recipients': current_app.config.get('REFUND_REQUEST').get('recipients'),
+        'recipients': recepients,
         'content': {
-            'subject': f'Refund Request for {email_msg.get("identifier")}',
+            'subject': subject,
             'body': html_out,
             'attachments': []
         }

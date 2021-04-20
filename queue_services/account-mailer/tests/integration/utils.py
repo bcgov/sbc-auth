@@ -36,11 +36,12 @@ async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
 
 async def helper_add_ref_req_to_queue(stan_client: stan.aio.client.Client,
                                       subject: str,
-                                      invoice_id: str = '1', mail_details: dict = {}):
+                                      invoice_id: str = '1', mail_details: dict = {},
+                                      pay_method: str = 'direct_pay'):
     """Add a refund request event to the Queue."""
     payload = {
         'specversion': '1.x-wip',
-        'type': 'bc.registry.payment.refundRequest',
+        'type': f'bc.registry.payment.{pay_method}.refundRequest',
         'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/invoices/{invoice_id}',
         'id': f'{invoice_id}',
         'time': '2020-08-28T17:37:34.651294+00:00',
