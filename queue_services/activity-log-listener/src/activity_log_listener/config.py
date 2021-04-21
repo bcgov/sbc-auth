@@ -91,8 +91,8 @@ class _Config():  # pylint: disable=too-few-public-methods
     }
 
     SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_ACCOUNT_SUBJECT', 'account.activity_log.listener'),
-        'queue': os.getenv('NATS_ACCOUNT_QUEUE', 'account.activity_log.worker'),
+        'subject': os.getenv('NATS_ACCOUNT_SUBJECT', 'account.activity.events'),
+        'queue': os.getenv('NATS_ACCOUNT_QUEUE', 'ccount.events.worker'),
         'durable_name': os.getenv('NATS_ACCOUNT_QUEUE', 'account-activity_log-worker') + '_durable',
     }
     # NATS Config

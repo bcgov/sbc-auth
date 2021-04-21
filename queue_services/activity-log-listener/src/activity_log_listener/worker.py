@@ -46,7 +46,7 @@ db.init_app(FLASK_APP)
 
 
 async def process_event(event_message, flask_app):
-    """Render the org status."""
+    """Insert into Activity log table."""
     if not flask_app:
         raise QueueException('Flask App not available.')
 
@@ -58,7 +58,8 @@ async def process_event(event_message, flask_app):
                                                             item_type=data.get('itemType'),
                                                             item_name=data.get('itemName'),
                                                             item_id=data.get('itemId'),
-                                                            remote_addr=data.get('remoteAddr')
+                                                            remote_addr=data.get('remoteAddr'),
+                                                            created=data.get('createdAt')
                                                             )
         activity_model.commit()
 
