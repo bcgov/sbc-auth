@@ -222,11 +222,12 @@ class Invitation:
         recipient = invitation.recipient_email
         token_confirm_url = '{}/{}/{}'.format(app_url, mail_configs.get('token_confirm_path'), invitation.token)
         template = ENV.get_template(f"email_templates/{mail_configs.get('template_name')}.html")
-
+        role = invitation.membership[0].membership_type.display_name
         sent_response = send_email(subject, sender, recipient,
                                    template.render(invitation=invitation,
                                                    url=token_confirm_url,
                                                    user=user,
+                                                   role=role,
                                                    org_name=org_name,
                                                    logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
         if not sent_response:
@@ -255,7 +256,7 @@ class Invitation:
         govm_member_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'govm_member_invitation_email',
-            'subject': '[BC Registries and Online Services] You have been added as a team member.',
+            'subject': '[BC Registries and Online Services] You have been added as a team member',
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
