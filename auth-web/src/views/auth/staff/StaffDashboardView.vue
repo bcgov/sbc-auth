@@ -9,7 +9,7 @@
     <v-card flat class="mb-4 pa-8">
       <div class="view-header flex-column mb-10">
         <h2 class="view-header__title">Search Entities</h2>
-        <p class="mt-3 mb-0">Enter the entity's Incorporation Number below to access their dashboard.</p>
+        <p class="mt-3 mb-0">Enter the Entity's Incorporation Number below to access their dashboard.</p>
       </div>
       <v-expand-transition>
         <div v-show="errorMessage">
