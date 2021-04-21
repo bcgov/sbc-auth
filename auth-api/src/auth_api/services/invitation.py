@@ -256,7 +256,7 @@ class Invitation:
         govm_member_configs = {
             'token_confirm_path': token_confirm_path,
             'template_name': 'govm_member_invitation_email',
-            'subject': '[BC Registries and Online Services] You have been added as a team member.',
+            'subject': '[BC Registries and Online Services] You have been added as a team member',
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
