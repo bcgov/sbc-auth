@@ -229,7 +229,7 @@ import moment from 'moment'
 @Component({
   computed: {
     ...mapState('staff', ['accountUnderReview', 'accountUnderReviewAddress', 'accountUnderReviewAdmin', 'accountUnderReviewAdminContact', 'accountUnderReviewAffidavitInfo']),
-    ...mapGetters('staff', ['accountNotaryName', 'accountNotaryContact', 'affidavitDocumentUrl'])
+    ...mapGetters('staff', ['accountNotaryName', 'accountNotaryContact'])
   },
   methods: {
     ...mapActions('staff', ['syncAccountUnderReview', 'approveAccountUnderReview', 'rejectAccountUnderReview'])
@@ -249,7 +249,6 @@ export default class ReviewAccountView extends Vue {
   private readonly accountUnderReviewAffidavitInfo!: AffidavitInformation
   private readonly accountNotaryName!: string
   private readonly accountNotaryContact!: Contact
-  private readonly affidavitDocumentUrl!: string
   private readonly syncAccountUnderReview!: (organizationIdentifier: number) => Promise<void>
   private readonly approveAccountUnderReview!: () => Promise<void>
   private readonly rejectAccountUnderReview!: () => Promise<void>
@@ -301,7 +300,7 @@ export default class ReviewAccountView extends Vue {
 
   private async downloadAffidavit (): Promise<void> {
     // Invoke document service to get affidavit for current organization
-    DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, `${this.accountUnderReview.name}-affidavit`)
+    DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
   private selectApprove (): void {
