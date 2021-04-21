@@ -194,7 +194,7 @@ export default class ReviewAccountView extends Vue {
 
   private async downloadAffidavit (): Promise<void> {
     // Invoke document service to get affidavit for current organization
-    await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo.documentUrl, `${this.accountUnderReview.name}-affidavit`)
+    await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {
