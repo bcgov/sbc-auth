@@ -35,7 +35,8 @@ def publish_activity(action: str, item_type: str, item_name: str, item_id: str):
             'itemId': item_id,
             'actor': g.jwt_oidc_token_info.get('preferred_username',
                                                None) if g and 'jwt_oidc_token_info' in g else None,
-            'remoteAddr': fetch_remote_addr()
+            'remoteAddr': fetch_remote_addr(),
+            'createdAt': f'{datetime.now()}'
 
         }
         source = 'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
@@ -49,7 +50,7 @@ def publish_activity(action: str, item_type: str, item_name: str, item_id: str):
             'datacontenttype': 'application/json',
             'data': data
         }
-        publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
+        publish_response(payload=payload, client_name=CONFIG.NATS_ACTIVITY_CLIENT_NAME,
                          subject=CONFIG.NATS_ACTIVITY_SUBJECT)
     except Exception as err:  # noqa: B902 # pylint: disable=broad-except
         capture_message('Activity Queue Publish Event Error:' + str(err), level='error')
