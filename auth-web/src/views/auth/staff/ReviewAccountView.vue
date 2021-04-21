@@ -130,7 +130,6 @@ export default class ReviewAccountView extends Vue {
 
   @StaffModule.Getter('accountNotaryName') public accountNotaryName!: string
   @StaffModule.Getter('accountNotaryContact') public accountNotaryContact!: Contact
-  @StaffModule.Getter('affidavitDocumentUrl') public affidavitDocumentUrl!: string
 
   @StaffModule.Action('syncTaskUnderReview') public syncTaskUnderReview!: (task:Task) => Promise<void>
   @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
@@ -195,7 +194,7 @@ export default class ReviewAccountView extends Vue {
 
   private async downloadAffidavit (): Promise<void> {
     // Invoke document service to get affidavit for current organization
-    DocumentService.getSignedAffidavit(this.affidavitDocumentUrl, `${this.accountUnderReview.name}-affidavit`)
+    await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo.documentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {

@@ -44,10 +44,6 @@ export default class StaffModule extends VuexModule {
     return this.accountUnderReviewAffidavitInfo?.contacts?.length > 0 && this.accountUnderReviewAffidavitInfo?.contacts[0]
   }
 
-  public get affidavitDocumentUrl (): string {
-    return this.accountUnderReviewAffidavitInfo?.documentUrl
-  }
-
   public get rejectedReviewCount (): number {
     return this.rejectedStaffOrgs?.length || 0
   }
