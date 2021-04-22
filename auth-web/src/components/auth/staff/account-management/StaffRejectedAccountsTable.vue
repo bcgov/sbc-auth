@@ -31,14 +31,12 @@
 </template>
 
 <script lang="ts">
-import { AccountStatus, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import { AccountStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { mapState } from 'vuex'
 import { namespace } from 'vuex-class'
 
 const StaffModule = namespace('staff')
@@ -107,14 +105,11 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
   }
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
-    // set this variable so that the chip is shown
-    const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
         statuses: [AccountStatus.REJECTED],
         pageNumber: page,
         pageLimit: pageLimit
-      // name: appliedFilterValue
       }
       const activeAccountsResp:any = await this.searchOrgs(this.orgFilter)
       this.rejectedOrgs = activeAccountsResp?.orgs
