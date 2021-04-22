@@ -2,9 +2,9 @@
   <v-data-table
     class="user-list"
     :headers="headerAccounts"
-    :items="rejectedStaffOrgs"
+    :items="rejectedOrgs"
     :items-per-page.sync="tableDataOptions.itemsPerPage"
-    :hide-default-footer="rejectedStaffOrgs.length <= tableDataOptions.itemsPerPage"
+    :hide-default-footer="totalAccountsCount <= tableDataOptions.itemsPerPage"
     :custom-sort="columnSort"
     :no-data-text="$t('noActiveAccountsLabel')"
     :footer-props="{
@@ -31,22 +31,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import { AccountStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
-import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { mapState } from 'vuex'
+import { namespace } from 'vuex-class'
 
-@Component({
-  computed: {
-    ...mapState('staff', [
-      'rejectedStaffOrgs'
-    ])
-  }
-})
+const StaffModule = namespace('staff')
+
+@Component({})
 export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) {
-  private readonly rejectedStaffOrgs!: Organization[]
+  @StaffModule.State('rejectedStaffOrgs') private rejectedStaffOrgs!: Organization[]
+  @StaffModule.Action('searchOrgs') private searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  @StaffModule.State('rejectedReviewCount') private rejectedReviewCount!: number
 
   private columnSort = CommonUtils.customSort
 
@@ -82,6 +81,11 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
 
   private formatDate = CommonUtils.formatDisplayDate
 
+  private orgFilter: OrgFilterParams
+  private isTableLoading: boolean = false
+  private rejectedOrgs: Organization[] = []
+  private totalAccountsCount = 0
+
   private getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
@@ -90,6 +94,30 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
+    }
+    this.rejectedOrgs = this.rejectedStaffOrgs
+    this.totalAccountsCount = this.rejectedReviewCount
+  }
+
+  @Watch('tableDataOptions', { deep: true })
+  async getAccounts (val, oldVal) {
+    await this.getOrgs(val?.page, val?.itemsPerPage)
+  }
+
+  private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
+    try {
+      this.orgFilter = {
+        statuses: [AccountStatus.REJECTED],
+        pageNumber: page,
+        pageLimit: pageLimit
+      }
+      const activeAccountsResp:any = await this.searchOrgs(this.orgFilter)
+      this.rejectedOrgs = activeAccountsResp?.orgs
+      this.totalAccountsCount = activeAccountsResp?.total || 0
+    } catch (error) {
+      this.isTableLoading = false
+      // eslint-disable-next-line no-console
+      console.error(error)
     }
   }
 

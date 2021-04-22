@@ -1,6 +1,7 @@
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
+
 import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
@@ -31,6 +32,8 @@ export default class StaffModule extends VuexModule {
   accountUnderReviewAdminContact: Contact
   accountUnderReviewAffidavitInfo: AffidavitInformation
   suspendedReviewTotal: number = 0
+  pendingReviewTotal: number = 0
+  rejectedReviewTotal: number = 0
 
   public get accountNotaryName (): string {
     return this.accountUnderReviewAffidavitInfo?.issuer || '-'
@@ -41,11 +44,11 @@ export default class StaffModule extends VuexModule {
   }
 
   public get pendingReviewCount (): number {
-    return this.pendingStaffOrgs?.length || 0
+    return this.pendingReviewTotal || 0
   }
 
   public get rejectedReviewCount (): number {
-    return this.rejectedStaffOrgs?.length || 0
+    return this.rejectedReviewTotal || 0
   }
 
   public get pendingInvitationsCount (): number {
@@ -119,6 +122,16 @@ export default class StaffModule extends VuexModule {
   @Mutation
   public setSuspendedReviewCount (count: number) {
     this.suspendedReviewTotal = count
+  }
+
+  @Mutation
+  public setRejectedReviewCount (count: number) {
+    this.rejectedReviewTotal = count
+  }
+
+  @Mutation
+  public setPendingReviewCount (count: number) {
+    this.pendingReviewTotal = count
   }
 
   @Action({ commit: 'setProducts', rawError: true })
@@ -196,18 +209,23 @@ export default class StaffModule extends VuexModule {
 
   @Action({ commit: 'setPendingStaffOrgs', rawError: true })
   public async syncPendingStaffOrgs () {
-    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_STAFF_REVIEW)
+    const response:any = await StaffService.getStaffOrgs(AccountStatus.PENDING_STAFF_REVIEW)
+    this.context.commit('setPendingReviewCount', response?.data?.total)
     return response?.data?.orgs || []
   }
 
   @Action({ commit: 'setRejectedStaffOrgs', rawError: true })
   public async syncRejectedStaffOrgs () {
-    const response = await StaffService.getStaffOrgs(AccountStatus.REJECTED)
+    const response:any = await StaffService.getStaffOrgs(AccountStatus.REJECTED)
+    this.context.commit('setRejectedReviewCount', response?.data?.total)
     return response?.data?.orgs || []
   }
   @Action({ commit: 'setSuspendedStaffOrgs', rawError: true })
   public async syncSuspendedStaffOrgs () {
-    const response:any = await StaffService.getStaffOrgs(AccountStatus.NSF_SUSPENDED)
+    const orgFilter = {
+      statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED]
+    }
+    const response:any = await StaffService.searchOrgs(orgFilter)
     this.context.commit('setSuspendedReviewCount', response?.data?.total)
     return response?.data?.orgs || []
   }

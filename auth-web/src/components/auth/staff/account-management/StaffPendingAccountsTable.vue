@@ -2,16 +2,18 @@
   <v-data-table
     class="user-list"
     :headers="headerAccounts"
-    :items="pendingStaffOrgs"
+    :items="pendingOrgs"
     :items-per-page.sync="tableDataOptions.itemsPerPage"
-    :hide-default-footer="pendingStaffOrgs.length <= tableDataOptions.itemsPerPage"
+    :hide-default-footer="totalAccountsCount <= tableDataOptions.itemsPerPage"
     :custom-sort="columnSort"
     :no-data-text="$t('noActiveAccountsLabel')"
     :footer-props="{
         itemsPerPageOptions: getPaginationOptions
       }"
     :options.sync="tableDataOptions"
+    :loading="isTableLoading"
     @update:items-per-page="saveItemsPerPage"
+    :server-items-length="totalAccountsCount"
   >
     <template v-slot:loading>
       Loading...
@@ -35,22 +37,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import { AccountStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
-import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { mapState } from 'vuex'
+import { namespace } from 'vuex-class'
 
-@Component({
-  computed: {
-    ...mapState('staff', [
-      'pendingStaffOrgs'
-    ])
-  }
-})
+const StaffModule = namespace('staff')
+
+@Component({})
 export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
-  private readonly pendingStaffOrgs!: Organization[]
+  @StaffModule.State('pendingStaffOrgs') private pendingStaffOrgs!: Organization[]
+  @StaffModule.Action('searchOrgs') private searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  @StaffModule.State('pendingReviewCount') private pendingReviewCount!: number
 
   private columnSort = CommonUtils.customSort
   private tableDataOptions: Partial<DataOptions> = {}
@@ -85,11 +86,40 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   ]
 
   private formatDate = CommonUtils.formatDisplayDate
+  private orgFilter: OrgFilterParams
+  private isTableLoading: boolean = false
+  private pendingOrgs: Organization[] = []
+  private totalAccountsCount = 0
 
   mounted () {
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
+    }
+    this.pendingOrgs = this.pendingStaffOrgs
+    this.totalAccountsCount = this.pendingReviewCount
+  }
+
+  @Watch('tableDataOptions', { deep: true })
+  async getAccounts (val, oldVal) {
+    await this.getOrgs(val?.page, val?.itemsPerPage)
+  }
+
+  private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
+    // set this variable so that the chip is shown
+    try {
+      this.orgFilter = {
+        statuses: [AccountStatus.PENDING_STAFF_REVIEW],
+        pageNumber: page,
+        pageLimit: pageLimit
+      }
+      const activeAccountsResp:any = await this.searchOrgs(this.orgFilter)
+      this.pendingOrgs = activeAccountsResp?.orgs
+      this.totalAccountsCount = activeAccountsResp?.total || 0
+    } catch (error) {
+      this.isTableLoading = false
+      // eslint-disable-next-line no-console
+      console.error(error)
     }
   }
 
