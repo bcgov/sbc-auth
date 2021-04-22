@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing a Activity resource."""
 
-from flask import request
+from flask import request, g
 from flask_restplus import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -37,7 +37,7 @@ class ActivityLog(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_jwt.has_one_of_roles([Role.STAFF.value])
-    def get():
+    def get(org_id):
         """Fetch activities."""
         try:
             # Search based on request arguments
@@ -47,7 +47,9 @@ class ActivityLog(Resource):
             page = request.args.get('page', 1)
             limit = request.args.get('limit', 10)
 
-            response, status = ActivityLogService.fetch_activity_logs(item_name=item_name,
+            response, status = ActivityLogService.fetch_activity_logs(org_id,
+                                                                      token_info=g.jwt_oidc_token_info,
+                                                                      item_name=item_name,
                                                                       item_type=item_type, action=action,
                                                                       page=page, limit=limit), http_status.HTTP_200_OK
         except BusinessException as exception:

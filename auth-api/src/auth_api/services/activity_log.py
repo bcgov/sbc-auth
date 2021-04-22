@@ -15,6 +15,7 @@
 
 This module manages the activity logs.
 """
+from typing import Dict
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -22,6 +23,8 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.schemas import ActivityLogSchema
+from auth_api.services.authorization import check_auth
+from auth_api.utils.roles import ADMIN, STAFF
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -50,12 +53,12 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def fetch_activity_logs(**kwargs):
+    def fetch_activity_logs(org_id: int, token_info: Dict = None, **kwargs):
         """Search all activity logs."""
         item_name = kwargs.get('item_name')
         item_type = kwargs.get('item_type')
         action = kwargs.get('action')
-
+        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
         logs = {'activity_logs': []}
         page: int = int(kwargs.get('page'))
         limit: int = int(kwargs.get('limit'))
@@ -66,10 +69,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
                        limit)
 
         current_app.logger.debug('<fetch_activity logs ')
-        activity_logs_models, count = ActivityLogModel.fetch_activity_logs(*search_args)
-
-        if not activity_logs_models:
-            return logs
+        activity_logs_models, count = ActivityLogModel.fetch_activity_logs_for_account(org_id, *search_args)
 
         for activity_log in activity_logs_models:
             log_dict = ActivityLog(activity_log).as_dict()

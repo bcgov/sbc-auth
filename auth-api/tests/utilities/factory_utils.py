@@ -284,14 +284,17 @@ def factory_task_models(count: int, user_id: int):
         task.save()
 
 
-def factory_activity_log_model(actor: str, action: str, item_type=str, item_name='Foo Bar', item_id='', remote_addr=''):
+def factory_activity_log_model(actor: str, action: str, item_type: str = 'Account', item_name='Foo Bar', item_id=10,
+                               org_id=10,
+                               remote_addr=''):
     """Create a Log Model."""
     activity_log = ActivityLogModel(
         actor=actor,
         action=action,
-        item_type=item_type,
         item_name=item_name,
         item_id=item_id,
-        remote_addr=remote_addr
+        item_type=item_type,
+        remote_addr=remote_addr,
+        org_id=org_id
     )
     activity_log.save()

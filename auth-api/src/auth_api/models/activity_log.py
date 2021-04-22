@@ -26,17 +26,19 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     id = Column(Integer, primary_key=True)
     actor = Column(String(250))  # who did the activity
     action = Column(String(250), index=True)  # Reset Passcode , Remove Affiliation etc
-    item_type = Column(String(250), index=True)  # Org ,Business
+    item_type = Column(String(250), index=True)  # Account ,Business, Names etc.. Not used now ,defaulting to account
     item_name = Column(String(250), index=True)  # UI needs to display this ;mostly org name/business name
     item_id = Column(String(250))  # id of the entity
     remote_addr = Column(String(250), index=False)
+    org_id = Column(Integer, nullable=True, index=True)
 
     @classmethod
-    def fetch_activity_logs(cls, item_name: str, item_type: str,  # pylint:disable=too-many-arguments
-                            action: str,
-                            page: int, limit: int):
+    def fetch_activity_logs_for_account(cls, org_id: int, item_name: str,  # pylint:disable=too-many-arguments
+                                        item_type: str,
+                                        action: str,
+                                        page: int, limit: int):
         """Fetch all activity logs."""
-        query = db.session.query(ActivityLog)
+        query = db.session.query(ActivityLog).filter_by(org_id=org_id)
 
         if item_name:
             query = query.filter(ActivityLog.item_name == item_name)

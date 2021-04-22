@@ -25,7 +25,8 @@ from auth_api.services.queue_publisher import publish_response
 CONFIG = get_named_config()
 
 
-def publish_activity(action: str, item_type: str, item_name: str, item_id: str):  # pylint:disable=unused-argument
+def publish_activity(action: str, item_name: str,
+                     item_id: str, org_id: int = None, item_type: str = 'ACCOUNT'):  # pylint:disable=unused-argument
     """Publish the activity asynchronously, using the given details."""
     try:
         data = {
@@ -33,6 +34,7 @@ def publish_activity(action: str, item_type: str, item_name: str, item_id: str):
             'itemType': item_type,
             'itemName': item_name,
             'itemId': item_id,
+            'orgId': org_id,
             'actor': g.jwt_oidc_token_info.get('preferred_username',
                                                None) if g and 'jwt_oidc_token_info' in g else None,
             'remoteAddr': fetch_remote_addr(),

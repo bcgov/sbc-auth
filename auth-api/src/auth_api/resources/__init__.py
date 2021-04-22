@@ -102,7 +102,7 @@ API.add_namespace(PERMISSIONS_API, path='/permissions')
 API.add_namespace(ORG_AUTHORISATION_API, path='/orgs/<int:org_id>/authorizations')
 API.add_namespace(ORG_API_KEYS_API, path='/orgs/<int:org_id>/api-keys')
 API.add_namespace(TASKS_API, path='/tasks')
-API.add_namespace(ACTIVITY_LOG_API, path='/activity-logs')
+API.add_namespace(ACTIVITY_LOG_API, path='/orgs/<int:org_id>/activity-logs')
 
 TEST_BLUEPRINT = Blueprint('TEST', __name__, url_prefix='/test')
 
