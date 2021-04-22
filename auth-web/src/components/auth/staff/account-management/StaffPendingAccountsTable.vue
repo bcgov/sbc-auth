@@ -4,7 +4,7 @@
     :headers="headerAccounts"
     :items="pendingOrgs"
     :items-per-page.sync="tableDataOptions.itemsPerPage"
-    :hide-default-footer="pendingOrgs.length <= tableDataOptions.itemsPerPage"
+    :hide-default-footer="totalAccountsCount <= tableDataOptions.itemsPerPage"
     :custom-sort="columnSort"
     :no-data-text="$t('noActiveAccountsLabel')"
     :footer-props="{
