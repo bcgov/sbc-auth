@@ -4,11 +4,11 @@
 
 # Application Name
 
-BC Registries Names Examination, research and approval system API
+BC Registries Auth API
 
 ## Technology Stack Used
 * Python, Flask
-* Postgres -  SQLAlchemy, psycopg2-binary & alembic
+* Postgres -  SQLAlchemy () alembic
 
 ## Third-Party Products/Libraries used and the the License they are covert by
 

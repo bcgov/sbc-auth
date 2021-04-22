@@ -92,8 +92,8 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     SUBSCRIPTION_OPTIONS = {
         'subject': os.getenv('NATS_ACCOUNT_SUBJECT', 'account.activity.events'),
-        'queue': os.getenv('NATS_ACCOUNT_QUEUE', 'ccount.events.worker'),
-        'durable_name': os.getenv('NATS_ACCOUNT_QUEUE', 'account-activity_log-worker') + '_durable',
+        'queue': os.getenv('NATS_ACCOUNT_QUEUE', 'account.activity.events.worker'),
+        'durable_name': os.getenv('NATS_ACCOUNT_QUEUE', 'account-activity-log-worker') + '_durable',
     }
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
