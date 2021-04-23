@@ -146,6 +146,7 @@ class Product:
                 product_config = products_config.get(product.code)
                 if product_config:
                     merged_product_infos.append({
+                        'code': product.code,
                         'name': product.description,
                         'description': product_config.get('description'),
                         'url': product_config.get('url'),
