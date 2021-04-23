@@ -26,7 +26,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import TaskStatus, TaskRelationshipType, OrgStatus, LoginSource, TaskRelationshipStatus, \
-    TaskTypePrefix, PaymentMethod
+    TaskTypePrefix
 from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo, \
     TestPaymentMethodInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
