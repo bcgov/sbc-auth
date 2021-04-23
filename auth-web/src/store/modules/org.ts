@@ -914,7 +914,7 @@ export default class OrgModule extends VuexModule {
 
   @Action({ commit: 'setCurrentSelectedProducts', rawError: true })
   public async addToCurrentSelectedProducts (productCode:string): Promise<any> {
-    let currentSelectedProducts = this.context.state['currentSelectedProducts']
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
     const isAlreadySelected = currentSelectedProducts.includes(productCode)
 
     let productList = []
