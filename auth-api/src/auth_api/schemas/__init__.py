@@ -32,3 +32,4 @@ from .user_settings import UserSettingsSchema
 from .product_subscription import ProductSubscriptionSchema
 from .suspension_reason_code import SuspensionReasonCodeSchema
 from .task import TaskSchema
+from .activity_log import ActivityLogSchema
