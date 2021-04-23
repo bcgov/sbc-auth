@@ -426,6 +426,19 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
             has_status_changing = True
+            # create a staff review task for this account
+            task_type = TaskTypePrefix.GOVM_REVIEW.value
+            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+            task_info = {'name': org_model.name,
+                         'relationshipId': org_model.id,
+                         'relatedTo': user.id,
+                         'dateSubmitted': datetime.today(),
+                         'relationshipType': TaskRelationshipType.ORG.value,
+                         'type': task_type,
+                         'status': TaskStatus.OPEN.value,
+                         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                         }
+            TaskService.create_task(task_info=task_info, user=user, do_commit=False)
 
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}

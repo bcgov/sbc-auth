@@ -264,6 +264,7 @@ class TaskTypePrefix(Enum):
     """Task Type prefix to be appended to type column while saving a task."""
 
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
+    GOVM_REVIEW = 'GovM'
 
 
 class ActivityAction(Enum):
