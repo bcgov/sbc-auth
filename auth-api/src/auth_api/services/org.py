@@ -388,7 +388,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.add_to_session()
 
     def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
-                   bearer_token: str = None, origin_url: str = None):
+                   bearer_token: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -438,7 +438,7 @@ class Org:  # pylint: disable=too-many-public-methods
                          'status': TaskStatus.OPEN.value,
                          'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                          }
-            TaskService.create_task(task_info=task_info, user=user, origin_url=origin_url, do_commit=False)
+            TaskService.create_task(task_info=task_info, user=user, do_commit=False)
 
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}

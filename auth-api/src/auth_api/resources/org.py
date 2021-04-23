@@ -146,7 +146,6 @@ class Org(Resource):
         valid_format, errors = schema_utils.validate(request_json, 'org')
         toke_info = g.jwt_oidc_token_info
         bearer_token = request.headers['Authorization'].replace('Bearer ', '')
-        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
@@ -162,7 +161,7 @@ class Org(Resource):
                                                           bearer_token).as_dict(), http_status.HTTP_200_OK
                 else:
                     response, status = org.update_org(org_info=request_json, token_info=toke_info,
-                                                      bearer_token=bearer_token, origin_url=origin).as_dict(), \
+                                                      bearer_token=bearer_token).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
