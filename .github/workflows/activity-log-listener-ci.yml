@@ -1,0 +1,65 @@
+name: Activity Log Queue CI
+
+on:
+  pull_request:
+    branches:
+      - development
+    paths:
+      - "queue_services/activity-log-listener/**"
+
+jobs:
+  activity-log-listener-ci:
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./queue_services/activity-log-listener
+
+    if: github.repository == 'bcgov/sbc-auth'
+    env:
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      TEST_NATS_DOCKER: "YES"
+      STAN_CLUSTER_NAME: "test-cluster"
+
+    strategy:
+      matrix:
+        python-version: [3.8]
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
+      - name: Lint with pylint
+        run: |
+          make pylint
+      #- name: Lint with flake8
+      #  run: |
+      #    make flake8
+      - name: Test with pytest
+        run: |
+          make test
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./queue_services/activity-log-listener/coverage.xml
+          flags: activityloglistenerqueue
+          name: codecov-activity-log-listener
+          fail_ci_if_error: true
+      - name: build to check strictness
+        run: |
+          make build-nc
