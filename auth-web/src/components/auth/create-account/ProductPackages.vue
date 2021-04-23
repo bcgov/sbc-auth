@@ -12,7 +12,7 @@
         </div>
     </template>
     <template v-else>
-      <template v-if="avilableProducts.length > 0">
+      <template v-if="avilableProducts && avilableProducts.length > 0">
         <div v-for="product in avilableProducts" :key="product.code">
           <Product
             :productDetails="product"
@@ -124,7 +124,7 @@ export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
     }
   }
   get isFormValid () {
-    return this.currentSelectedProducts.length > 0
+    return this.currentSelectedProducts && this.currentSelectedProducts.length > 0
   }
 
   setSelectedProduct (product) {
