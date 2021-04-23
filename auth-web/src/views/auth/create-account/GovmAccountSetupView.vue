@@ -91,8 +91,8 @@ export default class GovmAccountSetupView extends Vue {
         }
       },
       {
-        title: 'Product Packages',
-        stepName: 'Product Packages',
+        title: 'Products and Services',
+        stepName: 'Products and Services',
         component: ProductPackages,
         componentProps: {
           isStepperView: true
