@@ -25,9 +25,10 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
-from auth_api.utils.enums import CorpType, NRNameStatus, NRStatus
+from auth_api.utils.enums import CorpType, NRNameStatus, NRStatus, ActivityAction
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
+from .activity_log_publisher import publish_activity
 from .rest_service import RestService
 
 
@@ -167,7 +168,7 @@ class Affiliation:
         affiliation.save()
 
         entity.set_pass_code_claimed(True)
-
+        publish_activity(ActivityAction.CREATE_AFFILIATION.value, entity.name, entity_id, org_id)
         return Affiliation(affiliation)
 
     @staticmethod
@@ -262,6 +263,7 @@ class Affiliation:
             entity.reset_passcode(entity.business_identifier, email_addresses, token_info)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
+        publish_activity(ActivityAction.REMOVE_AFFILIATION.value, entity.name, business_identifier, org_id)
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):

@@ -53,6 +53,6 @@ from .user_status_code import UserStatusCode
 from .suspension_reason_code import SuspensionReasonCode
 from .task import Task
 from .product_subscriptions_status import ProductSubscriptionsStatus
-
+from .activity_log import ActivityLog
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
