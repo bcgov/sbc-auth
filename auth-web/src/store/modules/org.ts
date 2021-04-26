@@ -69,7 +69,9 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
   currentOrgGLInfo: GLInfo = undefined
-  orgProducts: OrgProduct[] =[]
+  orgProducts: OrgProduct[] =[] // product related to org, to show in dashbord products page
+  avilableProducts: Products[] = [] // list of all products
+  currentSelectedProducts:any = [] // selected product list code in array
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
@@ -239,6 +241,15 @@ export default class OrgModule extends VuexModule {
   public setCurrentOrganizationGLInfo (glInfo: GLInfo) {
     this.currentOrgGLInfo = glInfo
   }
+  @Mutation
+  public setAvailableProducts (products: Products[]) {
+    this.avilableProducts = products
+  }
+
+  @Mutation
+  public setCurrentSelectedProducts (productCodeList: []) {
+    this.currentSelectedProducts = productCodeList
+  }
 
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
@@ -402,6 +413,13 @@ export default class OrgModule extends VuexModule {
     const org: Organization = this.context.state['currentOrganization']
     const address = this.context.state['currentOrgAddress']
     const revenueAccount: GLInfo = this.context.state['currentOrgGLInfo']
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
+    // setting product subscriptions in requiered format
+    const productsSelected: [] = currentSelectedProducts.map((code) => {
+      return {
+        productCode: code
+      }
+    })
 
     const createRequestBody: CreateRequestBody = {
       name: org.name,
@@ -409,7 +427,7 @@ export default class OrgModule extends VuexModule {
       paymentInfo: {
         revenueAccount
       },
-      productSubscriptions: []
+      productSubscriptions: productsSelected
     }
 
     if (address) {
@@ -884,5 +902,28 @@ export default class OrgModule extends VuexModule {
     const orgId = this.context.state['currentOrganization']?.id
     const response = await OrgService.addProducts(orgId, productsRequestBody)
     return response?.data
+  }
+
+  @Action({ commit: 'setAvailableProducts', rawError: true })
+  public async getAvilableProducts (): Promise<OrgProduct> {
+    const response = await OrgService.avialbelProducts()
+    if (response && response.data && response.status === 200) {
+      return response?.data
+    }
+  }
+
+  @Action({ commit: 'setCurrentSelectedProducts', rawError: true })
+  public async addToCurrentSelectedProducts (productCode:string): Promise<any> {
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
+    const isAlreadySelected = currentSelectedProducts.includes(productCode)
+
+    let productList = []
+    // removing from array if already existing (unselecting)
+    if (isAlreadySelected) {
+      productList = currentSelectedProducts.filter(code => code !== productCode)
+    } else {
+      productList = [...currentSelectedProducts, productCode]
+    }
+    return productList
   }
 }

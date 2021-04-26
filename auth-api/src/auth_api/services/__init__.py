@@ -29,3 +29,4 @@ from .user import User
 from .user_settings import UserSettings
 from .api_gateway import ApiGateway
 from .task import Task
+from .activity_log import ActivityLog

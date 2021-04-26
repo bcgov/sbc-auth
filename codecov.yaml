@@ -70,3 +70,7 @@ flags:
     paths:
       - queue_services/account-mailer/src/account_mailer
     carryforward: true
+  activityloglistenerqueue:
+    paths:
+      - queue_services/activity-log-listener/src/activity_log_listener
+    carryforward: true

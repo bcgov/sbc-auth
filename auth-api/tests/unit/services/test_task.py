@@ -17,15 +17,18 @@ Test suite to ensure that the Task service routines are working as expected.
 """
 
 from datetime import datetime
+from unittest.mock import patch
 
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import Task as TaskModel
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
+from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import TaskStatus, TaskRelationshipType, OrgStatus, LoginSource, TaskRelationshipStatus, \
     TaskTypePrefix
-from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo
+from tests.utilities.factory_scenarios import TestUserInfo, TestJwtClaims, TestAffidavit, TestOrgInfo, \
+    TestPaymentMethodInfo
 from tests.utilities.factory_utils import factory_task_service, factory_org_model, factory_user_model, \
     factory_user_model_with_contact, factory_product_model
 
@@ -124,3 +127,53 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     assert dictionary['status'] == TaskStatus.COMPLETED.value
     assert dictionary['relationship_status'] == TaskRelationshipStatus.ACTIVE.value
+
+
+def test_create_task_govm(session,
+                          keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a task can be created when updating a GOVM account."""
+    user = factory_user_model()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
+                                             roles=['create_accounts'])
+    user2 = factory_user_model(TestUserInfo.user2)
+    public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
+                                                    roles=['gov_account_user'])
+
+    org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id, token_info=token_info)
+    assert org
+    with patch.object(RestService, 'put') as mock_post:
+        payment_details = TestPaymentMethodInfo.get_payment_method_input_with_revenue()
+        org_body = {
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
+            **payment_details
+
+        }
+        org = OrgService.update_org(org, org_body, token_info=public_token_info)
+        assert org
+        dictionary = org.as_dict()
+        assert dictionary['name'] == TestOrgInfo.org_govm['name']
+        mock_post.assert_called()
+        actual_data = mock_post.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
+            'paymentInfo': {
+                'methodOfPayment': 'EJV',
+                'billable': False,
+                'revenueAccount': payment_details.get('paymentInfo').get('revenueAccount')
+            },
+            'contactInfo': TestOrgInfo.get_mailing_address()
+
+        }
+        assert expected_data == actual_data
+
+        # Assert the task that is created
+        fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+                                               page=1,
+                                               limit=10)
+
+        for item in fetched_task['tasks']:
+            assert item['name'] == dictionary['name']
+            assert item['type'] == TaskTypePrefix.GOVM_REVIEW.value
+            assert item['status'] == TaskStatus.OPEN.value
+            assert item['relationship_id'] == dictionary['id']

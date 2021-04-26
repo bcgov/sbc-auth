@@ -5,10 +5,12 @@
         outlined
         hover
         class="product-card py-8 px-5 mb-4 elevation-1"
-        :class="[{'px-8': icon === ''}, {'processing-card' : !isRequesting}]"
+        :class="[{'px-8': icon === '' && !isSelectableView}, {'processing-card' : isHighlighted}]"
         :data-test="`div-product-${productDetails.title}`"
+        @click="selecThisProduct()"
       >
         <div>
+
           <header class="d-flex align-center">
             <div class="product-icon-container mt-n2 mr-2" v-if="!isRequesting">
               <v-icon meduim color="primary">{{icon}}</v-icon>
@@ -17,7 +19,7 @@
               <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.name}}</h3>
               <div>{{productSubTitle}}</div>
             </div>
-            <v-icon large v-if="isRequestNow"
+            <v-icon large v-if="isexpandedView"
             class="ml-auto"
             @click="requestNow()">mdi-close</v-icon>
             <v-btn
@@ -27,7 +29,7 @@
               color="primary"
               width="120"
               class="font-weight-bold ml-auto"
-              :outlined="!isApproved"
+              :outlined="showOutlinedBtn"
               :aria-label="`Select  ${productDetails.name}`"
               :data-test="`btn-productDetails-${productDetails.name}`"
               @click="requestNow()"
@@ -38,7 +40,7 @@
 
           <div class="product-card-contents">
             <v-expand-transition>
-              <div v-if="isRequestNow" class="pt-7">
+              <div v-if="isexpandedView" class="pt-7">
                 <ProductTos
                   :userName="userName"
                   :orgName="orgName"
@@ -77,9 +79,18 @@
 </template>
 
 <script lang="ts">
+/**
+This component can be use by two type
+1. only select and selected toggle
+2. with multiple status request/approve/reject -> apprval flow
+  on approval flow, it will open for TOS
+  pass appropriate props to choose
+*/
+
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgProduct } from '@/models/Organization'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
+
 import { productStatus } from '@/util/constants'
 
 @Component({
@@ -91,7 +102,10 @@ export default class Product extends Vue {
   @Prop({ default: undefined }) productDetails: OrgProduct
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
-  private isRequestNow: boolean = false
+  @Prop({ default: false }) isSelectableView: boolean // only to show select/selected
+  @Prop({ default: false }) isSelected: boolean
+
+  private isexpandedView: boolean = false
   private termsAccepted: boolean = false
   public isLoading : boolean = false
   public label = 'Request'
@@ -101,16 +115,32 @@ export default class Product extends Vue {
   public isPending = false
   public isRejected = false
   public isRequesting = false
+  public isHighlighted = false
 
   @Watch('productDetails')
   onProductChange (newProd:OrgProduct, oldProduct:OrgProduct) {
     if (newProd.subscriptionStatus !== oldProduct.subscriptionStatus) {
-      this.isRequestNow = false
+      this.isexpandedView = false
     }
     this.setupProductDetails(newProd)
   }
+
+  @Watch('isSelected')
+  onisSelectedChange () {
+    // update selected/ select
+    this.setupProductDetailsSelectable()
+  }
+
   get isDisableSaveBtn () {
     return !this.isFormvalid()
+  }
+
+  get showOutlinedBtn () {
+    if (this.isSelectableView) {
+      return !this.isSelected
+    } else {
+      return !this.isApproved
+    }
   }
 
   setupProductDetails (productDetails) {
@@ -140,17 +170,30 @@ export default class Product extends Vue {
       this.isRequesting = true
       this.productSubTitle = description
     }
+    this.isHighlighted = !this.isRequesting
+  }
+  setupProductDetailsSelectable () {
+    this.label = this.isSelected ? 'Selected' : 'Select'
+    this.icon = ''
+    this.productSubTitle = this.productDetails.description
+    this.isHighlighted = !!this.isSelected
   }
 
   public mounted () {
-    this.setupProductDetails(this.productDetails)
+    if (this.isSelectableView) {
+      this.setupProductDetailsSelectable()
+    } else {
+      this.setupProductDetails(this.productDetails)
+    }
   }
 
   public requestNow () {
-    const { subscriptionStatus } = this.productDetails
-    // need to expand only if not already requested
-    if (subscriptionStatus === '' || subscriptionStatus === productStatus.NOT_SUBSCRIBED) {
-      this.isRequestNow = !this.isRequestNow
+    if (!this.isSelectableView) {
+      const { subscriptionStatus } = this.productDetails
+      // need to expand only if not already requested
+      if (subscriptionStatus === '' || subscriptionStatus === productStatus.NOT_SUBSCRIBED) {
+        this.isexpandedView = !this.isexpandedView
+      }
     }
   }
 
@@ -166,6 +209,14 @@ export default class Product extends Vue {
     }
     return false
   }
+
+  @Emit('set-selected-product')
+  selecThisProduct () {
+    if (this.isSelectableView) {
+      return this.productDetails
+    }
+  }
+
   public isFormvalid () {
     return this.termsAccepted
   }

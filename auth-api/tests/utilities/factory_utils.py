@@ -31,6 +31,7 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import Task as TaskModel
+from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
@@ -281,3 +282,19 @@ def factory_task_models(count: int, user_id: int):
                          related_to=user_id,
                          relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
         task.save()
+
+
+def factory_activity_log_model(actor: str, action: str, item_type: str = 'Account', item_name='Foo Bar', item_id=10,
+                               org_id=10,
+                               remote_addr=''):
+    """Create a Log Model."""
+    activity_log = ActivityLogModel(
+        actor=actor,
+        action=action,
+        item_name=item_name,
+        item_id=item_id,
+        item_type=item_type,
+        remote_addr=remote_addr,
+        org_id=org_id
+    )
+    activity_log.save()
