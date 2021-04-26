@@ -26,7 +26,7 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import db
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
-    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus
+    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, AccessType
 from .task import Task as TaskService
 from .authorization import check_auth
 from ..utils.cache import cache
@@ -67,7 +67,7 @@ class Product:
         create product subscription first
         create the product role next if roles are given
         """
-        org = OrgModel.find_by_org_id(org_id)
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
@@ -85,13 +85,14 @@ class Product:
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
             product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
             if product_model:
+                subscription_status = Product.find_subscription_status(org, product_model)
                 product_subscription = ProductSubscriptionModel(org_id=org_id,
                                                                 product_code=product_code,
-                                                                status_code=product_model.default_subscription_status) \
+                                                                status_code=subscription_status) \
                     .flush()
 
                 # create a staff review task for this product subscription if pending status
-                if product_model.default_subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
+                if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
                     user = UserModel.find_by_jwt_token(token=token_info)
                     task_type = product_model.description
                     task_info = {'name': org.name,
@@ -115,6 +116,13 @@ class Product:
             db.session.commit()
         # TODO return something better/useful.may be return the whole model from db
         return subscriptions_model_list
+
+    @staticmethod
+    def find_subscription_status(org, product_model):
+        """Return the subscriptions status based on org type."""
+        # GOVM accounts has default active subscriptions
+        return product_model.default_subscription_status if org.access_type not in [
+            AccessType.GOVM.value] else ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
     def create_default_product_subscriptions(org: OrgModel, is_new_transaction: bool = True):
