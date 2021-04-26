@@ -165,7 +165,7 @@ export default class Product extends Vue {
       this.label = 'Approved'
       this.icon = 'mdi-check-circle'
       this.isApproved = true
-      this.productSubTitle = `This account have access to ${name}`
+      this.productSubTitle = `This account has access to ${name}`
     } else {
       this.isRequesting = true
       this.productSubTitle = description

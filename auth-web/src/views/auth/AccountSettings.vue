@@ -128,7 +128,7 @@
                 v-if="!hideProductPackage"
                 dense
                 class="py-1 px-4"
-                aria-label="Product Package"
+                aria-label="Product and Services"
                 role="listitem"
                 :to="getUrl('product-settings')"
                 v-can:REQUEST_PRODUCT_PACKAGE.hide
@@ -136,7 +136,7 @@
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-apps</v-icon>
                 </v-list-item-icon>
-                <v-list-item-title>Product Package</v-list-item-title>
+                <v-list-item-title>Product and Services</v-list-item-title>
               </v-list-item>
             </v-list-item-group>
           </v-list>
