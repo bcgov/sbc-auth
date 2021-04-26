@@ -123,9 +123,9 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
-        # dir search doesnt need default products
+        # dir search and GOVM doesnt need default products
 
-        if access_type not in (AccessType.ANONYMOUS.value,):
+        if access_type not in (AccessType.ANONYMOUS.value,AccessType.GOVM.value):
             ProductService.create_default_product_subscriptions(org, is_new_transaction=False)
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
                                                               access_type=access_type)
