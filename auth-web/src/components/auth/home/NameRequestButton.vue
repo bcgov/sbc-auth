@@ -2,11 +2,10 @@
   <v-btn
     large
     color="#003366"
-    target="_blank"
-    rel="noopener noreferrer"
     class="btn-name-request white--text"
     :class="{'btn-name-request-wide': isWide}"
-    :href="nameRequestUrl">
+    @click="goToNameRequest()"
+  >
     <span class="btn-text">Request a Name</span>
   </v-btn>
 </template>
@@ -21,10 +20,12 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 export default class NameRequestButton extends Vue {
   @Prop() isWide: boolean
 
-  private get nameRequestUrl (): string {
-    return LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)
-      ? ConfigHelper.getNameRequestUrl()
-      : ConfigHelper.getNroUrl()
+  goToNameRequest (): void {
+    if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
+      window.location.href = ConfigHelper.getNameRequestUrl()
+    } else {
+      window.location.href = ConfigHelper.getNroUrl()
+    }
   }
 }
 </script>
