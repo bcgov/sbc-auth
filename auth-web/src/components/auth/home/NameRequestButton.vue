@@ -20,6 +20,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 export default class NameRequestButton extends Vue {
   @Prop() isWide: boolean
 
+  // open Name Request in current tab to retain current account and user
   goToNameRequest (): void {
     if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
       window.location.href = ConfigHelper.getNameRequestUrl()

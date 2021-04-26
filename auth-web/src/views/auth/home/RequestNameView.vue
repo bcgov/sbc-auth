@@ -72,6 +72,7 @@ export default class RequestNameView extends Vue {
     { text: 'If your name is approved, you can use it to incorporate or register your business.' }
   ]
 
+  // open Name Request in current tab to retain current account and user
   goToNameRequestExisting (): void {
     if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
       window.location.href = `${ConfigHelper.getNameRequestUrl()}existing`
@@ -79,6 +80,8 @@ export default class RequestNameView extends Vue {
       window.location.href = `${ConfigHelper.getNroUrl()}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
     }
   }
+
+  // open Name Request in current tab to retain current account and user
   goToNameRequest (): void {
     if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
       window.location.href = ConfigHelper.getNameRequestUrl()
