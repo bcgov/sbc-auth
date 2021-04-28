@@ -6,7 +6,7 @@
         Products and Services
       </h2>
       <p class="mt-3 payment-page-sub">
-        Select additional products or services you wish to access through your account.
+        Request additional products or services you wish to access through your account.
       </p>
       <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
