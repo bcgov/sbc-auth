@@ -127,6 +127,7 @@ class AffidavitStatus(Enum):
     PENDING = 'PENDING'
     APPROVED = 'APPROVED'
     REJECTED = 'REJECTED'
+    INACTIVE = 'INACTIVE'
 
 
 class AccessType(Enum):
