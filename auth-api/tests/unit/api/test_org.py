@@ -1550,7 +1550,8 @@ def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, se
     affidavit_response_second_time = client.post(
         '/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
         headers=headers,
-        data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key2, email=new_contact_email, issuer=issuer)),
+        data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key2, email=new_contact_email,
+                                                                      issuer=issuer)),
         content_type='application/json')
 
     org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers,
