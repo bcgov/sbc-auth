@@ -160,7 +160,8 @@ class Org(Resource):
                     response, status = org.change_org_ype(request_json, action,
                                                           bearer_token).as_dict(), http_status.HTTP_200_OK
                 else:
-                    response, status = org.update_org(request_json, toke_info, bearer_token).as_dict(), \
+                    response, status = org.update_org(org_info=request_json, token_info=toke_info,
+                                                      bearer_token=bearer_token).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \

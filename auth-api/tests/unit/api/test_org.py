@@ -320,6 +320,13 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
                     headers=headers_invited, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
 
+    rv_products = client.get(f'/api/v1/orgs/{org_id}/products',
+                             headers=headers_invited, content_type='application/json')
+    list_products = json.loads(rv_products.data)
+
+    vs_product = next(x for x in list_products if x.get('code') == 'VS')
+    assert vs_product.get('subscriptionStatus') == 'ACTIVE'
+
 
 def test_add_anonymous_org_staff_admin(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""

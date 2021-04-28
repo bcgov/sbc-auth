@@ -235,7 +235,7 @@ class ProductCode(Enum):
 class TaskRelationshipType(Enum):
     """Task relationship type."""
 
-    ORG = 'ORG'     # Task related to Org staff review
+    ORG = 'ORG'  # Task related to Org staff review
     AFFIDAVIT = 'AFFIDAVIT'
     PRODUCT = 'PRODUCT'
 
@@ -243,8 +243,8 @@ class TaskRelationshipType(Enum):
 class TaskStatus(Enum):
     """Task relationship type."""
 
-    OPEN = 'OPEN'     # Open Task - needs to be taken action
-    COMPLETED = 'COMPLETED'   # Task has been acted upon
+    OPEN = 'OPEN'  # Open Task - needs to be taken action
+    COMPLETED = 'COMPLETED'  # Task has been acted upon
 
 
 class TaskRelationshipStatus(Enum):
@@ -264,3 +264,13 @@ class TaskTypePrefix(Enum):
     """Task Type prefix to be appended to type column while saving a task."""
 
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
+    GOVM_REVIEW = 'GovM'
+
+
+class ActivityAction(Enum):
+    """Different actions in an activity."""
+
+    REMOVE_AFFILIATION = 'Remove Affiliation'
+    RESET_PASSCODE = 'Reset Passcode'
+    GENERATED_PASSCODE = 'Generated Passcode'
+    CREATE_AFFILIATION = 'Created Affiliation'

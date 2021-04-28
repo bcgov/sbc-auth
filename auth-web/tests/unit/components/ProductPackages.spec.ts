@@ -20,9 +20,49 @@ describe('ProductPackages.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
     localVue.use(VueRouter)
+    const userModule = {
+      namespaced: true,
+      state: {
+        currentUser: { 'userName': 'user1' }
+      }
+    }
+    const orgModule = {
+      namespaced: true,
+      state: {
+        currentOrganization: {
+        },
+        avilableProducts: [
+          {
+            'code': 'PPR',
+            'name': 'Personal Property Registry',
+            'description': 'test',
+            'url': 'https://test.com/ppr',
+            'type': 'INTERNAL',
+            'mdiIcon': 'mdi-image-outline'
+          },
+          {
+            'code': 'VS',
+            'name': 'Wills Registry',
+            'description': 'VS',
+            'url': 'https://test.com/vs',
+            'type': 'PARTNER',
+            'mdiIcon': 'mdi-image-outline'
+          }
+        ],
+        currentSelectedProducts: ['VS']
+      },
+      actions: {
+        getAvilableProducts: jest.fn(),
+        addToCurrentSelectedProducts: jest.fn()
+      }
+    }
+
     const store = new Vuex.Store({
       strict: false,
-      modules: {}
+      modules: {
+        org: orgModule,
+        user: userModule
+      }
     })
     const router = new VueRouter()
 

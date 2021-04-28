@@ -117,4 +117,8 @@ export default class OrgService {
   public static async addProducts (orgIdentifier: number, productsRequestBody: OrgProductsRequestBody): Promise<AxiosResponse<OrgProduct>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`, productsRequestBody)
   }
+
+  public static async avialbelProducts (): Promise<AxiosResponse<OrgProduct>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/products`)
+  }
 }
