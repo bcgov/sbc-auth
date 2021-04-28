@@ -60,7 +60,8 @@ async def process_event(event_message, flask_app):
                                                             item_name=data.get('itemName'),
                                                             item_id=data.get('itemId'),
                                                             remote_addr=data.get('remoteAddr'),
-                                                            created=data.get('createdAt')
+                                                            created=data.get('createdAt'),
+                                                            org_id=data.get('orgId')
                                                             )
         activity_model.save()
         logger.debug('activity log saved')
