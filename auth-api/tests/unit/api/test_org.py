@@ -1519,6 +1519,63 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
     assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value
 
 
+def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, session,
+                                                                 keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that staff admin can approve pending affidavits."""
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Get the affidavit as a bcol admin
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    # POST a contact to test user
+    client.post('/api/v1/users/contacts', data=json.dumps(TestContactInfo.contact1),
+                headers=headers, content_type='application/json')
+
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
+    doc_key = document_signature.json.get('key')
+    new_contact_email = 'test@test.com'
+    issuer = 'New_Issuer'
+
+    client.post('/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
+                headers=headers,
+                data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(
+                    doc_id=doc_key)),
+                content_type='application/json')
+    document_signature2 = client.get('/api/v1/documents/test2.jpeg/signatures', headers=headers,
+                                     content_type='application/json')
+    doc_key2 = document_signature2.json.get('key')
+    affidavit_response_second_time = client.post(
+        '/api/v1/users/{}/affidavits'.format(TestJwtClaims.public_user_role.get('sub')),
+        headers=headers,
+        data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key2, email=new_contact_email, issuer=issuer)),
+        content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()), headers=headers,
+                               content_type='application/json')
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+
+    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
+                                      headers=headers, content_type='application/json')
+
+    assert org_patch_response.json.get('orgStatus') == OrgStatus.ACTIVE.value
+
+    affidavit_staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
+                                          headers=headers, content_type='application/json')
+
+    assert schema_utils.validate(affidavit_staff_response.json, 'affidavit_response')[0]
+    assert affidavit_staff_response.json.get('documentId') == doc_key2
+    assert affidavit_staff_response.json.get('id') == affidavit_response_second_time.json.get('id')
+    assert affidavit_staff_response.json.get('status') == AffidavitStatus.APPROVED.value
+    assert affidavit_staff_response.json.get('issuer') == issuer
+    assert affidavit_staff_response.json.get('contacts')[0].get('email') == new_contact_email
+
+
 def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
     # 1. Create User
