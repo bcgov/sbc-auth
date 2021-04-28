@@ -52,6 +52,7 @@ async def process_event(event_message, flask_app):
 
     with flask_app.app_context():
         data = event_message.get('data')
+        logger.debug('message_type recieved %s', data)
 
         activity_model: ActivityLogModel = ActivityLogModel(actor=data.get('actor'),
                                                             action=data.get('action'),
@@ -61,7 +62,8 @@ async def process_event(event_message, flask_app):
                                                             remote_addr=data.get('remoteAddr'),
                                                             created=data.get('createdAt')
                                                             )
-        activity_model.commit()
+        activity_model.save()
+        logger.debug('activity log saved')
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
