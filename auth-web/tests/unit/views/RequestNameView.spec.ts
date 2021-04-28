@@ -50,17 +50,17 @@ describe('RequestNameView.vue', () => {
   })
 
   it('renders the name request button', () => {
-    const nameRequestBtn = wrapper.vm.$el.querySelector('.v-btn')
+    const nameRequestBtn = wrapper.find('.btn-name-request')
 
     expect(nameRequestBtn).toBeDefined()
-    expect(nameRequestBtn.textContent).toContain('Request a Name')
+    expect(nameRequestBtn.text()).toContain('Request a Name')
   })
 
-  it('renders the name request link', () => {
-    const nameRequestLink = wrapper.vm.$el.querySelectorAll('a')
+  it('renders the name request status link', () => {
+    const statusLink = wrapper.find('.status-link')
 
-    expect(nameRequestLink[1]).toBeDefined()
-    expect(nameRequestLink[1].textContent).toContain('Check your Name Request Status')
+    expect(statusLink).toBeDefined()
+    expect(statusLink.text()).toContain('Check your Name Request Status')
   })
 
   it('renders the correct text and number of bullet points', () => {
