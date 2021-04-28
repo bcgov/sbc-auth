@@ -1450,7 +1450,7 @@ def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):
 def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can get pending affidavits."""
     # 1. Create User
-    # 2. Get document signed link
+    # 2. Get document signed linktest_affidavit.py
     # 3. Create affidavit
     # 4. Create Org
     # 5. Get the affidavit as a bcol admin
