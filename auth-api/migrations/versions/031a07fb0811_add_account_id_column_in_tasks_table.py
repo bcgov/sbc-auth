@@ -25,7 +25,8 @@ def upgrade():
     op.add_column('tasks', sa.Column('relationship_status', sa.String(length=100), nullable=True))
 
     conn = op.get_bind()
-    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code in ('PENDING_STAFF_REVIEW', 'REJECTED', 'ACTIVE');")
+    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code in ('PENDING_STAFF_REVIEW', 'REJECTED', 'ACTIVE') AND "
+                           f"access_type in ('REGULAR_BCEID', 'EXTRA_PROVINCIAL');")
     org_list: List[Org] = org_res.fetchall()
 
     for org in org_list:
