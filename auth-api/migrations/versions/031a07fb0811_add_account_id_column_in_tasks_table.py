@@ -46,7 +46,8 @@ def upgrade():
                               "relationship_id, created_by_id, modified_by_id, related_to, status, "
                               "type, relationship_status) "
                               "VALUES (:created_time, :created_time, :name, :date_submitted, :task_relationship_type, "
-                              ":org_id, :user_id, :user_id, :user_id, :status, :task_type, :relationship_status)").params(
+                              ":org_id, :user_id, :user_id, :user_id, :status, :task_type, "
+                              ":relationship_status)").params(
                 created_time=created_time, name=name, date_submitted=date_submitted,
                 task_relationship_type=task_relationship_type, org_id=org_id, user_id=user_id, status=status,
                 task_type=task_type, relationship_status=relationship_status)
@@ -59,12 +60,13 @@ def upgrade():
                               "relationship_id, created_by_id, modified_by_id, related_to, status, type, "
                               "relationship_status) "
                               "VALUES (:created_time, :created_time, :name, :date_submitted, :task_relationship_type, "
-                              ":org_id, :user_id, :user_id, :user_id, :status, :task_type, :relationship_status)").params(
+                              ":org_id, :user_id, :user_id, :user_id, :status, :task_type, :relationship_status)")\
+                .params(
                 created_time=created_time, name=name, date_submitted=date_submitted,
                 task_relationship_type=task_relationship_type, org_id=org_id, user_id=user_id, status=status,
                 task_type=task_type, relationship_status=relationship_status)
             op.execute(insert_sql)
-        # Let us seed Tasks table with the existing rejected accounts
+        # Let us seed Tasks table with the existing active accounts
         elif org.status_code == OrgStatus.ACTIVE.value:
             relationship_status = TaskRelationshipStatus.ACTIVE.value
             # Insert into tasks
@@ -72,7 +74,8 @@ def upgrade():
                               "relationship_id, created_by_id, modified_by_id, related_to, status, type, "
                               "relationship_status) "
                               "VALUES (:created_time, :created_time, :name, :date_submitted, :task_relationship_type, "
-                              ":org_id, :user_id, :user_id, :user_id, :status, :task_type, :relationship_status)").params(
+                              ":org_id, :user_id, :user_id, :user_id, :status, :task_type, :relationship_status)")\
+                .params(
                 created_time=created_time, name=name, date_submitted=date_submitted,
                 task_relationship_type=task_relationship_type, org_id=org_id, user_id=user_id, status=status,
                 task_type=task_type, relationship_status=relationship_status)
