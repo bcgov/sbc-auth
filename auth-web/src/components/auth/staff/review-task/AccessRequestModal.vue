@@ -77,14 +77,15 @@ export default class AccessRequestModal extends Vue {
 
   get modalData () {
     // meed to change Wills Registry to product
+    //  Wills Registry TO DO add product name
     let title = 'Approve Access Request?'
-    let text = 'Approving the request will give this account access to Wills Registry'
+    let text = 'Approving the request will give this account access'
     let icon = 'mdi-check'
     let color = 'primary'
     let btnLabel = 'Yes, Approve Request'
     if (this.isRejectModal) {
       title = 'Reject Access Request?'
-      text = 'Rejecting the request will reject this account to access Wills Registry'
+      text = 'Rejecting the request will reject this account to access'
       icon = 'mdi-alert-circle-outline'
       color = 'error'
       btnLabel = 'Yes, Reject Request'
@@ -94,12 +95,13 @@ export default class AccessRequestModal extends Vue {
 
   get confirmModalData () {
     let title = 'Request has been Approved'
-    let text = `The account <strong>${this.orgName}</strong> has been approved to access Wills Registry`
+    //  to access Wills Registry TO fix add product name
+    let text = `The account <strong>${this.orgName}</strong> has been approved`
 
     if (this.isRejectModal) {
       title = 'Request has been Rejected'
       // eslint-disable-next-line no-irregular-whitespace
-      text = `The account <strong>${this.orgName}</strong> has been rejected to access Wills Registry`
+      text = `The account <strong>${this.orgName}</strong> has been rejected`
     }
     return { title, text }
   }
