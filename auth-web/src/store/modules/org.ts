@@ -13,6 +13,7 @@ import {
   MembershipType,
   OrgPaymentDetails,
   OrgProduct,
+  OrgProductFeeCode,
   OrgProductsRequestBody,
   Organization,
   PADInfo,
@@ -76,6 +77,7 @@ export default class OrgModule extends VuexModule {
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
   statementSettings: StatementSettings = {} as StatementSettings
+  orgProductFeeCodes: OrgProductFeeCode[] = []
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -249,6 +251,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentSelectedProducts (productCodeList: []) {
     this.currentSelectedProducts = productCodeList
+  }
+
+  @Mutation
+  public setOrgProductFeeCodes (orgProductFeeCodes: OrgProductFeeCode[]) {
+    this.orgProductFeeCodes = orgProductFeeCodes
   }
 
   @Action({ rawError: true })
@@ -925,5 +932,38 @@ export default class OrgModule extends VuexModule {
       productList = [...currentSelectedProducts, productCode]
     }
     return productList
+  }
+
+  @Action({ commit: 'setCurrentOrganizationGLInfo', rawError: true })
+  public async fetchCurrentOrganizationGLInfo (accountId: number): Promise<any> {
+    const response = await PaymentService.getRevenueAccountDetails(accountId)
+    if (response?.data?.revenueAccount) {
+      const revenueAccount = response?.data?.revenueAccount
+      const glInfo: GLInfo = {
+        client: revenueAccount.client,
+        responsibilityCentre: revenueAccount.responsibilityCentre,
+        serviceLine: revenueAccount.serviceLine,
+        stob: revenueAccount.stob,
+        projectCode: revenueAccount.projectCode
+      }
+      return glInfo
+    }
+    return {}
+  }
+
+  @Action({ commit: 'setOrgProductFeeCodes', rawError: true })
+  public async fetchOrgProductFeeCodes (): Promise<OrgProductFeeCode[]> {
+    const response = await PaymentService.getOrgProductFeeCodes()
+    if (response?.data?.codes && response?.data?.codes.length !== 0) {
+      const unfilteredOrgProductFeeCodes = response.data.codes
+      const filteredOrgProductFeeCodes = unfilteredOrgProductFeeCodes.filter((orgProductFeeCode: OrgProductFeeCode) => {
+        const code = orgProductFeeCode.code
+        if (code.startsWith('TRF')) {
+          return orgProductFeeCode
+        }
+      })
+      return filteredOrgProductFeeCodes
+    }
+    return []
   }
 }

@@ -1,6 +1,6 @@
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
-import { PADInfo, PADInfoValidation } from '@/models/Organization'
+import { OrgProductFeeCode, PADInfo, PADInfoValidation } from '@/models/Organization'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -9,11 +9,12 @@ import {
   StatementSettings
 } from '@/models/statement'
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
+
 import { AxiosPromise } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Payment } from '@/models/Payment'
 import { PaymentTypes } from '@/util/constants'
-import { axios } from '@/util/http-util.ts'
+import { axios } from '@/util/http-util'
 
 export default class PaymentService {
   static createTransaction (paymentId: string, redirectUrl: string): AxiosPromise<any> {
@@ -154,5 +155,13 @@ export default class PaymentService {
 
   static createAccountPayment (accountId: string) :AxiosPromise<Payment> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true`, {})
+  }
+
+  static getRevenueAccountDetails (accountId: number): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}`)
+  }
+
+  static getOrgProductFeeCodes (): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/codes/fee_codes`)
   }
 }

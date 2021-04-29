@@ -218,7 +218,7 @@ export enum productStatus {
 export enum TaskRelationshipType {
     ORG = 'ORG',
     PRODUCT = 'PRODUCT',
-  }
+}
 
 export enum TaskRelationshipStatus {
     ACTIVE = 'ACTIVE',
@@ -232,4 +232,9 @@ export enum TaskRelationshipStatus {
 export enum TaskStatus {
     OPEN = 'OPEN',
     COMPLETED = 'COMPLETED'
+}
+
+export enum TaskType {
+    NEW_ACCOUNT_STAFF_REVIEW = 'New Account',
+    GOVM_REVIEW = 'GovM'
 }
