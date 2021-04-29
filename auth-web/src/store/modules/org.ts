@@ -1,6 +1,6 @@
 import { Account, AccountStatus, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
+  AccountFee,
   AddUserBody,
   AddUsersToOrgBody,
   BulkUsersFailed,
@@ -20,6 +20,7 @@ import {
   PADInfoValidation,
   UpdateMemberPayload
 } from '@/models/Organization'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
@@ -965,5 +966,10 @@ export default class OrgModule extends VuexModule {
       return filteredOrgProductFeeCodes
     }
     return []
+  }
+
+  @Action({ rawError: true })
+  public async createAccountFees (accoundId:number, accountFeePayload: AccountFee[]): Promise<any> {
+    await PaymentService.createAccountFees(accoundId.toString(), accountFeePayload)
   }
 }

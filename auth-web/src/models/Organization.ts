@@ -247,8 +247,8 @@ export interface OrgProductFeeCode {
 // Named similiar to Pay-Api
 export interface AccountFee {
   product: string;
-  applyFilingFees?: boolean;
-  serviceFeeCode?: string;
+  applyFilingFees: boolean;
+  serviceFeeCode: string;
 }
 
 export interface AccountFeeDTO {

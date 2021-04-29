@@ -141,6 +141,7 @@ export default class ReviewAccountView extends Vue {
   @orgModule.State('currentOrgGLInfo') public currentOrgGLInfo!: GLInfo
   @orgModule.Action('fetchOrgProductFeeCodes') public fetchOrgProductFeeCodes!:() =>Promise<OrgProductFeeCode>
   @orgModule.Action('getOrgProducts') public getOrgProducts!:(accountId: number) =>Promise<OrgProduct[]>
+  @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number, accountFeePayload: AccountFee[]) =>Promise<any>
 
   private staffStore = getModule(StaffModuleStore, this.$store)
   public isLoading = true
@@ -153,7 +154,7 @@ export default class ReviewAccountView extends Vue {
   private isRejectModal:boolean = false
   public task :Task
   public taskRelationshipType:string = ''
-  private accountFeePayload: AccountFee = null
+  private accountFeePayload: AccountFee[] = null
   private productFeeFromValid: boolean = false
 
   $refs: {
@@ -245,15 +246,23 @@ export default class ReviewAccountView extends Vue {
 
   private async saveSelection (): Promise<void> {
     this.isSaving = true
-
-    if (!this.isRejectModal) {
-      await this.approveAccountUnderReview(this.task)
-    } else {
-      await this.rejectAccountUnderReview(this.task)
+    try {
+      if (!this.isRejectModal) {
+        await this.approveAccountUnderReview(this.task)
+      } else {
+        await this.rejectAccountUnderReview(this.task)
+      }
+      if (this.task.type === TaskType.GOVM_REVIEW) {
+        await this.createAccountFees(this.task.relationshipId, this.accountFeePayload)
+      }
+      this.openModal(this.isRejectModal, true)
+      // this.$router.push(Pages.STAFF_DASHBOARD)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error)
+    } finally {
+      this.isSaving = false
     }
-    this.isSaving = false
-    this.openModal(this.isRejectModal, true)
-    // this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
   private goBack (): void {
