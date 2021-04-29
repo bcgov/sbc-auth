@@ -25,7 +25,7 @@ def upgrade():
     op.add_column('tasks', sa.Column('relationship_status', sa.String(length=100), nullable=True))
 
     conn = op.get_bind()
-    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code in ('PENDING_STAFF_REVIEW', 'REJECTED', 'APPROVED');")
+    org_res = conn.execute(f"SELECT * FROM orgs WHERE status_code in ('PENDING_STAFF_REVIEW', 'REJECTED', 'ACTIVE');")
     org_list: List[Org] = org_res.fetchall()
 
     for org in org_list:
@@ -44,9 +44,11 @@ def upgrade():
         # Let us seed Tasks table with the existing rejected accounts
         elif org.status_code == OrgStatus.REJECTED.value:
             relationship_status = TaskRelationshipStatus.REJECTED.value
+            status = TaskStatus.COMPLETED.value
         # Let us seed Tasks table with the existing active accounts
         else:
             relationship_status = TaskRelationshipStatus.ACTIVE.value
+            status = TaskStatus.COMPLETED.value
 
         # Insert into tasks
         insert_sql = text("INSERT INTO tasks(created, modified, name, date_submitted, relationship_type, "
