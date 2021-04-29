@@ -25,8 +25,7 @@
         <div class="request-name-info-btns mt-5">
           <name-request-button />
           <p class="mt-5">Have an existing Name Request?
-            <a :href="nameRequestExistingUrl"
-              target="_blank" rel="noopener noreferrer" class="status-link">
+            <a class="status-link" @click="goToNameRequestExisting()">
               Check your Name Request Status
             </a>
           </p>
@@ -37,9 +36,13 @@
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <a :href="nameRequestUrl" target="_blank">
-          <v-img src="../../../assets/img/Step2_NameRequest_x2.png" aspect-ratio="1.2" contain></v-img>
-        </a>
+        <v-img
+          src="../../../assets/img/Step2_NameRequest_x2.png"
+          aspect-ratio="1.2"
+          contain
+          class="cursor-pointer"
+          @click="goToNameRequest()"
+        />
       </v-col>
     </v-row>
   </v-container>
@@ -69,16 +72,22 @@ export default class RequestNameView extends Vue {
     { text: 'If your name is approved, you can use it to incorporate or register your business.' }
   ]
 
-  private get nameRequestExistingUrl () {
-    return LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)
-      ? `${ConfigHelper.getNameRequestUrl()}existing`
-      : `${ConfigHelper.getNroUrl()}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
+  // open Name Request in current tab to retain current account and user
+  goToNameRequestExisting (): void {
+    if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
+      window.location.href = `${ConfigHelper.getNameRequestUrl()}existing`
+    } else {
+      window.location.href = `${ConfigHelper.getNroUrl()}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
+    }
   }
 
-  private get nameRequestUrl (): string {
-    return LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)
-      ? ConfigHelper.getNameRequestUrl()
-      : ConfigHelper.getNroUrl()
+  // open Name Request in current tab to retain current account and user
+  goToNameRequest (): void {
+    if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
+      window.location.href = ConfigHelper.getNameRequestUrl()
+    } else {
+      window.location.href = ConfigHelper.getNroUrl()
+    }
   }
 }
 </script>
@@ -126,6 +135,7 @@ export default class RequestNameView extends Vue {
     .status-link {
       font-size: 1rem;
       color: $BCgoveBueText1;
+      text-decoration: underline;
     }
 
     .status-link:hover {

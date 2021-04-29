@@ -45,6 +45,7 @@
                   :userName="userName"
                   :orgName="orgName"
                   @tos-status-changed="tosChanged"
+                  ref="tosForm"
                 />
                 <v-divider class="my-7"></v-divider>
                 <div class="form__btns d-flex">
@@ -52,7 +53,6 @@
                     large
                     class="request-btn"
                     color="primary"
-                    :disabled="isDisableSaveBtn"
                     @click="requestProduct"
                     :loading="isLoading"
                   >
@@ -117,6 +117,10 @@ export default class Product extends Vue {
   public isRequesting = false
   public isHighlighted = false
 
+  $refs: {
+    tosForm: HTMLFormElement
+  }
+
   @Watch('productDetails')
   onProductChange (newProd:OrgProduct, oldProduct:OrgProduct) {
     if (newProd.subscriptionStatus !== oldProduct.subscriptionStatus) {
@@ -165,7 +169,7 @@ export default class Product extends Vue {
       this.label = 'Approved'
       this.icon = 'mdi-check-circle'
       this.isApproved = true
-      this.productSubTitle = `This account have access to ${name}`
+      this.productSubTitle = `This account has access to ${name}`
     } else {
       this.isRequesting = true
       this.productSubTitle = description
@@ -200,10 +204,11 @@ export default class Product extends Vue {
   public tosChanged (termsAccepted:boolean) {
     this.termsAccepted = termsAccepted
   }
-
+  // this function will only used when we have to show TOS (in product and service dashboard)
   @Emit('set-selected-product')
   public requestProduct () {
     // this.tosChanged()
+    this.$refs.tosForm.tosChanged()
     if (this.isFormvalid()) {
       return this.productDetails
     }

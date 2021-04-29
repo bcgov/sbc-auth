@@ -60,9 +60,14 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('<create_affidavit ')
         user = UserService.find_by_jwt_token(token=token_info)
         # If the user already have a pending affidavit, raise error
-        existing_affidavit = AffidavitModel.find_pending_by_user_id(user_id=user.identifier)
+        existing_affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(user_id=user.identifier)
         if existing_affidavit is not None:
-            raise BusinessException(Error.ACTIVE_AFFIDAVIT_EXISTS, None)
+            # approved affidavit cant be changed
+            if existing_affidavit.status_code == AffidavitStatus.APPROVED.value:
+                raise BusinessException(Error.ACTIVE_AFFIDAVIT_EXISTS, None)
+            # inactivate the current affidavit
+            existing_affidavit.status_code = AffidavitStatus.INACTIVE.value
+            existing_affidavit.flush()
 
         contact = affidavit_info.pop('contact')
         affidavit_model = AffidavitModel(
