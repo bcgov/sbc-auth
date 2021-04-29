@@ -1,6 +1,6 @@
+import { AccountFee, OrgProductFeeCode, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
-import { OrgProductFeeCode, PADInfo, PADInfoValidation } from '@/models/Organization'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -163,5 +163,9 @@ export default class PaymentService {
 
   static getOrgProductFeeCodes (): AxiosPromise<any> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/codes/fee_codes`)
+  }
+
+  static createAccountFees (accountId: string, accountFeePayload: AccountFee): AxiosPromise<any> {
+    return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/fee_codes`)
   }
 }
