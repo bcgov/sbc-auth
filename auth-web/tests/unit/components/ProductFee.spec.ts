@@ -51,19 +51,4 @@ describe('PaymentInformation.vue', () => {
     })
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
-
-  it('validate properties', () => {
-    wrapper = shallowMount(ProductFee, {
-      store,
-      vuetify,
-      propsData: {
-        tabNumber: 1,
-        title: 'Product Fee'
-      },
-      mocks: {
-        $t: (mock) => mock
-      }
-    })
-    expect(wrapper.find('h2').text()).toBe('1. Product Fee')
-  })
 })
