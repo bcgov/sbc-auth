@@ -175,6 +175,20 @@
                 </v-list-item-icon>
                 <v-list-item-title>Transactions</v-list-item-title>
               </v-list-item>
+
+              <v-list-item
+                dense
+                class="py-1 px-4"
+                aria-label="Activity Log"
+                role="listitem"
+                :to="activityLogUrl"
+                data-test="activity-log-nav-item"
+              >
+                <v-list-item-icon>
+                  <v-icon color="link" left>mdi-history</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Activity Log</v-list-item-title>
+              </v-list-item>
             </v-list-item-group>
           </v-list>
         </v-navigation-drawer>
@@ -254,6 +268,9 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   private get statementsUrl (): string {
     return `/account/${this.orgId}/settings/statements`
+  }
+  private get activityLogUrl (): string {
+    return `/account/${this.orgId}/settings/activity-log`
   }
 
   private get backToTab () {

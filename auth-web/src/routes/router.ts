@@ -109,6 +109,8 @@ export function getRoutes (): RouteConfig[] {
   const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/statement/Statements.vue')
   const productPackage = () => import(/* webpackChunkName: "product-settings" */ '../components/auth/account-settings/product/ProductPackage.vue')
+  const activityLog = () => import(/* webpackChunkName: "activity-log" */ '../components/auth/account-settings/activity-log/ActivityLog.vue')
+
   const routes = [
     { path: '/', name: 'root', redirect: 'home' },
     {
@@ -222,6 +224,14 @@ export function getRoutes (): RouteConfig[] {
           path: 'product-settings',
           name: 'product-settings',
           component: productPackage
+        },
+        {
+          path: 'activity-log',
+          name: 'activity-log',
+          component: activityLog,
+          meta: {
+            isPremiumOnly: true
+          }
         }
       ]
     },
