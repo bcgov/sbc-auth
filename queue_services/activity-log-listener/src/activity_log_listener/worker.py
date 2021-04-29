@@ -52,7 +52,7 @@ async def process_event(event_message, flask_app):
 
     with flask_app.app_context():
         data = event_message.get('data')
-        logger.debug('message_type recieved %s', data)
+        logger.debug('message_type received %s', data)
 
         activity_model: ActivityLogModel = ActivityLogModel(actor=data.get('actor'),
                                                             action=data.get('action'),
