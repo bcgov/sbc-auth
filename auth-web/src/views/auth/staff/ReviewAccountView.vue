@@ -81,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
+import { AccountFee, AccountFeeDTO, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
 import { Pages, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -143,7 +143,8 @@ export default class ReviewAccountView extends Vue {
   @orgModule.State('currentOrgGLInfo') public currentOrgGLInfo!: GLInfo
   @orgModule.Action('fetchOrgProductFeeCodes') public fetchOrgProductFeeCodes!:() =>Promise<OrgProductFeeCode>
   @orgModule.Action('getOrgProducts') public getOrgProducts!:(accountId: number) =>Promise<OrgProduct[]>
-  @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number, accountFeePayload: AccountFee[]) =>Promise<any>
+  @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
+  @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
 
   private staffStore = getModule(StaffModuleStore, this.$store)
   public isLoading = true
@@ -156,8 +157,7 @@ export default class ReviewAccountView extends Vue {
   private isRejectModal:boolean = false
   public task :Task
   public taskRelationshipType:string = ''
-  private accountFeePayload: AccountFee[] = null
-  private productFeeFromValid: boolean = false
+  private productFeeFormValid: boolean = false
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -216,6 +216,10 @@ export default class ReviewAccountView extends Vue {
         await this.fetchCurrentOrganizationGLInfo(accountId)
         await this.fetchOrgProductFeeCodes()
         await this.getOrgProducts(accountId)
+        // For rejected accounts view
+        if (!this.canSelect) {
+          await this.syncCurrentAccountFees(accountId)
+        }
       }
     } catch (ex) {
       // eslint-disable-next-line no-console
@@ -231,7 +235,7 @@ export default class ReviewAccountView extends Vue {
   }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {
-    if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFromValid) {
+    if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFormValid) {
       return
     }
     this.isConfirmationModal = isConfirmationModal
@@ -255,7 +259,7 @@ export default class ReviewAccountView extends Vue {
         await this.rejectAccountUnderReview(this.task)
       }
       if (this.task.type === TaskType.GOVM_REVIEW) {
-        await this.createAccountFees(this.task.relationshipId, this.accountFeePayload)
+        await this.createAccountFees(this.task.relationshipId)
       }
       this.openModal(this.isRejectModal, true)
       // this.$router.push(Pages.STAFF_DASHBOARD)
@@ -271,9 +275,8 @@ export default class ReviewAccountView extends Vue {
     this.$router.push(Pages.STAFF_DASHBOARD)
   }
 
-  private productFeeChange (productFeeChangeObject): void {
-    this.accountFeePayload = productFeeChangeObject?.accountFees
-    this.productFeeFromValid = productFeeChangeObject?.isFormValid
+  private productFeeChange (isFormValid): void {
+    this.productFeeFormValid = isFormValid
   }
 
   formattedComponent (tabNumber, id, component, props, event = null) {
@@ -368,7 +371,8 @@ export default class ReviewAccountView extends Vue {
       `product-fee-${tabNumber}`,
       ProductFee,
       {
-        title: 'Product Fee'
+        title: 'Product Fee',
+        canSelect: this.canSelect
       },
       { 'emit-product-fee-change': this.productFeeChange }
     )

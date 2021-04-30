@@ -11,6 +11,7 @@
       }"
     :options.sync="tableDataOptions"
     @update:items-per-page="saveItemsPerPage"
+    :server-items-length="totalRejectedTasks"
   >
     <template v-slot:loading>
       Loading...

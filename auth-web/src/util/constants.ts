@@ -238,3 +238,7 @@ export enum TaskType {
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account',
     GOVM_REVIEW = 'GovM'
 }
+
+export enum FeeCodes {
+    PPR_CHANGE_OR_AMENDMENT = 'TRF'
+}

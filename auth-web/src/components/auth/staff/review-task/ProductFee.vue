@@ -17,9 +17,10 @@
               :items="applyFilingFeesValues"
               :rules="applyFilingFeesRules"
               v-model="accountFee.applyFilingFees"
-              @change="serviceFeeCodeChange"
+              @change="selectChange"
               :data-test="getIndexedTag('select-apply-filing-fees', index)"
               req
+              :disabled="!canSelect"
               />
             </v-col>
             <v-col
@@ -33,9 +34,10 @@
               item-text="amount"
               item-value="code"
               v-model="accountFee.serviceFeeCode"
-              @change="serviceFeeCodeChange"
+              @change="selectChange"
               :data-test="getIndexedTag('select-service-fee-code', index)"
               req
+              :disabled="!canSelect"
               >
                 <template slot="selection" slot-scope="data">
                   $ {{ data.item.amount }}
@@ -63,9 +65,11 @@ export default class ProductFee extends Vue {
     @Prop({ default: null }) private tabNumber: number
     @orgModule.State('orgProductFeeCodes') public orgProductFeeCodes!: OrgProductFeeCode[]
     @orgModule.State('orgProducts') public orgProducts!: OrgProduct[]
+    @orgModule.State('currentAccountFees') public accountFees!: AccountFee[]
+    @orgModule.Mutation('setCurrentAccountFees') public setCurrentAccountFees!:(accountFees: AccountFee[]) =>void
     @Prop({ default: 'Product Fee' }) private title: string
-    // TODO: Make this as state
-    private accountFees: AccountFee[] = []
+    @Prop({ default: false }) private canSelect: boolean
+
     // Create a DTO array so as to map applyFilingFees(boolean) value to string for v-select
     private accountFeesDTO: AccountFeeDTO[] = []
     private applyFilingFeesValues = [
@@ -121,20 +125,24 @@ export default class ProductFee extends Vue {
       v => !!v || 'A service fee is required'
     ]
 
-    private serviceFeeCodeChange (): void {
+    private selectChange (): void {
       // Wait till next DOM render to emit event so that we capture form validation
       this.$nextTick(() => {
-        const accountFees = JSON.parse(JSON.stringify(this.accountFeesDTO))
-        accountFees.map((accountFee:AccountFee) => {
-          if (accountFee.applyFilingFees) {
-            accountFee.applyFilingFees = accountFee.applyFilingFees.toString() === 'true'
-          }
-        })
-        const productFeeChangeObject = {
-          accountFees: accountFees,
-          isFormValid: this.$refs.productFeeForm?.validate()
+        const isFormValid = this.$refs.productFeeForm?.validate()
+        if (isFormValid) {
+          // Map back to AccountFees to store
+          const accountFees: AccountFee[] = []
+          this.accountFeesDTO.forEach((accountFeeDTO: AccountFeeDTO) => {
+            const accountFee: AccountFee = {
+              product: accountFeeDTO.product,
+              applyFilingFees: accountFeeDTO.applyFilingFees === 'true',
+              serviceFeeCode: accountFeeDTO.serviceFeeCode
+            }
+            accountFees.push(accountFee)
+          })
+          this.setCurrentAccountFees(accountFees)
         }
-        this.$emit('emit-product-fee-change', productFeeChangeObject)
+        this.$emit('emit-product-fee-change', isFormValid)
       })
     }
 

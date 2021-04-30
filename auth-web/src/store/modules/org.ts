@@ -1,4 +1,4 @@
-import { Account, AccountStatus, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
 import {
   AccountFee,
   AddUserBody,
@@ -79,6 +79,7 @@ export default class OrgModule extends VuexModule {
   currentOrgTransactionList: TransactionTableRow[] = []
   statementSettings: StatementSettings = {} as StatementSettings
   orgProductFeeCodes: OrgProductFeeCode[] = []
+  currentAccountFees: AccountFee[] = []
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -257,6 +258,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setOrgProductFeeCodes (orgProductFeeCodes: OrgProductFeeCode[]) {
     this.orgProductFeeCodes = orgProductFeeCodes
+  }
+
+  @Mutation
+  public setCurrentAccountFees (accountFee: AccountFee[]) {
+    this.currentAccountFees = accountFee
   }
 
   @Action({ rawError: true })
@@ -959,7 +965,7 @@ export default class OrgModule extends VuexModule {
       const unfilteredOrgProductFeeCodes = response.data.codes
       const filteredOrgProductFeeCodes = unfilteredOrgProductFeeCodes.filter((orgProductFeeCode: OrgProductFeeCode) => {
         const code = orgProductFeeCode.code
-        if (code.startsWith('TRF')) {
+        if (code.startsWith(FeeCodes.PPR_CHANGE_OR_AMENDMENT)) {
           return orgProductFeeCode
         }
       })
@@ -969,7 +975,16 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createAccountFees (accoundId:number, accountFeePayload: AccountFee[]): Promise<any> {
-    await PaymentService.createAccountFees(accoundId.toString(), accountFeePayload)
+  public async createAccountFees (accoundId:number): Promise<any> {
+    const accountFeePayload = JSON.parse(JSON.stringify(this.context.state['currentAccountFees']))
+    await PaymentService.createAccountFees(accoundId.toString(), { accountFees: accountFeePayload })
+  }
+
+  @Action({ commit: 'setCurrentAccountFees', rawError: true })
+  public async syncCurrentAccountFees (accoundId:number): Promise<AccountFee[]> {
+    const response = await PaymentService.getAccountFees(accoundId.toString())
+    if (response && response.data && response.status === 200) {
+      return response.data.accountFees
+    }
   }
 }
