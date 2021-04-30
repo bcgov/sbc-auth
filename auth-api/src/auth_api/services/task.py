@@ -26,7 +26,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus, TaskTypePrefix
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)

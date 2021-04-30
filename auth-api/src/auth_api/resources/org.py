@@ -162,7 +162,7 @@ class Org(Resource):
                                                           bearer_token).as_dict(), http_status.HTTP_200_OK
                 else:
                     response, status = org.update_org(org_info=request_json, token_info=toke_info,
-                                                      bearer_token=bearer_token).as_dict(), \
+                                                      bearer_token=bearer_token, origin_url=origin).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
