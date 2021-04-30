@@ -110,19 +110,13 @@ export default class ActivityLogs extends Mixins(AccountChangeMixin) {
   }
 
   public async initialize () {
-    if (!this.isActivityAllowed) {
-      // if the account switing happening when the user is already in the activity log page,
-      // redirect to account info if its a basic account
-      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
-    } else {
-      await this.loadActivityList()
-    }
+    await this.loadActivityList()
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async getTransactions (val, oldVal) {
-    const pageNumber = val.page || 1
-    const itemsPerPage = val.itemsPerPage
+  async getActivityLogs (val, oldVal) {
+    const pageNumber = val?.page || 1
+    const itemsPerPage = val?.itemsPerPage
     await this.loadActivityList(pageNumber, itemsPerPage)
   }
 
@@ -138,11 +132,6 @@ export default class ActivityLogs extends Mixins(AccountChangeMixin) {
     this.activityList = resp?.activityLogs || []
     this.totalActivityCount = resp?.total || 0
     this.isDataLoading = false
-  }
-
-  private get isActivityAllowed (): boolean {
-    return (this.currentOrganization?.orgType === Account.PREMIUM) &&
-      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
   }
 }
 </script>

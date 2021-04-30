@@ -228,10 +228,7 @@ export function getRoutes (): RouteConfig[] {
         {
           path: 'activity-log',
           name: 'activity-log',
-          component: activityLog,
-          meta: {
-            isPremiumOnly: true
-          }
+          component: activityLog
         }
       ]
     },
