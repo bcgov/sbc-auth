@@ -809,9 +809,12 @@ class Org:  # pylint: disable=too-many-public-methods
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
 
         # If status is PENDING_STAFF_REVIEW handle affidavit approve process, else raise error
-        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value:
+        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
+                org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             AffidavitService.approve_or_reject(org_id, is_approved, user)
-        else:
+        elif org.status_code != OrgStatus.PENDING_STAFF_REVIEW.value or \
+                org.access_type not in \
+                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVM.value):
             raise BusinessException(Error.INVALID_INPUT, None)
 
         if is_approved:
@@ -826,9 +829,12 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org.save()
 
-        # Find admin email address
-        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-        Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
+        # TODO Implement mailing for GovM account approval/reject
+        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
+                org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+            # Find admin email address
+            admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+            Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)

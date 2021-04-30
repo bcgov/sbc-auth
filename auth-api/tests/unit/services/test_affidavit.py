@@ -16,8 +16,6 @@
 Test suite to ensure that the affidavit service routines are working as expected.
 """
 
-import pytest
-from auth_api.exceptions import BusinessException, Error
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import AffidavitStatus, LoginSource, OrgStatus
@@ -43,11 +41,10 @@ def test_create_affidavit_duplicate(session, keycloak_mock):  # pylint:disable=u
     token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     affidavit = AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
-    assert affidavit
+
     assert affidavit.as_dict().get('status', None) == AffidavitStatus.PENDING.value
-    with pytest.raises(BusinessException) as exception:
-        AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
-    assert exception.value.code == Error.ACTIVE_AFFIDAVIT_EXISTS.name
+    new_affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=new_affidavit_info)
 
 
 def test_approve_org(session, keycloak_mock):  # pylint:disable=unused-argument
