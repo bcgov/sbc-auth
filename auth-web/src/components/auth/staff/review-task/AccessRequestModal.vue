@@ -30,6 +30,7 @@
     <!-- confirmation modal -->
     <ModalDialog
       ref="accessRequestConfirmationDialog"
+       :isPersistent="true"
       :title="confirmModalData.title"
       :text="confirmModalData.text"
       dialog-class="notify-dialog"
@@ -56,8 +57,8 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { TaskRelationshipType } from '@/util/constants'
 
 @Component({
   components: {
@@ -69,6 +70,8 @@ export default class AccessRequestModal extends Vue {
   @Prop({ default: false }) private isConfirmationModal: boolean
   @Prop({ default: false }) private isSaving: boolean
   @Prop({ default: '' }) private orgName: string
+  @Prop({ default: '' }) private accountType: string
+  @Prop({ default: '' }) private taskName: string
 
   $refs: {
     accessRequest: ModalDialog,
@@ -76,30 +79,51 @@ export default class AccessRequestModal extends Vue {
   }
 
   get modalData () {
-    // meed to change Wills Registry to product
-    let title = 'Approve Access Request?'
-    let text = 'Approving the request will give this account access to Wills Registry'
-    let icon = 'mdi-check'
+    const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
+    let title = isProductApproval
+      ? 'Approve Access Request ?'
+      : 'Approve Account Creation Request ?'
+    let text = isProductApproval
+      ? `By approving the request, this account will access to  ${this.taskName}`
+      : `Approving the request will activate this account`
+    let icon = 'mdi-help-circle-outline'
     let color = 'primary'
-    let btnLabel = 'Yes, Approve Request'
+    let btnLabel = 'Approve'
+
     if (this.isRejectModal) {
-      title = 'Reject Access Request?'
-      text = 'Rejecting the request will reject this account to access Wills Registry'
-      icon = 'mdi-alert-circle-outline'
-      color = 'error'
-      btnLabel = 'Yes, Reject Request'
+      title = isProductApproval
+        ? 'Reject Access Request ?'
+        : 'Reject Account Creation Request ?'
+
+      text = isProductApproval
+        // eslint-disable-next-line no-irregular-whitespace
+        ? `By rejecting the request, this account won't have access to ${this.taskName}`
+        : 'Rejecting the request will not activate this account'
+
+      btnLabel = 'Reject'
     }
     return { title, text, icon, color, btnLabel }
   }
 
   get confirmModalData () {
-    let title = 'Request has been Approved'
-    let text = `The account <strong>${this.orgName}</strong> has been approved to access Wills Registry`
+    const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
+
+    let title = isProductApproval
+      ? `Request has been Approved`
+      : `Account has been Approved`
+
+    let text = isProductApproval
+      ? `The account <strong>${this.orgName}</strong> has been approved to access ${this.taskName}`
+      : `Account creation request has been approved`
 
     if (this.isRejectModal) {
-      title = 'Request has been Rejected'
+      title = isProductApproval
+        ? `Request has been Rejected`
+        : `Account has been Rejected`
       // eslint-disable-next-line no-irregular-whitespace
-      text = `The account <strong>${this.orgName}</strong> has been rejected to access Wills Registry`
+      text = isProductApproval
+        ? `The account <strong>${this.orgName}</strong> has been rejected to access ${this.taskName}`
+        : `Account creation request has been rejected`
     }
     return { title, text }
   }

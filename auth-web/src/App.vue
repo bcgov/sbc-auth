@@ -162,8 +162,9 @@ export default class App extends Mixins(NextPageMixin) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
       this.$router.push(`/home`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      const label = encodeURIComponent(btoa(this.currentAccountSettings?.label))
       // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
-      this.$router.push(`/${Pages.PENDING_APPROVAL}/${this.currentAccountSettings.label}`)
+      this.$router.push(`/${Pages.PENDING_APPROVAL}/${label}`)
     }
   }
 
