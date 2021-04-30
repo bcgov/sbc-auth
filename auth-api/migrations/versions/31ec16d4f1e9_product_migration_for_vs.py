@@ -1,11 +1,12 @@
 """product_migration_for_vs
 
-Revision ID: a45ecaa80870
-Revises: d0392ebda924
-Create Date: 2021-04-28 15:04:17.693702
+Revision ID: 31ec16d4f1e9
+Revises: a37f90e6802d
+Create Date: 2021-04-30 10:01:10.794355
 
 """
-
+from alembic import op
+import sqlalchemy as sa
 from alembic import op
 from flask import current_app
 
@@ -13,9 +14,10 @@ from auth_api.models import db
 from auth_api.services.products import Product
 from auth_api.services.rest_service import RestService
 
+
 # revision identifiers, used by Alembic.
-revision = 'a45ecaa80870'
-down_revision = 'd0392ebda924'
+revision = '31ec16d4f1e9'
+down_revision = 'a37f90e6802d'
 branch_labels = None
 depends_on = None
 
