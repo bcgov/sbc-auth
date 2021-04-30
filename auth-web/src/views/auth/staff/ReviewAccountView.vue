@@ -71,6 +71,8 @@
           :orgName="accountUnderReview.name"
           @approve-reject-action="saveSelection()"
           @after-confirm-action="goBack()"
+          :accountType="taskRelationshipType"
+          :taskName="task.type"
           />
 
       </v-card>
