@@ -197,6 +197,43 @@ async def process_event(event_message: dict, flask_app):
                 template_name=template_name,
                 subject=subject, **email_msg)
 
+        elif message_type in (MessageType.ADMIN_NOTIFICATION.value, MessageType.BUSINESS_INVITATION.value,
+                              MessageType.BUSINESS_INVITATION_FOR_BCEID.value,
+                              MessageType.DIRSEARCH_BUSINESS_INVITATION.value):
+
+            if message_type == MessageType.ADMIN_NOTIFICATION.value:
+                template_name = TemplateType.ADMIN_NOTIFICATION_TEMPLATE_NAME.value
+                subject = SubjectType.ADMIN_NOTIFICATION.value
+            elif message_type == MessageType.BUSINESS_INVITATION.value:
+                template_name = TemplateType.BUSINESS_INVITATION_TEMPLATE_NAME.value
+                subject = SubjectType.BUSINESS_INVITATION.value
+            elif message_type == MessageType.BUSINESS_INVITATION_FOR_BCEID.value:
+                template_name = TemplateType.BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME.value
+                subject = SubjectType.BUSINESS_INVITATION_FOR_BCEID.value
+            elif message_type == MessageType.DIRSEARCH_BUSINESS_INVITATION.value:
+                template_name = TemplateType.DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME.value
+                subject = SubjectType.DIRSEARCH_BUSINESS_INVITATION.value
+
+            if message_type == MessageType.DIRSEARCH_BUSINESS_INVITATION.value:
+                kwargs = {
+                    'title': subject,
+                    'context_url': email_msg.get('contextUrl')
+                }
+            else:
+                kwargs = {
+                    'title': subject,
+                    'user_first_name': email_msg.get('userFirstName'),
+                    'user_last_name': email_msg.get('userLastName'),
+                    'context_url': email_msg.get('contextUrl')
+                }
+
+            org_id = email_msg.get('accountId')
+            email_dict = common_mailer.process(
+                org_id=org_id,
+                recipients=email_msg.get('emailAddresses'),
+                template_name=template_name,
+                subject=subject, **kwargs)
+
         if email_dict:
             logger.debug('Extracted email msg Recipient: %s ', email_dict.get('recipients', ''))
             process_email(email_dict, FLASK_APP, token)

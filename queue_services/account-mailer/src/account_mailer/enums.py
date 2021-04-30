@@ -35,6 +35,10 @@ class MessageType(Enum):
     PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
     EJV_FAILED = 'bc.registry.payment.ejvFailed'
     RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
+    ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
+    BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
+    BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitation'
+    DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
 
 
 class SubjectType(Enum):
@@ -51,6 +55,10 @@ class SubjectType(Enum):
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
     RESET_PASSCODE = 'BC Registries Account Passcode Reset'
+    ADMIN_NOTIFICATION = 'Notification from Business Registry'
+    BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
+    BUSINESS_INVITATION_FOR_BCEID = 'Invitation to Join an Account at Business Registry'
+    DIRSEARCH_BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
 
 
 class TemplateType(Enum):
@@ -69,6 +77,10 @@ class TemplateType(Enum):
     PAYMENT_PENDING_TEMPLATE_NAME = 'paymanet_pending'
     EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'
     RESET_PASSCODE_TEMPLATE_NAME = 'reset_passcode'
+    ADMIN_NOTIFICATION_TEMPLATE_NAME = 'admin_notification_email'
+    BUSINESS_INVITATION_TEMPLATE_NAME = 'business_invitation_email'
+    BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME = 'business_invitation_email_for_bceid'
+    DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME = 'dirsearch_business_invitation_email'
 
 
 class Constants(Enum):
