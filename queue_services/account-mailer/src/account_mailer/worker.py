@@ -346,3 +346,4 @@ def map_templates_based_on_message_type(message_type: str):
     }
     if switcher.get(message_type):
         return switcher.get(message_type)['template_name'], switcher.get(message_type)['subject']
+    return None, None
