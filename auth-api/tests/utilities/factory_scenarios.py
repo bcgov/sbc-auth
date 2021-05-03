@@ -674,7 +674,9 @@ class TestUserInfo(dict, Enum):
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, staff_admin}',
-        'keycloak_guid': uuid.uuid4()
+        'keycloak_guid': uuid.uuid4(),
+        'type': 'STAFF'
+
     }
     user2 = {
         'username': fake.user_name(),
