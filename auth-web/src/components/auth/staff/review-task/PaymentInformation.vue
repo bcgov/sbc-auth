@@ -1,6 +1,6 @@
 <template>
     <section v-if="currentOrganizationGLInfo && canSelect">
-        <h2 class="mb-5">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''}${title}`}}</h2>
+        <h2 class="mb-5">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''} ${title}`}}</h2>
 
         <v-row>
             <v-col class="cols-12 col-sm-3 py-2">Client Code</v-col>
