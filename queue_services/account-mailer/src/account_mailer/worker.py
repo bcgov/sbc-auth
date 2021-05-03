@@ -233,10 +233,12 @@ async def process_event(event_message: dict, flask_app):
                 }
 
             org_id = email_msg.get('accountId')
+            logo_url = email_msg.get('logo_url')
             email_dict = common_mailer.process(
                 org_id=org_id,
                 recipients=email_msg.get('emailAddresses'),
                 template_name=template_name,
+                logo_url=logo_url,
                 subject=subject, **kwargs)
 
         if email_dict:
