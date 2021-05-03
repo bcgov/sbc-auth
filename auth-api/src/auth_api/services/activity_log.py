@@ -17,7 +17,7 @@ This module manages the activity logs.
 """
 from typing import Dict
 
-from flask import current_app
+from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -50,6 +50,10 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         """
         activity_log_schema = ActivityLogSchema()
         obj = activity_log_schema.dump(self._model, many=False)
+        is_staff_access = g.jwt_oidc_token_info and 'staff' in \
+            g.jwt_oidc_token_info.get('realm_access', {}).get('roles', None)
+        if not is_staff_access and 'IDIR' in obj['actor']:
+            obj['actor'] = 'BCREG/Staff'
         return obj
 
     @staticmethod

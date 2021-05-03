@@ -24,7 +24,7 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     __tablename__ = 'activity_logs'
 
     id = Column(Integer, primary_key=True)
-    actor = Column(String(250))  # who did the activity
+    actor_id = Column(Integer, nullable=True, index=False)  # who did the activity.Refers to user id in user table.
     action = Column(String(250), index=True)  # Reset Passcode , Remove Affiliation etc
     item_type = Column(String(250), index=True)  # Account ,Business, Names etc.. Not used now ,defaulting to account
     item_name = Column(String(250), index=True)  # UI needs to display this ;mostly org name/business name
