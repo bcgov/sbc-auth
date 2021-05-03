@@ -33,6 +33,7 @@ from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
+from ..utils.account_mailer import publish_to_mailer
 
 
 def test_as_dict(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
@@ -284,13 +285,15 @@ def test_send_invitation_exception(session, notify_mock, keycloak_mock):  # pyli
     user_dictionary = User(user).as_dict()
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     org_dictionary = org.as_dict()
+    print(user_dictionary)
 
     invitation_info = factory_invitation(org_dictionary['id'])
 
     invitation = InvitationModel.create_from_dict(invitation_info, user.id, 'STANDARD')
 
-    with patch.object(notification, 'send_email', return_value=False):
+    with patch.object(InvitationService, 'send_invitation', return_value=None):
         with pytest.raises(BusinessException) as exception:
-            InvitationService.send_invitation(invitation, org_dictionary['name'], user_dictionary, '', '')
+            InvitationService.send_invitation(invitation, org_dictionary['name'], org_dictionary['id'],
+                                              user_dictionary, '', '')
 
     assert exception.value.code == Error.FAILED_INVITATION.name

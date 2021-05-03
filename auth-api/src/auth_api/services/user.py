@@ -43,7 +43,7 @@ from auth_api.utils.util import camelback2snake
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
-from .notification import send_email
+from ..utils.account_mailer import publish_to_mailer
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -199,29 +199,26 @@ class User:  # pylint: disable=too-many-instance-attributes
         check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, COORDINATOR, STAFF))
         try:
             KeycloakService.reset_otp(str(user.keycloak_guid))
-            User.send_otp_authenticator_reset_notification(user.email, origin_url)
+            User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err)
 
     @staticmethod
-    def send_otp_authenticator_reset_notification(recipient_email, origin_url):
+    def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
         """Send Authenticator reset notification to the user."""
         current_app.logger.debug('<send_otp_authenticator_reset_notification')
-        sender = current_app.config.get('MAIL_FROM_ID')
-        template = ENV.get_template('email_templates/otp_authenticator_reset_notification_email.html')
-        subject = '[BC Registries and Online Services] Authenticator Has Been Reset'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
-        logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
         context_path = 'signin/bceid'
         login_url = '{}/{}'.format(app_url, context_path)
+        data = {
+            'accountId': org_id,
+            'emailAddresses': recipient_email,
+            'contextUrl': login_url
+        }
         try:
-            sent_response = send_email(subject, sender, recipient_email,
-                                       template.render(url=login_url, logo_url=logo_url))
+            publish_to_mailer('otpAuthenticatorResetNotification', org_id=org_id, data=data)
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
-            if not sent_response:
-                current_app.logger.error('<send_otp_authenticator_reset_notification failed')
-                raise BusinessException(Error.FAILED_NOTIFICATION, None)
         except:  # noqa=B901
             current_app.logger.error('<send_otp_authenticator_reset_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)

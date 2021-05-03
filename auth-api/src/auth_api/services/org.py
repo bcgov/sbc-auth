@@ -41,10 +41,10 @@ from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
 from .keycloak import KeycloakService
-from .notification import send_email
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
+from ..utils.account_mailer import publish_to_mailer
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -826,7 +826,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             # Find admin email address
             admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-            Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
+            Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -835,51 +835,52 @@ class Org:  # pylint: disable=too-many-public-methods
     def send_staff_review_account_reminder(user, org_id, origin_url):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
-        subject = '[BC Registries and Online Services] An out of province account needs to be approved.'
-        sender = current_app.config.get('MAIL_FROM_ID')
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
-        template = ENV.get_template('email_templates/staff_review_account_email.html')
         context_path = f'review-account/{org_id}'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
-        logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
+        first_name = ''
+        last_name = ''
 
+        if user:
+            first_name = user.firstname
+            last_name = user.lastname
+
+        data = {
+            'accountId': org_id,
+            'emailAddresses': recipient,
+            'contextUrl': review_url,
+            'userFirstName': first_name,
+            'userLastName': last_name
+        }
         try:
-            sent_response = send_email(subject, sender, recipient,
-                                       template.render(url=review_url, user=user, logo_url=logo_url))
+            publish_to_mailer('staffReviewAccount', org_id=org_id, data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
-            if not sent_response:
-                current_app.logger.error('<send_staff_review_account_reminder failed')
-                raise BusinessException(Error.FAILED_NOTIFICATION, None)
         except:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     @staticmethod
-    def send_approved_rejected_notification(receipt_admin_email, org_name, org_status: OrgStatus, origin_url):
+    def send_approved_rejected_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url):
         """Send Approved/Rejected notification to the user."""
         current_app.logger.debug('<send_approved_rejected_notification')
-        sender = current_app.config.get('MAIL_FROM_ID')
+
         if org_status == OrgStatus.ACTIVE.value:
-            template = ENV.get_template('email_templates/nonbcsc_org_approved_notification_email.html')
-            subject = '[BC Registries and Online Services] APPROVED Business Registry Account'
+            notification_type = 'nonbcscOrgApprovedNotification'
         elif org_status == OrgStatus.REJECTED.value:
-            template = ENV.get_template('email_templates/nonbcsc_org_rejected_notification_email.html')
-            subject = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
-                      'Business Registry Account cannot be approved'
+            notification_type = 'nonbcscOrgRejectedNotification'
         else:
             return  # dont send mail for any other status change
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
-        logo_url = f'{app_url}/{current_app.config.get("REGISTRIES_LOGO_IMAGE_NAME")}'
-        params = {'org_name': org_name}
+        data = {
+            'accountId': org_id,
+            'emailAddresses': receipt_admin_email,
+            'contextUrl': app_url,
+            'org_name': org_name
+        }
         try:
-            sent_response = send_email(subject, sender, receipt_admin_email,
-                                       template.render(url=app_url, params=params, org_name=org_name,
-                                                       logo_url=logo_url))
+            publish_to_mailer(notification_type, org_id=org_id, data=data)
             current_app.logger.debug('<send_approved_rejected_notification')
-            if not sent_response:
-                current_app.logger.error('<send_approved_rejected_notification failed')
-                raise BusinessException(Error.FAILED_NOTIFICATION, None)
         except:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
