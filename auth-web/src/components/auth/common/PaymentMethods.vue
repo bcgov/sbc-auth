@@ -92,9 +92,8 @@
     </v-row>
     <template v-else>
       <PaymentInformation
-      title="General Ledger Information"
+      :title="ejvPaymentInformationTitle"
       :currentOrganizationGLInfo="currentOrgGLInfo"
-
       ></PaymentInformation>
     </template>
   </div>
@@ -189,6 +188,7 @@ export default class PaymentMethods extends Vue {
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
   private isTouched: boolean = false
+  private ejvPaymentInformationTitle = 'General Ledger Information'
 
   // this object can define the payment methods allowed for each account tyoes
   private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()

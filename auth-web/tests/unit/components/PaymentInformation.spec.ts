@@ -65,10 +65,6 @@ describe('PaymentInformation.vue', () => {
     expect(wrapper.find(PaymentInformation).exists()).toBe(true)
   })
 
-  it('renders proper header content', () => {
-    expect(wrapper.find('h2').text()).toBe(`${props.tabNumber}. ${props.title}`)
-  })
-
   it('renders proper GLInfo content', () => {
     expect(wrapper.find('[data-test="payment-info-client"]').text()).toBe('112')
     expect(wrapper.find('[data-test="payment-info-responsibilityCentre"]').text()).toBe('32041')
