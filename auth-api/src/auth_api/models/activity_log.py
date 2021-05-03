@@ -14,6 +14,7 @@
 """Model for all activity stream related changes."""
 from sqlalchemy import Column, Integer, String
 
+from . import User
 from .base_model import BaseModel
 from .db import db
 
@@ -38,7 +39,9 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
                                         action: str,
                                         page: int, limit: int):
         """Fetch all activity logs."""
-        query = db.session.query(ActivityLog).filter_by(org_id=org_id)
+        query = db.session.query(ActivityLog, User). \
+            outerjoin(User, User.id == ActivityLog.actor_id). \
+            filter(ActivityLog.org_id == org_id)
 
         if item_name:
             query = query.filter(ActivityLog.item_name == item_name)

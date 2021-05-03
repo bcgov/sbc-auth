@@ -55,6 +55,7 @@ def test_fetch_activity_log(client, jwt, session):  # pylint:disable=unused-argu
     rv = client.get(f'/api/v1/orgs/{org.id}/activity-logs',
                     headers=headers, content_type='application/json')
     activity_logs = rv.json
+    print('----------' ,rv.json)
     assert len(activity_logs.get('activityLogs')) == 2
     assert schema_utils.validate(activity_logs, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK

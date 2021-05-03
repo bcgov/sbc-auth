@@ -289,7 +289,7 @@ def factory_activity_log_model(actor: str, action: str, item_type: str = 'Accoun
                                remote_addr=''):
     """Create a Log Model."""
     activity_log = ActivityLogModel(
-        actor=actor,
+        actor_id=actor,
         action=action,
         item_name=item_name,
         item_id=item_id,

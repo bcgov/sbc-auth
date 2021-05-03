@@ -36,7 +36,7 @@ class ActivityLog(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value,
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value,
                             Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value])
     def get(org_id):
         """Fetch activities."""
