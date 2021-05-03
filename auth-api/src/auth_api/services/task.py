@@ -26,7 +26,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus, TaskTypePrefix
+from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -71,8 +71,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         # Send task creation mail to staff for review
         task_relationship_type = task_info.get('relationshipType')
-        if task_relationship_type == TaskRelationshipType.ORG.value and \
-                task_model.type == TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value:
+        if task_relationship_type == TaskRelationshipType.ORG.value:
             from auth_api.services import \
                 Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
             OrgService.send_staff_review_account_reminder(user, task_model.id, origin_url)

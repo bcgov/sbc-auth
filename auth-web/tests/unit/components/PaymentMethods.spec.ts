@@ -1,4 +1,5 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
+
 import { Account } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'

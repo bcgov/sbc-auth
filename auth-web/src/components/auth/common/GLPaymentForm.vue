@@ -1,7 +1,7 @@
 <template>
   <div>
     <template >
-      <p class="mb-9">
+      <p class="mb-9" v-if="canSelect">
         General Ledger codes for the account that is issued by the Finance department of the Ministry
       </p>
 
@@ -23,6 +23,7 @@
               @change="emitGLInfo"
               v-mask="'###'"
               data-test="input-client-code"
+              :disabled="!canSelect"
             ></v-text-field>
           </v-col>
           <v-col cols="4" class="py-0">
@@ -36,6 +37,7 @@
               @change="emitGLInfo"
               v-mask="'#####'"
               data-test="input-responsibilityCentre"
+              :disabled="!canSelect"
             ></v-text-field>
           </v-col>
             <v-col cols="4" class="py-0">
@@ -49,6 +51,7 @@
               @change="emitGLInfo"
               data-test="input-serviceLine"
               v-mask="'#####'"
+              :disabled="!canSelect"
             ></v-text-field>
           </v-col>
           <v-col cols="4" class="py-0">
@@ -62,6 +65,7 @@
               data-test="input-stob"
               v-mask="'####'"
               @change="emitGLInfo"
+              :disabled="!canSelect"
               >
             ></v-text-field>
           </v-col>
@@ -76,6 +80,7 @@
               @change="emitGLInfo"
               data-test="input-projectCode"
               v-mask="'#######'"
+              :disabled="!canSelect"
               >
             ></v-text-field>
           </v-col>
@@ -103,6 +108,8 @@ export default class GLPaymentForm extends Vue {
   @OrgModule.Mutation('setCurrentOrganizationGLInfo') private setCurrentOrganizationGLInfo!: (glInfo: GLInfo) => void
 
   @Prop({ default: () => ({} as GLInfo) }) glInformation: any
+  @Prop({ default: true }) private canSelect: boolean
+
   private client: string = ''
   private responsibilityCentre: string = ''
   private serviceLine: string = ''
