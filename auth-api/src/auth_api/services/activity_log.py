@@ -17,14 +17,14 @@ This module manages the activity logs.
 """
 from typing import Dict
 
-from flask import current_app
+from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.schemas import ActivityLogSchema
 from auth_api.services.authorization import check_auth
-from auth_api.utils.roles import ADMIN, STAFF
+from auth_api.utils.roles import ADMIN, STAFF, Role
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -53,7 +53,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def fetch_activity_logs(org_id: int, token_info: Dict = None, **kwargs):
+    def fetch_activity_logs(org_id: int, token_info: Dict = None, **kwargs):  # pylint: disable=too-many-locals
         """Search all activity logs."""
         item_name = kwargs.get('item_name')
         item_type = kwargs.get('item_type')
@@ -69,10 +69,17 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
                        limit)
 
         current_app.logger.debug('<fetch_activity logs ')
-        activity_logs_models, count = ActivityLogModel.fetch_activity_logs_for_account(org_id, *search_args)
+        results, count = ActivityLogModel.fetch_activity_logs_for_account(org_id, *search_args)
+        is_staff_access = g.jwt_oidc_token_info and 'staff' in \
+            g.jwt_oidc_token_info.get('realm_access', {}).get('roles', None)
+        for result in results:
+            activity_log: ActivityLogModel = result[0]
 
-        for activity_log in activity_logs_models:
-            log_dict = ActivityLog(activity_log).as_dict()
+            log_dict = ActivityLogSchema(exclude=('actor_id',)).dump(activity_log)
+
+            if user := result[1]:
+                actor = ActivityLog._mask_user_name(is_staff_access, user)
+                log_dict['actor'] = actor
             logs['activity_logs'].append(log_dict)
 
         logs['total'] = count
@@ -81,3 +88,13 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
         current_app.logger.debug('>fetch_activiy logs')
         return logs
+
+    @staticmethod
+    def _mask_user_name(is_staff_access, user):
+        is_actor_a_staff = user.type == Role.STAFF.name
+        if not is_staff_access and is_actor_a_staff:
+            # if staff ,change it to BC Regisitry Staff
+            actor = 'BC Registry Staff'
+        else:
+            actor = user.username if is_actor_a_staff else f'{user.firstname} {user.lastname}'
+        return actor

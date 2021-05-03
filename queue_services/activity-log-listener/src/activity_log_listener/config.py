@@ -80,7 +80,7 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_ACCOUNT_CLIENT_NAME', 'accounts.activity_log.worker')
+        'name': os.getenv('NATS_ACTIVITY_LOG_CLIENT_NAME', 'accounts.activity_log.worker')
 
     }
     STAN_CONNECTION_OPTIONS = {
@@ -91,9 +91,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     }
 
     SUBSCRIPTION_OPTIONS = {
-        'subject': os.getenv('NATS_ACCOUNT_SUBJECT', 'account.activity.events'),
-        'queue': os.getenv('NATS_ACCOUNT_QUEUE', 'account.activity.events.worker'),
-        'durable_name': os.getenv('NATS_ACCOUNT_QUEUE', 'account-activity-log-worker') + '_durable',
+        'subject': os.getenv('NATS_ACTIVITY_LOG_SUBJECT', 'account.activity.events'),
+        'queue': os.getenv('NATS_ACTIVITY_LOG_QUEUE', 'account.activity.events.worker'),
+        'durable_name': os.getenv('NATS_ACTIVITY_LOG_QUEUE', 'account-activity-log-worker') + '_durable',
     }
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
