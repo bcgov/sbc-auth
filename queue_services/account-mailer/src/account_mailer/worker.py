@@ -226,6 +226,12 @@ async def process_event(event_message: dict, flask_app):
                     'role': email_msg.get('role'),
                     'label': email_msg.get('label')
                 }
+            elif message_type == MessageType.PROD_PACKAGE_APPROVED_NOTIFICATION.value:
+                kwargs = {
+                    'title': subject,
+                    'context_url': email_msg.get('contextUrl'),
+                    'product_name': email_msg.get('productName'),
+                }
             else:
                 kwargs = {
                     'title': subject,
@@ -328,6 +334,14 @@ def map_templates_based_on_message_type(message_type: str):
         f'{MessageType.STAFF_REVIEW_ACCOUNT.value}': {
             'template_name': TemplateType.STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME.value,
             'subject': SubjectType.STAFF_REVIEW_ACCOUNT.value
+        },
+        f'{MessageType.GOVM_APPROVED_NOTIFICATION.value}': {
+            'template_name': TemplateType.GOVM_APPROVED_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.GOVM_APPROVED_NOTIFICATION.value
+        },
+        f'{MessageType.PROD_PACKAGE_APPROVED_NOTIFICATION.value}': {
+            'template_name': TemplateType.PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.PROD_PACKAGE_APPROVED_NOTIFICATION.value
         }
     }
     if switcher.get(message_type):

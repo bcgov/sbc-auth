@@ -48,6 +48,8 @@ class MessageType(Enum):
     OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'bc.registry.auth.otpAuthenticatorResetNotification'
     ROLE_CHANGED_NOTIFICATION = 'bc.registry.auth.roleChangedNotification'
     STAFF_REVIEW_ACCOUNT = 'bc.registry.auth.staffReviewAccount'
+    GOVM_APPROVED_NOTIFICATION = 'bc.registry.auth.govmApprovedNotification'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
 
 
 class SubjectType(Enum):
@@ -77,6 +79,8 @@ class SubjectType(Enum):
     OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'Your Authenticator Has Been Reset'
     ROLE_CHANGED_NOTIFICATION = 'Your Role Has Been Changed'
     STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
+    GOVM_APPROVED_NOTIFICATION = 'Your BC Registries Account Has Been Approved'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
 
 
 class TemplateType(Enum):
@@ -108,6 +112,8 @@ class TemplateType(Enum):
     OTP_AUTHENTICATOR_RESET_NOTIFICATION_TEMPLATE_NAME = 'otp_authenticator_reset_notification_email'
     ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME = 'role_changed_notification_email'
     STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = 'staff_review_account_email'
+    GOVM_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'govm_approved_notification'
+    PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
 
 
 class Constants(Enum):
