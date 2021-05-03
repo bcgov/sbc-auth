@@ -47,6 +47,7 @@ from account_mailer.enums import Constants, MessageType, SubjectType, TemplateTy
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 
+
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
@@ -280,8 +281,7 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
 
 
 def map_templates_based_on_message_type(message_type: str):
-    """Provide template, subject and args based on message type"""
-
+    """Provide template, subject and args based on message type."""
     switcher = {
         f'{MessageType.ADMIN_NOTIFICATION.value}': {
             'template_name': TemplateType.ADMIN_NOTIFICATION_TEMPLATE_NAME.value,
