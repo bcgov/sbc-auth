@@ -6,7 +6,7 @@ import { axios } from '@/util/http-util'
 
 export default class ActivityService {
   public static async getActivityListByorgId (orgId: number, filterParams:ActivityLogFilterParams): Promise<AxiosResponse<ActivityLog>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }

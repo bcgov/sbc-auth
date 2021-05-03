@@ -92,14 +92,6 @@ export default class ActivityLogs extends Mixins(AccountChangeMixin) {
     }
   ]
 
-  //   {
-  //   text: 'Business Name',
-  //   align: 'left',
-  //   sortable: false,
-  //   value: 'frequency',
-  // class: 'bold-header'
-  // },
-
   public get getPaginationOptions () {
     return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
   }
@@ -114,7 +106,7 @@ export default class ActivityLogs extends Mixins(AccountChangeMixin) {
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async getActivityLogs (val, oldVal) {
+  async getActivityLogs (val) {
     const pageNumber = val?.page || 1
     const itemsPerPage = val?.itemsPerPage
     await this.loadActivityList(pageNumber, itemsPerPage)

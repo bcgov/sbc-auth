@@ -11,7 +11,6 @@ export interface ActivityLog {
     itemType?: string;
     modified?: Date;
     orgId?:number;
-    remoteAddr?:string
 }
 
 export interface ActivityLogsResponse {

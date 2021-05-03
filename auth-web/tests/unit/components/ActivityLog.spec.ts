@@ -27,8 +27,7 @@ describe('Account settings ActivityLog.vue', () => {
         'itemName': 'HUNTINGTON PLACE HOUSING CO-OPERATIVE',
         'itemType': 'ACCOUNT',
         'modified': '2021-04-29T18:18:37.484371+00:00',
-        'orgId': 1132,
-        'remoteAddr': '10.97.84.1'
+        'orgId': 1132
       }
     ],
     'limit': 10,

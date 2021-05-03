@@ -20,5 +20,6 @@ export default class ActvityLogModule extends VuexModule {
           return response.data
         }
       }
+      return {}
     }
 }
