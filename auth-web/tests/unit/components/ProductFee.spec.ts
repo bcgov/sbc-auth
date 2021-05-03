@@ -1,5 +1,4 @@
-import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
 import Vue from 'vue'

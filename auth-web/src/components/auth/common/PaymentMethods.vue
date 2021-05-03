@@ -74,8 +74,11 @@
         </div>
       </v-card>
     </template>
+    <template v-else-if="isPaymentEJV">
+      <GLPaymentForm :canSelect="false"></GLPaymentForm>
+    </template>
     <!-- showing PAD form without card selector for single payment types -->
-    <v-row v-else-if="isPADOnly">
+    <v-row v-else>
       <v-col cols="9" class="py-0">
         <PADInfoForm
           :padInformation="{}"
@@ -90,23 +93,17 @@
         ></PADInfoForm>
       </v-col>
     </v-row>
-    <template v-else>
-      <PaymentInformation
-      :title="ejvPaymentInformationTitle"
-      :currentOrganizationGLInfo="currentOrgGLInfo"
-      ></PaymentInformation>
-    </template>
   </div>
 </template>
 
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { GLInfo, Organization, PADInfo } from '@/models/Organization'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Organization, PADInfo } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
+import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import PaymentInformation from '../staff/review-task/PaymentInformation.vue'
 import { namespace } from 'vuex-class'
 
 const PAYMENT_METHODS = {
@@ -168,7 +165,7 @@ const orgModule = namespace('org')
   components: {
     PADInfoForm,
     LinkedBCOLBanner,
-    PaymentInformation
+    GLPaymentForm
   }
 })
 export default class PaymentMethods extends Vue {
@@ -181,7 +178,6 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: false }) isInitialTOSAccepted: boolean
   @Prop({ default: false }) isInitialAcknowledged: boolean
 
-  @orgModule.State('currentOrgGLInfo') public currentOrgGLInfo!: GLInfo
   @orgModule.Action('fetchCurrentOrganizationGLInfo') public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
 
   private selectedPaymentMethod: string = ''
@@ -209,7 +205,7 @@ export default class PaymentMethods extends Vue {
   }
 
   private get isPaymentEJV () {
-    return (this.currentOrgType === Account.PREMIUM && this.currentSelectedPaymentMethod === PaymentTypes.EJV)
+    return this.currentSelectedPaymentMethod === PaymentTypes.EJV
   }
 
   // set on change of input only for single allowed payments

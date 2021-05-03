@@ -362,8 +362,7 @@ export default class ReviewAccountView extends Vue {
       PaymentInformation,
       {
         title: 'Payment Information',
-        currentOrganizationGLInfo: this.currentOrgGLInfo,
-        canSelect: this.canSelect
+        currentOrganizationGLInfo: this.currentOrgGLInfo
       }
     )
   }

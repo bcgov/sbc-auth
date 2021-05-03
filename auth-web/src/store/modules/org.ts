@@ -946,14 +946,13 @@ export default class OrgModule extends VuexModule {
     const response = await PaymentService.getRevenueAccountDetails(accountId)
     if (response?.data?.revenueAccount) {
       const revenueAccount = response?.data?.revenueAccount
-      const glInfo: GLInfo = {
+      return {
         client: revenueAccount.client,
         responsibilityCentre: revenueAccount.responsibilityCentre,
         serviceLine: revenueAccount.serviceLine,
         stob: revenueAccount.stob,
         projectCode: revenueAccount.projectCode
       }
-      return glInfo
     }
     return {}
   }
@@ -963,13 +962,12 @@ export default class OrgModule extends VuexModule {
     const response = await PaymentService.getOrgProductFeeCodes()
     if (response?.data?.codes && response?.data?.codes.length !== 0) {
       const unfilteredOrgProductFeeCodes = response.data.codes
-      const filteredOrgProductFeeCodes = unfilteredOrgProductFeeCodes.filter((orgProductFeeCode: OrgProductFeeCode) => {
+      return unfilteredOrgProductFeeCodes.filter((orgProductFeeCode: OrgProductFeeCode) => {
         const code = orgProductFeeCode.code
         if (code.startsWith(FeeCodes.PPR_CHANGE_OR_AMENDMENT)) {
           return orgProductFeeCode
         }
       })
-      return filteredOrgProductFeeCodes
     }
     return []
   }
