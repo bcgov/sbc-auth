@@ -189,7 +189,8 @@ export enum PaymentTypes {
     BCOL = 'DRAWDOWN',
     DIRECT_PAY = 'DIRECT_PAY',
     ONLINE_BANKING = 'ONLINE_BANKING',
-    PAD = 'PAD'
+    PAD = 'PAD',
+    EJV = 'EJV'
 }
 
 export enum paymentErrorType {

@@ -66,7 +66,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
+import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -145,7 +145,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
     if (this.isBtnSaved) {
       disableSaveBtn = false
-    } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (!this.paymentMethodChanged)) {
+    } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (!this.paymentMethodChanged) || (this.selectedPaymentMethod === PaymentTypes.EJV)) {
       disableSaveBtn = true
     }
 
@@ -187,7 +187,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
     if (this.isPaymentViewAllowed) {
       this.savedOrganizationType =
-      ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId)
+      ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId && this.currentOrganization?.accessType !== AccessType.GOVM)
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
       this.selectedPaymentMethod = ''
       const orgPayments: OrgPaymentDetails = await this.getOrgPayments()

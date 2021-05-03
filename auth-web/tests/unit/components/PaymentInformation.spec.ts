@@ -26,7 +26,8 @@ describe('PaymentInformation.vue', () => {
   const props = {
     tabNumber: 3,
     title: 'Payment Information',
-    currentOrganizationGLInfo: revenueAccount
+    currentOrganizationGLInfo: revenueAccount,
+    canSelect: true
   }
 
   beforeEach(() => {
