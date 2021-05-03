@@ -98,7 +98,8 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
                        x.get('action') == ActivityAction.REMOVE_AFFILIATION.value)
     assert staff_actor.get('actor') == staff_user.username
 
-    user_actor = next(x for x in activity_logs.get('activityLogs') if x.get('action') == ActivityAction.CREATE_AFFILIATION.value)
+    user_actor = next(x for x in activity_logs.get('activityLogs') if
+                      x.get('action') == ActivityAction.CREATE_AFFILIATION.value)
 
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'
 
