@@ -47,7 +47,6 @@ from account_mailer.enums import Constants, MessageType, SubjectType, TemplateTy
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
 
-
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
 APP_CONFIG = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
 FLASK_APP = Flask(__name__)
@@ -197,33 +196,39 @@ async def process_event(event_message: dict, flask_app):
                 template_name=template_name,
                 subject=subject, **email_msg)
 
-        elif message_type in (MessageType.ADMIN_NOTIFICATION.value, MessageType.BUSINESS_INVITATION.value,
-                              MessageType.BUSINESS_INVITATION_FOR_BCEID.value,
-                              MessageType.DIRSEARCH_BUSINESS_INVITATION.value):
+        else:
+            template_name, subject = map_templates_based_on_message_type(message_type)
 
-            if message_type == MessageType.ADMIN_NOTIFICATION.value:
-                template_name = TemplateType.ADMIN_NOTIFICATION_TEMPLATE_NAME.value
-                subject = SubjectType.ADMIN_NOTIFICATION.value
-            elif message_type == MessageType.BUSINESS_INVITATION.value:
-                template_name = TemplateType.BUSINESS_INVITATION_TEMPLATE_NAME.value
-                subject = SubjectType.BUSINESS_INVITATION.value
-            elif message_type == MessageType.BUSINESS_INVITATION_FOR_BCEID.value:
-                template_name = TemplateType.BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME.value
-                subject = SubjectType.BUSINESS_INVITATION_FOR_BCEID.value
-            elif message_type == MessageType.DIRSEARCH_BUSINESS_INVITATION.value:
-                template_name = TemplateType.DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME.value
-                subject = SubjectType.DIRSEARCH_BUSINESS_INVITATION.value
+            if template_name is None or subject is None:
+                return
 
-            if message_type == MessageType.DIRSEARCH_BUSINESS_INVITATION.value:
-                kwargs = {
-                    'title': subject,
-                    'context_url': email_msg.get('contextUrl')
-                }
-            else:
+            if message_type in (MessageType.ADMIN_NOTIFICATION.value,
+                                MessageType.BUSINESS_INVITATION.value,
+                                MessageType.BUSINESS_INVITATION_FOR_BCEID.value,
+                                MessageType.STAFF_REVIEW_ACCOUNT.value
+                                ):
                 kwargs = {
                     'title': subject,
                     'user_first_name': email_msg.get('userFirstName'),
                     'user_last_name': email_msg.get('userLastName'),
+                    'context_url': email_msg.get('contextUrl')
+                }
+            elif message_type == MessageType.GOVM_MEMBER_INVITATION.value:
+                kwargs = {
+                    'title': subject,
+                    'context_url': email_msg.get('contextUrl'),
+                    'role': email_msg.get('role')
+                }
+            elif message_type == MessageType.ROLE_CHANGED_NOTIFICATION.value:
+                kwargs = {
+                    'title': subject,
+                    'context_url': email_msg.get('contextUrl'),
+                    'role': email_msg.get('role'),
+                    'label': email_msg.get('label')
+                }
+            else:
+                kwargs = {
+                    'title': subject,
                     'context_url': email_msg.get('contextUrl')
                 }
 
@@ -264,3 +269,66 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
     except Exception:  # NOQA # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
+
+
+def map_templates_based_on_message_type(message_type: str):
+    """Provide template, subject and args based on message type"""
+
+    switcher = {
+        f'{MessageType.ADMIN_NOTIFICATION.value}': {
+            'template_name': TemplateType.ADMIN_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.ADMIN_NOTIFICATION.value
+        },
+        f'{MessageType.BUSINESS_INVITATION.value}': {
+            'template_name': TemplateType.BUSINESS_INVITATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.BUSINESS_INVITATION.value
+        },
+        f'{MessageType.BUSINESS_INVITATION_FOR_BCEID.value}': {
+            'template_name': TemplateType.BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME.value,
+            'subject': SubjectType.BUSINESS_INVITATION_FOR_BCEID.value
+        },
+        f'{MessageType.DIRSEARCH_BUSINESS_INVITATION.value}': {
+            'template_name': TemplateType.DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.DIRSEARCH_BUSINESS_INVITATION.value
+        },
+        f'{MessageType.GOVM_BUSINESS_INVITATION.value}': {
+            'template_name': TemplateType.GOVM_BUSINESS_INVITATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.GOVM_BUSINESS_INVITATION.value
+        },
+        f'{MessageType.GOVM_MEMBER_INVITATION.value}': {
+            'template_name': TemplateType.GOVM_MEMBER_INVITATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.GOVM_MEMBER_INVITATION.value
+        },
+        f'{MessageType.MEMBERSHIP_APPROVED_NOTIFICATION.value}': {
+            'template_name': TemplateType.MEMBERSHIP_APPROVED_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.MEMBERSHIP_APPROVED_NOTIFICATION.value
+        },
+        f'{MessageType.MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID.value}': {
+            'template_name': TemplateType.MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID_TEMPLATE_NAME.value,
+            'subject': SubjectType.MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID.value
+        },
+        f'{MessageType.NONBCSC_ORG_APPROVED_NOTIFICATION.value}': {
+            'template_name': TemplateType.NONBCSC_ORG_APPROVED_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.NONBCSC_ORG_APPROVED_NOTIFICATION.value
+        },
+        f'{MessageType.NONBCSC_ORG_REJECTED_NOTIFICATION.value}': {
+            'template_name': TemplateType.NONBCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.NONBCSC_ORG_REJECTED_NOTIFICATION.value
+        },
+        f'{MessageType.OTP_AUTHENTICATOR_RESET_NOTIFICATION.value}': {
+            'template_name': TemplateType.OTP_AUTHENTICATOR_RESET_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.OTP_AUTHENTICATOR_RESET_NOTIFICATION.value
+        },
+        f'{MessageType.ROLE_CHANGED_NOTIFICATION.value}': {
+            'template_name': TemplateType.ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME.value,
+            'subject': SubjectType.ROLE_CHANGED_NOTIFICATION.value
+        },
+        f'{MessageType.STAFF_REVIEW_ACCOUNT.value}': {
+            'template_name': TemplateType.STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME.value,
+            'subject': SubjectType.STAFF_REVIEW_ACCOUNT.value
+        }
+    }
+    if switcher.get(message_type):
+        return switcher.get(message_type)['template_name'], switcher.get(message_type)['subject']
+    else:
+        return None, None

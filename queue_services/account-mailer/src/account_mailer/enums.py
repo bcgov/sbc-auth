@@ -37,8 +37,17 @@ class MessageType(Enum):
     RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
     ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
     BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
-    BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitation'
+    BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitationForBceid'
     DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
+    GOVM_BUSINESS_INVITATION = 'bc.registry.auth.govmBusinessInvitation'
+    GOVM_MEMBER_INVITATION = 'bc.registry.auth.govmMemberInvitation'
+    MEMBERSHIP_APPROVED_NOTIFICATION = 'bc.registry.auth.membershipApprovedNotification'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = 'bc.registry.auth.membershipApprovedNotificationForBceid'
+    NONBCSC_ORG_APPROVED_NOTIFICATION = 'bc.registry.auth.nonbcscOrgApprovedNotification'
+    NONBCSC_ORG_REJECTED_NOTIFICATION = 'bc.registry.auth.nonbcscOrgRejectedNotification'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'bc.registry.auth.otpAuthenticatorResetNotification'
+    ROLE_CHANGED_NOTIFICATION = 'bc.registry.auth.roleChangedNotification'
+    STAFF_REVIEW_ACCOUNT = 'bc.registry.auth.staffReviewAccount'
 
 
 class SubjectType(Enum):
@@ -59,6 +68,15 @@ class SubjectType(Enum):
     BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
     BUSINESS_INVITATION_FOR_BCEID = 'Invitation to Join an Account at Business Registry'
     DIRSEARCH_BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
+    GOVM_BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
+    GOVM_MEMBER_INVITATION = 'Invitation to Join an Account at Business Registry'
+    MEMBERSHIP_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = 'Your Membership Has Been Approved'
+    NONBCSC_ORG_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
+    NONBCSC_ORG_REJECTED_NOTIFICATION = 'Your Membership Has Been Rejected'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'Your Authenticator Has Been Reset'
+    ROLE_CHANGED_NOTIFICATION = 'Your Role Has Been Changed'
+    STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
 
 
 class TemplateType(Enum):
@@ -81,6 +99,15 @@ class TemplateType(Enum):
     BUSINESS_INVITATION_TEMPLATE_NAME = 'business_invitation_email'
     BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME = 'business_invitation_email_for_bceid'
     DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME = 'dirsearch_business_invitation_email'
+    GOVM_BUSINESS_INVITATION_TEMPLATE_NAME = 'govm_business_invitation_email'
+    GOVM_MEMBER_INVITATION_TEMPLATE_NAME = 'govm_member_invitation_email'
+    MEMBERSHIP_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'membership_approved_notification_email'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID_TEMPLATE_NAME = 'membership_approved_notification_email_for_bceid'
+    NONBCSC_ORG_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_approved_notification_email'
+    NONBCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_rejected_notification_email'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION_TEMPLATE_NAME = 'otp_authenticator_reset_notification_email'
+    ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME = 'role_changed_notification_email'
+    STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = 'staff_review_account_email'
 
 
 class Constants(Enum):
