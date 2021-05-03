@@ -190,7 +190,8 @@ export enum PaymentTypes {
     BCOL = 'DRAWDOWN',
     DIRECT_PAY = 'DIRECT_PAY',
     ONLINE_BANKING = 'ONLINE_BANKING',
-    PAD = 'PAD'
+    PAD = 'PAD',
+    EJV = 'EJV'
 }
 
 export enum paymentErrorType {
@@ -219,7 +220,7 @@ export enum productStatus {
 export enum TaskRelationshipType {
     ORG = 'ORG',
     PRODUCT = 'PRODUCT',
-  }
+}
 
 export enum TaskRelationshipStatus {
     ACTIVE = 'ACTIVE',
@@ -233,4 +234,13 @@ export enum TaskRelationshipStatus {
 export enum TaskStatus {
     OPEN = 'OPEN',
     COMPLETED = 'COMPLETED'
+}
+
+export enum TaskType {
+    NEW_ACCOUNT_STAFF_REVIEW = 'New Account',
+    GOVM_REVIEW = 'GovM'
+}
+
+export enum FeeCodes {
+    PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }

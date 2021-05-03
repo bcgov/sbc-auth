@@ -388,7 +388,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.add_to_session()
 
     def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
-                   bearer_token: str = None):
+                   bearer_token: str = None, origin_url: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -438,7 +438,7 @@ class Org:  # pylint: disable=too-many-public-methods
                          'status': TaskStatus.OPEN.value,
                          'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                          }
-            TaskService.create_task(task_info=task_info, user=user, do_commit=False)
+            TaskService.create_task(task_info=task_info, user=user, do_commit=False, origin_url=origin_url)
 
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
@@ -801,9 +801,12 @@ class Org:  # pylint: disable=too-many-public-methods
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
 
         # If status is PENDING_STAFF_REVIEW handle affidavit approve process, else raise error
-        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value:
+        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
+                org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             AffidavitService.approve_or_reject(org_id, is_approved, user)
-        else:
+        elif org.status_code != OrgStatus.PENDING_STAFF_REVIEW.value or \
+                org.access_type not in \
+                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVM.value):
             raise BusinessException(Error.INVALID_INPUT, None)
 
         if is_approved:
@@ -818,9 +821,12 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org.save()
 
-        # Find admin email address
-        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-        Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
+        # TODO Implement mailing for GovM account approval/reject
+        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
+                org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+            # Find admin email address
+            admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+            Org.send_approved_rejected_notification(admin_email, org.name, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
