@@ -14,7 +14,6 @@ from auth_api.models import db
 from auth_api.services.products import Product
 from auth_api.services.rest_service import RestService
 
-
 # revision identifiers, used by Alembic.
 revision = '31ec16d4f1e9'
 down_revision = 'a37f90e6802d'
@@ -26,7 +25,7 @@ def upgrade():
     # Query all orgs which are linked to BCOL.
     conn = op.get_bind()
     org_res = conn.execute(
-        "select o.id, o.bcol_user_id from orgs o where bcol_user_id is not null and bcol_account_id is not null;"
+        "select o.id, o.bcol_user_id from orgs o where bcol_user_id is not null and bcol_account_id is not null and status_code in ('ACTIVE', 'PENDING_STAFF_REVIEW');"
     )
     orgs = org_res.fetchall()
     print('starting migration for BCOL products')
@@ -42,6 +41,7 @@ def upgrade():
         except Exception as exc:
             print('Profile Error')
             print(exc)
+            raise exc
     db.session.commit()
 
 
