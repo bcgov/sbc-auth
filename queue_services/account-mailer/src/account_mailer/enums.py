@@ -82,7 +82,7 @@ class SubjectType(Enum):
     STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
     GOVM_APPROVED_NOTIFICATION = 'Your BC Registries Account Has Been Approved'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
-    PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Rejected'
+    PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
 
 
 class TemplateType(Enum):
