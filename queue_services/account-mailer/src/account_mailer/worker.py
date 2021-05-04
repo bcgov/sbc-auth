@@ -227,7 +227,8 @@ async def process_event(event_message: dict, flask_app):
                     'role': email_msg.get('role'),
                     'label': email_msg.get('label')
                 }
-            elif message_type == MessageType.PROD_PACKAGE_APPROVED_NOTIFICATION.value:
+            elif message_type in (MessageType.PROD_PACKAGE_APPROVED_NOTIFICATION.value,
+                                  MessageType.PROD_PACKAGE_REJECTED_NOTIFICATION.value):
                 kwargs = {
                     'title': subject,
                     'context_url': email_msg.get('contextUrl'),

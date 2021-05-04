@@ -234,7 +234,7 @@ class Product:
         if product_subscription_status == ProductSubscriptionStatus.ACTIVE.value:
             notification_type = 'prodPackageApprovedNotification'
         else:
-            return  # don't send mail for any other status change
+            notification_type = 'prodPackageRejectedNotification'
         data = {
             'productName': product_name,
             'emailAddresses': receipt_admin_email

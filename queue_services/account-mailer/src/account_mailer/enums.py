@@ -50,6 +50,7 @@ class MessageType(Enum):
     STAFF_REVIEW_ACCOUNT = 'bc.registry.auth.staffReviewAccount'
     GOVM_APPROVED_NOTIFICATION = 'bc.registry.auth.govmApprovedNotification'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
+    PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
 
 
 class SubjectType(Enum):
@@ -81,6 +82,7 @@ class SubjectType(Enum):
     STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
     GOVM_APPROVED_NOTIFICATION = 'Your BC Registries Account Has Been Approved'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Rejected'
 
 
 class TemplateType(Enum):
@@ -114,6 +116,7 @@ class TemplateType(Enum):
     STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = 'staff_review_account_email'
     GOVM_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'govm_approved_notification'
     PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
+    PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
 
 
 class Constants(Enum):
