@@ -830,7 +830,7 @@ class Org:  # pylint: disable=too-many-public-methods
         elif org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
                 org.access_type == AccessType.GOVM.value:
             admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-            Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
+            Org.send_approved_govm_notification(admin_email, org.id, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -890,7 +890,7 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     @staticmethod
-    def send_approved_govm_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url):
+    def send_approved_govm_notification(receipt_admin_email, org_id, org_status: OrgStatus, origin_url):
         """Send Approved govm notification to the user."""
         current_app.logger.debug('<send_approved_govm_notification')
 
