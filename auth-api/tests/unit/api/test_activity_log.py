@@ -103,13 +103,14 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
 
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'
 
-    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
     claims['sub'] = str(user.keycloak_guid)
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.get(f'/api/v1/orgs/{org.id}/activity-logs',
                     headers=headers, content_type='application/json')
     activity_logs = rv.json
+
     staff_actor = next(x for x in activity_logs.get('activityLogs') if
                        x.get('action') == ActivityAction.REMOVE_AFFILIATION.value)
     assert staff_actor.get('actor') == 'BC Registry Staff'
