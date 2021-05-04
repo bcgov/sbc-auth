@@ -119,11 +119,16 @@ export default class ActivityLogs extends Mixins(AccountChangeMixin) {
       pageLimit: itemsPerPage,
       orgId: this.currentOrganization.id
     }
-
-    const resp:any = await this.getActivityLog(filterParams)
-    this.activityList = resp?.activityLogs || []
-    this.totalActivityCount = resp?.total || 0
-    this.isDataLoading = false
+    try {
+      const resp:any = await this.getActivityLog(filterParams)
+      this.activityList = resp?.activityLogs || []
+      this.totalActivityCount = resp?.total || 0
+      this.isDataLoading = false
+    } catch {
+      this.activityList = []
+      this.totalActivityCount = 0
+      this.isDataLoading = false
+    }
   }
 }
 </script>
