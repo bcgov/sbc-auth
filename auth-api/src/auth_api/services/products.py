@@ -21,14 +21,15 @@ from sqlalchemy.exc import SQLAlchemyError
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Org as OrgModel
-from auth_api.models import User as UserModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
+from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
     ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, AccessType
-from .task import Task as TaskService
 from .authorization import check_auth
+from .task import Task as TaskService
 from ..utils.cache import cache
 from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
 
@@ -125,7 +126,8 @@ class Product:
             AccessType.GOVM.value] else ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
-    def create_default_product_subscriptions(org: OrgModel, is_new_transaction: bool = True):
+    def create_default_product_subscriptions(org: OrgModel, bcol_profile_flags: List[str],
+                                             is_new_transaction: bool = True):
         """Create default product subscriptions for the account."""
         internal_product_codes = ProductCodeModel.find_by_type_code(type_code=ProductTypeCode.INTERNAL.value)
         for product_code in internal_product_codes:
@@ -137,8 +139,30 @@ class Product:
             else:
                 ProductSubscriptionModel(org_id=org.id, product_code=product_code.code,
                                          status_code=product_code.default_subscription_status).flush()
+        # Now add or update the product subscription based on bcol profiles.
+        Product.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
         if is_new_transaction:  # Commit the transaction if it's a new transaction
             db.session.commit()
+
+    @staticmethod
+    def create_subscription_from_bcol_profile(org_id: int, bcol_profile_flags: List[str]):
+        """Create product subscription from bcol profile flags."""
+        if not bcol_profile_flags:
+            return
+        for profile_flag in bcol_profile_flags:
+            product_code = BCOL_PROFILE_PRODUCT_MAP.get(profile_flag, None)
+            if product_code:
+                # Check if account already have an entry for this product.
+                subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_org_id_product_code(
+                    org_id, product_code
+                )
+                if not subscription:
+                    ProductSubscriptionModel(org_id=org_id, product_code=product_code,
+                                             status_code=ProductSubscriptionStatus.ACTIVE.value).flush()
+                elif subscription and \
+                        (existing_sub := subscription[0]).status_code != ProductSubscriptionStatus.ACTIVE.value:
+                    existing_sub.status_code = ProductSubscriptionStatus.ACTIVE.value
+                    existing_sub.flush()
 
     @staticmethod
     def get_products():
