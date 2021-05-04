@@ -7,7 +7,7 @@ MKFILE_PATH:=$(abspath $(lastword $(MAKEFILE_LIST)))
 CURRENT_ABS_DIR:=$(patsubst %/,%,$(dir $(MKFILE_PATH)))
 
 PROJECT_NAME:=activity_log_listener
-DOCKER_NAME:=activity_log_listener
+DOCKER_NAME:=activity-log-listener
 
 #################################################################################
 # COMMANDS -- Setup                                                             #
