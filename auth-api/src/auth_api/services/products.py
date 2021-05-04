@@ -202,7 +202,7 @@ class Product:
         return merged_product_infos
 
     @staticmethod
-    def update_product_subscription(product_subscription_id: int, is_approved: bool,  org_id: int,
+    def update_product_subscription(product_subscription_id: int, is_approved: bool, org_id: int,
                                     is_new_transaction: bool = True):
         """Update Product Subscription."""
         current_app.logger.debug('<update_task_product ')
