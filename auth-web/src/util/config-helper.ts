@@ -1,4 +1,5 @@
 import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+
 import Axios from 'axios'
 
 /**
@@ -115,7 +116,7 @@ export default class ConfigHelper {
   static paymentsAllowedPerAccountType () {
     return {
       [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
-      [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
+      [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL, PaymentTypes.EJV ],
       [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
     }
   }

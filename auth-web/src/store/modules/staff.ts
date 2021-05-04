@@ -1,7 +1,6 @@
-import { AccountStatus, TaskRelationshipType } from '@/util/constants'
+import { AccountStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 
 import { Address } from '@/models/address'
@@ -166,17 +165,21 @@ export default class StaffModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async syncTaskUnderReview (task:any): Promise<void> {
-    const taskrRelationshipType = task.relationshipType
+  public async syncTaskUnderReview (task:Task): Promise<void> {
+    const taskRelationshipType = task.relationshipType
     const taskRelationshipId = task.relationshipId
     const taskAccountId = task.accountId
+    const taskType = task.type
 
     // if type is org need to set org details and affidavit details
-    if (taskrRelationshipType === TaskRelationshipType.ORG) {
+    if (taskRelationshipType === TaskRelationshipType.ORG && taskType === TaskType.NEW_ACCOUNT_STAFF_REVIEW) {
       await this.context.dispatch('syncAccountUnderReview', taskRelationshipId)
       await this.context.dispatch('syncAccountAffidavit', taskRelationshipId)
-    } else if (taskrRelationshipType === TaskRelationshipType.PRODUCT) {
+    } else if (taskRelationshipType === TaskRelationshipType.PRODUCT) {
       await this.context.dispatch('syncAccountUnderReview', taskAccountId)
+    } else {
+      // for GovM accounts
+      await this.context.dispatch('syncAccountUnderReview', task.relationshipId)
     }
   }
 
