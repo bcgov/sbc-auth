@@ -1,6 +1,6 @@
 <template>
   <div>
-    <template v-if="!isPADOnly">
+    <template v-if="!isPADOnly && !isPaymentEJV">
       <v-card
         outlined
         hover
@@ -74,6 +74,9 @@
         </div>
       </v-card>
     </template>
+    <template v-else-if="isPaymentEJV">
+      <GLPaymentForm :canSelect="false"></GLPaymentForm>
+    </template>
     <!-- showing PAD form without card selector for single payment types -->
     <v-row v-else>
       <v-col cols="9" class="py-0">
@@ -95,11 +98,13 @@
 
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Organization, PADInfo } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
+import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
+import { namespace } from 'vuex-class'
 
 const PAYMENT_METHODS = {
   [PaymentTypes.CREDIT_CARD]: {
@@ -154,10 +159,13 @@ const PAYMENT_METHODS = {
   }
 }
 
+const orgModule = namespace('org')
+
 @Component({
   components: {
     PADInfoForm,
-    LinkedBCOLBanner
+    LinkedBCOLBanner,
+    GLPaymentForm
   }
 })
 export default class PaymentMethods extends Vue {
@@ -169,10 +177,14 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: false }) isTouchedUpdate: boolean
   @Prop({ default: false }) isInitialTOSAccepted: boolean
   @Prop({ default: false }) isInitialAcknowledged: boolean
+
+  @orgModule.Action('fetchCurrentOrganizationGLInfo') public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
+
   private selectedPaymentMethod: string = ''
   private paymentTypes = PaymentTypes
   private padInfo: PADInfo = {} as PADInfo
   private isTouched: boolean = false
+  private ejvPaymentInformationTitle = 'General Ledger Information'
 
   // this object can define the payment methods allowed for each account tyoes
   private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
@@ -192,14 +204,21 @@ export default class PaymentMethods extends Vue {
     return (this.currentOrgType === Account.UNLINKED_PREMIUM)
   }
 
+  private get isPaymentEJV () {
+    return this.currentSelectedPaymentMethod === PaymentTypes.EJV
+  }
+
   // set on change of input only for single allowed payments
   private isPadInfoTouched (isTouched) {
     this.isTouched = isTouched
   }
 
-  private mounted () {
+  private async mounted () {
     if (!this.isPADOnly) {
       this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod }, false)
+    }
+    if (this.isPaymentEJV) {
+      await this.fetchCurrentOrganizationGLInfo(this.currentOrganization?.id)
     }
   }
 

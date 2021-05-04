@@ -1,6 +1,6 @@
-import { Account, AccountStatus, Actions, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
 import {
+  AccountFee,
   AddUserBody,
   AddUsersToOrgBody,
   BulkUsersFailed,
@@ -13,12 +13,14 @@ import {
   MembershipType,
   OrgPaymentDetails,
   OrgProduct,
+  OrgProductFeeCode,
   OrgProductsRequestBody,
   Organization,
   PADInfo,
   PADInfoValidation,
   UpdateMemberPayload
 } from '@/models/Organization'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
@@ -76,6 +78,8 @@ export default class OrgModule extends VuexModule {
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
   currentOrgTransactionList: TransactionTableRow[] = []
   statementSettings: StatementSettings = {} as StatementSettings
+  orgProductFeeCodes: OrgProductFeeCode[] = []
+  currentAccountFees: AccountFee[] = []
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -249,6 +253,16 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentSelectedProducts (productCodeList: []) {
     this.currentSelectedProducts = productCodeList
+  }
+
+  @Mutation
+  public setOrgProductFeeCodes (orgProductFeeCodes: OrgProductFeeCode[]) {
+    this.orgProductFeeCodes = orgProductFeeCodes
+  }
+
+  @Mutation
+  public setCurrentAccountFees (accountFee: AccountFee[]) {
+    this.currentAccountFees = accountFee
   }
 
   @Action({ rawError: true })
@@ -925,5 +939,50 @@ export default class OrgModule extends VuexModule {
       productList = [...currentSelectedProducts, productCode]
     }
     return productList
+  }
+
+  @Action({ commit: 'setCurrentOrganizationGLInfo', rawError: true })
+  public async fetchCurrentOrganizationGLInfo (accountId: number): Promise<any> {
+    const response = await PaymentService.getRevenueAccountDetails(accountId)
+    if (response?.data?.revenueAccount) {
+      const revenueAccount = response?.data?.revenueAccount
+      return {
+        client: revenueAccount.client,
+        responsibilityCentre: revenueAccount.responsibilityCentre,
+        serviceLine: revenueAccount.serviceLine,
+        stob: revenueAccount.stob,
+        projectCode: revenueAccount.projectCode
+      }
+    }
+    return {}
+  }
+
+  @Action({ commit: 'setOrgProductFeeCodes', rawError: true })
+  public async fetchOrgProductFeeCodes (): Promise<OrgProductFeeCode[]> {
+    const response = await PaymentService.getOrgProductFeeCodes()
+    if (response?.data?.codes && response?.data?.codes.length !== 0) {
+      const unfilteredOrgProductFeeCodes = response.data.codes
+      return unfilteredOrgProductFeeCodes.filter((orgProductFeeCode: OrgProductFeeCode) => {
+        const code = orgProductFeeCode.code
+        if (code.startsWith(FeeCodes.PPR_CHANGE_OR_AMENDMENT)) {
+          return orgProductFeeCode
+        }
+      })
+    }
+    return []
+  }
+
+  @Action({ rawError: true })
+  public async createAccountFees (accoundId:number): Promise<any> {
+    const accountFeePayload = JSON.parse(JSON.stringify(this.context.state['currentAccountFees']))
+    await PaymentService.createAccountFees(accoundId.toString(), { accountFees: accountFeePayload })
+  }
+
+  @Action({ commit: 'setCurrentAccountFees', rawError: true })
+  public async syncCurrentAccountFees (accoundId:number): Promise<AccountFee[]> {
+    const response = await PaymentService.getAccountFees(accoundId.toString())
+    if (response && response.data && response.status === 200) {
+      return response.data.accountFees
+    }
   }
 }
