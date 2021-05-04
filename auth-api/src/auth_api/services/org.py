@@ -81,11 +81,13 @@ class Org:  # pylint: disable=too-many-public-methods
         selected_payment_method = payment_info.get('paymentMethod', None)
         org_type = org_info.get('typeCode', OrgType.BASIC.value)
         branch_name = org_info.get('branchName', None)
+        bcol_profile_flags = None
 
         # If the account is created using BCOL credential, verify its valid bc online account
         if bcol_credential:
             bcol_response = Org.get_bcol_details(bcol_credential, bearer_token).json()
             Org._map_response_to_org(bcol_response, org_info)
+            bcol_profile_flags = bcol_response.get('profileFlags')
 
         is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
         is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
@@ -124,9 +126,9 @@ class Org:  # pylint: disable=too-many-public-methods
         Org.create_membership(access_type, is_staff_admin, org, user_id)
 
         # dir search and GOVM doesnt need default products
-
         if access_type not in (AccessType.ANONYMOUS.value, AccessType.GOVM.value):
-            ProductService.create_default_product_subscriptions(org, is_new_transaction=False)
+            ProductService.create_default_product_subscriptions(org, bcol_profile_flags, is_new_transaction=False)
+
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
                                                               access_type=access_type)
 
@@ -353,6 +355,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(Error.INVALID_INPUT, None)
             bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
+            ProductService.create_subscription_from_bcol_profile(self._model.id, bcol_response.get('profileFlags'))
             payment_type = PaymentMethod.BCOL.value
 
             # If mailing address is provided, save it
@@ -414,6 +417,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
             bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
+            ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get('profileFlags'))
             has_org_updates = True
 
         product_subscriptions = org_info.pop('productSubscriptions', None)
@@ -426,20 +430,7 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
             has_status_changing = True
-            # create a staff review task for this account
-            task_type = TaskTypePrefix.GOVM_REVIEW.value
-            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-            task_info = {'name': org_model.name,
-                         'relationshipId': org_model.id,
-                         'relatedTo': user.id,
-                         'dateSubmitted': datetime.today(),
-                         'relationshipType': TaskRelationshipType.ORG.value,
-                         'type': task_type,
-                         'status': TaskStatus.OPEN.value,
-                         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                         }
-            TaskService.create_task(task_info=task_info, user=user, do_commit=False, origin_url=origin_url)
-
+            self._create_gov_account_task(org_model, token_info, origin_url)
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
             ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
@@ -468,6 +459,22 @@ class Org:  # pylint: disable=too-many-public-methods
             Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, user.username, False)
             current_app.logger.debug('>update_org ')
         return self
+
+    @staticmethod
+    def _create_gov_account_task(org_model: OrgModel, token_info: dict, origin_url: str):
+        # create a staff review task for this account
+        task_type = TaskTypePrefix.GOVM_REVIEW.value
+        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        task_info = {'name': org_model.name,
+                     'relationshipId': org_model.id,
+                     'relatedTo': user.id,
+                     'dateSubmitted': datetime.today(),
+                     'relationshipType': TaskRelationshipType.ORG.value,
+                     'type': task_type,
+                     'status': TaskStatus.OPEN.value,
+                     'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                     }
+        TaskService.create_task(task_info=task_info, user=user, do_commit=False, origin_url=origin_url)
 
     @staticmethod
     def delete_org(org_id, token_info: Dict = None, ):

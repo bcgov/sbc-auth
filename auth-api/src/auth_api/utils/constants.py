@@ -22,3 +22,23 @@ GROUP_API_GW_USERS = 'api_gateway_users'
 
 # Affidavit folder
 AFFIDAVIT_FOLDER_NAME = 'Affidavits'
+
+# BCol profile to product mapping, this will grow as and when more products are onboarded.
+BCOL_PROFILE_PRODUCT_MAP = {
+    'VS': 'VS'
+          # 'COURT_SERVICES': 'CSO',
+          # "OSBR":'',
+          #     "ADS",
+          #     "COLIN_TYPE",
+          #     "COMP",
+          #     "ICBC",
+          #     "MH",
+          #     "LTO",
+          #     "SES",
+          #     "PPR",
+          # "CCREF",
+          # "CCREL",
+          # "ATSOURCE",
+          # "EMERGIS",
+          # "LOCATION_CODE"
+}
