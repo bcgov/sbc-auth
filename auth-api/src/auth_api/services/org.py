@@ -821,10 +821,14 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org.save()
 
-        # TODO Implement mailing for GovM account approval/reject
         if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
                 org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             # Find admin email address
+            admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+            Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
+
+        elif org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
+                org.access_type == AccessType.GOVM.value:
             admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
             Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
 
@@ -883,4 +887,26 @@ class Org:  # pylint: disable=too-many-public-methods
             current_app.logger.debug('<send_approved_rejected_notification')
         except:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+
+    @staticmethod
+    def send_approved_govm_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url):
+        """Send Approved govm notification to the user."""
+        current_app.logger.debug('<send_approved_govm_notification')
+
+        if org_status == OrgStatus.ACTIVE.value:
+            notification_type = 'govmApprovedNotification'
+        else:
+            return  # dont send mail for any other status change
+        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        data = {
+            'accountId': org_id,
+            'emailAddresses': receipt_admin_email,
+            'contextUrl': app_url,
+        }
+        try:
+            publish_to_mailer(notification_type, org_id=org_id, data=data)
+            current_app.logger.debug('send_approved_govm_notification>')
+        except:  # noqa=B901
+            current_app.logger.error('<send_approved_govm_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)

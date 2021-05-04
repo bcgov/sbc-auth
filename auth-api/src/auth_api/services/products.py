@@ -20,6 +20,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import ProductCode as ProductCodeModel
@@ -29,6 +30,7 @@ from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
     ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, AccessType
 from .task import Task as TaskService
 from .authorization import check_auth
+from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
 from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
 
@@ -200,7 +202,8 @@ class Product:
         return merged_product_infos
 
     @staticmethod
-    def update_product_subscription(product_subscription_id: int, is_approved: bool, is_new_transaction: bool = True):
+    def update_product_subscription(product_subscription_id: int, is_approved: bool,  org_id: int,
+                                    is_new_transaction: bool = True):
         """Update Product Subscription."""
         current_app.logger.debug('<update_task_product ')
         # Approve/Reject Product subscription
@@ -212,4 +215,33 @@ class Product:
         product_subscription.flush()
         if is_new_transaction:  # Commit the transaction if it's a new transaction
             db.session.commit()
+
+        # Get the org and to get admin mail address
+        org: OrgModel = OrgModel.find_by_org_id(org_id)
+        # Find admin email address
+        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+        product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
+        Product.send_approved_product_subscription_notification(admin_email, product_model.description,
+                                                                product_subscription.status_code)
         current_app.logger.debug('>update_task_product ')
+
+    @staticmethod
+    def send_approved_product_subscription_notification(receipt_admin_email, product_name,
+                                                        product_subscription_status: ProductSubscriptionStatus):
+        """Send Approved product subscription notification to the user."""
+        current_app.logger.debug('<send_approved_prod_subscription_notification')
+
+        if product_subscription_status == ProductSubscriptionStatus.ACTIVE.value:
+            notification_type = 'prodPackageApprovedNotification'
+        else:
+            return  # don't send mail for any other status change
+        data = {
+            'productName': product_name,
+            'emailAddresses': receipt_admin_email
+        }
+        try:
+            publish_to_mailer(notification_type, data=data)
+            current_app.logger.debug('<send_approved_prod_subscription_notification>')
+        except:  # noqa=B901
+            current_app.logger.error('<send_approved_prod_subscription_notification failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
