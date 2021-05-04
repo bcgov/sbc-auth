@@ -1,5 +1,6 @@
 import Vuex, { StoreOptions } from 'vuex'
 
+import ActvityLogModule from '@/store/modules/activityLog'
 import BusinessModule from './modules/business'
 import CodesModule from '@/store/modules/codes'
 import OrgModule from '@/store/modules/org'
@@ -36,7 +37,8 @@ const storeOptions: StoreOptions<RootState> = {
     org: OrgModule,
     staff: StaffModule,
     codes: CodesModule,
-    task: TaskModule
+    task: TaskModule,
+    activity: ActvityLogModule
   }
 }
 

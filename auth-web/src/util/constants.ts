@@ -154,8 +154,9 @@ export enum Permission {
     MAKE_PAYMENT = 'MAKE_PAYMENT',
     GENERATE_INVOICE = 'GENERATE_INVOICE',
     VIEW_AUTH_OPTIONS = 'VIEW_AUTH_OPTIONS',
-    CHANGE_AUTH_OPTIONS = 'CHANGE_AUTH_OPTIONS'
-
+    CHANGE_AUTH_OPTIONS = 'CHANGE_AUTH_OPTIONS',
+    REQUEST_PRODUCT_PACKAGE = 'REQUEST_PRODUCT_PACKAGE',
+    VIEW_ACTIVITYLOG = 'VIEW_ACTIVITYLOG'
 }
 
 export enum LDFlags {
@@ -189,7 +190,8 @@ export enum PaymentTypes {
     BCOL = 'DRAWDOWN',
     DIRECT_PAY = 'DIRECT_PAY',
     ONLINE_BANKING = 'ONLINE_BANKING',
-    PAD = 'PAD'
+    PAD = 'PAD',
+    EJV = 'EJV'
 }
 
 export enum paymentErrorType {
@@ -218,7 +220,7 @@ export enum productStatus {
 export enum TaskRelationshipType {
     ORG = 'ORG',
     PRODUCT = 'PRODUCT',
-  }
+}
 
 export enum TaskRelationshipStatus {
     ACTIVE = 'ACTIVE',
@@ -232,4 +234,13 @@ export enum TaskRelationshipStatus {
 export enum TaskStatus {
     OPEN = 'OPEN',
     COMPLETED = 'COMPLETED'
+}
+
+export enum TaskType {
+    NEW_ACCOUNT_STAFF_REVIEW = 'New Account',
+    GOVM_REVIEW = 'GovM'
+}
+
+export enum FeeCodes {
+    PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }
