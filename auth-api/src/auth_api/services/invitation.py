@@ -208,7 +208,13 @@ class Invitation:
             'userLastName': user['lastname'],
             'orgName': org_name
         }
-        publish_to_mailer(notification_type='adminNotification', org_id=org_id, data=data)
+        try:
+            current_app.logger.debug('<send_admin_notification')
+            publish_to_mailer(notification_type='adminNotification', org_id=org_id, data=data)
+            current_app.logger.debug('send_admin_notification>')
+        except:  # noqa=B901
+            current_app.logger.error('<send_admin_notification failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     @staticmethod
     def send_invitation(invitation: InvitationModel, org_name, org_id, user,  # pylint: disable=too-many-arguments
