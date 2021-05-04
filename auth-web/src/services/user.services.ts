@@ -8,7 +8,7 @@ import { axios } from '@/util/http-util.ts'
 
 export default class UserService {
   static async getUserProfile (identifier: string): Promise<AxiosResponse<User>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${identifier}`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(identifier)}`)
   }
 
   static async getRoles (): Promise<AxiosResponse<RoleInfo[]>> {
