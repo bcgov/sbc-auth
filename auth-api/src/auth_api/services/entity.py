@@ -188,7 +188,8 @@ class Entity:
             )
 
         entity = Entity(entity)
-        publish_activity(ActivityAction.GENERATED_PASSCODE.value, business_name, business_identifier)
+        publish_activity(f'{ActivityAction.GENERATED_PASSCODE.value}-{business_name}', business_name,
+                         business_identifier)
         return entity
 
     def add_contact(self, contact_info: dict):
@@ -262,4 +263,5 @@ class Entity:
             self.delete_contact()
 
         self._model.delete()
-        publish_activity(ActivityAction.REMOVE_AFFILIATION.value, self._model.name, self._model.business_identifier)
+        publish_activity(f'{ActivityAction.REMOVE_AFFILIATION.value}-{self._model.name}', self._model.name,
+                         self._model.business_identifier)

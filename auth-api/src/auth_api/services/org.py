@@ -391,7 +391,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.add_to_session()
 
     def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
-                   bearer_token: str = None):
+                   bearer_token: str = None, origin_url: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -430,8 +430,7 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
             has_status_changing = True
-            self._create_gov_account_task(org_model, token_info)
-
+            self._create_gov_account_task(org_model, token_info, origin_url)
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
             ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
@@ -462,7 +461,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return self
 
     @staticmethod
-    def _create_gov_account_task(org_model, token_info):
+    def _create_gov_account_task(org_model: OrgModel, token_info: dict, origin_url: str):
         # create a staff review task for this account
         task_type = TaskTypePrefix.GOVM_REVIEW.value
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
@@ -475,7 +474,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'status': TaskStatus.OPEN.value,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
-        TaskService.create_task(task_info=task_info, user=user, do_commit=False)
+        TaskService.create_task(task_info=task_info, user=user, do_commit=False, origin_url=origin_url)
 
     @staticmethod
     def delete_org(org_id, token_info: Dict = None, ):
