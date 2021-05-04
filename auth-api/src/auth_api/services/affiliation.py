@@ -168,7 +168,7 @@ class Affiliation:
         affiliation.save()
 
         entity.set_pass_code_claimed(True)
-        publish_activity(ActivityAction.CREATE_AFFILIATION.value, entity.name, entity_id, org_id)
+        publish_activity(f'{ActivityAction.CREATE_AFFILIATION.value}-{entity.name}', entity.name, entity_id, org_id)
         return Affiliation(affiliation)
 
     @staticmethod
@@ -263,7 +263,8 @@ class Affiliation:
             entity.reset_passcode(entity.business_identifier, email_addresses, token_info)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
-        publish_activity(ActivityAction.REMOVE_AFFILIATION.value, entity.name, business_identifier, org_id)
+        publish_activity(f'{ActivityAction.REMOVE_AFFILIATION.value}-{entity.name}', entity.name,
+                         business_identifier, org_id)
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
