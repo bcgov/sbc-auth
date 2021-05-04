@@ -20,23 +20,28 @@ from sentry_sdk import capture_message
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
 from auth_api.config import get_named_config
+from auth_api.models import User as UserModel
 from auth_api.services.queue_publisher import publish_response
 
 CONFIG = get_named_config()
 
 
 def publish_activity(action: str, item_name: str,
-                     item_id: str, org_id: int = None, item_type: str = 'ACCOUNT'):  # pylint:disable=unused-argument
+                     item_id: str, org_id: int = None, user_id=None):  # pylint:disable=unused-argument
     """Publish the activity asynchronously, using the given details."""
     try:
+        # find user_id if haven't passed in
+        if not user_id and g and 'jwt_oidc_token_info' in g:
+            user: UserModel = UserModel.find_by_jwt_token(token=g.jwt_oidc_token_info)
+            user_id = user.id
+
         data = {
             'action': action,
-            'itemType': item_type,
+            'itemType': 'ACCOUNT',
             'itemName': item_name,
             'itemId': item_id,
             'orgId': org_id,
-            'actor': g.jwt_oidc_token_info.get('preferred_username',
-                                               None) if g and 'jwt_oidc_token_info' in g else None,
+            'actor': user_id,
             'remoteAddr': fetch_remote_addr(),
             'createdAt': f'{datetime.now()}'
 
