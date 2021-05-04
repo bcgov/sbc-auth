@@ -238,3 +238,21 @@ export interface OrgProductsRequestBody {
 export interface OrgProductCode {
   productCode: string
 }
+
+export interface OrgProductFeeCode {
+  amount: number;
+  code: string;
+}
+
+// Named similiar to Pay-Api
+export interface AccountFee {
+  product: string;
+  applyFilingFees: boolean;
+  serviceFeeCode: string;
+}
+
+export interface AccountFeeDTO {
+  product: string;
+  applyFilingFees?: string;
+  serviceFeeCode?: string;
+}
