@@ -91,7 +91,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { GLInfo } from '@/models/Organization'
 import { mask } from 'vue-the-mask'
 import { namespace } from 'vuex-class'
@@ -144,15 +144,26 @@ export default class GLPaymentForm extends Vue {
     v => (v.length === 7) || 'Project should be 7 digits'
   ]
 
+  @Watch('currentOrgGLInfo')
+  oncurrentOrgGLInfoChange (newGlInfo) {
+    this.setGlInfo(newGlInfo)
+  }
+
   // setup basic details on mount
   public mounted () {
     const glInfo: GLInfo = (Object.keys(this.glInformation).length) ? this.glInformation : this.currentOrgGLInfo
+    this.setGlInfo(glInfo)
+  }
+  public updated () {
+    this.isGlInfoFormValid()
+  }
+
+  public setGlInfo (glInfo) {
     this.client = glInfo?.client || ''
     this.responsibilityCentre = glInfo?.responsibilityCentre || ''
     this.serviceLine = glInfo?.serviceLine || ''
     this.stob = glInfo?.stob || ''
     this.projectCode = glInfo?.projectCode || ''
-    // this.isGlInfoFormValid()
   }
 
   // setting value to store

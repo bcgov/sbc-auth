@@ -3,7 +3,7 @@
         "vault": "nats",
         "application": [
             "base",
-            "account-events-listener"
+            "account-activity-listener"
         ]
     },
     {

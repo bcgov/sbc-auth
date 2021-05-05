@@ -1,5 +1,5 @@
 // Vuetify Overrides
-@import "theme.scss";
+@import 'theme.scss';
 
 // Buttons
 .v-btn {
@@ -16,7 +16,7 @@
   }
 }
 
-// Overflow Button 
+// Overflow Button
 .v-overflow-btn .v-select__slot {
   height: auto;
 }
@@ -25,12 +25,12 @@
   margin-top: 0 !important;
 }
 
-// Updating sizing 
+// Updating sizing
 .v-btn.v-size--small {
   font-size: 0.8125rem;
 }
 
-// v-dialog 
+// v-dialog
 .v-dialog > .v-card > .v-card__title {
   padding: 1.5rem;
   letter-spacing: -0.03rem;
@@ -42,7 +42,7 @@
   border-radius: 0;
 }
 
-// v-alert 
+// v-alert
 .v-alert {
   font-size: 1rem;
 }
@@ -67,7 +67,7 @@
   padding: 1.5rem;
 }
 
-.theme--light.v-card >.v-card__text {
+.theme--light.v-card > .v-card__text {
   color: $gray9;
 }
 
@@ -84,8 +84,8 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-transition: "color 9999s ease-out, background-color 9999s ease-out";
-    -webkit-transition-delay: 9999s;
+  -webkit-transition: 'color 9999s ease-out, background-color 9999s ease-out';
+  -webkit-transition-delay: 9999s;
 }
 
 // Tab Navigation
@@ -111,4 +111,11 @@ input:-webkit-autofill:active {
 // Radio Buttons
 .v-radio {
   align-self: flex-start;
+}
+
+.bold-header {
+  span {
+    font-weight: 700;
+    color: $gray9;
+  }
 }

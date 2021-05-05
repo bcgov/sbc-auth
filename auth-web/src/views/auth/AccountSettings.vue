@@ -131,7 +131,7 @@
                 aria-label="Product and Services"
                 role="listitem"
                 :to="getUrl('product-settings')"
-                v-can:REQUEST_PRODUCT_PACKAGE.hide
+                v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-apps</v-icon>
@@ -144,9 +144,9 @@
           <v-list
             role="navigation"
             aria-label="Account Activity"
-            v-if="isPremiumAccount"
-            v-can:MANAGE_STATEMENTS.hide
+            v-if="accountActivityMenuPermission"
           >
+          <!-- add inside permission when adding menu items in this list -->
             <v-list-item-group color="primary" role="list">
               <v-subheader class="mt-2 px-0">ACCOUNT ACTIVITY</v-subheader>
               <v-list-item
@@ -156,6 +156,8 @@
                 role="listitem"
                 :to="statementsUrl"
                 data-test="statements-nav-item"
+                v-if="isPremiumAccount"
+                v-can:MANAGE_STATEMENTS.hide
               >
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-file-document-outline</v-icon>
@@ -169,11 +171,29 @@
                 role="listitem"
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
+                v-if="isPremiumAccount"
+                v-can:MANAGE_STATEMENTS.hide
               >
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-format-list-bulleted</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Transactions</v-list-item-title>
+              </v-list-item>
+
+              <v-list-item
+                dense
+                class="py-1 px-4"
+                aria-label="Activity Log"
+                role="listitem"
+                :to="activityLogUrl"
+                data-test="activity-log-nav-item"
+                v-can:VIEW_ACTIVITYLOG.hide
+              >
+
+                <v-list-item-icon>
+                  <v-icon color="link" left>mdi-history</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Activity Log</v-list-item-title>
               </v-list-item>
             </v-list-item-group>
           </v-list>
@@ -188,7 +208,7 @@
 
 <script lang="ts">
 
-import { AccountStatus, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
+import { AccountStatus, LDFlags, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
@@ -208,7 +228,8 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
       ]),
       ...mapState('org', [
         'currentOrganization',
-        'currentMembership'
+        'currentMembership',
+        'permissions'
       ])
     },
     methods: {
@@ -226,6 +247,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private isDirSearchUser: boolean = false
   private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
   private readonly pagesEnum = Pages
+  private readonly permissions!: string[]
 
   private handleBackButton (): void {
     const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
@@ -255,6 +277,9 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private get statementsUrl (): string {
     return `/account/${this.orgId}/settings/statements`
   }
+  private get activityLogUrl (): string {
+    return `/account/${this.orgId}/settings/activity-log`
+  }
 
   private get backToTab () {
     return this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED ? Pages.STAFF_DASHBOARD_SUSPENDED : Pages.STAFF_DASHBOARD
@@ -270,7 +295,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private get hideProductPackage (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.HideProductPackage) || false
   }
-
+  // show menu header if statment of activity log present
+  get accountActivityMenuPermission () {
+    return [Permission.VIEW_ACTIVITYLOG, Permission.MANAGE_STATEMENTS].some(per => this.permissions.includes(per))
+  }
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
     return this.isStaff && (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED || this.currentOrganization?.statusCode === AccountStatus.SUSPENDED)

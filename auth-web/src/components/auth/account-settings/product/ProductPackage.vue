@@ -1,5 +1,7 @@
 <template>
-  <v-container class="view-container">
+  <v-container class="view-container"
+  v-can:EDIT_REQUEST_PRODUCT_PACKAGE.disable.card
+  >
 
     <div class="view-header flex-column mb-6">
       <h2 class="view-header__title" data-test="account-settings-title">

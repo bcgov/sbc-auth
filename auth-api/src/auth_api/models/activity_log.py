@@ -24,7 +24,7 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     __tablename__ = 'activity_logs'
 
     id = Column(Integer, primary_key=True)
-    actor = Column(String(250))  # who did the activity
+    actor_id = Column(Integer, nullable=True, index=False)  # who did the activity.Refers to user id in user table.
     action = Column(String(250), index=True)  # Reset Passcode , Remove Affiliation etc
     item_type = Column(String(250), index=True)  # Account ,Business, Names etc.. Not used now ,defaulting to account
     item_name = Column(String(250), index=True)  # UI needs to display this ;mostly org name/business name
@@ -38,7 +38,10 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
                                         action: str,
                                         page: int, limit: int):
         """Fetch all activity logs."""
-        query = db.session.query(ActivityLog).filter_by(org_id=org_id)
+        from . import User  # pylint:disable=cyclic-import, import-outside-toplevel
+        query = db.session.query(ActivityLog, User). \
+            outerjoin(User, User.id == ActivityLog.actor_id). \
+            filter(ActivityLog.org_id == org_id)
 
         if item_name:
             query = query.filter(ActivityLog.item_name == item_name)
