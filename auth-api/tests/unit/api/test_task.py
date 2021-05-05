@@ -123,14 +123,19 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     # Post user, org and product subscription
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-    dictionary = json.loads(rv.data)
+    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user = factory_user_model_with_contact(user_with_token)
+
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
+
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id,
+                                token_info=TestJwtClaims.public_bceid_user)
+    org_dict = org.as_dict()
 
     product_which_doesnt_need_approval = TestOrgProductsInfo.org_products1
-    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+    rv_products = client.post(f"/api/v1/orgs/{org_dict.get('id')}/products",
                               data=json.dumps(product_which_doesnt_need_approval),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
@@ -139,10 +144,10 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
     tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
                                     limit=10)
-    assert len(tasks['tasks']) == 0
+    assert len(tasks['tasks']) == 1
 
     product_which_needs_approval = TestOrgProductsInfo.org_products_vs
-    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+    rv_products = client.post(f"/api/v1/orgs/{org_dict.get('id')}/products",
                               data=json.dumps(product_which_needs_approval),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
@@ -152,7 +157,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
-    fetched_task = fetched_tasks[0]
+    fetched_task = fetched_tasks[1]
     assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value
 
     org_products = json.loads(rv_products.data)
@@ -160,7 +165,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     # Assert task name
     product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
-    org_name = dictionary['name']
+    org_name = org_dict['name']
     assert fetched_task['name'] == org_name
     assert fetched_task['type'] == product.description
 

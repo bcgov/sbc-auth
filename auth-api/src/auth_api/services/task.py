@@ -117,7 +117,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
-            self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id)
+            account_id = task_model.account_id
+            self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id,
+                                              org_id=account_id)
 
         current_app.logger.debug('>update_task_relationship ')
 
@@ -135,13 +137,14 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_org ')
 
     @staticmethod
-    def _update_product_subscription(is_approved: bool, product_subscription_id: int):
+    def _update_product_subscription(is_approved: bool, product_subscription_id: int, org_id: int):
         """Review Product Subscription."""
         current_app.logger.debug('<_update_product_subscription ')
         from auth_api.services import \
             Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
         # Approve/Reject Product subscription
-        ProductService.update_product_subscription(product_subscription_id, is_approved, is_new_transaction=False)
+        ProductService.update_product_subscription(product_subscription_id=product_subscription_id,
+                                                   is_approved=is_approved, org_id=org_id, is_new_transaction=False)
         current_app.logger.debug('>_update_product_subscription ')
 
     @staticmethod

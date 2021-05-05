@@ -38,7 +38,6 @@ from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
-from .notification import send_email
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
 
@@ -98,13 +97,19 @@ class Invitation:
         invitation.token = confirmation_token
         invitation.login_source = mandatory_login_source
         invitation.save()
-        Invitation.send_invitation(invitation, org_name, user.as_dict(),
+        Invitation.send_invitation(invitation, org_name, org.id, user.as_dict(),
                                    '{}/{}'.format(invitation_origin, context_path), mandatory_login_source,
                                    org_status=org.status_code)
         # notify admin if staff adds team members
         is_staff_access = token_info and 'staff' in token_info.get('realm_access', {}).get('roles', None)
         if is_staff_access and invitation_type == InvitationType.STANDARD.value:
-            publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
+            try:
+                current_app.logger.debug('<send_team_member_invitation_notification')
+                publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
+                current_app.logger.debug('send_team_member_invitation_notification>')
+            except:  # noqa=B901
+                current_app.logger.error('<send_team_member_invitation_notification failed')
+                raise BusinessException(Error.FAILED_NOTIFICATION, None)
         return Invitation(invitation)
 
     @staticmethod
@@ -130,7 +135,7 @@ class Invitation:
         self._model.token = confirmation_token
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
-        Invitation.send_invitation(updated_invitation, org_name, user.as_dict(),
+        Invitation.send_invitation(updated_invitation, org_name, self._model.membership[0].org_id, user.as_dict(),
                                    '{}/{}'.format(invitation_origin, context_path), self._model.login_source)
         return Invitation(updated_invitation)
 
@@ -193,48 +198,52 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def send_admin_notification(user, url, recipient_email_list, org_name):
+    def send_admin_notification(user, url, recipient_email_list, org_name, org_id):
         """Send the admin email notification."""
-        subject = '[BC Registries and Online Services] {} {} has responded for the invitation to join the account {}'. \
-            format(user['firstname'], user['firstname'], org_name)
-        sender = CONFIG.MAIL_FROM_ID
+        data = {
+            'accountId': org_id,
+            'emailAddresses': recipient_email_list,
+            'contextUrl': url,
+            'userFirstName': user['firstname'],
+            'userLastName': user['lastname'],
+            'orgName': org_name
+        }
         try:
-            template = ENV.get_template('email_templates/admin_notification_email.html')
-        except Exception:  # NOQA # pylint: disable=broad-except
-            raise BusinessException(Error.FAILED_INVITATION, None)
-
-        sent_response = send_email(subject, sender, recipient_email_list,
-                                   template.render(url=url, user=user, org_name=org_name,
-                                                   logo_url=f'{url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
-        if not sent_response:
-            # invitation.invitation_status_code = 'FAILED'
-            # invitation.save()
-            raise BusinessException(Error.FAILED_INVITATION, None)
+            current_app.logger.debug('<send_admin_notification')
+            publish_to_mailer(notification_type='adminNotification', org_id=org_id, data=data)
+            current_app.logger.debug('send_admin_notification>')
+        except:  # noqa=B901
+            current_app.logger.error('<send_admin_notification failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None)
 
     @staticmethod
-    def send_invitation(invitation: InvitationModel, org_name, user,  # pylint: disable=too-many-arguments
+    def send_invitation(invitation: InvitationModel, org_name, org_id, user,  # pylint: disable=too-many-arguments
                         app_url, login_source, org_status=None):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
         mail_configs = Invitation._get_invitation_configs(org_name, login_source, org_status)
-        subject = mail_configs.get('subject').format(user['firstname'], user['lastname'])
-        sender = CONFIG.MAIL_FROM_ID
         recipient = invitation.recipient_email
         token_confirm_url = '{}/{}/{}'.format(app_url, mail_configs.get('token_confirm_path'), invitation.token)
-        template = ENV.get_template(f"email_templates/{mail_configs.get('template_name')}.html")
         role = invitation.membership[0].membership_type.display_name
-        sent_response = send_email(subject, sender, recipient,
-                                   template.render(invitation=invitation,
-                                                   url=token_confirm_url,
-                                                   user=user,
-                                                   role=role,
-                                                   org_name=org_name,
-                                                   logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
-        if not sent_response:
+        data = {
+            'accountId': org_id,
+            'emailAddresses': recipient,
+            'contextUrl': token_confirm_url,
+            'userFirstName': user['firstname'],
+            'userLastName': user['lastname'],
+            'orgName': org_name,
+            'role': role
+        }
+
+        try:
+            publish_to_mailer(notification_type=mail_configs.get('notification_type'), org_id=org_id, data=data)
+        except BusinessException as exception:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()
             current_app.logger.debug('>send_invitation failed')
+            current_app.logger.debug(exception)
             raise BusinessException(Error.FAILED_INVITATION, None)
+
         current_app.logger.debug('>send_invitation')
 
     @staticmethod
@@ -250,29 +259,23 @@ class Invitation:
 
         govm_setup_configs = {
             'token_confirm_path': token_confirm_path,
-            'template_name': 'govm_business_invitation_email',
-            'subject': '[BC Registries and Online Services] You’ve been invited to create a BC Registries account',
+            'notification_type': 'govmBusinessInvitation',
         }
         govm_member_configs = {
             'token_confirm_path': token_confirm_path,
-            'template_name': 'govm_member_invitation_email',
-            'subject': '[BC Registries and Online Services] You have been added as a team member',
+            'notification_type': 'govmMemberInvitation',
         }
         director_search_configs = {
             'token_confirm_path': token_confirm_path,
-            'template_name': 'dirsearch_business_invitation_email',
-            'subject': 'Your BC Registries Account has been created',
+            'notification_type': 'dirsearchBusinessInvitation',
         }
         bceid_configs = {
             'token_confirm_path': token_confirm_path,
-            'template_name': 'business_invitation_email_for_bceid',
-            'subject': '[BC Registries and Online Services] {} {} has invited you to join an account',
+            'notification_type': 'businessInvitationForBceid',
         }
         default_configs = {
             'token_confirm_path': token_confirm_path,
-            'template_name': 'business_invitation_email',
-            'subject': '[BC Registries and Online Services] {} {} has invited you to join an account',
-
+            'notification_type': 'businessInvitation',
         }
         mail_configs = {
             'BCROS': director_search_configs,
@@ -334,7 +337,8 @@ class Invitation:
         if admin_emails != '':
             Invitation.send_admin_notification(user.as_dict(),
                                                '{}/{}'.format(invitation_origin, context_path),
-                                               admin_emails, invitation.membership[0].org.name)
+                                               admin_emails, invitation.membership[0].org.name,
+                                               invitation.membership[0].org.id)
             current_app.logger.debug('>notify_admin')
 
         return Invitation(invitation)
