@@ -35,6 +35,22 @@ class MessageType(Enum):
     PAYMENT_PENDING = 'bc.registry.payment.ob.outstandingInvoice'
     EJV_FAILED = 'bc.registry.payment.ejvFailed'
     RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
+    ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
+    BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
+    BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitationForBceid'
+    DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
+    GOVM_BUSINESS_INVITATION = 'bc.registry.auth.govmBusinessInvitation'
+    GOVM_MEMBER_INVITATION = 'bc.registry.auth.govmMemberInvitation'
+    MEMBERSHIP_APPROVED_NOTIFICATION = 'bc.registry.auth.membershipApprovedNotification'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = 'bc.registry.auth.membershipApprovedNotificationForBceid'
+    NONBCSC_ORG_APPROVED_NOTIFICATION = 'bc.registry.auth.nonbcscOrgApprovedNotification'
+    NONBCSC_ORG_REJECTED_NOTIFICATION = 'bc.registry.auth.nonbcscOrgRejectedNotification'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'bc.registry.auth.otpAuthenticatorResetNotification'
+    ROLE_CHANGED_NOTIFICATION = 'bc.registry.auth.roleChangedNotification'
+    STAFF_REVIEW_ACCOUNT = 'bc.registry.auth.staffReviewAccount'
+    GOVM_APPROVED_NOTIFICATION = 'bc.registry.auth.govmApprovedNotification'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
+    PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
 
 
 class SubjectType(Enum):
@@ -51,6 +67,24 @@ class SubjectType(Enum):
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
     RESET_PASSCODE = 'BC Registries Account Passcode Reset'
+    ADMIN_NOTIFICATION = '[BC Registries and Online Services] Notification from Business Registry'
+    BUSINESS_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at Business Registry'
+    BUSINESS_INVITATION_FOR_BCEID = '[BC Registries and Online Services] Invitation to Join an Account at ' \
+                                    'Business Registry'
+    DIRSEARCH_BUSINESS_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at ' \
+                                    'Business Registry'
+    GOVM_BUSINESS_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at Business Registry'
+    GOVM_MEMBER_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at Business Registry'
+    MEMBERSHIP_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Membership Has Been Approved'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[BC Registries and Online Services] Your Membership Has Been Approved'
+    NONBCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Membership Has Been Approved'
+    NONBCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] Your Membership Has Been Rejected'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = '[BC Registries and Online Services] Your Authenticator Has Been Reset'
+    ROLE_CHANGED_NOTIFICATION = '[BC Registries and Online Services] Your Role Has Been Changed'
+    STAFF_REVIEW_ACCOUNT = '[BC Registries and Online Services] Notification from Business Registry'
+    GOVM_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your BC Registries Account Has Been Approved'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request Has Been Approved'
+    PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request Has Been Rejected'
 
 
 class TemplateType(Enum):
@@ -69,6 +103,22 @@ class TemplateType(Enum):
     PAYMENT_PENDING_TEMPLATE_NAME = 'paymanet_pending'
     EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'
     RESET_PASSCODE_TEMPLATE_NAME = 'reset_passcode'
+    ADMIN_NOTIFICATION_TEMPLATE_NAME = 'admin_notification_email'
+    BUSINESS_INVITATION_TEMPLATE_NAME = 'business_invitation_email'
+    BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME = 'business_invitation_email_for_bceid'
+    DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME = 'dirsearch_business_invitation_email'
+    GOVM_BUSINESS_INVITATION_TEMPLATE_NAME = 'govm_business_invitation_email'
+    GOVM_MEMBER_INVITATION_TEMPLATE_NAME = 'govm_member_invitation_email'
+    MEMBERSHIP_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'membership_approved_notification_email'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID_TEMPLATE_NAME = 'membership_approved_notification_email_for_bceid'
+    NONBCSC_ORG_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_approved_notification_email'
+    NONBCSC_ORG_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'nonbcsc_org_rejected_notification_email'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION_TEMPLATE_NAME = 'otp_authenticator_reset_notification_email'
+    ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME = 'role_changed_notification_email'
+    STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = 'staff_review_account_email'
+    GOVM_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'govm_approved_notification'
+    PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
+    PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
 
 
 class Constants(Enum):

@@ -20,7 +20,6 @@ from unittest.mock import patch, Mock
 import pytest
 from requests import Response
 
-import auth_api.services.notification as notification
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
@@ -911,18 +910,3 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
         mock_notify.assert_called()
-
-
-def test_send_staff_review_account_reminder_exception(session,
-                                                      notify_org_mock,
-                                                      keycloak_mock):  # pylint:disable=unused-argument
-    """Send a reminder with exception."""
-    user = factory_user_model_with_contact(TestUserInfo.user_test)
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
-    org_dictionary = org.as_dict()
-
-    with patch.object(notification, 'send_email', return_value=False):
-        with pytest.raises(BusinessException) as exception:
-            OrgService.send_staff_review_account_reminder(user, org_dictionary['id'], 'localhost')
-
-    assert exception.value.code == Error.FAILED_NOTIFICATION.name
