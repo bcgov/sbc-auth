@@ -28,7 +28,7 @@ def upgrade():
                               column('membership_type_code', sa.String(length=15)),
                               column('org_status_code', sa.String(length=25)),
                               column('actions', sa.String(length=100)))
-    op.execute('delete from permissions where action="request_product_package"')
+    op.execute('delete from permissions where actions="request_product_package"')
     conn = op.get_bind()
     res = conn.execute(
         f"select max(id) from permissions;")
