@@ -94,7 +94,7 @@ class SubjectType(Enum):
 
 class TitleType(Enum):
     """Event Title Types."""
-    
+
     ADMIN_NOTIFICATION = 'Notification from Business Registry'
     BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
     BUSINESS_INVITATION_FOR_BCEID = 'Invitation to Join an Account at Business Registry'
