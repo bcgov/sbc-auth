@@ -32,7 +32,9 @@
                 :is="component.component"
                 v-bind="component.props"
                 v-on="component.events"
+                :ref="component.ref"
               />
+              <!-- :ref="component.ref" -->
               <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
             </template>
             <template v-if="canSelect" >
@@ -145,6 +147,7 @@ export default class ReviewAccountView extends Vue {
   @orgModule.Action('getOrgProducts') public getOrgProducts!:(accountId: number) =>Promise<OrgProduct[]>
   @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
   @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
+  @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
 
   private staffStore = getModule(StaffModuleStore, this.$store)
   public isLoading = true
@@ -161,6 +164,7 @@ export default class ReviewAccountView extends Vue {
 
   $refs: {
     accessRequest: AccessRequestModal,
+    productFeeRef: HTMLFormElement
   }
 
   private get canSelect (): boolean {
@@ -205,7 +209,6 @@ export default class ReviewAccountView extends Vue {
 
   private async mounted () {
     // need to change call task api before
-
     try {
       this.task = await this.getTaskById(this.orgId)
       this.taskRelationshipType = this.task.relationshipType
@@ -219,6 +222,8 @@ export default class ReviewAccountView extends Vue {
         // For rejected accounts view
         if (!this.canSelect) {
           await this.syncCurrentAccountFees(accountId)
+        } else {
+          this.resetCurrentAccountFees()
         }
       }
     } catch (ex) {
@@ -236,7 +241,11 @@ export default class ReviewAccountView extends Vue {
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {
     if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFormValid) {
-      return
+      // validate form before showing pop-up
+      (this.$refs.productFeeRef[0] as any).validateNow()
+      if (!this.productFeeFormValid) {
+        return false
+      }
     }
     this.isConfirmationModal = isConfirmationModal
     this.isRejectModal = isRejectModal
@@ -252,6 +261,7 @@ export default class ReviewAccountView extends Vue {
 
   private async saveSelection (): Promise<void> {
     this.isSaving = true
+
     try {
       if (!this.isRejectModal) {
         await this.approveAccountUnderReview(this.task)
@@ -279,7 +289,7 @@ export default class ReviewAccountView extends Vue {
     this.productFeeFormValid = isFormValid
   }
 
-  formattedComponent (tabNumber, id, component, props, event = null) {
+  formattedComponent (tabNumber, id, component, props, event = null, ref = null) {
     return {
       id: id,
       component: component,
@@ -287,7 +297,8 @@ export default class ReviewAccountView extends Vue {
         tabNumber: tabNumber,
         ...props
       },
-      events: { ...event }
+      events: { ...event },
+      ref: ref
     }
   }
 
@@ -374,7 +385,8 @@ export default class ReviewAccountView extends Vue {
         title: 'Product Fee',
         canSelect: this.canSelect
       },
-      { 'emit-product-fee-change': this.productFeeChange }
+      { 'emit-product-fee-change': this.productFeeChange },
+      'productFeeRef'
     )
   }
 }
