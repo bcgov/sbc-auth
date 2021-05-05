@@ -67,7 +67,14 @@ def factory_entity_service(entity_info: dict = TestEntityInfo.entity1):
 
 def factory_user_model(user_info: dict = TestUserInfo.user1):
     """Produce a user model."""
-    user_type = Role.ANONYMOUS_USER.name if user_info.get('access_type', None) == AccessType.ANONYMOUS.value else None
+    roles = user_info.get('roles', None)
+    if user_info.get('access_type', None) == AccessType.ANONYMOUS.value:
+        user_type = Role.ANONYMOUS_USER.name
+    elif Role.STAFF.value in roles:
+        user_type = Role.STAFF.name
+    else:
+        user_type = None
+
     user = UserModel(username=user_info['username'],
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
@@ -289,7 +296,7 @@ def factory_activity_log_model(actor: str, action: str, item_type: str = 'Accoun
                                remote_addr=''):
     """Create a Log Model."""
     activity_log = ActivityLogModel(
-        actor=actor,
+        actor_id=actor,
         action=action,
         item_name=item_name,
         item_id=item_id,

@@ -29,6 +29,7 @@ from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode, AccessType
+from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus
 from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
@@ -666,6 +667,15 @@ def test_upgrade_org(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     assert dictionary['id'] == org_id
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == premium_info['name']
+
+    rv = client.get('/api/v1/orgs/{}/products?includeInternal=false'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    has_vs_access: bool = False
+    for product in json.loads(rv.data):
+        if product.get('code') == ProductCode.VS.value:
+            has_vs_access = product.get('subscriptionStatus') == ProductSubscriptionStatus.ACTIVE.value
+    assert has_vs_access
 
 
 def test_upgrade_downgrade_reattach_bcol_todifferent_org(client, jwt, session,
@@ -1387,6 +1397,17 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     assert schema_utils.validate(rv.json, 'org_response')[0]
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
     assert rv.json.get('name') == TestOrgInfo.bcol_linked()['name']
+
+    # assert user have access to VS, as this bcol linked user have VS access
+    org_id = rv.json.get('id')
+    rv = client.get('/api/v1/orgs/{}/products?includeInternal=false'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    has_vs_access: bool = False
+    for product in json.loads(rv.data):
+        if product.get('code') == ProductCode.VS.value:
+            has_vs_access = product.get('subscriptionStatus') == ProductSubscriptionStatus.ACTIVE.value
+    assert has_vs_access
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
