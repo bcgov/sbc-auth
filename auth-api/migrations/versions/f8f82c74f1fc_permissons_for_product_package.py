@@ -53,7 +53,7 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('delete from permissions where action in ("edit_request_product_package", "view_request_product_package")')
+    op.execute('delete from permissions where actions in ("edit_request_product_package", "view_request_product_package")')
     # ### end Alembic commands ###
     permissions_table = table('permissions',
                               column('id', sa.Integer()),
