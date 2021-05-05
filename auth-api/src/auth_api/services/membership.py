@@ -168,9 +168,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             # TODO how to check properly if user is bceid user
             is_bceid_user = self._model.user.username.find('@bceid') > 0
             if is_bceid_user:
-                notification_type_for_mailer = 'membershipApprovedNotification'
-            else:
                 notification_type_for_mailer = 'membershipApprovedNotificationForBceid'
+            else:
+                notification_type_for_mailer = 'membershipApprovedNotification'
 
             data = {
                 'accountId': org_id,

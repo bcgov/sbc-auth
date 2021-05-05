@@ -78,7 +78,7 @@ class SubjectType(Enum):
                                'You’ve been invited to create a BC Registries account'
     GOVM_MEMBER_INVITATION = '[BC Registries and Online Services] You have been added as a team member'
     MEMBERSHIP_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Welcome to the account {account_name}'
-    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[BC Registries and Online Services] Your Membership Has Been Approved'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[BC Registries and Online Services] Welcome to the account {account_name}'
     NONBCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] APPROVED Business Registry Account'
     NONBCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                         'Business Registry Account cannot be approved'
