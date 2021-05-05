@@ -152,7 +152,9 @@ export default class CommonUtils {
       Permission.MAKE_PAYMENT,
       Permission.GENERATE_INVOICE,
       Permission.VIEW_ACTIVITYLOG,
-      Permission.VIEW_ADDRESS
+      Permission.VIEW_ADDRESS,
+      Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
+      Permission.EDIT_REQUEST_PRODUCT_PACKAGE
     ]
   }
   static getViewOnlyPermissions (): string[] {
@@ -162,7 +164,8 @@ export default class CommonUtils {
       Permission.VIEW_ADMIN_CONTACT,
       Permission.RESET_OTP,
       Permission.VIEW_PAYMENT_METHODS,
-      Permission.VIEW_AUTH_OPTIONS
+      Permission.VIEW_AUTH_OPTIONS,
+      Permission.VIEW_REQUEST_PRODUCT_PACKAGE
     ]
   }
   // for converting address object of sbc-auth to as needed for BaseAddress component

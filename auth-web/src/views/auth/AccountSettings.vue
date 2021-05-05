@@ -131,7 +131,7 @@
                 aria-label="Product and Services"
                 role="listitem"
                 :to="getUrl('product-settings')"
-                v-can:REQUEST_PRODUCT_PACKAGE.hide
+                v-can:VIEW_REQUEST_PRODUCT_PACKAGE.hide
                 data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-apps</v-icon>
