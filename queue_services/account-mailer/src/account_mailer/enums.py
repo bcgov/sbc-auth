@@ -67,24 +67,49 @@ class SubjectType(Enum):
     PAYMENT_PENDING = '[BC Registries and Online Services] Payment is now due for pending transaction on your account'
     EJV_FAILED = 'GL disbursement failure for EJV'
     RESET_PASSCODE = 'BC Registries Account Passcode Reset'
-    ADMIN_NOTIFICATION = '[BC Registries and Online Services] Notification from Business Registry'
-    BUSINESS_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at Business Registry'
-    BUSINESS_INVITATION_FOR_BCEID = '[BC Registries and Online Services] Invitation to Join an Account at ' \
-                                    'Business Registry'
-    DIRSEARCH_BUSINESS_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at ' \
-                                    'Business Registry'
-    GOVM_BUSINESS_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at Business Registry'
-    GOVM_MEMBER_INVITATION = '[BC Registries and Online Services] Invitation to Join an Account at Business Registry'
-    MEMBERSHIP_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Membership Has Been Approved'
+    ADMIN_NOTIFICATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
+                         'has responded for the invitation to join the account {account_name}'
+    BUSINESS_INVITATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
+                          'has invited you to join an account'
+    BUSINESS_INVITATION_FOR_BCEID = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
+                                    'has invited you to join an account'
+    DIRSEARCH_BUSINESS_INVITATION = 'Your BC Registries Account has been created'
+    GOVM_BUSINESS_INVITATION = '[BC Registries and Online Services] ' \
+                               'You’ve been invited to create a BC Registries account'
+    GOVM_MEMBER_INVITATION = '[BC Registries and Online Services] You have been added as a team member'
+    MEMBERSHIP_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Welcome to the account {account_name}'
     MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = '[BC Registries and Online Services] Your Membership Has Been Approved'
-    NONBCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Membership Has Been Approved'
-    NONBCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] Your Membership Has Been Rejected'
-    OTP_AUTHENTICATOR_RESET_NOTIFICATION = '[BC Registries and Online Services] Your Authenticator Has Been Reset'
+    NONBCSC_ORG_APPROVED_NOTIFICATION = '[BC Registries and Online Services] APPROVED Business Registry Account'
+    NONBCSC_ORG_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+                                        'Business Registry Account cannot be approved'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = '[BC Registries and Online Services] Authenticator Has Been Reset'
     ROLE_CHANGED_NOTIFICATION = '[BC Registries and Online Services] Your Role Has Been Changed'
-    STAFF_REVIEW_ACCOUNT = '[BC Registries and Online Services] Notification from Business Registry'
+    STAFF_REVIEW_ACCOUNT = '[BC Registries and Online Services] An out of province account needs to be approved.'
     GOVM_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your BC Registries Account Has Been Approved'
-    PROD_PACKAGE_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request Has Been Approved'
-    PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request Has Been Rejected'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request ' \
+                                         '{product_name} Has Been Approved'
+    PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+                                         'Your Product Request {product_name} Has Been Rejected'
+
+
+class TitleType(Enum):
+    """Event Title Types."""
+    ADMIN_NOTIFICATION = 'Notification from Business Registry'
+    BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
+    BUSINESS_INVITATION_FOR_BCEID = 'Invitation to Join an Account at Business Registry'
+    DIRSEARCH_BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
+    GOVM_BUSINESS_INVITATION = 'Invitation to Join an Account at Business Registry'
+    GOVM_MEMBER_INVITATION = 'Invitation to Join an Account at Business Registry'
+    MEMBERSHIP_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
+    MEMBERSHIP_APPROVED_NOTIFICATION_FOR_BCEID = 'Your Membership Has Been Approved'
+    NONBCSC_ORG_APPROVED_NOTIFICATION = 'Your Membership Has Been Approved'
+    NONBCSC_ORG_REJECTED_NOTIFICATION = 'Your Membership Has Been Rejected'
+    OTP_AUTHENTICATOR_RESET_NOTIFICATION = 'Your Authenticator Has Been Reset'
+    ROLE_CHANGED_NOTIFICATION = 'Your Role Has Been Changed'
+    STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
+    GOVM_APPROVED_NOTIFICATION = 'Your BC Registries Account Has Been Approved'
+    PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
+    PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
 
 
 class TemplateType(Enum):
