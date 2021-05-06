@@ -57,6 +57,7 @@
 import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import { productStatus } from '@/util/constants'
 
 const orgModule = namespace('org')
 
@@ -91,10 +92,12 @@ export default class ProductFee extends Vue {
       if (!this.accountFees.length) {
         // prepopulate the array with the subscribed products
         this.orgProducts.forEach((orgProduct: OrgProduct) => {
-          const accountFeeDTO: AccountFeeDTO = {
-            product: orgProduct.code
+          if (orgProduct.subscriptionStatus === productStatus.ACTIVE) {
+            const accountFeeDTO: AccountFeeDTO = {
+              product: orgProduct.code
+            }
+            this.accountFeesDTO.push(accountFeeDTO)
           }
-          this.accountFeesDTO.push(accountFeeDTO)
         })
       } else {
         // Map account fees details to accountFeesDTO so as to display in v-select
@@ -105,8 +108,10 @@ export default class ProductFee extends Vue {
       }
     }
 
-    private updated () {
-      this.$refs.productFeeForm?.validate()
+    public validateNow () {
+      const isFormValid = this.$refs.productFeeForm?.validate()
+
+      this.$emit('emit-product-fee-change', isFormValid)
     }
 
     private displayProductName (productCode: string): string {
@@ -127,23 +132,19 @@ export default class ProductFee extends Vue {
 
     private selectChange (): void {
       // Wait till next DOM render to emit event so that we capture form validation
-      this.$nextTick(() => {
-        const isFormValid = this.$refs.productFeeForm?.validate()
-        if (isFormValid) {
-          // Map back to AccountFees to store
-          const accountFees: AccountFee[] = []
-          this.accountFeesDTO.forEach((accountFeeDTO: AccountFeeDTO) => {
-            const accountFee: AccountFee = {
-              product: accountFeeDTO.product,
-              applyFilingFees: accountFeeDTO.applyFilingFees === 'true',
-              serviceFeeCode: accountFeeDTO.serviceFeeCode
-            }
-            accountFees.push(accountFee)
-          })
-          this.setCurrentAccountFees(accountFees)
+      // this.$nextTick(() => {
+      // Map back to AccountFees to store
+      const accountFees: AccountFee[] = []
+      this.accountFeesDTO.forEach((accountFeeDTO: AccountFeeDTO) => {
+        const accountFee: AccountFee = {
+          product: accountFeeDTO.product,
+          applyFilingFees: accountFeeDTO.applyFilingFees === 'true',
+          serviceFeeCode: accountFeeDTO.serviceFeeCode
         }
-        this.$emit('emit-product-fee-change', isFormValid)
+        accountFees.push(accountFee)
       })
+      this.setCurrentAccountFees(accountFees)
+      // })
     }
 
     private getIndexedTag (tag, index): string {

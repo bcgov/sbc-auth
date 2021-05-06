@@ -35,7 +35,6 @@ from auth_api.config import get_named_config
 
 from .authorization import check_auth
 from .keycloak import KeycloakService
-from .notification import send_email
 from .org import Org as OrgService
 from .user import User as UserService
 from ..utils.account_mailer import publish_to_mailer
@@ -149,36 +148,40 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         """Send member notification."""
         current_app.logger.debug(f'<send {notification_type} notification')
         org_name = self._model.org.name
-        template_name = ''
-        params = {}
+        org_id = self._model.org.id
+        recipient = self._model.user.contacts[0].contact.email
+        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
+        app_url = '{}/{}'.format(origin_url, context_path)
+        notification_type_for_mailer = ''
+        data = {}
         if notification_type == NotificationType.ROLE_CHANGED.value:
-            subject = '[BC Registries and Online Services] Your Role has been changed'
-            template_name = 'role_changed_notification_email.html'
-            params = {'org_name': org_name, 'role': self._model.membership_type.code,
-                      'label': self._model.membership_type.label}
+            notification_type_for_mailer = 'roleChangedNotification'
+            data = {
+                'accountId': org_id,
+                'emailAddresses': recipient,
+                'contextUrl': app_url,
+                'orgName': org_name,
+                'role': self._model.membership_type.code,
+                'label': self._model.membership_type.label
+            }
         elif notification_type == NotificationType.MEMBERSHIP_APPROVED.value:
-            subject = '[BC Registries and Online Services] Welcome to the account {}'. \
-                format(org_name)
             # TODO how to check properly if user is bceid user
             is_bceid_user = self._model.user.username.find('@bceid') > 0
             if is_bceid_user:
-                template_name = 'membership_approved_notification_email_for_bceid.html'
+                notification_type_for_mailer = 'membershipApprovedNotificationForBceid'
             else:
-                template_name = 'membership_approved_notification_email.html'
-            params = {'org_name': org_name}
-        sender = CONFIG.MAIL_FROM_ID
-        template = ENV.get_template(f'email_templates/{template_name}')
-        context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
-        app_url = '{}/{}'.format(origin_url, context_path)
+                notification_type_for_mailer = 'membershipApprovedNotification'
+
+            data = {
+                'accountId': org_id,
+                'emailAddresses': recipient,
+                'contextUrl': app_url,
+                'orgName': org_name
+            }
 
         try:
-            sent_response = send_email(subject, sender, self._model.user.contacts[0].contact.email,
-                                       template.render(url=app_url, params=params,
-                                                       logo_url=f'{app_url}/{CONFIG.REGISTRIES_LOGO_IMAGE_NAME}'))
+            publish_to_mailer(notification_type_for_mailer, org_id=org_id, data=data)
             current_app.logger.debug('<send_approval_notification_to_member')
-            if not sent_response:
-                current_app.logger.error('<send_notification_to_member failed')
-                raise BusinessException(Error.FAILED_NOTIFICATION, None)
         except:  # noqa=B901
             current_app.logger.error('<send_notification_to_member failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None)
