@@ -12,11 +12,11 @@
       </v-row>
       <v-row>
         <v-col class="cols-12 col-sm-3 py-2">Email Address</v-col>
-        <v-col class="py-2">{{ accountUnderReviewAdminContact.email }}</v-col>
+        <v-col class="py-2">{{ accountUnderReviewAdminContact && accountUnderReviewAdminContact.email }}</v-col>
       </v-row>
       <v-row>
         <v-col class="cols-12 col-sm-3 py-2">Phone Number</v-col>
-        <v-col class="py-2">{{ accountUnderReviewAdminContact.phone }}</v-col>
+        <v-col class="py-2">{{ accountUnderReviewAdminContact && accountUnderReviewAdminContact.phone }}</v-col>
       </v-row>
     </section>
 </template>
@@ -31,6 +31,6 @@ export default class AccountAdministrator extends Vue {
   @Prop({ default: null }) private tabNumber: number
   @Prop({ default: 'Account Administrator' }) private title: string
   @Prop({ default: {} }) accountUnderReviewAdmin: User
-  @Prop({ default: {} }) accountUnderReviewAdminContact: Contact
+  @Prop() accountUnderReviewAdminContact: Contact
 }
 </script>
