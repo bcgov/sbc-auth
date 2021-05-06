@@ -265,6 +265,11 @@ export default class OrgModule extends VuexModule {
     this.currentAccountFees = accountFee
   }
 
+  @Mutation
+  public resetCurrentAccountFees () {
+    this.currentAccountFees = []
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
