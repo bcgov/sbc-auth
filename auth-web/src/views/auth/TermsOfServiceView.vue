@@ -106,6 +106,13 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       const userTerms = await this.saveUserTerms()
       if (userTerms?.userTerms?.isTermsOfUseAccepted) {
         await this.syncUser()
+        // if this IDIR GOVM , user take him to accept invite itself.
+        // IDIR user doesnt have user profile.so next page mixin will yield wrong navigation if used here.
+        const isGovmUser = this.currentUser?.loginSource === LoginSource.IDIR
+        if (isGovmUser && this.token) {
+          this.$router.push(`/confirmtoken/${this.token}/${LoginSource.IDIR}`)
+          return
+        }
         // if there is a token in the url , that means user is in the invitation flow
         // so after TOS , dont create accont , rather let him create profile if he is not bcros user
         const isBcrosUser = this.currentUser?.loginSource === LoginSource.BCROS
