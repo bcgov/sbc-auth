@@ -832,7 +832,7 @@ class Org:  # pylint: disable=too-many-public-methods
         admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
         if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
-        else:
+        elif org.access_type == AccessType.GOVM.value:
             Org.send_approved_govm_notification(admin_email, org.id, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
