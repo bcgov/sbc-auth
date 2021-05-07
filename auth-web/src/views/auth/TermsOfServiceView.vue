@@ -108,7 +108,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
         await this.syncUser()
         // if this IDIR GOVM , user take him to accept invite itself.
         // IDIR user doesnt have user profile.so next page mixin will yield wrong navigation if used here.
-        const isGovmUser = this.currentUser?.loginSource === LoginSource.IDIR
+        const isGovmUser = this.currentUser?.loginSource.toUpperCase() === LoginSource.IDIR.toUpperCase()
         if (isGovmUser && this.token) {
           this.$router.push(`/confirmtoken/${this.token}/${LoginSource.IDIR}`)
           return

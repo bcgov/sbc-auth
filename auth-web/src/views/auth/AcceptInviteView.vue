@@ -50,7 +50,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   }
 
   private isProfileNeeded (): boolean {
-    return this.loginSource !== LoginSource.IDIR
+    return this.loginSource.toUpperCase() !== LoginSource.IDIR.toUpperCase()
   }
 
   /**
