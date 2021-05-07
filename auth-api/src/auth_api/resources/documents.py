@@ -23,7 +23,7 @@ from auth_api.auth import jwt as _jwt
 from auth_api.services import Documents as DocumentService
 from auth_api.services.minio import MinioService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, DocumentType
+from auth_api.utils.enums import AccessType, DocumentType, LoginSource
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('documents', description='Endpoints for document management')
@@ -46,6 +46,9 @@ class Documents(Resource):
                 token = g.jwt_oidc_token_info
                 if token.get('accessType', None) == AccessType.ANONYMOUS.value:
                     document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value
+                elif token.get('loginSource',
+                               None) == LoginSource.STAFF.value:  # ideally for govm user who logs in with IDIR
+                    document_type = DocumentType.TERMS_OF_USE_GOVM.value
 
             doc = DocumentService.fetch_latest_document(document_type)
             if doc is not None:
