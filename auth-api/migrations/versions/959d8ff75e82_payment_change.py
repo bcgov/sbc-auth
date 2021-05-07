@@ -17,7 +17,7 @@ from auth_api.utils.enums import OrgType, PaymentMethod
 
 revision = '959d8ff75e82'
 down_revision = '66ae9d618842'
-branch_labels = Nonef5deb2ebf9a8_removed_deprecated_table.py
+branch_labels = None
 depends_on = None
 
 
