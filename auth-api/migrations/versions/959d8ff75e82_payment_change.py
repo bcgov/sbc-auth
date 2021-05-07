@@ -11,13 +11,13 @@ import sqlalchemy as sa
 from alembic import op
 from flask import current_app
 
-from auth_api.models import AccountPaymentSettingsDeprecated, Org
+from auth_api.models import Org
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import OrgType, PaymentMethod
 
 revision = '959d8ff75e82'
 down_revision = '66ae9d618842'
-branch_labels = None
+branch_labels = Nonef5deb2ebf9a8_removed_deprecated_table.py
 depends_on = None
 
 
@@ -28,50 +28,6 @@ def upgrade():
     op.add_column('org_version', sa.Column('bcol_account_id', sa.String(length=20), autoincrement=False, nullable=True))
     op.add_column('org_version', sa.Column('bcol_user_id', sa.String(length=20), autoincrement=False, nullable=True))
 
-    # iterate over each org and invoke payment api to create payment records
-
-    conn = op.get_bind()
-    org_res = conn.execute(f"select * from org o where status_code = 'ACTIVE';")
-    org_list: List[Org] = org_res.fetchall()
-
-
-
-    acc_res = conn.execute(
-        f"select * from account_payment_settings where is_active;")
-    account_payment_list: List[AccountPaymentSettingsDeprecated] = acc_res.fetchall()
-    account_payment_dict: Dict[int, AccountPaymentSettingsDeprecated] = {account_payment.org_id: account_payment for
-                                                                         account_payment in account_payment_list}
-
-    pay_url = current_app.config.get('PAY_API_URL')
-    default_type = PaymentMethod.DIRECT_PAY.value if current_app.config.get(
-        'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
-    if len(org_list) > 0:
-        token = RestService.get_service_account_token()
-    for org in org_list:
-        # invoke pay-api for each org
-        account_payment_detail = account_payment_dict.get(org.id)
-        pay_request = {
-            'accountId': org.id,
-            'accountName': org.name,
-            'paymentInfo': {
-                'methodOfPayment': getattr(account_payment_detail, 'preferred_payment_code', default_type),
-                'billable': org.billable
-            }
-        }
-        if is_premium := org.type_code == OrgType.PREMIUM.value:
-            bcol_account_number = getattr(account_payment_detail, 'bcol_account_id', '')
-            bcol_user_id = getattr(account_payment_detail, 'bcol_user_id', '')
-            pay_request['bcolAccountNumber'] = bcol_account_number
-            pay_request['bcolUserId'] = bcol_user_id
-
-        accounts_url = f'{pay_url}/accounts/{org.id}'
-        RestService.put(endpoint=accounts_url,
-                        data=pay_request, token=token, raise_for_status=False)
-
-        if is_premium:
-            op.execute(
-                f"update org set bcol_account_id = '{bcol_account_number}' , "
-                f"bcol_user_id = '{bcol_user_id}' where id={org.id}")
     # ### end Alembic commands ###
 
 
