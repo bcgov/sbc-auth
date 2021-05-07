@@ -1,19 +1,6 @@
 <template>
   <div>
     <article>
-      <v-alert dark tile color="bcgovblue2" class="mb-0">
-        <v-container>
-          <p class="mb-0">UPDATED Sept. 30th, 2020 - Special Notice Regarding COVID-19 and Annual General Meetings</p>
-          <p class="title font-weight-bold">Additional 6 month Extension for AGM Granted to March 31, 2021</p>
-          <p>Due to the guidelines and recommendations set forth by the Provincial Health Officer, B.C. Health
-            Minister, as well as Health Canada guidelines in regards to COVID-19, the Registrar has decided to grant
-            another extension for all Cooperatives that wish to delay their Annual General Meeting (AGM) for a period
-            of six months from, October 1, 2020 to March 31, 2021. You do not need to make an application to the
-            registrar to request a delay of your AGM; however, you must inform your members that the AGM has been
-            delayed.</p>
-        </v-container>
-      </v-alert>
-
       <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
         <v-container>
           <h1>Start a Benefit Company and Keep <br>Cooperatives Records up to date</h1>
