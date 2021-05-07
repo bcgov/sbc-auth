@@ -50,10 +50,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   }
 
   private isProfileNeeded (): boolean {
-    return this.loginSource !== IdpHint.IDIR
-  }
-  private isTosAcceptanceNeeded (): boolean {
-    return this.loginSource !== IdpHint.IDIR
+    return this.loginSource.toUpperCase() !== LoginSource.IDIR.toUpperCase()
   }
 
   /**
@@ -63,7 +60,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
    */
   private async accept () {
     try {
-      if (!this.userProfile.userTerms.isTermsOfUseAccepted && this.isTosAcceptanceNeeded()) {
+      if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
         await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}`)
         return
       } else if (!this.userContact && this.isProfileNeeded()) {

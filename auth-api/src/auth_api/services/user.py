@@ -480,10 +480,15 @@ class User:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
+        is_govm_user = token.get('loginSource', None) == LoginSource.STAFF.value
         # If terms accepted , double check if there is a new TOS in place. If so, update the flag to false.
         if user_model.is_terms_of_use_accepted:
-            document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value if is_anonymous_user \
-                else DocumentType.TERMS_OF_USE.value
+            if is_anonymous_user:
+                document_type = DocumentType.TERMS_OF_USE_DIRECTOR_SEARCH.value
+            elif is_govm_user:
+                document_type = DocumentType.TERMS_OF_USE_GOVM.value
+            else:
+                document_type = DocumentType.TERMS_OF_USE.value
             # get the digit version of the terms of service..ie d1 gives 1 ; d2 gives 2..for proper comparison
             latest_version = util.digitify(DocumentService.find_latest_version_by_type(document_type))
             current_version = util.digitify(user_model.terms_of_use_accepted_version)
