@@ -1,6 +1,9 @@
 <template>
   <div>
-    <template v-if="!isPADOnly && !isPaymentEJV">
+     <template v-if="isPaymentEJV">
+      <GLPaymentForm :canSelect="false"></GLPaymentForm>
+    </template>
+    <template v-else-if="!isPADOnly && !isPaymentEJV">
       <v-card
         outlined
         hover
@@ -73,9 +76,6 @@
           </div>
         </div>
       </v-card>
-    </template>
-    <template v-else-if="isPaymentEJV">
-      <GLPaymentForm :canSelect="false"></GLPaymentForm>
     </template>
     <!-- showing PAD form without card selector for single payment types -->
     <v-row v-else>
@@ -194,7 +194,9 @@ export default class PaymentMethods extends Vue {
     if (this.currentOrgType) {
       const paymentTypes = this.paymentsPerAccountType[this.currentOrgType]
       paymentTypes.forEach(paymentType => {
-        paymentMethods.push(PAYMENT_METHODS[paymentType])
+        if (PAYMENT_METHODS[paymentType]) {
+          paymentMethods.push(PAYMENT_METHODS[paymentType])
+        }
       })
     }
     return paymentMethods
