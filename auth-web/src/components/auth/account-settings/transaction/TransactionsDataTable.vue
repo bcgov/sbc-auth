@@ -230,7 +230,9 @@ export default class TransactionsDataTable extends Vue {
   }
 
   private formatStatus (status) {
-    return (status === 'Settlement Scheduled' || status === 'PAD Invoice Approved') ? 'Pending' : status
+    // status show as pending array
+    const statusMapToPending = ['Settlement Scheduled', 'PAD Invoice Approved']
+    return statusMapToPending.includes(status) ? 'Pending' : status
   }
 
   private getStatusColor (status) {
