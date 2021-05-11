@@ -17,6 +17,7 @@
       <template v-slot:loading>
         Loading...
       </template>
+
       <template v-slot:[`header.status`]="{ header }">
         {{header.text}}
         <v-tooltip bottom color="grey darken-4">
@@ -28,44 +29,57 @@
           </div>
         </v-tooltip>
       </template>
-      <template v-slot:[`item.transactionNames`]="{ item }">
-        <div class="product-purchased font-weight-bold"
-          :data-test="getIndexedTag('transaction-name', item.index)"
-          >
-          <div class="product-name font-weight-bold"
-            v-for="(name, nameIndex) in item.transactionNames"
-            :key="nameIndex">
-            {{ name }}
-          </div>
-        </div>
-        <div
-          v-if="item.businessIdentifier"
-          :data-test="getIndexedTag('transaction-incorp-number', item.index)"
+      <!-- Need to show detaisl in another tr  -->
+      <template
+        v-slot:body="{ items }"
         >
-          Incorporation Number: {{ item.businessIdentifier }}
-        </div>
+        <tbody v-for="item in items"
+        class="product-tr-body"
+          :key="item.id">
+          <tr class="product-tr">
+            <td>
+              <div class="product-purchased font-weight-bold"
+                :data-test="getIndexedTag('transaction-name', item.index)"
+                >
+                <div class="product-name font-weight-bold"
+                  v-for="(name, nameIndex) in item.transactionNames"
+                  :key="nameIndex">
+                  {{ name }}
+                </div>
+              </div>
+            </td>
+            <td>{{item.folioNumber}}</td>
+            <td><span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span></td>
+            <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span></td>
+            <td>
+              <div class="font-weight-bold">
+                ${{item.totalAmount}}
+              </div>
+            </td>
+            <td>
+              <v-chip
+                small
+                label
+                :color="getStatusColor(item.status)"
+                class="text-uppercase font-weight-bold mt-n1"
+                >
+                {{formatStatus(item.status)}}
+              </v-chip>
+            </td>
+          </tr>
+          <!-- no tr if no details -->
+          <tr class="product-details-tr" v-if="item.details && item.details.length > 0">
+            <td :colspan="7">
+              <div  v-for="detail in item.details"
+                :key="detail && detail.id"
+                >
+                {{detail && detail.label}}&nbsp;{{detail && detail.value}}
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </template>
-      <template v-slot:[`item.initiatedBy`]="{ item }">
-        <span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span>
-      </template>
-      <template v-slot:[`item.transactionDate`]="{ item }">
-        <span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span>
-      </template>
-      <template v-slot:[`item.totalAmount`]="{ item }">
-        <div class="font-weight-bold">
-          ${{item.totalAmount}}
-        </div>
-      </template>
-      <template v-slot:[`item.status`]="{ item }">
-        <v-chip
-          small
-          label
-          :color="getStatusColor(item.status)"
-          class="text-uppercase font-weight-bold mt-n1"
-        >
-          {{formatStatus(item.status)}}
-        </v-chip>
-      </template>
+
     </v-data-table>
   </div>
 </template>
@@ -217,7 +231,7 @@ export default class TransactionsDataTable extends Vue {
   }
 
   private formatStatus (status) {
-    return (status === 'Settlement Scheduled') ? 'Pending' : status
+    return (status === 'Settlement Scheduled' || status === 'PAD Invoice Approved') ? 'Pending' : status
   }
 
   private getStatusColor (status) {
@@ -271,8 +285,7 @@ export default class TransactionsDataTable extends Vue {
   }
 
   td {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
+    padding-bottom: .5rem !important;
     height: auto;
     vertical-align: top;
     overflow: hidden;
@@ -294,5 +307,19 @@ export default class TransactionsDataTable extends Vue {
 thead + thead {
   position: absolute;
   top: -2px;
+}
+.product-tr-body{
+  &:hover{
+    background: #eee;
+  }
+  & .product-tr > td {
+      border-bottom: none !important;
+      padding-top: 1rem !important;
+  }
+
+  & tr:last-child > td{
+      border-bottom: thin solid rgba(0,0,0,.12) !important;
+      padding-bottom: 1rem !important;
+  }
 }
 </style>
