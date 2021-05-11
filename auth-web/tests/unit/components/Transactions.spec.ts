@@ -33,9 +33,7 @@ describe('Transactions.vue', () => {
     const orgModule = {
       namespaced: true,
       actions: {
-        getTransactionReport: jest.fn(() => {
-
-        })
+        getTransactionReport: jest.fn()
       },
       state: {
         currentMembership: {
