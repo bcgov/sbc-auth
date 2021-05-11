@@ -1,5 +1,5 @@
 <template>
-  <v-card v-if="showAutoComplete" class="mt-0 auto-complete-card" elevation="5">
+  <v-card v-if="showAutoComplete" class="mt-0 auto-complete-card" elevation="5" data-test="auto-complete-card">
     <v-row no-gutters justify="end" class="mx-0 close-btn-row">
       <v-col cols="auto" justify="end" class="pt-0">
         <v-btn append
@@ -7,6 +7,7 @@
         x-small
         right
         class="auto-complete-close-btn"
+        data-test="auto-complete-close-btn"
         @click="autoCompleteIsActive=false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -20,7 +21,7 @@
             :key="i"
             class="pt-0 pb-0 pl-1 auto-complete-item">
               <v-list-item-content class="pt-2 pb-2">
-                <v-list-item-title v-text="result.value"></v-list-item-title>
+                <v-list-item-title :data-test="getIndexedTag('auto-complete-item', i)" v-text="result.value"></v-list-item-title>
               </v-list-item-content>
             </v-list-item>
           </v-list-item-group>
@@ -90,6 +91,10 @@ export default class AutoCompleteView extends Vue {
         // eslint-disable-next-line no-console
         console.log('Error while auto complete...')
       }
+    }
+
+    private getIndexedTag (tag, index): string {
+      return `${tag}-${index}`
     }
 }
 </script>
