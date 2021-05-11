@@ -31,7 +31,7 @@
       </template>
       <!-- Need to show detaisl in another tr  -->
       <template
-        v-slot:body="{ items }"
+        v-slot:body="{ headers, items }"
         >
         <tbody v-for="item in items"
         class="product-tr-body"
@@ -69,7 +69,7 @@
           </tr>
           <!-- no tr if no details -->
           <tr class="product-details-tr" v-if="item.details && item.details.length > 0">
-            <td :colspan="7">
+            <td :colspan="headers.length">
               <div  v-for="detail in item.details"
                 :key="detail && detail.id"
                 >
