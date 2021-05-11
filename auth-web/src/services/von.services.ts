@@ -5,6 +5,6 @@ import { axios } from '@/util/http-util'
 
 export default class VonService {
   public static async getAutoComplete (searchValue: string): Promise<AxiosResponse<AutoCompleteResponseIF>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/search/autocomplete?q=${searchValue}`)
+    return axios.get(`${ConfigHelper.getVonAPIUrl()}/search/autocomplete?q=${searchValue}`)
   }
 }

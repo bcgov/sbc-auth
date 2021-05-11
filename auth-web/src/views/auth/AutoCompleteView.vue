@@ -1,12 +1,11 @@
 <template>
-  <v-card v-if="showAutoComplete" :class="['mt-1', $style['auto-complete-card']]" elevation="5">
-    <v-row no-gutters justify="end" :class="$style['close-btn-row']">
+  <v-card v-if="showAutoComplete" class="auto-complete-card" elevation="5">
+    <v-row no-gutters justify="end" class="close-btn-row">
       <v-col cols="auto" justify="end" class="pt-0">
         <v-btn append
         icon
         x-small
         right
-        :id="$style['auto-complete-close-btn']"
         class="auto-complete-close-btn"
         @click="autoCompleteIsActive=false">
           <v-icon>mdi-close</v-icon>
@@ -19,7 +18,7 @@
           <v-list-item-group v-model="autoCompleteSelected">
             <v-list-item v-for="(result, i) in autoCompleteResults"
             :key="i"
-            :class="['pt-0', 'pb-0', 'pl-1', $style['auto-complete-item']]">
+            class="pt-0 pb-0 pl-1 auto-complete-item">
               <v-list-item-content class="pt-2 pb-2">
                 <v-list-item-title v-text="result.value"></v-list-item-title>
               </v-list-item-content>
@@ -41,23 +40,27 @@ const OrgModule = namespace('org')
 @Component({})
 export default class AutoCompleteView extends Vue {
     @OrgModule.Action('getAutoComplete') public getAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponseIF>
-    @Prop({ default: false }) private autoCompleteIsActive: boolean
+    @Prop({ default: false }) private setAutoCompleteIsActive: boolean
     @Prop({ default: '' }) private searchValue: string
 
     private autoCompleteResults: AutoCompleteResultIF[] = []
-    private autoCompletedSelected : number = -1
+    private autoCompleteSelected : number = -1
+    private autoCompleteIsActive: boolean = false
 
     private get showAutoComplete () {
-      const value = this.autoCompleteResults.length > 0 && this.autoCompleteIsActive
-      this.$emit('hide-auto-complete', value)
-      return value
+      return this.autoCompleteResults.length > 0 && this.autoCompleteIsActive
     }
 
     @Watch('searchValue', { deep: true })
-    async updateAutoCompleteResults (val, oldVal) {
+    async GetAutoCompleteResults (val, oldVal) {
       if (oldVal !== val && this.autoCompleteIsActive) {
         await this.getAutoCompleteResults(val)
       }
+    }
+
+    @Watch('setAutoCompleteIsActive', { deep: true })
+    async AutoCompleteIsActive (val) {
+      this.autoCompleteIsActive = val
     }
 
     @Watch('autoCompleteIsActive', { deep: true })
@@ -67,7 +70,7 @@ export default class AutoCompleteView extends Vue {
       }
     }
 
-    @Watch('autoCompletedSelected', { deep: true })
+    @Watch('autoCompleteSelected', { deep: true })
     async emitSelectedValue (val) {
       if (val >= 0) {
         const searchValue = this.autoCompleteResults[val]?.value
@@ -92,8 +95,8 @@ export default class AutoCompleteView extends Vue {
 </script>
 
 <style lang="scss" scoped>
-#auto-complete-close-btn {
-  color: $gray5 !important;
+.auto-complete-close-btn {
+  color: grey !important;
   background-color: transparent !important;
 }
 .auto-complete-item {
