@@ -1,6 +1,6 @@
 <template>
-  <v-card v-if="showAutoComplete" class="auto-complete-card" elevation="5">
-    <v-row no-gutters justify="end" class="close-btn-row">
+  <v-card v-if="showAutoComplete" class="mt-0 auto-complete-card" elevation="5">
+    <v-row no-gutters justify="end" class="mx-0 close-btn-row">
       <v-col cols="auto" justify="end" class="pt-0">
         <v-btn append
         icon
@@ -12,7 +12,7 @@
         </v-btn>
       </v-col>
     </v-row>
-    <v-row no-gutters justify="center" class="pl-2 pr-5">
+    <v-row no-gutters justify="center" class="mx-0 pl-2 pr-5">
       <v-col no-gutters cols="auto">
         <v-list class="pt-0">
           <v-list-item-group v-model="autoCompleteSelected">
@@ -83,7 +83,7 @@ export default class AutoCompleteView extends Vue {
       try {
         const response: AutoCompleteResponseIF = await this.getAutoComplete(searchValue)
         if (searchValue === this.searchValue && response?.results) {
-        // will take up to 5 results
+        // will take up to 5 results - similar to PPR
           this.autoCompleteResults = response?.results.slice(0, 5)
         }
       } catch (ex) {
@@ -95,8 +95,10 @@ export default class AutoCompleteView extends Vue {
 </script>
 
 <style lang="scss" scoped>
+@import '../../assets/scss/theme.scss';
+
 .auto-complete-close-btn {
-  color: grey !important;
+  color: $gray5 !important;
   background-color: transparent !important;
 }
 .auto-complete-item {

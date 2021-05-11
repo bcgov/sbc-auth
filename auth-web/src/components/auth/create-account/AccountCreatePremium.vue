@@ -30,6 +30,11 @@
           @change="updateOrgNameAndClearErrors"
           data-test="input-premium-orgName"
         />
+        <auto-complete-view
+        :searchValue="autoCompleteSearchValue"
+        :setAutoCompleteIsActive="autoCompleteIsActive"
+        @auto-complete-value="setAutoCompleteSearchValue">
+        </auto-complete-view>
       </fieldset>
 
       <fieldset>
@@ -100,10 +105,11 @@
 <script lang="ts">
 import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
+import AutoCompleteView from '@/views/auth/AutoCompleteView.vue'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -116,6 +122,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    AutoCompleteView,
     BcolLogin,
     BaseAddressForm,
     ConfirmCancelButton,
@@ -168,6 +175,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private orgName = ''
   private orgNameReadOnly = true
   private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
+  private autoCompleteIsActive: boolean = false
+  private autoCompleteSearchValue: string = ''
 
   private baseAddressSchema: {} = addressSchema
 
@@ -308,6 +317,19 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private checkBaseAddressValidity (isValid) {
     this.isBaseAddressValid = !!isValid
+  }
+
+  private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
+    this.autoCompleteIsActive = false
+    this.orgName = autoCompleteSearchValue
+  }
+
+  @Watch('orgName', { deep: true })
+  getAutoCompleteValues (val) {
+    if (val) {
+      this.autoCompleteSearchValue = val
+    }
+    this.autoCompleteIsActive = val !== ''
   }
 }
 </script>
