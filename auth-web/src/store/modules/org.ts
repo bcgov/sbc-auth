@@ -761,7 +761,8 @@ export default class OrgModule extends VuexModule {
         initiatedBy: transaction.createdName,
         transactionDate: transaction.createdOn,
         totalAmount: (transaction?.total || 0).toFixed(2),
-        status: transaction.statusCode
+        status: transaction.statusCode,
+        details: transaction.details || []
       })
     })
     return transactionTableData
