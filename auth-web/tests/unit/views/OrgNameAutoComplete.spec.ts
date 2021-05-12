@@ -22,12 +22,37 @@ const vuetify = new Vuetify({})
 describe('OrgNameAutoComplete.vue', () => {
   let wrapper: any
   const testAutoCompleteResponse: AutoCompleteResponse = {
-    total: 1,
+    total: 10,
     results: [
       {
         type: 'name',
-        value: 'TEST TEST ULC',
+        value: 'TEST TEST ULC1',
         score: 66
+      },
+      {
+        type: 'name',
+        value: 'TEST TEST ULC2',
+        score: 67
+      },
+      {
+        type: 'name',
+        value: 'TEST TEST ULC3',
+        score: 68
+      },
+      {
+        type: 'name',
+        value: 'TEST TEST ULC4',
+        score: 60
+      },
+      {
+        type: 'name',
+        value: 'TEST TEST ULC5',
+        score: 70
+      },
+      {
+        type: 'name',
+        value: 'TEST TEST ULC6',
+        score: 71
       }
     ]
   }
@@ -85,6 +110,7 @@ describe('OrgNameAutoComplete.vue', () => {
     await Vue.nextTick()
     expect(wrapper.vm.showAutoComplete).toBeTruthy()
     expect(wrapper.find('[data-test="auto-complete-item-0"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="auto-complete-item-0"]').text()).toBe('TEST TEST ULC')
+    expect(wrapper.find('[data-test="auto-complete-item-0"]').text()).toBe('TEST TEST ULC1')
+    expect(wrapper.findAll('.auto-complete-item').length).toBe(5)
   })
 })
