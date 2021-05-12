@@ -65,7 +65,7 @@ describe('OrgNameAutoComplete.vue', () => {
     const orgModule = {
       namespaced: true,
       actions: {
-        getAutoComplete: jest.fn().mockResolvedValue(testAutoCompleteResponse)
+        getOrgNameAutoComplete: jest.fn().mockResolvedValue(testAutoCompleteResponse)
       }
     }
 

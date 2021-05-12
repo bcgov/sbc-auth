@@ -994,11 +994,11 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getAutoComplete (searchValue: string): Promise<AutoCompleteResponse> {
+  public async getOrgNameAutoComplete (searchValue: string): Promise<AutoCompleteResponse> {
     if (!searchValue) {
       return
     }
-    return VonService.getAutoComplete(searchValue)
+    return VonService.getOrgNameAutoComplete(searchValue)
       .then(response => {
         const data = response?.data
         if (!data) {

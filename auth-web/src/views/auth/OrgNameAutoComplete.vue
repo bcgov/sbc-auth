@@ -41,7 +41,7 @@ const OrgModule = namespace('org')
 
 @Component({})
 export default class OrgNameAutoComplete extends Vue {
-    @OrgModule.Action('getAutoComplete') public getAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponse>
+    @OrgModule.Action('getOrgNameAutoComplete') public getOrgNameAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponse>
     @Prop({ default: false }) private setAutoCompleteIsActive: boolean
     @Prop({ default: '' }) private searchValue: string
 
@@ -83,9 +83,9 @@ export default class OrgNameAutoComplete extends Vue {
 
     private async getAutoCompleteResults (searchValue: string) {
       try {
-        const response: AutoCompleteResponse = await this.getAutoComplete(searchValue)
+        const response: AutoCompleteResponse = await this.getOrgNameAutoComplete(searchValue)
         if (searchValue === this.searchValue && response?.results) {
-        // will take up to 5 results - similar to PPR
+        // will slice results - similar to PPR
           this.autoCompleteResults = response?.results.slice(0, ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT)
         }
       } catch (ex) {
