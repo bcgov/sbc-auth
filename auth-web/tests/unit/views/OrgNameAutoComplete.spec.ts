@@ -1,7 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
-import { AutoCompleteResponseIF } from '@/models/AutoComplete'
-import AutoCompleteView from '@/views/auth/AutoCompleteView.vue'
+import { AutoCompleteResponse } from '@/models/AutoComplete'
+import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -19,9 +19,9 @@ document.body.setAttribute('data-app', 'true')
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
-describe('AutoCompleteView.vue', () => {
+describe('OrgNameAutoComplete.vue', () => {
   let wrapper: any
-  const testAutoCompleteResponse: AutoCompleteResponseIF = {
+  const testAutoCompleteResponse: AutoCompleteResponse = {
     total: 1,
     results: [
       {
@@ -52,7 +52,7 @@ describe('AutoCompleteView.vue', () => {
       }
     })
 
-    wrapper = mount(AutoCompleteView, {
+    wrapper = mount(OrgNameAutoComplete, {
       store,
       localVue,
       router,

@@ -16,7 +16,7 @@
     <v-row no-gutters justify="center" class="mx-0 pl-2 pr-5">
       <v-col no-gutters cols="auto">
         <v-list class="pt-0">
-          <v-list-item-group v-model="autoCompleteSelected">
+          <v-list-item-group v-model="autoCompleteSelectedIndex">
             <v-list-item v-for="(result, i) in autoCompleteResults"
             :key="i"
             class="pt-0 pb-0 pl-1 auto-complete-item">
@@ -32,47 +32,48 @@
 </template>
 
 <script lang="ts">
-import { AutoCompleteResponseIF, AutoCompleteResultIF } from '@/models/AutoComplete'
+import { AutoCompleteResponse, AutoCompleteResult } from '@/models/AutoComplete'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT } from '@/util/constants'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
 
 @Component({})
-export default class AutoCompleteView extends Vue {
-    @OrgModule.Action('getAutoComplete') public getAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponseIF>
+export default class OrgNameAutoComplete extends Vue {
+    @OrgModule.Action('getAutoComplete') public getAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponse>
     @Prop({ default: false }) private setAutoCompleteIsActive: boolean
     @Prop({ default: '' }) private searchValue: string
 
-    private autoCompleteResults: AutoCompleteResultIF[] = []
-    private autoCompleteSelected : number = -1
+    private autoCompleteResults: AutoCompleteResult[] = []
+    private autoCompleteSelectedIndex : number = -1
     private autoCompleteIsActive: boolean = false
 
     private get showAutoComplete () {
       return this.autoCompleteResults.length > 0 && this.autoCompleteIsActive
     }
 
-    @Watch('searchValue', { deep: true })
+    @Watch('searchValue')
     async GetAutoCompleteResults (val, oldVal) {
       if (oldVal !== val && this.autoCompleteIsActive) {
         await this.getAutoCompleteResults(val)
       }
     }
 
-    @Watch('setAutoCompleteIsActive', { deep: true })
-    async AutoCompleteIsActive (val) {
+    @Watch('setAutoCompleteIsActive')
+    async AutoCompleteIsActive (val: boolean) {
       this.autoCompleteIsActive = val
     }
 
-    @Watch('autoCompleteIsActive', { deep: true })
-    updateAutoCompleteIsActive (val) {
+    @Watch('autoCompleteIsActive')
+    updateAutoCompleteIsActive (val: boolean) {
       if (!val) {
         this.autoCompleteResults = []
       }
     }
 
-    @Watch('autoCompleteSelected', { deep: true })
-    async emitSelectedValue (val) {
+    @Watch('autoCompleteSelectedIndex')
+    async emitSelectedValue (val: number) {
       if (val >= 0) {
         const searchValue = this.autoCompleteResults[val]?.value
         this.autoCompleteIsActive = false
@@ -82,10 +83,10 @@ export default class AutoCompleteView extends Vue {
 
     private async getAutoCompleteResults (searchValue: string) {
       try {
-        const response: AutoCompleteResponseIF = await this.getAutoComplete(searchValue)
+        const response: AutoCompleteResponse = await this.getAutoComplete(searchValue)
         if (searchValue === this.searchValue && response?.results) {
         // will take up to 5 results - similar to PPR
-          this.autoCompleteResults = response?.results.slice(0, 5)
+          this.autoCompleteResults = response?.results.slice(0, ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT)
         }
       } catch (ex) {
         // eslint-disable-next-line no-console

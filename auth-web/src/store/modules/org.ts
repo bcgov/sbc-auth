@@ -29,7 +29,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionTableList, Trans
 
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
-import { AutoCompleteResponseIF } from '@/models/AutoComplete'
+import { AutoCompleteResponse } from '@/models/AutoComplete'
 import BcolService from '@/services/bcol.services'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -994,7 +994,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getAutoComplete (searchValue: string): Promise<AutoCompleteResponseIF> {
+  public async getAutoComplete (searchValue: string): Promise<AutoCompleteResponse> {
     if (!searchValue) {
       return
     }

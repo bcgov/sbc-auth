@@ -19,11 +19,12 @@
         :readonly="govmAccount"
         autocomplete="off"
       />
-      <auto-complete-view
+      <org-name-auto-complete
+      v-if="enableOrgNameAutoComplete"
       :searchValue="autoCompleteSearchValue"
       :setAutoCompleteIsActive="autoCompleteIsActive"
       @auto-complete-value="setAutoCompleteSearchValue">
-      </auto-complete-view>
+      </org-name-auto-complete>
       <v-text-field
         filled
         label="Branch/Division (If applicable)"
@@ -91,11 +92,11 @@ import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
-import AutoCompleteView from '@/views/auth/AutoCompleteView.vue'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgModule from '@/store/modules/org'
+import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
@@ -104,7 +105,7 @@ import { getModule } from 'vuex-module-decorators'
   components: {
     BaseAddressForm,
     ConfirmCancelButton,
-    AutoCompleteView
+    OrgNameAutoComplete
   },
   computed: {
     ...mapState('org', [
@@ -168,6 +169,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
 
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
+
+  private get enableOrgNameAutoComplete (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
   }
 
   private get address () {
@@ -242,16 +247,20 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    this.autoCompleteIsActive = false
-    this.orgName = autoCompleteSearchValue
+    if (this.enableOrgNameAutoComplete) {
+      this.autoCompleteIsActive = false
+      this.orgName = autoCompleteSearchValue
+    }
   }
 
-  @Watch('orgName', { deep: true })
-  getAutoCompleteValues (val) {
-    if (val) {
-      this.autoCompleteSearchValue = val
+  @Watch('orgName')
+  getAutoCompleteValues (val: string) {
+    if (this.enableOrgNameAutoComplete) {
+      if (val) {
+        this.autoCompleteSearchValue = val
+      }
+      this.autoCompleteIsActive = val !== ''
     }
-    this.autoCompleteIsActive = val !== ''
   }
 }
 </script>

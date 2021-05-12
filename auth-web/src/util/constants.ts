@@ -167,8 +167,8 @@ export enum LDFlags {
     EnableUpgradeDowngrade = 'enable-upgrade-downgrade-accounts',
     EnableMandatoryAddress = 'enable-mandatory-address',
     EnableGovmInvite = 'enable-govm-account-invite',
-    HideProductPackage = 'hide-product-packages'
-
+    HideProductPackage = 'hide-product-packages',
+    EnableOrgNameAutoComplete = 'enable-org-name-auto-complete'
 }
 
 export enum DateFilterCodes {
@@ -245,3 +245,5 @@ export enum TaskType {
 export enum FeeCodes {
     PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }
+
+export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5

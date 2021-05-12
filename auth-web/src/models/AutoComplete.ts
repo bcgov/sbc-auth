@@ -1,10 +1,10 @@
 // To handle Von autocomplete responses
-export interface AutoCompleteResponseIF {
+export interface AutoCompleteResponse {
     total: number,
-    results: Array<AutoCompleteResultIF>
+    results: Array<AutoCompleteResult>
 }
 
-export interface AutoCompleteResultIF {
+export interface AutoCompleteResult {
     type: string
     value: string
     score: number
