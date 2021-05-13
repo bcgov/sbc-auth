@@ -781,8 +781,6 @@ paths:
                         country: CA
                         created: '2020-05-14T17:33:04.315908+00:00'
                         createdBy: BCREGTEST Bena THIRTEEN
-                        links:
-                          - 713
                         modified: '2020-08-07T23:55:56.576008+00:00'
                         modifiedBy: BCREGTEST Bena THIRTEEN
                         postalCode: V4T 2A5
@@ -1068,10 +1066,14 @@ paths:
               examples:
                 example1:
                   value:
-                    id: '1234'
-                    name: Mock Account
-                    preferred_payment: CC
+                    accessType: REGULAR
+                    created: '2021-02-27T23:33:42.039641+00:00'
+                    createdBy: BCREG2 Chun THIRTEEN
+                    id: 852
+                    modified: '2021-02-27T23:33:42.039641+00:00'
+                    name: SAMPLE PREMIUM ACCOUNT
                     orgType: PREMIUM
+                    orgStatus: ACTIVE
         '404':
           description: Not Found
           content:
@@ -4153,79 +4155,65 @@ components:
         version_id:
           type: string
     contact:
-      title: contact
+      description: ''
       type: object
       properties:
-        email:
-          type: string
-          title: Email
-          default: ''
-          example:
-            - abc123@mail.com
-          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
-        phoneExtension:
-          type: string
-          title: Phone Extension
-          default: ''
-          example:
-            - '123'
-          pattern: ^(.*)$
-        phone:
-          type: string
-          title: Phone
-          default: ''
-          example:
-            - 111-222-3333
-          pattern: ^(.*)$
-        deliveryInstructions:
-          type: string
-          title: Delivery Instructions
-          default: ''
-          example:
-            - Ring buzzer 123
-          pattern: ^(.*)$
-        postalCode:
-          type: string
-          title: Postal Code
-          default: ''
-          example:
-            - V1A 1A1
-          pattern: ^(.*)$
-        country:
-          type: string
-          title: Country
-          default: ''
-          example:
-            - CA
-          pattern: ^(.*)$
-        region:
-          type: string
-          title: Region
-          default: ''
-          example:
-            - British Columbia
-          pattern: ^(.*)$
-        city:
-          type: string
-          title: City
-          default: ''
-          example:
-            - Victoria
-          pattern: ^(.*)$
-        streetAdditional:
-          type: string
-          title: Street Additional
-          default: ''
-          example:
-            - Unit 1
-          pattern: ^(.*)$
-        street:
-          type: string
-          title: Street
-          default: ''
-          example:
-            - 123 Roundabout Lane
-          pattern: ^(.*)$
+        contacts:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            required:
+              - city
+              - country
+              - created
+              - createdBy
+              - modified
+              - postalCode
+              - region
+              - street
+              - streetAdditional
+            properties:
+              city:
+                type: string
+                minLength: 1
+              country:
+                type: string
+                minLength: 1
+              created:
+                type: string
+                minLength: 1
+              createdBy:
+                type: string
+                minLength: 1
+              modified:
+                type: string
+                minLength: 1
+              postalCode:
+                type: string
+                minLength: 1
+              region:
+                type: string
+                minLength: 1
+              street:
+                type: string
+                minLength: 1
+              streetAdditional:
+                type: string
+      required:
+        - contacts
+      x-examples:
+        example-1:
+          contacts:
+            - city: Dunnville
+              country: CA
+              created: '2021-02-27T23:36:25.044631+00:00'
+              createdBy: BCREG2 Chun THIRTEEN
+              modified: '2021-02-27T23:36:25.044631+00:00'
+              postalCode: N1A 2Y5
+              region: 'ON'
+              street: 111-503 Main St E
+              streetAdditional: ''
     entity:
       title: entity
       type: object
@@ -4781,22 +4769,13 @@ components:
           example:
             - IMPLICIT
           pattern: ^(.*)$
-        org_status:
+        orgStatus:
           type: string
           title: The Org_status Schema
           default: ''
           example:
             - ACTIVE
           pattern: ^(.*)$
-        preferred_payment:
-          type: string
-          title: The Preferred_payment Schema
-          default: ''
-          example:
-            - CC
-          pattern: ^(.*)$
-        modified_by:
-          type: string
       required:
         - created
         - created_by
@@ -4804,8 +4783,7 @@ components:
         - modified
         - name
         - orgType
-        - org_status
-        - preferred_payment
+        - orgStatus
     authorizations:
       title: authorizations
       type: object
