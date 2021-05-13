@@ -22,7 +22,7 @@ itsdangerous==1.1.0
 protobuf==3.14.0
 psycopg2-binary==2.8.6
 pycparser==2.20
-pydantic==1.7.3
+pydantic==1.7.4
 python-dateutil==2.8.1
 python-dotenv==0.15.0
 python-editor==1.0.4
