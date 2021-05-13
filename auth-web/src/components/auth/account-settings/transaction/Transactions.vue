@@ -7,6 +7,7 @@
         color="primary"
         class="font-weight-bold ml-auto"
         @click="exportCSV"
+        data-test="btn-export-csv"
       >Export CSV</v-btn>
     </header>
     <SearchFilterInput

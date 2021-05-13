@@ -30,6 +30,12 @@
           @change="updateOrgNameAndClearErrors"
           data-test="input-premium-orgName"
         />
+        <org-name-auto-complete
+        v-if="enableOrgNameAutoComplete"
+        :searchValue="autoCompleteSearchValue"
+        :setAutoCompleteIsActive="autoCompleteIsActive"
+        @auto-complete-value="setAutoCompleteSearchValue">
+        </org-name-auto-complete>
       </fieldset>
 
       <fieldset>
@@ -98,9 +104,9 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
@@ -108,14 +114,17 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import OrgModule from '@/store/modules/org'
+import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    OrgNameAutoComplete,
     BcolLogin,
     BaseAddressForm,
     ConfirmCancelButton,
@@ -168,6 +177,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private orgName = ''
   private orgNameReadOnly = true
   private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
+  private autoCompleteIsActive: boolean = false
+  private autoCompleteSearchValue: string = ''
 
   private baseAddressSchema: {} = addressSchema
 
@@ -308,6 +319,27 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private checkBaseAddressValidity (isValid) {
     this.isBaseAddressValid = !!isValid
+  }
+
+  private get enableOrgNameAutoComplete (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
+  }
+
+  private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
+    if (this.enableOrgNameAutoComplete) {
+      this.autoCompleteIsActive = false
+      this.orgName = autoCompleteSearchValue
+    }
+  }
+
+  @Watch('orgName')
+  getAutoCompleteValues (val: string) {
+    if (this.enableOrgNameAutoComplete) {
+      if (val) {
+        this.autoCompleteSearchValue = val
+      }
+      this.autoCompleteIsActive = val !== ''
+    }
   }
 }
 </script>
