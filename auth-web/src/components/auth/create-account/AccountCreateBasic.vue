@@ -3,7 +3,7 @@
     <fieldset>
 
       <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
-       <legend class="mb-3"  v-else>Enter an Account Name</legend>
+      <legend class="mb-3"  v-else>Enter an Account Name</legend>
       <v-slide-y-transition>
         <div v-show="errorMessage">
           <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
@@ -17,8 +17,15 @@
         :disabled="saving"
         data-test="input-org-name"
         :readonly="govmAccount"
+        autocomplete="off"
       />
-       <v-text-field
+      <org-name-auto-complete
+      v-if="enableOrgNameAutoComplete"
+      :searchValue="autoCompleteSearchValue"
+      :setAutoCompleteIsActive="autoCompleteIsActive"
+      @auto-complete-value="setAutoCompleteSearchValue">
+      </org-name-auto-complete>
+      <v-text-field
         filled
         label="Branch/Division (If applicable)"
         v-model.trim="branchName"
@@ -81,7 +88,7 @@
 
 <script lang="ts">
 import { Account, Actions, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import { Address } from '@/models/address'
@@ -89,6 +96,7 @@ import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgModule from '@/store/modules/org'
+import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
@@ -96,7 +104,8 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   components: {
     BaseAddressForm,
-    ConfirmCancelButton
+    ConfirmCancelButton,
+    OrgNameAutoComplete
   },
   computed: {
     ...mapState('org', [
@@ -126,6 +135,8 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly currentOrganization!: Organization
   private orgName: string = ''
   private branchName: string = ''
+  private autoCompleteIsActive: boolean = false
+  private autoCompleteSearchValue: string = ''
 
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
@@ -158,6 +169,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
 
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+  }
+
+  private get enableOrgNameAutoComplete (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
   }
 
   private get address () {
@@ -229,6 +244,23 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
 
   private goNext () {
     this.stepForward()
+  }
+
+  private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
+    if (this.enableOrgNameAutoComplete) {
+      this.autoCompleteIsActive = false
+      this.orgName = autoCompleteSearchValue
+    }
+  }
+
+  @Watch('orgName')
+  getAutoCompleteValues (val: string) {
+    if (this.enableOrgNameAutoComplete) {
+      if (val) {
+        this.autoCompleteSearchValue = val
+      }
+      this.autoCompleteIsActive = val !== ''
+    }
   }
 }
 </script>

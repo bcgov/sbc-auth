@@ -29,6 +29,7 @@ import { TransactionFilter, TransactionFilterParams, TransactionTableList, Trans
 
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
+import { AutoCompleteResponse } from '@/models/AutoComplete'
 import BcolService from '@/services/bcol.services'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -42,6 +43,7 @@ import PermissionService from '@/services/permission.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import VonService from '@/services/von.services'
 
 @Module({
   name: 'org',
@@ -990,5 +992,22 @@ export default class OrgModule extends VuexModule {
     if (response && response.data && response.status === 200) {
       return response.data.accountFees
     }
+  }
+
+  @Action({ rawError: true })
+  public async getOrgNameAutoComplete (searchValue: string): Promise<AutoCompleteResponse> {
+    if (!searchValue) {
+      return
+    }
+    return VonService.getOrgNameAutoComplete(searchValue)
+      .then(response => {
+        const data = response?.data
+        if (!data) {
+          throw new Error('Invalid API response')
+        }
+        return data
+      }).catch(error => {
+        return error
+      })
   }
 }
