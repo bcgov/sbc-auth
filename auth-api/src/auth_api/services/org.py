@@ -44,7 +44,13 @@ from .keycloak import KeycloakService
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
+from auth_api.services.validators.account_limit import validate as account_limit_validate
+from auth_api.services.validators.access_type import validate as access_type_validate
+from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
+from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
+from .validators.validator_response import ValidatorResponse
 from ..utils.account_mailer import publish_to_mailer
+from ..utils.user_context import UserContext, user_context
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -71,33 +77,26 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                   token_info: Dict = None, bearer_token: str = None, origin_url: str = None):
+                   token_info: Dict = None, origin_url: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         # bcol is treated like an access type as well;so its outside the scheme
-        bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
         payment_info = org_info.pop('paymentInfo', {})
         selected_payment_method = payment_info.get('paymentMethod', None)
         org_type = org_info.get('typeCode', OrgType.BASIC.value)
-        branch_name = org_info.get('branchName', None)
         bcol_profile_flags = None
-
+        validate_response: ValidatorResponse = Org.validate(org_info)
+        if not validate_response.is_valid:
+            raise BusinessException(validate_response.error[0], None)
         # If the account is created using BCOL credential, verify its valid bc online account
-        if bcol_credential:
-            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token).json()
-            Org._map_response_to_org(bcol_response, org_info)
-            bcol_profile_flags = bcol_response.get('profileFlags')
+        bcol_details_response = validate_response.response.get('bcol_response', None)
+        if bcol_details_response is not None and (bcol_details := bcol_details_response.json()) is not None:
+            Org._map_response_to_org(bcol_details, org_info)
+            bcol_profile_flags = bcol_details.get('profileFlags')
 
-        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
-        is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
-
-        Org.validate_account_limit(is_staff_admin, user_id)
-
-        access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
-
-        # Always check duplicated name for all type of account.
-        Org.raise_error_if_duplicate_name(org_info['name'], branch_name)
+        print('---validate_response.response-----', validate_response.response)
+        access_type = validate_response.response.get('access_type')
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
         if access_type == AccessType.GOVM.value:
@@ -123,7 +122,7 @@ class Org:  # pylint: disable=too-many-public-methods
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        Org.create_membership(access_type, is_staff_admin, org, user_id)
+        Org.create_membership(access_type, org, user_id)
 
         # dir search and GOVM doesnt need default products
         if access_type not in (AccessType.ANONYMOUS.value, AccessType.GOVM.value):
@@ -192,9 +191,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return payment_type
 
     @staticmethod
-    def create_membership(access_type, is_staff_admin, org, user_id):
+    @user_context
+    def create_membership(access_type, org, user_id, **kwargs):
         """Create membership account."""
-        if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
+        user: UserContext = kwargs['user']
+        if not user.is_staff_admin() and access_type != AccessType.ANONYMOUS.value:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
                                          membership_type_status=Status.ACTIVE.value)
             membership.add_to_session()
@@ -203,44 +204,12 @@ class Org:  # pylint: disable=too-many-public-methods
             KeycloakService.join_account_holders_group()
 
     @staticmethod
-    def validate_account_limit(is_staff_admin, user_id):
+    def _validate_account_limit(is_staff_admin, user_id):
         """Validate account limit."""
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
             if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
-
-    @staticmethod
-    def validate_access_type(is_bceid_user, is_staff_admin, org_info):
-        """Validate and return access type."""
-        access_type: str = org_info.get('accessType', None)
-        if access_type:
-            if is_staff_admin and not access_type:
-                raise BusinessException(Error.ACCCESS_TYPE_MANDATORY, None)
-            if not is_staff_admin and access_type in AccessType.ANONYMOUS.value:
-                raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
-            if not is_staff_admin and access_type in AccessType.GOVM.value:
-                raise BusinessException(Error.USER_CANT_CREATE_GOVM_ORG, None)
-            if not is_bceid_user and access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
-                raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
-            if is_bceid_user and access_type not in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
-                raise BusinessException(Error.USER_CANT_CREATE_REGULAR_ORG, None)
-        else:
-            # If access type is not provided, add default value based on user
-            if is_staff_admin:
-                pass
-            elif is_bceid_user:
-                access_type = AccessType.EXTRA_PROVINCIAL.value
-            else:
-                access_type = AccessType.REGULAR.value
-        return access_type
-
-    @staticmethod
-    def raise_error_if_duplicate_name(name, branch_name=None):
-        """Raise error if there is duplicate org name already."""
-        existing_similar__org = OrgModel.find_similar_org_by_name(name, branch_name=branch_name)
-        if existing_similar__org is not None:
-            raise BusinessException(Error.DATA_CONFLICT, None)
 
     @staticmethod
     def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
@@ -290,6 +259,22 @@ class Org:  # pylint: disable=too-many-public-methods
             payment_account_status = PaymentAccountStatus.FAILED
 
         return payment_account_status
+
+    @staticmethod
+    def validate(org_info: dict):
+        validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
+        access_type: str = org_info.get('accessType', None)
+        arg_dict = {'accessType': access_type, 'name': org_info.get('name'), 'branch_name': org_info.get('branchName')}
+        if (bcol_credential := org_info.pop('bcOnlineCredential', None)) is not None:
+            validators.append(bcol_credentials_validate)
+            arg_dict['bcol_credential'] = bcol_credential
+        validator_response = ValidatorResponse()
+
+        for validator in validators:
+            validator(validator_response, **arg_dict)
+
+        print(validator_response)
+        return validator_response
 
     @staticmethod
     def _get_default_payment_method_for_creditcard():

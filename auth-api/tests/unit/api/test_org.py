@@ -44,6 +44,8 @@ def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+    print(rv.json)
+    print(schema_utils.validate(rv.json, 'org_response'))
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
@@ -255,6 +257,7 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_govm),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
+    print('-----dictionary',dictionary)
     assert dictionary.get('branchName') == TestOrgInfo.org_govm.get('branchName')
     org_id = dictionary['id']
     # Invite a user to the org
@@ -420,6 +423,7 @@ def test_add_same_org_409(client, jwt, session, keycloak_mock):  # pylint:disabl
     assert rv.status_code == http_status.HTTP_201_CREATED, 'created first org'
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
+    print('--------rv.status_cod-----',rv.status_code)
     assert rv.status_code == http_status.HTTP_409_CONFLICT, 'not able to create duplicates org'
 
 
@@ -1407,7 +1411,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     for product in json.loads(rv.data):
         if product.get('code') == ProductCode.VS.value:
             has_vs_access = product.get('subscriptionStatus') == ProductSubscriptionStatus.ACTIVE.value
-    assert has_vs_access
+    assert has_vs_access ,'test vs access'
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
