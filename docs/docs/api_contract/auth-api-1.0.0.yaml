@@ -5,8 +5,10 @@ info:
   version: 1.0.1
   contact:
     name: Auth API Support
-    url: http://www.example.com/support
-    email: support@example.com
+    url: BC Registries
+    email: BC Registries
+  license:
+    name: Apache 2.0
 paths:
   '/users/{username}':
     parameters:
@@ -86,7 +88,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/org'
-
         '404':
           description: Not Found
           content:
@@ -132,7 +133,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
-
       operationId: put_user_contacts
       tags:
         - users
@@ -143,7 +143,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/contact'
-
     post:
       responses:
         '200':
@@ -169,18 +168,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
-
       operationId: post_user_contacts
       tags:
         - users
-      summary: 'Create a new contact for the user associated with the JWT in the authorization header."'
-      description: 'Create a new contact for the user associated with the JWT in the authorization header."'
+      summary: Create a new contact for the user associated with the JWT in the authorization header."
+      description: Create a new contact for the user associated with the JWT in the authorization header."
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/user'
-
     delete:
       responses:
         '200':
@@ -217,7 +214,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
-
           headers:
             X-Application-Context:
               schema:
@@ -311,7 +307,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
-
         '400':
           description: Bad Request
           content:
@@ -393,7 +388,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
-
       operationId: get_user
       tags:
         - users
@@ -425,7 +419,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
-
       operationId: post_users
       tags:
         - users
@@ -456,13 +449,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/user'
-
       operationId: get_users
       tags:
         - users
       summary: Return a set of users based on search query parameters (staff only).
       description: Return a set of users based on search query parameters (staff only).
-
   '/orgs/{org_id}/members/{membership_id}':
     parameters:
       - name: org_id
@@ -500,7 +491,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/membership'
-
       operationId: patch_org_member
       tags:
         - orgs
@@ -544,7 +534,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/membership'
-
         '404':
           description: Not Found
           content:
@@ -596,11 +585,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/membership'
-
       operationId: get_org_members
       tags:
         - orgs
-
       summary: Retrieve the set of members for the given org.
       description: Retrieve the set of members for the given org.
   '/orgs/{org_id}/invitations':
@@ -635,7 +622,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/invitation'
-
       operationId: get_org_invitations
       tags:
         - orgs
@@ -673,7 +659,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
-
         '400':
           description: Bad Request
           content:
@@ -698,7 +683,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/contact'
-
     post:
       responses:
         '201':
@@ -724,7 +708,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
-
         '400':
           description: Bad Request
           content:
@@ -749,7 +732,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/contact'
-
         description: ''
     delete:
       responses:
@@ -776,7 +758,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/contact'
-
       operationId: delete_org_contacts
       tags:
         - orgs
@@ -801,14 +782,13 @@ paths:
                         created: '2020-05-14T17:33:04.315908+00:00'
                         createdBy: BCREGTEST Bena THIRTEEN
                         links:
-                        - 713
+                          - 713
                         modified: '2020-08-07T23:55:56.576008+00:00'
                         modifiedBy: BCREGTEST Bena THIRTEEN
                         postalCode: V4T 2A5
                         region: BC
                         street: 66-2098 Boucherie Rd
                         streetAdditional: First
-
           headers:
             X-Application-Context:
               schema:
@@ -897,7 +877,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/affiliation'
-
         '400':
           description: Bad Request
           content:
@@ -924,21 +903,19 @@ paths:
               title: affiliationRequest
               properties:
                 businessIdentifier:
-                  #$id: '#/properties/businessIdentifier'
                   type: string
                   title: Business Identifier
                   default: ''
                   example:
                     - CP1234567
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 passCode:
-                  #$id: '#/properties/passCode'
                   type: string
                   title: Passcode
                   default: ''
                   example:
                     - '12345'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
               required:
                 - businessIdentifier
     get:
@@ -966,7 +943,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/affiliation'
-
       operationId: get_org_affiliations
       tags:
         - orgs
@@ -1007,7 +983,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/org'
-
         '400':
           description: Bad Request
           content:
@@ -1049,22 +1024,20 @@ paths:
               type: object
               properties:
                 name:
-                  #$id: '#/properties/name'
                   type: string
                   title: Organization Name
                   default: ''
                   example:
                     - Foobar Inc.
-                  pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
+                  pattern: '^[^\s]+(\s+[^\s]+)*$'
                 typeCode:
-                  #$id: '#/properties/orgType'
                   type: string
                   title: Organizational Type
                   default: IMPLICIT
                   example:
                     - IMPLICIT
                     - EXPLICIT
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
               required:
                 - name
     get:
@@ -1099,7 +1072,6 @@ paths:
                     name: Mock Account
                     preferred_payment: CC
                     orgType: PREMIUM
-
         '404':
           description: Not Found
           content:
@@ -1119,7 +1091,6 @@ paths:
         - orgs
       summary: Get the org specified by the provided id.
       description: Get the org specified by the provided id.
-
   /orgs:
     post:
       responses:
@@ -1146,7 +1117,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/org'
-
         '400':
           description: Bad Request
           content:
@@ -1174,22 +1144,20 @@ paths:
               type: object
               properties:
                 name:
-                  #$id: '#/properties/name'
                   type: string
                   title: Organization Name
                   default: ''
                   example:
                     - Foobar Inc.
-                  pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
+                  pattern: '^[^\s]+(\s+[^\s]+)*$'
                 typeCode:
-                  #$id: '#/properties/orgType'
                   type: string
                   title: Organizational Type
                   default: IMPLICIT
                   example:
                     - IMPLICIT
                     - EXPLICIT
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
               required:
                 - name
     get:
@@ -1248,68 +1216,60 @@ paths:
                 type: object
                 properties:
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T13:49:45.244134+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created_by:
-                    #$id: '#/properties/created_by'
                     type: string
                     title: The Created_by Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   id:
-                    #$id: '#/properties/id'
                     type: integer
                     title: The Id Schema
                     default: 0
                     example:
                       - 103
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T13:49:45.244148+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
                     example:
                       - AOT
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   orgType:
-                    #$id: '#/properties/orgType'
                     type: string
                     title: The Orgtype Schema
                     default: ''
                     example:
                       - IMPLICIT
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   org_status:
-                    #$id: '#/properties/org_status'
                     type: string
                     title: The Org_status Schema
                     default: ''
                     example:
                       - ACTIVE
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   preferred_payment:
-                    #$id: '#/properties/preferred_payment'
                     type: string
                     title: The Preferred_payment Schema
                     default: ''
                     example:
                       - CC
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified_by:
                     type: string
                 required:
@@ -1328,7 +1288,6 @@ paths:
                       - id: '1234'
                         name: Mock Account
                         preferred_payment: CC
-
                 CP0002000:
                   value:
                     - id: '2000'
@@ -1466,15 +1425,13 @@ paths:
                 type: object
                 properties:
                   expiresOn:
-                    #$id: '#/properties/expiresOn'
                     type: string
                     title: The Expireson Schema
                     default: ''
                     example:
                       - '2020-01-16T13:55:05.960809+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   id:
-                    #$id: '#/properties/id'
                     type: integer
                     title: The Id Schema
                     default: 0
@@ -1492,55 +1449,48 @@ paths:
                           type: object
                           properties:
                             created:
-                              #$id: '#/properties/created'
                               type: string
                               title: The Created Schema
                               default: ''
                               example:
                                 - '2020-01-09T11:13:59.293603+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             email:
-                              #$id: '#/properties/email'
                               type: string
                               title: The Email Schema
                               default: ''
                               example:
                                 - service-account-sbc-auth-admin@placeholder.org
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             firstname:
-                              #$id: '#/properties/firstname'
                               type: string
                               title: The Firstname Schema
                               default: ''
                               example:
                                 - sbc-auth
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             keycloakGuid:
-                              #$id: '#/properties/keycloakGuid'
                               type: string
                               title: The Keycloakguid Schema
                               default: ''
                               example:
                                 - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             lastname:
-                              #$id: '#/properties/lastname'
                               type: string
                               title: The Lastname Schema
                               default: ''
                               example:
                                 - admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             modified:
-                              #$id: '#/properties/modified'
                               type: string
                               title: The Modified Schema
                               default: ''
                               example:
                                 - '2020-01-09T11:13:59.295264+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             userStatus:
-                              #$id: '#/properties/userStatus'
                               type: integer
                               title: The Userstatus Schema
                               default: 0
@@ -1555,13 +1505,12 @@ paths:
                                 termsOfUseAcceptedVersion:
                                   type: string
                             username:
-                              #$id: '#/properties/username'
                               type: string
                               title: The Username Schema
                               default: ''
                               example:
                                 - service-account-sbc-auth-admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                           required:
                             - created
                             - email
@@ -1577,68 +1526,60 @@ paths:
                           type: object
                           properties:
                             created:
-                              #$id: '#/properties/created'
                               type: string
                               title: The Created Schema
                               default: ''
                               example:
                                 - '2020-01-09T13:49:45.244134+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             created_by:
-                              #$id: '#/properties/created_by'
                               type: string
                               title: The Created_by Schema
                               default: ''
                               example:
                                 - sbc-auth admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             id:
-                              #$id: '#/properties/id'
                               type: integer
                               title: The Id Schema
                               default: 0
                               example:
                                 - 103
                             modified:
-                              #$id: '#/properties/modified'
                               type: string
                               title: The Modified Schema
                               default: ''
                               example:
                                 - '2020-01-09T13:49:45.244148+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             name:
-                              #$id: '#/properties/name'
                               type: string
                               title: The Name Schema
                               default: ''
                               example:
                                 - AOT
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             orgType:
-                              #$id: '#/properties/orgType'
                               type: string
                               title: The Orgtype Schema
                               default: ''
                               example:
                                 - IMPLICIT
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             org_status:
-                              #$id: '#/properties/org_status'
                               type: string
                               title: The Org_status Schema
                               default: ''
                               example:
                                 - ACTIVE
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             preferred_payment:
-                              #$id: '#/properties/preferred_payment'
                               type: string
                               title: The Preferred_payment Schema
                               default: ''
                               example:
                                 - CC
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             modified_by:
                               type: string
                           required:
@@ -1657,37 +1598,33 @@ paths:
                         id:
                           type: string
                   recipientEmail:
-                    #$id: '#/properties/recipientEmail'
                     type: string
                     title: The Recipientemail Schema
                     default: ''
                     example:
                       - saravanpa@gmai.com
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   sentDate:
-                    #$id: '#/properties/sentDate'
                     type: string
                     title: The Sentdate Schema
                     default: ''
                     example:
                       - '2020-01-09T13:55:05.960809+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   status:
-                    #$id: '#/properties/status'
                     type: string
                     title: The Status Schema
                     default: ''
                     example:
                       - PENDING
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   token:
-                    #$id: '#/properties/token'
                     type: string
                     title: The Token Schema
                     default: ''
                     example:
                       - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                 required:
                   - expiresOn
                   - id
@@ -1736,15 +1673,13 @@ paths:
                 type: object
                 properties:
                   expiresOn:
-                    #$id: '#/properties/expiresOn'
                     type: string
                     title: The Expireson Schema
                     default: ''
                     example:
                       - '2020-01-16T13:55:05.960809+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   id:
-                    #$id: '#/properties/id'
                     type: integer
                     title: The Id Schema
                     default: 0
@@ -1762,55 +1697,48 @@ paths:
                           type: object
                           properties:
                             created:
-                              #$id: '#/properties/created'
                               type: string
                               title: The Created Schema
                               default: ''
                               example:
                                 - '2020-01-09T11:13:59.293603+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             email:
-                              #$id: '#/properties/email'
                               type: string
                               title: The Email Schema
                               default: ''
                               example:
                                 - service-account-sbc-auth-admin@placeholder.org
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             firstname:
-                              #$id: '#/properties/firstname'
                               type: string
                               title: The Firstname Schema
                               default: ''
                               example:
                                 - sbc-auth
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             keycloakGuid:
-                              #$id: '#/properties/keycloakGuid'
                               type: string
                               title: The Keycloakguid Schema
                               default: ''
                               example:
                                 - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             lastname:
-                              #$id: '#/properties/lastname'
                               type: string
                               title: The Lastname Schema
                               default: ''
                               example:
                                 - admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             modified:
-                              #$id: '#/properties/modified'
                               type: string
                               title: The Modified Schema
                               default: ''
                               example:
                                 - '2020-01-09T11:13:59.295264+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             userStatus:
-                              #$id: '#/properties/userStatus'
                               type: integer
                               title: The Userstatus Schema
                               default: 0
@@ -1825,13 +1753,12 @@ paths:
                                 termsOfUseAcceptedVersion:
                                   type: string
                             username:
-                              #$id: '#/properties/username'
                               type: string
                               title: The Username Schema
                               default: ''
                               example:
                                 - service-account-sbc-auth-admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                           required:
                             - created
                             - email
@@ -1847,68 +1774,60 @@ paths:
                           type: object
                           properties:
                             created:
-                              #$id: '#/properties/created'
                               type: string
                               title: The Created Schema
                               default: ''
                               example:
                                 - '2020-01-09T13:49:45.244134+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             created_by:
-                              #$id: '#/properties/created_by'
                               type: string
                               title: The Created_by Schema
                               default: ''
                               example:
                                 - sbc-auth admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             id:
-                              #$id: '#/properties/id'
                               type: integer
                               title: The Id Schema
                               default: 0
                               example:
                                 - 103
                             modified:
-                              #$id: '#/properties/modified'
                               type: string
                               title: The Modified Schema
                               default: ''
                               example:
                                 - '2020-01-09T13:49:45.244148+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             name:
-                              #$id: '#/properties/name'
                               type: string
                               title: The Name Schema
                               default: ''
                               example:
                                 - AOT
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             orgType:
-                              #$id: '#/properties/orgType'
                               type: string
                               title: The Orgtype Schema
                               default: ''
                               example:
                                 - IMPLICIT
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             org_status:
-                              #$id: '#/properties/org_status'
                               type: string
                               title: The Org_status Schema
                               default: ''
                               example:
                                 - ACTIVE
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             preferred_payment:
-                              #$id: '#/properties/preferred_payment'
                               type: string
                               title: The Preferred_payment Schema
                               default: ''
                               example:
                                 - CC
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             modified_by:
                               type: string
                           required:
@@ -1927,37 +1846,33 @@ paths:
                         id:
                           type: string
                   recipientEmail:
-                    #$id: '#/properties/recipientEmail'
                     type: string
                     title: The Recipientemail Schema
                     default: ''
                     example:
                       - saravanpa@gmai.com
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   sentDate:
-                    #$id: '#/properties/sentDate'
                     type: string
                     title: The Sentdate Schema
                     default: ''
                     example:
                       - '2020-01-09T13:55:05.960809+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   status:
-                    #$id: '#/properties/status'
                     type: string
                     title: The Status Schema
                     default: ''
                     example:
                       - PENDING
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   token:
-                    #$id: '#/properties/token'
                     type: string
                     title: The Token Schema
                     default: ''
                     example:
                       - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                 required:
                   - expiresOn
                   - id
@@ -2026,15 +1941,13 @@ paths:
                 type: object
                 properties:
                   expiresOn:
-                    #$id: '#/properties/expiresOn'
                     type: string
                     title: The Expireson Schema
                     default: ''
                     example:
                       - '2020-01-16T13:55:05.960809+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   id:
-                    #$id: '#/properties/id'
                     type: integer
                     title: The Id Schema
                     default: 0
@@ -2052,55 +1965,48 @@ paths:
                           type: object
                           properties:
                             created:
-                              #$id: '#/properties/created'
                               type: string
                               title: The Created Schema
                               default: ''
                               example:
                                 - '2020-01-09T11:13:59.293603+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             email:
-                              #$id: '#/properties/email'
                               type: string
                               title: The Email Schema
                               default: ''
                               example:
                                 - service-account-sbc-auth-admin@placeholder.org
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             firstname:
-                              #$id: '#/properties/firstname'
                               type: string
                               title: The Firstname Schema
                               default: ''
                               example:
                                 - sbc-auth
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             keycloakGuid:
-                              #$id: '#/properties/keycloakGuid'
                               type: string
                               title: The Keycloakguid Schema
                               default: ''
                               example:
                                 - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             lastname:
-                              #$id: '#/properties/lastname'
                               type: string
                               title: The Lastname Schema
                               default: ''
                               example:
                                 - admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             modified:
-                              #$id: '#/properties/modified'
                               type: string
                               title: The Modified Schema
                               default: ''
                               example:
                                 - '2020-01-09T11:13:59.295264+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             userStatus:
-                              #$id: '#/properties/userStatus'
                               type: integer
                               title: The Userstatus Schema
                               default: 0
@@ -2115,13 +2021,12 @@ paths:
                                 termsOfUseAcceptedVersion:
                                   type: string
                             username:
-                              #$id: '#/properties/username'
                               type: string
                               title: The Username Schema
                               default: ''
                               example:
                                 - service-account-sbc-auth-admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                           required:
                             - created
                             - email
@@ -2137,68 +2042,60 @@ paths:
                           type: object
                           properties:
                             created:
-                              #$id: '#/properties/created'
                               type: string
                               title: The Created Schema
                               default: ''
                               example:
                                 - '2020-01-09T13:49:45.244134+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             created_by:
-                              #$id: '#/properties/created_by'
                               type: string
                               title: The Created_by Schema
                               default: ''
                               example:
                                 - sbc-auth admin
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             id:
-                              #$id: '#/properties/id'
                               type: integer
                               title: The Id Schema
                               default: 0
                               example:
                                 - 103
                             modified:
-                              #$id: '#/properties/modified'
                               type: string
                               title: The Modified Schema
                               default: ''
                               example:
                                 - '2020-01-09T13:49:45.244148+00:00'
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             name:
-                              #$id: '#/properties/name'
                               type: string
                               title: The Name Schema
                               default: ''
                               example:
                                 - AOT
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             orgType:
-                              #$id: '#/properties/orgType'
                               type: string
                               title: The Orgtype Schema
                               default: ''
                               example:
                                 - IMPLICIT
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             org_status:
-                              #$id: '#/properties/org_status'
                               type: string
                               title: The Org_status Schema
                               default: ''
                               example:
                                 - ACTIVE
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             preferred_payment:
-                              #$id: '#/properties/preferred_payment'
                               type: string
                               title: The Preferred_payment Schema
                               default: ''
                               example:
                                 - CC
-                              pattern: '^(.*)$'
+                              pattern: ^(.*)$
                             modified_by:
                               type: string
                           required:
@@ -2216,39 +2113,34 @@ paths:
                           type: string
                         id:
                           type: string
-
                   recipientEmail:
-                    #$id: '#/properties/recipientEmail'
                     type: string
                     title: The Recipientemail Schema
                     default: ''
                     example:
                       - saravanpa@gmai.com
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   sentDate:
-                    #$id: '#/properties/sentDate'
                     type: string
                     title: The Sentdate Schema
                     default: ''
                     example:
                       - '2020-01-09T13:55:05.960809+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   status:
-                    #$id: '#/properties/status'
                     type: string
                     title: The Status Schema
                     default: ''
                     example:
                       - PENDING
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   token:
-                    #$id: '#/properties/token'
                     type: string
                     title: The Token Schema
                     default: ''
                     example:
                       - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                 required:
                   - expiresOn
                   - id
@@ -2277,7 +2169,6 @@ paths:
                   type: string
                   format: datetime
                   title: The date invitation is sent.
-
       summary: Send a new invitation using the details in request and saves the invitation.
       description: Send a new invitation using the details in request and saves the invitation.
   '/entities/{business_identifier}/contacts':
@@ -2315,21 +2206,19 @@ paths:
                 type: object
                 properties:
                   businessIdentifier:
-                    #$id: '#/properties/businessIdentifier'
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
                     example:
                       - CP0001578
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   businessNumber:
-                    #$id: '#/properties/businessNumber'
                     type: string
                     title: The Businessnumber Schema
                     default: ''
                     example:
                       - CP0001847
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   contacts:
                     type: array
                     title: The Contacts Schema
@@ -2343,114 +2232,106 @@ paths:
                           default: ''
                           example:
                             - abc123@mail.com
-                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
                           example:
                             - '123'
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
                           example:
                             - 111-222-3333
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
                           example:
                             - Ring buzzer 123
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         postalCode:
-                          #$id: '#/properties/postal_code'
                           type: string
                           title: Postal Code
                           default: ''
                           example:
                             - V1A 1A1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
                           example:
                             - CA
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         region:
-                          #$id: '#/properties/region'
                           type: string
                           title: Region
                           default: ''
                           example:
                             - British Columbia
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
                           example:
                             - Victoria
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
                           example:
                             - Unit 1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
                           example:
                             - 123 Roundabout Lane
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                   corpType:
-                    #$id: '#/properties/corpType'
                     type: string
                     title: The Corptype Schema
                     default: ''
                     example:
                       - CP
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T11:11:31.303521+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T11:14:06.560862+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modifiedBy:
-                    #$id: '#/properties/modifiedBy'
                     type: string
                     title: The Modifiedby Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
                     example:
                       - Business
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   passCodeClaimed:
-                    #$id: '#/properties/passCodeClaimed'
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
@@ -2514,72 +2395,70 @@ paths:
                   default: ''
                   example:
                     - abc123@mail.com
-                  pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                  pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                 phoneExtension:
                   type: string
                   title: Phone Extension
                   default: ''
                   example:
                     - '123'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 phone:
                   type: string
                   title: Phone
                   default: ''
                   example:
                     - 111-222-3333
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 deliveryInstructions:
                   type: string
                   title: Delivery Instructions
                   default: ''
                   example:
                     - Ring buzzer 123
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 postalCode:
-                  #$id: '#/properties/postal_code'
                   type: string
                   title: Postal Code
                   default: ''
                   example:
                     - V1A 1A1
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 country:
                   type: string
                   title: Country
                   default: ''
                   example:
                     - CA
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 region:
-                  #$id: '#/properties/region'
                   type: string
                   title: Region
                   default: ''
                   example:
                     - British Columbia
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 city:
                   type: string
                   title: City
                   default: ''
                   example:
                     - Victoria
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 streetAdditional:
                   type: string
                   title: Street Additional
                   default: ''
                   example:
                     - Unit 1
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 street:
                   type: string
                   title: Street
                   default: ''
                   example:
                     - 123 Roundabout Lane
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
     post:
       responses:
         '200':
@@ -2591,21 +2470,19 @@ paths:
                 type: object
                 properties:
                   businessIdentifier:
-                    #$id: '#/properties/businessIdentifier'
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
                     example:
                       - CP0001578
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   businessNumber:
-                    #$id: '#/properties/businessNumber'
                     type: string
                     title: The Businessnumber Schema
                     default: ''
                     example:
                       - CP0001847
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   contacts:
                     type: array
                     title: The Contacts Schema
@@ -2619,114 +2496,106 @@ paths:
                           default: ''
                           example:
                             - abc123@mail.com
-                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
                           example:
                             - '123'
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
                           example:
                             - 111-222-3333
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
                           example:
                             - Ring buzzer 123
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         postalCode:
-                          #$id: '#/properties/postal_code'
                           type: string
                           title: Postal Code
                           default: ''
                           example:
                             - V1A 1A1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
                           example:
                             - CA
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         region:
-                          #$id: '#/properties/region'
                           type: string
                           title: Region
                           default: ''
                           example:
                             - British Columbia
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
                           example:
                             - Victoria
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
                           example:
                             - Unit 1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
                           example:
                             - 123 Roundabout Lane
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                   corpType:
-                    #$id: '#/properties/corpType'
                     type: string
                     title: The Corptype Schema
                     default: ''
                     example:
                       - CP
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T11:11:31.303521+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T11:14:06.560862+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modifiedBy:
-                    #$id: '#/properties/modifiedBy'
                     type: string
                     title: The Modifiedby Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
                     example:
                       - Business
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   passCodeClaimed:
-                    #$id: '#/properties/passCodeClaimed'
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
@@ -2794,72 +2663,70 @@ paths:
                   default: ''
                   example:
                     - abc123@mail.com
-                  pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                  pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                 phoneExtension:
                   type: string
                   title: Phone Extension
                   default: ''
                   example:
                     - '123'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 phone:
                   type: string
                   title: Phone
                   default: ''
                   example:
                     - 111-222-3333
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 deliveryInstructions:
                   type: string
                   title: Delivery Instructions
                   default: ''
                   example:
                     - Ring buzzer 123
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 postalCode:
-                  #$id: '#/properties/postal_code'
                   type: string
                   title: Postal Code
                   default: ''
                   example:
                     - V1A 1A1
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 country:
                   type: string
                   title: Country
                   default: ''
                   example:
                     - CA
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 region:
-                  #$id: '#/properties/region'
                   type: string
                   title: Region
                   default: ''
                   example:
                     - British Columbia
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 city:
                   type: string
                   title: City
                   default: ''
                   example:
                     - Victoria
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 streetAdditional:
                   type: string
                   title: Street Additional
                   default: ''
                   example:
                     - Unit 1
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 street:
                   type: string
                   title: Street
                   default: ''
                   example:
                     - 123 Roundabout Lane
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
           application/xml:
             schema:
               title: contact
@@ -2871,72 +2738,70 @@ paths:
                   default: ''
                   example:
                     - abc123@mail.com
-                  pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                  pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                 phoneExtension:
                   type: string
                   title: Phone Extension
                   default: ''
                   example:
                     - '123'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 phone:
                   type: string
                   title: Phone
                   default: ''
                   example:
                     - 111-222-3333
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 deliveryInstructions:
                   type: string
                   title: Delivery Instructions
                   default: ''
                   example:
                     - Ring buzzer 123
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 postalCode:
-                  #$id: '#/properties/postal_code'
                   type: string
                   title: Postal Code
                   default: ''
                   example:
                     - V1A 1A1
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 country:
                   type: string
                   title: Country
                   default: ''
                   example:
                     - CA
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 region:
-                  #$id: '#/properties/region'
                   type: string
                   title: Region
                   default: ''
                   example:
                     - British Columbia
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 city:
                   type: string
                   title: City
                   default: ''
                   example:
                     - Victoria
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 streetAdditional:
                   type: string
                   title: Street Additional
                   default: ''
                   example:
                     - Unit 1
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 street:
                   type: string
                   title: Street
                   default: ''
                   example:
                     - 123 Roundabout Lane
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
         description: ''
     delete:
       responses:
@@ -2949,21 +2814,19 @@ paths:
                 type: object
                 properties:
                   businessIdentifier:
-                    #$id: '#/properties/businessIdentifier'
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
                     example:
                       - CP0001578
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   businessNumber:
-                    #$id: '#/properties/businessNumber'
                     type: string
                     title: The Businessnumber Schema
                     default: ''
                     example:
                       - CP0001847
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   contacts:
                     type: array
                     title: The Contacts Schema
@@ -2977,114 +2840,106 @@ paths:
                           default: ''
                           example:
                             - abc123@mail.com
-                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
                           example:
                             - '123'
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
                           example:
                             - 111-222-3333
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
                           example:
                             - Ring buzzer 123
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         postalCode:
-                          #$id: '#/properties/postal_code'
                           type: string
                           title: Postal Code
                           default: ''
                           example:
                             - V1A 1A1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
                           example:
                             - CA
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         region:
-                          #$id: '#/properties/region'
                           type: string
                           title: Region
                           default: ''
                           example:
                             - British Columbia
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
                           example:
                             - Victoria
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
                           example:
                             - Unit 1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
                           example:
                             - 123 Roundabout Lane
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                   corpType:
-                    #$id: '#/properties/corpType'
                     type: string
                     title: The Corptype Schema
                     default: ''
                     example:
                       - CP
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T11:11:31.303521+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T11:14:06.560862+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modifiedBy:
-                    #$id: '#/properties/modifiedBy'
                     type: string
                     title: The Modifiedby Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
                     example:
                       - Business
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   passCodeClaimed:
-                    #$id: '#/properties/passCodeClaimed'
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
@@ -3370,7 +3225,7 @@ paths:
             value: CP0002000
           CP0001239:
             value: CP0001239
-  '/accounts/{account_id}/products/{product_code}/authorizations':
+  '/api/v1/accounts/{account_id}/products/{product_code}/authorizations':
     get:
       summary: Get authorizations for the account per product
       operationId: getAccAuthorizations
@@ -3413,23 +3268,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/authorizations'
               examples:
-                example1:
+                example-1:
                   value:
-                    orgMembership: OWNER
+                    orgMembership: MEMBER
                     roles:
                       - search
                       - edit
                       - make_payment
-                    business:
-                      folioNumber: MOCK1234
-                      name: Mock Business
-                    account:
-                      id: '1234'
-                      name: Mock Account
-                      paymentPreference:
-                        methodOfPayment: CC
-                        bcOnlineUserId: PB25020
-                        bcOnlineAccountId: ''
+                example-2:
+                  value:
+                    orgMembership: ADMIN
+                    roles:
+                      - search
+                      - edit
+                      - make_payment
         default:
           description: unexpected error
           content:
@@ -3443,7 +3295,7 @@ paths:
         name: account_id
         in: path
         required: true
-        description: Corp Num/Incorporation Number of the entity
+        description: Account ID
         example:
           example1:
             value: 1234
@@ -3452,7 +3304,7 @@ paths:
         name: product_code
         in: path
         required: true
-        description: Corp Num/Incorporation Number of the entity
+        description: Product code
         example:
           example1:
             value: PPR
@@ -3506,32 +3358,31 @@ paths:
                       id: '1234'
                       name: Mock Account
                     paymentPreference:
-                      bcOnlineAccountId:
-                      bcOnlineUserId:
+                      bcOnlineAccountId: null
+                      bcOnlineUserId: null
                       preferred_payment: PAD
                     business:
-                      folioNumber:
-                      name:
+                      folioNumber: null
+                      name: null
                     orgMembership: ADMIN
                     roles:
-                    - remove_business
-                    - change_address
-                    - change_org_name
-                    - invite_members
-                    - change_account_type
-                    - change_role
-                    - reset_password
-                    - set_auth_options
-                    - transaction_history
-                    - manage_statements
-                    - reset_otp
-                    - view_payment_methods
-                    - edit
-                    - view
-                    - make_payment
-                    - generate_invoice
-                    - change_statement_settings
-
+                      - remove_business
+                      - change_address
+                      - change_org_name
+                      - invite_members
+                      - change_account_type
+                      - change_role
+                      - reset_password
+                      - set_auth_options
+                      - transaction_history
+                      - manage_statements
+                      - reset_otp
+                      - view_payment_methods
+                      - edit
+                      - view
+                      - make_payment
+                      - generate_invoice
+                      - change_statement_settings
         default:
           description: unexpected error
           content:
@@ -3584,21 +3435,19 @@ paths:
                 type: object
                 properties:
                   businessIdentifier:
-                    #$id: '#/properties/businessIdentifier'
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
                     example:
                       - CP0001578
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   businessNumber:
-                    #$id: '#/properties/businessNumber'
                     type: string
                     title: The Businessnumber Schema
                     default: ''
                     example:
                       - CP0001847
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   contacts:
                     type: array
                     title: The Contacts Schema
@@ -3612,114 +3461,106 @@ paths:
                           default: ''
                           example:
                             - abc123@mail.com
-                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
                           example:
                             - '123'
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
                           example:
                             - 111-222-3333
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
                           example:
                             - Ring buzzer 123
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         postalCode:
-                          #$id: '#/properties/postal_code'
                           type: string
                           title: Postal Code
                           default: ''
                           example:
                             - V1A 1A1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
                           example:
                             - CA
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         region:
-                          #$id: '#/properties/region'
                           type: string
                           title: Region
                           default: ''
                           example:
                             - British Columbia
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
                           example:
                             - Victoria
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
                           example:
                             - Unit 1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
                           example:
                             - 123 Roundabout Lane
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                   corpType:
-                    #$id: '#/properties/corpType'
                     type: string
                     title: The Corptype Schema
                     default: ''
                     example:
                       - CP
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T11:11:31.303521+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T11:14:06.560862+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modifiedBy:
-                    #$id: '#/properties/modifiedBy'
                     type: string
                     title: The Modifiedby Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
                     example:
                       - Business
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   passCodeClaimed:
-                    #$id: '#/properties/passCodeClaimed'
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
@@ -3782,21 +3623,19 @@ paths:
                 type: object
                 properties:
                   businessIdentifier:
-                    #$id: '#/properties/businessIdentifier'
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
                     example:
                       - CP0001578
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   businessNumber:
-                    #$id: '#/properties/businessNumber'
                     type: string
                     title: The Businessnumber Schema
                     default: ''
                     example:
                       - CP0001847
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   contacts:
                     type: array
                     title: The Contacts Schema
@@ -3810,114 +3649,106 @@ paths:
                           default: ''
                           example:
                             - abc123@mail.com
-                          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
                           example:
                             - '123'
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
                           example:
                             - 111-222-3333
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
                           example:
                             - Ring buzzer 123
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         postalCode:
-                          #$id: '#/properties/postal_code'
                           type: string
                           title: Postal Code
                           default: ''
                           example:
                             - V1A 1A1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
                           example:
                             - CA
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         region:
-                          #$id: '#/properties/region'
                           type: string
                           title: Region
                           default: ''
                           example:
                             - British Columbia
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
                           example:
                             - Victoria
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
                           example:
                             - Unit 1
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
                           example:
                             - 123 Roundabout Lane
-                          pattern: '^(.*)$'
+                          pattern: ^(.*)$
                   corpType:
-                    #$id: '#/properties/corpType'
                     type: string
                     title: The Corptype Schema
                     default: ''
                     example:
                       - CP
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T11:11:31.303521+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T11:14:06.560862+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modifiedBy:
-                    #$id: '#/properties/modifiedBy'
                     type: string
                     title: The Modifiedby Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
                     example:
                       - Business
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   passCodeClaimed:
-                    #$id: '#/properties/passCodeClaimed'
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
@@ -3991,45 +3822,40 @@ paths:
               type: object
               properties:
                 businessIdentifier:
-                  #$id: '#/properties/businessIdentifier'
                   type: string
                   title: Business Identifier
                   default: ''
                   example:
                     - CP1234567
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 businessNumber:
-                  #$id: '#/properties/businessNumber'
                   type: string
                   title: Business Number
                   default: ''
                   example:
                     - 791861073BC0001
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 name:
-                  #$id: '#/properties/name'
                   type: string
                   title: Business Name
                   default: ''
                   example:
                     - 'Foobar, Inc.'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 passCode:
-                  #$id: '#/properties/passCode'
                   type: string
                   title: Passcode
                   default: ''
                   example:
                     - '12345'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
                 corpTypeCode:
-                  #$id: '#/properties/corpTypeCode'
                   type: string
                   title: corpTypeCode
                   default: ''
                   example:
                     - '12345'
-                  pattern: '^(.*)$'
+                  pattern: ^(.*)$
               required:
                 - businessIdentifier
         description: ''
@@ -4178,14 +4004,102 @@ paths:
                     type: string
                     description: Description of the error.
                 description: Contains details of an error that was encountered.
-      summary: "Return the code table values by giving code's name"
+      summary: Return the code table values by giving code's name
       operationId: get_codes
       tags:
         - codes
       description: Endpoints for get codes from database
+  '/users/{user-guid}/settings':
+    parameters:
+      - schema:
+          type: string
+        name: user-guid
+        in: path
+        required: true
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/userSettings'
+              examples:
+                example-1:
+                  value:
+                    - accountStatus: ACTIVE
+                      accountType: PREMIUM
+                      id: 2662
+                      label: PREMIUM SAMPLE ACCOUNT
+                      productSettings: /account/2662/settings/product-settings
+                      type: ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /account/2662/settings
+                    - accountStatus: ACTIVE
+                      accountType: BASIC
+                      id: 2664
+                      label: BASIC SAMPLE ACCOUNT
+                      productSettings: /account/2664/settings/product-settings
+                      type: ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /account/2664/settings
+                    - id: 4
+                      label: USER PROFILE
+                      type: USER_PROFILE
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /userprofile
+                    - id: 4
+                      label: CREATE ACCOUNT
+                      type: CREATE_ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /setup-account
+                example-2:
+                  value:
+                    - accountStatus: ACTIVE
+                      accountType: PREMIUM
+                      id: 2468
+                      label: SAMPLE PREMIUM ACCOUNT
+                      productSettings: /account/2468/settings/product-settings
+                      type: ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /account/2468/settings
+                    - accountStatus: ACTIVE
+                      accountType: BASIC
+                      id: 2446
+                      label: SAMPLE BASIC ACCOUNT
+                      productSettings: /account/2446/settings/product-settings
+                      type: ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /account/2446/settings
+                    - accountStatus: ACTIVE
+                      accountType: PREMIUM
+                      id: 2466
+                      label: SAMPLE PREMIUM ACCOUNT II
+                      productSettings: /account/2466/settings/product-settings
+                      type: ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /account/2466/settings
+                    - id: 1333
+                      label: USER PROFILE
+                      type: USER_PROFILE
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /userprofile
+                    - id: 1333
+                      label: CREATE ACCOUNT
+                      type: CREATE_ACCOUNT
+                      urlorigin: 'https://dev.bcregistry.ca/business/auth'
+                      urlpath: /setup-account
+      operationId: get-users-user-guid-settings
+      description: Get user settings
 servers:
-  - url: 'https://auth-api-dev.pathfinder.gov.bc.ca/'
+  - url: 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/'
     description: Dev
+  - url: 'https://auth-api-test.apps.silver.devops.gov.bc.ca/'
+    description: Test
+  - url: 'https://auth-api.apps.silver.devops.gov.bc.ca/'
+    description: Prod
 tags:
   - name: Meta
     description: Metadata
@@ -4205,7 +4119,6 @@ tags:
     description: Endpoints for document management
   - name: codes
     description: Endpoints for get codes from database
-
 components:
   schemas:
     codes:
@@ -4249,92 +4162,88 @@ components:
           default: ''
           example:
             - abc123@mail.com
-          pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+          pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
         phoneExtension:
           type: string
           title: Phone Extension
           default: ''
           example:
             - '123'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         phone:
           type: string
           title: Phone
           default: ''
           example:
             - 111-222-3333
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         deliveryInstructions:
           type: string
           title: Delivery Instructions
           default: ''
           example:
             - Ring buzzer 123
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         postalCode:
-          #$id: '#/properties/postal_code'
           type: string
           title: Postal Code
           default: ''
           example:
             - V1A 1A1
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         country:
           type: string
           title: Country
           default: ''
           example:
             - CA
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         region:
-          #$id: '#/properties/region'
           type: string
           title: Region
           default: ''
           example:
             - British Columbia
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         city:
           type: string
           title: City
           default: ''
           example:
             - Victoria
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         streetAdditional:
           type: string
           title: Street Additional
           default: ''
           example:
             - Unit 1
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         street:
           type: string
           title: Street
           default: ''
           example:
             - 123 Roundabout Lane
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
     entity:
       title: entity
       type: object
       properties:
         businessIdentifier:
-          #$id: '#/properties/businessIdentifier'
           type: string
           title: The Businessidentifier Schema
           default: ''
           example:
             - CP0001578
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         businessNumber:
-          #$id: '#/properties/businessNumber'
           type: string
           title: The Businessnumber Schema
           default: ''
           example:
             - CP0001847
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         contacts:
           type: array
           title: The Contacts Schema
@@ -4348,114 +4257,106 @@ components:
                 default: ''
                 example:
                   - abc123@mail.com
-                pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
               phoneExtension:
                 type: string
                 title: Phone Extension
                 default: ''
                 example:
                   - '123'
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               phone:
                 type: string
                 title: Phone
                 default: ''
                 example:
                   - 111-222-3333
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               deliveryInstructions:
                 type: string
                 title: Delivery Instructions
                 default: ''
                 example:
                   - Ring buzzer 123
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               postalCode:
-                #$id: '#/properties/postal_code'
                 type: string
                 title: Postal Code
                 default: ''
                 example:
                   - V1A 1A1
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               country:
                 type: string
                 title: Country
                 default: ''
                 example:
                   - CA
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               region:
-                #$id: '#/properties/region'
                 type: string
                 title: Region
                 default: ''
                 example:
                   - British Columbia
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               city:
                 type: string
                 title: City
                 default: ''
                 example:
                   - Victoria
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               streetAdditional:
                 type: string
                 title: Street Additional
                 default: ''
                 example:
                   - Unit 1
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
               street:
                 type: string
                 title: Street
                 default: ''
                 example:
                   - 123 Roundabout Lane
-                pattern: '^(.*)$'
+                pattern: ^(.*)$
         corpType:
-          #$id: '#/properties/corpType'
           type: string
           title: The Corptype Schema
           default: ''
           example:
             - CP
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         created:
-          #$id: '#/properties/created'
           type: string
           title: The Created Schema
           default: ''
           example:
             - '2020-01-09T11:11:31.303521+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         modified:
-          #$id: '#/properties/modified'
           type: string
           title: The Modified Schema
           default: ''
           example:
             - '2020-01-09T11:14:06.560862+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         modifiedBy:
-          #$id: '#/properties/modifiedBy'
           type: string
           title: The Modifiedby Schema
           default: ''
           example:
             - sbc-auth admin
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         name:
-          #$id: '#/properties/name'
           type: string
           title: The Name Schema
           default: ''
           example:
             - Business
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         passCodeClaimed:
-          #$id: '#/properties/passCodeClaimed'
           type: boolean
           title: The Passcodeclaimed Schema
           default: false
@@ -4492,66 +4393,59 @@ components:
       type: object
       properties:
         businessIdentifier:
-          #$id: '#/properties/businessIdentifier'
           type: string
           title: Business Identifier
           default: ''
           example:
             - CP1234567
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         businessNumber:
-          #$id: '#/properties/businessNumber'
           type: string
           title: Business Number
           default: ''
           example:
             - 791861073BC0001
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         name:
-          #$id: '#/properties/name'
           type: string
           title: Business Name
           default: ''
           example:
             - 'Foobar, Inc.'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         passCode:
-          #$id: '#/properties/passCode'
           type: string
           title: Passcode
           default: ''
           example:
             - '12345'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         corpTypeCode:
-          #$id: '#/properties/corpTypeCode'
           type: string
           title: corpTypeCode
           default: ''
           example:
             - '12345'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
       required:
         - businessIdentifier
     affiliationRequest:
       title: affiliationRequest
       properties:
         businessIdentifier:
-          #$id: '#/properties/businessIdentifier'
           type: string
           title: Business Identifier
           default: ''
           example:
             - CP1234567
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         passCode:
-          #$id: '#/properties/passCode'
           type: string
           title: Passcode
           default: ''
           example:
             - '12345'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
       required:
         - businessIdentifier
     invitationRequest:
@@ -4578,28 +4472,26 @@ components:
               - edit
               - view
               - make_payment
-            pattern: '^(.*)$'
+            pattern: ^(.*)$
     orgRequest:
       title: orgRequest
       type: object
       properties:
         name:
-          #$id: '#/properties/name'
           type: string
           title: Organization Name
           default: ''
           example:
             - Foobar Inc.
-          pattern: "^[^\\s]+(\\s+[^\\s]+)*$"
+          pattern: '^[^\s]+(\s+[^\s]+)*$'
         typeCode:
-          #$id: '#/properties/orgType'
           type: string
           title: Organizational Type
           default: IMPLICIT
           example:
             - IMPLICIT
             - EXPLICIT
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
       required:
         - name
     userTerms:
@@ -4615,55 +4507,48 @@ components:
       type: object
       properties:
         created:
-          #$id: '#/properties/created'
           type: string
           title: The Created Schema
           default: ''
           example:
             - '2020-01-09T11:13:59.293603+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         email:
-          #$id: '#/properties/email'
           type: string
           title: The Email Schema
           default: ''
           example:
             - service-account-sbc-auth-admin@placeholder.org
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         firstname:
-          #$id: '#/properties/firstname'
           type: string
           title: The Firstname Schema
           default: ''
           example:
             - sbc-auth
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         keycloakGuid:
-          #$id: '#/properties/keycloakGuid'
           type: string
           title: The Keycloakguid Schema
           default: ''
           example:
             - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         lastname:
-          #$id: '#/properties/lastname'
           type: string
           title: The Lastname Schema
           default: ''
           example:
             - admin
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         modified:
-          #$id: '#/properties/modified'
           type: string
           title: The Modified Schema
           default: ''
           example:
             - '2020-01-09T11:13:59.295264+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         userStatus:
-          #$id: '#/properties/userStatus'
           type: integer
           title: The Userstatus Schema
           default: 0
@@ -4678,13 +4563,12 @@ components:
             termsOfUseAcceptedVersion:
               type: string
         username:
-          #$id: '#/properties/username'
           type: string
           title: The Username Schema
           default: ''
           example:
             - service-account-sbc-auth-admin
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
       required:
         - created
         - email
@@ -4704,55 +4588,48 @@ components:
           type: object
           properties:
             created:
-              #$id: '#/properties/created'
               type: string
               title: The Created Schema
               default: ''
               example:
                 - '2020-01-09T11:13:59.293603+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             email:
-              #$id: '#/properties/email'
               type: string
               title: The Email Schema
               default: ''
               example:
                 - service-account-sbc-auth-admin@placeholder.org
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             firstname:
-              #$id: '#/properties/firstname'
               type: string
               title: The Firstname Schema
               default: ''
               example:
                 - sbc-auth
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             keycloakGuid:
-              #$id: '#/properties/keycloakGuid'
               type: string
               title: The Keycloakguid Schema
               default: ''
               example:
                 - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             lastname:
-              #$id: '#/properties/lastname'
               type: string
               title: The Lastname Schema
               default: ''
               example:
                 - admin
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             modified:
-              #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
               example:
                 - '2020-01-09T11:13:59.295264+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             userStatus:
-              #$id: '#/properties/userStatus'
               type: integer
               title: The Userstatus Schema
               default: 0
@@ -4767,13 +4644,12 @@ components:
                 termsOfUseAcceptedVersion:
                   type: string
             username:
-              #$id: '#/properties/username'
               type: string
               title: The Username Schema
               default: ''
               example:
                 - service-account-sbc-auth-admin
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
           required:
             - created
             - email
@@ -4789,68 +4665,60 @@ components:
           type: object
           properties:
             created:
-              #$id: '#/properties/created'
               type: string
               title: The Created Schema
               default: ''
               example:
                 - '2020-01-09T13:49:45.244134+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             created_by:
-              #$id: '#/properties/created_by'
               type: string
               title: The Created_by Schema
               default: ''
               example:
                 - sbc-auth admin
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             id:
-              #$id: '#/properties/id'
               type: integer
               title: The Id Schema
               default: 0
               example:
                 - 103
             modified:
-              #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
               example:
                 - '2020-01-09T13:49:45.244148+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             name:
-              #$id: '#/properties/name'
               type: string
               title: The Name Schema
               default: ''
               example:
                 - AOT
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             orgType:
-              #$id: '#/properties/orgType'
               type: string
               title: The Orgtype Schema
               default: ''
               example:
                 - IMPLICIT
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             org_status:
-              #$id: '#/properties/org_status'
               type: string
               title: The Org_status Schema
               default: ''
               example:
                 - ACTIVE
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             preferred_payment:
-              #$id: '#/properties/preferred_payment'
               type: string
               title: The Preferred_payment Schema
               default: ''
               example:
                 - CC
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             modified_by:
               type: string
           required:
@@ -4873,68 +4741,60 @@ components:
       type: object
       properties:
         created:
-          #$id: '#/properties/created'
           type: string
           title: The Created Schema
           default: ''
           example:
             - '2020-01-09T13:49:45.244134+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         created_by:
-          #$id: '#/properties/created_by'
           type: string
           title: The Created_by Schema
           default: ''
           example:
             - sbc-auth admin
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         id:
-          #$id: '#/properties/id'
           type: integer
           title: The Id Schema
           default: 0
           example:
             - 103
         modified:
-          #$id: '#/properties/modified'
           type: string
           title: The Modified Schema
           default: ''
           example:
             - '2020-01-09T13:49:45.244148+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         name:
-          #$id: '#/properties/name'
           type: string
           title: The Name Schema
           default: ''
           example:
             - AOT
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         orgType:
-          #$id: '#/properties/orgType'
           type: string
           title: The Orgtype Schema
           default: ''
           example:
             - IMPLICIT
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         org_status:
-          #$id: '#/properties/org_status'
           type: string
           title: The Org_status Schema
           default: ''
           example:
             - ACTIVE
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         preferred_payment:
-          #$id: '#/properties/preferred_payment'
           type: string
           title: The Preferred_payment Schema
           default: ''
           example:
             - CC
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         modified_by:
           type: string
       required:
@@ -4950,28 +4810,17 @@ components:
       title: authorizations
       type: object
       properties:
-        corp_type_code:
-          #$id: '#/properties/corp_type_code'
-          type: string
-          title: The Corp_type_code Schema
-          default: ''
-          example:
-            - CP
-          pattern: '^(.*)$'
         orgMembership:
-          #$id: '#/properties/orgMembership'
           type: string
           title: The Orgmembership Schema
           default: ''
           example:
             - OWNER
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         roles:
-          #$id: '#/properties/roles'
           type: array
           title: The Roles Schema
           items:
-            #$id: '#/properties/roles/items'
             type: string
             title: The Items Schema
             default: ''
@@ -4979,7 +4828,7 @@ components:
               - edit
               - view
               - make_payment
-            pattern: '^(.*)$'
+            pattern: ^(.*)$
       required:
         - orgMembership
         - roles
@@ -4992,21 +4841,19 @@ components:
           type: object
           properties:
             businessIdentifier:
-              #$id: '#/properties/businessIdentifier'
               type: string
               title: The Businessidentifier Schema
               default: ''
               example:
                 - CP0001578
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             businessNumber:
-              #$id: '#/properties/businessNumber'
               type: string
               title: The Businessnumber Schema
               default: ''
               example:
                 - CP0001847
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             contacts:
               type: array
               title: The Contacts Schema
@@ -5020,114 +4867,106 @@ components:
                     default: ''
                     example:
                       - abc123@mail.com
-                    pattern: "(^[a-zA-Z0-9!#$%&'*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$)"
+                    pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                   phoneExtension:
                     type: string
                     title: Phone Extension
                     default: ''
                     example:
                       - '123'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   phone:
                     type: string
                     title: Phone
                     default: ''
                     example:
                       - 111-222-3333
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   deliveryInstructions:
                     type: string
                     title: Delivery Instructions
                     default: ''
                     example:
                       - Ring buzzer 123
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   postalCode:
-                    #$id: '#/properties/postal_code'
                     type: string
                     title: Postal Code
                     default: ''
                     example:
                       - V1A 1A1
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   country:
                     type: string
                     title: Country
                     default: ''
                     example:
                       - CA
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   region:
-                    #$id: '#/properties/region'
                     type: string
                     title: Region
                     default: ''
                     example:
                       - British Columbia
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   city:
                     type: string
                     title: City
                     default: ''
                     example:
                       - Victoria
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   streetAdditional:
                     type: string
                     title: Street Additional
                     default: ''
                     example:
                       - Unit 1
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   street:
                     type: string
                     title: Street
                     default: ''
                     example:
                       - 123 Roundabout Lane
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
             corpType:
-              #$id: '#/properties/corpType'
               type: string
               title: The Corptype Schema
               default: ''
               example:
                 - CP
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             created:
-              #$id: '#/properties/created'
               type: string
               title: The Created Schema
               default: ''
               example:
                 - '2020-01-09T11:11:31.303521+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             modified:
-              #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
               example:
                 - '2020-01-09T11:14:06.560862+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             modifiedBy:
-              #$id: '#/properties/modifiedBy'
               type: string
               title: The Modifiedby Schema
               default: ''
               example:
                 - sbc-auth admin
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             name:
-              #$id: '#/properties/name'
               type: string
               title: The Name Schema
               default: ''
               example:
                 - Business
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             passCodeClaimed:
-              #$id: '#/properties/passCodeClaimed'
               type: boolean
               title: The Passcodeclaimed Schema
               default: false
@@ -5174,68 +5013,60 @@ components:
           type: object
           properties:
             created:
-              #$id: '#/properties/created'
               type: string
               title: The Created Schema
               default: ''
               example:
                 - '2020-01-09T13:49:45.244134+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             created_by:
-              #$id: '#/properties/created_by'
               type: string
               title: The Created_by Schema
               default: ''
               example:
                 - sbc-auth admin
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             id:
-              #$id: '#/properties/id'
               type: integer
               title: The Id Schema
               default: 0
               example:
                 - 103
             modified:
-              #$id: '#/properties/modified'
               type: string
               title: The Modified Schema
               default: ''
               example:
                 - '2020-01-09T13:49:45.244148+00:00'
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             name:
-              #$id: '#/properties/name'
               type: string
               title: The Name Schema
               default: ''
               example:
                 - AOT
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             orgType:
-              #$id: '#/properties/orgType'
               type: string
               title: The Orgtype Schema
               default: ''
               example:
                 - IMPLICIT
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             org_status:
-              #$id: '#/properties/org_status'
               type: string
               title: The Org_status Schema
               default: ''
               example:
                 - ACTIVE
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             preferred_payment:
-              #$id: '#/properties/preferred_payment'
               type: string
               title: The Preferred_payment Schema
               default: ''
               example:
                 - CC
-              pattern: '^(.*)$'
+              pattern: ^(.*)$
             modified_by:
               type: string
           required:
@@ -5252,15 +5083,13 @@ components:
       type: object
       properties:
         expiresOn:
-          #$id: '#/properties/expiresOn'
           type: string
           title: The Expireson Schema
           default: ''
           example:
             - '2020-01-16T13:55:05.960809+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         id:
-          #$id: '#/properties/id'
           type: integer
           title: The Id Schema
           default: 0
@@ -5278,55 +5107,48 @@ components:
                 type: object
                 properties:
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T11:13:59.293603+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   email:
-                    #$id: '#/properties/email'
                     type: string
                     title: The Email Schema
                     default: ''
                     example:
                       - service-account-sbc-auth-admin@placeholder.org
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   firstname:
-                    #$id: '#/properties/firstname'
                     type: string
                     title: The Firstname Schema
                     default: ''
                     example:
                       - sbc-auth
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   keycloakGuid:
-                    #$id: '#/properties/keycloakGuid'
                     type: string
                     title: The Keycloakguid Schema
                     default: ''
                     example:
                       - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   lastname:
-                    #$id: '#/properties/lastname'
                     type: string
                     title: The Lastname Schema
                     default: ''
                     example:
                       - admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
                     example:
                       - '2020-01-09T11:13:59.295264+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   userStatus:
-                    #$id: '#/properties/userStatus'
                     type: integer
                     title: The Userstatus Schema
                     default: 0
@@ -5341,13 +5163,12 @@ components:
                       termsOfUseAcceptedVersion:
                         type: string
                   username:
-                    #$id: '#/properties/username'
                     type: string
                     title: The Username Schema
                     default: ''
                     example:
                       - service-account-sbc-auth-admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                 required:
                   - created
                   - email
@@ -5363,68 +5184,48 @@ components:
                 type: object
                 properties:
                   created:
-                    #$id: '#/properties/created'
                     type: string
                     title: The Created Schema
                     default: ''
                     example:
                       - '2020-01-09T13:49:45.244134+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   created_by:
-                    #$id: '#/properties/created_by'
                     type: string
                     title: The Created_by Schema
                     default: ''
                     example:
                       - sbc-auth admin
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   id:
-                    #$id: '#/properties/id'
                     type: integer
                     title: The Id Schema
                     default: 0
-                    # example:
-                    #   - 103
                   modified:
-                    #$id: '#/properties/modified'
                     type: string
                     title: The Modified Schema
                     default: ''
-                    # example:
-                    #   - '2020-01-09T13:49:45.244148+00:00'
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   name:
-                    #$id: '#/properties/name'
                     type: string
                     title: The Name Schema
                     default: ''
-                    # example:
-                    #   - AOT
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   orgType:
-                    #$id: '#/properties/orgType'
                     type: string
                     title: The Orgtype Schema
                     default: ''
-                    # example:
-                    #   - IMPLICIT
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   org_status:
-                    #$id: '#/properties/org_status'
                     type: string
                     title: The Org_status Schema
                     default: ''
-                    # example:
-                    #   - ACTIVE
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   preferred_payment:
-                    #$id: '#/properties/preferred_payment'
                     type: string
                     title: The Preferred_payment Schema
                     default: ''
-                    # example:
-                    #   - CC
-                    pattern: '^(.*)$'
+                    pattern: ^(.*)$
                   modified_by:
                     type: string
                 required:
@@ -5443,37 +5244,25 @@ components:
               id:
                 type: string
         recipientEmail:
-          #$id: '#/properties/recipientEmail'
           type: string
           title: The Recipientemail Schema
           default: ''
-          # example:
-          #   - saravanpa@gmai.com
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         sentDate:
-          #$id: '#/properties/sentDate'
           type: string
           title: The Sentdate Schema
           default: ''
-          # example:
-          #   - '2020-01-09T13:55:05.960809+00:00'
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         status:
-          #$id: '#/properties/status'
           type: string
           title: The Status Schema
           default: ''
-          # example:
-          #   - PENDING
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
         token:
-          #$id: '#/properties/token'
           type: string
           title: The Token Schema
           default: ''
-          # example:
-          #   - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-          pattern: '^(.*)$'
+          pattern: ^(.*)$
       required:
         - expiresOn
         - id
@@ -5492,3 +5281,36 @@ components:
           type: string
         notifyUser:
           type: string
+    userSettings:
+      type: array
+      description: User settings model
+      minItems: 1
+      uniqueItems: true
+      items:
+        type: object
+        properties:
+          accountStatus:
+            type: string
+            minLength: 1
+          accountType:
+            type: string
+            minLength: 1
+          id:
+            type: number
+          label:
+            type: string
+            minLength: 1
+          productSettings:
+            type: string
+            minLength: 1
+          type:
+            type: string
+            minLength: 1
+          urlorigin:
+            type: string
+            minLength: 1
+          urlpath:
+            type: string
+            minLength: 1
+        required:
+          - type
