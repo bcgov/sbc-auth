@@ -88,6 +88,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('NAME_REQUEST_URL')
   }
 
+  static getVonAPIUrl () {
+    return ConfigHelper.getValue('VON_API_URL')
+  }
+
   static getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]
