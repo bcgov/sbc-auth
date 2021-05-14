@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
-import json
 from datetime import datetime
 from typing import Dict, Tuple
 
@@ -21,7 +20,7 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException, CustomException
+from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import Affiliation as AffiliationModel
@@ -220,7 +219,6 @@ class Org:  # pylint: disable=too-many-public-methods
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
-        return
         pay_request = {
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
@@ -289,15 +287,18 @@ class Org:  # pylint: disable=too-many-public-methods
             'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     @staticmethod
-    def get_bcol_details(bcol_credential: Dict, bearer_token: str = None, org_id=None):
+    @user_context
+    def get_bcol_details(bcol_credential: Dict, org_id=None):
         """Retrieve and validate BC Online credentials."""
         validator_obj = ValidatorResponse()
-        bcol_credentials_validate(validator_obj, bcol_credential=bcol_credential)
+        arg_dict = {'bcol_credential': bcol_credential,
+                    'org_id': org_id}
+        bcol_credentials_validate(validator_obj, **arg_dict)
         if not validator_obj.is_valid:
             raise BusinessException(validator_obj.error[0], None)
         return validator_obj.response.get('bcol_response', None)
 
-    def change_org_ype(self, org_info, action=None, bearer_token: str = None):
+    def change_org_ype(self, org_info, action=None):
         """Update the passed organization with the new info.
 
         if Upgrade:
@@ -337,7 +338,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if action == ChangeType.UPGRADE.value:
             if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
-            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             ProductService.create_subscription_from_bcol_profile(self._model.id, bcol_response.get('profileFlags'))
             payment_type = PaymentMethod.BCOL.value
@@ -375,7 +376,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.add_to_session()
 
     def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
-                   bearer_token: str = None, origin_url: str = None):
+                   origin_url: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -399,7 +400,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
-            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get('profileFlags'))
             has_org_updates = True

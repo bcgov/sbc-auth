@@ -46,5 +46,4 @@ def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) ->
         if is_fatal:
             raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
         return
-    print('-----bcol_response----',bcol_response)
     validator_response.add_response({'bcol_response': bcol_response})
