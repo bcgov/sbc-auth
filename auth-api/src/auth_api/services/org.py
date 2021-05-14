@@ -220,6 +220,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
+        return
         pay_request = {
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
@@ -290,20 +291,11 @@ class Org:  # pylint: disable=too-many-public-methods
     @staticmethod
     def get_bcol_details(bcol_credential: Dict, bearer_token: str = None, org_id=None):
         """Retrieve and validate BC Online credentials."""
-        bcol_response = None
-        if bcol_credential:
-            bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
-                                             data=bcol_credential, token=bearer_token, raise_for_status=False)
-
-            if bcol_response.status_code != http_status.HTTP_200_OK:
-                error = json.loads(bcol_response.text)
-                raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
-
-            bcol_account_number = bcol_response.json().get('accountNumber')
-
-            if Org.bcol_account_link_check(bcol_account_number, org_id):
-                raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
-        return bcol_response
+        validator_obj = ValidatorResponse()
+        bcol_credentials_validate(validator_obj, bcol_credential=bcol_credential)
+        if not validator_obj.is_valid:
+            raise BusinessException(validator_obj.error[0], None)
+        return validator_obj.response.get('bcol_response', None)
 
     def change_org_ype(self, org_info, action=None, bearer_token: str = None):
         """Update the passed organization with the new info.
