@@ -50,32 +50,26 @@ import { SearchFilterParam } from '@/models/searchfilter'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import moment from 'moment'
 
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
+
 @Component({
   components: {
     TransactionsDataTable,
     SearchFilterInput
-  },
-  methods: {
-    ...mapActions('org', [
-      'getTransactionReport',
-      'getOrgPayments'
-    ])
-  },
-  computed: {
-    ...mapState('org', [
-      'currentOrganization',
-      'currentMembership',
-      'currentOrgPaymentDetails'
-    ])
   }
 })
 export default class Transactions extends Mixins(AccountChangeMixin) {
   @Prop({ default: '' }) private orgId: string;
-  private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
-  private readonly currentOrgPaymentDetails!: OrgPaymentDetails
-  private readonly getTransactionReport!: (filterParams: TransactionFilter) => TransactionTableList
-  private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
+
+  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @OrgModule.State('currentMembership') private currentMembership!: Member
+  @OrgModule.State('currentOrgPaymentDetails') private currentOrgPaymentDetails!: OrgPaymentDetails
+
+  @OrgModule.Action('getTransactionReport') private getTransactionReport!: (filterParams: TransactionFilter) => TransactionTableList
+  @OrgModule.Action('getOrgPayments') private getOrgPayments!: (orgId: number) => OrgPaymentDetails
+
   private updateTransactionTableCounter: number = 0
   private totalTransactionsCount: number = 0
   private searchFilter: SearchFilterParam[] = []
