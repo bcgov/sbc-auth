@@ -5,7 +5,7 @@
 
     <div class="view-header flex-column mb-6">
       <h2 class="view-header__title" data-test="account-settings-title">
-        Product and Services
+        Products and Services
       </h2>
       <p class="mt-3 payment-page-sub">
         Request additional products or services you wish to access through your account.
