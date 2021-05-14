@@ -63,7 +63,7 @@ def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_put_task_org(client, jwt, session, keycloak_mock,monkeypatch):  # pylint:disable=unused-argument
+def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
     # 2. Get document signed link

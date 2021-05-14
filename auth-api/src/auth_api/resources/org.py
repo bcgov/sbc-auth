@@ -157,7 +157,8 @@ class Org(Resource):
                 if action in (ChangeType.DOWNGRADE.value, ChangeType.UPGRADE.value):
                     response, status = org.change_org_ype(request_json, action).as_dict(), http_status.HTTP_200_OK
                 else:
-                    response, status = org.update_org(org_info=request_json, token_info=toke_info, origin_url=origin).as_dict(), \
+                    response, status = org.update_org(org_info=request_json, token_info=toke_info,
+                                                      origin_url=origin).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
