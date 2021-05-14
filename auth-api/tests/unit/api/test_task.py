@@ -63,7 +63,7 @@ def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_put_task_org(client, jwt, session, keycloak_mock,monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
     # 2. Get document signed link
@@ -77,9 +77,8 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
-
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id,
-                                token_info=TestJwtClaims.public_bceid_user)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
@@ -115,7 +114,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock):  # pylint:disable=un
     assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
 
 
-def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the task can be updated."""
     # 1. Create User
     # 4. Create Product subscription
@@ -129,9 +128,8 @@ def test_put_task_product(client, jwt, session, keycloak_mock):  # pylint:disabl
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
-
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id,
-                                token_info=TestJwtClaims.public_bceid_user)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
 
     product_which_doesnt_need_approval = TestOrgProductsInfo.org_products1

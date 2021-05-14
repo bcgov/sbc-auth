@@ -53,7 +53,6 @@ from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
 
-
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
@@ -78,8 +77,9 @@ class Org:  # pylint: disable=too-many-public-methods
         return obj
 
     @staticmethod
+    @user_context
     def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                   token_info: Dict = None, origin_url: str = None):
+                   origin_url: str = None, **kwargs):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         # bcol is treated like an access type as well;so its outside the scheme
@@ -111,7 +111,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            Org._handle_bceid_status_and_notification(org, origin_url, token_info)
+            Org._handle_bceid_status_and_notification(org, origin_url)
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
@@ -132,7 +132,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         user_name = ''
         if payment_method == PaymentMethod.PAD.value:  # to get the pad accepted date
-            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+            user_from_context: UserContext = kwargs['user']
+            user: UserModel = UserModel.find_by_jwt_token(token=user_from_context.token_info)
             user_name = user.username
 
         Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_name, True)
@@ -148,9 +149,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def _handle_bceid_status_and_notification(org, origin_url, token_info):
+    @user_context
+    def _handle_bceid_status_and_notification(org, origin_url, **kwargs):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
-        user = UserModel.find_by_jwt_token(token=token_info)
+        user_from_context: UserContext = kwargs['user']
+        user = UserModel.find_by_jwt_token(token=user_from_context.token_info)
         # Org.send_staff_review_account_reminder(user, org.id, origin_url)
         # create a staff review task for this account
         task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
@@ -329,7 +332,7 @@ class Org:  # pylint: disable=too-many-public-methods
             # if they have not changed the name , they can claim the name. Dont check duplicate..or else check duplicate
             # TODO fix this
             # if org_info.get('name') != self._model.name:
-                # Org.raise_error_if_duplicate_name(org_info['name'])
+            # Org.raise_error_if_duplicate_name(org_info['name'])
 
             # remove the bcol payment details from payment table
             org_info['bcol_account_id'] = ''

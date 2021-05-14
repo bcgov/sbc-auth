@@ -63,7 +63,7 @@ class Orgs(Resource):
                                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
             origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
-            response, status = OrgService.create_org(request_json, user.identifier, token,
+            response, status = OrgService.create_org(request_json, user.identifier,
                                                      origin_url=origin_url).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

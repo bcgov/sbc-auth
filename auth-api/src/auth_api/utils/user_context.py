@@ -33,6 +33,7 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
     def __init__(self):
         """Return a User Context object."""
         token_info: Dict = _get_token_info()
+        self._token_info = token_info
         user_model: UserModel = UserModel.find_by_jwt_token(token_info)
         self._user_id = None
         if user_model:
@@ -127,6 +128,11 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
     def name(self) -> str:
         """Return the name."""
         return self._name
+
+    @property
+    def token_info(self) -> Dict:
+        """Return the name."""
+        return self._token_info
 
 
 def user_context(function):
