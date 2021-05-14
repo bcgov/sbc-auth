@@ -2,33 +2,45 @@
   <v-container class="transaction-container">
     <header class="view-header align-center mb-7">
       <h2 class="view-header__title">Transactions</h2>
-      <v-btn
-        large
-        color="primary"
-        class="font-weight-bold ml-auto"
-        @click="exportCSV"
-        data-test="btn-export-csv"
-      >Export CSV</v-btn>
+
     </header>
-    <SearchFilterInput
-      :filterParams="searchFilter"
-      :filteredRecordsCount="totalTransactionsCount"
-      @filter-texts="setAppliedFilterValue"
-      :isDataFetchCompleted="isTransactionFetchDone"
-    ></SearchFilterInput>
-    <TransactionsDataTable
-      class="mt-4"
-      :transactionFilters="transactionFilterProp"
-      :key="updateTransactionTableCounter"
-      @total-transaction-count="setTotalTransactionCount"
-    ></TransactionsDataTable>
+     <section v-if="credit !==0">
+       <v-divider class="mb-8"></v-divider>
+          <h2>Account Credit: <span class="cad-credit">CAD</span> ${{credit}}</h2>
+          <p class="credit-details mt-1">You have a credit of ${{credit}} on this account.</p>
+       <v-divider class="mb-8 mt-8"></v-divider>
+      </section>
+    <section>
+      <div class="d-flex">
+      <SearchFilterInput
+        :filterParams="searchFilter"
+        :filteredRecordsCount="totalTransactionsCount"
+        @filter-texts="setAppliedFilterValue"
+        :isDataFetchCompleted="isTransactionFetchDone"
+      ></SearchFilterInput>
+       <v-btn
+          large
+          color="primary"
+          class="font-weight-bold ml-auto"
+          @click="exportCSV"
+          data-test="btn-export-csv"
+        >Export CSV</v-btn>
+         </div>
+      <TransactionsDataTable
+        class="mt-4"
+        :transactionFilters="transactionFilterProp"
+        :key="updateTransactionTableCounter"
+        @total-transaction-count="setTotalTransactionCount"
+      ></TransactionsDataTable>
+
+    </section>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Account, Pages, SearchFilterCodes } from '@/util/constants'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { TransactionFilter, TransactionFilterParams, TransactionTableList } from '@/models/transaction'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -45,13 +57,15 @@ import moment from 'moment'
   },
   methods: {
     ...mapActions('org', [
-      'getTransactionReport'
+      'getTransactionReport',
+      'getOrgPayments'
     ])
   },
   computed: {
     ...mapState('org', [
       'currentOrganization',
-      'currentMembership'
+      'currentMembership',
+      'currentOrgPaymentDetails'
     ])
   }
 })
@@ -59,16 +73,29 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   @Prop({ default: '' }) private orgId: string;
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
+  private readonly currentOrgPaymentDetails!: OrgPaymentDetails
   private readonly getTransactionReport!: (filterParams: TransactionFilter) => TransactionTableList
+  private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
   private updateTransactionTableCounter: number = 0
   private totalTransactionsCount: number = 0
   private searchFilter: SearchFilterParam[] = []
   private transactionFilterProp: TransactionFilter = {} as TransactionFilter
   private isTransactionFetchDone: boolean = false
+  public credit:any = 0
 
   private async mounted () {
     this.setAccountChangedHandler(this.initFilter)
     this.initFilter()
+  }
+
+  private async getPaymentDetails () {
+    const { authAccountId, credit } = this.currentOrgPaymentDetails
+    if (!authAccountId || Number(authAccountId) !== this.currentOrganization?.id) {
+      const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(this.currentOrganization?.id)
+      this.credit = paymentDetails.credit && paymentDetails.credit !== null ? paymentDetails.credit : 0
+    } else {
+      this.credit = credit && credit !== null ? credit : 0
+    }
   }
 
   private initializeFilters () {
@@ -119,6 +146,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   private initFilter () {
     if (this.isTransactionsAllowed) {
       this.initializeFilters()
+      this.getPaymentDetails()
       this.updateTransactionTableCounter++
     } else {
       // if the account switing happening when the user is already in the transaction page,
@@ -146,6 +174,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
+@import "$assets/scss/theme.scss";
   .view-header {
     display: flex;
     flex-direction: row;
@@ -227,5 +256,12 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     .v-progress-linear {
       margin-top: -2px !important
     }
+  }
+  .cad-credit{
+    font-size: 14px;
+    color: $gray6;
+  }
+  .credit-details{
+     color: $gray7;
   }
 </style>

@@ -82,6 +82,7 @@ export default class OrgModule extends VuexModule {
   statementSettings: StatementSettings = {} as StatementSettings
   orgProductFeeCodes: OrgProductFeeCode[] = []
   currentAccountFees: AccountFee[] = []
+  currentOrgPaymentDetails:OrgPaymentDetails[] = []
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -226,6 +227,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganizationPaymentType (paymentType: string) {
     this.currentOrgPaymentType = paymentType
+  }
+
+  @Mutation
+  public setCurrentOrganizationPaymentDetails (orgPaymentDetails: OrgPaymentDetails[]) {
+    this.currentOrgPaymentDetails = orgPaymentDetails
   }
 
   @Mutation
@@ -816,6 +822,7 @@ export default class OrgModule extends VuexModule {
     // setting padinfo for showing details
     const padInfo = response?.data?.cfsAccount || {}
     this.context.commit('setCurrentOrganizationPADInfo', padInfo)
+    this.context.commit('setCurrentOrganizationPaymentDetails', response?.data)
     return response?.data
   }
 
