@@ -6,8 +6,8 @@
     </header>
      <section v-if="credit !==0">
        <v-divider class="mb-8"></v-divider>
-          <h2>Account Credit: <span class="cad-credit">CAD</span> ${{credit}}</h2>
-          <p class="credit-details mt-1">You have a credit of ${{credit}} on this account.</p>
+          <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{credit.toFixed(2)}}</h2>
+          <p class="credit-details mt-1">You have a credit of ${{credit.toFixed(2)}} on this account.</p>
        <v-divider class="mb-8 mt-8"></v-divider>
       </section>
     <section>
