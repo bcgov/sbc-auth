@@ -287,7 +287,6 @@ class Org:  # pylint: disable=too-many-public-methods
             'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     @staticmethod
-    @user_context
     def get_bcol_details(bcol_credential: Dict, org_id=None):
         """Retrieve and validate BC Online credentials."""
         validator_obj = ValidatorResponse()
@@ -374,6 +373,16 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.contact = contact
         contact_link.org = org
         contact_link.add_to_session()
+
+    @staticmethod
+    def raise_error_if_duplicate_name(name, branch_name=None):
+        """Raise error if there is duplicate org name already."""
+        validator_obj = ValidatorResponse()
+        arg_dict = {'name': name,
+                    'branch_name': branch_name}
+        duplicate_org_name_validate(validator_obj, **arg_dict)
+        if not validator_obj.is_valid:
+            raise BusinessException(validator_obj.error[0], None)
 
     def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
                    origin_url: str = None):
