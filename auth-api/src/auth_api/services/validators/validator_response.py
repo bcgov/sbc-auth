@@ -27,8 +27,10 @@ class ValidatorResponse:  # pylint: disable=too-few-public-methods; convenience 
         self.is_valid = True
 
     def add_error(self, error: Error):
+        """Add error to the response object and make it invalid."""
         self.is_valid = False
         self.error.append(error)
 
     def add_response(self, response_message: dict):
+        """Add to the response [success cases]."""
         self.response.update(response_message)

@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Util for validating duplication in account name."""
 
 from auth_api.exceptions import Error, BusinessException
 from auth_api.models import Org as OrgModel
@@ -20,11 +21,10 @@ from auth_api.utils.user_context import user_context
 
 @user_context
 def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) -> None:
-    print('--name---------',kwargs)
+    """Validate and return org name."""
     name = kwargs.get('name')
     branch_name = kwargs.get('branch_name')
     existing_similar__org = OrgModel.find_similar_org_by_name(name, branch_name=branch_name)
-    print('00------existing_similar__org----',existing_similar__org)
     if existing_similar__org is not None:
         validator_response.add_error(Error.DATA_CONFLICT)
         if is_fatal:

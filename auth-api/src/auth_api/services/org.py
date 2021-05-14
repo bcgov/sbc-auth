@@ -31,12 +31,19 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
-from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
+from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
+from auth_api.services.validators.access_type import validate as access_type_validate
+from auth_api.services.validators.account_limit import validate as account_limit_validate
+from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
+from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
-    Status, PaymentAccountStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, TaskTypePrefix)
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
+    AccessType, ChangeType, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod, Status, TaskRelationshipStatus,
+    TaskRelationshipType, TaskStatus, TaskTypePrefix)
+from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
+
+from ..utils.account_mailer import publish_to_mailer
+from ..utils.user_context import UserContext, user_context
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -44,13 +51,8 @@ from .keycloak import KeycloakService
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
-from auth_api.services.validators.account_limit import validate as account_limit_validate
-from auth_api.services.validators.access_type import validate as access_type_validate
-from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
-from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
 from .validators.validator_response import ValidatorResponse
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.user_context import UserContext, user_context
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -86,16 +88,13 @@ class Org:  # pylint: disable=too-many-public-methods
         selected_payment_method = payment_info.get('paymentMethod', None)
         org_type = org_info.get('typeCode', OrgType.BASIC.value)
         bcol_profile_flags = None
-        validate_response: ValidatorResponse = Org.validate(org_info)
-        if not validate_response.is_valid:
-            raise BusinessException(validate_response.error[0], None)
+        validate_response: ValidatorResponse = Org._validate_and_raise_error(org_info)
         # If the account is created using BCOL credential, verify its valid bc online account
         bcol_details_response = validate_response.response.get('bcol_response', None)
         if bcol_details_response is not None and (bcol_details := bcol_details_response.json()) is not None:
             Org._map_response_to_org(bcol_details, org_info)
             bcol_profile_flags = bcol_details.get('profileFlags')
 
-        print('---validate_response.response-----', validate_response.response)
         access_type = validate_response.response.get('access_type')
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
@@ -261,19 +260,23 @@ class Org:  # pylint: disable=too-many-public-methods
         return payment_account_status
 
     @staticmethod
-    def validate(org_info: dict):
+    def _validate_and_raise_error(org_info: dict):
+        """Execute the validators in chain and raise error or return."""
         validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
         access_type: str = org_info.get('accessType', None)
-        arg_dict = {'accessType': access_type, 'name': org_info.get('name'), 'branch_name': org_info.get('branchName')}
+        arg_dict = {'accessType': access_type,
+                    'name': org_info.get('name'),
+                    'branch_name': org_info.get('branchName')}
         if (bcol_credential := org_info.pop('bcOnlineCredential', None)) is not None:
-            validators.append(bcol_credentials_validate)
+            validators.insert(0, bcol_credentials_validate)
             arg_dict['bcol_credential'] = bcol_credential
         validator_response = ValidatorResponse()
 
         for validator in validators:
             validator(validator_response, **arg_dict)
 
-        print(validator_response)
+        if not validator_response.is_valid:
+            raise BusinessException(validator_response.error[0], None)
         return validator_response
 
     @staticmethod
@@ -324,8 +327,9 @@ class Org:  # pylint: disable=too-many-public-methods
             if org_info.get('typeCode') != OrgType.BASIC.value:
                 raise BusinessException(Error.INVALID_INPUT, None)
             # if they have not changed the name , they can claim the name. Dont check duplicate..or else check duplicate
-            if org_info.get('name') != self._model.name:
-                Org.raise_error_if_duplicate_name(org_info['name'])
+            # TODO fix this
+            # if org_info.get('name') != self._model.name:
+                # Org.raise_error_if_duplicate_name(org_info['name'])
 
             # remove the bcol payment details from payment table
             org_info['bcol_account_id'] = ''

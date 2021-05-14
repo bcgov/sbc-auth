@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Util for validating duplication maximum number of orgs."""
 from flask import current_app
 
 from auth_api.exceptions import Error, BusinessException
@@ -21,6 +22,7 @@ from auth_api.models import Org as OrgModel
 
 @user_context
 def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) -> None:
+    """Validate account limit for user."""
     user: UserContext = kwargs['user']
     if not user.is_staff_admin():
         count = OrgModel.get_count_of_org_created_by_user_id(user.user_id)
