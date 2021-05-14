@@ -174,13 +174,13 @@ def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
 
 
 def test_create_basic_org_assert_pay_request_is_govm(session,
-                                                     keycloak_mock):  # pylint:disable=unused-argument
+                                                     keycloak_mock, staff_user_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
-                                             roles=['create_accounts'])
+    TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
+                                roles=['create_accounts'])
     with patch.object(RestService, 'post') as mock_post:
-        org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id, token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
         assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org_govm['name']
@@ -199,7 +199,7 @@ def test_create_basic_org_assert_pay_request_is_govm(session,
 
 
 def test_put_basic_org_assert_pay_request_is_govm(session,
-                                                  keycloak_mock):  # pylint:disable=unused-argument
+                                                  keycloak_mock, staff_user_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
@@ -696,8 +696,8 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     assert GROUP_ACCOUNT_HOLDERS in groups
 
 
-def test_delete_org_removes_user_from_account_holders_group(session, monkeypatch,
-                                                            auth_mock):  # pylint:disable=unused-argument
+def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
+                                                            monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org deletion removes the user from account holders group."""
     # Create a user in keycloak
     keycloak_service = KeycloakService()
@@ -809,20 +809,25 @@ def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument
 def test_create_org_with_a_linked_bcol_details(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that org creation with an existing linked BCOL account fails."""
     user = factory_user_model()
-
+    print('-----------------------------------------first---------------start')
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
+    print('-----------------------------------------first---------------end')
     assert org
     # Create again
+    print('-----------------------------------------second---------------start')
+    print('\n' * 10)
 
     with pytest.raises(BusinessException) as exception:
+        print('-----------------------------------------second---------------second')
         OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert exception.value.code == Error.BCOL_ACCOUNT_ALREADY_LINKED.name
 
 
-def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_org_by_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id, token_info=token_info)
@@ -834,10 +839,11 @@ def test_create_org_by_bceid_user(session, keycloak_mock):  # pylint:disable=unu
         mock_notify.assert_called()
 
 
-def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_org_by_in_province_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
         org = OrgService.create_org(TestOrgInfo.org_regular_bceid, user_id=user.id, token_info=token_info)
@@ -849,16 +855,17 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock):  # pylint
         mock_notify.assert_called()
 
 
-def test_create_org_invalid_access_type_user(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_org_invalid_access_type_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org cannot be created by providing wrong access type."""
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id, token_info=token_info)
     assert exception.value.code == Error.USER_CANT_CREATE_REGULAR_ORG.name
 
 
-def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     # Steps
     # 1. Create a pending affidavit
@@ -867,6 +874,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:di
     # 4. Same user create new org, which should be ACTIVE.
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
 
@@ -885,7 +893,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock):  # pylint:di
         mock_notify.assert_called()
 
 
-def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     # Steps
     # 1. Create a pending affidavit
@@ -894,6 +902,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock):  # pylint:di
     # 4. Same user create new org, which should be PENDING_STAFF_REVIEW.
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
 

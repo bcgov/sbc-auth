@@ -47,15 +47,15 @@ def test_create_affidavit_duplicate(session, keycloak_mock):  # pylint:disable=u
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=new_affidavit_info)
 
 
-def test_approve_org(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
-
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org = OrgService.approve_or_reject(org_dict['id'], is_approved=True, token_info=token_info)
@@ -65,15 +65,15 @@ def test_approve_org(session, keycloak_mock):  # pylint:disable=unused-argument
     assert affidavit['status'] == AffidavitStatus.APPROVED.value
 
 
-def test_reject_org(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be rejected."""
     user = factory_user_model_with_contact()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
-
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org = OrgService.approve_or_reject(org_dict['id'], is_approved=False, token_info=token_info)
