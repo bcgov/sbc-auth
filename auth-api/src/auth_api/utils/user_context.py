@@ -38,7 +38,9 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         self._user_id = None
         if user_model:
             self._user_id = user_model.id
-        self._user_name: str = token_info.get('username', token_info.get('preferred_username', None))
+        # try to user name from DB ;if not avaiable fall back to token_info
+        self._user_name: str = getattr(user_model, 'username',
+                                       token_info.get('username', token_info.get('preferred_username', None)))
         self._first_name: str = token_info.get('firstname', None)
         self._bearer_token: str = _get_token()
         self._roles: list = token_info.get('realm_access', None).get('roles', None) if 'realm_access' in token_info \

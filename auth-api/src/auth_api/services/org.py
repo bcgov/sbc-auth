@@ -76,9 +76,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return obj
 
     @staticmethod
-    @user_context
-    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                   origin_url: str = None, **kwargs):
+    def create_org(org_info: dict, user_id, origin_url: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         # bcol is treated like an access type as well;so its outside the scheme
@@ -129,13 +127,7 @@ class Org:  # pylint: disable=too-many-public-methods
         payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
                                                               access_type=access_type)
 
-        user_name = ''
-        if payment_method == PaymentMethod.PAD.value:  # to get the pad accepted date
-            user_from_context: UserContext = kwargs['user']
-            user: UserModel = UserModel.find_by_jwt_token(token=user_from_context.token_info)
-            user_name = user.username
-
-        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_name, True)
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, True)
 
         # TODO do we have to check anything like this below?
         # if payment_account_status == PaymentAccountStatus.FAILED:
@@ -213,9 +205,10 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
 
     @staticmethod
+    @user_context
     def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
-                                 payment_method: str, mailing_address=None, username: str = None,
-                                 is_new_org: bool = True) -> PaymentAccountStatus:
+                                 payment_method: str, mailing_address=None,
+                                 is_new_org: bool = True, **kwargs) -> PaymentAccountStatus:
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
@@ -242,7 +235,7 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
-            pay_request['padTosAcceptedBy'] = username
+            pay_request['padTosAcceptedBy'] = kwargs['user'].user_name
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
@@ -348,7 +341,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
         # TODO pass username instead of blanks
-        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, '', False)
+        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, False)
         return self
 
     @staticmethod
@@ -448,9 +441,8 @@ class Org:  # pylint: disable=too-many-public-methods
             selected_payment_method = payment_info.get('paymentMethod', None)
             payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code],
                                                                 self._model.access_type)
-            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
             # TODO when updating the bank info , dont pass user.username as tos updated by..handle this
-            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, user.username, False)
+            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, False)
             current_app.logger.debug('>update_org ')
         return self
 

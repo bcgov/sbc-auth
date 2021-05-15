@@ -202,13 +202,13 @@ def test_put_basic_org_assert_pay_request_is_govm(session,
                                                   keycloak_mock, staff_user_mock):  # pylint:disable=unused-argument
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
-                                             roles=['create_accounts'])
+    TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
+                                roles=['create_accounts'])
     user2 = factory_user_model(TestUserInfo.user2)
     public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
                                                     roles=['gov_account_user'])
 
-    org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id, token_info=token_info)
+    org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
     assert org
     with patch.object(RestService, 'put') as mock_post:
         payment_details = TestPaymentMethodInfo.get_payment_method_input_with_revenue()
@@ -654,7 +654,7 @@ def test_delete_contact_org_link(session, auth_mock):  # pylint:disable=unused-a
     contact_link.commit()
 
     OrgService.delete_contact(org_id=org_id)
-    org = OrgService.find_by_org_id(org_id)
+    OrgService.find_by_org_id(org_id)
     response = OrgService.get_contacts(org_id)
 
     assert len(response['contacts']) == 0
@@ -719,7 +719,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
 
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
-    org = OrgService.delete_org(org.as_dict().get('id'), token_info())
+    OrgService.delete_org(org.as_dict().get('id'), token_info())
 
     user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
     groups = []
@@ -830,7 +830,7 @@ def test_create_org_by_bceid_user(session, keycloak_mock, monkeypatch):  # pylin
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
-        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id, token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
@@ -846,7 +846,7 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock, monkeypatc
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
-        org = OrgService.create_org(TestOrgInfo.org_regular_bceid, user_id=user.id, token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org_regular_bceid, user_id=user.id)
         assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org1['name']
@@ -861,7 +861,7 @@ def test_create_org_invalid_access_type_user(session, keycloak_mock, monkeypatch
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id, token_info=token_info)
+        OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id)
     assert exception.value.code == Error.USER_CANT_CREATE_REGULAR_ORG.name
 
 
@@ -879,15 +879,14 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
-        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
         org = OrgService.approve_or_reject(org_dict['id'], is_approved=True, token_info=token_info)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.ACTIVE.value
 
-        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
-                                    token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.ACTIVE.value
         mock_notify.assert_called()
@@ -907,15 +906,14 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):
     AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
-        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id, token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
         org = OrgService.approve_or_reject(org_dict['id'], is_approved=False, token_info=token_info)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.REJECTED.value
 
-        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id,
-                                    token_info=token_info)
+        org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(name='Test 123'), user_id=user.id)
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
         mock_notify.assert_called()
