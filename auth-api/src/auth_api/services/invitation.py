@@ -34,10 +34,10 @@ from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, S
     OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
+from auth_api.utils.account_mailer import publish_to_mailer
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
-from auth_api.utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
