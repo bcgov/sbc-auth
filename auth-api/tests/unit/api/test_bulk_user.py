@@ -53,6 +53,7 @@ def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pyl
 
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
+    print('--------------test_add_user_admin_valid_bcros1---------------------------:')
     rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
                      headers=headers, content_type='application/json')
 

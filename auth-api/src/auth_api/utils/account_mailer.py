@@ -41,5 +41,6 @@ def publish_to_mailer(notification_type, org_id: str = None, data=None, business
         'datacontenttype': 'application/json',
         'data': data
     }
+    print('--------------client_name--:', CONFIG.NATS_MAILER_CLIENT_NAME)
     publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
                      subject=CONFIG.NATS_MAILER_SUBJECT)
