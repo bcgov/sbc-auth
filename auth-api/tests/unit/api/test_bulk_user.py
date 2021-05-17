@@ -19,7 +19,6 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 import json
 
 from auth_api import status as http_status
-from auth_api.schemas import utils as schema_utils
 from auth_api.services.keycloak import KeycloakService
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation_anonymous
