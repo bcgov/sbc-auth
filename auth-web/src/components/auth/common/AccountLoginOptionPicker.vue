@@ -105,16 +105,14 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
   private authOptions = [
     {
       type: LoginSource.BCSC,
-      title: 'BC Services Card',
-      description: `Use your BC Services Card with a mobile app or 
-                    a USB card reader to verify your identity.`,
+      title: this.$t('bCSCLoginOptionTitle'),
+      description: this.$t('bCSCLoginOptionDescription'),
       icon: 'mdi-account-card-details-outline'
     },
     {
       type: LoginSource.BCEID,
-      title: 'BCeID and 2-factor authentication app',
-      description: `Login with a BCeID combined with a verification code in a mobile app, 
-                    such as Google or Microsoft Authenticator.`,
+      title: this.$t('bCeIDLoginOptionTitle'),
+      description: this.$t('bCeIDLoginOptionDescription'),
       icon: 'mdi-two-factor-authentication'
     }
   ]
@@ -134,7 +132,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     switch (authType) {
       case LoginSource.BCSC:
         // open up BCSC learn more dialog
-        window.open('https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card', '_blank')
+        window.open('https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card', '_blank')
         break
       case LoginSource.BCEID:
         // open up BCEID learn more dialog
