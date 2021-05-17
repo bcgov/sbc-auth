@@ -17,18 +17,13 @@
 Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import json
-import uuid
-from random import randint
-
-from tests.utilities.factory_scenarios import BulkUserTestScenario, TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation_anonymous
 
 from auth_api import status as http_status
+from auth_api.config import get_named_config
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.enums import IdpHint, ProductCode
-from auth_api.config import get_named_config
-
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_utils import factory_auth_header, factory_invitation_anonymous
 
 KEYCLOAK_SERVICE = KeycloakService()
 
