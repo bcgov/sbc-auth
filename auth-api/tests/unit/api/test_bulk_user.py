@@ -34,12 +34,3 @@ def test_add_user_admin_valid(client, jwt, session, keycloak_mock):  # pylint:di
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_anonymous),
                      headers=headers, content_type='application/json')
 
-    dictionary = json.loads(rv.data)
-    org_id = dictionary['id']
-    print('--------------test_add_user_admin_valid_bcros1---------------------------:')
-    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation_anonymous(org_id=org_id)),
-                     headers=headers, content_type='application/json')
-
-    dictionary = json.loads(rv.data)
-    assert dictionary.get('token') is not None
-    assert rv.status_code == http_status.HTTP_201_CREATED
