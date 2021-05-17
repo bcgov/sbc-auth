@@ -311,11 +311,10 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     MINIO_SECURE = False
 
     STAFF_ADMIN_EMAIL = 'test@test.com'
+    NATS_MAILER_CLIENT_NAME = 'account.mailer.worker'
 
     API_GW_CONSUMERS_API_URL = 'https://bcregistry-bcregistry-mock.apigee.net/mockTarget'
     API_GW_CONSUMER_EMAIL = 'test.all.mc@gov.bc.ca'
-    NATS_CLIENT_NAME = 'entity.filing.payment.worker'
-    NATS_MAILER_CLIENT_NAME = 'entity.filing.payment.worker'
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
