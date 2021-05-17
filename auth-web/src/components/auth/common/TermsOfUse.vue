@@ -92,6 +92,10 @@ export default class TermsOfUse extends Vue {
         padding-left: 50px !important;
       }
 
+      ul.alpha-listing {
+        list-style-type: lower-alpha !important;
+      }
+
       li {
         + li {
           margin-top: 1rem;
