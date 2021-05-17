@@ -27,15 +27,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 KEYCLOAK_SERVICE = KeycloakService()
 
 
-def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
-    """Assert that a user can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-    assert schema_utils.validate(rv.json, 'user_response')[0]
-
-
-def test_add_user_admin_valid_bcros(client, jwt, session):  # pylint:disable=unused-argument
+def test_add_user_admin_valid(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org admin can create members."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
