@@ -1,6 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Statements from '@/components/auth/account-settings/statement/Statements.vue'
-import UserService from '../../../src/services/user.services'
 
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
@@ -8,24 +7,25 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
+Vue.use(Vuetify)
 Vue.use(VueI18n)
 Vue.use(VueRouter)
-Vue.use(Vuetify)
 
 describe('Statements.vue', () => {
-  let localVue
   let store
+  let localVue
 
   const config = {
-    VUE_APP_ROOT_API: 'https://localhost:8080/api/v1/',
-    VUE_APP_COPS_REDIRECT_URL: 'https://test.gov.bc.ca/',
-    VUE_APP_PAY_ROOT_API: 'https://pay-api.gov.bc.ca/api/v1'
+    VUE_APP_ROOT_API: 'https://localhost:8080/api/v1/sbc',
+    VUE_APP_COPS_REDIRECT_URL: 'https://dev.gov.bc.ca/',
+    VUE_APP_PAY_ROOT_API: 'https://pay.gov.bc.ca/api/v1'
   }
-
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+
   beforeEach(() => {
     localVue = createLocalVue()
     localVue.use(Vuex)
+
     const orgModule = {
       namespaced: true,
       actions: {
@@ -75,7 +75,7 @@ describe('Statements.vue', () => {
             'lastname': 'one',
             'loginSource': 'BCSC',
             'modified': '2021-05-11T19:38:35.067210+00:00',
-            'username': 'bcsc/fyd76wbcng76cpxbu42hhua4qphtivb5'
+            'username': 'user1'
           }
         }
       }
@@ -91,14 +91,23 @@ describe('Statements.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('Shows empty panel message', () => {
-    UserService.getOrganizations = jest.fn().mockResolvedValue({ orgs: [] })
+  it('is a Vue instance', () => {
     const $t = () => ''
     const wrapper = shallowMount(Statements, {
       store,
       localVue,
       mocks: { $t }
     })
-    expect(wrapper.text()).toContain('')
+    expect(wrapper.isVueInstance()).toBeTruthy()
+  })
+
+  it('renders proper header content', () => {
+    const $t = () => ''
+    const wrapper = shallowMount(Statements, {
+      store,
+      localVue,
+      mocks: { $t }
+    })
+    expect(wrapper.find('h2').text()).toBe('Statements')
   })
 })
