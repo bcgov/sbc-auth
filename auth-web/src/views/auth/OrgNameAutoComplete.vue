@@ -1,21 +1,9 @@
 <template>
   <v-card v-if="showAutoComplete" class="mt-0 auto-complete-card" elevation="5" data-test="auto-complete-card">
-    <v-row no-gutters justify="end" class="mx-0 close-btn-row">
-      <v-col cols="auto" justify="end" class="pt-0">
-        <v-btn append
-        icon
-        x-small
-        right
-        class="auto-complete-close-btn"
-        data-test="auto-complete-close-btn"
-        @click="autoCompleteIsActive=false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
-    <v-row no-gutters justify="center" class="mx-0 pl-2 pr-5">
-      <v-col no-gutters cols="auto">
-        <v-list class="pt-0">
+    <v-row no-gutters justify="start" class="mx-0 pl-2 pr-5">
+      <v-col no-gutters cols="12">
+        <div class="content px-2 pt-1">
+        <v-list class="pt-0 content-list">
           <v-list-item-group v-model="autoCompleteSelectedIndex">
             <v-list-item v-for="(result, i) in autoCompleteResults"
             :key="i"
@@ -26,6 +14,16 @@
             </v-list-item>
           </v-list-item-group>
         </v-list>
+         <v-btn append
+        icon
+        x-small
+        right
+        class="auto-complete-close-btn"
+        data-test="auto-complete-close-btn"
+        @click="autoCompleteIsActive=false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        </div>
       </v-col>
     </v-row>
   </v-card>
@@ -106,14 +104,25 @@ export default class OrgNameAutoComplete extends Vue {
 .auto-complete-close-btn {
   color: $gray5 !important;
   background-color: transparent !important;
+  position: absolute;
+  right: 10px;
+  top: 5px;
 }
 .auto-complete-item {
   min-height: 0;
 }
 .auto-complete-card {
-  max-width: 30rem;
   position: absolute;
   z-index: 3;
+  width: 100%;
+  top:64px;
+}
+.content{
+  display: flex;
+  justify-content: space-between;
+  & .content-list{
+    width: 100%;
+  }
 }
 .close-btn-row {
   height: 1rem;

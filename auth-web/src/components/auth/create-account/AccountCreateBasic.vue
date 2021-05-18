@@ -1,6 +1,6 @@
 <template>
   <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
-    <fieldset>
+    <fieldset class="auto-complete-relative">
 
       <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
       <legend class="mb-3"  v-else>Enter an Account Name</legend>
