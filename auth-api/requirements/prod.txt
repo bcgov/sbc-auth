@@ -1,6 +1,6 @@
 gunicorn
 Flask
-Flask-Migrate
+Flask-Migrate==2.7.0
 Flask-Mail
 Flask-Script
 Flask-Moment
