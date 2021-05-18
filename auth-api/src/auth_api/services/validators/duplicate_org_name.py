@@ -20,12 +20,15 @@ from auth_api.utils.user_context import user_context
 
 
 @user_context
-def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) -> None:
+def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate and return org name."""
     name = kwargs.get('name')
     branch_name = kwargs.get('branch_name')
-    existing_similar__org = OrgModel.find_similar_org_by_name(name, branch_name=branch_name)
+    org_id = kwargs.get('org_id', None)
+    validator_response = ValidatorResponse()
+    existing_similar__org = OrgModel.find_similar_org_by_name(name, org_id=org_id, branch_name=branch_name)
     if existing_similar__org is not None:
         validator_response.add_error(Error.DATA_CONFLICT)
         if is_fatal:
             raise BusinessException(Error.DATA_CONFLICT, None)
+    return validator_response

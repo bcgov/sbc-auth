@@ -21,12 +21,14 @@ from auth_api.models import Org as OrgModel
 
 
 @user_context
-def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) -> None:
+def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate account limit for user."""
     user: UserContext = kwargs['user']
+    validator_response = ValidatorResponse()
     if not user.is_staff_admin():
         count = OrgModel.get_count_of_org_created_by_user_id(user.user_id)
         if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
             validator_response.add_error(Error.MAX_NUMBER_OF_ORGS_LIMIT)
             if is_fatal:
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
+    return validator_response

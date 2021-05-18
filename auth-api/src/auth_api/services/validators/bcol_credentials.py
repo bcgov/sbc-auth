@@ -24,11 +24,12 @@ from auth_api.utils.user_context import user_context, UserContext
 
 
 @user_context
-def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) -> None:
+def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate bcol credentials."""
     bcol_credential = kwargs.get('bcol_credential')
     org_id = kwargs.get('org_id', None)
     user: UserContext = kwargs['user']
+    validator_response = ValidatorResponse()
     bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
                                      data=bcol_credential, token=user.bearer_token, raise_for_status=False)
     if bcol_response.status_code != http_status.HTTP_200_OK:
@@ -37,7 +38,7 @@ def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) ->
             CustomException(error['detail'], bcol_response.status_code))
         if is_fatal:
             raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
-        return
+        return validator_response
     bcol_account_number = bcol_response.json().get('accountNumber')
     from auth_api.services.org import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
     if OrgService.bcol_account_link_check(bcol_account_number, org_id):
@@ -45,5 +46,6 @@ def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) ->
             Error.BCOL_ACCOUNT_ALREADY_LINKED)
         if is_fatal:
             raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
-        return
-    validator_response.add_response({'bcol_response': bcol_response})
+        return validator_response
+    validator_response.add_info({'bcol_response': bcol_response})
+    return validator_response

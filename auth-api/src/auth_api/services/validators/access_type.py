@@ -20,11 +20,12 @@ from auth_api.utils.user_context import user_context, UserContext
 
 
 @user_context
-def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) -> None:
+def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate and return correct access type."""
     access_type: str = kwargs.get('accessType')
     user: UserContext = kwargs['user']
     error = None
+    validator_response = ValidatorResponse()
     if access_type:
         if user.is_staff_admin() and not access_type:
             error = Error.ACCCESS_TYPE_MANDATORY
@@ -42,7 +43,7 @@ def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) ->
             if is_fatal:
                 raise BusinessException(error, None)
             validator_response.add_error(error)
-            return
+            return validator_response
     else:
         # If access type is not provided, add default value based on user
         if user.is_staff_admin():
@@ -51,4 +52,5 @@ def validate(validator_response: ValidatorResponse, is_fatal=False, **kwargs) ->
             access_type = AccessType.EXTRA_PROVINCIAL.value
         else:
             access_type = AccessType.REGULAR.value
-    validator_response.add_response({'access_type': access_type})
+    validator_response.add_info({'access_type': access_type})
+    return validator_response
