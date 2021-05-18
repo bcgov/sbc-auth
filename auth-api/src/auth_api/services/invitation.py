@@ -34,10 +34,10 @@ from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, S
     OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
-from auth_api.utils.account_mailer import publish_to_mailer
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
+from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -220,11 +220,22 @@ class Invitation:
                         app_url, login_source, org_status=None):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
+        mail_configs = Invitation._get_invitation_configs(org_name, login_source, org_status)
+        recipient = invitation.recipient_email
+        token_confirm_url = '{}/{}/{}'.format(app_url, mail_configs.get('token_confirm_path'), invitation.token)
+        role = invitation.membership[0].membership_type.display_name
         data = {
+            'accountId': org_id,
+            'emailAddresses': recipient,
+            'contextUrl': token_confirm_url,
+            'userFirstName': user['firstname'],
+            'userLastName': user['lastname'],
+            'orgName': org_name,
+            'role': role
         }
 
         try:
-            publish_to_mailer('test', org_id=org_id, data=data)
+            publish_to_mailer(notification_type=mail_configs.get('notification_type'), org_id=org_id, data=data)
         except BusinessException as exception:
             invitation.invitation_status_code = 'FAILED'
             invitation.save()

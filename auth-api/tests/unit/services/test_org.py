@@ -809,16 +809,11 @@ def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument
 def test_create_org_with_a_linked_bcol_details(session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that org creation with an existing linked BCOL account fails."""
     user = factory_user_model()
-    print('-----------------------------------------first---------------start')
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
-    print('-----------------------------------------first---------------end')
     assert org
     # Create again
-    print('-----------------------------------------second---------------start')
-    print('\n' * 10)
 
     with pytest.raises(BusinessException) as exception:
-        print('-----------------------------------------second---------------second')
         OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert exception.value.code == Error.BCOL_ACCOUNT_ALREADY_LINKED.name
 
