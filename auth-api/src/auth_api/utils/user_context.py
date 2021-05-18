@@ -14,9 +14,10 @@
 """User Context to hold request scoped variables."""
 
 import functools
-from typing import Dict, List
+from typing import Dict
 
 from flask import g, request
+
 from auth_api.models import User as UserModel
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
@@ -47,24 +48,12 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
             else None
         self._sub: str = token_info.get('sub', None)
         self._login_source: str = token_info.get('loginSource', None)
-        self._account_id: str = get_auth_account_id()
         self._name: str = '{} {}'.format(token_info.get('firstname', None), token_info.get('lastname', None))
-        self._product_code: str = token_info.get('product_code', None)
-        self._permission = _get_permission()
 
     @property
     def user_name(self) -> str:
         """Return the user_name."""
         return self._user_name.upper() if self._user_name else None
-
-    @property
-    def user_name_with_no_idp(self) -> str:
-        """Return the user_name with no idp info."""
-        user_name = self.user_name
-        if user_name:
-            login_source = self._login_source.upper()
-            user_name = user_name.replace(f'@{login_source}', '').replace(f'{login_source}\\', '')
-        return user_name
 
     @property
     def first_name(self) -> str:
@@ -90,21 +79,6 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
     def sub(self) -> str:
         """Return the subject."""
         return self._sub
-
-    @property
-    def account_id(self) -> str:
-        """Return the account_id."""
-        return self._account_id
-
-    @property
-    def permission(self) -> List[str]:
-        """Return the permission."""
-        return self._permission
-
-    @property
-    def product_code(self) -> str:
-        """Return the product_code."""
-        return self._product_code
 
     def has_role(self, role_name: str) -> bool:
         """Return True if the user has the role."""
@@ -153,15 +127,6 @@ def _get_token_info() -> Dict:
     return g.jwt_oidc_token_info if g and 'jwt_oidc_token_info' in g else {}
 
 
-def _get_permission() -> Dict:
-    return g.user_permission if g and 'user_permission' in g else []
-
-
 def _get_token() -> str:
     token: str = request.headers['Authorization'] if request and 'Authorization' in request.headers else None
     return token.replace('Bearer ', '') if token else None
-
-
-def get_auth_account_id() -> str:
-    """Return account id from the header."""
-    return request.headers['Account-Id'] if request and 'Account-Id' in request.headers else None
