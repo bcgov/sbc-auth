@@ -32,7 +32,7 @@ from auth_api.config import get_named_config
 
 KEYCLOAK_SERVICE = KeycloakService()
 
-CONFIG = get_named_config('testing')
+CONFIG = get_named_config()
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
