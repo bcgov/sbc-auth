@@ -52,7 +52,7 @@
             <td><span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span></td>
             <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span></td>
             <td>
-              <div class="font-weight-bold">
+              <div class="font-weight-bold text-right">
                 ${{item.totalAmount}}
               </div>
             </td>
