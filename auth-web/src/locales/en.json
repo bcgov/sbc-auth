@@ -126,5 +126,9 @@
   "willsRegistryTosSubtext":"The search and registration products are intended for the exclusive use of solicitors and notaries only. Title Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.",
   "willsRegistryTosIagree":"I confirm that the information above is all correct and this account act as a solicitor, notary or title search company approved by the Vital Statistics agency.",
   "noActivityLogList": "No Activity Log Records",
-  "productFeeSubTitle":"Select statutory and service fee amount for each partners that applies to this account."
+  "productFeeSubTitle":"Select statutory and service fee amount for each partners that applies to this account.",
+  "bCSCLoginOptionTitle":"Mobile BC Services Card",
+  "bCSCLoginOptionDescription":"Login with your BC Services Card.",
+  "bCeIDLoginOptionTitle":"BCeID and 2-factor authentication",
+  "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator."
 }

@@ -76,6 +76,6 @@ describe('Account settings ProductPackage.vue', () => {
   })
 
   it('renders proper header content', () => {
-    expect(wrapper.find('h2').text()).toBe('Product and Services')
+    expect(wrapper.find('h2').text()).toBe('Products and Services')
   })
 })

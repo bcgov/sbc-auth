@@ -19,7 +19,7 @@
         @unlink-account="unlinkAccount"
       ></LinkedBCOLBanner>
 
-      <fieldset>
+      <fieldset class="auto-complete-relative">
         <v-text-field
           filled
           label="Account Name"

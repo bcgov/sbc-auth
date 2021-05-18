@@ -82,6 +82,7 @@ export default class OrgModule extends VuexModule {
   statementSettings: StatementSettings = {} as StatementSettings
   orgProductFeeCodes: OrgProductFeeCode[] = []
   currentAccountFees: AccountFee[] = []
+  currentOrgPaymentDetails:OrgPaymentDetails[] = []
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -226,6 +227,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganizationPaymentType (paymentType: string) {
     this.currentOrgPaymentType = paymentType
+  }
+
+  @Mutation
+  public setCurrentOrganizationPaymentDetails (orgPaymentDetails: OrgPaymentDetails[]) {
+    this.currentOrgPaymentDetails = orgPaymentDetails
   }
 
   @Mutation
@@ -809,6 +815,7 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async getOrgPayments (orgId?: number): Promise<OrgPaymentDetails> {
     const id = orgId || this.context.state['currentOrganization'].id
+    // TODO can refator for performance improvment check on Transactions page getPaymentDetails method for sample code
     const response = await OrgService.getOrgPayments(id)
     let paymentType = response?.data?.futurePaymentMethod ? response?.data?.futurePaymentMethod : response?.data?.paymentMethod || undefined
     paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
@@ -816,6 +823,7 @@ export default class OrgModule extends VuexModule {
     // setting padinfo for showing details
     const padInfo = response?.data?.cfsAccount || {}
     this.context.commit('setCurrentOrganizationPADInfo', padInfo)
+    this.context.commit('setCurrentOrganizationPaymentDetails', response?.data)
     return response?.data
   }
 
