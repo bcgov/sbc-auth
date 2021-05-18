@@ -46,13 +46,8 @@ describe('OrgNameAutoComplete.vue', () => {
       },
       {
         type: 'name',
-        value: 'TEST TEST ULC5',
-        score: 70
-      },
-      {
-        type: 'name',
-        value: 'TEST TEST ULC6',
-        score: 71
+        value: 'TEST TEST ULC4',
+        score: 60
       }
     ]
   }
@@ -111,6 +106,8 @@ describe('OrgNameAutoComplete.vue', () => {
     expect(wrapper.vm.showAutoComplete).toBeTruthy()
     expect(wrapper.find('[data-test="auto-complete-item-0"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="auto-complete-item-0"]').text()).toBe('TEST TEST ULC1')
-    expect(wrapper.findAll('.auto-complete-item').length).toBe(5)
+    // Assert duplicate value is removed
+    expect(testAutoCompleteResponse.results.length).toBe(5)
+    expect(wrapper.findAll('.auto-complete-item').length).toBe(4)
   })
 })
