@@ -38,14 +38,14 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
             CustomException(error['detail'], bcol_response.status_code))
         if is_fatal:
             raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
-        return validator_response
-    bcol_account_number = bcol_response.json().get('accountNumber')
-    from auth_api.services.org import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
-    if OrgService.bcol_account_link_check(bcol_account_number, org_id):
-        validator_response.add_error(
-            Error.BCOL_ACCOUNT_ALREADY_LINKED)
-        if is_fatal:
-            raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
-        return validator_response
-    validator_response.add_info({'bcol_response': bcol_response})
+    else:
+        bcol_account_number = bcol_response.json().get('accountNumber')
+        from auth_api.services.org import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+        if OrgService.bcol_account_link_check(bcol_account_number, org_id):
+            validator_response.add_error(
+                Error.BCOL_ACCOUNT_ALREADY_LINKED)
+            if is_fatal:
+                raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
+        else:
+            validator_response.add_info({'bcol_response': bcol_response})
     return validator_response
