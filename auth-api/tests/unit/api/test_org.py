@@ -1407,7 +1407,7 @@ def test_add_bcol_linked_org(client, jwt, session, keycloak_mock):  # pylint:dis
     for product in json.loads(rv.data):
         if product.get('code') == ProductCode.VS.value:
             has_vs_access = product.get('subscriptionStatus') == ProductSubscriptionStatus.ACTIVE.value
-    assert has_vs_access
+    assert has_vs_access, 'test vs access'
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 

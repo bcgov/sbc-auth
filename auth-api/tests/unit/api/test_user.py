@@ -620,7 +620,8 @@ def test_delete_unknown_user_returns_404(client, jwt, session):  # pylint:disabl
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
-def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mock,
+                                               monkeypatch):  # pylint:disable=unused-argument
     """Test if the user is the only owner of a team assert status is 400."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -632,7 +633,8 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model.keycloak_guid)
 
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id, token_info=claims)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', claims)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
 
@@ -647,7 +649,8 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
+                                           monkeypatch):  # pylint:disable=unused-argument
     """Test if the user is the member of a team assert status is 204."""
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
     contact = factory_contact_model()
@@ -665,8 +668,8 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock):
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model2.keycloak_guid)
-
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id, token_info=claims)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', claims)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
 
