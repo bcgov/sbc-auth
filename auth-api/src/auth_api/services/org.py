@@ -231,20 +231,22 @@ class Org:  # pylint: disable=too-many-public-methods
     def _validate_and_raise_error(org_info: dict):
         """Execute the validators in chain and raise error or return."""
         validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
-        access_type: str = org_info.get('accessType', None)
-        arg_dict = {'accessType': access_type,
+        arg_dict = {'accessType': org_info.get('accessType', None),
                     'name': org_info.get('name'),
                     'branch_name': org_info.get('branchName')}
         if (bcol_credential := org_info.pop('bcOnlineCredential', None)) is not None:
-            validators.insert(0, bcol_credentials_validate)
+            validators.insert(0, bcol_credentials_validate)  # first validator should be bcol ,thus 0th position
             arg_dict['bcol_credential'] = bcol_credential
+
         validator_response_list: List[ValidatorResponse] = []
+        for validate in validators:
+            validator_response_list.append(validate(**arg_dict))
+
+        not_valid_obj = next((x for x in validator_response_list if getattr(x, 'is_valid', None) is False), None)
+        if not_valid_obj:
+            raise BusinessException(not_valid_obj.error[0], None)
+
         response: dict = {}
-        for validator in validators:
-            validator_response_list.append(validator(**arg_dict))
-        invalid_obj = next((x for x in validator_response_list if getattr(x, 'is_valid', None) is False), None)
-        if invalid_obj:
-            raise BusinessException(invalid_obj.error[0], None)
         for val in validator_response_list:
             response.update(val.info)
         return response
