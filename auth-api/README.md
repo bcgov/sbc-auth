@@ -33,6 +33,7 @@ To prepare your local database:
 
 Note:
 
+
 **[Mac Users]**
 : You might get an error regarding the SSL certificate verification failed.
 follow the steps to resolve that issue:
