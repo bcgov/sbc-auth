@@ -40,7 +40,7 @@
               :disabled="!canSelect"
               >
                 <template slot="selection" slot-scope="data">
-                  $ {{ data.item.amount }}
+                  $ {{ data.item.amount.toFixed(2) }}
                 </template>
                 <template slot="item" slot-scope="data">
                   {{ displayProductFee(data.item.amount) }}
