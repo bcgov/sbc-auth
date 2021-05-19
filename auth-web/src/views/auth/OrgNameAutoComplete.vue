@@ -83,8 +83,11 @@ export default class OrgNameAutoComplete extends Vue {
       try {
         const response: AutoCompleteResponse = await this.getOrgNameAutoComplete(searchValue)
         if (searchValue === this.searchValue && response?.results) {
-        // will slice results - similar to PPR
-          this.autoCompleteResults = response?.results.slice(0, ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT)
+        // will slice results and show distinct results by value - similar to PPR
+          const autoCompleteResponse = response?.results
+          const key = 'value'
+          this.autoCompleteResults = [...new Map(autoCompleteResponse.map(item =>
+            [item[key], item])).values()].slice(0, ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT)
         }
       } catch (ex) {
         // eslint-disable-next-line no-console
