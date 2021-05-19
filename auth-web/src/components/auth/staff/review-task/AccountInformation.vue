@@ -1,7 +1,7 @@
 <template>
   <section>
     <h2 class="mb-3">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''}${title}`}}</h2>
-    <v-row v-if="accountUnderReview.orgType === 'BASIC'">
+    <v-row v-if="accountUnderReview.orgType === Account.BASIC">
       <v-col class="col-12 col-sm-3">
         Account Name
       </v-col>
@@ -9,6 +9,25 @@
         {{ accountUnderReview.name }}
       </v-col>
     </v-row>
+    <!-- for GOVM account showing banch name  -->
+     <v-row v-else-if="accountUnderReview.orgType === Account.PREMIUM && accountUnderReview.accessType === AccessType.GOVM">
+      <v-col class="col-12 col-sm-3">
+       <span> Account Name <br/> &amp; Branch Details</span>
+      </v-col>
+      <v-col>
+        <v-alert dark color="primary" class="bcol-acc mb-0 px-7 py-5">
+          <div class="bcol-acc__name mt-n1">
+            {{ accountUnderReview.name }}
+          </div>
+          <ul class="bcol-acc__meta">
+            <li>
+              Branch Name : {{ accountUnderReview.branchName }}
+            </li>
+          </ul>
+        </v-alert>
+      </v-col>
+    </v-row>
+    <!-- all other accounts -->
     <v-row v-else>
       <v-col class="col-12 col-sm-3">
         <span>Account Name <br/> &amp; BC Online Details</span>
@@ -45,7 +64,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { AccessType, Account } from '@/util/constants'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Address } from '@/models/address'
 
 @Component({})
@@ -56,6 +76,9 @@ export default class AccountInformation extends Vue {
   @Prop({ default: 'Account Information' }) private title: string
   @Prop({ default: {} }) accountUnderReview: any
   @Prop({ default: {} }) accountUnderReviewAddress: Address
+
+  AccessType = AccessType
+  Account = Account
 }
 </script>
 
