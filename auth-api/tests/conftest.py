@@ -315,7 +315,6 @@ def staff_user_mock(monkeypatch):
 
     monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
 
 
 @pytest.fixture()
@@ -327,7 +326,6 @@ def bceid_user_mock(monkeypatch):
             'username': 'CP1234567 user',
             'realm_access': {
                 'roles': [
-                    'staff',
                     'edit',
                     'create_accounts'
                 ]
@@ -338,5 +336,4 @@ def bceid_user_mock(monkeypatch):
         return 'test'
 
     monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)

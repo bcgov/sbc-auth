@@ -62,7 +62,7 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
 
     @property
     def user_id(self) -> str:
-        """Return the user_name."""
+        """Return the user_id."""
         return self._user_id
 
     @property
