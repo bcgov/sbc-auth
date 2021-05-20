@@ -292,3 +292,48 @@ def minio_mock(monkeypatch):
         }
 
     monkeypatch.setattr('auth_api.services.minio.MinioService._get_client', get_nr)
+
+
+@pytest.fixture()
+def staff_user_mock(monkeypatch):
+    """Mock user_context."""
+
+    def token_info():  # pylint: disable=unused-argument; mocks of library methods
+        return {
+            'username': 'staff user',
+            'realm_access': {
+                'roles': [
+                    'staff',
+                    'edit',
+                    'create_accounts'
+                ]
+            }
+        }
+
+    def mock_auth():  # pylint: disable=unused-argument; mocks of library methods
+        return 'test'
+
+    monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+
+
+@pytest.fixture()
+def bceid_user_mock(monkeypatch):
+    """Mock user_context."""
+
+    def token_info():  # pylint: disable=unused-argument; mocks of library methods
+        return {
+            'username': 'CP1234567 user',
+            'realm_access': {
+                'roles': [
+                    'edit',
+                    'create_accounts'
+                ]
+            }
+        }
+
+    def mock_auth():  # pylint: disable=unused-argument; mocks of library methods
+        return 'test'
+
+    monkeypatch.setattr('auth_api.utils.user_context._get_token', mock_auth)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)

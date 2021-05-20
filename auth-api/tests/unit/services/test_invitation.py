@@ -198,7 +198,7 @@ def test_accept_invitation(session, auth_mock, keycloak_mock):  # pylint:disable
                 assert len(members) == 1
 
 
-def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
+def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Accept the invitation and add membership from the invitation to the org."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
@@ -206,8 +206,9 @@ def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock):  # pylin
                 user_with_token = TestUserInfo.user_staff_admin
                 user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
                 user = factory_user_model(user_with_token)
-                org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id,
-                                            token_info=TestJwtClaims.staff_admin_role)
+                monkeypatch.setattr('auth_api.utils.user_context._get_token_info',
+                                    lambda: TestJwtClaims.staff_admin_role)
+                org = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary['id'])
                 user_with_token_invitee = TestUserInfo.user1

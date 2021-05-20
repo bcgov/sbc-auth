@@ -41,10 +41,9 @@ class BcOnlineProfiles(Resource):
     def post():
         """Return BC Online profile details."""
         request_json = request.get_json()
-        bearer_token = request.headers['Authorization'].replace('Bearer ', '')
 
         try:
-            bcol_response = Org.get_bcol_details(bcol_credential=request_json, bearer_token=bearer_token)
+            bcol_response = Org.get_bcol_details(bcol_credential=request_json)
             response, status = bcol_response.json(), bcol_response.status_code
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
