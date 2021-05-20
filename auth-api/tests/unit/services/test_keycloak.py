@@ -17,14 +17,13 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
-from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
-
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
+from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
 
 
 KEYCLOAK_SERVICE = KeycloakService()

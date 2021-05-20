@@ -5,11 +5,9 @@ Revises: 4efb2fdcc1ab
 Create Date: 2020-05-21 17:25:46.599633
 
 """
-from alembic import op
 import sqlalchemy as sa
 from alembic import op
-import sqlalchemy as sa
-from sqlalchemy import String, Integer, Boolean
+from sqlalchemy import Boolean, Integer, String
 from sqlalchemy.sql import column, table
 
 

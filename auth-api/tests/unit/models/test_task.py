@@ -19,8 +19,8 @@ Test suite to ensure that the Staff Task model routines are working as expected.
 from _datetime import datetime
 
 from auth_api.models import Task as TaskModel
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus, TaskTypePrefix
-from tests.utilities.factory_utils import factory_user_model, factory_task_models
+from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
+from tests.utilities.factory_utils import factory_task_models, factory_user_model
 
 
 def test_task_model(session):

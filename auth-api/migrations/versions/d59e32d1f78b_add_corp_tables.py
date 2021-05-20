@@ -5,9 +5,11 @@ Revises: 93ba1db65ed3
 Create Date: 2019-12-23 11:36:43.202374
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
+
 from auth_api.utils.custom_sql import CustomSql
+
 
 # revision identifiers, used by Alembic.
 revision = 'd59e32d1f78b'

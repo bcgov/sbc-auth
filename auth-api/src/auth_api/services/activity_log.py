@@ -26,6 +26,7 @@ from auth_api.schemas import ActivityLogSchema
 from auth_api.services.authorization import check_auth
 from auth_api.utils.roles import ADMIN, STAFF, Role
 
+
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 

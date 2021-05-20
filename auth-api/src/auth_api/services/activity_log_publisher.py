@@ -15,13 +15,14 @@
 import uuid
 from datetime import datetime
 
-from flask import g, current_app
+from flask import current_app, g
 from sentry_sdk import capture_message
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
 from auth_api.config import get_named_config
 from auth_api.models import User as UserModel
 from auth_api.services.queue_publisher import publish_response
+
 
 CONFIG = get_named_config()
 

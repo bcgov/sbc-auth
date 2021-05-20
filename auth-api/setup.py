@@ -16,7 +16,7 @@
 from glob import glob
 from os.path import basename, splitext
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 
 def read_requirements(filename):

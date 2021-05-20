@@ -5,9 +5,11 @@ Revises: a930f64458f6
 Create Date: 2020-03-09 19:02:58.716934
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
+
 from auth_api.utils.custom_sql import CustomSql
+
 
 # revision identifiers, used by Alembic.
 revision = '9b3cd480fa3b'

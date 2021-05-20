@@ -24,10 +24,10 @@ from werkzeug.exceptions import HTTPException
 from auth_api.services.authorization import Authorization, check_auth
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
+from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
     factory_org_model, factory_product_model, factory_user_model)
-from tests.utilities.factory_scenarios import TestJwtClaims
 
 
 def test_get_user_authorizations_for_entity(session):  # pylint:disable=unused-argument

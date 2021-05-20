@@ -34,11 +34,12 @@ from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestUserInfo, TestOrgTypeInfo)
+    TestOrgTypeInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model)
+
 
 KEYCLOAK_SERVICE = KeycloakService()
 

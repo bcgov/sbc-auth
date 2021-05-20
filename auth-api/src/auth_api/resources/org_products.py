@@ -14,12 +14,12 @@
 """API endpoints for managing an Org resource."""
 import json
 
-from flask import request, g
+from flask import g, request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException
 from auth_api.auth import jwt as _jwt
+from auth_api.exceptions import BusinessException
 from auth_api.schemas import ProductSubscriptionSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Product as ProductService

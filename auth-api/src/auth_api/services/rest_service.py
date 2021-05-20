@@ -19,13 +19,14 @@ from typing import Dict
 import requests
 from flask import current_app, request
 from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
-from requests.exceptions import ConnectTimeout, HTTPError
 # pylint:disable=ungrouped-imports
 from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import ConnectTimeout, HTTPError
 from urllib3.util.retry import Retry
 
 from auth_api.exceptions import ServiceUnavailableException
 from auth_api.utils.enums import AuthHeaderType, ContentType
+
 
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 

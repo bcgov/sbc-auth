@@ -18,6 +18,7 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AffidavitStatus
+
 from .base_model import VersionedModel
 from .db import db
 from .membership import Membership

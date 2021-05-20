@@ -21,10 +21,11 @@ from flask import current_app, g
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS, \
-    GROUP_GOV_ACCOUNT_USERS
+from auth_api.utils.constants import (
+    GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS)
 from auth_api.utils.enums import ContentType, LoginSource
 from auth_api.utils.roles import Role
+
 from .keycloak_user import KeycloakUser
 
 

@@ -13,12 +13,11 @@
 # limitations under the License.
 """Service for managing Entity data."""
 
-from typing import Dict, Tuple
-import string
 import secrets
+import string
+from typing import Dict, Tuple
 
 from flask import current_app
-
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException
@@ -28,10 +27,11 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.account_mailer import publish_to_mailer
+from auth_api.utils.enums import ActivityAction
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, Role
 from auth_api.utils.util import camelback2snake
-from auth_api.utils.enums import ActivityAction
+
 from .activity_log_publisher import publish_activity
 from .authorization import check_auth
 

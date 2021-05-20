@@ -18,14 +18,14 @@ Test suite to ensure that the Entity service routines are working as expected.
 from unittest.mock import patch
 
 import pytest
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
-from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
-from auth_api.services.entity import Entity as EntityService
 from auth_api.services import activity_log_publisher as activity_log_publisher
+from auth_api.services.entity import Entity as EntityService
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
+from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument

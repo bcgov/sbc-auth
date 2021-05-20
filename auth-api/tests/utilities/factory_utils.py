@@ -17,10 +17,7 @@ Test Utility for creating model factory.
 """
 import datetime
 
-from tests.utilities.factory_scenarios import (
-    JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo,
-    TestPaymentTypeInfo, TestUserInfo)
-
+from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
@@ -31,18 +28,20 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import Task as TaskModel
-from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Entity as EntityService
-from auth_api.services import Task as TaskService
 from auth_api.services import Org as OrgService
-from auth_api.utils.enums import (AccessType, InvitationType,
-                                  TaskStatus, TaskRelationshipType, ProductSubscriptionStatus, TaskRelationshipStatus,
-                                  TaskTypePrefix)
+from auth_api.services import Task as TaskService
+from auth_api.utils.enums import (
+    AccessType, InvitationType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
+    TaskTypePrefix)
 from auth_api.utils.roles import Role
+from tests.utilities.factory_scenarios import (
+    JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo,
+    TestPaymentTypeInfo, TestUserInfo)
 
 
 def factory_auth_header(jwt, claims):

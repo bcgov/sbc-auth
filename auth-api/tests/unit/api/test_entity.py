@@ -21,16 +21,15 @@ import copy
 import json
 from unittest.mock import patch
 
-from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
-from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_membership_model, factory_org_model,
-    factory_user_model)
-
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_membership_model, factory_org_model,
+    factory_user_model)
 
 
 def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument

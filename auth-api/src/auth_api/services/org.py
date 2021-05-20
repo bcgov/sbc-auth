@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 from datetime import datetime
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -34,9 +34,8 @@ from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
-from auth_api.services.validators.payment_type import validate as payment_type_validate
-
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
+from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, ChangeType, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod, Status, TaskRelationshipStatus,
     TaskRelationshipType, TaskStatus, TaskTypePrefix)
@@ -53,6 +52,7 @@ from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 

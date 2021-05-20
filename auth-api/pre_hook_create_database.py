@@ -7,6 +7,7 @@ import sqlalchemy.exc
 
 from auth_api.config import ProdConfig
 
+
 DB_ADMIN_PASSWORD = os.getenv('DB_ADMIN_PASSWORD', None)
 
 if not hasattr(ProdConfig, 'DB_NAME') or not DB_ADMIN_PASSWORD:
