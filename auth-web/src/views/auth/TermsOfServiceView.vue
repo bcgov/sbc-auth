@@ -11,9 +11,10 @@
     <div v-if="!isLoading">
       <v-alert type="warning" icon="mdi-alert-circle-outline" class="pa-5 mb-8"
         v-if="showTosBanner"
-      >{{$t('tos_updated')}}
+      >{{$t(isGovmUser ? 'govm_tos_updated' : 'tos_updated')}}
       </v-alert>
-      <h1 class="mb-10">BC Registry Terms and Conditions</h1>
+      <h1 class="mb-10" >{{$t(isGovmUser ? 'govm_tos_title' : 'tos_title')}} </h1>
+
       <v-card flat>
         <v-card-text class="pa-8">
 
@@ -83,6 +84,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   @Prop() token: string
   protected readonly currentUser!: KCUserProfile
   private showTosBanner = false
+  private isGovmUser: boolean = false
 
   private onScroll (e) {
     this.atBottom = (e.target.scrollHeight - e.target.scrollTop) <= (e.target.offsetHeight + 25)
@@ -90,6 +92,11 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
 
   mounted () {
     this.$store.commit('updateHeader')
+    this.isGovmUser = this.isGovmUserLoggedin()
+  }
+
+  isGovmUserLoggedin () {
+    return this.currentUser?.loginSource.toUpperCase() === LoginSource.IDIR.toUpperCase()
   }
 
   showUpdateBanner () {
@@ -108,7 +115,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
         await this.syncUser()
         // if this IDIR GOVM , user take him to accept invite itself.
         // IDIR user doesnt have user profile.so next page mixin will yield wrong navigation if used here.
-        const isGovmUser = this.currentUser?.loginSource.toUpperCase() === LoginSource.IDIR.toUpperCase()
+        const isGovmUser = this.isGovmUserLoggedin()
         if (isGovmUser && this.token) {
           this.$router.push(`/confirmtoken/${this.token}/${LoginSource.IDIR}`)
           return

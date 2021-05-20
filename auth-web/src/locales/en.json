@@ -88,6 +88,7 @@
   "passwordResetFailureTitle": "An error has occured",
   "passwordResetFailureText": "An error occurred while attempting to reset this password.\nPlease try again later.",
   "tos_updated": "We have updated our Terms of Use. Please review and accept the new terms to proceed.",
+  "govm_tos_updated":"We have updated our Memorandum of Understanding. Please review and accept the new MOU to proceed.",
   "createBCRegistriesAccount": "Create a BC Registries and Online Services Account",
   "pendingAffidavitReviewTitle": "Thanks for creating the account {team} at BC Registries and Online Services.",
   "pendingAffidvitReviewMessage": "Once your account has been reviewed and approved you will receive\n\nan email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
@@ -130,5 +131,7 @@
   "bCSCLoginOptionTitle":"Mobile BC Services Card",
   "bCSCLoginOptionDescription":"Login with your BC Services Card.",
   "bCeIDLoginOptionTitle":"BCeID and 2-factor authentication",
-  "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator."
+  "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator.",
+  "govm_tos_title":"Ministry Use Memorandum of Understanding (MOU)",
+  "tos_title":"BC Registry Terms and Conditions"
 }
