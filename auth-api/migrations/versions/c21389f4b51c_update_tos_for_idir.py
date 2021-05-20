@@ -32,7 +32,7 @@ def upgrade():
                <section>
         <header>Definitions</header>
         <p>In this MOU:</p>
-        <p>“Website” means the BC Registry Website at <a hre="https://www.bcregistry.gov.bc.ca">https://www.bcregistry.gov.bc.ca</a> and includes all web pages, content, associated materials and the services provided through the Website.</p>
+        <p>“Website” means the BC Registry Website at <a href="https://www.bcregistry.gov.bc.ca">https://www.bcregistry.gov.bc.ca</a> and includes all web pages, content, associated materials and the services provided through the Website.</p>
         <p>“Ministry Account” refers to a BC Registry account set up to enable a Ministry or a particular branch or group within a Ministry of the BC government to access the services provided through the Website.</p>
       </section>
       <section>
@@ -48,7 +48,7 @@ def upgrade():
       </section>
       <section>
         <header>Online Transactions</header>
-        <p>By creating a Ministry Account, a Ministry accepts that any designated Ministry users using the Ministry Account will be performing transactions that have a financial commitment. The Ministry must ensure that Ministry Account users are not making a commitment that would result in greater expense than a ministry’s current year’s appropriation(s) or available funds, and must not continue to complete transactions if there is a known inability to pay for services when due. Ministries are responsible to ensure that Ministry Account users are aware of their financial responsibilities, as outlined in Core Policy and Procedures, Chapter 7: Revenue and Receivables Management <a hre="https://www2.gov.bc.ca/gov/content/governments/policies-for-government/core-policy/policies/revenue-and-receivables-management">https://www2.gov.bc.ca/gov/content/governments/policies-for-government/core-policy/policies/revenue-and-receivables-management</a>
+        <p>By creating a Ministry Account, a Ministry accepts that any designated Ministry users using the Ministry Account will be performing transactions that have a financial commitment. The Ministry must ensure that Ministry Account users are not making a commitment that would result in greater expense than a ministry’s current year’s appropriation(s) or available funds, and must not continue to complete transactions if there is a known inability to pay for services when due. Ministries are responsible to ensure that Ministry Account users are aware of their financial responsibilities, as outlined in Core Policy and Procedures, Chapter 7: Revenue and Receivables Management <a href="https://www2.gov.bc.ca/gov/content/governments/policies-for-government/core-policy/policies/revenue-and-receivables-management">https://www2.gov.bc.ca/gov/content/governments/policies-for-government/core-policy/policies/revenue-and-receivables-management</a>
           </p><p>Ministries agree to pay service fees, and statutory fees where applicable, as listed on the Website for any transactions and services ordered under Ministry Accounts and payment will be processed through journal voucher.  All fees listed on the Website are in Canadian dollars and charges will be processed in Canadian dollars.  Ministries are responsible to ensure that general ledger information provided for the Ministry Account is accurate and up to date.</p>
         <p>By law, some transactions in BC Registries cannot be reversed. For these types of transactions, no refund or credit can be issued.</p>
         </section>
