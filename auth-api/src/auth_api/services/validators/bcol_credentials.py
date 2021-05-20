@@ -17,10 +17,10 @@ import json
 from flask import current_app
 
 from auth_api import status as http_status
-from auth_api.exceptions import Error, BusinessException, CustomException
+from auth_api.exceptions import BusinessException, CustomException, Error
 from auth_api.services.rest_service import RestService
 from auth_api.services.validators.validator_response import ValidatorResponse
-from auth_api.utils.user_context import user_context, UserContext
+from auth_api.utils.user_context import UserContext, user_context
 
 
 @user_context

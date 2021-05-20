@@ -17,13 +17,15 @@ Test Utility for creating test scenarios.
 """
 import uuid
 from enum import Enum
-from faker import Faker
 from random import choice
 from string import ascii_lowercase, ascii_uppercase
 
-from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import AccessType, IdpHint, LoginSource, ProductCode, OrgType, PaymentMethod
+from faker import Faker
+
 from auth_api.config import get_named_config
+from auth_api.services.keycloak_user import KeycloakUser
+from auth_api.utils.enums import AccessType, IdpHint, LoginSource, OrgType, PaymentMethod, ProductCode
+
 
 fake = Faker()
 

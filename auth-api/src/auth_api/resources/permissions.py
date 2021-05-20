@@ -19,11 +19,12 @@ from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException
 from auth_api.auth import jwt as _jwt
+from auth_api.exceptions import BusinessException
 from auth_api.services import Permissions as PermissionsService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('permissions', description='Endpoints for permissions management')
 TRACER = Tracer.get_instance()

@@ -5,12 +5,13 @@ Revises: 75336ba7d252
 Create Date: 2020-11-25 06:18:31.481932
 
 """
-from alembic import op
 import sqlalchemy as sa
-
-from auth_api.utils.custom_sql import CustomSql
+from alembic import op
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
+
+from auth_api.utils.custom_sql import CustomSql
+
 
 # revision identifiers, used by Alembic.
 revision = '1c958b749a20'

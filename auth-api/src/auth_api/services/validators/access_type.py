@@ -16,7 +16,7 @@
 from auth_api.exceptions import Error
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.enums import AccessType
-from auth_api.utils.user_context import user_context, UserContext
+from auth_api.utils.user_context import UserContext, user_context
 
 
 @user_context

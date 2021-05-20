@@ -19,8 +19,8 @@ The ProductSubscription object connects Org models to one or more ProductSubscri
 from sqlalchemy import Column, ForeignKey, Integer, and_
 from sqlalchemy.orm import relationship
 
-from .base_model import VersionedModel
 from ..utils.roles import VALID_SUBSCRIPTION_STATUSES
+from .base_model import VersionedModel
 
 
 class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-methods

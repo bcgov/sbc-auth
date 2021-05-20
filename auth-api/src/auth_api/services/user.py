@@ -19,8 +19,8 @@ This module manages the User Information.
 from typing import Dict, List
 
 from flask import current_app
-from requests import HTTPError
 from jinja2 import Environment, FileSystemLoader
+from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
@@ -40,10 +40,11 @@ from auth_api.utils.enums import AccessType, DocumentType, IdpHint, LoginSource,
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.util import camelback2snake
 
+from ..utils.account_mailer import publish_to_mailer
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
-from ..utils.account_mailer import publish_to_mailer
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 

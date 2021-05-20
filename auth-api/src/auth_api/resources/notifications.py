@@ -17,8 +17,8 @@ from flask import g
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException
 from auth_api.auth import jwt as _jwt
+from auth_api.exceptions import BusinessException
 from auth_api.services import Membership as MembershipService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role

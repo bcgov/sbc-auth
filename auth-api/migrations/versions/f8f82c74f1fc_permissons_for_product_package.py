@@ -13,7 +13,6 @@ from sqlalchemy.sql import column, table
 from auth_api.utils.custom_sql import CustomSql
 
 
-
 # revision identifiers, used by Alembic.
 revision = 'f8f82c74f1fc'
 down_revision = '1a46fdc4d630'

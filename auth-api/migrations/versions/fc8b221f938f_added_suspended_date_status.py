@@ -5,10 +5,11 @@ Revises: c51a33f55be6
 Create Date: 2020-11-22 15:32:40.287363
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
 revision = 'fc8b221f938f'

@@ -15,15 +15,14 @@
 
 Test suite to ensure that the Org model routines are working as expected.
 """
-from tests.utilities.factory_scenarios import TestUserInfo
-from tests.utilities.factory_utils import factory_user_model
-
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.utils.roles import ADMIN
+from tests.utilities.factory_scenarios import TestUserInfo
+from tests.utilities.factory_utils import factory_user_model
 
 
 def factory_membersip_model(session):

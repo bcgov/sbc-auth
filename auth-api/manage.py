@@ -17,13 +17,14 @@
 import logging
 
 from flask import url_for
-from flask_script import Manager  # class for handling a set of commands
 from flask_migrate import Migrate, MigrateCommand
+from flask_script import Manager  # class for handling a set of commands
 
-from auth_api import create_app
-from auth_api.models import db
 # models included so that migrate can build the database migrations
 from auth_api import models  # pylint: disable=unused-import
+from auth_api import create_app
+from auth_api.models import db
+
 
 APP = create_app()
 MIGRATE = Migrate(APP, db)

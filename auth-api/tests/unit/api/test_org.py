@@ -28,12 +28,13 @@ from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.utils.enums import AffidavitStatus, OrgType, OrgStatus, PaymentMethod, SuspensionReasonCode, AccessType
-from auth_api.utils.enums import ProductCode, ProductSubscriptionStatus
+from auth_api.utils.enums import (
+    AccessType, AffidavitStatus, OrgStatus, OrgType, PaymentMethod, ProductCode, ProductSubscriptionStatus,
+    SuspensionReasonCode)
 from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import (
-    TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestPaymentMethodInfo, DeleteAffiliationPayload)
+    DeleteAffiliationPayload, TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims,
+    TestOrgInfo, TestPaymentMethodInfo)
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
 
 

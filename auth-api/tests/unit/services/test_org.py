@@ -15,7 +15,7 @@
 
 Test suite to ensure that the Org service routines are working as expected.
 """
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from requests import Response
@@ -34,12 +34,10 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import (
-    AccessType, LoginSource, OrgStatus,
-    OrgType, PaymentMethod, SuspensionReasonCode)
+from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, PaymentMethod, SuspensionReasonCode
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestOrgProductsInfo, TestOrgTypeInfo, TestUserInfo, TestPaymentMethodInfo)
+    TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact)

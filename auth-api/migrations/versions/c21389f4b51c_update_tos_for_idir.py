@@ -5,10 +5,10 @@ Revises: f5deb2ebf9a8
 Create Date: 2021-05-17 13:26:44.653069
 
 """
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.sql import column, table
+from alembic import op
 from sqlalchemy import String
+from sqlalchemy.sql import column, table
 
 
 # revision identifiers, used by Alembic.

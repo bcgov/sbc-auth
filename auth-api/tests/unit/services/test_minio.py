@@ -16,9 +16,11 @@
 Test suite to ensure that the Minio service routines are working as expected.
 """
 
-from auth_api.services import MinioService
-import requests
 import os
+
+import requests
+
+from auth_api.services import MinioService
 
 
 def test_create_signed_put_url(session):  # pylint:disable=unused-argument

@@ -21,6 +21,7 @@ from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
@@ -29,15 +30,15 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import NotificationType, Status, LoginSource
+from auth_api.utils.enums import LoginSource, NotificationType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
-from auth_api.config import get_named_config
 
+from ..utils.account_mailer import publish_to_mailer
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .org import Org as OrgService
 from .user import User as UserService
-from ..utils.account_mailer import publish_to_mailer
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()

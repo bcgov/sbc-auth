@@ -17,12 +17,11 @@
 Test-Suite to ensure that the User Service is working as expected.
 """
 
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_user_model
-
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services import UserSettings as UserSettingsService
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_user_model
 
 
 def test_user_settings(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument

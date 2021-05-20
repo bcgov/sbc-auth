@@ -6,9 +6,11 @@ Revises: e27800c90c8a
 Create Date: 2019-11-17 08:30:51.449943
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
+
 from auth_api.utils.custom_sql import CustomSql
+
 
 # revision identifiers, used by Alembic.
 revision = 'dede70a6df1e'

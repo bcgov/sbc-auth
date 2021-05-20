@@ -9,6 +9,7 @@ from alembic import op
 
 from auth_api.utils.custom_sql import CustomSql
 
+
 # revision identifiers, used by Alembic.
 revision = 'b32d868d628c'
 down_revision = 'd46ec0214eb2'

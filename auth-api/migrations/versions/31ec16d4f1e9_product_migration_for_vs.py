@@ -5,7 +5,6 @@ Revises: a37f90e6802d
 Create Date: 2021-04-30 10:01:10.794355
 
 """
-from alembic import op
 import sqlalchemy as sa
 from alembic import op
 from flask import current_app
@@ -13,6 +12,7 @@ from flask import current_app
 from auth_api.models import db
 from auth_api.services.products import Product
 from auth_api.services.rest_service import RestService
+
 
 # revision identifiers, used by Alembic.
 revision = '31ec16d4f1e9'

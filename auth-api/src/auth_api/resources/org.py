@@ -17,8 +17,8 @@ from flask import g, jsonify, request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException
 from auth_api.auth import jwt as _jwt
+from auth_api.exceptions import BusinessException
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -28,10 +28,12 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType, \
-    OrgStatus as OrgStatusEnum, Status
+from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import Status
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()

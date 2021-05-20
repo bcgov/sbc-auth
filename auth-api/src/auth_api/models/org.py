@@ -19,15 +19,15 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import contains_eager, relationship
 
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, OrgStatus as OrgStatusEnum
-from auth_api.utils.roles import VALID_STATUSES, EXCLUDED_FIELDS
+from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
 
 from .base_model import VersionedModel
 from .contact import Contact
 from .contact_link import ContactLink
 from .db import db
-from .invitation import InvitationMembership
-from .invitation import Invitation
+from .invitation import Invitation, InvitationMembership
 from .org_status import OrgStatus
 from .org_type import OrgType
 

@@ -19,13 +19,12 @@ Test-Suite to ensure that the /tester/reset endpoint is working as expected.
 import json
 from unittest.mock import patch
 
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
-from tests.utilities.factory_utils import factory_auth_header
-
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services import ResetTestData as ResetDataService
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_utils import factory_auth_header
 
 
 def test_reset(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
