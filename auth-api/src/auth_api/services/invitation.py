@@ -106,9 +106,9 @@ class Invitation:
                 current_app.logger.debug('<send_team_member_invitation_notification')
                 publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
                 current_app.logger.debug('send_team_member_invitation_notification>')
-            except:  # noqa=B901
+            except Exception as e:  # noqa=B901
                 current_app.logger.error('<send_team_member_invitation_notification failed')
-                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+                raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
         return Invitation(invitation)
 
     @staticmethod
@@ -211,9 +211,9 @@ class Invitation:
             current_app.logger.debug('<send_admin_notification')
             publish_to_mailer(notification_type='adminNotification', org_id=org_id, data=data)
             current_app.logger.debug('send_admin_notification>')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_admin_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def send_invitation(invitation: InvitationModel, org_name, org_id, user,  # pylint: disable=too-many-arguments
@@ -241,7 +241,7 @@ class Invitation:
             invitation.save()
             current_app.logger.debug('>send_invitation failed')
             current_app.logger.debug(exception)
-            raise BusinessException(Error.FAILED_INVITATION, None)
+            raise BusinessException(Error.FAILED_INVITATION, None) from exception
 
         current_app.logger.debug('>send_invitation')
 
@@ -304,8 +304,8 @@ class Invitation:
         try:
             invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT,
                                              max_age=token_valid_for).get('id')
-        except:  # noqa: E722
-            raise BusinessException(Error.EXPIRED_INVITATION, None)
+        except Exception as e:  # noqa: E722
+            raise BusinessException(Error.EXPIRED_INVITATION, None) from e
 
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
 

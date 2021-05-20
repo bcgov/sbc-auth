@@ -166,17 +166,18 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     @classmethod
     def find_similar_org_by_name(cls, name, org_id=None, branch_name=None):
         """Find an Org instance that matches the provided name."""
-        query = cls.query.filter(and_(Org.name == name, Org.branch_name == branch_name)).\
+        query = cls.query.filter(and_(Org.name == name, Org.branch_name == branch_name)). \
             filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.first()
 
     @classmethod
-    def get_count_of_org_created_by_user_id(cls, user_id):
+    def get_count_of_org_created_by_user_id(cls, user_id: int):
         """Find the count of the organisations created by the user."""
-        return cls.query.filter(and_(Org.created_by_id == user_id, Org.status_code == 'ACTIVE')).with_entities(
-            func.count()).scalar()
+        return cls.query.filter(and_(
+            Org.created_by_id == user_id, Org.status_code == 'ACTIVE'  # pylint: disable=comparison-with-callable
+        )).with_entities(func.count()).scalar()
 
     def update_org_from_dict(self, org_info: dict, exclude=EXCLUDED_FIELDS):
         """Update this org with the provided dictionary."""

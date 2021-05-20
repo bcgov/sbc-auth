@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
 from flask import jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException

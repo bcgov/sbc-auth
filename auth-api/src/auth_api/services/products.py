@@ -266,6 +266,6 @@ class Product:
         try:
             publish_to_mailer(notification_type, data=data)
             current_app.logger.debug('<send_approved_prod_subscription_notification>')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_prod_subscription_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e

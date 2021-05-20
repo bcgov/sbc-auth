@@ -118,7 +118,8 @@ def build_cache(app):
             try:
                 from auth_api.services.permissions import \
                     Permissions as PermissionService  # pylint: disable=import-outside-toplevel
-                from auth_api.services.products import Product as ProductService
+                from auth_api.services.products import \
+                    Product as ProductService  # pylint: disable=import-outside-toplevel
                 PermissionService.build_all_permission_cache()
                 ProductService.build_all_products_cache()
             except Exception as e:  # NOQA # pylint:disable=broad-except

@@ -202,7 +202,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err) from err
 
     @staticmethod
     def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
@@ -219,9 +219,9 @@ class User:  # pylint: disable=too-many-instance-attributes
         try:
             publish_to_mailer('otpAuthenticatorResetNotification', org_id=org_id, data=data)
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_otp_authenticator_reset_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
@@ -243,7 +243,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             kc_user = KeycloakService.update_user(update_user_request)
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err) from err
         return kc_user
 
     @staticmethod
