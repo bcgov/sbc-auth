@@ -19,4 +19,4 @@ autopep8
 coverage
 pylint
 pylint-flask
-pydocstyle<4
+pydocstyle

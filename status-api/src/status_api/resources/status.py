@@ -16,7 +16,7 @@ from http import HTTPStatus
 
 from arrow import Arrow
 from flask import current_app, jsonify
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from status_api.services.status import Status as StatusService
 from status_api.utils.util import cors_preflight
