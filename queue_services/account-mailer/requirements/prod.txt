@@ -5,6 +5,6 @@ sentry-sdk[flask]
 asyncio-nats-client
 asyncio-nats-streaming
 pycountry
-Werkzeug<1
+Werkzeug<2
 jaeger-client
-attrs==19.1.0
+attrs

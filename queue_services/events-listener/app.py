@@ -20,6 +20,7 @@ import os
 
 from events_listener.worker import APP_CONFIG, cb_subscription_handler, qsm
 
+
 if __name__ == '__main__':
 
     # my_config = config.get_named_config(os.getenv('DEPLOYMENT_ENV', 'production'))
