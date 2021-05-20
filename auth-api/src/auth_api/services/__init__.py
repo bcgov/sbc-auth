@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all of the Services used in the API."""
+from .activity_log import ActivityLog
 from .affidavit import Affidavit
 from .affiliation import Affiliation
+from .api_gateway import ApiGateway
 from .codes import Codes
 from .contact import Contact
 from .documents import Documents
@@ -25,8 +27,6 @@ from .org import Org
 from .permissions import Permissions
 from .products import Product
 from .reset import ResetTestData
+from .task import Task
 from .user import User
 from .user_settings import UserSettings
-from .api_gateway import ApiGateway
-from .task import Task
-from .activity_log import ActivityLog

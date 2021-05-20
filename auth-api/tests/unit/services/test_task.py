@@ -95,7 +95,7 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     assert dictionary['relationship_type'] == TaskRelationshipType.PRODUCT.value
 
 
-def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
@@ -103,9 +103,8 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
-
-    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id,
-                                token_info=TestJwtClaims.public_bceid_user)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
 
@@ -130,7 +129,7 @@ def test_update_task(session, keycloak_mock):  # pylint:disable=unused-argument
 
 
 def test_create_task_govm(session,
-                          keycloak_mock):  # pylint:disable=unused-argument
+                          keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a task can be created when updating a GOVM account."""
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
@@ -138,8 +137,8 @@ def test_create_task_govm(session,
     user2 = factory_user_model(TestUserInfo.user2)
     public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
                                                     roles=['gov_account_user'])
-
-    org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id, token_info=token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
+    org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
     assert org
     with patch.object(RestService, 'put') as mock_post:
         payment_details = TestPaymentMethodInfo.get_payment_method_input_with_revenue()

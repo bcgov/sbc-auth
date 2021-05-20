@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Organization data."""
-import json
 from datetime import datetime
-from typing import Dict, Tuple
+from typing import Dict, Tuple, List
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.exceptions import BusinessException, CustomException
+from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
 from auth_api.models import Affiliation as AffiliationModel
@@ -31,12 +30,21 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
-from auth_api.schemas import ContactSchema, OrgSchema, InvitationSchema
+from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
+from auth_api.services.validators.access_type import validate as access_type_validate
+from auth_api.services.validators.account_limit import validate as account_limit_validate
+from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
+from auth_api.services.validators.payment_type import validate as payment_type_validate
+
+from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.utils.enums import (
-    AccessType, ChangeType, LoginSource, OrgStatus, OrgType, PaymentMethod,
-    Status, PaymentAccountStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, TaskTypePrefix)
-from auth_api.utils.roles import ADMIN, VALID_STATUSES, Role, STAFF, EXCLUDED_FIELDS
+    AccessType, ChangeType, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod, Status, TaskRelationshipStatus,
+    TaskRelationshipType, TaskStatus, TaskTypePrefix)
+from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
+
+from ..utils.account_mailer import publish_to_mailer
+from ..utils.user_context import UserContext, user_context
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -44,7 +52,7 @@ from .keycloak import KeycloakService
 from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
-from ..utils.account_mailer import publish_to_mailer
+from .validators.validator_response import ValidatorResponse
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -70,38 +78,25 @@ class Org:  # pylint: disable=too-many-public-methods
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id,  # pylint: disable=too-many-locals, too-many-statements, too-many-branches
-                   token_info: Dict = None, bearer_token: str = None, origin_url: str = None):
+    def create_org(org_info: dict, user_id, origin_url: str = None):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         # bcol is treated like an access type as well;so its outside the scheme
-        bcol_credential = org_info.pop('bcOnlineCredential', None)
         mailing_address = org_info.pop('mailingAddress', None)
         payment_info = org_info.pop('paymentInfo', {})
-        selected_payment_method = payment_info.get('paymentMethod', None)
-        org_type = org_info.get('typeCode', OrgType.BASIC.value)
-        branch_name = org_info.get('branchName', None)
+
         bcol_profile_flags = None
-
+        response = Org._validate_and_raise_error(org_info)
         # If the account is created using BCOL credential, verify its valid bc online account
-        if bcol_credential:
-            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token).json()
-            Org._map_response_to_org(bcol_response, org_info)
-            bcol_profile_flags = bcol_response.get('profileFlags')
+        bcol_details_response = response.get('bcol_response', None)
+        if bcol_details_response is not None and (bcol_details := bcol_details_response.json()) is not None:
+            Org._map_response_to_org(bcol_details, org_info)
+            bcol_profile_flags = bcol_details.get('profileFlags')
 
-        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
-        is_bceid_user = token_info and token_info.get('loginSource', None) == LoginSource.BCEID.value
-
-        Org.validate_account_limit(is_staff_admin, user_id)
-
-        access_type = Org.validate_access_type(is_bceid_user, is_staff_admin, org_info)
-
-        # Always check duplicated name for all type of account.
-        Org.raise_error_if_duplicate_name(org_info['name'], branch_name)
+        access_type = response.get('access_type')
 
         # set premium for GOVM accounts..TODO remove if not needed this logic
         if access_type == AccessType.GOVM.value:
-            org_type = OrgType.PREMIUM.value
             org_info.update({'typeCode': OrgType.PREMIUM.value})
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
@@ -113,7 +108,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
                 and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            Org._handle_bceid_status_and_notification(org, origin_url, token_info)
+            Org._handle_bceid_status_and_notification(org, origin_url)
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
@@ -123,21 +118,13 @@ class Org:  # pylint: disable=too-many-public-methods
             Org.add_contact_to_org(mailing_address, org)
 
         # create the membership record for this user if its not created by staff and access_type is anonymous
-        Org.create_membership(access_type, is_staff_admin, org, user_id)
+        Org.create_membership(access_type, org, user_id)
 
         # dir search and GOVM doesnt need default products
         if access_type not in (AccessType.ANONYMOUS.value, AccessType.GOVM.value):
             ProductService.create_default_product_subscriptions(org, bcol_profile_flags, is_new_transaction=False)
 
-        payment_method = Org._validate_and_get_payment_method(selected_payment_method, OrgType[org_type],
-                                                              access_type=access_type)
-
-        user_name = ''
-        if payment_method == PaymentMethod.PAD.value:  # to get the pad accepted date
-            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-            user_name = user.username
-
-        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, user_name, True)
+        Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
         # TODO do we have to check anything like this below?
         # if payment_account_status == PaymentAccountStatus.FAILED:
@@ -150,9 +137,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def _handle_bceid_status_and_notification(org, origin_url, token_info):
+    @user_context
+    def _handle_bceid_status_and_notification(org, origin_url, **kwargs):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
-        user = UserModel.find_by_jwt_token(token=token_info)
+        user_from_context: UserContext = kwargs['user']
+        user = UserModel.find_by_jwt_token(token=user_from_context.token_info)
         # Org.send_staff_review_account_reminder(user, org.id, origin_url)
         # create a staff review task for this account
         task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
@@ -168,33 +157,11 @@ class Org:  # pylint: disable=too-many-public-methods
         TaskService.create_task(task_info=task_info, user=user, origin_url=origin_url, do_commit=False)
 
     @staticmethod
-    def _validate_and_get_payment_method(selected_payment_type: str, org_type: OrgType, access_type=None) -> str:
-
-        # TODO whats a  better place for this
-        org_payment_method_mapping = {
-            OrgType.BASIC: (
-                PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value, PaymentMethod.ONLINE_BANKING.value),
-            OrgType.PREMIUM: (
-                PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
-                PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
-        }
-        if access_type == AccessType.GOVM.value:
-            payment_type = PaymentMethod.EJV.value
-        elif selected_payment_type:
-            valid_types = org_payment_method_mapping.get(org_type, [])
-            if selected_payment_type in valid_types:
-                payment_type = selected_payment_type
-            else:
-                raise BusinessException(Error.INVALID_INPUT, None)
-        else:
-            payment_type = PaymentMethod.BCOL.value if \
-                org_type == OrgType.PREMIUM else Org._get_default_payment_method_for_creditcard()
-        return payment_type
-
-    @staticmethod
-    def create_membership(access_type, is_staff_admin, org, user_id):
+    @user_context
+    def create_membership(access_type, org, user_id, **kwargs):
         """Create membership account."""
-        if not is_staff_admin and access_type != AccessType.ANONYMOUS.value:
+        user: UserContext = kwargs['user']
+        if not user.is_staff_admin() and access_type != AccessType.ANONYMOUS.value:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
                                          membership_type_status=Status.ACTIVE.value)
             membership.add_to_session()
@@ -203,7 +170,7 @@ class Org:  # pylint: disable=too-many-public-methods
             KeycloakService.join_account_holders_group()
 
     @staticmethod
-    def validate_account_limit(is_staff_admin, user_id):
+    def _validate_account_limit(is_staff_admin, user_id):
         """Validate account limit."""
         if not is_staff_admin:  # staff can create any number of orgs
             count = OrgModel.get_count_of_org_created_by_user_id(user_id)
@@ -211,41 +178,10 @@ class Org:  # pylint: disable=too-many-public-methods
                 raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
 
     @staticmethod
-    def validate_access_type(is_bceid_user, is_staff_admin, org_info):
-        """Validate and return access type."""
-        access_type: str = org_info.get('accessType', None)
-        if access_type:
-            if is_staff_admin and not access_type:
-                raise BusinessException(Error.ACCCESS_TYPE_MANDATORY, None)
-            if not is_staff_admin and access_type in AccessType.ANONYMOUS.value:
-                raise BusinessException(Error.USER_CANT_CREATE_ANONYMOUS_ORG, None)
-            if not is_staff_admin and access_type in AccessType.GOVM.value:
-                raise BusinessException(Error.USER_CANT_CREATE_GOVM_ORG, None)
-            if not is_bceid_user and access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
-                raise BusinessException(Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG, None)
-            if is_bceid_user and access_type not in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
-                raise BusinessException(Error.USER_CANT_CREATE_REGULAR_ORG, None)
-        else:
-            # If access type is not provided, add default value based on user
-            if is_staff_admin:
-                pass
-            elif is_bceid_user:
-                access_type = AccessType.EXTRA_PROVINCIAL.value
-            else:
-                access_type = AccessType.REGULAR.value
-        return access_type
-
-    @staticmethod
-    def raise_error_if_duplicate_name(name, branch_name=None):
-        """Raise error if there is duplicate org name already."""
-        existing_similar__org = OrgModel.find_similar_org_by_name(name, branch_name=branch_name)
-        if existing_similar__org is not None:
-            raise BusinessException(Error.DATA_CONFLICT, None)
-
-    @staticmethod
+    @user_context
     def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
-                                 payment_method: str, mailing_address=None, username: str = None,
-                                 is_new_org: bool = True) -> PaymentAccountStatus:
+                                 payment_method: str, mailing_address=None,
+                                 is_new_org: bool = True, **kwargs) -> PaymentAccountStatus:
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
@@ -272,7 +208,7 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
-            pay_request['padTosAcceptedBy'] = username
+            pay_request['padTosAcceptedBy'] = kwargs['user'].user_name
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
@@ -292,29 +228,45 @@ class Org:  # pylint: disable=too-many-public-methods
         return payment_account_status
 
     @staticmethod
+    def _validate_and_raise_error(org_info: dict):
+        """Execute the validators in chain and raise error or return."""
+        validators = [account_limit_validate, access_type_validate, duplicate_org_name_validate]
+        arg_dict = {'accessType': org_info.get('accessType', None),
+                    'name': org_info.get('name'),
+                    'branch_name': org_info.get('branchName')}
+        if (bcol_credential := org_info.pop('bcOnlineCredential', None)) is not None:
+            validators.insert(0, bcol_credentials_validate)  # first validator should be bcol ,thus 0th position
+            arg_dict['bcol_credential'] = bcol_credential
+
+        validator_response_list: List[ValidatorResponse] = []
+        for validate in validators:
+            validator_response_list.append(validate(**arg_dict))
+
+        not_valid_obj = next((x for x in validator_response_list if getattr(x, 'is_valid', None) is False), None)
+        if not_valid_obj:
+            raise BusinessException(not_valid_obj.error[0], None)
+
+        response: dict = {}
+        for val in validator_response_list:
+            response.update(val.info)
+        return response
+
+    @staticmethod
     def _get_default_payment_method_for_creditcard():
         return PaymentMethod.DIRECT_PAY.value if current_app.config.get(
             'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
 
     @staticmethod
-    def get_bcol_details(bcol_credential: Dict, bearer_token: str = None, org_id=None):
+    def get_bcol_details(bcol_credential: Dict, org_id=None):
         """Retrieve and validate BC Online credentials."""
-        bcol_response = None
-        if bcol_credential:
-            bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
-                                             data=bcol_credential, token=bearer_token, raise_for_status=False)
+        arg_dict = {'bcol_credential': bcol_credential,
+                    'org_id': org_id}
+        validator_obj = bcol_credentials_validate(**arg_dict)
+        if not validator_obj.is_valid:
+            raise BusinessException(validator_obj.error[0], None)
+        return validator_obj.info.get('bcol_response', None)
 
-            if bcol_response.status_code != http_status.HTTP_200_OK:
-                error = json.loads(bcol_response.text)
-                raise BusinessException(CustomException(error['detail'], bcol_response.status_code), None)
-
-            bcol_account_number = bcol_response.json().get('accountNumber')
-
-            if Org.bcol_account_link_check(bcol_account_number, org_id):
-                raise BusinessException(Error.BCOL_ACCOUNT_ALREADY_LINKED, None)
-        return bcol_response
-
-    def change_org_ype(self, org_info, action=None, bearer_token: str = None):
+    def change_org_ype(self, org_info, action=None):
         """Update the passed organization with the new info.
 
         if Upgrade:
@@ -339,8 +291,9 @@ class Org:  # pylint: disable=too-many-public-methods
             if org_info.get('typeCode') != OrgType.BASIC.value:
                 raise BusinessException(Error.INVALID_INPUT, None)
             # if they have not changed the name , they can claim the name. Dont check duplicate..or else check duplicate
-            if org_info.get('name') != self._model.name:
-                Org.raise_error_if_duplicate_name(org_info['name'])
+            # TODO fix this
+            # if org_info.get('name') != self._model.name:
+            # Org.raise_error_if_duplicate_name(org_info['name'])
 
             # remove the bcol payment details from payment table
             org_info['bcol_account_id'] = ''
@@ -353,7 +306,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if action == ChangeType.UPGRADE.value:
             if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
-            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             ProductService.create_subscription_from_bcol_profile(self._model.id, bcol_response.get('profileFlags'))
             payment_type = PaymentMethod.BCOL.value
@@ -364,7 +317,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
         # TODO pass username instead of blanks
-        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, '', False)
+        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, False)
         return self
 
     @staticmethod
@@ -390,8 +343,16 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.org = org
         contact_link.add_to_session()
 
+    @staticmethod
+    def raise_error_if_duplicate_name(name, branch_name=None, org_id=None):
+        """Raise error if there is duplicate org name already."""
+        arg_dict = {'name': name,
+                    'branch_name': branch_name,
+                    'org_id': org_id}
+        duplicate_org_name_validate(is_fatal=True, **arg_dict)
+
     def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
-                   bearer_token: str = None, origin_url: str = None):
+                   origin_url: str = None):
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -407,15 +368,13 @@ class Org:  # pylint: disable=too-many-public-methods
         # govm name is not being updated now
         is_name_getting_updated = 'name' in org_info and not is_govm_account
         if is_name_getting_updated:
-            existing_similar__org = OrgModel.find_similar_org_by_name(org_info['name'], self._model.id)
-            if existing_similar__org is not None:
-                raise BusinessException(Error.DATA_CONFLICT, None)
+            self.raise_error_if_duplicate_name(name=org_info['name'], org_id=self._model.id)
             has_org_updates = True
 
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
-            bcol_response = Org.get_bcol_details(bcol_credential, bearer_token, self._model.id).json()
+            bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
             Org._map_response_to_org(bcol_response, org_info)
             ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get('profileFlags'))
             has_org_updates = True
@@ -450,15 +409,23 @@ class Org:  # pylint: disable=too-many-public-methods
             excluded = ('type_code',) if has_status_changing else EXCLUDED_FIELDS
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
 
-        if payment_info:
-            selected_payment_method = payment_info.get('paymentMethod', None)
-            payment_type = Org._validate_and_get_payment_method(selected_payment_method, OrgType[self._model.type_code],
-                                                                self._model.access_type)
-            user: UserModel = UserModel.find_by_jwt_token(token=token_info)
-            # TODO when updating the bank info , dont pass user.username as tos updated by..handle this
-            Org._create_payment_settings(self._model, payment_info, payment_type, mailing_address, user.username, False)
-            current_app.logger.debug('>update_org ')
+        Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+        current_app.logger.debug('>update_org ')
         return self
+
+    @staticmethod
+    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True):
+        """Create Or update payment info for org."""
+        if not payment_info and not is_new_org:  # To ignore payment info updates if no info is passed
+            return
+        selected_payment_method = payment_info.get('paymentMethod', None)
+        arg_dict = {'selected_payment_method': selected_payment_method,
+                    'access_type': org.access_type,
+                    'org_type': OrgType[org.type_code]
+                    }
+        validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
+        payment_method = validator_obj.info.get('payment_type')
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
 
     @staticmethod
     def _create_gov_account_task(org_model: OrgModel, token_info: dict, origin_url: str):
