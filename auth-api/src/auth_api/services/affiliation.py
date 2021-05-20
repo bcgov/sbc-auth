@@ -274,6 +274,6 @@ class Affiliation:
             get_nr_response = RestService.get(get_nr_url, token=token)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
+            raise BusinessException(Error.DATA_NOT_FOUND, None) from e
 
         return get_nr_response.json()

@@ -69,4 +69,4 @@ class Codes:
                 return data
             return None
         except Exception as exception:  # NOQA # pylint: disable=broad-except
-            raise BusinessException(Error.UNDEFINED_ERROR, exception)
+            raise BusinessException(Error.UNDEFINED_ERROR, exception) from exception

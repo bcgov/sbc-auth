@@ -182,9 +182,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         try:
             publish_to_mailer(notification_type_for_mailer, org_id=org_id, data=data)
             current_app.logger.debug('<send_approval_notification_to_member')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_notification_to_member failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     def update_membership(self, updated_fields, token_info: Dict = None):
         """Update an existing membership with the given role."""
