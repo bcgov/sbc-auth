@@ -15,6 +15,7 @@
 """
 from status_api import create_app
 
+
 # Openshift s2i expects a lower case name of application
 application = create_app() # pylint: disable=invalid-name
 

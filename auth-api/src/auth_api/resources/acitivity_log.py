@@ -13,8 +13,8 @@
 # limitations under the License.
 """API endpoints for managing a Activity resource."""
 
-from flask import request, g
-from flask_restplus import Namespace, Resource, cors
+from flask import g, request
+from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
@@ -23,6 +23,7 @@ from auth_api.services import ActivityLog as ActivityLogService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('activity_logs', description='Endpoints for activity management')
 TRACER = Tracer.get_instance()

@@ -5,10 +5,11 @@ Revises: 243d9782085e
 Create Date: 2020-02-24 12:59:10.005224
 
 """
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.sql import table, column
-from sqlalchemy import String, Boolean, Date
+from alembic import op
+from sqlalchemy import Boolean, Date, String
+from sqlalchemy.sql import column, table
+
 
 # revision identifiers, used by Alembic.
 revision = '8111f90828de'

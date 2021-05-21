@@ -15,14 +15,15 @@
 
 
 from flask import send_from_directory
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.services import Documents as DocumentService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import DocumentType, ContentType
+from auth_api.utils.enums import ContentType, DocumentType
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('documents', description='Endpoints for document management')
 TRACER = Tracer.get_instance()

@@ -18,9 +18,6 @@ Test-Suite to ensure that the reset data Service is working as expected.
 """
 
 import pytest
-from tests.utilities.factory_scenarios import KeycloakScenario, TestEntityInfo, TestJwtClaims, TestUserInfo
-from tests.utilities.factory_utils import (
-    factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -30,6 +27,9 @@ from auth_api.services import ResetTestData as ResetDataService
 from auth_api.services import User as UserService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
+from tests.utilities.factory_scenarios import KeycloakScenario, TestEntityInfo, TestJwtClaims, TestUserInfo
+from tests.utilities.factory_utils import (
+    factory_entity_model, factory_membership_model, factory_org_model, factory_user_model)
 
 
 def test_reset(session, auth_mock):  # pylint: disable=unused-argument

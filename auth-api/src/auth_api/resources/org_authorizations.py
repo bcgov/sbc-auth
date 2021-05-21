@@ -14,13 +14,14 @@
 """API endpoints for managing a Product resource."""
 
 from flask import g, request
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
 from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('permissions', description='Endpoints for permissions management')
 TRACER = Tracer.get_instance()

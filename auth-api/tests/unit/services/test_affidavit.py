@@ -19,8 +19,7 @@ Test suite to ensure that the affidavit service routines are working as expected
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.utils.enums import AffidavitStatus, LoginSource, OrgStatus
-
-from tests.utilities.factory_scenarios import TestJwtClaims, TestAffidavit, TestOrgInfo
+from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact
 
 

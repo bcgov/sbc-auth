@@ -14,9 +14,9 @@
 """Util for validating access type against each user roles."""
 from flask import current_app
 
-from auth_api.exceptions import Error, BusinessException
+from auth_api.exceptions import BusinessException, Error
 from auth_api.services.validators.validator_response import ValidatorResponse
-from auth_api.utils.enums import AccessType, PaymentMethod, OrgType
+from auth_api.utils.enums import AccessType, OrgType, PaymentMethod
 from auth_api.utils.user_context import user_context
 
 

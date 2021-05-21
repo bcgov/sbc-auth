@@ -30,15 +30,18 @@ from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, Status, LoginSource, \
-    OrgStatus as OrgStatusEnum
-from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
+from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, LoginSource
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import Status
+from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+
+from ..utils.account_mailer import publish_to_mailer
+from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.util import escape_wam_friendly_url
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
@@ -106,9 +109,9 @@ class Invitation:
                 current_app.logger.debug('<send_team_member_invitation_notification')
                 publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
                 current_app.logger.debug('send_team_member_invitation_notification>')
-            except:  # noqa=B901
+            except Exception as e:  # noqa=B901
                 current_app.logger.error('<send_team_member_invitation_notification failed')
-                raise BusinessException(Error.FAILED_NOTIFICATION, None)
+                raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
         return Invitation(invitation)
 
     @staticmethod
@@ -211,9 +214,9 @@ class Invitation:
             current_app.logger.debug('<send_admin_notification')
             publish_to_mailer(notification_type='adminNotification', org_id=org_id, data=data)
             current_app.logger.debug('send_admin_notification>')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_admin_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def send_invitation(invitation: InvitationModel, org_name, org_id, user,  # pylint: disable=too-many-arguments
@@ -241,7 +244,7 @@ class Invitation:
             invitation.save()
             current_app.logger.debug('>send_invitation failed')
             current_app.logger.debug(exception)
-            raise BusinessException(Error.FAILED_INVITATION, None)
+            raise BusinessException(Error.FAILED_INVITATION, None) from exception
 
         current_app.logger.debug('>send_invitation')
 
@@ -304,8 +307,8 @@ class Invitation:
         try:
             invitation_id = serializer.loads(token, salt=CONFIG.EMAIL_SECURITY_PASSWORD_SALT,
                                              max_age=token_valid_for).get('id')
-        except:  # noqa: E722
-            raise BusinessException(Error.EXPIRED_INVITATION, None)
+        except Exception as e:  # noqa: E722
+            raise BusinessException(Error.EXPIRED_INVITATION, None) from e
 
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
 

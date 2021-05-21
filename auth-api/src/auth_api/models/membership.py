@@ -20,7 +20,7 @@ from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import Status
-from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_STATUSES, VALID_ORG_STATUSES
+from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
 
 from .base_model import VersionedModel
 from .db import db

@@ -20,8 +20,7 @@ Test-Suite to ensure that the /orgs/api-keys endpoint is working as expected.
 import json
 
 from auth_api import status as http_status
-from tests.utilities.factory_scenarios import (
-    TestJwtClaims, TestOrgInfo)
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header
 
 

@@ -25,14 +25,11 @@ from sentry_sdk.integrations.flask import FlaskIntegration  # pylint: disable=un
 
 from config import CONFIGURATION, _Config  # pylint: disable=import-error
 from status_api import models
-from status_api.jwt_wrapper import JWTWrapper
 from status_api.utils.run_version import get_run_version
 from status_api.utils.util_logging import setup_logging
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
-
-JWT = JWTWrapper.get_instance()
 
 
 def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
@@ -53,8 +50,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app.register_blueprint(OPS_BLUEPRINT)
     app.after_request(convert_to_camel)
 
-    setup_jwt_manager(app, JWT)
-
     ExceptionHandler(app)
 
     @app.after_request
@@ -68,20 +63,11 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     return app
 
 
-def setup_jwt_manager(app, jwt_manager):
-    """Use flask app to configure the JWTManager to work for a particular Realm."""
-    def get_roles(a_dict):
-        return a_dict['realm_access']['roles']  # pragma: no cover
-
-    app.config['JWT_ROLE_CALLBACK'] = get_roles
-
-    jwt_manager.init_app(app)
-
-
 def register_shellcontext(app):
     """Register shell context objects."""
+
     def shell_context():
         """Shell context objects."""
-        return {'app': app, 'jwt': JWT, 'models': models}  # pragma: no cover
+        return {'app': app, 'models': models}  # pragma: no cover
 
     app.shell_context_processor(shell_context)

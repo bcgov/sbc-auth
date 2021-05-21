@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 from datetime import datetime
-from typing import Dict, Tuple, List
+from typing import Dict, List, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -34,9 +34,8 @@ from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
-from auth_api.services.validators.payment_type import validate as payment_type_validate
-
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
+from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, ChangeType, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod, Status, TaskRelationshipStatus,
     TaskRelationshipType, TaskStatus, TaskTypePrefix)
@@ -53,6 +52,7 @@ from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -830,9 +830,9 @@ class Org:  # pylint: disable=too-many-public-methods
         try:
             publish_to_mailer('staffReviewAccount', org_id=org_id, data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def send_approved_rejected_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url):
@@ -855,9 +855,9 @@ class Org:  # pylint: disable=too-many-public-methods
         try:
             publish_to_mailer(notification_type, org_id=org_id, data=data)
             current_app.logger.debug('<send_approved_rejected_notification')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def send_approved_govm_notification(receipt_admin_email, org_id, org_status: OrgStatus, origin_url):
@@ -877,6 +877,6 @@ class Org:  # pylint: disable=too-many-public-methods
         try:
             publish_to_mailer(notification_type, org_id=org_id, data=data)
             current_app.logger.debug('send_approved_govm_notification>')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_govm_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e

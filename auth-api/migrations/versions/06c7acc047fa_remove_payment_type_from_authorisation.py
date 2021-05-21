@@ -5,12 +5,12 @@ Revises: 959d8ff75e82
 Create Date: 2020-09-30 13:32:03.915931
 
 """
-from alembic import op
 import sqlalchemy as sa
-
-from auth_api.utils.custom_sql import CustomSql
+from alembic import op
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
+
+from auth_api.utils.custom_sql import CustomSql
 
 
 # revision identifiers, used by Alembic.

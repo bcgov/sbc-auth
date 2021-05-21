@@ -5,14 +5,13 @@ Revises: c10f494d7e10
 Create Date: 2021-01-04 14:55:28.146682
 
 """
-from alembic import op
 import sqlalchemy as sa
 from alembic import op
-import sqlalchemy as sa
-
-from auth_api.utils.custom_sql import CustomSql
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
+
+from auth_api.utils.custom_sql import CustomSql
+
 
 # revision identifiers, used by Alembic.
 revision = '0f310e71e51d'

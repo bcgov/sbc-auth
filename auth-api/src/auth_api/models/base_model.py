@@ -15,13 +15,13 @@
 
 import datetime
 
-from flask import g, current_app
+from flask import current_app, g
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
-from .db import db, activity_plugin
+from .db import activity_plugin, db
 
 
 class BaseModel(db.Model):

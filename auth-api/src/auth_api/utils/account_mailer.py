@@ -17,6 +17,7 @@ from datetime import datetime
 from auth_api.config import get_named_config
 from auth_api.services.queue_publisher import publish_response
 
+
 CONFIG = get_named_config()
 
 

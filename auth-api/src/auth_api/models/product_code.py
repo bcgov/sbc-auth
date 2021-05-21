@@ -16,7 +16,9 @@
 It defines the available products.
 """
 from __future__ import annotations
+
 from typing import List
+
 from sqlalchemy import Column, ForeignKey
 
 from .base_model import BaseCodeModel

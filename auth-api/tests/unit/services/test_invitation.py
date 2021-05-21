@@ -20,8 +20,6 @@ from unittest.mock import patch
 
 import pytest
 from freezegun import freeze_time
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_invitation, factory_user_model
 
 import auth_api.services.authorization as auth
 from auth_api.exceptions import BusinessException
@@ -32,6 +30,8 @@ from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_invitation, factory_user_model
 
 
 def test_as_dict(session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument

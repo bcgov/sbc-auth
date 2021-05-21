@@ -13,11 +13,11 @@
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
 
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .db import db
 from .base_model import BaseModel
+from .db import db
 
 
 class Task(BaseModel):

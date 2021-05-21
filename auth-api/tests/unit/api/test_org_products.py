@@ -19,11 +19,10 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 
 import json
 
+from auth_api import status as http_status
+from auth_api.schemas import utils as schema_utils
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
 from tests.utilities.factory_utils import factory_auth_header
-
-from auth_api.schemas import utils as schema_utils
-from auth_api import status as http_status
 
 
 def test_add_multiple_org_products(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

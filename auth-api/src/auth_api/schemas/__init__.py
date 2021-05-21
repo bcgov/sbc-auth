@@ -13,6 +13,7 @@
 # limitations under the License.
 """Schema package."""
 
+from .activity_log import ActivityLogSchema
 from .affidavit import AffidavitSchema
 from .affiliation import AffiliationSchema
 from .contact import ContactSchema
@@ -27,9 +28,8 @@ from .membership_status_code import MembershipStatusCodeSchema
 from .membership_types import MembershipTypeSchema
 from .org import OrgSchema
 from .org_type import OrgTypeSchema
-from .user import UserSchema
-from .user_settings import UserSettingsSchema
 from .product_subscription import ProductSubscriptionSchema
 from .suspension_reason_code import SuspensionReasonCodeSchema
 from .task import TaskSchema
-from .activity_log import ActivityLogSchema
+from .user import UserSchema
+from .user_settings import UserSettingsSchema

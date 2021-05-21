@@ -5,11 +5,10 @@ Revises: b1fb7d214cb7
 Create Date: 2020-04-20 19:31:27.260794
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
-
 
 
 # revision identifiers, used by Alembic.
