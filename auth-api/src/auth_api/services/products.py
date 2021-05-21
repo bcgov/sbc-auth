@@ -27,13 +27,15 @@ from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
-from auth_api.utils.enums import ProductTypeCode, ProductCode, OrgType, \
-    ProductSubscriptionStatus, TaskRelationshipType, TaskStatus, TaskRelationshipStatus, AccessType
-from .authorization import check_auth
+from auth_api.utils.enums import (
+    AccessType, OrgType, ProductCode, ProductSubscriptionStatus, ProductTypeCode, TaskRelationshipStatus,
+    TaskRelationshipType, TaskStatus)
+
 from ..utils.account_mailer import publish_to_mailer
-from .task import Task as TaskService
 from ..utils.cache import cache
-from ..utils.roles import STAFF, CLIENT_ADMIN_ROLES
+from ..utils.roles import CLIENT_ADMIN_ROLES, STAFF
+from .authorization import check_auth
+from .task import Task as TaskService
 
 
 class Product:
@@ -266,6 +268,6 @@ class Product:
         try:
             publish_to_mailer(notification_type, data=data)
             current_app.logger.debug('<send_approved_prod_subscription_notification>')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_prod_subscription_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e

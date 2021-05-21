@@ -18,10 +18,9 @@ Test-Suite to ensure that the /permissions endpoint is working as expected.
 """
 import json
 
+from auth_api import status as http_status
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_auth_header
-
-from auth_api import status as http_status
 
 
 def test_permissions_returns_200(client, jwt, session):  # pylint:disable=unused-argument

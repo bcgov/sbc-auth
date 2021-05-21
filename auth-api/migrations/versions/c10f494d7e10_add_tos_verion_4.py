@@ -7,8 +7,8 @@ Create Date: 2020-12-24 11:04:39.997395
 """
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.sql import column, table
 from sqlalchemy import Integer, String
+from sqlalchemy.sql import column, table
 
 
 # revision identifiers, used by Alembic.

@@ -14,13 +14,13 @@
 """API endpoints for managing an Org resource."""
 
 from flask import request
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
-from auth_api.exceptions import BusinessException
 from auth_api.auth import jwt as _jwt
-from auth_api.utils.roles import Role
+from auth_api.exceptions import BusinessException
 from auth_api.services.org import Org
 from auth_api.tracer import Tracer
+from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
 

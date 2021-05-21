@@ -5,11 +5,11 @@ Revises: 69a7e464fef3
 Create Date: 2021-03-03 21:30:29.597634
 
 """
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 # revision identifiers, used by Alembic.
 from sqlalchemy.sql import column, table
+
 
 revision = 'd5b5eb2e8dd0'
 down_revision = '69a7e464fef3'

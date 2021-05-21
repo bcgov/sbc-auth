@@ -18,7 +18,7 @@ class BusinessException(Exception):
 
     def __init__(self, error, exception, *args, **kwargs):
         """Return a valid BusinessException."""
-        super(BusinessException, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.message = error.message
         self.error = error.message
@@ -35,7 +35,7 @@ class ServiceUnavailableException(Exception):
 
     def __init__(self, error, *args, **kwargs):
         """Return a valid BusinessException."""
-        super(ServiceUnavailableException, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.error = error
         self.status_code = Error.SERVICE_UNAVAILABLE.name
 

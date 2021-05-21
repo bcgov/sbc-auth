@@ -18,13 +18,13 @@ from random import random
 
 import pytest
 from flask_migrate import Migrate, upgrade
+from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
+from stan.aio.client import Client as Stan
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.auth import jwt as _jwt
 from auth_api.models import db as _db
-from nats.aio.client import Client as Nats
-from stan.aio.client import Client as Stan
 
 
 @pytest.fixture(scope='session')

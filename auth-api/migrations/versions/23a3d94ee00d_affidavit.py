@@ -10,6 +10,7 @@ from alembic import op
 from sqlalchemy import Boolean, String
 from sqlalchemy.sql import column, table
 
+
 # revision identifiers, used by Alembic.
 revision = '23a3d94ee00d'
 down_revision = '422daf97fd19'

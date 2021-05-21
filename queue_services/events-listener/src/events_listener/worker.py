@@ -88,7 +88,7 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         event_message = json.loads(msg.data.decode('utf-8'))
         logger.debug('Event Message Received: %s', event_message)
         await process_event(event_message, FLASK_APP)
-    except Exception:  # pylint: disable=broad-except
+    except Exception:  # noqa pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
 
@@ -113,7 +113,7 @@ async def publish_mailer_events(message_type: str, org_id: str):
         await publish(payload=payload,
                       client_name=APP_CONFIG.NATS_MAILER_CLIENT_NAME,
                       subject=APP_CONFIG.NATS_MAILER_SUBJECT)
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:  # noqa pylint: disable=broad-except
         logger.error(e)
         logger.warning('Notification to Queue failed for the Account Mailer %s - %s', org_id,
                        payload)

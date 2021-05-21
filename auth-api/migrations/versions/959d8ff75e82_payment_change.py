@@ -5,7 +5,7 @@ Revises: 66ae9d618842
 Create Date: 2020-09-28 07:34:51.175055
 
 """
-from typing import List, Dict
+from typing import Dict, List
 
 import sqlalchemy as sa
 from alembic import op
@@ -14,6 +14,7 @@ from flask import current_app
 from auth_api.models import Org
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import OrgType, PaymentMethod
+
 
 revision = '959d8ff75e82'
 down_revision = '66ae9d618842'

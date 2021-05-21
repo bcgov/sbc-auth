@@ -5,8 +5,8 @@ Revises: 18a4955730f9
 Create Date: 2020-11-05 16:12:46.942143
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.sql import column, table
 
 

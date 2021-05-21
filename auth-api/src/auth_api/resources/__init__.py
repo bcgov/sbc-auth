@@ -26,6 +26,7 @@ from flask import Blueprint, current_app
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler
 
 from .account import API as ACCOUNTS_API
+from .acitivity_log import API as ACTIVITY_LOG_API
 from .apihelper import Api
 from .bcol_profiles import API as BCOL_PROFILE_API
 from .bulk_user import API as BULK_USER_API
@@ -38,16 +39,15 @@ from .meta import API as META_API
 from .notifications import API as NOTIFICATIONS_API
 from .ops import API as OPS_API
 from .org import API as ORG_API
+from .org_api_keys import API as ORG_API_KEYS_API
+from .org_authorizations import API as ORG_AUTHORISATION_API
 from .org_products import API as ORG_PRODUCTS_API
 from .permissions import API as PERMISSIONS_API
-from .org_authorizations import API as ORG_AUTHORISATION_API
 from .products import API as PRODUCTS_API
 from .reset import API as RESET_API
+from .task import API as TASKS_API
 from .user import API as USER_API
 from .user_settings import API as USER_SETTINGS_API
-from .org_api_keys import API as ORG_API_KEYS_API
-from .task import API as TASKS_API
-from .acitivity_log import API as ACTIVITY_LOG_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')

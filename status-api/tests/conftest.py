@@ -15,10 +15,6 @@
 import pytest
 
 from status_api import create_app
-from status_api.jwt_wrapper import JWTWrapper
-
-
-_JWT = JWTWrapper.get_instance()
 
 
 @pytest.fixture(scope='session')
@@ -41,12 +37,6 @@ def app_request():
 def client(app):  # pylint: disable=redefined-outer-name
     """Return a session-wide Flask test client."""
     return app.test_client()
-
-
-@pytest.fixture(scope='session')
-def jwt():
-    """Return a session-wide jwt manager."""
-    return _JWT
 
 
 @pytest.fixture(scope='session')

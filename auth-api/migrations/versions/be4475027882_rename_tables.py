@@ -5,14 +5,14 @@ Revises: a490b2db8b13
 Create Date: 2021-01-18 06:27:37.050548
 
 """
-from alembic import op
-from sqlalchemy import create_engine
-from sqlalchemy.engine import reflection
-from sqlalchemy import MetaData
 import re
 
+from alembic import op
+from sqlalchemy import MetaData, create_engine
+from sqlalchemy.engine import reflection
 # revision identifiers, used by Alembic.
 from sqlalchemy.engine.reflection import Inspector
+
 
 VERSION = '_version'
 

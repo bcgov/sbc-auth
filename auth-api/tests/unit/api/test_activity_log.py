@@ -21,9 +21,8 @@ from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.utils.enums import ActivityAction
 from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
-from tests.utilities.factory_utils import (factory_auth_header,
-                                           factory_user_model, factory_activity_log_model, factory_org_model,
-                                           factory_membership_model)
+from tests.utilities.factory_utils import (
+    factory_activity_log_model, factory_auth_header, factory_membership_model, factory_org_model, factory_user_model)
 
 
 def test_fetch_log_no_content_no_org(client, jwt, session):  # pylint:disable=unused-argument

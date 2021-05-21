@@ -6,11 +6,14 @@ Create Date: 2021-04-14 17:48:33.958394
 
 """
 from typing import List
-from alembic import op
+
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy import text
+
 from auth_api.models import Org
-from auth_api.utils.enums import TaskStatus, TaskRelationshipType, TaskTypePrefix, TaskRelationshipStatus, OrgStatus
+from auth_api.utils.enums import OrgStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
+
 
 # revision identifiers, used by Alembic.
 revision = '031a07fb0811'

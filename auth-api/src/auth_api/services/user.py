@@ -19,8 +19,8 @@ This module manages the User Information.
 from typing import Dict, List
 
 from flask import current_app
-from requests import HTTPError
 from jinja2 import Environment, FileSystemLoader
+from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
@@ -40,10 +40,11 @@ from auth_api.utils.enums import AccessType, DocumentType, IdpHint, LoginSource,
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.util import camelback2snake
 
+from ..utils.account_mailer import publish_to_mailer
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
-from ..utils.account_mailer import publish_to_mailer
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -202,7 +203,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err) from err
 
     @staticmethod
     def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
@@ -219,9 +220,9 @@ class User:  # pylint: disable=too-many-instance-attributes
         try:
             publish_to_mailer('otpAuthenticatorResetNotification', org_id=org_id, data=data)
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
-        except:  # noqa=B901
+        except Exception as e:  # noqa=B901
             current_app.logger.error('<send_otp_authenticator_reset_notification failed')
-            raise BusinessException(Error.FAILED_NOTIFICATION, None)
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
@@ -243,7 +244,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             kc_user = KeycloakService.update_user(update_user_request)
         except HTTPError as err:
             current_app.logger.error('update_user in keycloak failed {}', err)
-            raise BusinessException(Error.UNDEFINED_ERROR, err)
+            raise BusinessException(Error.UNDEFINED_ERROR, err) from err
         return kc_user
 
     @staticmethod

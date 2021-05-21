@@ -14,17 +14,19 @@
 """API endpoints for managing a Task resource."""
 
 from flask import g, request
-from flask_restplus import Namespace, Resource, cors
-from auth_api.tracer import Tracer
-from auth_api.auth import jwt as _jwt
-from auth_api.utils.util import cors_preflight
-from auth_api.utils.roles import Role
-from auth_api.services import Task as TaskService
+from flask_restx import Namespace, Resource, cors
+
 from auth_api import status as http_status
+from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.models import Task as TaskModel
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import Task as TaskService
+from auth_api.tracer import Tracer
 from auth_api.utils.enums import TaskStatus
+from auth_api.utils.roles import Role
+from auth_api.utils.util import cors_preflight
+
 
 API = Namespace('tasks', description='Endpoints for tasks management')
 TRACER = Tracer.get_instance()

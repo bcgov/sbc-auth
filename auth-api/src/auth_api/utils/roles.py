@@ -14,7 +14,7 @@
 """Role definitions."""
 from enum import Enum
 
-from .enums import Status, OrgStatus, ProductSubscriptionStatus
+from .enums import OrgStatus, ProductSubscriptionStatus, Status
 
 
 class Role(Enum):

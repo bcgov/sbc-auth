@@ -17,6 +17,7 @@ Test suite to ensure that the Product api endpoints are working as expected.
 """
 
 import json
+
 from auth_api.schemas import utils as schema_utils
 
 

@@ -19,15 +19,15 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
 from sqlalchemy.orm import contains_eager, relationship
 
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, OrgStatus as OrgStatusEnum
-from auth_api.utils.roles import VALID_STATUSES, EXCLUDED_FIELDS
+from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
+from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
 
 from .base_model import VersionedModel
 from .contact import Contact
 from .contact_link import ContactLink
 from .db import db
-from .invitation import InvitationMembership
-from .invitation import Invitation
+from .invitation import Invitation, InvitationMembership
 from .org_status import OrgStatus
 from .org_type import OrgType
 
@@ -166,17 +166,18 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     @classmethod
     def find_similar_org_by_name(cls, name, org_id=None, branch_name=None):
         """Find an Org instance that matches the provided name."""
-        query = cls.query.filter(and_(Org.name == name, Org.branch_name == branch_name)).\
+        query = cls.query.filter(and_(Org.name == name, Org.branch_name == branch_name)). \
             filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.first()
 
     @classmethod
-    def get_count_of_org_created_by_user_id(cls, user_id):
+    def get_count_of_org_created_by_user_id(cls, user_id: int):
         """Find the count of the organisations created by the user."""
-        return cls.query.filter(and_(Org.created_by_id == user_id, Org.status_code == 'ACTIVE')).with_entities(
-            func.count()).scalar()
+        return cls.query.filter(and_(
+            Org.created_by_id == user_id, Org.status_code == 'ACTIVE'  # pylint: disable=comparison-with-callable
+        )).with_entities(func.count()).scalar()
 
     def update_org_from_dict(self, org_info: dict, exclude=EXCLUDED_FIELDS):
         """Update this org with the provided dictionary."""

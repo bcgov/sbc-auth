@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to invoke Rest services."""
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
 from auth_api.models.permissions import Permissions as PermissionsModel
+
 from ..utils.cache import cache
 from ..utils.enums import OrgStatus
 

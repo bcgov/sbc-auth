@@ -14,7 +14,7 @@
 """API endpoints for managing an Org resource."""
 
 from flask import g, request
-from flask_restplus import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt

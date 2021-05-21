@@ -19,13 +19,13 @@ A User stores basic information from a KeyCloak user (including the KeyCloak GUI
 import datetime
 
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String
-from sqlalchemy import Integer, and_, or_
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AccessType, Status, UserStatus
 from auth_api.utils.roles import Role
+
 from .base_model import BaseModel
 from .db import db
 from .membership import Membership as MembershipModel

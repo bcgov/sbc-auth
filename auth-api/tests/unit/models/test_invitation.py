@@ -17,6 +17,7 @@ Test suite to ensure that the  model routines are working as expected.
 """
 from _datetime import datetime, timedelta
 
+from auth_api.config import get_named_config
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationMembership as InvitationMembershipModel
 from auth_api.models import Org as OrgModel
@@ -24,7 +25,6 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User
-from auth_api.config import get_named_config
 
 
 def factory_invitation_model(session, status, sent_date=datetime.now()):

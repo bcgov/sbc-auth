@@ -19,13 +19,14 @@ from typing import Dict
 import requests
 from flask import current_app, request
 from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
-from requests.exceptions import ConnectTimeout, HTTPError
 # pylint:disable=ungrouped-imports
 from requests.exceptions import ConnectionError as ReqConnectionError
+from requests.exceptions import ConnectTimeout, HTTPError
 from urllib3.util.retry import Retry
 
 from auth_api.exceptions import ServiceUnavailableException
 from auth_api.utils.enums import AuthHeaderType, ContentType
+
 
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
@@ -70,12 +71,12 @@ class RestService:
         except (ReqConnectionError, ConnectTimeout) as exc:
             current_app.logger.error('---Error on POST---')
             current_app.logger.error(exc)
-            raise ServiceUnavailableException(exc)
+            raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
             current_app.logger.error(
                 'HTTPError on POST with status code {}'.format(response.status_code if response else ''))
             if response and response.status_code >= 500:
-                raise ServiceUnavailableException(exc)
+                raise ServiceUnavailableException(exc) from exc
             raise exc
         finally:
             RestService.__log_response(response)
@@ -149,12 +150,12 @@ class RestService:
         except (ReqConnectionError, ConnectTimeout) as exc:
             current_app.logger.error('---Error on GET---')
             current_app.logger.error(exc)
-            raise ServiceUnavailableException(exc)
+            raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
             current_app.logger.error(
                 'HTTPError on GET with status code {}'.format(response.status_code if response else ''))
             if response and response.status_code >= 500:
-                raise ServiceUnavailableException(exc)
+                raise ServiceUnavailableException(exc) from exc
             raise exc
         finally:
             current_app.logger.debug(response.headers if response else 'Empty Response Headers')

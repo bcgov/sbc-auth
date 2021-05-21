@@ -17,6 +17,7 @@ from datetime import timedelta
 
 from flask import current_app
 from minio import Minio
+
 from auth_api.utils.constants import AFFIDAVIT_FOLDER_NAME
 
 

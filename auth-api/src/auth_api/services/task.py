@@ -26,8 +26,9 @@ from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
-from auth_api.utils.enums import TaskRelationshipType, TaskStatus, TaskRelationshipStatus
+from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.util import camelback2snake
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -72,8 +73,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         # Send task creation mail to staff for review
         task_relationship_type = task_info.get('relationshipType')
         if task_relationship_type == TaskRelationshipType.ORG.value:
-            from auth_api.services import \
-                Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+            from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
             OrgService.send_staff_review_account_reminder(user, task_model.id, origin_url)
 
         current_app.logger.debug('>create_task ')
@@ -126,8 +126,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _update_org(is_approved: bool, org_id: int, token_info: Dict = None, origin_url: str = None):
         """Approve/Reject Affidavit and Org."""
-        from auth_api.services import \
-            Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+        from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
         current_app.logger.debug('<update_task_org ')
 
         OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
@@ -140,8 +139,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
     def _update_product_subscription(is_approved: bool, product_subscription_id: int, org_id: int):
         """Review Product Subscription."""
         current_app.logger.debug('<_update_product_subscription ')
-        from auth_api.services import \
-            Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
+        from auth_api.services import Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
+
         # Approve/Reject Product subscription
         ProductService.update_product_subscription(product_subscription_id=product_subscription_id,
                                                    is_approved=is_approved, org_id=org_id, is_new_transaction=False)

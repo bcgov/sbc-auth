@@ -22,10 +22,10 @@ from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Invitation as InvitationService
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.constants import GROUP_PUBLIC_USERS, \
-    GROUP_GOV_ACCOUNT_USERS
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, KeycloakScenario
+from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS
+from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation
+
 
 KEYCLOAK_SERVICE = KeycloakService()
 
