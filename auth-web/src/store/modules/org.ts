@@ -84,6 +84,10 @@ export default class OrgModule extends VuexModule {
   currentAccountFees: AccountFee[] = []
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
 
+  public get isCurrentProductsPremiumOnly (): boolean {
+    return true
+  }
+
   @Mutation
   public setAccessType (accessType:string) {
     this.accessType = accessType
