@@ -31,8 +31,8 @@
     </template>
   <v-divider class="mt-7 mb-10"></v-divider>
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
-        <v-btn
+      <v-col cols="12" class="form__btns py-0 text-right">
+<!--         <v-btn
           large
           depressed
           v-if="isStepperView"
@@ -43,7 +43,7 @@
           <v-icon left class="mr-2">mdi-arrow-left</v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer></v-spacer> -->
 
         <v-btn
           large
