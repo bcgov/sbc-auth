@@ -41,7 +41,8 @@ describe('AccountInfo.vue', () => {
         currentOrganization: {
           name: 'testOrg',
           statusCode: AccountStatus.ACTIVE,
-          orgStatus: AccountStatus.ACTIVE
+          orgStatus: AccountStatus.ACTIVE,
+          id: 1234
         },
         currentMembership: {},
         currentOrgAddress: {},
@@ -58,7 +59,8 @@ describe('AccountInfo.vue', () => {
           orgModule.state.currentOrganization = {
             name: 'testOrg_suspended',
             statusCode: AccountStatus.SUSPENDED,
-            orgStatus: AccountStatus.SUSPENDED
+            orgStatus: AccountStatus.SUSPENDED,
+            id: 1234
           }
         })
       },
@@ -139,7 +141,7 @@ describe('AccountInfo.vue', () => {
     expect(wrapper.vm.showSuspendAccountDialog).toBeCalled()
   })
 
-  it('Account status displayed properly', () => {
+  it('Account status and number displayed properly', () => {
     wrapper = shallowMount(AccountInfo, {
       store,
       localVue,
@@ -158,6 +160,7 @@ describe('AccountInfo.vue', () => {
     store.commit('org/setCurrentOrganization')
     expect(wrapper.vm.$store.state.org.currentOrganization.name).toBe('testOrg_suspended')
     expect(wrapper.find("[data-test='btn-suspend-account']").text()).toBe('Unsuspend Account')
+    expect(wrapper.find("[data-test='div-account-number']").text()).toBe('1234')
   })
 
   it('Account Info color code', () => {
