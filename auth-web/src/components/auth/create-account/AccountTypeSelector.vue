@@ -62,7 +62,7 @@
         sm="12" md="6"
       >
         <v-badge color>
-          <span slot="badge" v-if="isCurrentProductsPremiumOnly">
+          <span slot="badge" data-test="badge-account-premium" v-if="isCurrentProductsPremiumOnly">
             <v-chip
             class="premium-badge-chip"
             label
@@ -182,7 +182,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
-  @OrgModule.Getter('isCurrentProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
+  @OrgModule.State('isCurrentProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
 
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @OrgModule.State('accountTypeBeforeChange') private accountTypeBeforeChange!: string

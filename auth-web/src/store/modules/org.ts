@@ -83,9 +83,11 @@ export default class OrgModule extends VuexModule {
   orgProductFeeCodes: OrgProductFeeCode[] = []
   currentAccountFees: AccountFee[] = []
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
+  isCurrentSelectedProductsPremiumOnly = false
 
-  public get isCurrentProductsPremiumOnly (): boolean {
-    return true
+  @Mutation
+  public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {
+    this.isCurrentSelectedProductsPremiumOnly = isCurrentSelectedProductsPremiumOnly
   }
 
   @Mutation
