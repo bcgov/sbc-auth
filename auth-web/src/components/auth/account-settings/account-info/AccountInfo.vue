@@ -19,6 +19,12 @@
         </div>
 
         <template v-show="!anonAccount">
+          <div class="nv-list-item mb-10">
+            <div class="name" id="accountNumber">Account Number</div>
+            <div class="value" aria-labelledby="accountNumber">
+              <div class="value__title" data-test="div-account-number">{{ currentOrganization.id }}</div>
+            </div>
+          </div>
           <div v-if="isStaff" class="nv-list-item mb-10">
             <div class="name" id="accountStatusStaff">Account Status</div>
             <div class="value-column">
