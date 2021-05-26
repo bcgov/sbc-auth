@@ -116,3 +116,32 @@ def test_task_model_account_id(session):
     assert task.id is not None
     assert task.name == 'TEST'
     assert task.account_id == 10
+
+
+def test_fetch_pending_tasks_descending(session):  # pylint:disable=unused-argument
+    """Assert that we can fetch all tasks."""
+    user = factory_user_model()
+    task = TaskModel(name='TEST 1', date_submitted=datetime.now(),
+                     relationship_type=TaskRelationshipType.ORG.value,
+                     relationship_id=10, type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
+                     status=TaskStatus.OPEN.value,
+                     related_to=user.id,
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task.save()
+    task = TaskModel(name='TEST 2', date_submitted=datetime(2021, 5, 25),
+                     relationship_type=TaskRelationshipType.ORG.value,
+                     relationship_id=10, type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
+                     status=TaskStatus.OPEN.value,
+                     related_to=user.id,
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task.save()
+    task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+
+    found_tasks, count = TaskModel.fetch_tasks(
+        task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        task_type=task_type,
+        task_status=TaskStatus.OPEN.value, page=1, limit=2)
+    assert found_tasks
+    assert found_tasks[0].name == 'TEST 2'
+    assert found_tasks[1].name == 'TEST 1'
+    assert count == 2

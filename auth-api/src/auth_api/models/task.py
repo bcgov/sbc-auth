@@ -18,6 +18,7 @@ from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 from .db import db
+from ..utils.enums import TaskRelationshipStatus
 
 
 class Task(BaseModel):
@@ -54,7 +55,11 @@ class Task(BaseModel):
         if task_status:
             query = query.filter(Task.status == task_status)
         if task_relationship_status:
-            query = query.filter(Task.relationship_status == task_relationship_status)
+            if task_relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
+                query = query.filter(Task.relationship_status == task_relationship_status).order_by(
+                    Task.date_submitted.asc())
+            else:
+                query = query.filter(Task.relationship_status == task_relationship_status)
 
         # Add pagination
         pagination = query.paginate(per_page=limit, page=page)
