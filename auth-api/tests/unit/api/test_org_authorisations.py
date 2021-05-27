@@ -20,7 +20,7 @@ Test-Suite to ensure that the /orgs/authorisations endpoint is working as expect
 import json
 
 from auth_api import status as http_status
-from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
 from tests.utilities.factory_utils import factory_auth_header
 
 
@@ -68,10 +68,16 @@ def test_ppr_auth(client, jwt, session, keycloak_mock):  # pylint:disable=unused
     assert rv.status_code == http_status.HTTP_201_CREATED
     orgs = json.loads(rv.data)
     id = orgs.get('id')
+
+    # Try to add PPR as a product which doesn't add product as account is BASIC.
+    client.post(f'/api/v1/orgs/{id}/products',
+                data=json.dumps(TestOrgProductsInfo.org_products1),
+                headers=headers, content_type='application/json')
     # Check PPR access and assert no roles are returned.
     rv = client.get(f'/api/v1/accounts/{id}/products/PPR/authorizations',
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
+
     org_authorisations = json.loads(rv.data)
     assert len(org_authorisations.get('roles')) == 0
 
@@ -81,6 +87,10 @@ def test_ppr_auth(client, jwt, session, keycloak_mock):  # pylint:disable=unused
     assert rv.status_code == http_status.HTTP_201_CREATED
     orgs = json.loads(rv.data)
     id = orgs.get('id')
+    # Try to add PPR as a product which adds product as account is PREMIUM.
+    client.post(f'/api/v1/orgs/{id}/products',
+                data=json.dumps(TestOrgProductsInfo.org_products1),
+                headers=headers, content_type='application/json')
     # Check PPR access and assert no roles are returned.
     rv = client.get(f'/api/v1/accounts/{id}/products/PPR/authorizations', headers=headers,
                     content_type='application/json')

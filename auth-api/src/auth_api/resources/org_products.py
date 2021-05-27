@@ -14,13 +14,12 @@
 """API endpoints for managing an Org resource."""
 import json
 
-from flask import g, request
+from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
-from auth_api.schemas import ProductSubscriptionSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Product as ProductService
 from auth_api.tracer import Tracer
@@ -49,14 +48,8 @@ class OrgProducts(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            subscriptions = ProductService.create_product_subscription(org_id, request_json,
-                                                                       token_info=g.jwt_oidc_token_info)
-            if subscriptions is None:
-                response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
-            else:
-                response, status = {'subscriptions': ProductSubscriptionSchema().dump(subscriptions, many=True)}, \
-                                   http_status.HTTP_201_CREATED
+            subscriptions = ProductService.create_product_subscription(org_id, request_json)
+            response, status = {'subscriptions': subscriptions}, http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -68,16 +61,7 @@ class OrgProducts(Resource):
     def get(org_id):
         """GET a new product subscription to the org using the request body."""
         try:
-            include_internal_products = request.args.get('includeInternal', 'true').lower() == 'true'
-
-            products = ProductService.get_all_product_subscription(org_id,
-                                                                   include_internal_products=include_internal_products,
-                                                                   token_info=g.jwt_oidc_token_info)
-            if products is None:
-                response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
-            else:
-                response, status = json.dumps(products), http_status.HTTP_200_OK
+            response, status = json.dumps(ProductService.get_all_product_subscription(org_id)), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
