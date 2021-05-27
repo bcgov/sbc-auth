@@ -20,6 +20,8 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 import json
 from unittest.mock import patch
 
+import pytest
+
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -38,21 +40,13 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
 
 
-def test_add_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('org_info', [TestOrgInfo.org1, TestOrgInfo.org_onlinebanking, TestOrgInfo.org_with_products,
+                                      TestOrgInfo.org_regular])
+def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-    assert schema_utils.validate(rv.json, 'org_response')[0]
-
-
-def test_add_basic_org_with_online_banking(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_onlinebanking),
+    rv = client.post('/api/v1/orgs', data=json.dumps(org_info),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv.json, 'org_response')[0]
