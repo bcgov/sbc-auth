@@ -49,6 +49,7 @@ class MessageType(Enum):
     ROLE_CHANGED_NOTIFICATION = 'bc.registry.auth.roleChangedNotification'
     STAFF_REVIEW_ACCOUNT = 'bc.registry.auth.staffReviewAccount'
     GOVM_APPROVED_NOTIFICATION = 'bc.registry.auth.govmApprovedNotification'
+    GOVM_REJECTED_NOTIFICATION = 'bc.registry.auth.govmRejectedNotification'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
 
@@ -87,6 +88,8 @@ class SubjectType(Enum):
     ROLE_CHANGED_NOTIFICATION = '[BC Registries and Online Services] Your Role Has Been Changed'
     STAFF_REVIEW_ACCOUNT = '[BC Registries and Online Services] An out of province account needs to be approved.'
     GOVM_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your BC Registries Account Has Been Approved'
+    GOVM_REJECTED_NOTIFICATION = '[BC Registries and Online Services] Your BC Registries Account {account_name} ' \
+                                 'Has Been Rejected'
     PROD_PACKAGE_APPROVED_NOTIFICATION = '[BC Registries and Online Services] Your Product Request ' \
                                          '{product_name} Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
@@ -110,6 +113,7 @@ class TitleType(Enum):
     ROLE_CHANGED_NOTIFICATION = 'Your Role Has Been Changed'
     STAFF_REVIEW_ACCOUNT = 'Notification from Business Registry'
     GOVM_APPROVED_NOTIFICATION = 'Your BC Registries Account Has Been Approved'
+    GOVM_REJECTED_NOTIFICATION = 'Your BC Registries Account Has Been Rejected'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
 
@@ -144,6 +148,7 @@ class TemplateType(Enum):
     ROLE_CHANGED_NOTIFICATION_TEMPLATE_NAME = 'role_changed_notification_email'
     STAFF_REVIEW_ACCOUNT_TEMPLATE_NAME = 'staff_review_account_email'
     GOVM_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'govm_approved_notification'
+    GOVM_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'govm_rejected_notification'
     PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
     PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
 
