@@ -7,30 +7,17 @@
     "default": {},
     "examples": [
         {
-            "name": "Personal Property Registry",
-            "description": "View and maintain records of charges such as liens, security interests, and encumberances filed against personal property.",
+            "description": "Personal Property Registry",
             "url": "https://dev.bcregistry.ca/business/ppr",
-            "type": "INTERNAL",
-            "mdiIcon": "mdi-image-outline"
+            "type": "INTERNAL"
         }
     ],
     "required": [
-        "name",
         "description",
         "url",
-        "type",
-        "mdiIcon"
+        "type"
     ],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
-            "type": "string",
-            "title": "Name",
-            "default": "",
-            "examples": [
-                "Personal Property Registry"
-            ]
-        },
         "description": {
             "$id": "#/properties/description",
             "type": "string",
@@ -39,6 +26,33 @@
             "examples": [
                 "View and maintain records of charges such as liens, security interests, and encumberances filed against personal property."
             ]
+        },
+        "code": {
+            "$id": "#/properties/code",
+            "type": "string",
+            "title": "Code",
+            "default": "",
+            "examples": [
+                "PPR"
+            ]
+        },
+        "hidden": {
+            "$id": "#/properties/hidden",
+            "type": "boolean",
+            "title": "Hidden",
+            "default": false
+        },
+        "needReview": {
+            "$id": "#/properties/needReview",
+            "type": "boolean",
+            "title": "Need Review",
+            "default": false
+        },
+        "premiumOnly": {
+            "$id": "#/properties/premiumOnly",
+            "type": "boolean",
+            "title": "Premium Only",
+            "default": false
         },
         "url": {
             "$id": "#/properties/url",
@@ -49,6 +63,15 @@
                 "https://dev.bcregistry.ca/business/ppr"
             ]
         },
+        "subscriptionStatus": {
+            "$id": "#/properties/subscriptionStatus",
+            "type": "string",
+            "title": "subscriptionStatus",
+            "default": "",
+            "examples": [
+                "ACTIVE"
+            ]
+        },
         "type": {
             "$id": "#/properties/type",
             "type": "string",
@@ -56,15 +79,6 @@
             "default": "",
             "examples": [
                 "INTERNAL"
-            ]
-        },
-        "mdiIcon": {
-            "$id": "#/properties/mdiIcon",
-            "type": "string",
-            "title": "MDI Icon",
-            "default": "",
-            "examples": [
-                "mdi-image-outline"
             ]
         }
     },

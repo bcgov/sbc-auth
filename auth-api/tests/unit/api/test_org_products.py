@@ -67,20 +67,13 @@ def test_add_single_org_product_vs(client, jwt, session, keycloak_mock):  # pyli
                               data=json.dumps(TestOrgProductsInfo.org_products_vs),
                               headers=headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
-    print('json.loads(rv_products.data)', json.loads(rv_products.data))
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
-
-    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products?includeInternal=false", headers=headers,
-                             content_type='application/json')
-    list_products = json.loads(rv_products.data)
-    assert len(list_products) == 1
-    assert list_products[0].get('code') == 'VS', 'only one external product'
-    assert list_products[0].get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'
 
     rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products", headers=headers,
                              content_type='application/json')
     list_products = json.loads(rv_products.data)
-    assert len(list_products) == 2, 'total 2 products'
+    vs_product = next(prod for prod in list_products if prod.get('code') == 'VS')
+    assert vs_product.get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'
 
 
 def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
@@ -94,7 +87,7 @@ def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):
     assert dictionary['accessType'] == 'ANONYMOUS'
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
-    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products?includeInternal=false", headers=headers,
+    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products", headers=headers,
                              content_type='application/json')
 
     list_products = json.loads(rv_products.data)
