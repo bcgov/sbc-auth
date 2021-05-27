@@ -2,9 +2,9 @@
   <div>
     <template>
       <div>
-        <v-divider class="mb-7" v-if="!isApprovalFlow" ></v-divider>
-        <p class="mb-7 mt-7" v-if="!isApprovalFlow" >{{$t('willsRegistryTosSubtext')}}
-        </p>
+        <!-- <v-divider class="mb-7" v-if="!isApprovalFlow" ></v-divider> -->
+        <!-- <p class="mb-7 mt-7" v-if="!isApprovalFlow" >{{$t('willsRegistryTosSubtext')}}
+        </p> -->
         <h4>Terms of Service</h4>
         <p> I confirm, I <strong>{{userName}}</strong> am an authorized prime admin for this account.<br />
           I declare that this account <strong>{{orgName}}</strong> and all team members act as a solicitor, or name search company approved by the Vital Statistics agency.

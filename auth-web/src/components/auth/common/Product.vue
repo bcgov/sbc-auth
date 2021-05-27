@@ -5,70 +5,58 @@
         outlined
         hover
         class="product-card py-8 px-5 mb-4 elevation-1"
-        :class="[{'px-8': icon === '' && !isSelectableView}, {'processing-card' : isHighlighted}]"
-        :data-test="`div-product-${productDetails.title}`"
-        @click="selecThisProduct()"
+        :class="[ {'processing-card' : isSelected}]"
+        :data-test="`div-product-${productDetails.name}`"
       >
         <div>
-
           <header class="d-flex align-center">
-            <div class="product-icon-container mt-n2 mr-2" v-if="!isRequesting">
-              <v-icon meduim color="primary">{{icon}}</v-icon>
-            </div>
             <div class="pr-8 ">
-              <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.name}}</h3>
-              <div>{{productSubTitle}}</div>
+              <v-checkbox
+                color="primary"
+                class="align-checkbox-label--top ma-0 pa-0"
+                hide-details
+                v-model="productSelected"
+                :indeterminate="isexpandedView && isTOSNeeded && !termsAccepted"
+                :data-test="`check-product-${productDetails.name}`"
+                @change="selecThisProduct"
+              >
+                <template v-slot:label>
+                  <div class="ml-2">
+                    <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.name}}</h3>
+                    <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
+                  </div>
+              </template>
+              </v-checkbox>
             </div>
-            <v-icon large v-if="isexpandedView"
-            class="ml-auto"
-            @click="requestNow()">mdi-close</v-icon>
             <v-btn
-            v-else
               large
               depressed
               color="primary"
               width="120"
               class="font-weight-bold ml-auto"
-              :outlined="showOutlinedBtn"
               :aria-label="`Select  ${productDetails.name}`"
               :data-test="`btn-productDetails-${productDetails.name}`"
-              @click="requestNow()"
+              text
+              @click="expand()"
             >
-              <span>{{label}}</span>
+
+              <span v-if="isexpandedView">Read Less <v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
+              <span v-else>Read More <v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
             </v-btn>
           </header>
 
-          <div class="product-card-contents">
+          <div class="product-card-contents ml-9">
             <v-expand-transition>
-              <div v-if="isexpandedView" class="pt-7">
-                <ProductTos
-                  :userName="userName"
-                  :orgName="orgName"
-                  @tos-status-changed="tosChanged"
-                  ref="tosForm"
-                />
-                <v-divider class="my-7"></v-divider>
-                <div class="form__btns d-flex">
-                  <v-btn
-                    large
-                    class="request-btn"
-                    color="primary"
-                    @click="requestProduct"
-                    :loading="isLoading"
-                  >
-                    <span class="save-btn__label">Request</span>
-                  </v-btn>
-
-                    <v-btn
-                    large
-                    class="request-cancel-btn ml-3"
-                    color="gray"
-                    @click="cancel"
-                    :loading="isLoading"
-                  >
-                    <span class="save-btn__label">Cancel</span>
-                  </v-btn>
-                </div>
+              <div v-if="isexpandedView" >
+                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"/>
+                  <component
+                    v-if="isTOSNeeded"
+                    :key="productTOS.id"
+                    :is="productTOS.component"
+                    v-bind="productTOS.props"
+                    v-on="productTOS.events"
+                    :ref="productTOS.ref"
+                  />
               </div>
             </v-expand-transition>
           </div>
@@ -79,19 +67,12 @@
 </template>
 
 <script lang="ts">
-/**
-This component can be use by two type
-1. only select and selected toggle
-2. with multiple status request/approve/reject -> apprval flow
-  on approval flow, it will open for TOS
-  pass appropriate props to choose
-*/
 
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgProduct } from '@/models/Organization'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
-import { productStatus } from '@/util/constants'
+// import { productStatus } from '@/util/constants'
 
 @Component({
   components: {
@@ -102,131 +83,89 @@ export default class Product extends Vue {
   @Prop({ default: undefined }) productDetails: OrgProduct
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
-  @Prop({ default: false }) isSelectableView: boolean // only to show select/selected
   @Prop({ default: false }) isSelected: boolean
+  // @Prop({ default: false }) isTOSNeeded: boolean
+  // @Prop({ default: '' }) expandedProductCode: string
+  @Prop({ default: false }) isexpandedView: boolean
 
-  private isexpandedView: boolean = false
+  // private isexpandedView: boolean = false
   private termsAccepted: boolean = false
   public isLoading : boolean = false
-  public label = 'Request'
-  public productSubTitle = ''
-  public icon = ''
-  public isApproved = false
-  public isPending = false
-  public isRejected = false
-  public isRequesting = false
-  public isHighlighted = false
+
+  public productSelected:boolean = false
 
   $refs: {
     tosForm: HTMLFormElement
   }
 
-  @Watch('productDetails')
-  onProductChange (newProd:OrgProduct, oldProduct:OrgProduct) {
-    if (newProd.subscriptionStatus !== oldProduct.subscriptionStatus) {
-      this.isexpandedView = false
-    }
-    this.setupProductDetails(newProd)
-  }
+  // @Watch('expandedProductCode')
+  // onExpandedProductChange (newValue:string) {
+  //   // eslint-disable-next-line no-console
+  //   console.log('newValue', newValue)
+  //   this.isexpandedView = this.productDetails.code === newValue
+  //   // update selected/ select
+  //   // this.setupProductDetailsSelectable()
+  // }
 
   @Watch('isSelected')
-  onisSelectedChange () {
-    // update selected/ select
-    this.setupProductDetailsSelectable()
+  onisSelectedChange (newValue:boolean) {
+    // setting check box
+    this.productSelected = newValue
   }
 
-  get isDisableSaveBtn () {
-    return !this.isFormvalid()
+  get productLabel () {
+    const { code } = this.productDetails
+    const subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
+    const details = `${code && code.toLowerCase()}CodeDescription` || ''
+
+    return { subTitle, details }
   }
 
-  get showOutlinedBtn () {
-    if (this.isSelectableView) {
-      return !this.isSelected
-    } else {
-      return !this.isApproved
+  // if TOS needed will inject component
+  // in future can use different components for different product
+  get productTOS () {
+    return {
+      id: 'tos',
+      component: ProductTos,
+      props: {
+        userName: this.userName,
+        orgName: this.orgName
+
+      },
+      events: { 'tos-status-changed': this.tosChanged },
+      ref: 'tosForm'
     }
   }
 
-  setupProductDetails (productDetails) {
-    const { subscriptionStatus, name, description } = productDetails
-    // resetiing all values first
-    this.isApproved = false
-    this.isPending = false
-    this.isRejected = false
-    this.isRequesting = false
-
-    if (subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
-      this.label = 'Pending'
-      this.icon = 'mdi-clock-outline'
-      this.isPending = true
-      this.productSubTitle = 'Your request is under review (pending)'
-    } else if (subscriptionStatus === productStatus.REJECTED) {
-      this.label = 'Rejected'
-      this.icon = 'mdi-clock-outline'
-      this.productSubTitle = 'Your request is rejected (rejected)'
-      this.isRejected = true
-    } else if (subscriptionStatus === productStatus.ACTIVE) {
-      this.label = 'Approved'
-      this.icon = 'mdi-check-circle'
-      this.isApproved = true
-      this.productSubTitle = `This account has access to ${name}`
-    } else {
-      this.isRequesting = true
-      this.productSubTitle = description
-    }
-    this.isHighlighted = !this.isRequesting
-  }
-  setupProductDetailsSelectable () {
-    this.label = this.isSelected ? 'Selected' : 'Select'
-    this.icon = ''
-    this.productSubTitle = this.productDetails.description
-    this.isHighlighted = !!this.isSelected
+  get isTOSNeeded () {
+    // move this to constant file if API is not returning flag
+    return this.productDetails.code.includes('VS')
   }
 
   public mounted () {
-    if (this.isSelectableView) {
-      this.setupProductDetailsSelectable()
-    } else {
-      this.setupProductDetails(this.productDetails)
-    }
+    this.productSelected = this.isSelected
   }
 
-  public requestNow () {
-    if (!this.isSelectableView) {
-      const { subscriptionStatus } = this.productDetails
-      // need to expand only if not already requested
-      if (subscriptionStatus === '' || subscriptionStatus === productStatus.NOT_SUBSCRIBED) {
-        this.isexpandedView = !this.isexpandedView
-      }
-    }
+  @Emit('toggle-product-details')
+  public expand () {
+    return this.isexpandedView ? '' : this.productDetails.code
   }
 
   public tosChanged (termsAccepted:boolean) {
     this.termsAccepted = termsAccepted
+    this.selecThisProduct()
   }
-  // this function will only used when we have to show TOS (in product and service dashboard)
+  // // this function will only used when we have to show TOS (in product and service dashboard)
   @Emit('set-selected-product')
-  public requestProduct () {
-    // this.tosChanged()
-    this.$refs.tosForm.tosChanged()
-    if (this.isFormvalid()) {
-      return this.productDetails
+  public selecThisProduct () {
+    if (this.isTOSNeeded && !this.termsAccepted) {
+      if (!this.isexpandedView) {
+        this.expand()
+      }
+      // this.productSelected = false
+      return false
     }
-    return false
-  }
-
-  @Emit('set-selected-product')
-  selecThisProduct () {
-    if (this.isSelectableView) {
-      return this.productDetails
-    }
-  }
-
-  public isFormvalid () {
-    return this.termsAccepted
-  }
-  cancel () {
-    this.requestNow()
+    return this.productDetails
   }
 }
 </script>

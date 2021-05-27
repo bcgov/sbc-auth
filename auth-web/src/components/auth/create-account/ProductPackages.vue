@@ -2,11 +2,11 @@
   <v-form ref="form" lazy-validation data-test="form-profile">
 
     <div class="view-header flex-column mb-6">
-    <p class="mb-9" v-if="isStepperView">Which products will this account require access to?</p>
+    <p class="mb-9" v-if="isStepperView">To access our digitial registries servcies, select multiple product and services you require.</p>
 
       <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
-     <template v-if="isLoading">
+    <template v-if="isLoading">
       <div v-if="isLoading" class="loading-inner-container">
           <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
         </div>
@@ -17,12 +17,12 @@
           <Product
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
+            @toggle-product-details="toggleProductDetails"
+            :isexpandedView ="product.code === expandedProductCode"
             :userName="currentUser.fullName"
             :orgName="currentOrganization.name"
-            :isSelectableView="isStepperView"
             :isSelected="currentSelectedProducts.includes(product.code)"
           ></Product>
-
         </div>
       </template>
       <template v-else>
@@ -103,6 +103,7 @@ export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:string) =>Promise<void>
 
   public isLoading: boolean = false
+  public expandedProductCode: string = ''
 
   $refs: {
     form: HTMLFormElement
@@ -131,6 +132,11 @@ export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
     const productCode = product.code
     // adding to store and submit on final click
     this.addToCurrentSelectedProducts(productCode)
+  }
+
+  toggleProductDetails (productCode) {
+    // controll product expand here to collapse all other product
+    this.expandedProductCode = productCode
   }
 
   public goBack () {
