@@ -28,7 +28,7 @@ def upgrade():
     op.drop_column('product_codes', 'default_subscription_status')
 
     # Update product codes
-    op.execute("update product_codes set hidden=false, linked_product_code='NRO', description='Business Registry & Name Request', need_review=false, premium_only=false, url='https://dev.bcregistry.ca/business'  where code='BUSINESS'")
+    op.execute("update product_codes set hidden=false, linked_product_code='NRO', description='Business Registry & Name Request', need_review=false, premium_only=false, url='https://www.bcregistry.ca/business'  where code='BUSINESS'")
     op.execute(
         "update product_codes set hidden=true, linked_product_code=null, need_review=false, premium_only=false, url='https://www.bcregistry.ca/namerequest'  where code='NRO'")
     op.execute(
