@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-20.04
     if: github.repository == 'bcgov/sbc-auth'
 
+    environment:
+      name: "dev"
+
     steps:
       - uses: actions/checkout@v2
       - name: Login Openshift and Restart mailhog
