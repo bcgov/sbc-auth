@@ -1,102 +1,27 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org_product_subscriptions_response",
-    "type": "object",
-    "title": "Organization Product Subscriptions",
-    "description": "The response schema of organization product subscriptions.",
-    "default": {},
-    "examples": [
-        {
-            "subscriptions": [
-                {
-                    "created": "2020-11-23T11:16:15.491065+00:00",
-                    "createdBy": "Ashley Mcguire",
-                    "id": 2,
-                    "modified": "2020-11-23T11:16:15.491073+00:00",
-                    "product": "PPR"
-                },
-                {
-                    "created": "2020-11-23T11:16:15.548317+00:00",
-                    "createdBy": "Ashley Mcguire",
-                    "id": 3,
-                    "modified": "2020-11-23T11:16:15.548325+00:00",
-                    "product": "DIR_SEARCH"
-                }
-            ]
-        }
-    ],
-    "required": [
-        "subscriptions"
-    ],
-    "properties": {
-        "subscriptions": {
-            "$id": "#/properties/subscriptions",
-            "type": "array",
-            "title": "Subscriptions",
-            "default": [],
-            "additionalItems": true,
-            "items": {
-                "$id": "#/properties/subscriptions/items",
-                "anyOf": [
-                    {
-                        "$id": "#/properties/subscriptions/items/anyOf/0",
-                        "type": "object",
-                        "default": {},
-                        "required": [
-                            "product"
-                        ],
-                        "properties": {
-                            "created": {
-                                "$id": "#/properties/subscriptions/items/anyOf/0/properties/created",
-                                "type": "string",
-                                "title": "Created",
-                                "default": "",
-                                "examples": [
-                                    "2020-11-23T11:16:15.491065+00:00"
-                                ]
-                            },
-                            "createdBy": {
-                                "$id": "#/properties/subscriptions/items/anyOf/0/properties/createdBy",
-                                "type": "string",
-                                "title": "Created By",
-                                "default": "",
-                                "examples": [
-                                    "Ashley Mcguire"
-                                ]
-                            },
-                            "id": {
-                                "$id": "#/properties/subscriptions/items/anyOf/0/properties/id",
-                                "type": "integer",
-                                "title": "ID",
-                                "default": 0,
-                                "examples": [
-                                    2
-                                ]
-                            },
-                            "modified": {
-                                "$id": "#/properties/subscriptions/items/anyOf/0/properties/modified",
-                                "type": "string",
-                                "title": "Modified",
-                                "default": "",
-                                "examples": [
-                                    "2020-11-23T11:16:15.491073+00:00"
-                                ]
-                            },
-                            "product": {
-                                "$id": "#/properties/subscriptions/items/anyOf/0/properties/product",
-                                "type": "string",
-                                "title": "Product",
-                                "default": "",
-                                "examples": [
-                                    "PPR"
-                                ]
-                            }
-                        },
-                        "additionalProperties": true
-                    }
-                ]
-            }
-        }
-    },
-    "additionalProperties": true
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/org_product_subscriptions_response",
+  "type": "object",
+  "title": "Organization Product Subscriptions",
+  "description": "The response schema of organization product subscriptions.",
+  "default": {},
+  "required": [
+    "subscriptions"
+  ],
+  "properties": {
+    "subscriptions": {
+      "$id": "#/properties/subscriptions",
+      "title": "Subscriptions",
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/product"
+          }
+        ]
+      },
+      "default": []
+    }
+  },
+  "additionalProperties": true
 }

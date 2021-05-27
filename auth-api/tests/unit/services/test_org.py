@@ -292,8 +292,8 @@ def test_create_product_single_subscription(session, keycloak_mock):  # pylint:d
                                                                TestOrgProductsInfo.org_products1,
                                                                skip_auth=True,
                                                                token_info=TestJwtClaims.public_bceid_user)
-    assert len(subscriptions) == 1
-    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode'])
 
 
 def test_create_product_single_subscription_duplicate_error(session, keycloak_mock):  # pylint:disable=unused-argument
@@ -306,24 +306,39 @@ def test_create_product_single_subscription_duplicate_error(session, keycloak_mo
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
     subscriptions = ProductService.create_product_subscription(dictionary['id'],
-                                                               TestOrgProductsInfo.org_products1,
+                                                               TestOrgProductsInfo.org_products_business,
                                                                skip_auth=True,
                                                                token_info=TestJwtClaims.public_bceid_user)
-    assert len(subscriptions) == 1
-    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products1['subscriptions'][0]['productCode']
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products_business['subscriptions'][0]['productCode'])
+
     with pytest.raises(BusinessException) as exception:
         ProductService.create_product_subscription(dictionary['id'],
-                                                   TestOrgProductsInfo.org_products1,
+                                                   TestOrgProductsInfo.org_products_business,
                                                    skip_auth=True,
                                                    token_info=TestJwtClaims.public_bceid_user)
     assert exception.value.code == Error.PRODUCT_SUBSCRIPTION_EXISTS.name
 
 
-def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
     user = factory_user_model(user_with_token)
+
+    def token_info():  # pylint: disable=unused-argument; mocks of library methods
+        return {
+            'sub': str(user_with_token['keycloak_guid']),
+            'username': 'public_user',
+            'realm_access': {
+                'roles': [
+                    'edit'
+                ]
+            }
+        }
+
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -332,9 +347,10 @@ def test_create_product_multiple_subscription(session, keycloak_mock):  # pylint
                                                                TestOrgProductsInfo.org_products2,
                                                                skip_auth=True,
                                                                token_info=TestJwtClaims.public_bceid_user)
-    assert len(subscriptions) == 2
-    assert subscriptions[0].product_code == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode']
-    assert subscriptions[1].product_code == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode']
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode'])
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode'])
 
 
 def test_create_org_with_duplicate_name(session):  # pylint:disable=unused-argument

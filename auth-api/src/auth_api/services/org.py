@@ -120,9 +120,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, org, user_id)
 
-        # dir search and GOVM doesnt need default products
-        if access_type not in (AccessType.ANONYMOUS.value, AccessType.GOVM.value):
-            ProductService.create_default_product_subscriptions(org, bcol_profile_flags, is_new_transaction=False)
+        ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
         Org._create_payment_for_org(mailing_address, org, payment_info, True)
 
@@ -380,6 +378,7 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
 
         product_subscriptions = org_info.pop('productSubscriptions', None)
+
         mailing_address = org_info.pop('mailingAddress', None)
         payment_info = org_info.pop('paymentInfo', {})
         if is_govm_account_creation and (mailing_address is None or payment_info.get('revenueAccount') is None):
@@ -393,7 +392,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
             ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
-                                                       skip_auth=True, token_info=token_info)
+                                                       skip_auth=True)
 
         # Update mailing address Or create new one
         if mailing_address:

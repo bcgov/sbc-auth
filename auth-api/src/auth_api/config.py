@@ -19,7 +19,6 @@ All modules and lookups get their configuration from the Flask config,
 rather than reading environment variables directly or by accessing this configuration directly.
 """
 
-import json
 import os
 import sys
 
@@ -153,9 +152,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     # url for the front end app
     WEB_APP_URL = os.getenv('WEB_APP_URL')
 
-    # Product config json object string - includes URL and description content
-    PRODUCT_CONFIG = json.loads(os.getenv('PRODUCT_CONFIG', '[]'))
-
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
     except:  # pylint:disable=bare-except # noqa: B901, E722
@@ -286,22 +282,6 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
     USE_DOCKER_MOCK = os.getenv('USE_DOCKER_MOCK', None)
     MAX_NUMBER_OF_ORGS = 3
-
-    PRODUCT_CONFIG = {
-        'BUSINESS': {
-            'url': 'https://test.bcregistry.ca/cooperatives',
-            'description': 'Information for companies, firms & societies. '
-                           'Most filings for BC & Extraprovincial companies can be done in the Business Registry.',
-            'mdiIcon': 'mdi-image-outline'
-        },
-        'VS': {
-            'url': 'https://www2.gov.bc.ca/gov/content/family-social-supports/seniors/health-safety/health-care'
-                   '-programs-and-services/vital-statistics',
-            'description': 'The Vital Statistics Agency registers all births, marriages, deaths, and changes of name '
-                           'that occur in British Columbia.',
-            'mdiIcon': 'mdi-image-outline'
-        }
-    }
 
     BCOL_ACCOUNT_LINK_CHECK = True
 

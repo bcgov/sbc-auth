@@ -126,6 +126,19 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model_with_contact(user_with_token)
 
+    def token_info():  # pylint: disable=unused-argument; mocks of library methods
+        return {
+            'sub': str(user_with_token['keycloak_guid']),
+            'username': 'public_user',
+            'realm_access': {
+                'roles': [
+                    'edit'
+                ]
+            }
+        }
+
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
@@ -158,11 +171,9 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     fetched_task = fetched_tasks[1]
     assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value
 
-    org_products = json.loads(rv_products.data)
-    org_product = org_products.get('subscriptions')[0]
-
     # Assert task name
-    product: ProductCodeModel = ProductCodeModel.find_by_code(org_product.get('product'))
+    product: ProductCodeModel = ProductCodeModel.find_by_code(
+        product_which_needs_approval['subscriptions'][0].get('productCode'))
     org_name = org_dict['name']
     assert fetched_task['name'] == org_name
     assert fetched_task['type'] == product.description
