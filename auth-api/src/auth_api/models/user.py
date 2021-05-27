@@ -81,7 +81,6 @@ class User(BaseModel):
     @classmethod
     def find_by_jwt_token(cls, token: dict):
         """Find an existing user by the keycloak GUID and (idpUserId is null or from token) in the provided token."""
-        current_app.logger.info('token.get(sub) {}', token.get('sub'))
         return db.session.query(User).filter(
             and_(User.keycloak_guid == token.get('sub'),
                  or_(User.idp_userid == token.get('idp_userid', None), User.idp_userid.is_(None)))).one_or_none()
