@@ -6,23 +6,25 @@
         hover
         class="product-card py-8 px-5 mb-4 elevation-1"
         :class="[ {'processing-card' : isSelected}]"
-        :data-test="`div-product-${productDetails.name}`"
+        :data-test="`div-product-${productDetails.description}`"
       >
         <div>
           <header class="d-flex align-center">
             <div class="pr-8 ">
+
               <v-checkbox
                 color="primary"
                 class="align-checkbox-label--top ma-0 pa-0"
                 hide-details
                 v-model="productSelected"
                 :indeterminate="isexpandedView && isTOSNeeded && !termsAccepted"
-                :data-test="`check-product-${productDetails.name}`"
+                :data-test="`check-product-${productDetails.description}`"
                 @change="selecThisProduct"
+                :key="Math.random()"
               >
                 <template v-slot:label>
                   <div class="ml-2">
-                    <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.name}}</h3>
+                    <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.description}}</h3>
                     <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
                   </div>
               </template>
@@ -34,8 +36,8 @@
               color="primary"
               width="120"
               class="font-weight-bold ml-auto"
-              :aria-label="`Select  ${productDetails.name}`"
-              :data-test="`btn-productDetails-${productDetails.name}`"
+              :aria-label="`Select  ${productDetails.description}`"
+              :data-test="`btn-productDetails-${productDetails.description}`"
               text
               @click="expand()"
             >
@@ -84,28 +86,17 @@ export default class Product extends Vue {
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
   @Prop({ default: false }) isSelected: boolean
-  // @Prop({ default: false }) isTOSNeeded: boolean
-  // @Prop({ default: '' }) expandedProductCode: string
   @Prop({ default: false }) isexpandedView: boolean
 
-  // private isexpandedView: boolean = false
   private termsAccepted: boolean = false
   public isLoading : boolean = false
+  public abcd:boolean = false
 
   public productSelected:boolean = false
-
+public newproductSelected = 'tes'
   $refs: {
     tosForm: HTMLFormElement
   }
-
-  // @Watch('expandedProductCode')
-  // onExpandedProductChange (newValue:string) {
-  //   // eslint-disable-next-line no-console
-  //   console.log('newValue', newValue)
-  //   this.isexpandedView = this.productDetails.code === newValue
-  //   // update selected/ select
-  //   // this.setupProductDetailsSelectable()
-  // }
 
   @Watch('isSelected')
   onisSelectedChange (newValue:boolean) {
@@ -158,14 +149,15 @@ export default class Product extends Vue {
   // // this function will only used when we have to show TOS (in product and service dashboard)
   @Emit('set-selected-product')
   public selecThisProduct () {
+    let forceRemove = false
     if (this.isTOSNeeded && !this.termsAccepted) {
       if (!this.isexpandedView) {
         this.expand()
       }
-      // this.productSelected = false
-      return false
+      this.productSelected = false
+      forceRemove = true
     }
-    return this.productDetails
+    return { ...this.productDetails, forceRemove }
   }
 }
 </script>

@@ -100,7 +100,7 @@ export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
   @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
 
   @OrgModule.Action('getAvilableProducts') public getAvilableProducts!:() =>Promise<Products>
-  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:string) =>Promise<void>
+  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
 
   public isLoading: boolean = false
   public expandedProductCode: string = ''
@@ -128,10 +128,13 @@ export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
     return this.currentSelectedProducts && this.currentSelectedProducts.length > 0
   }
 
-  setSelectedProduct (product) {
-    const productCode = product.code
+  setSelectedProduct (productDetails) {
+    const productCode = productDetails.code
+    const forceRemove = productDetails.forceRemove
     // adding to store and submit on final click
-    this.addToCurrentSelectedProducts(productCode)
+    if (productCode) {
+      this.addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
+    }
   }
 
   toggleProductDetails (productCode) {

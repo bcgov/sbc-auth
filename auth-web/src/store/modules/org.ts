@@ -949,13 +949,13 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ commit: 'setCurrentSelectedProducts', rawError: true })
-  public async addToCurrentSelectedProducts (productCode:string): Promise<any> {
+  public async addToCurrentSelectedProducts ({ productCode, forceRemove = false }): Promise<any> {
     const currentSelectedProducts = this.context.state['currentSelectedProducts']
     const isAlreadySelected = currentSelectedProducts.includes(productCode)
 
     let productList = []
     // removing from array if already existing (unselecting)
-    if (isAlreadySelected) {
+    if (isAlreadySelected || forceRemove) {
       productList = currentSelectedProducts.filter(code => code !== productCode)
     } else {
       productList = [...currentSelectedProducts, productCode]
