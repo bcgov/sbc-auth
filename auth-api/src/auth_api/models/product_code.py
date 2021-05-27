@@ -29,10 +29,11 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
 
     __tablename__ = 'product_codes'
     type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
-    premium_only = Column(Boolean(), default=False, nullable=True)
-    need_review = Column(Boolean(), default=False, nullable=True)
-    hidden = Column(Boolean(), default=False, nullable=True)
-    linked_product_code = Column(String(100), nullable=True)
+    premium_only = Column(Boolean(), default=False, nullable=True)  # Available only for premium accounts
+    need_review = Column(Boolean(), default=False, nullable=True)  # Need a review from staff for activating product
+    hidden = Column(Boolean(), default=False, nullable=True)  # Flag to hide from the UI
+    linked_product_code = Column(String(100),
+                                 nullable=True)  # Product linked to to another product, like business and NR
     url = Column(String(100), nullable=True)
 
     @classmethod
