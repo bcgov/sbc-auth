@@ -28,6 +28,7 @@ from .membership_status_code import MembershipStatusCodeSchema
 from .membership_types import MembershipTypeSchema
 from .org import OrgSchema
 from .org_type import OrgTypeSchema
+from .product_code import ProductCodeSchema
 from .product_subscription import ProductSubscriptionSchema
 from .suspension_reason_code import SuspensionReasonCodeSchema
 from .task import TaskSchema

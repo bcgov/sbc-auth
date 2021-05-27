@@ -25,4 +25,4 @@ def test_get_products(session):  # pylint:disable=unused-argument
     assert response
     # assert the structure is correct by checking for name, description properties in each element
     for item in response:
-        assert item['name'] and item['description']
+        assert item['code'] and item['description']

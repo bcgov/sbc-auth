@@ -26,10 +26,11 @@ from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.schemas import ProductCodeSchema
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, OrgType, ProductCode, ProductSubscriptionStatus, ProductTypeCode, TaskRelationshipStatus,
-    TaskRelationshipType, TaskStatus)
+    AccessType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
+from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
@@ -64,25 +65,24 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
+    @user_context
     def create_product_subscription(org_id, subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
                                     is_new_transaction: bool = True,
-                                    token_info: Dict = None, skip_auth=False):
+                                    skip_auth=False, **kwargs):
         """Create product subscription for the user.
 
         create product subscription first
         create the product role next if roles are given
         """
         org: OrgModel = OrgModel.find_by_org_id(org_id)
+        user_from_context: UserContext = kwargs['user']
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
         if not skip_auth:
-            check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+            check_auth(user_from_context.token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get('subscriptions')
-        # just used for returning all the models.. not ideal..
-        # todo remove this and may be return the subscriptions from db
-        subscriptions_model_list = []
         for subscription in subscriptions_list:
             product_code = subscription.get('productCode')
             existing_product_subscriptions = ProductSubscriptionModel.find_by_org_id_product_code(org_id, product_code)
@@ -90,63 +90,60 @@ class Product:
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
             product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
             if product_model:
+                # Check if product needs premium account, if yes skip and continue.
+                if product_model.premium_only and org.type_code != OrgType.PREMIUM.value:
+                    continue
+
                 subscription_status = Product.find_subscription_status(org, product_model)
                 product_subscription = ProductSubscriptionModel(org_id=org_id,
                                                                 product_code=product_code,
-                                                                status_code=subscription_status) \
-                    .flush()
+                                                                status_code=subscription_status
+                                                                ).flush()
+                # If there is a linked product, add subscription to that too.
+                # This is to handle cases where Names and Business Registry is combined together.
+                if product_model.linked_product_code:
+                    ProductSubscriptionModel(org_id=org_id,
+                                             product_code=product_model.linked_product_code,
+                                             status_code=subscription_status
+                                             ).flush()
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
-                    user = UserModel.find_by_jwt_token(token=token_info)
-                    task_type = product_model.description
-                    task_info = {'name': org.name,
-                                 'relationshipId': product_subscription.id,
-                                 'relatedTo': user.id,
-                                 'dateSubmitted': datetime.today(),
-                                 'relationshipType': TaskRelationshipType.PRODUCT.value,
-                                 'type': task_type,
-                                 'status': TaskStatus.OPEN.value,
-                                 'accountId': org_id,
-                                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                                 }
-                    do_commit = False
-                    TaskService.create_task(task_info, do_commit)
+                    user = UserModel.find_by_jwt_token(token=user_from_context.token_info)
+                    Product._create_review_task(org, product_model, product_subscription, user)
 
-                subscriptions_model_list.append(product_subscription)
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         if is_new_transaction:  # Commit the transaction if it's a new transaction
             db.session.commit()
-        # TODO return something better/useful.may be return the whole model from db
-        return subscriptions_model_list
+
+        return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
+
+    @staticmethod
+    def _create_review_task(org, product_model, product_subscription, user):
+        task_type = product_model.description
+        task_info = {'name': org.name,
+                     'relationshipId': product_subscription.id,
+                     'relatedTo': user.id,
+                     'dateSubmitted': datetime.today(),
+                     'relationshipType': TaskRelationshipType.PRODUCT.value,
+                     'type': task_type,
+                     'status': TaskStatus.OPEN.value,
+                     'accountId': org.id,
+                     'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                     }
+        TaskService.create_task(task_info, False)
 
     @staticmethod
     def find_subscription_status(org, product_model):
         """Return the subscriptions status based on org type."""
         # GOVM accounts has default active subscriptions
-        return product_model.default_subscription_status if org.access_type not in [
-            AccessType.GOVM.value] else ProductSubscriptionStatus.ACTIVE.value
-
-    @staticmethod
-    def create_default_product_subscriptions(org: OrgModel, bcol_profile_flags: List[str],
-                                             is_new_transaction: bool = True):
-        """Create default product subscriptions for the account."""
-        internal_product_codes = ProductCodeModel.find_by_type_code(type_code=ProductTypeCode.INTERNAL.value)
-        for product_code in internal_product_codes:
-            # Add PPR only if the account is premium.
-            if product_code.code == ProductCode.PPR.value:
-                if org.type_code == OrgType.PREMIUM.value:
-                    ProductSubscriptionModel(org_id=org.id, product_code=product_code.code,
-                                             status_code=product_code.default_subscription_status).flush()
-            else:
-                ProductSubscriptionModel(org_id=org.id, product_code=product_code.code,
-                                         status_code=product_code.default_subscription_status).flush()
-        # Now add or update the product subscription based on bcol profiles.
-        Product.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
-        if is_new_transaction:  # Commit the transaction if it's a new transaction
-            db.session.commit()
+        skip_review_types = [AccessType.GOVM.value]
+        if product_model.need_review:
+            return ProductSubscriptionStatus.ACTIVE.value if (org.access_type in skip_review_types) \
+                else ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+        return ProductSubscriptionStatus.ACTIVE.value
 
     @staticmethod
     def create_subscription_from_bcol_profile(org_id: int, bcol_profile_flags: List[str]):
@@ -169,63 +166,35 @@ class Product:
                     existing_sub.flush()
 
     @staticmethod
-    def get_products():
+    @user_context
+    def get_products(include_hidden: bool = True, **kwargs):
         """Get a list of all products."""
-        products = ProductCodeModel.get_all_products()
-
-        # We only want to return products that have content configured,
-        # so read configuration and merge
-        merged_product_infos = []
-        products_config = current_app.config.get('PRODUCT_CONFIG')
-        if products_config:
-            for product in products:
-                product_config = products_config.get(product.code)
-                if product_config:
-                    merged_product_infos.append({
-                        'code': product.code,
-                        'name': product.description,
-                        'description': product_config.get('description'),
-                        'url': product_config.get('url'),
-                        'type': product.type_code,
-                        'mdiIcon': product_config.get('mdiIcon')
-                    })
-        return merged_product_infos
+        user_from_context: UserContext = kwargs['user']
+        products = ProductCodeModel.get_all_products() if (user_from_context.is_staff() and include_hidden) \
+            else ProductCodeModel.get_visible_products()
+        return ProductCodeSchema().dump(products, many=True)
 
     @staticmethod
-    def get_all_product_subscription(org_id, include_internal_products=True, token_info: Dict = None, skip_auth=False):
+    @user_context
+    def get_all_product_subscription(org_id, skip_auth=False, **kwargs):
         """Get a list of all products with their subscription details."""
         org = OrgModel.find_by_org_id(org_id)
+        user_from_context: UserContext = kwargs['user']
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
         if not skip_auth:
-            check_auth(token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+            check_auth(user_from_context.token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
-        # We only want to return products that have content configured,
-        # so read configuration and merge
-        merged_product_infos = []
-        products_config = current_app.config.get('PRODUCT_CONFIG')
-        products: List[ProductCodeModel] = ProductCodeModel.get_all_products()
-        if products:
-            for product in products:
-                if not include_internal_products and product.type_code == ProductTypeCode.INTERNAL.value:
-                    continue
-                product_config = products_config.get(product.code)
-                if product_config:
-                    merged_product_infos.append({
-                        'code': product.code,
-                        'name': product.description,
-                        'description': product_config.get('description'),
-                        'url': product_config.get('url'),
-                        'type': product.type_code,
-                        'mdiIcon': product_config.get('mdiIcon'),
-                        'subscriptionStatus': subscriptions_dict.get(product.code,
-                                                                     ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
-                    })
-        return merged_product_infos
+        products = Product.get_products(include_hidden=False)
+        for product in products:
+            product['subscriptionStatus'] = subscriptions_dict.get(product.get('code'),
+                                                                   ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
+
+        return products
 
     @staticmethod
     def update_product_subscription(product_subscription_id: int, is_approved: bool, org_id: int,
