@@ -84,6 +84,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # bcol is treated like an access type as well;so its outside the scheme
         mailing_address = org_info.pop('mailingAddress', None)
         payment_info = org_info.pop('paymentInfo', {})
+        product_subscriptions = org_info.pop('productSubscriptions', None)
 
         bcol_profile_flags = None
         response = Org._validate_and_raise_error(org_info)
@@ -105,10 +106,6 @@ class Org:  # pylint: disable=too-many-public-methods
         org.billable = access_type not in [AccessType.ANONYMOUS.value, AccessType.GOVM.value]
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
-        # Send an email to staff to remind review the pending account
-        if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
-                and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            Org._handle_bceid_status_and_notification(org, origin_url)
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
@@ -120,6 +117,11 @@ class Org:  # pylint: disable=too-many-public-methods
         # create the membership record for this user if its not created by staff and access_type is anonymous
         Org.create_membership(access_type, org, user_id)
 
+        if product_subscriptions is not None:
+            subscription_data = {'subscriptions': product_subscriptions}
+            ProductService.create_product_subscription(org.id, subscription_data=subscription_data,
+                                                       skip_auth=True)
+
         ProductService.create_subscription_from_bcol_profile(org.id, bcol_profile_flags)
 
         Org._create_payment_for_org(mailing_address, org, payment_info, True)
@@ -129,6 +131,11 @@ class Org:  # pylint: disable=too-many-public-methods
         # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
         org.commit()
+
+        # Send an email to staff to remind review the pending account
+        if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
+                and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
+            Org._handle_bceid_status_and_notification(org, origin_url)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
@@ -166,14 +173,6 @@ class Org:  # pylint: disable=too-many-public-methods
 
             # Add the user to account_holders group
             KeycloakService.join_account_holders_group()
-
-    @staticmethod
-    def _validate_account_limit(is_staff_admin, user_id):
-        """Validate account limit."""
-        if not is_staff_admin:  # staff can create any number of orgs
-            count = OrgModel.get_count_of_org_created_by_user_id(user_id)
-            if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
-                raise BusinessException(Error.MAX_NUMBER_OF_ORGS_LIMIT, None)
 
     @staticmethod
     @user_context
