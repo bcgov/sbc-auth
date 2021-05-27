@@ -799,7 +799,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
         elif org.access_type == AccessType.GOVM.value:
-            Org.send_approved_govm_notification(admin_email, org.id, org.status_code, origin_url)
+            Org.send_approved_rejected_govm_notification(admin_email, org.name, org.id, org.status_code, origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -843,13 +843,13 @@ class Org:  # pylint: disable=too-many-public-methods
         elif org_status == OrgStatus.REJECTED.value:
             notification_type = 'nonbcscOrgRejectedNotification'
         else:
-            return  # dont send mail for any other status change
+            return  # Don't send mail for any other status change
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         data = {
             'accountId': org_id,
             'emailAddresses': receipt_admin_email,
             'contextUrl': app_url,
-            'org_name': org_name
+            'orgName': org_name
         }
         try:
             publish_to_mailer(notification_type, org_id=org_id, data=data)
@@ -859,23 +859,27 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_approved_govm_notification(receipt_admin_email, org_id, org_status: OrgStatus, origin_url):
+    def send_approved_rejected_govm_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus,
+                                                 origin_url):
         """Send Approved govm notification to the user."""
-        current_app.logger.debug('<send_approved_govm_notification')
+        current_app.logger.debug('<send_approved_rejected_govm_notification')
 
         if org_status == OrgStatus.ACTIVE.value:
             notification_type = 'govmApprovedNotification'
+        elif org_status == OrgStatus.REJECTED.value:
+            notification_type = 'govmRejectedNotification'
         else:
-            return  # dont send mail for any other status change
+            return  # Don't send mail for any other status change
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         data = {
             'accountId': org_id,
             'emailAddresses': receipt_admin_email,
             'contextUrl': app_url,
+            'orgName': org_name
         }
         try:
             publish_to_mailer(notification_type, org_id=org_id, data=data)
-            current_app.logger.debug('send_approved_govm_notification>')
+            current_app.logger.debug('send_approved_rejected_govm_notification>')
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_approved_govm_notification failed')
+            current_app.logger.error('<send_approved_rejected_govm_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
