@@ -30,3 +30,5 @@ class ProductCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-
         exclude = ['default', 'linked_product_code']
 
     type_code = fields.String(data_key='type')
+    premium_only = fields.Boolean(data_key='premiumOnly')
+    need_review = fields.Boolean(data_key='needReview')
