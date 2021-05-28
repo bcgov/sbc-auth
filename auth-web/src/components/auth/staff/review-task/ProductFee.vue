@@ -115,7 +115,7 @@ export default class ProductFee extends Vue {
     }
 
     private displayProductName (productCode: string): string {
-      return this.orgProducts?.find(orgProduct => orgProduct.code === productCode)?.name
+      return this.orgProducts?.find(orgProduct => orgProduct.code === productCode)?.description
     }
 
     private displayProductFee (feeAmount: number): string {

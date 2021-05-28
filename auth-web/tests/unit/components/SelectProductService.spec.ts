@@ -31,7 +31,7 @@ describe('SelectProductService.vue', () => {
       state: {
         currentOrganization: {
         },
-        avilableProducts: [
+        productList: [
           {
             'code': 'PPR',
             'name': 'Personal Property Registry',
@@ -52,7 +52,7 @@ describe('SelectProductService.vue', () => {
         currentSelectedProducts: ['VS']
       },
       actions: {
-        getAvilableProducts: jest.fn(),
+        getProductList: jest.fn(),
         addToCurrentSelectedProducts: jest.fn()
       }
     }

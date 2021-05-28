@@ -4,7 +4,6 @@
     <div class="view-header flex-column mb-6">
     <p class="mb-9" v-if="isStepperView">To access our digitial registries servcies, select multiple product and services you require.</p>
 
-      <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
     <template v-if="isLoading">
       <div v-if="isLoading" class="loading-inner-container">
@@ -12,9 +11,9 @@
         </div>
     </template>
     <template v-else>
-      <template v-if="avilableProducts && avilableProducts.length > 0">
+      <template v-if="productList && productList.length > 0">
 
-        <div v-for="product in avilableProducts" :key="product.code">
+        <div v-for="product in productList" :key="product.code">
           <Product
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
@@ -79,7 +78,7 @@ import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vu
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Product from '@/components/auth/common/Product.vue'
-import { Products } from '@/models/Staff'
+
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 import { namespace } from 'vuex-class'
@@ -97,10 +96,10 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   @Prop({ default: false }) isStepperView: boolean
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
-  @OrgModule.State('avilableProducts') public avilableProducts!: OrgProduct[]
+  @OrgModule.State('productList') public productList!: OrgProduct[]
   @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
 
-  @OrgModule.Action('getAvilableProducts') public getAvilableProducts!:() =>Promise<Products>
+  @OrgModule.Action('getProductList') public getProductList!:() =>Promise<OrgProduct>
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
 
   public isLoading: boolean = false
@@ -120,10 +119,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
     await this.setup()
   }
   public async loadProduct () {
-    // No need to load again if already product fetched
-    if (!this.avilableProducts || this.avilableProducts.length === 0) {
-      const orgProducts = await this.getAvilableProducts()
-    }
+    const orgProducts = await this.getProductList()
   }
   get isFormValid () {
     return this.currentSelectedProducts && this.currentSelectedProducts.length > 0

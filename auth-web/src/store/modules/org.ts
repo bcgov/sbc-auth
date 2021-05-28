@@ -74,7 +74,7 @@ export default class OrgModule extends VuexModule {
   memberLoginOption = ''
   currentOrgGLInfo: GLInfo = undefined
   orgProducts: OrgProduct[] =[] // product related to org, to show in dashbord products page
-  avilableProducts: Products[] = [] // list of all products
+  productList: OrgProduct[] = [] // list of all products
   currentSelectedProducts:any = [] // selected product list code in array
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
@@ -260,8 +260,8 @@ export default class OrgModule extends VuexModule {
     this.currentOrgGLInfo = glInfo
   }
   @Mutation
-  public setAvailableProducts (products: Products[]) {
-    this.avilableProducts = products
+  public setProductList (products: OrgProduct[]) {
+    this.productList = products
   }
 
   @Mutation
@@ -413,10 +413,19 @@ export default class OrgModule extends VuexModule {
     const paymentMethod = this.context.state['currentOrgPaymentType']
     const padInfo: PADInfo = this.context.state['currentOrgPADInfo']
 
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
+    // setting product subscriptions in required format
+    const productsSelected: [] = currentSelectedProducts.map((code) => {
+      return {
+        productCode: code
+      }
+    })
+
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: this.context.state['accessType'],
-      typeCode: org.orgType
+      typeCode: org.orgType,
+      productSubscriptions: productsSelected
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
@@ -940,8 +949,8 @@ export default class OrgModule extends VuexModule {
     return response?.data
   }
 
-  @Action({ commit: 'setAvailableProducts', rawError: true })
-  public async getAvilableProducts (): Promise<OrgProduct> {
+  @Action({ commit: 'setProductList', rawError: true })
+  public async getProductList (): Promise<OrgProduct> {
     const response = await OrgService.avialbelProducts()
     if (response && response.data && response.status === 200) {
       return response?.data
@@ -970,11 +979,11 @@ export default class OrgModule extends VuexModule {
   @Action({ commit: 'setIsCurrentSelectedProductsPremiumOnly', rawError: true })
   public async currentSelectedProductsPremiumOnly (): Promise<any> {
     const currentSelectedProducts = this.context.state['currentSelectedProducts']
-    const avilableProducts = this.context.state['avilableProducts']
+    const productList = this.context.state['productList']
 
     let isPremiumOnly = false
     if (currentSelectedProducts.length > 0) {
-      isPremiumOnly = avilableProducts.some(product => product.premiumOnly && currentSelectedProducts.includes(product.code))
+      isPremiumOnly = productList.some(product => product.premiumOnly && currentSelectedProducts.includes(product.code))
     }
 
     return isPremiumOnly

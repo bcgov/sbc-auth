@@ -118,7 +118,7 @@ export default class AccountSetupView extends Vue {
   private stepperConfig: Array<StepConfiguration> =
     [
       {
-        title: 'Products and Services',
+        title: 'Select Product and Services',
         stepName: 'Products and Services',
         component: SelectProductService,
         componentProps: {
