@@ -25,6 +25,9 @@
             @set-selected-product="setSelectedProduct"
             :userName="currentUser.fullName"
             :orgName="currentOrganization.name"
+            :isexpandedView ="product.code === expandedProductCode"
+            @toggle-product-details="toggleProductDetails"
+            :isSelected="showAsSelected(product.subscriptionStatus)"
           ></Product>
         </div>
       </template>
@@ -92,6 +95,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public productDetails:any =[]
   public productsLoaded:boolean = null
   public productsAddSuccess:boolean = false
+  public expandedProductCode: string = ''
 
   $refs: {
       errorDialog: ModalDialog
@@ -117,10 +121,21 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
       }
     }
   }
+
+  public showAsSelected (productStatusCode) {
+    const isSubscribed = [productStatus.ACTIVE].includes(productStatusCode)
+    return isSubscribed
+  }
+
   private async setup () {
     this.isLoading = true
     await this.loadProduct()
     this.isLoading = false
+  }
+
+  private toggleProductDetails (productCode) {
+    // controll product expand here to collapse all other product
+    this.expandedProductCode = productCode
   }
 
   public async mounted () {

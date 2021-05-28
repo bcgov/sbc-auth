@@ -446,6 +446,7 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
+    this.context.dispatch('resetoCurrentSelectedProducts') // resting selected product list after account create
     await this.addOrgSettings(organization)
     return response?.data
   }
@@ -887,6 +888,7 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setCurrentOrganizationType', undefined)
     this.context.commit('setCurrentOrganizationPaymentType', undefined)
     this.context.commit('setCurrentOrganizationPADInfo', undefined)
+    this.context.dispatch('resetoCurrentSelectedProducts')
   }
 
   @Action({ rawError: true })
@@ -973,7 +975,12 @@ export default class OrgModule extends VuexModule {
     }
     this.context.commit('setCurrentSelectedProducts', productList)
     this.context.dispatch('currentSelectedProductsPremiumOnly')
-    // return productList
+  }
+
+  @Action({ rawError: true })
+  public async resetoCurrentSelectedProducts (): Promise<any> {
+    this.context.commit('setCurrentSelectedProducts', [])
+    this.context.dispatch('currentSelectedProductsPremiumOnly')
   }
 
   @Action({ commit: 'setIsCurrentSelectedProductsPremiumOnly', rawError: true })

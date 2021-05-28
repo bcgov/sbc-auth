@@ -12,15 +12,12 @@
     </template>
     <template v-else>
       <template v-if="productList && productList.length > 0">
-
         <div v-for="product in productList" :key="product.code">
           <Product
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
             @toggle-product-details="toggleProductDetails"
             :isexpandedView ="product.code === expandedProductCode"
-            :userName="currentUser.fullName"
-            :orgName="currentOrganization.name"
             :isSelected="currentSelectedProducts.includes(product.code)"
           ></Product>
         </div>
@@ -101,6 +98,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
 
   @OrgModule.Action('getProductList') public getProductList!:() =>Promise<OrgProduct>
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
+  @OrgModule.Action('resetoCurrentSelectedProducts') public resetoCurrentSelectedProducts!:() =>Promise<void>
 
   public isLoading: boolean = false
   public expandedProductCode: string = ''
@@ -125,7 +123,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
     return this.currentSelectedProducts && this.currentSelectedProducts.length > 0
   }
 
-  setSelectedProduct (productDetails) {
+  public setSelectedProduct (productDetails) {
     const productCode = productDetails.code
     const forceRemove = productDetails.forceRemove
     // adding to store and submit on final click
@@ -134,7 +132,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
     }
   }
 
-  toggleProductDetails (productCode) {
+  public toggleProductDetails (productCode) {
     // controll product expand here to collapse all other product
     this.expandedProductCode = productCode
   }

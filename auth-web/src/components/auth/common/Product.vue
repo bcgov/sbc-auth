@@ -53,11 +53,11 @@
                 <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"/>
                   <component
                     v-if="isTOSNeeded"
-                    :key="productTOS.id"
-                    :is="productTOS.component"
-                    v-bind="productTOS.props"
-                    v-on="productTOS.events"
-                    :ref="productTOS.ref"
+                    :key="productFooter.id"
+                    :is="productFooter.component"
+                    v-bind="productFooter.props"
+                    v-on="productFooter.events"
+                    :ref="productFooter.ref"
                   />
               </div>
             </v-expand-transition>
@@ -69,12 +69,11 @@
 </template>
 
 <script lang="ts">
-
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgProduct } from '@/models/Organization'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
-// import { productStatus } from '@/util/constants'
+const TOS_NEEDED_PRODUCT = ['VS']
 
 @Component({
   components: {
@@ -111,7 +110,7 @@ export default class Product extends Vue {
 
   // if TOS needed will inject component
   // in future can use different components for different product
-  get productTOS () {
+  get productFooter () {
     return {
       id: 'tos',
       component: ProductTos,
@@ -127,7 +126,7 @@ export default class Product extends Vue {
 
   get isTOSNeeded () {
     // move this to constant file if API is not returning flag
-    return this.productDetails.code.includes('VS')
+    return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
   }
 
   public mounted () {
