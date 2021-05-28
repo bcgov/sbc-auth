@@ -253,8 +253,6 @@ export default class UserModule extends VuexModule {
 
   @Action({ rawError: true })
   public async getUserSettings (keycloakGuid: string) {
-    // eslint-disable-next-line no-console
-    console.log(this.userProfile?.keycloakGuid)
     const response = await UserService.getUserSettings(keycloakGuid)
     if (response && response.data) {
       const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))

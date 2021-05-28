@@ -10,19 +10,29 @@
     <div class="mb-3 justify-center d-flex">
       <strong class="font-weight-bold text-center">Use one of the existing accounts:</strong>
     </div>
-     <template v-if="orgsOfUser.length > 0">
-        <v-list dense class="pt-0 pb-0">
+    <template class="d-flex justify-center mb-6 pb-6">
+    <v-card flat v-if="orgsOfUser.length > 0 && !isLoading" class="p-1">
+      <v-card-text>
+       <v-list dense>
           <template v-for="(org, index) in orgsOfUser">
-            <v-divider class="mt-1 mb-1" :key="index"></v-divider>
-            <v-list-item :key="org.id">
+            <v-divider class="mt-1 mb-1" :key="index" v-if="index>1"></v-divider>
+            <v-list-item :key="org.id" class="d-flex flex-row justify-center">
                 <v-list-item-content>
-                    <v-list-item-title>{{ org.name }}</v-list-item-title>
-                    <v-list-item-subtitle>{{ org.addressLine }}</v-list-item-subtitle>
+                    <v-list-item-title><h2 class="font-weight-bold v-list-item__title">{{ org.name }}</h2></v-list-item-title>
+                    <v-list-item-subtitle class="mt-3 v-list-item__subtitle"><strong>{{ org.addressLine }}</strong></v-list-item-subtitle>
                 </v-list-item-content>
+                <v-btn large color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
             </v-list-item>
           </template>
-        </v-list>
-      </template>
+         </v-list>
+      </v-card-text>
+      <v-card-actions class="justify-center">
+        <v-btn large outlined color="primary" @click="save">
+          Create Another Account
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+    </template>
   </v-container>
 </template>
 
@@ -43,9 +53,11 @@ export default class DuplicateAccountWarningView extends Vue {
     @UserModule.Action('getUserProfile') private getUserProfile!: (identifier: string) => Promise<User>
     @OrgModule.Action('getOrgAdminContact') private getOrgAdminContact!: (orgId: number) => Promise<Address>
     private orgsOfUser: OrgWithAddress[] = []
+    private isLoading: boolean = false
 
     private async mounted () {
       try {
+        this.isLoading = true
         await this.getUserProfile('@me')
         const userSettings: UserSettings[] = await this.getUserSettings(this.userProfile?.keycloakGuid)
         for (let i = 0; i < userSettings.length && userSettings.length > 0; i++) {
@@ -54,19 +66,26 @@ export default class DuplicateAccountWarningView extends Vue {
           const orgOfUser: OrgWithAddress = {
             id: orgId,
             name: userSettings[i].label,
-            addressLine: `${orgAdminContact.street} 
-            ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
+            addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
           }
           this.orgsOfUser.push(orgOfUser)
         }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(`Error while loading duplicate accounts ${err}`)
+      } finally {
+        this.isLoading = false
       }
     }
 }
 </script>
 
-<style>
+<style lang="scss" scoped>
+    .v-list-item__title {
+      line-height: 1.5rem;
+    }
 
+    .v-list-item__subtitle {
+      line-height: 1rem;
+    }
 </style>
