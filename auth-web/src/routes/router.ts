@@ -589,6 +589,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/duplicate-account-warning',
       component: DuplicateAccountWarningView,
       meta: { requiresAuth: true, requiresProfile: true },
+      name: 'DuplicateAccountWarningView',
       props: true
     },
     { path: '*', name: 'notfound', component: PageNotFound }

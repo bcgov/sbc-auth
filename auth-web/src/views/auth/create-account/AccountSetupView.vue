@@ -39,23 +39,22 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, LoginSource, PaymentTypes } from '@/util/constants'
+import { LDFlags, LoginSource, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
+import { AccountSettings } from '@/models/account-settings'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
 @Component({
@@ -97,7 +96,6 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
   }
 })
 export default class AccountSetupView extends Vue {
-  private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
   private readonly createOrg!: () => Promise<Organization>
@@ -144,6 +142,15 @@ export default class AccountSetupView extends Vue {
         }
       }
     ]
+  async beforeRouteEnter (to, from, next) {
+    const accountFromSession:AccountSettings = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
+    const hasExistingAccount = accountFromSession && Object.keys(accountFromSession).length === 0
+    if (hasExistingAccount) {
+      next(`${Pages.DUPLICATE_ACCOUNT_WARNING}`)
+    } else {
+      next()
+    }
+  }
 
   private beforeMount () {
     if (this.enablePaymentMethodSelectorStep) {
