@@ -35,8 +35,11 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         """Return a User Context object."""
         token_info: Dict = _get_token_info()
         self._token_info = token_info
-        user_model: UserModel = UserModel.find_by_jwt_token(token_info)
         self._user_id = None
+        user_model: UserModel = None
+        if token_info:
+            user_model = UserModel.find_by_jwt_token(token_info)
+
         if user_model:
             self._user_id = user_model.id
         # try to user name from DB ;if not avaiable fall back to token_info
