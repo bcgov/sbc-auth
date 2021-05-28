@@ -42,7 +42,7 @@ describe('AccountTypeSelector.vue', () => {
         },
         accountTypeBeforeChange: '',
         currentOrganizationType: '',
-        isCurrentProductsPremiumOnly: true
+        isCurrentSelectedProductsPremiumOnly: true
       },
       mutations: {
         setSelectedAccountType: jest.fn(),
@@ -52,7 +52,7 @@ describe('AccountTypeSelector.vue', () => {
         setAccountTypeBeforeChange: jest.fn(),
         setAccessType: jest.fn(),
         setIsCurrentProductsPremiumOnly: jest.fn().mockImplementation(() => {
-          orgModule.state.isCurrentProductsPremiumOnly = false
+          orgModule.state.isCurrentSelectedProductsPremiumOnly = false
         })
       }
     }
