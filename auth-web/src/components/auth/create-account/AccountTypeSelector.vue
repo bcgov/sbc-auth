@@ -182,7 +182,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
-  @OrgModule.State('isCurrentProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
+  @OrgModule.State('isCurrentSelectedProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
 
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @OrgModule.State('accountTypeBeforeChange') private accountTypeBeforeChange!: string

@@ -948,7 +948,7 @@ export default class OrgModule extends VuexModule {
     }
   }
 
-  @Action({ commit: 'setCurrentSelectedProducts', rawError: true })
+  @Action({ rawError: true })
   public async addToCurrentSelectedProducts ({ productCode, forceRemove = false }): Promise<any> {
     const currentSelectedProducts = this.context.state['currentSelectedProducts']
     const isAlreadySelected = currentSelectedProducts.includes(productCode)
@@ -960,7 +960,22 @@ export default class OrgModule extends VuexModule {
     } else {
       productList = [...currentSelectedProducts, productCode]
     }
-    return productList
+    this.context.commit('setCurrentSelectedProducts', productList)
+    this.context.dispatch('currentSelectedProductsPremiumOnly')
+    // return productList
+  }
+
+  @Action({ commit: 'setIsCurrentSelectedProductsPremiumOnly', rawError: true })
+  public async currentSelectedProductsPremiumOnly (): Promise<any> {
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
+    const avilableProducts = this.context.state['avilableProducts']
+
+    let isPremiumOnly = false
+    if (currentSelectedProducts.length > 0) {
+      isPremiumOnly = avilableProducts.some(product => product.premiumOnly && currentSelectedProducts.includes(product.code))
+    }
+
+    return isPremiumOnly
   }
 
   @Action({ commit: 'setCurrentOrganizationGLInfo', rawError: true })

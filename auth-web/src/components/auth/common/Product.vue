@@ -90,10 +90,8 @@ export default class Product extends Vue {
 
   private termsAccepted: boolean = false
   public isLoading : boolean = false
-  public abcd:boolean = false
-
   public productSelected:boolean = false
-public newproductSelected = 'tes'
+
   $refs: {
     tosForm: HTMLFormElement
   }
@@ -108,7 +106,6 @@ public newproductSelected = 'tes'
     const { code } = this.productDetails
     const subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
     const details = `${code && code.toLowerCase()}CodeDescription` || ''
-
     return { subTitle, details }
   }
 

@@ -49,13 +49,13 @@ import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInf
 import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaymentMethodSelector.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
-import ProductPackages from '@/components/auth/create-account/ProductPackages.vue'
+import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import { namespace } from 'vuex-class'
 const OrgModule = namespace('org')
 
 @Component({
   components: {
-    ProductPackages,
+    SelectProductService,
     AccountCreateBasic,
     GovmPaymentMethodSelector,
     Stepper,
@@ -93,7 +93,7 @@ export default class GovmAccountSetupView extends Vue {
       {
         title: 'Products and Services',
         stepName: 'Products and Services',
-        component: ProductPackages,
+        component: SelectProductService,
         componentProps: {
           isStepperView: true
         }

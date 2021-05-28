@@ -13,6 +13,7 @@
     </template>
     <template v-else>
       <template v-if="avilableProducts && avilableProducts.length > 0">
+
         <div v-for="product in avilableProducts" :key="product.code">
           <Product
             :productDetails="product"
@@ -31,8 +32,8 @@
     </template>
   <v-divider class="mt-7 mb-10"></v-divider>
     <v-row>
-      <v-col cols="12" class="form__btns py-0 text-right">
-<!--         <v-btn
+      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+        <v-btn
           large
           depressed
           v-if="isStepperView"
@@ -43,7 +44,7 @@
           <v-icon left class="mr-2">mdi-arrow-left</v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer> -->
+        <v-spacer></v-spacer>
 
         <v-btn
           large
@@ -92,7 +93,7 @@ const userModule = namespace('user')
     Product
   }
 })
-export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
+export default class SelectProductService extends Mixins(NextPageMixin, Steppable) {
   @Prop({ default: false }) isStepperView: boolean
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile

@@ -53,7 +53,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
-import ProductPackages from '@/components/auth/create-account/ProductPackages.vue'
+import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
@@ -65,7 +65,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     AccountCreateBasic,
     AccountCreatePremium,
     PaymentMethodSelector,
-    ProductPackages,
+    SelectProductService,
     Stepper,
     ModalDialog,
     PremiumChooser
@@ -120,7 +120,7 @@ export default class AccountSetupView extends Vue {
       {
         title: 'Products and Services',
         stepName: 'Products and Services',
-        component: ProductPackages,
+        component: SelectProductService,
         componentProps: {
           isStepperView: true
         }
