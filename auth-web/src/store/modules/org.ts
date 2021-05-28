@@ -946,11 +946,12 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ commit: 'setProductList', rawError: true })
-  public async getProductList (): Promise<OrgProduct> {
-    const response = await OrgService.avialbelProducts()
+  public async getProductList (): Promise<OrgProduct[]> {
+    const response:any = await OrgService.avialbelProducts()
     if (response && response.data && response.status === 200) {
-      return response?.data
+      return response.data
     }
+    return []
   }
 
   @Action({ rawError: true })
