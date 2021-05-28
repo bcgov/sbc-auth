@@ -18,8 +18,8 @@
         </div>
     </template>
     <template v-else>
-      <template v-if="productsLoaded">
-        <div v-for="product in productDetails" :key="product.code">
+      <template v-if="productList && productList.length > 0">
+        <div v-for="product in productList" :key="product.code">
           <Product
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
@@ -84,6 +84,8 @@ const userModule = namespace('user')
 export default class ProductPackage extends Mixins(AccountChangeMixin) {
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
+  @OrgModule.State('productList') public productList!: OrgProduct[]
+
   @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
   @OrgModule.Action('addOrgProducts') public addOrgProducts!:(product:OrgProductsRequestBody) =>Promise<OrgProduct>
 
@@ -92,7 +94,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public isLoading: boolean = false
   public errorTitle = 'Product Request Failed'
   public errorText = ''
-  public productDetails:any =[]
+
   public productsLoaded:boolean = null
   public productsAddSuccess:boolean = false
   public expandedProductCode: string = ''
@@ -112,8 +114,9 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
         const addProductsRequestBody: OrgProductsRequestBody = {
           subscriptions: productsSelected
         }
-        await this.addOrgProducts(addProductsRequestBody)
-        this.loadProduct()
+        // TODO now comment to avoid requesting product on check box. revisit as a part of new ticket
+        // await this.addOrgProducts(addProductsRequestBody)
+        // this.loadProduct()
         this.productsAddSuccess = true
       } catch {
         // open when error
@@ -133,7 +136,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     this.isLoading = false
   }
 
-  private toggleProductDetails (productCode) {
+  public toggleProductDetails (productCode) {
     // controll product expand here to collapse all other product
     this.expandedProductCode = productCode
   }
@@ -144,13 +147,12 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   }
 
   public async loadProduct () {
+    // refactor on next ticket
     try {
-      const orgProducts = await this.getOrgProducts(this.currentOrganization.id)
-      this.productDetails = orgProducts
+      this.getOrgProducts(this.currentOrganization.id)
       this.productsLoaded = true
     } catch {
       this.productsLoaded = false
-      this.productDetails = []
     }
   }
 

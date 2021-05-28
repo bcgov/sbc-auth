@@ -73,7 +73,6 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
   currentOrgGLInfo: GLInfo = undefined
-  orgProducts: OrgProduct[] =[] // product related to org, to show in dashbord products page
   productList: OrgProduct[] = [] // list of all products
   currentSelectedProducts:any = [] // selected product list code in array
 
@@ -248,11 +247,6 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setCurrentOrganizationPADInfo (padInfo: PADInfo) {
     this.currentOrgPADInfo = padInfo
-  }
-
-  @Mutation
-  public setOrgProducts (products: OrgProduct[]) {
-    this.orgProducts = products
   }
 
   @Mutation
@@ -938,7 +932,7 @@ export default class OrgModule extends VuexModule {
     return organization
   }
 
-  @Action({ commit: 'setOrgProducts', rawError: true })
+  @Action({ commit: 'setProductList', rawError: true })
   public async getOrgProducts (orgId:number): Promise<OrgProduct[]> {
     const response = await OrgService.getProducts(orgId)
     return response?.data

@@ -11,7 +11,6 @@
         <div>
           <header class="d-flex align-center">
             <div class="pr-8 ">
-
               <v-checkbox
                 color="primary"
                 class="align-checkbox-label--top ma-0 pa-0"
@@ -42,8 +41,8 @@
               @click="expand()"
             >
 
-              <span v-if="isexpandedView">Read Less <v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
-              <span v-else>Read More <v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
+              <span v-if="isexpandedView">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
+              <span v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
             </v-btn>
           </header>
 
@@ -51,14 +50,14 @@
             <v-expand-transition>
               <div v-if="isexpandedView" >
                 <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"/>
-                  <component
-                    v-if="isTOSNeeded"
-                    :key="productFooter.id"
-                    :is="productFooter.component"
-                    v-bind="productFooter.props"
-                    v-on="productFooter.events"
-                    :ref="productFooter.ref"
-                  />
+                <component
+                  v-if="isTOSNeeded"
+                  :key="productFooter.id"
+                  :is="productFooter.component"
+                  v-bind="productFooter.props"
+                  v-on="productFooter.events"
+                  :ref="productFooter.ref"
+                />
               </div>
             </v-expand-transition>
           </div>
@@ -88,7 +87,6 @@ export default class Product extends Vue {
   @Prop({ default: false }) isexpandedView: boolean
 
   private termsAccepted: boolean = false
-  public isLoading : boolean = false
   public productSelected:boolean = false
 
   $refs: {
@@ -108,24 +106,8 @@ export default class Product extends Vue {
     return { subTitle, details }
   }
 
-  // if TOS needed will inject component
-  // in future can use different components for different product
-  get productFooter () {
-    return {
-      id: 'tos',
-      component: ProductTos,
-      props: {
-        userName: this.userName,
-        orgName: this.orgName
-
-      },
-      events: { 'tos-status-changed': this.tosChanged },
-      ref: 'tosForm'
-    }
-  }
-
   get isTOSNeeded () {
-    // move this to constant file if API is not returning flag
+    // check tos needed for product
     return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
   }
 
@@ -135,17 +117,20 @@ export default class Product extends Vue {
 
   @Emit('toggle-product-details')
   public expand () {
+    // emit selected product code to controll expand all product
     return this.isexpandedView ? '' : this.productDetails.code
   }
 
   public tosChanged (termsAccepted:boolean) {
     this.termsAccepted = termsAccepted
+    // force select when tos accept
     this.selecThisProduct()
   }
   // // this function will only used when we have to show TOS (in product and service dashboard)
   @Emit('set-selected-product')
   public selecThisProduct () {
     let forceRemove = false
+    // expand if tos needed
     if (this.isTOSNeeded && !this.termsAccepted) {
       if (!this.isexpandedView) {
         this.expand()
@@ -156,21 +141,25 @@ export default class Product extends Vue {
     }
     return { ...this.productDetails, forceRemove }
   }
+
+  // if TOS needed will inject component
+  // in future can use different components for different product
+  get productFooter () {
+    return {
+      id: 'tos',
+      component: ProductTos,
+      props: {
+        userName: this.userName,
+        orgName: this.orgName
+      },
+      events: { 'tos-status-changed': this.tosChanged },
+      ref: 'tosForm'
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-.form__btns {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 2rem;
-
-  .v-btn {
-    width: 6rem;
-  }
-}
 
 .product-card {
   transition: all ease-out 0.2s;
@@ -185,29 +174,10 @@ export default class Product extends Vue {
   &.processing-card{
     border-color: var(--v-primary-base) !important;
   }
-
 }
 
 .theme--light.v-card.v-card--outlined.selected {
   border-color: var(--v-primary-base);
 }
 
-.product-icon-container {
-  flex: 0 0 auto;
-}
-.label-color {
-  color:  rgba(0,0,0,.87) !important;
-}
-.pad-form-container {
-  max-width: 75ch;
-}
-.terms-error{
-  color: var(--v-error-base) !important;
-  font-size: 16px;
-  font-weight: bold;
-  display: flex;
-}
-.error-color{
-  color: var(--v-error-base) !important;
-}
 </style>

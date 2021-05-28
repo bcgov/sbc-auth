@@ -6,7 +6,7 @@
 
     </div>
     <template v-if="isLoading">
-      <div v-if="isLoading" class="loading-inner-container">
+      <div class="loading-inner-container">
           <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
         </div>
     </template>
@@ -26,13 +26,13 @@
         <div>No Products are available...</div>
       </template>
     </template>
-  <v-divider class="mt-7 mb-10"></v-divider>
+    <v-divider class="mt-7 mb-10"></v-divider>
     <v-row>
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
         <v-btn
           large
           depressed
-          v-if="isStepperView"
+          v-if="isStepperView && !noBackButton"
           color="default"
           @click="goBack"
           data-test="btn-back"
@@ -91,6 +91,8 @@ const userModule = namespace('user')
 })
 export default class SelectProductService extends Mixins(NextPageMixin, Steppable) {
   @Prop({ default: false }) isStepperView: boolean
+  @Prop({ default: false }) noBackButton: boolean
+
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
   @OrgModule.State('productList') public productList!: OrgProduct[]
@@ -108,7 +110,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   }
   private async setup () {
     this.isLoading = true
-    await this.loadProduct()
+    await this.getProductList()
     this.isLoading = false
   }
 
@@ -116,9 +118,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
     // this.setAccountChangedHandler(this.setup)
     await this.setup()
   }
-  public async loadProduct () {
-    const orgProducts = await this.getProductList()
-  }
+
   get isFormValid () {
     return this.currentSelectedProducts && this.currentSelectedProducts.length > 0
   }

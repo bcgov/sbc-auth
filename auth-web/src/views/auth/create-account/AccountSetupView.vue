@@ -122,7 +122,8 @@ export default class AccountSetupView extends Vue {
         stepName: 'Products and Services',
         component: SelectProductService,
         componentProps: {
-          isStepperView: true
+          isStepperView: true,
+          noBackButton: true
         }
       },
       {
