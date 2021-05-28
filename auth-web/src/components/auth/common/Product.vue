@@ -152,6 +152,7 @@ export default class Product extends Vue {
         this.expand()
       }
       this.productSelected = false
+      // wait till user approve TOS or remove product selection from array if tos not accepted
       forceRemove = true
     }
     return { ...this.productDetails, forceRemove }

@@ -955,6 +955,8 @@ export default class OrgModule extends VuexModule {
 
     let productList = []
     // removing from array if already existing (unselecting)
+    // forceRemove will be used to remove when user didn't accept TOS
+    // also no need to push if user didnt accept TOS
     if (isAlreadySelected || forceRemove) {
       productList = currentSelectedProducts.filter(code => code !== productCode)
     } else {
