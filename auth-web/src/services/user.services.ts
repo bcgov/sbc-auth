@@ -1,10 +1,11 @@
 import { AddUsersToOrgBody, BulkUserResponseBody, Member, Organizations, RoleInfo } from '@/models/Organization'
 import { Contact, Contacts } from '@/models/contact'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
-import { User, UserProfileRequestBody } from '@/models/user'
+import { User, UserProfileRequestBody, UserSettings } from '@/models/user'
+
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { axios } from '@/util/http-util.ts'
+import { axios } from '@/util/http-util'
 
 export default class UserService {
   static async getUserProfile (identifier: string): Promise<AxiosResponse<User>> {
@@ -104,5 +105,9 @@ export default class UserService {
 
   static async resetOTPAuthenticator (username: string): Promise<AxiosResponse<any>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/${username}/otp`)
+  }
+
+  static getUserSettings (currentUserSub: string): Promise<AxiosResponse<UserSettings[]>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${currentUserSub}/settings`)
   }
 }

@@ -1,5 +1,6 @@
 import { Contact } from '@/models/contact'
 import { RoleInfo } from '@/models/Organization'
+
 export interface User {
     firstname: string;
     lastname: string;
@@ -10,6 +11,7 @@ export interface User {
     email?: string,
     loginSource?: string
     id?: number
+    keycloakGuid?: string
 }
 
 export interface UserTerms {
@@ -33,4 +35,14 @@ export interface UserProfileData {
     email: string;
     phone: string;
     phoneExtension?: string;
+}
+
+export interface UserSettings {
+    id: string
+    label: string
+    type: string
+    urlpath: string
+    urlorigin: string
+    accountType: string // will be only present for accounts
+    accountStatus: string
 }

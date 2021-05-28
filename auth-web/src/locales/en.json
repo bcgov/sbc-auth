@@ -133,5 +133,6 @@
   "bCeIDLoginOptionTitle":"BCeID and 2-factor authentication",
   "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator.",
   "govm_tos_title":"Ministry Use Memorandum of Understanding (MOU)",
-  "tos_title":"BC Registry Terms and Conditions"
+  "tos_title":"BC Registry Terms and Conditions",
+  "duplicateAccountWarningViewMessage": "It looks like you already have an account with BC Registries and Online Services. <br /> Do you want to access an existing account or create another account?"
 }

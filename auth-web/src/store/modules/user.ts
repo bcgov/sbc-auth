@@ -1,6 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { DocumentUpload, User, UserProfileData } from '@/models/user'
+import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
+
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -248,5 +249,17 @@ export default class UserModule extends VuexModule {
   public async getTermsOfUse (docType: string = 'termsofuse') {
     const response = await DocumentService.getTermsOfService(docType)
     return response?.data
+  }
+
+  @Action({ rawError: true })
+  public async getUserSettings (keycloakGuid: string) {
+    // eslint-disable-next-line no-console
+    console.log(this.userProfile?.keycloakGuid)
+    const response = await UserService.getUserSettings(keycloakGuid)
+    if (response && response.data) {
+      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
+      return orgs
+    }
+    return []
   }
 }

@@ -1,4 +1,5 @@
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
+
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/create-account/AccountChangeSuccessView.vue'
@@ -21,6 +22,7 @@ import ConfigHelper from '@/util/config-helper'
 import CreateAccountView from '@/views/auth/CreateAccountView.vue'
 import DashboardView from '@/views/auth/DashboardView.vue'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
+import DuplicateAccountWarningView from '@/views/auth/create-account/DuplicateAccountWarningView.vue'
 import DuplicateTeamWarningView from '@/views/auth/DuplicateTeamWarningView.vue'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
@@ -582,6 +584,12 @@ export function getRoutes (): RouteConfig[] {
       props: true,
       component: PADTermsAndConditionsView,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/duplicate-account-warning',
+      component: DuplicateAccountWarningView,
+      meta: { requiresAuth: true, requiresProfile: true },
+      props: true
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]

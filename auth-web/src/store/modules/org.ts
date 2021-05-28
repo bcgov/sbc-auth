@@ -1018,4 +1018,10 @@ export default class OrgModule extends VuexModule {
         return error
       })
   }
+
+  @Action({ rawError: true })
+  public async getOrgAdminContact (orgId: number): Promise<Address> {
+    const response = await OrgService.getContactForOrg(orgId)
+    return response
+  }
 }
