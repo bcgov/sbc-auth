@@ -6,7 +6,7 @@
         hover
         class="product-card py-8 px-5 mb-4 elevation-1"
         :class="[ {'processing-card' : isSelected}]"
-        :data-test="`div-product-${productDetails.description}`"
+        :data-test="`div-product-${productDetails.code}`"
       >
         <div>
           <header class="d-flex align-center">
@@ -17,13 +17,13 @@
                 hide-details
                 v-model="productSelected"
                 :indeterminate="isexpandedView && isTOSNeeded && !termsAccepted"
-                :data-test="`check-product-${productDetails.description}`"
+                :data-test="`check-product-${productDetails.code}`"
                 @change="selecThisProduct"
                 :key="Math.random()"
               >
                 <template v-slot:label>
                   <div class="ml-2">
-                    <h3 class="title font-weight-bold product-title mt-n1">{{productDetails.description}}</h3>
+                    <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
                     <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
                   </div>
               </template>
@@ -36,19 +36,19 @@
               width="120"
               class="font-weight-bold ml-auto"
               :aria-label="`Select  ${productDetails.description}`"
-              :data-test="`btn-productDetails-${productDetails.description}`"
+              :data-test="`btn-productDetails-${productDetails.code}`"
               text
               @click="expand()"
             >
 
-              <span v-if="isexpandedView">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
-              <span v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
+              <span v-if="isexpandedView" :data-test="`span-readless-${productDetails.code}`">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
+              <span :data-test="`span-readmore-${productDetails.code}`" v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
             </v-btn>
           </header>
 
           <div class="product-card-contents ml-9">
             <v-expand-transition>
-              <div v-if="isexpandedView" >
+              <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
                 <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"/>
                 <component
                   v-if="isTOSNeeded"
@@ -100,6 +100,9 @@ export default class Product extends Vue {
   }
 
   get productLabel () {
+    // this is mapping product code with lang file.
+    // lang file have subtitle and description with product code prefix.
+    // eg: pprCodeSubtitle, pprCodeDescription
     const { code } = this.productDetails
     const subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
     const details = `${code && code.toLowerCase()}CodeDescription` || ''

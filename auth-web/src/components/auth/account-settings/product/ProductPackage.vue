@@ -125,8 +125,8 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     }
   }
 
-  public showAsSelected (productStatusCode) {
-    const isSubscribed = [productStatus.ACTIVE].includes(productStatusCode)
+  private showAsSelected (productStatusCode:string):boolean {
+    const isSubscribed = ([productStatus.ACTIVE] as Array<string>).includes(productStatusCode)
     return isSubscribed
   }
 
@@ -136,7 +136,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     this.isLoading = false
   }
 
-  public toggleProductDetails (productCode) {
+  public toggleProductDetails (productCode:string) {
     // controll product expand here to collapse all other product
     this.expandedProductCode = productCode
   }
