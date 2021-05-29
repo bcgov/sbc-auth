@@ -51,11 +51,10 @@ import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccoun
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
+import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 
 @Component({
@@ -66,6 +65,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     AccountCreateBasic,
     AccountCreatePremium,
     PaymentMethodSelector,
+    SelectProductService,
     Stepper,
     ModalDialog,
     PremiumChooser
@@ -118,6 +118,15 @@ export default class AccountSetupView extends Vue {
   private stepperConfig: Array<StepConfiguration> =
     [
       {
+        title: 'Select Product and Services',
+        stepName: 'Products and Services',
+        component: SelectProductService,
+        componentProps: {
+          isStepperView: true,
+          noBackButton: true
+        }
+      },
+      {
         title: 'Select Account Type',
         stepName: 'Select Account Type',
         component: AccountTypeSelector,
@@ -155,7 +164,7 @@ export default class AccountSetupView extends Vue {
       }
       this.stepperConfig.push(paymentMethodStep)
       // use the new premium chooser account when flag is enabled
-      this.stepperConfig[1].alternate.component = PremiumChooser
+      this.stepperConfig[2].alternate.component = PremiumChooser
     }
   }
 
