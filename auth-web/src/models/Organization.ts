@@ -223,12 +223,13 @@ export interface GLInfo {
 
 export interface OrgProduct {
   code: string;
-  name: string;
   description: string;
   url?: string;
   type?: string;
-  mdiIcon?: string;
   subscriptionStatus?: string;
+  hidden?:boolean
+  premiumOnly?:boolean
+  needReview?:boolean
 }
 
 export interface OrgProductsRequestBody {

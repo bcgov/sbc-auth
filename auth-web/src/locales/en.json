@@ -125,7 +125,7 @@
   "removedBusinessSuccessText": "Your business has been successfully removed from the account and the current passcode has been cancelled",
   "generatePasscodeSuccessText": "You have successfully generated a passcode. The new passcode has been emailed",
   "willsRegistryTosSubtext":"The search and registration products are intended for the exclusive use of solicitors and notaries only. Title Search companies approved by the Vital Statistics Agency may also be granted access to Wills Registry.",
-  "willsRegistryTosIagree":"I confirm that the information above is all correct and this account act as a solicitor, notary or title search company approved by the Vital Statistics agency.",
+  "willsRegistryTosIagree":"I confirm that the information above is all correct",
   "noActivityLogList": "No Activity Log Records",
   "productFeeSubTitle":"Select statutory and service fee amount for each partners that applies to this account.",
   "bCSCLoginOptionTitle":"Mobile BC Services Card",
@@ -133,5 +133,12 @@
   "bCeIDLoginOptionTitle":"BCeID and 2-factor authentication",
   "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator.",
   "govm_tos_title":"Ministry Use Memorandum of Understanding (MOU)",
-  "tos_title":"BC Registry Terms and Conditions"
+  "tos_title":"BC Registry Terms and Conditions",
+  "businessCodeSubtitle":"Select this if you need to register or incorporate a business and keep business records up to date",
+  "pprCodeSubtitle":"Select this if you need to register or search all encumbrances created against personal property in B.C., whether it belongs to a business or an individual.",
+  "vsCodeSubtitle":"<p>Select this if you need to register the location of a will by filing a wills notice or search for a wills notice as part of an estate probate.</p>",
+  "businessCodeDescription":"<ul><li>Request a name for your business </li><li>File annual reports </li><li>View and change your current directors or address</li><li>See the history of your business' fillings</li></ul>",
+  "pprCodeDescription":"<ul><li>Protect from loss or legal conflict by registering your interest (cars, boats, trailers or machinery). </li><li>Search for existing liens on personal property .</li><li>Provides personal property registration and search services.</li></ul>",
+  "vsCodeDescription":"<p>The search and registration products are intended for the exclusive use of solicitors and notaries only. Title Search companies approved by the Vital Statstics Agency may also be granted access to Wills Registry. To add this product, accept the Terms of Service. Review the terms and check the box below if you confirm. BC Registry staff will review your information and grant access to Wills Registry in <strong>3-4 days</strong> if approved.</p>"
+  
 }

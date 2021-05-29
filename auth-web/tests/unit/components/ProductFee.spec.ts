@@ -25,7 +25,7 @@ describe('PaymentInformation.vue', () => {
       namespaced: true,
       state: {
         orgProductFeeCodes: [{ amount: 1.5, code: 'TRF01' }, { amount: 1, code: 'TRF02' }],
-        orgProducts: [{ code: 'BCA', name: 'BC Assessment' }, { code: 'VS', name: 'Wills Registry' }],
+        productList: [{ code: 'BCA', name: 'BC Assessment' }, { code: 'VS', name: 'Wills Registry' }],
         currentAccountFees: []
       }
     }

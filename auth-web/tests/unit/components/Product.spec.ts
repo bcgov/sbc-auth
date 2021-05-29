@@ -35,6 +35,10 @@ describe('Product.vue', () => {
         vuetify,
         propsData: {
           ...propsData
+        },
+        mocks: {
+          $t: (mock) => mock,
+          $te: (mock) => mock
         }
       })
     }
