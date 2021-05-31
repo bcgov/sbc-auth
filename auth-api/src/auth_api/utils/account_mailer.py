@@ -17,7 +17,6 @@ from datetime import datetime
 from auth_api.config import get_named_config
 from auth_api.services.queue_publisher import publish_response
 
-
 CONFIG = get_named_config()
 
 
@@ -42,5 +41,5 @@ def publish_to_mailer(notification_type, org_id: str = None, data=None, business
         'datacontenttype': 'application/json',
         'data': data
     }
-    publish_response(payload=payload, client_name=CONFIG.NATS_ACTIVITY_CLIENT_NAME,
-                     subject=CONFIG.NATS_ACTIVITY_SUBJECT)
+    publish_response(payload=payload, client_name=CONFIG.NATS_MAILER_CLIENT_NAME,
+                     subject=CONFIG.NATS_MAILER_SUBJECT)

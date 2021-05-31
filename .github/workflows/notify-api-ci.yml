@@ -3,37 +3,33 @@ name: Notify API CI
 on:
   pull_request:
     branches:
-      - development
+      - main
     paths:
       - "notify-api/**"
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ./notify-api
+
 jobs:
-  notify-api-ci:
+  setup-job:
     runs-on: ubuntu-20.04
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./notify-api
 
     if: github.repository == 'bcgov/sbc-auth'
-    env:
-      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
-      TEST_NATS_DOCKER: "YES"
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: "true"
+
+  linting:
+    needs: setup-job
+    runs-on: ubuntu-20.04
 
     strategy:
       matrix:
         python-version: [3.8]
-    services:
-      postgres:
-        image: postgres:11
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: postgres
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -44,12 +40,45 @@ jobs:
         run: |
           make setup
       - name: Lint with pylint
+        id: pylint
         run: |
           make pylint
       - name: Lint with flake8
+        id: flake8
         run: |
           make flake8
+
+  testing:
+    needs: setup-job
+    env:
+      DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+      TEST_NATS_DOCKER: "YES"
+
+    runs-on: ubuntu-20.04
+
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          make setup
       - name: Test with pytest
+        id: test
         run: |
           make test
       - name: Upload coverage to Codecov
@@ -59,6 +88,14 @@ jobs:
           flags: notifyapi
           name: codecov-notify-api
           fail_ci_if_error: true
+
+  build-check:
+    needs: setup-job
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
       - name: build to check strictness
+        id: build
         run: |
           make build-nc

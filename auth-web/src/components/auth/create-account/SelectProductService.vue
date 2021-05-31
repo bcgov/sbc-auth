@@ -2,40 +2,37 @@
   <v-form ref="form" lazy-validation data-test="form-profile">
 
     <div class="view-header flex-column mb-6">
-    <p class="mb-9" v-if="isStepperView">Which products will this account require access to?</p>
+    <p class="mb-9" v-if="isStepperView">To access our digitial registries servcies, select multiple product and services you require.</p>
 
-      <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
     </div>
-     <template v-if="isLoading">
-      <div v-if="isLoading" class="loading-inner-container">
+    <template v-if="isLoading">
+      <div class="loading-inner-container">
           <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
         </div>
     </template>
     <template v-else>
-      <template v-if="avilableProducts && avilableProducts.length > 0">
-        <div v-for="product in avilableProducts" :key="product.code">
+      <template v-if="productList && productList.length > 0">
+        <div v-for="product in productList" :key="product.code">
           <Product
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
-            :userName="currentUser.fullName"
-            :orgName="currentOrganization.name"
-            :isSelectableView="isStepperView"
+            @toggle-product-details="toggleProductDetails"
+            :isexpandedView ="product.code === expandedProductCode"
             :isSelected="currentSelectedProducts.includes(product.code)"
           ></Product>
-
         </div>
       </template>
       <template v-else>
         <div>No Products are available...</div>
       </template>
     </template>
-  <v-divider class="mt-7 mb-10"></v-divider>
+    <v-divider class="mt-7 mb-10"></v-divider>
     <v-row>
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
         <v-btn
           large
           depressed
-          v-if="isStepperView"
+          v-if="isStepperView && !noBackButton"
           color="default"
           @click="goBack"
           data-test="btn-back"
@@ -78,7 +75,7 @@ import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vu
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Product from '@/components/auth/common/Product.vue'
-import { Products } from '@/models/Staff'
+
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 import { namespace } from 'vuex-class'
@@ -92,24 +89,28 @@ const userModule = namespace('user')
     Product
   }
 })
-export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
+export default class SelectProductService extends Mixins(NextPageMixin, Steppable) {
   @Prop({ default: false }) isStepperView: boolean
+  @Prop({ default: false }) noBackButton: boolean
+
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
-  @OrgModule.State('avilableProducts') public avilableProducts!: OrgProduct[]
+  @OrgModule.State('productList') public productList!: OrgProduct[]
   @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
 
-  @OrgModule.Action('getAvilableProducts') public getAvilableProducts!:() =>Promise<Products>
-  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:string) =>Promise<void>
+  @OrgModule.Action('getProductList') public getProductList!:() =>Promise<OrgProduct>
+  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
+  @OrgModule.Action('resetoCurrentSelectedProducts') public resetoCurrentSelectedProducts!:() =>Promise<void>
 
   public isLoading: boolean = false
+  public expandedProductCode: string = ''
 
   $refs: {
     form: HTMLFormElement
   }
   private async setup () {
     this.isLoading = true
-    await this.loadProduct()
+    await this.getProductList()
     this.isLoading = false
   }
 
@@ -117,20 +118,23 @@ export default class ProductPackages extends Mixins(NextPageMixin, Steppable) {
     // this.setAccountChangedHandler(this.setup)
     await this.setup()
   }
-  public async loadProduct () {
-    // No need to load again if already product fetched
-    if (!this.avilableProducts || this.avilableProducts.length === 0) {
-      const orgProducts = await this.getAvilableProducts()
-    }
-  }
+
   get isFormValid () {
     return this.currentSelectedProducts && this.currentSelectedProducts.length > 0
   }
 
-  setSelectedProduct (product) {
-    const productCode = product.code
+  public setSelectedProduct (productDetails) {
+    const productCode = productDetails.code
+    const forceRemove = productDetails.forceRemove
     // adding to store and submit on final click
-    this.addToCurrentSelectedProducts(productCode)
+    if (productCode) {
+      this.addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
+    }
+  }
+
+  public toggleProductDetails (productCode) {
+    // controll product expand here to collapse all other product
+    this.expandedProductCode = productCode
   }
 
   public goBack () {

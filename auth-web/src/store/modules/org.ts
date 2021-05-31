@@ -73,8 +73,7 @@ export default class OrgModule extends VuexModule {
   accessType: string
   memberLoginOption = ''
   currentOrgGLInfo: GLInfo = undefined
-  orgProducts: OrgProduct[] =[] // product related to org, to show in dashbord products page
-  avilableProducts: Products[] = [] // list of all products
+  productList: OrgProduct[] = [] // list of all products
   currentSelectedProducts:any = [] // selected product list code in array
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
@@ -83,6 +82,12 @@ export default class OrgModule extends VuexModule {
   orgProductFeeCodes: OrgProductFeeCode[] = []
   currentAccountFees: AccountFee[] = []
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
+  isCurrentSelectedProductsPremiumOnly = false
+
+  @Mutation
+  public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {
+    this.isCurrentSelectedProductsPremiumOnly = isCurrentSelectedProductsPremiumOnly
+  }
 
   @Mutation
   public setAccessType (accessType:string) {
@@ -245,17 +250,12 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setOrgProducts (products: OrgProduct[]) {
-    this.orgProducts = products
-  }
-
-  @Mutation
   public setCurrentOrganizationGLInfo (glInfo: GLInfo) {
     this.currentOrgGLInfo = glInfo
   }
   @Mutation
-  public setAvailableProducts (products: Products[]) {
-    this.avilableProducts = products
+  public setProductList (products: OrgProduct[]) {
+    this.productList = products
   }
 
   @Mutation
@@ -407,10 +407,19 @@ export default class OrgModule extends VuexModule {
     const paymentMethod = this.context.state['currentOrgPaymentType']
     const padInfo: PADInfo = this.context.state['currentOrgPADInfo']
 
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
+    // setting product subscriptions in required format
+    const productsSelected: [] = currentSelectedProducts.map((code) => {
+      return {
+        productCode: code
+      }
+    })
+
     const createRequestBody: CreateRequestBody = {
       name: org.name,
       accessType: this.context.state['accessType'],
-      typeCode: org.orgType
+      typeCode: org.orgType,
+      productSubscriptions: productsSelected
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
@@ -431,6 +440,7 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data
     this.context.commit('setCurrentOrganization', organization)
+    this.context.dispatch('resetoCurrentSelectedProducts') // resting selected product list after account create
     await this.addOrgSettings(organization)
     return response?.data
   }
@@ -872,6 +882,7 @@ export default class OrgModule extends VuexModule {
     this.context.commit('setCurrentOrganizationType', undefined)
     this.context.commit('setCurrentOrganizationPaymentType', undefined)
     this.context.commit('setCurrentOrganizationPADInfo', undefined)
+    this.context.dispatch('resetoCurrentSelectedProducts')
   }
 
   @Action({ rawError: true })
@@ -921,7 +932,7 @@ export default class OrgModule extends VuexModule {
     return organization
   }
 
-  @Action({ commit: 'setOrgProducts', rawError: true })
+  @Action({ commit: 'setProductList', rawError: true })
   public async getOrgProducts (orgId:number): Promise<OrgProduct[]> {
     const response = await OrgService.getProducts(orgId)
     return response?.data
@@ -934,27 +945,50 @@ export default class OrgModule extends VuexModule {
     return response?.data
   }
 
-  @Action({ commit: 'setAvailableProducts', rawError: true })
-  public async getAvilableProducts (): Promise<OrgProduct> {
-    const response = await OrgService.avialbelProducts()
+  @Action({ commit: 'setProductList', rawError: true })
+  public async getProductList (): Promise<OrgProduct[]> {
+    const response:any = await OrgService.avialbelProducts()
     if (response && response.data && response.status === 200) {
-      return response?.data
+      return response.data
     }
+    return []
   }
 
-  @Action({ commit: 'setCurrentSelectedProducts', rawError: true })
-  public async addToCurrentSelectedProducts (productCode:string): Promise<any> {
+  @Action({ rawError: true })
+  public async addToCurrentSelectedProducts ({ productCode, forceRemove = false }): Promise<any> {
     const currentSelectedProducts = this.context.state['currentSelectedProducts']
     const isAlreadySelected = currentSelectedProducts.includes(productCode)
 
     let productList = []
     // removing from array if already existing (unselecting)
-    if (isAlreadySelected) {
+    // forceRemove will be used to remove when user didn't accept TOS
+    // also no need to push if user didnt accept TOS
+    if (isAlreadySelected || forceRemove) {
       productList = currentSelectedProducts.filter(code => code !== productCode)
     } else {
       productList = [...currentSelectedProducts, productCode]
     }
-    return productList
+    this.context.commit('setCurrentSelectedProducts', productList)
+    this.context.dispatch('currentSelectedProductsPremiumOnly')
+  }
+
+  @Action({ rawError: true })
+  public async resetoCurrentSelectedProducts (): Promise<any> {
+    this.context.commit('setCurrentSelectedProducts', [])
+    this.context.dispatch('currentSelectedProductsPremiumOnly')
+  }
+
+  @Action({ commit: 'setIsCurrentSelectedProductsPremiumOnly', rawError: true })
+  public async currentSelectedProductsPremiumOnly (): Promise<any> {
+    const currentSelectedProducts = this.context.state['currentSelectedProducts']
+    const productList = this.context.state['productList']
+
+    let isPremiumOnly = false
+    if (currentSelectedProducts.length > 0) {
+      isPremiumOnly = productList.some(product => product.premiumOnly && currentSelectedProducts.includes(product.code))
+    }
+
+    return isPremiumOnly
   }
 
   @Action({ commit: 'setCurrentOrganizationGLInfo', rawError: true })

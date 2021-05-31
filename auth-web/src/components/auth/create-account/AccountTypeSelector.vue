@@ -1,4 +1,3 @@
-import { AccessType } from '@/util/constants'
 <template>
   <div  data-test="div-stepper-container">
     <p class="mb-7" v-if="!isAccountChange">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
@@ -16,6 +15,7 @@ import { AccessType } from '@/util/constants'
           hover
           @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
           data-test="div-stepper-basic"
+          :disabled="isCurrentProductsPremiumOnly"
         >
           <div class="account-type">
             <div class="account-type__title">
@@ -61,55 +61,64 @@ import { AccessType } from '@/util/constants'
         class="d-flex align-stretch"
         sm="12" md="6"
       >
-        <v-card
-          class="account-card pa-8 elevation-2 d-flex"
-          :class="{'active': selectedAccountType == ACCOUNT_TYPE.PREMIUM}"
-          flat
-          outlined
-          hover
-          @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
-          data-test="div-stepper-premium"
-        >
-          <div class="account-type">
-            <div class="account-type__title">
-              Premium
+        <v-badge color>
+          <span slot="badge" data-test="badge-account-premium" v-if="isCurrentProductsPremiumOnly">
+            <v-chip
+            class="premium-badge-chip"
+            label
+            >
+              <span>A Premium Account type is required based on the services you have selected.</span>
+            </v-chip>
+          </span>
+          <v-card
+            class="account-card pa-8 elevation-2"
+            :class="{'active': selectedAccountType == ACCOUNT_TYPE.PREMIUM}"
+            flat
+            outlined
+            hover
+            @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
+            data-test="div-stepper-premium"
+          >
+            <div class="account-type">
+              <div class="account-type__title">
+                Premium
+              </div>
+              <div class="account-type__name">
+                Pre-authorized
+              </div>
+              <div class="account-type__summary">
+                For firms and companies who search frequently or file for a large number of businesses.
+              </div>
+              <ul class="account-type__details">
+                <li>Unlimited transactions</li>
+                <li>Unlimited team members</li>
+                <li>Pay by pre-authorized debit or <a href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">BC Online deposit account</a></li>
+                <li>Financial Statements</li>
+              </ul>
             </div>
-            <div class="account-type__name">
-              Pre-authorized
-            </div>
-            <div class="account-type__summary">
-              For firms and companies who search frequently or file for a large number of businesses.
-            </div>
-            <ul class="account-type__details">
-              <li>Unlimited transactions</li>
-              <li>Unlimited team members</li>
-              <li>Pay by pre-authorized debit or <a href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">BC Online deposit account</a></li>
-              <li>Financial Statements</li>
-            </ul>
 
             <!-- State Button (Create Account) -->
-            <div class="card-buttons" v-if="!isAccountChange">
+            <div class="mt-10" v-if="!isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
-                data-test="btn-stepper-premium-select"
-                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
-                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+              data-test="btn-stepper-premium-select"
+              :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+              @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
+                  {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
               </v-btn>
             </div>
 
             <!-- State Button (Change Account) -->
-            <div class="card-buttons" v-if="isAccountChange">
+            <div class="mt-10" v-if="isAccountChange">
               <v-btn large block depressed color="primary" class="font-weight-bold"
-                data-test="btn-stepper-edit-premium-select"
-                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
-                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
+              data-test="btn-stepper-edit-premium-select"
+              :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+              @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
                 <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
                 <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.PREMIUM">{{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT'}}</span>
               </v-btn>
             </div>
-
-          </div>
-        </v-card>
+          </v-card>
+        </v-badge>
       </v-col>
     </v-row>
 
@@ -118,9 +127,24 @@ import { AccessType } from '@/util/constants'
     <v-row>
       <v-col
         cols="12"
-        class="form__btns py-0 text-right"
+        class="form__btns py-0"
       >
-        <v-btn large color="primary" class="mr-3" @click="goNext" :disabled='!canContinue' data-test="btn-stepper-next">
+        <v-btn
+        large
+        depressed
+        color="default"
+        @click="goBack"
+        data-test="btn-back">
+          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+          <span>Back</span>
+        </v-btn>
+        <v-spacer></v-spacer>
+        <v-btn large
+        color="primary"
+        class="mr-3"
+        @click="goNext"
+        :disabled='!canContinue'
+        data-test="btn-stepper-next">
           <span>Next</span>
           <v-icon class="ml-2">mdi-arrow-right</v-icon>
         </v-btn>
@@ -138,51 +162,40 @@ import { AccessType } from '@/util/constants'
 
 import { AccessType, Account, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { namespace } from 'vuex-class'
+const OrgModule = namespace('org')
+const UserModule = namespace('user')
 
   @Component({
     components: {
       ConfirmCancelButton
-    },
-    computed: {
-      ...mapState('org', [
-        'currentOrganization',
-        'accountTypeBeforeChange',
-        'currentOrganizationType'
-      ]),
-      ...mapState('user', ['currentUser'])
-    },
-    methods: {
-      ...mapMutations('org', [
-        'setSelectedAccountType',
-        'setCurrentOrganization',
-        'setCurrentOrganizationType',
-        'resetCurrentOrganisation',
-        'setAccountTypeBeforeChange',
-        'setAccessType'
-      ])
     }
   })
 export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
   private selectedAccountType = ''
-  private readonly setSelectedAccountType!: (selectedAccountType: Account) => void
-  private readonly setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
-  private readonly setCurrentOrganization!: (organization: Organization) => void
-  private readonly setCurrentOrganizationType!: (orgType: string) => void
-  private readonly setAccessType!: (accessType: string) => void
-  private readonly currentOrganization!: Organization
-  private readonly accountTypeBeforeChange!: string
-  private readonly currentOrganizationType!: string
-  private readonly resetCurrentOrganisation!: () => void
-  protected readonly currentUser!: KCUserProfile
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
+
+  @OrgModule.State('isCurrentSelectedProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
+
+  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @OrgModule.State('accountTypeBeforeChange') private accountTypeBeforeChange!: string
+  @OrgModule.State('currentOrganizationType') private currentOrganizationType!: string
+
+  @UserModule.State('currentUser') private currentUser!: KCUserProfile
+
+  @OrgModule.Mutation('setSelectedAccountType') private setSelectedAccountType!: (selectedAccountType: Account) => void
+  @OrgModule.Mutation('setCurrentOrganization') private setCurrentOrganization!: (organization: Organization) => void
+  @OrgModule.Mutation('setCurrentOrganizationType') private setCurrentOrganizationType!: (orgType: string) => void
+  @OrgModule.Mutation('resetCurrentOrganisation') private resetCurrentOrganisation!: () => void
+  @OrgModule.Mutation('setAccountTypeBeforeChange') private setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
+  @OrgModule.Mutation('setAccessType') private setAccessType!: (accessType: string) => void
 
   private async mounted () {
     if (this.isAccountChange) {
@@ -198,8 +211,15 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       if (!this.currentOrganization) {
         this.setCurrentOrganization({ name: '' })
       }
-      this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
-        ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
+
+      // first time stepper hits step 2 after selecting a premium product/service in step 1
+      if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
+        this.selectAccountType(this.ACCOUNT_TYPE.PREMIUM)
+      } else {
+        // come back to step 2 or after selecting basic products/services in step 1
+        this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
+          ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
+      }
       this.setAccessType(this.getOrgAccessType())
       // remove current account from session storage .Or else permission of old account will be fetched
       ConfigHelper.removeFromSession('CURRENT_ACCOUNT')
@@ -224,6 +244,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   private goNext () {
     this.stepForward(this.selectedAccountType === this.ACCOUNT_TYPE.PREMIUM)
+  }
+
+  private goBack () {
+    this.stepBack()
   }
 
   private get canContinue () {
@@ -251,6 +275,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   display: flex;
   flex-direction: column;
   position: relative;
+  height: 100%;
   //background-color: var(--v-grey-lighten4) !important;
 
   &:hover {
@@ -324,4 +349,28 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   width: 20rem;
   font-weight: 700;
 }
+
+.premium-badge-chip {
+  background: var(--v-secondary-lighten1) !important;
+  color: var(--v-accent-lighten5) !important;
+  white-space: break-spaces !important;
+  width: 250px !important;
+  height: auto !important;
+  text-align: start;
+  padding: 10px;
+}
+
+::v-deep .v-badge__wrapper {
+  width: 50% !important;
+}
+
+::v-deep .v-badge__badge  {
+  height: 40px !important;
+}
+
+.form__btns {
+  display: flex;
+  justify-content: flex-end;
+}
+
 </style>
