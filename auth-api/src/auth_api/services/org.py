@@ -53,7 +53,6 @@ from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
 
-
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
@@ -130,12 +129,17 @@ class Org:  # pylint: disable=too-many-public-methods
         # if payment_account_status == PaymentAccountStatus.FAILED:
         # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
+        # Send an email to staff to remind review the pending account
+        is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
+                                                          AccessType.REGULAR_BCEID.value) and not \
+            AffidavitModel.find_approved_by_user_id(user_id=user_id)
+        if is_bceid_status_handling_needed:
+            Org._handle_bceid_status_and_notification(org)
+
         org.commit()
 
-        # Send an email to staff to remind review the pending account
-        if access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value) \
-                and not AffidavitModel.find_approved_by_user_id(user_id=user_id):
-            Org._handle_bceid_status_and_notification(org, origin_url)
+        if is_bceid_status_handling_needed:
+            Org.send_staff_review_account_reminder(org.id, origin_url)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
@@ -143,11 +147,10 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def _handle_bceid_status_and_notification(org, origin_url, **kwargs):
+    def _handle_bceid_status_and_notification(org, **kwargs):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
         user_from_context: UserContext = kwargs['user']
         user = UserModel.find_by_jwt_token(token=user_from_context.token_info)
-        # Org.send_staff_review_account_reminder(user, org.id, origin_url)
         # create a staff review task for this account
         task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
         task_info = {'name': org.name,
@@ -159,7 +162,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'status': TaskStatus.OPEN.value,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
-        TaskService.create_task(task_info=task_info, user=user, origin_url=origin_url, do_commit=False)
+        TaskService.create_task(task_info=task_info, do_commit=False)
 
     @staticmethod
     @user_context
@@ -387,7 +390,7 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
             has_status_changing = True
-            self._create_gov_account_task(org_model, token_info, origin_url)
+            self._create_gov_account_task(org_model, token_info)
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
             ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
@@ -406,6 +409,8 @@ class Org:  # pylint: disable=too-many-public-methods
         if has_org_updates:
             excluded = ('type_code',) if has_status_changing else EXCLUDED_FIELDS
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
+            # send mail after the org is committed to DB
+            Org.send_staff_review_account_reminder(self._model.id, origin_url)
 
         Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         current_app.logger.debug('>update_org ')
@@ -426,7 +431,7 @@ class Org:  # pylint: disable=too-many-public-methods
         Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
 
     @staticmethod
-    def _create_gov_account_task(org_model: OrgModel, token_info: dict, origin_url: str):
+    def _create_gov_account_task(org_model: OrgModel, token_info: dict):
         # create a staff review task for this account
         task_type = TaskTypePrefix.GOVM_REVIEW.value
         user: UserModel = UserModel.find_by_jwt_token(token=token_info)
@@ -439,7 +444,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'status': TaskStatus.OPEN.value,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
-        TaskService.create_task(task_info=task_info, user=user, do_commit=False, origin_url=origin_url)
+        TaskService.create_task(task_info=task_info, do_commit=False)
 
     @staticmethod
     def delete_org(org_id, token_info: Dict = None, ):
@@ -804,19 +809,17 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def send_staff_review_account_reminder(user, org_id, origin_url):
+    @user_context
+    def send_staff_review_account_reminder(org_id, origin_url, **kwargs):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         context_path = f'review-account/{org_id}'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
-        first_name = ''
-        last_name = ''
-
-        if user:
-            first_name = user.firstname
-            last_name = user.lastname
+        user_from_context: UserContext = kwargs['user']
+        first_name = user_from_context.first_name
+        last_name = user_from_context.last_name
 
         data = {
             'accountId': org_id,
