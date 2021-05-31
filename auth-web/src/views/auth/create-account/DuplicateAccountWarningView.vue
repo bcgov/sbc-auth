@@ -17,6 +17,14 @@
           <template v-for="(org, index) in orgsOfUser">
             <v-divider class="mt-1 mb-1" :key="index" v-if="index>1"></v-divider>
             <v-list-item :key="org.id" class="d-flex flex-row justify-center">
+                <v-avatar
+                tile
+                left
+                color="#4d7094"
+                size="32"
+                class="user-avatar">
+                {{ org.name.slice(0,1) }}
+                </v-avatar>
                 <v-list-item-content>
                     <v-list-item-title><h2 class="font-weight-bold v-list-item__title">{{ org.name }}</h2></v-list-item-title>
                     <v-list-item-subtitle class="mt-3 v-list-item__subtitle"><strong>{{ org.addressLine }}</strong></v-list-item-subtitle>
@@ -99,11 +107,18 @@ export default class DuplicateAccountWarningView extends Vue {
 </script>
 
 <style lang="scss" scoped>
+  @import '$assets/scss/theme.scss';
+
     .v-list-item__title {
       line-height: 1.5rem;
     }
 
     .v-list-item__subtitle {
       line-height: 1rem;
+    }
+
+    .user-avatar {
+      margin-right: 0.75rem;
+      color: var(--v-accent-lighten5);
     }
 </style>
