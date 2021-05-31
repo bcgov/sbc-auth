@@ -46,6 +46,7 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         self._user_name: str = getattr(user_model, 'username',
                                        token_info.get('username', token_info.get('preferred_username', None)))
         self._first_name: str = token_info.get('firstname', None)
+        self._last_name: str = token_info.get('lastname', None)
         self._bearer_token: str = _get_token()
         self._roles: list = token_info.get('realm_access', None).get('roles', None) if 'realm_access' in token_info \
             else None
@@ -56,12 +57,17 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
     @property
     def user_name(self) -> str:
         """Return the user_name."""
-        return self._user_name.upper() if self._user_name else None
+        return self._user_name if self._user_name else None
 
     @property
     def first_name(self) -> str:
-        """Return the user_name."""
+        """Return the user_first_name."""
         return self._first_name
+
+    @property
+    def last_name(self) -> str:
+        """Return the user_last_name."""
+        return self._last_name
 
     @property
     def user_id(self) -> str:
