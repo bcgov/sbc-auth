@@ -21,13 +21,13 @@
                     <v-list-item-title><h2 class="font-weight-bold v-list-item__title">{{ org.name }}</h2></v-list-item-title>
                     <v-list-item-subtitle class="mt-3 v-list-item__subtitle"><strong>{{ org.addressLine }}</strong></v-list-item-subtitle>
                 </v-list-item-content>
-                <v-btn large color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
+                <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
             </v-list-item>
           </template>
          </v-list>
       </v-card-text>
       <v-card-actions class="justify-center">
-        <v-btn large outlined color="primary" @click="save">
+        <v-btn large outlined color="primary" @click="createAccount()">
           Create Another Account
         </v-btn>
       </v-card-actions>
@@ -37,10 +37,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { OrgWithAddress, Organization } from '@/models/Organization'
+import { Pages, SessionStorageKeys } from '@/util/constants'
 import { User, UserSettings } from '@/models/user'
 import { Address } from '@/models/address'
-import { OrgWithAddress } from '@/models/Organization'
+import ConfigHelper from '@/util/config-helper'
+
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -49,16 +52,19 @@ const UserModule = namespace('user')
 @Component({})
 export default class DuplicateAccountWarningView extends Vue {
     @UserModule.Action('getUserSettings') private getUserSettings!: (keycloakGuid: string) => Promise<any>
+    // @UserModule.Action('getUserProfile') private getUserProfile!: (identifier: string) => Promise<User>
     @UserModule.State('userProfile') private userProfile!: User
-    @UserModule.Action('getUserProfile') private getUserProfile!: (identifier: string) => Promise<User>
     @OrgModule.Action('getOrgAdminContact') private getOrgAdminContact!: (orgId: number) => Promise<Address>
+    @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+    @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
     private orgsOfUser: OrgWithAddress[] = []
     private isLoading: boolean = false
+    @Prop({ default: '' }) redirectToUrl !: string
 
     private async mounted () {
       try {
         this.isLoading = true
-        await this.getUserProfile('@me')
+        await this.addOrgSettings(this.currentOrganization)
         const userSettings: UserSettings[] = await this.getUserSettings(this.userProfile?.keycloakGuid)
         for (let i = 0; i < userSettings.length && userSettings.length > 0; i++) {
           const orgId = parseInt(userSettings[i].id)
@@ -76,6 +82,18 @@ export default class DuplicateAccountWarningView extends Vue {
       } finally {
         this.isLoading = false
       }
+    }
+
+    private navigateToRedirectUrl (accountId: number): void {
+      if (this.redirectToUrl) {
+        window.location.assign(this.redirectToUrl.toString())
+      } else {
+        this.$router.push(`/${Pages.HOME}`)
+      }
+    }
+
+    private createAccount () {
+      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
     }
 }
 </script>

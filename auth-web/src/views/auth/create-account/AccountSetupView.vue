@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -108,6 +108,7 @@ export default class AccountSetupView extends Vue {
   private errorTitle = 'Account creation failed'
   private errorText = ''
   private isLoading: boolean = false
+  @Prop({ default: '' }) redirectToUrl !: string;
 
   $refs: {
     errorDialog: ModalDialog
@@ -144,9 +145,13 @@ export default class AccountSetupView extends Vue {
     ]
   async beforeRouteEnter (to, from, next) {
     const accountFromSession:AccountSettings = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
-    const hasExistingAccount = accountFromSession && Object.keys(accountFromSession).length === 0
-    if (hasExistingAccount) {
-      next(`${Pages.DUPLICATE_ACCOUNT_WARNING}`)
+    const hasExistingAccount = accountFromSession && Object.keys(accountFromSession).length > 0
+    if (hasExistingAccount && from.fullPath !== Pages.DUPLICATE_ACCOUNT_WARNING) {
+      next((vm) => {
+        let redirectUrlToDuplicateAccountWarning = vm.redirectToUrl
+          ? `${Pages.DUPLICATE_ACCOUNT_WARNING}?redirectToUrl=${encodeURIComponent(vm.redirectToUrl)}` : `${Pages.DUPLICATE_ACCOUNT_WARNING}`
+        next(redirectUrlToDuplicateAccountWarning)
+      })
     } else {
       next()
     }

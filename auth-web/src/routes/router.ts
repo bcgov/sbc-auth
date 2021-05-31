@@ -251,7 +251,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account',
       name: 'setupaccount',
       component: AccountSetupView,
-      props: true,
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl }),
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
@@ -588,9 +588,9 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/duplicate-account-warning',
       component: DuplicateAccountWarningView,
-      meta: { requiresAuth: true, requiresProfile: true },
-      name: 'DuplicateAccountWarningView',
-      props: true
+      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true },
+      name: 'duplicateaccountwarning',
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl })
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]
