@@ -16,7 +16,6 @@
                 class="align-checkbox-label--top ma-0 pa-0"
                 hide-details
                 v-model="productSelected"
-
                 :data-test="`check-product-${productDetails.code}`"
                 @change="selecThisProduct"
                 :key="Math.random()"
