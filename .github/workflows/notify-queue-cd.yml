@@ -1,11 +1,12 @@
-name: Auth API CD
+name: Notify Queue CD
 
 on:
   push:
     branches:
       - main
     paths:
-      - "auth-api/**"
+      - "notify-api/**"
+      - "queue_services/notify-queue/**"
   workflow_dispatch:
     inputs:
       environment:
@@ -16,14 +17,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./auth-api
+    working-directory: ./queue_services/notify-queue
 
 env:
-  APP_NAME: "auth-api"
+  APP_NAME: "notify-queue"
   TAG_NAME: "dev"
 
 jobs:
-  auth-api-cd-by-push:
+  notify-queue-cd-by-push:
     runs-on: ubuntu-20.04
 
     if: github.event_name == 'push' && github.repository == 'bcgov/sbc-auth'
@@ -60,13 +61,13 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Auth API Built and Deployed to ${{env.TAG_NAME}}*"
+          job_name: "*Notify Queue Built and Deployed to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  auth-api-cd-by-dispatch:
+  notify-queue-cd-by-dispatch:
     runs-on: ubuntu-20.04
 
     if: github.event_name == 'workflow_dispatch' && github.repository == 'bcgov/sbc-auth'
@@ -106,7 +107,7 @@ jobs:
         if: failure()
         with:
           type: ${{ job.status }}
-          job_name: "*Auth API Built and Deployed to ${{env.TAG_NAME}}*"
+          job_name: "*Notify Queue Built and Deployed to ${{env.TAG_NAME}}*"
           channel: "#registries-bot"
           url: ${{ secrets.ROCKETCHAT_WEBHOOK }}
           commit: true

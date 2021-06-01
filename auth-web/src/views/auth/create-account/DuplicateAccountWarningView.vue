@@ -1,46 +1,49 @@
 <template>
-  <v-container>
-    <header class="view-header mb-3 d-flex flex-column">
+  <v-container class="view-container" >
+    <v-row justify="center">
+      <v-col cols="12" sm="8" md="6" class="text-center">
         <v-icon large color="error" class="font-weight-bold">mdi-alert-circle-outline</v-icon>
-        <div>
-            <h1 class="view-header__title text-center mt-3">Looks like you already have an account</h1>
-            <p class="text-center my-3 pl-10 pr-10" v-html="$t('duplicateAccountWarningViewMessage')"/>
-        </div>
-    </header>
-    <div class="mb-3 justify-center d-flex">
-      <strong class="font-weight-bold text-center">Use one of the existing accounts:</strong>
-    </div>
-    <template class="d-flex justify-center mb-6 pb-6">
-    <v-card flat v-if="orgsOfUser.length > 0 && !isLoading" class="p-1">
-      <v-card-text>
-       <v-list dense>
-          <template v-for="(org, index) in orgsOfUser">
-            <v-divider class="mt-1 mb-1" :key="index" v-if="index>1"></v-divider>
-            <v-list-item :key="org.id" class="d-flex flex-row justify-center">
+        <h1 class="view-header__title text-center mt-3 ">Looks like you already have an account</h1>
+        <p class="text-center my-3 pl-3 pr-3" v-html="$t('duplicateAccountWarningViewMessage')"/>
+        <p class="mt-6 pb-0 justify-center d-flex font-weight-bold ">
+          Use one of the existing accounts:
+        </p>
+      </v-col>
+    </v-row>
+      <v-row justify="center" v-if="orgsOfUser.length > 0 && !isLoading">
+        <v-col cols="12" sm="9" md="7" class="text-center">
+          <v-card flat  class="my-4 d-flex justify-space-between align-center pa-5"
+            v-for="(org, index) in orgsOfUser" :key="index">
+            <div  class="d-flex align-center">
+              <div>
                 <v-avatar
-                tile
-                left
-                color="#4d7094"
-                size="32"
-                class="user-avatar">
-                {{ org.name.slice(0,1) }}
-                </v-avatar>
-                <v-list-item-content>
-                    <v-list-item-title><h2 class="font-weight-bold v-list-item__title">{{ org.name }}</h2></v-list-item-title>
-                    <v-list-item-subtitle class="mt-3 v-list-item__subtitle"><strong>{{ org.addressLine }}</strong></v-list-item-subtitle>
-                </v-list-item-content>
-                <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
-            </v-list-item>
-          </template>
-         </v-list>
-      </v-card-text>
-      <v-card-actions class="justify-center">
+                      tile
+                      left
+                      color="#4d7094"
+                      size="32"
+                      class="user-avatar">
+                      <strong>{{ org.name && org.name.slice(0,1) && org.name.slice(0,1).toUpperCase() }}</strong>
+                  </v-avatar>
+                </div>
+                <div class="text-left ml-2">
+                <h4 class="font-weight-bold ">{{ org.name }}</h4>
+                <p class="mb-0">{{ org.addressLine }}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
+            </div>
+          </v-card>
+
+        </v-col>
+    </v-row>
+      <v-row justify="center">
+      <v-col cols="12" sm="8" md="6"  class="text-center">
         <v-btn large outlined color="primary" @click="createAccount()">
-          Create Another Account
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-    </template>
+            Create Another Account
+          </v-btn>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
@@ -113,9 +116,11 @@ export default class DuplicateAccountWarningView extends Vue {
     .v-list-item__subtitle {
       line-height: 1rem;
     }
-
     .user-avatar {
       margin-right: 0.75rem;
       color: var(--v-accent-lighten5);
+      border-radius: 0.15rem;
+      font-size: 1.1875rem;
+      font-weight: 700;
     }
 </style>

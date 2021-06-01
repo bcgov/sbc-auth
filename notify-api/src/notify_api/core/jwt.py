@@ -91,8 +91,8 @@ class JWTAuthenticationBackend(AuthenticationBackend):  # pylint: disable=too-ma
             self.well_known_config = get_api_settings().JWT_OIDC_WELL_KNOWN_CONFIG
             if self.well_known_config:
                 # try to get the jwks & issuer from the well known config
-                jurl = urlopen(url=self.well_known_config)
-                self.well_known_obj_cache = json.loads(jurl.read().decode('utf-8'))
+                with urlopen(url=self.well_known_config) as jurl:
+                    self.well_known_obj_cache = json.loads(jurl.read().decode('utf-8'))
 
                 self.jwks_uri = self.well_known_obj_cache['jwks_uri']
                 self.issuer = self.well_known_obj_cache['issuer']
@@ -180,8 +180,8 @@ class JWTAuthenticationBackend(AuthenticationBackend):  # pylint: disable=too-ma
         return jwks
 
     def _fetch_jwks_from_url(self):
-        jsonurl = urlopen(self.jwks_uri)
-        return json.loads(jsonurl.read().decode('utf-8'))
+        with urlopen(url=self.jwks_uri) as jsonurl:
+            return json.loads(jsonurl.read().decode('utf-8'))
 
     def get_rsa_key(self, jwks, kid):  # pylint: disable=no-self-use
         """Get a public key."""

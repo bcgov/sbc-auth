@@ -65,7 +65,7 @@ const orgModule = namespace('org')
 export default class ProductFee extends Vue {
     @Prop({ default: null }) private tabNumber: number
     @orgModule.State('orgProductFeeCodes') public orgProductFeeCodes!: OrgProductFeeCode[]
-    @orgModule.State('orgProducts') public orgProducts!: OrgProduct[]
+    @orgModule.State('productList') public orgProducts!: OrgProduct[]
     @orgModule.State('currentAccountFees') public accountFees!: AccountFee[]
     @orgModule.Mutation('setCurrentAccountFees') public setCurrentAccountFees!:(accountFees: AccountFee[]) =>void
     @Prop({ default: 'Product Fee' }) private title: string
@@ -115,7 +115,7 @@ export default class ProductFee extends Vue {
     }
 
     private displayProductName (productCode: string): string {
-      return this.orgProducts?.find(orgProduct => orgProduct.code === productCode)?.name
+      return this.orgProducts?.find(orgProduct => orgProduct.code === productCode)?.description
     }
 
     private displayProductFee (feeAmount: number): string {
