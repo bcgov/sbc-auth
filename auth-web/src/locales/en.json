@@ -134,7 +134,7 @@
   "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator.",
   "govm_tos_title":"Ministry Use Memorandum of Understanding (MOU)",
   "tos_title":"BC Registry Terms and Conditions",
-  "duplicateAccountWarningViewMessage": "It looks like you already have an account with BC Registries and Online Services. <br /> Do you want to access an existing account or create another account?"
+  "duplicateAccountWarningViewMessage": "It looks like you already have an account with BC Registries and Online Services. Do you want to access an existing account or create another account?",
   "businessCodeSubtitle":"Select this if you need to register or incorporate a business and keep business records up to date",
   "pprCodeSubtitle":"Select this if you need to register or search all encumbrances created against personal property in B.C., whether it belongs to a business or an individual.",
   "vsCodeSubtitle":"<p>Select this if you need to register the location of a will by filing a wills notice or search for a wills notice as part of an estate probate.</p>",
