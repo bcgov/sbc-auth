@@ -1,5 +1,12 @@
 <template>
   <v-container class="view-container" data-test="div-account-setup-container">
+    <!-- Loading status -->
+    <v-fade-transition>
+      <div class="loading-container" v-if="isCurrentUserSettingLoading">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isCurrentUserSettingLoading"/>
+      </div>
+    </v-fade-transition>
+    <template v-if="!isCurrentUserSettingLoading">
     <div class="view-header flex-column">
       <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
       <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
@@ -34,6 +41,7 @@
         </v-btn>
       </template>
     </ModalDialog>
+  </template>
   </v-container>
 </template>
 
@@ -42,6 +50,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
+import { User, UserSettings } from '@/models/user'
 import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
@@ -54,8 +63,11 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
-import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { namespace } from 'vuex-class'
+
+const UserModule = namespace('user')
+const AuthModule = namespace('auth')
 
 @Component({
   components: {
@@ -108,7 +120,12 @@ export default class AccountSetupView extends Vue {
   private errorTitle = 'Account creation failed'
   private errorText = ''
   private isLoading: boolean = false
+  private isCurrentUserSettingLoading: boolean = false
   @Prop({ default: '' }) redirectToUrl !: string;
+  @Prop({ default: false }) skipConfirmation !: boolean;
+
+  @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
+  @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
 
   $refs: {
     errorDialog: ModalDialog
@@ -143,17 +160,24 @@ export default class AccountSetupView extends Vue {
         }
       }
     ]
-  async beforeRouteEnter (to, from, next) {
-    const accountFromSession:AccountSettings = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
-    const hasExistingAccount = accountFromSession && Object.keys(accountFromSession).length > 0
-    if (hasExistingAccount && from.fullPath !== Pages.DUPLICATE_ACCOUNT_WARNING) {
-      next((vm) => {
-        let redirectUrlToDuplicateAccountWarning = vm.redirectToUrl
-          ? `${Pages.DUPLICATE_ACCOUNT_WARNING}?redirectToUrl=${encodeURIComponent(vm.redirectToUrl)}` : `${Pages.DUPLICATE_ACCOUNT_WARNING}`
-        next(redirectUrlToDuplicateAccountWarning)
-      })
-    } else {
-      next()
+
+  async created () {
+    try {
+      if (this.isAuthenticated && !this.skipConfirmation) {
+        this.isCurrentUserSettingLoading = true
+        const currentUserAccountSettings = await this.getUserAccountSettings()
+        const hasExistingAccount = currentUserAccountSettings.length > 0
+        if (hasExistingAccount) {
+          let redirectUrlToDuplicateAccountWarning = this.redirectToUrl
+            ? `${Pages.DUPLICATE_ACCOUNT_WARNING}?redirectToUrl=${encodeURIComponent(this.redirectToUrl)}` : `${Pages.DUPLICATE_ACCOUNT_WARNING}`
+          this.$router.push(redirectUrlToDuplicateAccountWarning)
+        }
+      }
+    } catch (ex) {
+      // eslint-disable-next-line no-console
+      console.log('error while setting up account view')
+    } finally {
+      this.isCurrentUserSettingLoading = false
     }
   }
 

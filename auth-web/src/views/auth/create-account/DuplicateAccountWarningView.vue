@@ -59,9 +59,7 @@ const UserModule = namespace('user')
 
 @Component({})
 export default class DuplicateAccountWarningView extends Vue {
-    @UserModule.Action('getUserSettings') private getUserSettings!: (keycloakGuid: string) => Promise<any>
-    // @UserModule.Action('getUserProfile') private getUserProfile!: (identifier: string) => Promise<User>
-    @UserModule.State('userProfile') private userProfile!: User
+    @UserModule.State('currentUserAccountSettings') private currentUserAccountSettings!: UserSettings[]
     @OrgModule.Action('getOrgAdminContact') private getOrgAdminContact!: (orgId: number) => Promise<Address>
     @OrgModule.State('currentOrganization') private currentOrganization!: Organization
     @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
@@ -72,14 +70,12 @@ export default class DuplicateAccountWarningView extends Vue {
     private async mounted () {
       try {
         this.isLoading = true
-        await this.addOrgSettings(this.currentOrganization)
-        const userSettings: UserSettings[] = await this.getUserSettings(this.userProfile?.keycloakGuid)
-        for (let i = 0; i < userSettings.length && userSettings.length > 0; i++) {
-          const orgId = parseInt(userSettings[i].id)
+        for (let i = 0; i < this.currentUserAccountSettings.length && this.currentUserAccountSettings.length > 0; i++) {
+          const orgId = parseInt(this.currentUserAccountSettings[i].id)
           const orgAdminContact = await this.getOrgAdminContact(orgId)
           const orgOfUser: OrgWithAddress = {
             id: orgId,
-            name: userSettings[i].label,
+            name: this.currentUserAccountSettings[i].label,
             addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
           }
           this.orgsOfUser.push(orgOfUser)
@@ -92,7 +88,8 @@ export default class DuplicateAccountWarningView extends Vue {
       }
     }
 
-    private navigateToRedirectUrl (accountId: number): void {
+    private async navigateToRedirectUrl (accountId: number): Promise<void> {
+      await this.addOrgSettings(this.currentOrganization)
       if (this.redirectToUrl) {
         window.location.assign(this.redirectToUrl.toString())
       } else {
@@ -101,7 +98,7 @@ export default class DuplicateAccountWarningView extends Vue {
     }
 
     private createAccount () {
-      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
+      this.$router.push(`/${Pages.CREATE_ACCOUNT}?skipConfirmation=true`)
     }
 }
 </script>

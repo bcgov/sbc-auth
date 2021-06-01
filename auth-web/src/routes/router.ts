@@ -251,7 +251,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-account',
       name: 'setupaccount',
       component: AccountSetupView,
-      props: (route) => ({ redirectToUrl: route.query.redirectToUrl }),
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl, skipConfirmation: route.query.skipConfirmation }),
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {

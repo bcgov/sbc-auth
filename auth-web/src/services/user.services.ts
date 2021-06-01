@@ -107,7 +107,7 @@ export default class UserService {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/${username}/otp`)
   }
 
-  static getUserSettings (currentUserSub: string): Promise<AxiosResponse<UserSettings[]>> {
+  static getUserAccountSettings (currentUserSub: string): Promise<AxiosResponse<UserSettings[]>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${currentUserSub}/settings`)
   }
 }

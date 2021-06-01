@@ -36,6 +36,7 @@ export default class UserModule extends VuexModule {
 
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
+  currentUserAccountSettings: UserSettings[] = undefined
 
   @Mutation
   public setUserProfile (userProfile: User) {
@@ -105,6 +106,11 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setUserProfileData (userProfile: UserProfileData) {
     this.userProfileData = userProfile
+  }
+
+  @Mutation
+  public setCurrentUserAccountSettings (currentUserAccountSettings: UserSettings[]) {
+    this.currentUserAccountSettings = currentUserAccountSettings
   }
 
   @Action({ commit: 'setCurrentUser' })
@@ -251,9 +257,9 @@ export default class UserModule extends VuexModule {
     return response?.data
   }
 
-  @Action({ rawError: true })
-  public async getUserSettings (keycloakGuid: string) {
-    const response = await UserService.getUserSettings(keycloakGuid)
+  @Action({ commit: 'setCurrentUserAccountSettings', rawError: true })
+  public async getUserAccountSettings () {
+    const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
     if (response && response.data) {
       const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
       return orgs
