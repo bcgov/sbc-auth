@@ -31,7 +31,7 @@
               </div>
             </div>
             <div class="text-right">
-              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
+              <v-btn large color="primary" @click="navigateToRedirectUrl()" title="Access Account" data-test="goto-dashboard-button">Access Account</v-btn>
             </div>
           </v-card>
 
@@ -91,7 +91,7 @@ export default class DuplicateAccountWarningView extends Vue {
       }
     }
 
-    private async navigateToRedirectUrl (accountId: number): Promise<void> {
+    private async navigateToRedirectUrl (): Promise<void> {
       await this.addOrgSettings(this.currentOrganization)
       if (this.redirectToUrl) {
         window.location.assign(this.redirectToUrl.toString())
