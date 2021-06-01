@@ -1,6 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { DocumentUpload, User, UserProfileData } from '@/models/user'
+import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
+
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -35,6 +36,7 @@ export default class UserModule extends VuexModule {
 
   redirectAfterLoginUrl: string = ''
   roleInfos: RoleInfo[] = undefined
+  currentUserAccountSettings: UserSettings[] = undefined
 
   @Mutation
   public setUserProfile (userProfile: User) {
@@ -104,6 +106,11 @@ export default class UserModule extends VuexModule {
   @Mutation
   public setUserProfileData (userProfile: UserProfileData) {
     this.userProfileData = userProfile
+  }
+
+  @Mutation
+  public setCurrentUserAccountSettings (currentUserAccountSettings: UserSettings[]) {
+    this.currentUserAccountSettings = currentUserAccountSettings
   }
 
   @Action({ commit: 'setCurrentUser' })
@@ -248,5 +255,15 @@ export default class UserModule extends VuexModule {
   public async getTermsOfUse (docType: string = 'termsofuse') {
     const response = await DocumentService.getTermsOfService(docType)
     return response?.data
+  }
+
+  @Action({ commit: 'setCurrentUserAccountSettings', rawError: true })
+  public async getUserAccountSettings () {
+    const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
+    if (response && response.data) {
+      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
+      return orgs
+    }
+    return []
   }
 }

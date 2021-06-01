@@ -67,8 +67,8 @@ export enum Pages {
     STAFF_DASHBOARD_SUSPENDED = '/staff/dashboard/suspended',
     MAKE_PAD_PAYMENT = '/make-cc-payment/',
     STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
-    SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success'
-
+    SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success',
+    DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning'
 }
 
 export enum Account {
