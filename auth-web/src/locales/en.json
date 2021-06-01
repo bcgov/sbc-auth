@@ -134,11 +134,12 @@
   "bCeIDLoginOptionDescription":"Login with a BCeID combined with a verification code in a mobile or desktop authenticator.",
   "govm_tos_title":"Ministry Use Memorandum of Understanding (MOU)",
   "tos_title":"BC Registry Terms and Conditions",
+  "duplicateAccountWarningViewMessage": "It looks like you already have an account with BC Registries and Online Services. Do you want to access an existing account or create another account?",
   "businessCodeSubtitle":"Select this if you need to register or incorporate a business and keep business records up to date",
   "pprCodeSubtitle":"Select this if you need to register or search all encumbrances created against personal property in B.C., whether it belongs to a business or an individual.",
   "vsCodeSubtitle":"<p>Select this if you need to register the location of a will by filing a wills notice or search for a wills notice as part of an estate probate.</p>",
   "businessCodeDescription":"<ul><li>Request a name for your business </li><li>File annual reports </li><li>View and change your current directors or address</li><li>See the history of your business' fillings</li></ul> <a href='https://www.bcregistry.ca/business/auth/home/decide-business' target='sbc-auth-business'>Learn More <span class='mdi mdi-open-in-new'></span></a>",
   "pprCodeDescription":"<ul><li>Protect from loss or legal conflict by registering your interest (cars, boats, trailers or machinery). </li><li>Search for existing liens on personal property .</li><li>Provides personal property registration and search services.</li></ul> <a href='https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/bc-registry-services-personal-property-registry' target='sbc-auth-ppr'>Learn More <span class='mdi mdi-open-in-new'></span></a>",
   "vsCodeDescription":"<p class='mb-1'>The search and registration products are intended for the exclusive use of solicitors and notaries only. Title Search companies approved by the Vital Statstics Agency may also be granted access to Wills Registry. To add this product, accept the Terms of Service. Review the terms and check the box below if you confirm. BC Registry staff will review your information and grant access to Wills Registry in <strong>3-4 days</strong> if approved.</p><a href='https://www2.gov.bc.ca/gov/content/life-events/death/wills-registry' target='sbc-auth-wills'>Learn More <span class='mdi mdi-open-in-new'></span></a>"
-  
+
 }

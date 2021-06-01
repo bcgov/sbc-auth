@@ -257,3 +257,9 @@ export interface AccountFeeDTO {
   applyFilingFees?: string;
   serviceFeeCode?: string;
 }
+
+export interface OrgWithAddress {
+  name: string;
+  id: number;
+  addressLine: string;
+}

@@ -1,5 +1,12 @@
 <template>
   <v-container class="view-container" data-test="div-account-setup-container">
+    <!-- Loading status -->
+    <v-fade-transition>
+      <div class="loading-container" v-if="isCurrentUserSettingLoading">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isCurrentUserSettingLoading"/>
+      </div>
+    </v-fade-transition>
+    <template v-if="!isCurrentUserSettingLoading">
     <div class="view-header flex-column">
       <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
       <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
@@ -34,12 +41,13 @@
         </v-btn>
       </template>
     </ModalDialog>
+  </template>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, LoginSource, PaymentTypes } from '@/util/constants'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
@@ -48,7 +56,6 @@ import AccountCreatePremium from '@/components/auth/create-account/AccountCreate
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
@@ -56,6 +63,10 @@ import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { namespace } from 'vuex-class'
+
+const UserModule = namespace('user')
+const AuthModule = namespace('auth')
 
 @Component({
   components: {
@@ -97,7 +108,6 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
   }
 })
 export default class AccountSetupView extends Vue {
-  private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
   private readonly createOrg!: () => Promise<Organization>
@@ -110,6 +120,12 @@ export default class AccountSetupView extends Vue {
   private errorTitle = 'Account creation failed'
   private errorText = ''
   private isLoading: boolean = false
+  private isCurrentUserSettingLoading: boolean = false
+  @Prop({ default: '' }) redirectToUrl !: string;
+  @Prop({ default: false }) skipConfirmation !: boolean;
+
+  @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
+  @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
 
   $refs: {
     errorDialog: ModalDialog
@@ -153,6 +169,26 @@ export default class AccountSetupView extends Vue {
         }
       }
     ]
+
+  async created () {
+    try {
+      if (this.isAuthenticated && !this.skipConfirmation) {
+        this.isCurrentUserSettingLoading = true
+        const currentUserAccountSettings = await this.getUserAccountSettings()
+        const hasExistingAccount = currentUserAccountSettings.length > 0
+        if (hasExistingAccount) {
+          let redirectUrlToDuplicateAccountWarning = this.redirectToUrl
+            ? `${Pages.DUPLICATE_ACCOUNT_WARNING}?redirectToUrl=${encodeURIComponent(this.redirectToUrl)}` : `${Pages.DUPLICATE_ACCOUNT_WARNING}`
+          this.$router.push(redirectUrlToDuplicateAccountWarning)
+        }
+      }
+    } catch (ex) {
+      // eslint-disable-next-line no-console
+      console.log('error while setting up account view')
+    } finally {
+      this.isCurrentUserSettingLoading = false
+    }
+  }
 
   private beforeMount () {
     if (this.enablePaymentMethodSelectorStep) {
