@@ -31,7 +31,7 @@
               </div>
             </div>
             <div class="text-right">
-              <v-btn large color="primary" @click="navigateToRedirectUrl()" title="Access Account" data-test="goto-dashboard-button">Access Account</v-btn>
+              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Access Account" data-test="btn-access-account">Access Account</v-btn>
             </div>
           </v-card>
 
@@ -48,12 +48,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { OrgWithAddress, Organization } from '@/models/Organization'
-import { Pages, SessionStorageKeys } from '@/util/constants'
-import { User, UserSettings } from '@/models/user'
 import { Address } from '@/models/address'
-import ConfigHelper from '@/util/config-helper'
+import { Pages } from '@/util/constants'
+import { UserSettings } from '@/models/user'
 
 import { namespace } from 'vuex-class'
 
@@ -66,6 +65,7 @@ export default class DuplicateAccountWarningView extends Vue {
     @OrgModule.Action('getOrgAdminContact') private getOrgAdminContact!: (orgId: number) => Promise<Address>
     @OrgModule.State('currentOrganization') private currentOrganization!: Organization
     @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
+    @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
     private orgsOfUser: OrgWithAddress[] = []
     private isLoading: boolean = false
     @Prop({ default: '' }) redirectToUrl !: string
@@ -73,16 +73,16 @@ export default class DuplicateAccountWarningView extends Vue {
     private async mounted () {
       try {
         this.isLoading = true
-        for (let i = 0; i < this.currentUserAccountSettings.length && this.currentUserAccountSettings.length > 0; i++) {
-          const orgId = parseInt(this.currentUserAccountSettings[i].id)
+        this.currentUserAccountSettings.map(async (accountsetting: UserSettings) => {
+          const orgId = parseInt(accountsetting.id)
           const orgAdminContact = await this.getOrgAdminContact(orgId)
           const orgOfUser: OrgWithAddress = {
             id: orgId,
-            name: this.currentUserAccountSettings[i].label,
+            name: accountsetting.label,
             addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
           }
           this.orgsOfUser.push(orgOfUser)
-        }
+        })
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(`Error while loading duplicate accounts ${err}`)
@@ -91,7 +91,8 @@ export default class DuplicateAccountWarningView extends Vue {
       }
     }
 
-    private async navigateToRedirectUrl (): Promise<void> {
+    private async navigateToRedirectUrl (accountId: number): Promise<void> {
+      await this.syncOrganization(accountId)
       await this.addOrgSettings(this.currentOrganization)
       if (this.redirectToUrl) {
         window.location.assign(this.redirectToUrl.toString())

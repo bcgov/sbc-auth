@@ -47,7 +47,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LDFlags, LoginSource, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
