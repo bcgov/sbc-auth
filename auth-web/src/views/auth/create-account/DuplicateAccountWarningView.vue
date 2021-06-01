@@ -1,10 +1,10 @@
 <template>
   <v-container class="view-container" >
     <v-row justify="center">
-      <v-col cols="12" sm="8" md="6" class="text-center">
+      <v-col cols="12" sm="8" md="6" class="text-center pb-0">
         <v-icon large color="error" class="font-weight-bold">mdi-alert-circle-outline</v-icon>
-        <h1 class="view-header__title text-center mt-3 ">Looks like you already have an account</h1>
-        <p class="text-center my-3 pl-3 pr-3" v-html="$t('duplicateAccountWarningViewMessage')"/>
+        <h1 class="view-header__title text-center mt-3 px-12">Looks like you already have an account</h1>
+        <p class="text-center my-3 pl-3 pr-3 mt-8" v-html="$t('duplicateAccountWarningViewMessage')"/>
         <p class="mt-6 pb-0 justify-center d-flex font-weight-bold ">
           Use one of the existing accounts:
         </p>
@@ -12,7 +12,7 @@
     </v-row>
       <v-row justify="center" v-if="orgsOfUser.length > 0 && !isLoading">
         <v-col cols="12" sm="9" md="7" class="text-center">
-          <v-card flat  class="my-4 d-flex justify-space-between align-center pa-5"
+          <v-card flat  class="my-4 d-flex justify-space-between align-center pa-8"
             v-for="(org, index) in orgsOfUser" :key="index">
             <div  class="d-flex align-center">
               <div>
@@ -31,7 +31,7 @@
               </div>
             </div>
             <div class="text-right">
-              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Access Account" data-test="btn-access-account">Access Account</v-btn>
+              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Access Account" data-test="goto-access-account-button">Access Account</v-btn>
             </div>
           </v-card>
 
