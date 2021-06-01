@@ -16,7 +16,7 @@
                 class="align-checkbox-label--top ma-0 pa-0"
                 hide-details
                 v-model="productSelected"
-                :indeterminate="isexpandedView && isTOSNeeded && !termsAccepted"
+
                 :data-test="`check-product-${productDetails.code}`"
                 @change="selecThisProduct"
                 :key="Math.random()"
@@ -159,7 +159,8 @@ export default class Product extends Vue {
       component: ProductTos,
       props: {
         userName: this.userName,
-        orgName: this.orgName
+        orgName: this.orgName,
+        isTOSAlreadyAccepted: this.termsAccepted
       },
       events: { 'tos-status-changed': this.tosChanged },
       ref: 'tosForm'
