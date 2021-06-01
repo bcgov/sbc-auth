@@ -31,7 +31,7 @@
               </div>
             </div>
             <div class="text-right">
-              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Access Account</v-btn>
+              <v-btn large color="primary" @click="navigateToRedirectUrl(org.id)" title="Access Account" data-test="goto-access-account-button">Access Account</v-btn>
             </div>
           </v-card>
 
