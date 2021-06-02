@@ -22,7 +22,7 @@
       <v-tab data-test="active-tab" :to=pagesEnum.STAFF_DASHBOARD_ACTIVE
         v-if="canViewAccounts">Active</v-tab>
 
-      <template v-if="canAdminAccounts">
+      <template v-if="canCreateAccounts">
         <v-tab data-test="invitations-tab" :to=pagesEnum.STAFF_DASHBOARD_INVITATIONS>
           <v-badge
             inline
@@ -184,7 +184,7 @@ export default class StaffAccountManagement extends Vue {
     await this.getCodes()
     await this.syncTasks()
     await this.syncSuspendedStaffOrgs()
-    if (this.canAdminAccounts) {
+    if (this.canCreateAccounts) {
       await this.syncPendingInvitationOrgs()
     }
   }
@@ -211,10 +211,6 @@ export default class StaffAccountManagement extends Vue {
 
   private get canSuspendAccounts () {
     return this.currentUser?.roles?.includes(Role.StaffSuspendAccounts) || this.currentUser?.roles?.includes(Role.StaffViewAccounts)
-  }
-
-  private get canAdminAccounts () {
-    return this.currentUser?.roles?.includes(Role.AdminStaff)
   }
 
   private async tabChange (tabIndex) {
