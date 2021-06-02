@@ -172,7 +172,7 @@ export default class NonBcscAccountSetupView extends Vue {
       }
       this.accountStepperConfig.push(paymentMethodStep)
       // use the new premium chooser account when flag is enabled
-      this.accountStepperConfig[2].alternate.component = PremiumChooser
+      this.accountStepperConfig[3].alternate.component = PremiumChooser
     }
   }
 
