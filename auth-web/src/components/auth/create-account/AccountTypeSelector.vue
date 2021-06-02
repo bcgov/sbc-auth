@@ -187,6 +187,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
   @OrgModule.State('accountTypeBeforeChange') private accountTypeBeforeChange!: string
   @OrgModule.State('currentOrganizationType') private currentOrganizationType!: string
+  @OrgModule.State('resetAccountTypeOnSetupAccount') private resetAccountTypeOnSetupAccount!: string
 
   @UserModule.State('currentUser') private currentUser!: KCUserProfile
 
@@ -196,6 +197,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   @OrgModule.Mutation('resetCurrentOrganisation') private resetCurrentOrganisation!: () => void
   @OrgModule.Mutation('setAccountTypeBeforeChange') private setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
   @OrgModule.Mutation('setAccessType') private setAccessType!: (accessType: string) => void
+  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   private async mounted () {
     if (this.isAccountChange) {
@@ -211,6 +213,11 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       if (!this.currentOrganization) {
         this.setCurrentOrganization({ name: '' })
       }
+      // when some one goes back into product page and come, this will be true and selectedAccountType as undefined.
+      if (this.resetAccountTypeOnSetupAccount) {
+        this.selectAccountType(undefined)
+        this.setResetAccountTypeOnSetupAccount(false) // reset back flag for coming back
+      }
 
       // first time stepper hits step 2 after selecting a premium product/service in step 1
       if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
@@ -220,6 +227,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
         this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
           ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
       }
+
       this.setAccessType(this.getOrgAccessType())
       // remove current account from session storage .Or else permission of old account will be fetched
       ConfigHelper.removeFromSession('CURRENT_ACCOUNT')

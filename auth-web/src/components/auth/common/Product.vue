@@ -16,7 +16,6 @@
                 class="align-checkbox-label--top ma-0 pa-0"
                 hide-details
                 v-model="productSelected"
-                :indeterminate="isexpandedView && isTOSNeeded && !termsAccepted"
                 :data-test="`check-product-${productDetails.code}`"
                 @change="selecThisProduct"
                 :key="Math.random()"
@@ -127,15 +126,21 @@ export default class Product extends Vue {
   public tosChanged (termsAccepted:boolean) {
     this.termsAccepted = termsAccepted
     // force select when tos accept
-    this.selecThisProduct()
+    this.selecThisProduct(undefined, true)// no need to collaps on TOS accept
   }
   // // this function will only used when we have to show TOS (in product and service dashboard)
+
+  // since event is first argument, we are using second to set emitFromTos
   @Emit('set-selected-product')
-  public selecThisProduct () {
+  // eslint-disable-next-line
+  public selecThisProduct (event, emitFromTos:boolean = false) {
+
     let forceRemove = false
     // expand if tos needed
+    // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
+    // need to collaps on uncheck. Since both are using same function emitFromTos will be true when click happend from TOS check box. then no need to collaps
     if (this.isTOSNeeded && !this.termsAccepted) {
-      if (!this.isexpandedView) {
+      if (!emitFromTos) { // expand and collaps on click if click is not coming from TOS
         this.expand()
       }
       this.productSelected = false
@@ -153,7 +158,8 @@ export default class Product extends Vue {
       component: ProductTos,
       props: {
         userName: this.userName,
-        orgName: this.orgName
+        orgName: this.orgName,
+        isTOSAlreadyAccepted: this.termsAccepted
       },
       events: { 'tos-status-changed': this.tosChanged },
       ref: 'tosForm'

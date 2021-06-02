@@ -83,6 +83,7 @@ export default class OrgModule extends VuexModule {
   currentAccountFees: AccountFee[] = []
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
   isCurrentSelectedProductsPremiumOnly = false
+  resetAccountTypeOnSetupAccount = false // this flag use to check need to reset accounttype select when moving back and forth in stepper
 
   @Mutation
   public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {
@@ -276,6 +277,11 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public resetCurrentAccountFees () {
     this.currentAccountFees = []
+  }
+
+  @Mutation
+  public setResetAccountTypeOnSetupAccount (resetAccountTypeOnSetupAccount:boolean) {
+    this.resetAccountTypeOnSetupAccount = resetAccountTypeOnSetupAccount
   }
 
   @Action({ rawError: true })
