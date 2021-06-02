@@ -153,5 +153,9 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+.loading-inner-container{
+  display: flex;
+  justify-content: center;
+}
 
 </style>
