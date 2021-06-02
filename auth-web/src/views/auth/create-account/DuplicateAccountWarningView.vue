@@ -72,16 +72,16 @@ export default class DuplicateAccountWarningView extends Vue {
     @Prop({ default: '' }) redirectToUrl !: string
 
     private async mounted () {
-      if (!Array.isArray(this.currentUserAccountSettings) || !this.currentUserAccountSettings.length) {
+      if (!this.currentUserAccountSettings?.length) {
         await this.getUserAccountSettings()
       }
     }
     @Watch('currentUserAccountSettings', { immediate: true })
-    private onCurrentUserAccountSettings (): void {
+    private async onCurrentUserAccountSettings (): Promise<void> {
       try {
-        if (Array.isArray(this.currentUserAccountSettings) && this.currentUserAccountSettings.length) {
+        if (this.currentUserAccountSettings?.length) {
           this.isLoading = true
-          this.currentUserAccountSettings.map(async (accountsetting: UserSettings) => {
+          this.orgsOfUser = await Promise.all(this.currentUserAccountSettings.map(async (accountsetting: UserSettings) => {
             const orgId = parseInt(accountsetting.id)
             const orgAdminContact = await this.getOrgAdminContact(orgId)
             const orgOfUser: OrgWithAddress = {
@@ -89,8 +89,8 @@ export default class DuplicateAccountWarningView extends Vue {
               name: accountsetting.label,
               addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
             }
-            this.orgsOfUser.push(orgOfUser)
-          })
+            return orgOfUser
+          }))
         }
       } catch (err) {
         // eslint-disable-next-line no-console
