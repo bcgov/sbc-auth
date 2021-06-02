@@ -122,7 +122,7 @@ export default class StaffDashboardView extends Vue {
   }
 
   private get canViewGLCodes (): boolean {
-    return (this.currentUser?.roles?.includes(Role.AdminStaff))
+    return (this.currentUser?.roles?.includes(Role.ManageGlCodes))
   }
 
   private isFormValid (): boolean {

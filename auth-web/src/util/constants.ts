@@ -18,18 +18,16 @@ export enum Role {
     Public = 'public_user',
     Edit = 'edit',
     Basic = 'basic',
-    // StaffAdmin = 'create_accounts',
     StaffCreateAccounts = 'create_accounts',
-    // StaffAdminBCOL = 'manage_accounts',
     StaffManageAccounts = 'manage_accounts',
     AnonymousUser = 'anonymous_user',
     StaffViewAccounts = 'view_accounts',
     Tester = 'tester',
     AccountHolder = 'account_holder',
     PublicUser = 'public_user',
-    AdminStaff = 'admin',
     StaffSuspendAccounts = 'suspend_accounts',
     GOVMAccountUser = 'gov_account_user',
+    ManageGlCodes = 'manage_gl_codes'
 }
 
 export enum Pages {
