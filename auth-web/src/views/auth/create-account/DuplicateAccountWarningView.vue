@@ -48,7 +48,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgWithAddress, Organization } from '@/models/Organization'
 import { Address } from '@/models/address'
 import { Pages } from '@/util/constants'
@@ -66,23 +66,32 @@ export default class DuplicateAccountWarningView extends Vue {
     @OrgModule.State('currentOrganization') private currentOrganization!: Organization
     @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
     @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
+    @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
     private orgsOfUser: OrgWithAddress[] = []
     private isLoading: boolean = false
     @Prop({ default: '' }) redirectToUrl !: string
 
     private async mounted () {
+      if (!this.currentUserAccountSettings?.length) {
+        await this.getUserAccountSettings()
+      }
+    }
+    @Watch('currentUserAccountSettings', { immediate: true })
+    private async onCurrentUserAccountSettings (): Promise<void> {
       try {
-        this.isLoading = true
-        this.currentUserAccountSettings.map(async (accountsetting: UserSettings) => {
-          const orgId = parseInt(accountsetting.id)
-          const orgAdminContact = await this.getOrgAdminContact(orgId)
-          const orgOfUser: OrgWithAddress = {
-            id: orgId,
-            name: accountsetting.label,
-            addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
-          }
-          this.orgsOfUser.push(orgOfUser)
-        })
+        if (this.currentUserAccountSettings?.length) {
+          this.isLoading = true
+          this.orgsOfUser = await Promise.all(this.currentUserAccountSettings.map(async (accountsetting: UserSettings) => {
+            const orgId = parseInt(accountsetting.id)
+            const orgAdminContact = await this.getOrgAdminContact(orgId)
+            const orgOfUser: OrgWithAddress = {
+              id: orgId,
+              name: accountsetting.label,
+              addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
+            }
+            return orgOfUser
+          }))
+        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.log(`Error while loading duplicate accounts ${err}`)
