@@ -261,7 +261,8 @@ export default class UserModule extends VuexModule {
   public async getUserAccountSettings () {
     const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
     if (response && response.data) {
-      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
+      // filter by account type and sort by name(label)
+      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT')).sort((a, b) => a.label.localeCompare(b.label))
       return orgs
     }
     return []

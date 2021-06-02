@@ -94,6 +94,7 @@ export default class DuplicateAccountWarningView extends Vue {
     private async navigateToRedirectUrl (accountId: number): Promise<void> {
       await this.syncOrganization(accountId)
       await this.addOrgSettings(this.currentOrganization)
+      this.$store.commit('updateHeader')
       if (this.redirectToUrl) {
         window.location.assign(this.redirectToUrl.toString())
       } else {
