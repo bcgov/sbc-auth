@@ -15,23 +15,33 @@ Vue.use(VueRouter)
 document.body.setAttribute('data-app', 'true')
 
 describe('DuplicateAccountWarningView.vue', () => {
-  let wrapper: any
-  let store: any
   let orgModule: any
   let userModule: any
+  let wrapper: any
+  let store: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
   localVue.directive('can', can)
+  localVue.use(Vuex)
   const vuetify = new Vuetify({})
 
-  const config = {
-    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
-    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
-  }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
-
   beforeEach(() => {
+    userModule = {
+      namespaced: true,
+      state: {
+        currentUserAccountSettings: [
+          {
+            accountStatus: 'ACTIVE',
+            accountType: 'BASIC',
+            id: 2446,
+            label: 'DEV SK OB1',
+            productSettings: '/account/2446/settings/product-settings',
+            type: 'ACCOUNT',
+            urlorigin: 'https://dev.bcregistry.ca/business/auth',
+            urlpath: '/account/2446/settings'
+          }
+        ]
+      }
+    }
     orgModule = {
       namespaced: true,
       state: {
@@ -56,24 +66,6 @@ describe('DuplicateAccountWarningView.vue', () => {
             streetAdditional: ''
           }
         })
-      }
-    }
-
-    userModule = {
-      namespaced: true,
-      state: {
-        currentUserAccountSettings: [
-          {
-            accountStatus: 'ACTIVE',
-            accountType: 'BASIC',
-            id: 2446,
-            label: 'DEV SK OB1',
-            productSettings: '/account/2446/settings/product-settings',
-            type: 'ACCOUNT',
-            urlorigin: 'https://dev.bcregistry.ca/business/auth',
-            urlpath: '/account/2446/settings'
-          }
-        ]
       }
     }
 
