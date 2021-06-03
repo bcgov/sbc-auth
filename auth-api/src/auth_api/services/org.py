@@ -146,11 +146,9 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    @user_context
-    def _handle_bceid_status_and_notification(org, **kwargs):
+    def _handle_bceid_status_and_notification(org):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
-        user_from_context: UserContext = kwargs['user']
-        user = UserModel.find_by_jwt_token(token=user_from_context.token_info)
+        user = UserModel.find_by_jwt_token()
         # create a staff review task for this account
         task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
         task_info = {'name': org.name,
@@ -168,7 +166,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @user_context
     def create_membership(access_type, org, user_id, **kwargs):
         """Create membership account."""
-        user: UserContext = kwargs['user']
+        user: UserContext = kwargs['user_context']
         if not user.is_staff_admin() and access_type != AccessType.ANONYMOUS.value:
             membership = MembershipModel(org_id=org.id, user_id=user_id, membership_type_code='ADMIN',
                                          membership_type_status=Status.ACTIVE.value)
@@ -208,7 +206,7 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_request['paymentInfo']['bankTransitNumber'] = payment_info.get('bankTransitNumber', None)
             pay_request['paymentInfo']['bankInstitutionNumber'] = payment_info.get('bankInstitutionNumber', None)
             pay_request['paymentInfo']['bankAccountNumber'] = payment_info.get('bankAccountNumber', None)
-            pay_request['padTosAcceptedBy'] = kwargs['user'].user_name
+            pay_request['padTosAcceptedBy'] = kwargs['user_context'].user_name
         # invoke pay-api
         token = RestService.get_service_account_token()
         if is_new_org:
@@ -351,8 +349,7 @@ class Org:  # pylint: disable=too-many-public-methods
                     'org_id': org_id}
         duplicate_org_name_validate(is_fatal=True, **arg_dict)
 
-    def update_org(self, org_info, token_info: Dict = None,  # pylint: disable=too-many-locals
-                   origin_url: str = None):
+    def update_org(self, org_info, origin_url: str = None): # pylint: disable=too-many-locals
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -390,7 +387,7 @@ class Org:  # pylint: disable=too-many-public-methods
             has_org_updates = True
             org_info['statusCode'] = OrgStatus.PENDING_STAFF_REVIEW.value
             has_status_changing = True
-            self._create_gov_account_task(org_model, token_info)
+            self._create_gov_account_task(org_model)
         if product_subscriptions is not None:
             subscription_data = {'subscriptions': product_subscriptions}
             ProductService.create_product_subscription(self._model.id, subscription_data=subscription_data,
@@ -431,10 +428,10 @@ class Org:  # pylint: disable=too-many-public-methods
         Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
 
     @staticmethod
-    def _create_gov_account_task(org_model: OrgModel, token_info: dict):
+    def _create_gov_account_task(org_model: OrgModel):
         # create a staff review task for this account
         task_type = TaskTypePrefix.GOVM_REVIEW.value
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        user: UserModel = UserModel.find_by_jwt_token()
         task_info = {'name': org_model.name,
                      'relationshipId': org_model.id,
                      'relatedTo': user.id,
@@ -447,14 +444,16 @@ class Org:  # pylint: disable=too-many-public-methods
         TaskService.create_task(task_info=task_info, do_commit=False)
 
     @staticmethod
-    def delete_org(org_id, token_info: Dict = None, ):
+    @user_context
+    def delete_org(org_id, **kwargs):
         """Soft-Deletes an Org.
 
         It should not be deletable if there are members or business associated with the org
         """
         # Check authorization for the user
         current_app.logger.debug('<org Inactivated')
-        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        user_from_context: UserContext = kwargs['user_context']
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
@@ -468,10 +467,10 @@ class Org:  # pylint: disable=too-many-public-methods
         org.save()
 
         # Don't remove account if it's staff who deactivate org.
-        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
+        is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in user_from_context.roles
         if not is_staff_admin:
             # Remove user from thr group if the user doesn't have any other orgs membership
-            user = UserModel.find_by_jwt_token(token=token_info)
+            user = UserModel.find_by_jwt_token()
             if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
                 KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
 
@@ -486,7 +485,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return response.json()
 
     @staticmethod
-    def find_by_org_id(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
+    def find_by_org_id(org_id, allowed_roles: Tuple = None):
         """Find and return an existing organization with the provided id."""
         if org_id is None:
             return None
@@ -496,7 +495,7 @@ class Org:  # pylint: disable=too-many-public-methods
             return None
 
         # Check authorization for the user
-        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        check_auth(one_of_roles=allowed_roles, org_id=org_id)
 
         return Org(org_model)
 
@@ -518,7 +517,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return orgs
 
     @staticmethod
-    def get_login_options_for_org(org_id, token_info: Dict = None, allowed_roles: Tuple = None):
+    def get_login_options_for_org(org_id, allowed_roles: Tuple = None):
         """Get the payment settings for the given org."""
         current_app.logger.debug('get_login_options(>')
         org = OrgModel.find_by_org_id(org_id)
@@ -526,11 +525,11 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         # Check authorization for the user
-        check_auth(token_info, one_of_roles=allowed_roles, org_id=org_id)
+        check_auth(one_of_roles=allowed_roles, org_id=org_id)
         return AccountLoginOptionsModel.find_active_by_org_id(org_id)
 
     @staticmethod
-    def add_login_option(org_id, login_source, token_info: Dict = None):
+    def add_login_option(org_id, login_source):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
         current_app.logger.debug('>add_login_option')
@@ -538,14 +537,14 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+        check_auth(one_of_roles=ADMIN, org_id=org_id)
 
         login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
         login_option.save()
         return login_option
 
     @staticmethod
-    def update_login_option(org_id, login_source, token_info: Dict = None):
+    def update_login_option(org_id, login_source):
         """Create a new contact for this org."""
         # check for existing contact (only one contact per org for now)
         current_app.logger.debug('>update_login_option')
@@ -553,7 +552,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(token_info, one_of_roles=ADMIN, org_id=org_id)
+        check_auth(one_of_roles=ADMIN, org_id=org_id)
 
         existing_login_option = AccountLoginOptionsModel.find_active_by_org_id(org_id)
         if existing_login_option is not None:
@@ -676,8 +675,7 @@ class Org:  # pylint: disable=too-many-public-methods
             statuses: str = kwargs.get('statuses', None)
             name: str = kwargs.get('name', None)
             # https://github.com/bcgov/entity/issues/4786
-            access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None),
-                                                                 kwargs.get('token', None))
+            access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None))
             search_args = (access_type,
                            name,
                            statuses,
@@ -716,12 +714,13 @@ class Org:  # pylint: disable=too-many-public-methods
         return orgs
 
     @staticmethod
-    def refine_access_type(access_type_str, token_info):
+    @user_context
+    def refine_access_type(access_type_str, **kwargs):
         """Find Access Type."""
-        roles = token_info.get('realm_access').get('roles')
+        user_from_context: UserContext = kwargs['user_context']
+        roles = user_from_context.roles
 
-        is_staff_admin = token_info and (Role.STAFF_CREATE_ACCOUNTS.value in roles or
-                                         Role.STAFF_MANAGE_ACCOUNTS.value in roles)
+        is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
         access_type = [] if not access_type_str else access_type_str.split(',')
         if not is_staff_admin:
             if len(access_type) < 1:
@@ -742,7 +741,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return False
 
     @staticmethod
-    def change_org_status(org_id: int, status_code, suspension_reason_code, token_info: Dict = None):
+    def change_org_status(org_id: int, status_code, suspension_reason_code):
         """Update the status of the org.
 
         Used now for suspending/activate account.
@@ -756,7 +755,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org_model: OrgModel = OrgModel.find_by_org_id(org_id)
 
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        user: UserModel = UserModel.find_by_jwt_token()
         current_app.logger.debug('<setting org status to  ')
         org_model.status_code = status_code
         org_model.decision_made_by = user.username  # not sure if a new field is needed for this.
@@ -768,14 +767,14 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org_model)
 
     @staticmethod
-    def approve_or_reject(org_id: int, is_approved: bool, token_info: Dict, origin_url: str = None):
+    def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None):
         """Mark the affidavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         # Get the org and check what's the current status
         org: OrgModel = OrgModel.find_by_org_id(org_id)
 
         # Current User
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        user: UserModel = UserModel.find_by_jwt_token()
 
         # If status is PENDING_STAFF_REVIEW handle affidavit approve process, else raise error
         if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
@@ -817,7 +816,7 @@ class Org:  # pylint: disable=too-many-public-methods
         context_path = f'review-account/{org_id}'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
-        user_from_context: UserContext = kwargs['user']
+        user_from_context: UserContext = kwargs['user_context']
         first_name = user_from_context.first_name
         last_name = user_from_context.last_name
 

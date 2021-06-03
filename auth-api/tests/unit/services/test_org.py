@@ -700,7 +700,7 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
             }
         }
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
     OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
     user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
@@ -731,7 +731,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
             }
         }
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     OrgService.delete_org(org.as_dict().get('id'), token_info())
 
@@ -763,7 +763,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
             }
         }
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
     org1 = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
     OrgService.delete_org(org1.as_dict().get('id'), token_info())
@@ -885,7 +885,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
         org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
@@ -912,7 +912,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
         org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)

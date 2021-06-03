@@ -38,6 +38,7 @@ from .authorization import check_auth
 from .keycloak import KeycloakService
 from .org import Org as OrgService
 from .user import User as UserService
+from auth_api.utils.user_context import user_context, UserContext
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -72,11 +73,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return MembershipTypeModel.get_membership_type_by_code(type_code=type_code)
 
     @staticmethod
-    def get_pending_member_count_for_org(org_id, token_info: Dict = None):
+    def get_pending_member_count_for_org(org_id):
         """Return the number of pending notification for a user."""
         default_count = 0
         try:
-            current_user: UserService = UserService.find_by_jwt_token(token_info)
+            current_user: UserService = UserService.find_by_jwt_token()
         except BusinessException:
             return default_count
         is_active_admin_or_owner = MembershipModel.check_if_active_admin_or_owner_org_id(org_id,
@@ -87,22 +88,23 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return pending_member_count
 
     @staticmethod
+    @user_context
     def get_members_for_org(org_id, status=Status.ACTIVE,  # pylint:disable=too-many-return-statements
-                            membership_roles=ALL_ALLOWED_ROLES,
-                            token_info: Dict = None):
+                            membership_roles=ALL_ALLOWED_ROLES, **kwargs):
         """Get members of org.Fetches using status and roles."""
         org_model = OrgModel.find_by_org_id(org_id)
         if not org_model:
             return None
 
+        user_from_context: UserContext = kwargs['user_context']
         status = Status.ACTIVE.value if status is None else Status[status].value
         membership_roles = ALL_ALLOWED_ROLES if membership_roles is None else membership_roles
 
         # If staff return full list
-        if 'staff' in token_info.get('realm_access').get('roles'):
+        if user_from_context.is_staff():
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
 
-        current_user: UserService = UserService.find_by_jwt_token(token_info)
+        current_user: UserService = UserService.find_by_jwt_token()
         current_user_membership: MembershipModel = \
             MembershipModel.find_membership_by_user_and_org(user_id=current_user.identifier, org_id=org_id)
 
@@ -133,15 +135,17 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         return MembershipStatusCodeModel.get_membership_status_by_code(name=name)
 
     @classmethod
-    def find_membership_by_id(cls, membership_id, token_info: Dict = None):
+    @user_context
+    def find_membership_by_id(cls, membership_id, **kwargs):
         """Retrieve a membership record by id."""
+        user_from_context: UserContext = kwargs['user_context']
         membership = MembershipModel.find_membership_by_id(membership_id)
 
         if membership:
             # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
             # or that the membership is for the current user
-            if membership.user.username != token_info.get('username'):
-                check_auth(org_id=membership.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
+            if membership.user.username != user_from_context.user_name:
+                check_auth(org_id=membership.org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
             return Membership(membership)
         return None
 
@@ -187,11 +191,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             current_app.logger.error('<send_notification_to_member failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
-    def update_membership(self, updated_fields, token_info: Dict = None):
+    @user_context
+    def update_membership(self, updated_fields, **kwargs):
         """Update an existing membership with the given role."""
         # Ensure that this user is an COORDINATOR or ADMIN on the org associated with this membership
         current_app.logger.debug('<update_membership')
-        check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
+        user_from_context: UserContext = kwargs['user_context']
+        check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
 
         # bceid Members cant be ADMIN's.Unless they have an affidavit approved.
         # TODO when multiple teams for bceid are present , do if the user has affidavit present check
@@ -201,7 +207,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # Ensure that a member does not upgrade a member to ADMIN from COORDINATOR unless they are an ADMIN themselves
         if self._model.membership_type.code == COORDINATOR and updated_fields.get('membership_type', None) == ADMIN:
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
+            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN, STAFF))
 
         admin_getting_removed: bool = False
         # Admin can be removed by other admin or staff. #4909
@@ -224,7 +230,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         self._model.save()
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
-        is_staff_modifying = 'staff' in token_info.get('realm_access').get('roles')
+        is_staff_modifying = user_from_context.is_staff()
         is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
         # send mail if staff modifies , not applicable for bcros , only if anything is getting updated
         if is_staff_modifying and not is_bcros_user and len(updated_fields) != 0:
@@ -242,16 +248,18 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         current_app.logger.debug('>update_membership')
         return self
 
-    def deactivate_membership(self, token_info: Dict = None):
+    @user_context
+    def deactivate_membership(self, **kwargs):
         """Mark this membership as inactive."""
         current_app.logger.debug('<deactivate_membership')
+        user_from_context: UserContext = kwargs['user_context']
         # if this is a member removing another member, check that they admin or owner
-        if self._model.user.username != token_info.get('username'):
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN))
+        if self._model.user.username != user_from_context.user_name:
+            check_auth(org_id=self._model.org_id, one_of_roles=(COORDINATOR, ADMIN))
 
         # check to ensure that owner isn't removed by anyone but an owner
         if self._model.membership_type == ADMIN:
-            check_auth(org_id=self._model.org_id, token_info=token_info, one_of_roles=(ADMIN))
+            check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN))
 
         self._model.membership_status = MembershipStatusCodeModel.get_membership_status_by_code('INACTIVE')
         current_app.logger.info(f'<deactivate_membership for {self._model.user.username}')

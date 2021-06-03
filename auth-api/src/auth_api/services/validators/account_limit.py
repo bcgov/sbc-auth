@@ -15,7 +15,7 @@
 from flask import current_app
 
 from auth_api.exceptions import BusinessException, Error
-from auth_api.models import Org as OrgModel
+from auth_api.models import Org as OrgModel, User as UserModel
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -23,10 +23,11 @@ from auth_api.utils.user_context import UserContext, user_context
 @user_context
 def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate account limit for user."""
-    user: UserContext = kwargs['user']
+    user: UserContext = kwargs['user_context']
     validator_response = ValidatorResponse()
     if not user.is_staff_admin():
-        count = OrgModel.get_count_of_org_created_by_user_id(user.user_id)
+        user: UserModel = UserModel.find_by_jwt_token()
+        count = OrgModel.get_count_of_org_created_by_user_id(user.id)
         if count >= current_app.config.get('MAX_NUMBER_OF_ORGS'):
             validator_response.add_error(Error.MAX_NUMBER_OF_ORGS_LIMIT)
             if is_fatal:

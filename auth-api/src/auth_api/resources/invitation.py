@@ -43,16 +43,15 @@ class Invitations(Resource):
         [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def post():
         """Send a new invitation using the details in request and saves the invitation."""
-        token = g.jwt_oidc_token_info
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'invitation')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
-            user = UserService.find_by_jwt_token(token)
-            response, status = InvitationService.create_invitation(request_json, user, token,
-                                                                   origin).as_dict(), http_status.HTTP_201_CREATED
+            user = UserService.find_by_jwt_token()
+            response, status = InvitationService.create_invitation(request_json, user, origin).as_dict(), \
+                               http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -69,8 +68,7 @@ class Invitation(Resource):
     @_jwt.requires_auth
     def get(invitation_id):
         """Get the invitation specified by the provided id."""
-        token = g.jwt_oidc_token_info
-        invitation = InvitationService.find_invitation_by_id(invitation_id, token)
+        invitation = InvitationService.find_invitation_by_id(invitation_id)
         if invitation is None:
             response, status = {'message': 'The requested invitation could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
@@ -84,16 +82,15 @@ class Invitation(Resource):
     @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def patch(invitation_id):
         """Update the invitation specified by the provided id as retried."""
-        token = g.jwt_oidc_token_info
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         try:
-            invitation = InvitationService.find_invitation_by_id(invitation_id, token)
+            invitation = InvitationService.find_invitation_by_id(invitation_id)
             if invitation is None:
                 response, status = {'message': 'The requested invitation could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
             else:
-                user = UserService.find_by_jwt_token(token)
-                response, status = invitation.update_invitation(user, token, origin).as_dict(), http_status.HTTP_200_OK
+                user = UserService.find_by_jwt_token()
+                response, status = invitation.update_invitation(user, origin).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -105,9 +102,8 @@ class Invitation(Resource):
         [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(invitation_id):
         """Delete the specified invitation."""
-        token = g.jwt_oidc_token_info
         try:
-            InvitationService.delete_invitation(invitation_id, token)
+            InvitationService.delete_invitation(invitation_id)
             response, status = {}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -137,18 +133,16 @@ class InvitationAction(Resource):
     @_jwt.requires_auth
     def put(invitation_token):
         """Check whether the passed token is valid and add user, role and org from invitation to membership."""
-        token = g.jwt_oidc_token_info
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
 
         try:
-            user = UserService.find_by_jwt_token(token)
+            user = UserService.find_by_jwt_token()
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 invitation_id = InvitationService.validate_token(invitation_token).as_dict().get('id')
-                response, status = InvitationService.accept_invitation(invitation_id, user, origin,
-                                                                       token_info=token).as_dict(), \
+                response, status = InvitationService.accept_invitation(invitation_id, user, origin).as_dict(), \
                                    http_status.HTTP_200_OK  # noqa:E127
 
         except BusinessException as exception:

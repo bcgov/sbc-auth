@@ -25,6 +25,7 @@ from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.schemas import ActivityLogSchema
 from auth_api.services.authorization import check_auth
 from auth_api.utils.roles import ADMIN, STAFF, Role
+from auth_api.utils.user_context import user_context, UserContext
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -54,12 +55,14 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def fetch_activity_logs(org_id: int, token_info: Dict = None, **kwargs):  # pylint: disable=too-many-locals
+    @user_context
+    def fetch_activity_logs(org_id: int, **kwargs):  # pylint: disable=too-many-locals
         """Search all activity logs."""
+        user_from_context: UserContext = kwargs['user_context']
         item_name = kwargs.get('item_name')
         item_type = kwargs.get('item_type')
         action = kwargs.get('action')
-        check_auth(token_info, one_of_roles=(ADMIN, STAFF), org_id=org_id)
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         logs = {'activity_logs': []}
         page: int = int(kwargs.get('page'))
         limit: int = int(kwargs.get('limit'))
@@ -71,8 +74,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
         current_app.logger.debug('<fetch_activity logs ')
         results, count = ActivityLogModel.fetch_activity_logs_for_account(org_id, *search_args)
-        is_staff_access = g.jwt_oidc_token_info and 'staff' in \
-            g.jwt_oidc_token_info.get('realm_access', {}).get('roles', None)
+        is_staff_access = user_from_context.is_staff()
         for result in results:
             activity_log: ActivityLogModel = result[0]
 

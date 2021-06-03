@@ -634,7 +634,8 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model.keycloak_guid)
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', claims)
+    # monkeypatch.setattr('auth_api.utils.user_context._get_token_info', claims)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', claims)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
@@ -669,7 +670,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model2.keycloak_guid)
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', claims)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', claims)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']

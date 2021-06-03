@@ -76,7 +76,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     user = factory_user_model_with_contact(user_with_token)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
@@ -140,7 +140,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()

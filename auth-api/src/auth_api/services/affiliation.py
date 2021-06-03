@@ -65,13 +65,13 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_affiliated_entities_by_org_id(org_id, token_info: Dict = None):
+    def find_affiliated_entities_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
         current_app.logger.debug('<find_affiliations_by_org_id for org_id {}'.format(org_id))
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=ALL_ALLOWED_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -120,11 +120,11 @@ class Affiliation:
         return filtered_affiliations
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None, token_info: Dict = None):
+    def create_affiliation(org_id, business_identifier, pass_code=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=ALL_ALLOWED_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -174,7 +174,7 @@ class Affiliation:
 
     @staticmethod
     def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
-                                        business_identifier=None, email=None, phone=None, token_info: Dict = None,
+                                        business_identifier=None, email=None, phone=None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
         # Validate if org_id is valid by calling Org Service.
@@ -184,7 +184,7 @@ class Affiliation:
         if not email and not phone:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=CLIENT_AUTH_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=CLIENT_AUTH_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -242,14 +242,14 @@ class Affiliation:
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, email_addresses: str = None,
-                           reset_passcode: bool = False, token_info: Dict = None):
+                           reset_passcode: bool = False):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        org = OrgService.find_by_org_id(org_id, token_info=token_info, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        entity = EntityService.find_by_business_identifier(business_identifier, token_info=token_info,
+        entity = EntityService.find_by_business_identifier(business_identifier,
                                                            allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if entity is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -261,7 +261,7 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         if reset_passcode:
-            entity.reset_passcode(entity.business_identifier, email_addresses, token_info)
+            entity.reset_passcode(entity.business_identifier, email_addresses)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
         publish_activity(f'{ActivityAction.REMOVE_AFFILIATION.value}-{entity.name}', entity.name,

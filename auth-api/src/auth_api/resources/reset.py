@@ -40,10 +40,8 @@ class Reset(Resource):
     @_jwt.has_one_of_roles([Role.TESTER.value])
     def post():
         """Cleanup test data by the provided token."""
-        token = g.jwt_oidc_token_info
-
         try:
-            ResetService.reset(token)
+            ResetService.reset()
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

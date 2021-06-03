@@ -53,13 +53,12 @@ class Orgs(Resource):
 
         If the org already exists, update the attributes.
         """
-        token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
-            user = UserService.find_by_jwt_token(token)
+            user = UserService.find_by_jwt_token()
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
                                    http_status.HTTP_401_UNAUTHORIZED
@@ -96,7 +95,7 @@ class Orgs(Resource):
                 response, status = OrgService.search_orgs(business_identifier=business_identifier,
                                                           access_type=access_type, name=name,
                                                           statuses=statuses, bcol_account_id=bcol_account_id, page=page,
-                                                          limit=limit, token=token), http_status.HTTP_200_OK
+                                                          limit=limit), http_status.HTTP_200_OK
 
             # If public user is searching , return 200 with empty results if orgs exist
             # Else return 204
@@ -126,7 +125,7 @@ class Org(Resource):
         [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get(org_id):
         """Get the org specified by the provided id."""
-        org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info, allowed_roles=ALL_ALLOWED_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             response, status = {'message': 'The requested organization could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
@@ -144,23 +143,21 @@ class Org(Resource):
         request_json = request.get_json()
         action = request.args.get('action', '').upper()
         valid_format, errors = schema_utils.validate(request_json, 'org')
-        toke_info = g.jwt_oidc_token_info
+        token_info = g.jwt_oidc_token_info
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
-                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+            org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             if org and org.as_dict().get('accessType', None) == AccessType.ANONYMOUS.value and \
-                    Role.STAFF_CREATE_ACCOUNTS.value not in toke_info.get('realm_access').get('roles'):
+                    Role.STAFF_CREATE_ACCOUNTS.value not in token_info.get('realm_access').get('roles'):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
                 if action in (ChangeType.DOWNGRADE.value, ChangeType.UPGRADE.value):
                     response, status = org.change_org_ype(request_json, action).as_dict(), http_status.HTTP_200_OK
                 else:
-                    response, status = org.update_org(org_info=request_json, token_info=toke_info,
-                                                      origin_url=origin).as_dict(), \
+                    response, status = org.update_org(org_info=request_json, origin_url=origin).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
@@ -175,9 +172,8 @@ class Org(Resource):
     @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def delete(org_id):
         """Inactivates the org if it has no active members or affiliations."""
-        token = g.jwt_oidc_token_info
         try:
-            OrgService.delete_org(org_id, token)
+            OrgService.delete_org(org_id)
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -196,8 +192,7 @@ class OrgLoginOptions(Resource):
     def get(org_id):
         """Retrieve the set of payment settings associated with the specified org."""
         try:
-            login_options = OrgService.get_login_options_for_org(org_id, g.jwt_oidc_token_info,
-                                                                 allowed_roles=ALL_ALLOWED_ROLES)
+            login_options = OrgService.get_login_options_for_org(org_id, allowed_roles=ALL_ALLOWED_ROLES)
             response, status = jsonify(
                 {'loginOption': login_options.login_source if login_options else None}), http_status.HTTP_200_OK
         except BusinessException as exception:
@@ -214,7 +209,7 @@ class OrgLoginOptions(Resource):
         login_option_val = request_json.get('loginOption')
         # TODO may be add validation here
         try:
-            login_option = OrgService.add_login_option(org_id, login_option_val, g.jwt_oidc_token_info)
+            login_option = OrgService.add_login_option(org_id, login_option_val)
             response, status = jsonify({'login_option': login_option.login_source}), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -230,7 +225,7 @@ class OrgLoginOptions(Resource):
         login_option_val = request_json.get('loginOption')
         # TODO may be add validation here
         try:
-            login_option = OrgService.update_login_option(org_id, login_option_val, g.jwt_oidc_token_info)
+            login_option = OrgService.update_login_option(org_id, login_option_val)
             response, status = jsonify({'login_option': login_option.login_source}), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -323,11 +318,11 @@ class OrgAffiliations(Resource):
                 response, status = AffiliationService.create_new_business_affiliation(
                     org_id, request_json.get('businessIdentifier'), request_json.get('email'),
                     request_json.get('phone'),
-                    token_info=g.jwt_oidc_token_info, bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
+                    bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = AffiliationService.create_affiliation(
-                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),
-                    token_info=g.jwt_oidc_token_info).as_dict(), http_status.HTTP_201_CREATED
+                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),).as_dict(), \
+                                   http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -342,8 +337,7 @@ class OrgAffiliations(Resource):
         """Get all affiliated entities for the given org."""
         try:
             response, status = jsonify({
-                'entities': AffiliationService.find_affiliated_entities_by_org_id(org_id, g.jwt_oidc_token_info)}), \
-                               http_status.HTTP_200_OK
+                'entities': AffiliationService.find_affiliated_entities_by_org_id(org_id)}), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -366,8 +360,7 @@ class OrgAffiliation(Resource):
         email_addresses = request_json.get('passcodeResetEmail') if request_json else None
         reset_passcode = request_json.get('resetPasscode') if request_json else False
         try:
-            AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
-                                                  reset_passcode, g.jwt_oidc_token_info)
+            AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses, reset_passcode)
             response, status = {}, http_status.HTTP_200_OK
 
         except BusinessException as exception:
@@ -393,8 +386,7 @@ class OrgMembers(Resource):
             status = request.args.get('status').upper() if request.args.get('status') else None
             roles = request.args.get('roles').upper() if request.args.get('roles') else None
 
-            members = MembershipService.get_members_for_org(org_id, status=status,
-                                                            membership_roles=roles, token_info=g.jwt_oidc_token_info)
+            members = MembershipService.get_members_for_org(org_id, status=status, membership_roles=roles)
             if members:
                 response, status = {'members': MembershipSchema(exclude=['org']).dump(members, many=True)}, \
                                    http_status.HTTP_200_OK
@@ -419,7 +411,6 @@ class OrgMember(Resource):
     @cors.crossdomain(origin='*')
     def patch(org_id, membership_id):  # pylint:disable=unused-argument
         """Update a membership record with new member role."""
-        token = g.jwt_oidc_token_info
         role = request.get_json().get('role')
         membership_status = request.get_json().get('status')
         notify_user = request.get_json().get('notifyUser')
@@ -433,16 +424,16 @@ class OrgMember(Resource):
                 updated_fields_dict['membership_status'] = \
                     MembershipService.get_membership_status_by_code(membership_status)
 
-            membership = MembershipService.find_membership_by_id(membership_id, token)
+            membership = MembershipService.find_membership_by_id(membership_id)
 
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token(token).as_dict()['username']
+                UserService.find_by_jwt_token().as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
             else:
-                response, status = membership.update_membership(updated_fields=updated_fields_dict, token_info=token
-                                                                ).as_dict(), http_status.HTTP_200_OK
+                response, status = membership.update_membership(updated_fields=updated_fields_dict).as_dict(), \
+                                   http_status.HTTP_200_OK
 
                 # if user status changed to active , mail the user
                 if membership_status == Status.ACTIVE.name:
@@ -492,8 +483,7 @@ class OrgInvitations(Resource):
 
             invitation_status = request.args.get('status').upper() if request.args.get('status') else None
             invitations = InvitationService.get_invitations_for_org(org_id=org_id,
-                                                                    status=invitation_status,
-                                                                    token_info=g.jwt_oidc_token_info)
+                                                                    status=invitation_status)
 
             response, status = {'invitations': InvitationSchema().dump(invitations, many=True)}, http_status.HTTP_200_OK
         except BusinessException as exception:
@@ -535,7 +525,6 @@ class OrgStatus(Resource):
     def patch(org_id):
         """Patch an account."""
         request_json = request.get_json()
-        token = g.jwt_oidc_token_info
         # For now allowed is to put the status code, which will be done by bcol_staff_admin.
         # If this patch is going to be used by other other roles, then add proper security check
 
@@ -550,14 +539,12 @@ class OrgStatus(Resource):
                            http_status.HTTP_401_UNAUTHORIZED
 
                 response, status = OrgService.change_org_status(org_id=org_id, status_code=status_code,
-                                                                token_info=token,
                                                                 suspension_reason_code=suspension_reason_code
                                                                 ).as_dict(), http_status.HTTP_200_OK
             else:
                 is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
                 origin = request.environ.get('HTTP_ORIGIN', 'localhost')
                 response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                                                token_info=token,
                                                                 origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
@@ -578,8 +565,7 @@ class OrgPaymentSettings(Resource):
     def get(org_id):
         """Retrieve the set of payment settings associated with the specified org."""
         try:
-            org = OrgService.find_by_org_id(org_id, g.jwt_oidc_token_info,
-                                            allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
+            org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_ADMIN_ROLES, STAFF))
             response, status = org.get_payment_info(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

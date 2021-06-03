@@ -46,7 +46,6 @@ class EntityResources(Resource):
 
         # If the record exists, just return existing record.
         entity = EntityService.find_by_business_identifier(request_json.get('businessIdentifier'),
-                                                           token_info=g.jwt_oidc_token_info,
                                                            allowed_roles=ALL_ALLOWED_ROLES)
         if entity:
             return entity.as_dict(), http_status.HTTP_202_ACCEPTED
@@ -74,8 +73,7 @@ class EntityResource(Resource):
     def get(business_identifier):
         """Get an existing entity by it's business number."""
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=ALL_ALLOWED_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, allowed_roles=ALL_ALLOWED_ROLES)
             if entity is not None:
                 response, status = entity.as_dict(), http_status.HTTP_200_OK
             else:
@@ -98,16 +96,13 @@ class EntityResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         passcode_reset = request_json.get('resetPasscode', False)
-        token = g.jwt_oidc_token_info
 
         try:
             if passcode_reset:
                 entity = EntityService.reset_passcode(business_identifier,
-                                                      email_addresses=request_json.get('passcodeResetEmail', None),
-                                                      token_info=token)
+                                                      email_addresses=request_json.get('passcodeResetEmail', None))
             else:
-                entity = EntityService.update_entity(business_identifier, request_json,
-                                                     token_info=token)
+                entity = EntityService.update_entity(business_identifier, request_json)
 
             if entity is not None:
                 response, status = entity.as_dict(), http_status.HTTP_200_OK
@@ -125,8 +120,7 @@ class EntityResource(Resource):
     def delete(business_identifier):
         """Delete an existing entity by it's business number."""
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=ALL_ALLOWED_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, allowed_roles=ALL_ALLOWED_ROLES)
 
             if entity:
                 entity.delete()
@@ -156,8 +150,7 @@ class ContactResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=ALL_ALLOWED_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, allowed_roles=ALL_ALLOWED_ROLES)
             if entity:
                 response, status = entity.add_contact(request_json).as_dict(), \
                                    http_status.HTTP_201_CREATED
@@ -179,8 +172,7 @@ class ContactResource(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=ALL_ALLOWED_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, allowed_roles=ALL_ALLOWED_ROLES)
             if entity:
                 response, status = entity.update_contact(request_json).as_dict(), \
                                    http_status.HTTP_200_OK
@@ -197,8 +189,7 @@ class ContactResource(Resource):
     def delete(business_identifier):
         """Delete the business contact for the Entity identified by the provided id."""
         try:
-            entity = EntityService.find_by_business_identifier(business_identifier, token_info=g.jwt_oidc_token_info,
-                                                               allowed_roles=CLIENT_AUTH_ROLES)
+            entity = EntityService.find_by_business_identifier(business_identifier, allowed_roles=CLIENT_AUTH_ROLES)
             if entity:
                 response, status = entity.delete_contact().as_dict(), http_status.HTTP_200_OK
             else:
@@ -220,6 +211,5 @@ class AuthorizationResource(Resource):
     def get(business_identifier):
         """Return authorization for the user for the passed business identifier."""
         expanded: bool = request.args.get('expanded', False)
-        authorisations = AuthorizationService.get_user_authorizations_for_entity(g.jwt_oidc_token_info,
-                                                                                 business_identifier, expanded)
+        authorisations = AuthorizationService.get_user_authorizations_for_entity(business_identifier, expanded)
         return authorisations, http_status.HTTP_200_OK

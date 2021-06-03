@@ -48,7 +48,7 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
             'product_code': ProductCode.BUSINESS.value
         }
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     # Create another user
     request = KeycloakScenario.create_user_request()
@@ -97,7 +97,7 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
             'product_code': ProductCode.BUSINESS.value
         }
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     # Create another user
     request = KeycloakScenario.create_user_request()

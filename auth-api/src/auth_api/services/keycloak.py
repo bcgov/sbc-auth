@@ -17,7 +17,7 @@ import json
 from typing import Dict
 
 import requests
-from flask import current_app, g
+from flask import current_app
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -27,6 +27,7 @@ from auth_api.utils.enums import ContentType, LoginSource
 from auth_api.utils.roles import Role
 
 from .keycloak_user import KeycloakUser
+from auth_api.utils.user_context import user_context, UserContext
 
 
 class KeycloakService:
@@ -171,11 +172,13 @@ class KeycloakService:
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, err) from err
 
     @staticmethod
-    def join_users_group(token_info: Dict) -> str:
+    @user_context
+    def join_users_group(**kwargs) -> str:
         """Add user to the group (public_users or anonymous_users) if the user is public."""
+        user_from_context: UserContext = kwargs['user_context']
         group_name: str = None
-        login_source = token_info.get('loginSource', None)
-        roles = token_info.get('realm_access').get('roles')
+        login_source = user_from_context.login_source
+        roles = user_from_context.roles
 
         # Cannot check the group from token, so check if the role 'edit' is already present.
         if login_source in (LoginSource.BCEID.value, LoginSource.BCSC.value) and Role.PUBLIC_USER.value not in roles:
@@ -187,36 +190,41 @@ class KeycloakService:
             group_name = GROUP_ANONYMOUS_USERS
 
         if group_name:
-            KeycloakService.add_user_to_group(token_info.get('sub'), group_name)
+            KeycloakService.add_user_to_group(user_from_context.sub, group_name)
 
         return group_name
 
     @staticmethod
-    def join_account_holders_group(keycloak_guid: str = None):
+    @user_context
+    def join_account_holders_group(keycloak_guid: str = None, **kwargs):
         """Add user to the account holders group (account_holders) if the user is public."""
         # If keycloak_guid is provided add the user to the group directly, else find out from the token
         if not keycloak_guid:
-            token_info: Dict = KeycloakService._get_token_info()
+            user_from_context: UserContext = kwargs['user_context']
             # Cannot check the group from token, so check if the role 'account_holder' is already present.
-            if Role.ACCOUNT_HOLDER.value in token_info.get('realm_access').get('roles'):
+            if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
                 return
-            keycloak_guid = token_info.get('sub')
+            keycloak_guid = user_from_context.sub
 
         KeycloakService.add_user_to_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
-    def remove_from_account_holders_group(keycloak_guid: str = None):
+    @user_context
+    def remove_from_account_holders_group(keycloak_guid: str = None, **kwargs):
         """Remove user from the group."""
         if not keycloak_guid:
-            keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
+            user_from_context: UserContext = kwargs['user_context']
+            keycloak_guid: Dict = user_from_context.sub
 
         KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
-    def reset_otp(keycloak_guid: str = None):
+    @user_context
+    def reset_otp(keycloak_guid: str = None, **kwargs):
         """Reset user one time  password from Keycloak."""
         if not keycloak_guid:
-            keycloak_guid: Dict = KeycloakService._get_token_info().get('sub')
+            user_from_context: UserContext = kwargs['user_context']
+            keycloak_guid: Dict = user_from_context.sub
 
         KeycloakService._reset_otp(keycloak_guid)
 
@@ -291,10 +299,6 @@ class KeycloakService:
         }
         response = requests.get(get_group_url, headers=headers)
         return response.json()[0].get('id')
-
-    @staticmethod
-    def _get_token_info():
-        return g.jwt_oidc_token_info
 
     @staticmethod
     def _reset_otp(user_id: str):
