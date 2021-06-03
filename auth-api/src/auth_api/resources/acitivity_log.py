@@ -49,7 +49,6 @@ class ActivityLog(Resource):
             limit = request.args.get('limit', 10)
 
             response, status = ActivityLogService.fetch_activity_logs(org_id,
-                                                                      token_info=g.jwt_oidc_token_info,
                                                                       item_name=item_name,
                                                                       item_type=item_type, action=action,
                                                                       page=page, limit=limit), http_status.HTTP_200_OK

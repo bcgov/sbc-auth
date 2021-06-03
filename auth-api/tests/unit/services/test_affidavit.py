@@ -28,7 +28,7 @@ def test_create_affidavit(session, keycloak_mock):  # pylint:disable=unused-argu
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    affidavit = AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
     assert affidavit
     assert affidavit.as_dict().get('status', None) == AffidavitStatus.PENDING.value
@@ -39,11 +39,11 @@ def test_create_affidavit_duplicate(session, keycloak_mock):  # pylint:disable=u
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_real_user(user.keycloak_guid)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    affidavit = AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
 
     assert affidavit.as_dict().get('status', None) == AffidavitStatus.PENDING.value
     new_affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=new_affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=new_affidavit_info)
 
 
 def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -52,7 +52,7 @@ def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
@@ -70,7 +70,7 @@ def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=token_info, affidavit_info=affidavit_info)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()

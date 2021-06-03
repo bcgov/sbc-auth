@@ -34,6 +34,7 @@ from auth_api.utils.util import camelback2snake
 
 from .activity_log_publisher import publish_activity
 from .authorization import check_auth
+from auth_api.utils.user_context import user_context, UserContext
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -88,7 +89,7 @@ class Entity:
         return obj
 
     @classmethod
-    def find_by_business_identifier(cls, business_identifier: str = None, token_info: Dict = None,
+    def find_by_business_identifier(cls, business_identifier: str = None,
                                     allowed_roles: Tuple = None, skip_auth: bool = False):
         """Given a business identifier, this will return the corresponding entity or None."""
         if not business_identifier:
@@ -99,7 +100,7 @@ class Entity:
             return None
 
         if not skip_auth:
-            check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
+            check_auth(one_of_roles=allowed_roles, business_identifier=business_identifier)
 
         entity = Entity(entity_model)
         return entity
@@ -136,13 +137,15 @@ class Entity:
         return entity
 
     @staticmethod
-    def update_entity(business_identifier: str, entity_info: dict, token_info: Dict = None):
+    @user_context
+    def update_entity(business_identifier: str, entity_info: dict, **kwargs):
         """Update an entity from the given dictionary.
 
         Completely replaces the entity including the business identifier
         """
         if not entity_info or not business_identifier:
             return None
+        user_from_context: UserContext = kwargs['user_context']
         # todo No memberhsip created at this point. check_auth wont work.ideally we shud put the logic in here
         # check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
         entity = EntityModel.find_by_business_identifier(business_identifier)
@@ -151,8 +154,7 @@ class Entity:
         # if entity.corp_type_code != token_info.get('corp_type', None):
         #    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
-        is_system = token_info and Role.SYSTEM.value in token_info.get('realm_access').get('roles')
-        if is_system:
+        if user_from_context.is_system():
             if entity_info.get('passCode') is not None:
                 entity_info['passCode'] = passcode_hash(entity_info['passCode'])
 
@@ -163,10 +165,12 @@ class Entity:
         return entity
 
     @staticmethod
-    def reset_passcode(business_identifier: str, email_addresses: str = None, token_info: Dict = None):
+    @user_context
+    def reset_passcode(business_identifier: str, email_addresses: str = None, **kwargs):
         """Reset the entity passcode and send email."""
-        check_auth(token_info, one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
-        current_app.logger.debug('reset passcode identifier:{}; token:{}'.format(business_identifier, token_info))
+        user_from_context: UserContext = kwargs['user_context']
+        check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
+        current_app.logger.debug('reset passcode identifier:{}'.format(business_identifier))
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
         new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))
@@ -181,7 +185,7 @@ class Entity:
                 passCode=new_pass_code,
                 businessIdentifier=business_identifier,
                 businessName=entity.name,
-                isStaffInitiated=Role.STAFF.value in token_info.get('roles')
+                isStaffInitiated=user_from_context.is_staff()
             )
             publish_to_mailer(
                 notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload

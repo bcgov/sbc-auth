@@ -195,7 +195,7 @@ def test_join_account_holders_group_from_token(session, monkeypatch):
             }
         }
 
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
 
     KEYCLOAK_SERVICE.join_account_holders_group()
     # Get the user groups and verify the public_users group is in the list

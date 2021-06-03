@@ -18,7 +18,7 @@ from typing import Dict
 
 from flask import g, request
 
-from auth_api.models import User as UserModel
+# from auth_api.models import User as UserModel
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
 
@@ -35,16 +35,8 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         """Return a User Context object."""
         token_info: Dict = _get_token_info()
         self._token_info = token_info
-        self._user_id = None
-        user_model: UserModel = None
-        if token_info:
-            user_model = UserModel.find_by_jwt_token(token_info)
-
-        if user_model:
-            self._user_id = user_model.id
         # try to user name from DB ;if not avaiable fall back to token_info
-        self._user_name: str = getattr(user_model, 'username',
-                                       token_info.get('username', token_info.get('preferred_username', None)))
+        self._user_name: str = token_info.get('username', token_info.get('preferred_username', None))
         self._first_name: str = token_info.get('firstname', None)
         self._last_name: str = token_info.get('lastname', None)
         self._bearer_token: str = _get_token()
@@ -68,11 +60,6 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
     def last_name(self) -> str:
         """Return the user_last_name."""
         return self._last_name
-
-    @property
-    def user_id(self) -> str:
-        """Return the user_id."""
-        return self._user_id
 
     @property
     def bearer_token(self) -> str:
@@ -119,6 +106,19 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         """Return the name."""
         return self._token_info
 
+    @property
+    def account_id(self) -> Dict:
+        """Return the account id."""
+        account_id = _get_token_info().get('Account-Id', None)
+        if not account_id:
+            account_id = request.headers['Account-Id'] if request and 'Account-Id' in request.headers else None
+        return account_id
+
+    @property
+    def login_source(self) -> str:
+        """Return the login source."""
+        return self._login_source
+
 
 def user_context(function):
     """Add user context object as an argument to function."""
@@ -126,7 +126,7 @@ def user_context(function):
     @functools.wraps(function)
     def wrapper(*func_args, **func_kwargs):
         context = _get_context()
-        func_kwargs['user'] = context
+        func_kwargs['user_context'] = context
         return function(*func_args, **func_kwargs)
 
     return wrapper

@@ -72,7 +72,6 @@ class TaskUpdate(Resource):
     def put(task_id):
         """Update a task."""
         request_json = request.get_json()
-        token = g.jwt_oidc_token_info
 
         valid_format, errors = schema_utils.validate(request_json, 'task_request')
         if not valid_format:
@@ -84,7 +83,6 @@ class TaskUpdate(Resource):
                 # Update task and its relationships
                 origin = request.environ.get('HTTP_ORIGIN', 'localhost')
                 response, status = task.update_task(task_info=request_json,
-                                                    token_info=token,
                                                     origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
             else:

@@ -40,7 +40,5 @@ class AccountAuthorizations(Resource):
     def get(account_id, product_code):
         """Return authorizations for a product in an account."""
         expanded: bool = request.args.get('expanded', False)
-        authorizations = AuthorizationService.get_account_authorizations_for_product(
-            g.jwt_oidc_token_info,
-            account_id, product_code, expanded)
+        authorizations = AuthorizationService.get_account_authorizations_for_product(account_id, product_code, expanded)
         return authorizations, http_status.HTTP_200_OK

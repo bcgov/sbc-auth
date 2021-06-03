@@ -44,6 +44,7 @@ from ..utils.account_mailer import publish_to_mailer
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
+from auth_api.utils.user_context import user_context, UserContext
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -83,7 +84,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_user_and_add_membership(memberships: List[dict], org_id, token_info: Dict = None,
+    def create_user_and_add_membership(memberships: List[dict], org_id,
                                        # pylint: disable=too-many-locals, too-many-statements, too-many-branches
                                        single_mode: bool = False):
         """
@@ -94,7 +95,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         single_mode= true is used now incase of invitation for admin users scenarion
         other cases should be invoked with single_mode=false
         """
-        User._validate_and_throw_exception(memberships, org_id, single_mode, token_info)
+        User._validate_and_throw_exception(memberships, org_id, single_mode)
 
         current_app.logger.debug('create_user')
         users = []
@@ -164,12 +165,12 @@ class User:  # pylint: disable=too-many-instance-attributes
         KeycloakService.update_user(update_user_request)
 
     @staticmethod
-    def _validate_and_throw_exception(memberships, org_id, single_mode, token_info):
+    def _validate_and_throw_exception(memberships, org_id, single_mode):
         if single_mode:  # make sure no bulk operation and only owner is created using if no auth
             if len(memberships) > 1 or memberships[0].get('membershipType') not in [ADMIN, COORDINATOR]:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
         else:
-            check_auth(org_id=org_id, token_info=token_info, one_of_roles=(COORDINATOR, ADMIN, STAFF))
+            check_auth(org_id=org_id, one_of_roles=(COORDINATOR, ADMIN, STAFF))
         # check if anonymous org ;these actions cannot be performed on normal orgs
         org = OrgModel.find_by_org_id(org_id)
         if not org or org.access_type != AccessType.ANONYMOUS.value:
@@ -191,13 +192,13 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user_model
 
     @staticmethod
-    def delete_otp_for_user(user_name, token_info: Dict = None, origin_url: str = None):
+    def delete_otp_for_user(user_name, origin_url: str = None):
         """Reset the OTP of the user."""
         # TODO - handle when the multiple teams implemented for bceid..
         user = UserModel.find_by_username(user_name)
         membership = MembershipModel.find_membership_by_userid(user.id)
         org_id = membership.org_id
-        check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
         try:
             KeycloakService.reset_otp(str(user.keycloak_guid))
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
@@ -225,7 +226,7 @@ class User:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def reset_password_for_anon_user(user_info: dict, user_name, token_info: Dict = None):
+    def reset_password_for_anon_user(user_info: dict, user_name):
         """Reset the password of the user."""
         user = UserModel.find_by_username(user_name)
         membership = MembershipModel.find_membership_by_userid(user.id)
@@ -234,7 +235,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         if not org or org.access_type != AccessType.ANONYMOUS.value:
             raise BusinessException(Error.INVALID_INPUT, None)
 
-        check_auth(org_id=org_id, token_info=token_info, one_of_roles=(ADMIN, STAFF))
+        check_auth(org_id=org_id, one_of_roles=(ADMIN, STAFF))
         update_user_request = KeycloakUser()
         update_user_request.user_name = user_name.replace(IdpHint.BCROS.value + '/', '')
         update_user_request.password = user_info['password']
@@ -248,7 +249,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         return kc_user
 
     @staticmethod
-    def delete_anonymous_user(user_name, token_info: Dict = None):
+    @user_context
+    def delete_anonymous_user(user_name, **kwargs):
         """
         Delete User Profile.
 
@@ -257,7 +259,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         3) set user status as INACTIVE
         4) set membership as inactive
         """
-        admin_user: UserModel = UserModel.find_by_jwt_token(token_info)
+        user_from_context: UserContext = kwargs['user_context']
+        admin_user: UserModel = UserModel.find_by_jwt_token()
 
         if not admin_user:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -274,7 +277,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         if admin_user_membership.membership_type_code in [ADMIN]:
             is_valid_action = True
         # staff admin deleteion
-        is_staff_admin = token_info and Role.STAFF_CREATE_ACCOUNTS.value in token_info.get('realm_access').get('roles')
+        is_staff_admin = user_from_context.token_info and \
+                         Role.STAFF_CREATE_ACCOUNTS.value in user_from_context.token_info
         if is_staff_admin:
             is_valid_action = True
         # self deletion
@@ -309,25 +313,27 @@ class User:  # pylint: disable=too-many-instance-attributes
         return create_user_request
 
     @classmethod
-    def save_from_jwt_token(cls, token: dict, request_json: Dict = None):
+    @user_context
+    def save_from_jwt_token(cls, request_json: Dict = None, **kwargs):
         """Save user to database (create/update)."""
         current_app.logger.debug('save_from_jwt_token')
-        if not token:
+        user_from_context: UserContext = kwargs['user_context']
+        if not user_from_context.token_info:
             return None
         request_json = {} if not request_json else request_json
 
-        is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
+        is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value
         if not is_anonymous_user:
-            existing_user = UserModel.find_by_jwt_token(token)
+            existing_user = UserModel.find_by_jwt_token()
         else:
-            existing_user = UserModel.find_by_username(token.get('preferred_username'))
+            existing_user = UserModel.find_by_username(user_from_context.user_name)
 
-        first_name, last_name = User._get_names(existing_user, request_json, token)
+        first_name, last_name = User._get_names(existing_user, request_json)
 
         if existing_user is None:
-            user_model = UserModel.create_from_jwt_token(token, first_name, last_name)
+            user_model = UserModel.create_from_jwt_token(first_name, last_name)
         else:
-            user_model = UserModel.update_from_jwt_token(existing_user, token, first_name, last_name,
+            user_model = UserModel.update_from_jwt_token(existing_user, first_name, last_name,
                                                          is_login=request_json.get('isLogin', False))
 
         if not user_model:
@@ -347,23 +353,27 @@ class User:  # pylint: disable=too-many-instance-attributes
         return user
 
     @staticmethod
-    def _get_names(existing_user, request_json, token):
+    @user_context
+    def _get_names(existing_user, request_json, **kwargs):
         # For BCeID, IDIM doesn't want to use the names from token
-        if token.get('loginSource', None) == LoginSource.BCEID.value:
+        user_from_context: UserContext = kwargs['user_context']
+        if user_from_context.login_source == LoginSource.BCEID.value:
             first_name: str = request_json.get('firstName', existing_user.firstname) if existing_user \
                 else request_json.get('firstName', None)
             last_name: str = request_json.get('lastName', existing_user.lastname) if existing_user \
                 else request_json.get('lastName', None)
         else:
-            first_name: str = token.get('firstname', None)
-            last_name: str = token.get('lastname', None)
+            first_name: str = user_from_context.first_name
+            last_name: str = user_from_context.last_name
         return first_name, last_name
 
     @staticmethod
-    def get_contacts(token):
+    @user_context
+    def get_contacts(**kwargs):
         """Get the contact associated with this user."""
         current_app.logger.debug('get_contact')
-        user = UserModel.find_by_jwt_token(token)
+        user_from_context: UserContext = kwargs['user_context']
+        user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -378,10 +388,10 @@ class User:  # pylint: disable=too-many-instance-attributes
                 'error': error.value[0]}
 
     @staticmethod
-    def add_contact(token, contact_info: dict, throw_error_for_duplicates: bool = True):
+    def add_contact(contact_info: dict, throw_error_for_duplicates: bool = True, **kwargs):
         """Add contact information for an existing user."""
         current_app.logger.debug('add_contact')
-        user = UserModel.find_by_jwt_token(token)
+        user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -404,10 +414,10 @@ class User:  # pylint: disable=too-many-instance-attributes
         return ContactService(contact)
 
     @staticmethod
-    def update_contact(token, contact_info: dict):
+    def update_contact(contact_info: dict, **kwargs):
         """Update a contact for an existing user."""
         current_app.logger.debug('update_contact')
-        user = UserModel.find_by_jwt_token(token)
+        user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -426,19 +436,21 @@ class User:  # pylint: disable=too-many-instance-attributes
         return ContactService(contact)
 
     @staticmethod
-    def update_terms_of_use(token, is_terms_accepted, terms_of_use_version):
+    @user_context
+    def update_terms_of_use(is_terms_accepted, terms_of_use_version, **kwargs):
         """Update terms of use for an existing user."""
         current_app.logger.debug('update_terms_of_use')
-        if token is None:
+        user_from_context: UserContext = kwargs['user_context']
+        if user_from_context.token_info is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        user = UserModel.update_terms_of_use(token, is_terms_accepted, terms_of_use_version)
+        user = UserModel.update_terms_of_use(is_terms_accepted, terms_of_use_version)
         return User(user)
 
     @staticmethod
-    def delete_contact(token):
+    def delete_contact():
         """Delete the contact for an existing user."""
         current_app.logger.info('delete_contact')
-        user = UserModel.find_by_jwt_token(token)
+        user = UserModel.find_by_jwt_token()
         if not user or not user.contacts:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -470,18 +482,20 @@ class User:  # pylint: disable=too-many-instance-attributes
         return UserModel.find_users(first_name=first_name, last_name=last_name, email=email)
 
     @classmethod
-    def find_by_jwt_token(cls, token: dict = None):
+    @user_context
+    def find_by_jwt_token(cls, **kwargs):
         """Find user from database by user token."""
-        if not token:
+        user_from_context: UserContext = kwargs['user_context']
+        if not user_from_context.token_info:
             return None
 
-        user_model = UserModel.find_by_jwt_token(token)
+        user_model = UserModel.find_by_jwt_token()
 
         if not user_model:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        is_anonymous_user = token.get('accessType', None) == AccessType.ANONYMOUS.value
-        is_govm_user = token.get('loginSource', None) == LoginSource.STAFF.value
+        is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value
+        is_govm_user = user_from_context.login_source == LoginSource.STAFF.value
         # If terms accepted , double check if there is a new TOS in place. If so, update the flag to false.
         if user_model.is_terms_of_use_accepted:
             if is_anonymous_user:
@@ -521,7 +535,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
 
     @staticmethod
-    def delete_user(token):
+    def delete_user():
         """Delete User Profile.
 
         Does the following
@@ -534,7 +548,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         """
         current_app.logger.debug('<delete_user')
 
-        user: UserModel = UserModel.find_by_jwt_token(token)
+        user: UserModel = UserModel.find_by_jwt_token()
         if not user:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         if user.status == UserStatus.INACTIVE.value:
