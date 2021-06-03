@@ -39,7 +39,7 @@
     </v-row>
       <v-row justify="center">
       <v-col cols="12" sm="8" md="6"  class="text-center">
-        <v-btn large outlined color="primary" @click="createAccount()">
+        <v-btn large outlined color="primary" data-test="goto-create-account-button" @click="createAccount()">
             Create Another Account
           </v-btn>
       </v-col>
@@ -53,7 +53,6 @@ import { OrgWithAddress, Organization } from '@/models/Organization'
 import { Address } from '@/models/address'
 import { Pages } from '@/util/constants'
 import { UserSettings } from '@/models/user'
-
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -62,11 +61,13 @@ const UserModule = namespace('user')
 @Component({})
 export default class DuplicateAccountWarningView extends Vue {
     @UserModule.State('currentUserAccountSettings') private currentUserAccountSettings!: UserSettings[]
+    @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
+
     @OrgModule.Action('getOrgAdminContact') private getOrgAdminContact!: (orgId: number) => Promise<Address>
     @OrgModule.State('currentOrganization') private currentOrganization!: Organization
     @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
     @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
-    @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
+
     private orgsOfUser: OrgWithAddress[] = []
     private isLoading: boolean = false
     @Prop({ default: '' }) redirectToUrl !: string
@@ -87,7 +88,7 @@ export default class DuplicateAccountWarningView extends Vue {
             const orgOfUser: OrgWithAddress = {
               id: orgId,
               name: accountsetting.label,
-              addressLine: `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}`
+              addressLine: orgAdminContact ? `${orgAdminContact.street} ${orgAdminContact.city} ${orgAdminContact.region} ${orgAdminContact.postalCode} ${orgAdminContact.country}` : null
             }
             return orgOfUser
           }))
