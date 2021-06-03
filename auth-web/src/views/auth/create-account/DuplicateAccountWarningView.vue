@@ -67,6 +67,7 @@ export default class DuplicateAccountWarningView extends Vue {
     @OrgModule.State('currentOrganization') private currentOrganization!: Organization
     @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
     @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
+
     private orgsOfUser: OrgWithAddress[] = []
     private isLoading: boolean = false
     @Prop({ default: '' }) redirectToUrl !: string

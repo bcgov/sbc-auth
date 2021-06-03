@@ -52,6 +52,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
+import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -118,6 +119,15 @@ export default class NonBcscAccountSetupView extends Vue {
   private accountStepperConfig: Array<StepConfiguration> =
     [
       {
+        title: 'Select Product and Services',
+        stepName: 'Products and Services',
+        component: SelectProductService,
+        componentProps: {
+          isStepperView: true,
+          noBackButton: true
+        }
+      },
+      {
         title: 'Select Account Type',
         stepName: 'Select Account Type',
         component: AccountTypeSelector,
@@ -162,7 +172,7 @@ export default class NonBcscAccountSetupView extends Vue {
       }
       this.accountStepperConfig.push(paymentMethodStep)
       // use the new premium chooser account when flag is enabled
-      this.accountStepperConfig[2].alternate.component = PremiumChooser
+      this.accountStepperConfig[3].alternate.component = PremiumChooser
     }
   }
 

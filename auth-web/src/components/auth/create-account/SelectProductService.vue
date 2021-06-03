@@ -101,6 +101,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   @OrgModule.Action('getProductList') public getProductList!:() =>Promise<OrgProduct>
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
   @OrgModule.Action('resetoCurrentSelectedProducts') public resetoCurrentSelectedProducts!:() =>Promise<void>
+  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   public isLoading: boolean = false
   public expandedProductCode: string = ''
@@ -141,6 +142,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
     this.stepBack()
   }
   public next () {
+    this.setResetAccountTypeOnSetupAccount(true)
     this.stepForward()
   }
   private cancel () {
@@ -151,5 +153,9 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+.loading-inner-container{
+  display: flex;
+  justify-content: center;
+}
 
 </style>
