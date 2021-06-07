@@ -46,10 +46,10 @@ export interface Organization {
   contactEmail?: string,
   paymentSettings?: any,
   bcolAccountId?: string,
-  bcolUserId?: string
-  suspendedOn?: string
-  accountStatus?: string
-  suspensionReasonCode?: string
+  bcolUserId?: string,
+  suspendedOn?: string,
+  accountStatus?: string,
+  suspensionReasonCode?: string,
   branchName?: string
 }
 
@@ -262,4 +262,12 @@ export interface OrgWithAddress {
   name: string;
   id: number;
   addressLine: string;
+}
+
+export interface OrgBusinessType {
+  name?: string,
+  branchName?: string,
+  isBusinessAccount ?: string,
+  businessType ?: string,
+  businessSize ?: string
 }
