@@ -15,7 +15,7 @@
 
 import secrets
 import string
-from typing import Dict, Tuple
+from typing import Tuple
 
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -29,12 +29,11 @@ from auth_api.schemas import EntitySchema
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import ActivityAction
 from auth_api.utils.passcode import passcode_hash
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, Role
+from auth_api.utils.roles import ALL_ALLOWED_ROLES
+from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
-
 from .activity_log_publisher import publish_activity
 from .authorization import check_auth
-from auth_api.utils.user_context import user_context, UserContext
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)

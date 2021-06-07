@@ -131,8 +131,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # Send an email to staff to remind review the pending account
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
-                                                          AccessType.REGULAR_BCEID.value) and not \
-            AffidavitModel.find_approved_by_user_id(user_id=user_id)
+                                                          AccessType.REGULAR_BCEID.value) \
+            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
         if is_bceid_status_handling_needed:
             Org._handle_bceid_status_and_notification(org)
 
@@ -349,7 +349,7 @@ class Org:  # pylint: disable=too-many-public-methods
                     'org_id': org_id}
         duplicate_org_name_validate(is_fatal=True, **arg_dict)
 
-    def update_org(self, org_info, origin_url: str = None): # pylint: disable=too-many-locals
+    def update_org(self, org_info, origin_url: str = None):  # pylint: disable=too-many-locals
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 

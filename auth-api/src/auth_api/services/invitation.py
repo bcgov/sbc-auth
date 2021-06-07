@@ -35,13 +35,13 @@ from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, L
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
-from auth_api.utils.user_context import user_context, UserContext
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)

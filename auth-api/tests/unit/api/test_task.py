@@ -28,7 +28,7 @@ from auth_api.utils.enums import (
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_auth_header, factory_task_service, factory_user_model, factory_user_model_with_contact)
+    factory_auth_header, factory_task_service, factory_user_model, factory_user_model_with_contact, patch_token_info)
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
@@ -70,14 +70,14 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     # 3. Create affidavit
     # 4. Create Org
     # 5. Update the created task and the relationship
-
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
     user_with_token = TestUserInfo.user_staff_admin
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model_with_contact(user_with_token)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(affidavit_info=affidavit_info)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
@@ -126,22 +126,20 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model_with_contact(user_with_token)
 
-    def token_info():  # pylint: disable=unused-argument; mocks of library methods
-        return {
-            'sub': str(user_with_token['keycloak_guid']),
-            'username': 'public_user',
-            'realm_access': {
-                'roles': [
-                    'edit'
-                ]
-            }
+    patch_token_info({
+        'sub': str(user_with_token['keycloak_guid']),
+        'username': 'public_user',
+        'realm_access': {
+            'roles': [
+                'edit'
+            ]
         }
-
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+    }, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
     AffidavitService.create_affidavit(affidavit_info=affidavit_info)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+
+    patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
 

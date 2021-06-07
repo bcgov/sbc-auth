@@ -304,3 +304,11 @@ def factory_activity_log_model(actor: str, action: str, item_type: str = 'Accoun
         org_id=org_id
     )
     activity_log.save()
+
+
+def patch_token_info(claims, monkeypatch):
+    """Patch token info to mimic g."""
+    def token_info():
+        """Return token info."""
+        return claims
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)

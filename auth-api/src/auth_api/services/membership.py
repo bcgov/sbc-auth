@@ -15,7 +15,6 @@
 
 This module manages the Membership Information between an org and a user.
 """
-from typing import Dict
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -32,14 +31,12 @@ from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
 from auth_api.utils.enums import LoginSource, NotificationType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
-
-from ..utils.account_mailer import publish_to_mailer
+from auth_api.utils.user_context import UserContext, user_context
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .org import Org as OrgService
 from .user import User as UserService
-from auth_api.utils.user_context import user_context, UserContext
-
+from ..utils.account_mailer import publish_to_mailer
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 CONFIG = get_named_config()
