@@ -22,10 +22,10 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, or_
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-from auth_api.utils.user_context import user_context, UserContext
 
 from auth_api.utils.enums import AccessType, Status, UserStatus
 from auth_api.utils.roles import Role
+from auth_api.utils.user_context import UserContext, user_context
 
 from .base_model import BaseModel
 from .db import db
@@ -68,7 +68,7 @@ class User(BaseModel):
     orgs = relationship('Membership',
                         primaryjoin='and_(User.id == Membership.user_id,  or_(Membership.status == ' + str(
                             Status.ACTIVE.value) + ', Membership.status == ' + str(
-                                Status.PENDING_APPROVAL.value) + '))', lazy='select')  # noqa:E127
+                            Status.PENDING_APPROVAL.value) + '))', lazy='select')  # noqa:E127
 
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
@@ -94,7 +94,8 @@ class User(BaseModel):
     def create_from_jwt_token(cls, first_name: str, last_name: str, **kwargs):
         """Create a User from the provided JWT."""
         user_from_context: UserContext = kwargs['user_context']
-        if (token := user_from_context.token_info) is not None:
+        token = user_from_context.token_info
+        if token:
             user = User(
                 username=user_from_context.user_name,
                 firstname=first_name,
@@ -118,30 +119,30 @@ class User(BaseModel):
 
     @classmethod
     @user_context
-    def update_from_jwt_token(cls, user, # pylint:disable=too-many-arguments
+    def update_from_jwt_token(cls, user,  # pylint:disable=too-many-arguments
                               first_name: str, last_name: str, is_login: bool = False, **kwargs):
         """Update a User from the provided JWT."""
         user_from_context: UserContext = kwargs['user_context']
-        if (token := user_from_context.token_info) is None or user is None:
+        token = user_from_context.token_info
+        if not token or not user:
             return None
 
         # Do not save if nothing has been changed
         # pylint: disable=too-many-boolean-expressions
         if not is_login \
-                and user.username == user_from_context.user_name or user.username \
+                and (user.username == user_from_context.user_name or user.username) \
                 and user.firstname == first_name \
                 and user.lastname == last_name \
                 and user.email == token.get('email', user.email) \
-                and str(user.keycloak_guid) == user_from_context.sub or user.keycloak_guid \
+                and (str(user.keycloak_guid) == user_from_context.sub or user.keycloak_guid) \
                 and user.status == UserStatus.ACTIVE.value \
-                and user.login_source == user_from_context.login_source or user.login_source \
+                and (user.login_source == user_from_context.login_source or user.login_source) \
                 and user.idp_userid == token.get('idp_userid', None):
             return user
 
         current_app.logger.debug(
             'Updating user from JWT:{}; User:{}'.format(token, user)
         )
-
         user.username = user_from_context.user_name or user.username
 
         user.firstname = first_name

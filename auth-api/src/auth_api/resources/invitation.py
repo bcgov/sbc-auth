@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Invitation resource."""
 
-from flask import g, request
+from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -51,7 +51,7 @@ class Invitations(Resource):
         try:
             user = UserService.find_by_jwt_token()
             response, status = InvitationService.create_invitation(request_json, user, origin).as_dict(), \
-                               http_status.HTTP_201_CREATED
+                http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

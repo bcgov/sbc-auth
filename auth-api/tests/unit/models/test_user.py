@@ -18,6 +18,7 @@ Test-Suite to ensure that the User Class is working as expected.
 """
 
 from auth_api.models import User
+from tests.utilities.factory_utils import patch_token_info
 
 
 def test_user(session):
@@ -34,7 +35,7 @@ def test_user(session):
     assert user.id is not None
 
 
-def test_user_find_by_jwt_token(session):
+def test_user_find_by_jwt_token(session, monkeypatch):
     """Assert that a User can be stored in the service.
 
     Start with a blank database.
@@ -55,12 +56,13 @@ def test_user_find_by_jwt_token(session):
             ]
         }
     }
-    u = User.find_by_jwt_token(token)
+    patch_token_info(token, monkeypatch)
+    u = User.find_by_jwt_token()
 
     assert u.id is not None
 
 
-def test_create_from_jwt_token(session):  # pylint: disable=unused-argument
+def test_create_from_jwt_token(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert User is created from the JWT fields."""
     token = {
         'preferred_username': 'CP1234567',
@@ -73,18 +75,19 @@ def test_create_from_jwt_token(session):  # pylint: disable=unused-argument
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    u = User.create_from_jwt_token(token, 'fname', 'lname')
+    patch_token_info(token, monkeypatch)
+    u = User.create_from_jwt_token('fname', 'lname')
     assert u.id is not None
 
 
-def test_create_from_jwt_token_no_token(session):  # pylint: disable=unused-argument
+def test_create_from_jwt_token_no_token(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert User is not created from an empty token."""
-    token = None
-    u = User.create_from_jwt_token(token, 'fname', 'lname')
+    patch_token_info(None, monkeypatch)
+    u = User.create_from_jwt_token('fname', 'lname')
     assert u is None
 
 
-def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
+def test_update_from_jwt_token(session, monkeypatch):  # pylint: disable=unused-argument
     """Assert User is updated from a JWT and an existing User model."""
     token = {
         'preferred_username': 'CP1234567',
@@ -99,7 +102,8 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
+    patch_token_info(token, monkeypatch)
+    user = User.create_from_jwt_token('Bobby', 'Joe')
 
     updated_token = {
         'preferred_username': 'CP1234567',
@@ -114,12 +118,13 @@ def test_update_from_jwt_token(session):  # pylint: disable=unused-argument
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.update_from_jwt_token(user, updated_token, 'Bob', 'Joe')
+    patch_token_info(updated_token, monkeypatch)
+    user = User.update_from_jwt_token(user, 'Bob', 'Joe')
 
     assert user.firstname == 'Bob'
 
 
-def test_update_terms_of_user_success(session):  # pylint:disable=unused-argument
+def test_update_terms_of_user_success(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert User is updated from a JWT with new terms of use."""
     token = {
         'preferred_username': 'CP1234567',
@@ -134,16 +139,17 @@ def test_update_terms_of_user_success(session):  # pylint:disable=unused-argumen
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
+    patch_token_info(token, monkeypatch)
+    user = User.create_from_jwt_token('Bobby', 'Joe')
     assert user.is_terms_of_use_accepted is False
     assert user.terms_of_use_accepted_version is None
 
-    user = User.update_terms_of_use(token, True, '1')
+    user = User.update_terms_of_use(True, '1')
     assert user.is_terms_of_use_accepted is True
     assert user.terms_of_use_accepted_version == '1'
 
 
-def test_update_terms_of_user_success_with_integer(session):  # pylint:disable=unused-argument
+def test_update_terms_of_user_success_with_integer(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert User is updated from a JWT with new terms of use."""
     token = {
         'preferred_username': 'CP1234567',
@@ -158,16 +164,17 @@ def test_update_terms_of_user_success_with_integer(session):  # pylint:disable=u
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
+    patch_token_info(token, monkeypatch)
+    user = User.create_from_jwt_token('Bobby', 'Joe')
     assert user.is_terms_of_use_accepted is False
     assert user.terms_of_use_accepted_version is None
 
-    user = User.update_terms_of_use(token, True, 1)
+    user = User.update_terms_of_use(True, 1)
     assert user.is_terms_of_use_accepted is True
     assert user.terms_of_use_accepted_version == '1'
 
 
-def test_update_from_jwt_token_no_token(session):  # pylint:disable=unused-argument
+def test_update_from_jwt_token_no_token(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user is not updateable without a token (should return None)."""
     token = {
         'preferred_username': 'CP1234567',
@@ -182,14 +189,16 @@ def test_update_from_jwt_token_no_token(session):  # pylint:disable=unused-argum
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-    existing_user = User.create_from_jwt_token(token, 'Bobby', 'Joe')
+    patch_token_info(token, monkeypatch)
+    existing_user = User.create_from_jwt_token('Bobby', 'Joe')
 
     token = None
-    user = User.update_from_jwt_token(existing_user, token, 'Bobby', 'Joe')
+    patch_token_info(token, monkeypatch)
+    user = User.update_from_jwt_token(existing_user, 'Bobby', 'Joe')
     assert user is None
 
 
-def test_update_from_jwt_token_no_user(session):  # pylint:disable=unused-argument
+def test_update_from_jwt_token_no_user(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that a user is not updateable without a user (should return None)."""
     token = {
         'preferred_username': 'CP1234567',
@@ -204,8 +213,8 @@ def test_update_from_jwt_token_no_user(session):  # pylint:disable=unused-argume
         },
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
-
-    user = User.update_from_jwt_token(None, token, None, None)
+    patch_token_info(token, monkeypatch)
+    user = User.update_from_jwt_token(None, None, None)
     assert user is None
 
 

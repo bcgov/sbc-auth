@@ -13,8 +13,6 @@
 # limitations under the License.
 """Service for managing Affiliation data."""
 
-from typing import Dict
-
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -28,7 +26,6 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
-
 from .activity_log_publisher import publish_activity
 from .rest_service import RestService
 

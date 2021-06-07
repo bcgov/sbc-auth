@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an entity (business) resource."""
 
-from flask import g, request
+from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status

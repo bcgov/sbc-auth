@@ -62,8 +62,7 @@ class BaseModel(db.Model):
         """
         try:
             from .user import User as UserModel  # pylint:disable=cyclic-import, import-outside-toplevel
-            token = g.jwt_oidc_token_info
-            user = UserModel.find_by_jwt_token(token)
+            user = UserModel.find_by_jwt_token()
             if not user:
                 return None
             return user.id

@@ -387,7 +387,6 @@ class MembershipResource(Resource):
     @cors.crossdomain(origin='*')
     def get(org_id):
         """Get the membership for the given org and user."""
-
         try:
             user = UserService.find_by_jwt_token()
             if not user:

@@ -25,9 +25,9 @@ from auth_api.utils.constants import (
     GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS)
 from auth_api.utils.enums import ContentType, LoginSource
 from auth_api.utils.roles import Role
+from auth_api.utils.user_context import UserContext, user_context
 
 from .keycloak_user import KeycloakUser
-from auth_api.utils.user_context import user_context, UserContext
 
 
 class KeycloakService:

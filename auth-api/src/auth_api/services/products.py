@@ -31,12 +31,11 @@ from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
     AccessType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
-
+from .authorization import check_auth
+from .task import Task as TaskService
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
 from ..utils.roles import CLIENT_ADMIN_ROLES, STAFF
-from .authorization import check_auth
-from .task import Task as TaskService
 
 
 class Product:
@@ -65,17 +64,14 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
-    @user_context
     def create_product_subscription(org_id, subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
-                                    is_new_transaction: bool = True,
-                                    skip_auth=False, **kwargs):
+                                    is_new_transaction: bool = True, skip_auth=False):
         """Create product subscription for the user.
 
         create product subscription first
         create the product role next if roles are given
         """
         org: OrgModel = OrgModel.find_by_org_id(org_id)
-        user_from_context: UserContext = kwargs['user_context']
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
@@ -175,11 +171,9 @@ class Product:
         return ProductCodeSchema().dump(products, many=True)
 
     @staticmethod
-    @user_context
-    def get_all_product_subscription(org_id, skip_auth=False, **kwargs):
+    def get_all_product_subscription(org_id, skip_auth=False):
         """Get a list of all products with their subscription details."""
         org = OrgModel.find_by_org_id(org_id)
-        user_from_context: UserContext = kwargs['user_context']
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user

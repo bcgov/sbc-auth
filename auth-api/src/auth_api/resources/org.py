@@ -452,12 +452,11 @@ class OrgMember(Resource):
     @cors.crossdomain(origin='*')
     def delete(org_id, membership_id):  # pylint:disable=unused-argument
         """Mark a membership record as inactive.  Membership must match current user token."""
-        token = g.jwt_oidc_token_info
         try:
-            membership = MembershipService.find_membership_by_id(membership_id, token)
+            membership = MembershipService.find_membership_by_id(membership_id)
 
             if membership:
-                response, status = membership.deactivate_membership(token).as_dict(), \
+                response, status = membership.deactivate_membership().as_dict(), \
                                    http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested membership could not be found.'}, \

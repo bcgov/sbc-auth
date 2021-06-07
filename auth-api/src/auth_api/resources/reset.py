@@ -13,7 +13,6 @@
 # limitations under the License.
 """Endpoints to reset test data from database."""
 
-from flask import g
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status

@@ -38,13 +38,13 @@ from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
 from auth_api.utils.enums import AccessType, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
+from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
 from ..utils.account_mailer import publish_to_mailer
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
-from auth_api.utils.user_context import user_context, UserContext
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -277,8 +277,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         if admin_user_membership.membership_type_code in [ADMIN]:
             is_valid_action = True
         # staff admin deleteion
-        is_staff_admin = user_from_context.token_info and \
-                         Role.STAFF_CREATE_ACCOUNTS.value in user_from_context.token_info
+        is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in user_from_context.token_info
         if is_staff_admin:
             is_valid_action = True
         # self deletion
@@ -368,11 +367,9 @@ class User:  # pylint: disable=too-many-instance-attributes
         return first_name, last_name
 
     @staticmethod
-    @user_context
-    def get_contacts(**kwargs):
+    def get_contacts():
         """Get the contact associated with this user."""
         current_app.logger.debug('get_contact')
-        user_from_context: UserContext = kwargs['user_context']
         user = UserModel.find_by_jwt_token()
         if user is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -388,7 +385,7 @@ class User:  # pylint: disable=too-many-instance-attributes
                 'error': error.value[0]}
 
     @staticmethod
-    def add_contact(contact_info: dict, throw_error_for_duplicates: bool = True, **kwargs):
+    def add_contact(contact_info: dict, throw_error_for_duplicates: bool = True):
         """Add contact information for an existing user."""
         current_app.logger.debug('add_contact')
         user = UserModel.find_by_jwt_token()
@@ -414,7 +411,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         return ContactService(contact)
 
     @staticmethod
-    def update_contact(contact_info: dict, **kwargs):
+    def update_contact(contact_info: dict):
         """Update a contact for an existing user."""
         current_app.logger.debug('update_contact')
         user = UserModel.find_by_jwt_token()

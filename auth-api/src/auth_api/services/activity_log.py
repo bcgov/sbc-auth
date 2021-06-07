@@ -15,9 +15,8 @@
 
 This module manages the activity logs.
 """
-from typing import Dict
 
-from flask import current_app, g
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -25,8 +24,7 @@ from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.schemas import ActivityLogSchema
 from auth_api.services.authorization import check_auth
 from auth_api.utils.roles import ADMIN, STAFF, Role
-from auth_api.utils.user_context import user_context, UserContext
-
+from auth_api.utils.user_context import UserContext, user_context
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 

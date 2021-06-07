@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for reset test data."""
-from typing import Dict
 
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
-from auth_api.utils.user_context import user_context, UserContext
+from auth_api.utils.user_context import UserContext, user_context
 
 
 class ResetTestData:  # pylint:disable=too-few-public-methods
