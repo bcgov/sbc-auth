@@ -62,10 +62,10 @@ def upgrade():
             print('BCOL Response', bcol_response.json())
             Product.create_subscription_from_bcol_profile(org_id[0], bcol_response.json().get('profileFlags'))
         except Exception as exc:
-            print('Profile Error')
+            print('Profile Error for ', org_id[0], org_id[1])
             print(exc)
-            raise exc
     db.session.commit()
+
 
 def downgrade():
     op.execute("DELETE FROM product_codes WHERE code in ('RPPR')")
