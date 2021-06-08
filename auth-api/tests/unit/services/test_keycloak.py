@@ -24,7 +24,7 @@ from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USER
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
-
+from tests.utilities.factory_utils import patch_token_info
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -101,16 +101,17 @@ def test_keycloak_delete_user_by_username_user_not_exist(session):
     assert response is None
 
 
-def test_join_users_group(app, session):
+def test_join_users_group(app, session, monkeypatch):
     """Test the public_users group membership for public users."""
     # with app.app_context():
     request = KeycloakScenario.create_user_request()
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_users_group({'sub': user_id,
-                                       'loginSource': LoginSource.BCSC.value,
-                                       'realm_access': {'roles': []}})
+
+    patch_token_info({'sub': user_id, 'loginSource': LoginSource.BCSC.value,
+                      'realm_access': {'roles': []}}, monkeypatch)
+    KEYCLOAK_SERVICE.join_users_group()
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -119,8 +120,9 @@ def test_join_users_group(app, session):
     assert GROUP_PUBLIC_USERS in groups
 
     # BCROS
-    KEYCLOAK_SERVICE.join_users_group(
-        {'sub': user_id, 'loginSource': LoginSource.BCROS.value, 'realm_access': {'roles': []}})
+    patch_token_info({'sub': user_id, 'loginSource': LoginSource.BCROS.value, 'realm_access': {'roles': []}},
+                     monkeypatch)
+    KEYCLOAK_SERVICE.join_users_group()
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -129,15 +131,16 @@ def test_join_users_group(app, session):
     assert GROUP_ANONYMOUS_USERS in groups
 
 
-def test_join_users_group_for_staff_users(session, app):
+def test_join_users_group_for_staff_users(session, app, monkeypatch):
     """Test the staff user account creation, and assert the public_users group is not added."""
     # with app.app_context():
     request = KeycloakScenario.create_user_request()
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_users_group(
-        {'sub': user_id, 'loginSource': LoginSource.STAFF.value, 'realm_access': {'roles': []}})
+    patch_token_info({'sub': user_id, 'loginSource': LoginSource.STAFF.value, 'realm_access': {'roles': []}},
+                     monkeypatch)
+    KEYCLOAK_SERVICE.join_users_group()
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -146,14 +149,17 @@ def test_join_users_group_for_staff_users(session, app):
     assert GROUP_PUBLIC_USERS not in groups
 
 
-def test_join_users_group_for_existing_users(session):
+def test_join_users_group_for_existing_users(session, monkeypatch):
     """Test the existing user account, and assert the public_users group is not added."""
     request = KeycloakScenario.create_user_request()
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
     user = KEYCLOAK_SERVICE.get_user_by_username(request.user_name)
     user_id = user.id
-    KEYCLOAK_SERVICE.join_users_group(
-        {'sub': user_id, 'loginSource': LoginSource.BCSC.value, 'realm_access': {'roles': [Role.EDITOR.value]}})
+
+    patch_token_info(
+        {'sub': user_id, 'loginSource': LoginSource.BCSC.value, 'realm_access': {'roles': [Role.EDITOR.value]}},
+        monkeypatch)
+    KEYCLOAK_SERVICE.join_users_group()
     # Get the user groups and verify the public_users group is in the list
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
@@ -185,17 +191,7 @@ def test_join_account_holders_group_from_token(session, monkeypatch):
     user_id = user.id
 
     # Patch token info
-    def token_info():  # pylint: disable=unused-argument; mocks of library methods
-        return {
-            'sub': str(user_id),
-            'username': 'public user',
-            'realm_access': {
-                'roles': [
-                ]
-            }
-        }
-
-    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService._get_token_info', token_info)
+    patch_token_info({'sub': user_id}, monkeypatch)
 
     KEYCLOAK_SERVICE.join_account_holders_group()
     # Get the user groups and verify the public_users group is in the list

@@ -103,11 +103,11 @@ class Users(Resource):
                 if not valid_format:
                     return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
-            user = UserService.save_from_jwt_token(token, request_json)
+            user = UserService.save_from_jwt_token(request_json)
             response, status = user.as_dict(), http_status.HTTP_201_CREATED
             # Add the user to public_users group if the user doesn't have public_user group
             if token.get('loginSource', '') != LoginSource.STAFF.value:
-                KeycloakService.join_users_group(token)
+                KeycloakService.join_users_group()
             # For anonymous users, there are no invitation process for members,
             # so whenever they login perform this check and add them to corresponding groups
             if token.get('loginSource', '') == LoginSource.BCROS.value:
@@ -157,7 +157,7 @@ class UserOtp(Resource):
                 response, status = {'Only BCEID users has OTP', http_status.HTTP_400_BAD_REQUEST}
             else:
                 origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
-                UserService.delete_otp_for_user(username, token_info=g.jwt_oidc_token_info, origin_url=origin_url)
+                UserService.delete_otp_for_user(username, origin_url=origin_url)
                 response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -196,7 +196,7 @@ class UserStaff(Resource):
             elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
-                UserService.delete_anonymous_user(username, token_info=g.jwt_oidc_token_info)
+                UserService.delete_anonymous_user(username)
                 response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -225,7 +225,7 @@ class UserStaff(Resource):
             elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be patched', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
-                UserService.reset_password_for_anon_user(request_json, username, token_info=g.jwt_oidc_token_info)
+                UserService.reset_password_for_anon_user(request_json, username)
                 response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -243,9 +243,8 @@ class User(Resource):
     @_jwt.requires_auth
     def get():
         """Return the user profile associated with the JWT in the authorization header."""
-        token = g.jwt_oidc_token_info
         try:
-            response, status = UserService.find_by_jwt_token(token).as_dict(), http_status.HTTP_200_OK
+            response, status = UserService.find_by_jwt_token().as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -256,7 +255,6 @@ class User(Resource):
     @_jwt.requires_auth
     def patch():
         """Update terms of service for the user."""
-        token = g.jwt_oidc_token_info
         request_json = request.get_json()
 
         valid_format, errors = schema_utils.validate(request_json, 'termsofuse')
@@ -266,7 +264,7 @@ class User(Resource):
         version = request_json['termsversion']
         is_terms_accepted = request_json['istermsaccepted']
         try:
-            response, status = UserService.update_terms_of_use(token, is_terms_accepted, version).as_dict(), \
+            response, status = UserService.update_terms_of_use(is_terms_accepted, version).as_dict(), \
                                http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -278,9 +276,8 @@ class User(Resource):
     @_jwt.requires_auth
     def delete():
         """Delete the user profile."""
-        token = g.jwt_oidc_token_info
         try:
-            UserService.delete_user(token)
+            UserService.delete_user()
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -303,7 +300,7 @@ class UserContacts(Resource):
             return {'message': 'Authorization required.'}, http_status.HTTP_401_UNAUTHORIZED
 
         try:
-            response, status = UserService.get_contacts(token), http_status.HTTP_200_OK
+            response, status = UserService.get_contacts(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -314,14 +311,13 @@ class UserContacts(Resource):
     @_jwt.requires_auth
     def post():
         """Create a new contact for the user associated with the JWT in the authorization header."""
-        token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = UserService.add_contact(token, request_json).as_dict(), http_status.HTTP_201_CREATED
+            response, status = UserService.add_contact(request_json).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -332,13 +328,12 @@ class UserContacts(Resource):
     @_jwt.requires_auth
     def put():
         """Update an existing contact for the user associated with the JWT in the authorization header."""
-        token = g.jwt_oidc_token_info
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'contact')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
-            response, status = UserService.update_contact(token, request_json).as_dict(), http_status.HTTP_200_OK
+            response, status = UserService.update_contact(request_json).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -349,10 +344,8 @@ class UserContacts(Resource):
     @_jwt.requires_auth
     def delete():
         """Delete the contact info for the user associated with the JWT in the authorization header."""
-        token = g.jwt_oidc_token_info
-
         try:
-            response, status = UserService.delete_contact(token).as_dict(), http_status.HTTP_200_OK
+            response, status = UserService.delete_contact().as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -369,10 +362,8 @@ class UserOrgs(Resource):
     @_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Get a list of orgs that the current user is associated with."""
-        token = g.jwt_oidc_token_info
-
         try:
-            user = UserService.find_by_jwt_token(token)
+            user = UserService.find_by_jwt_token()
             if not user:
                 response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
             else:
@@ -396,10 +387,8 @@ class MembershipResource(Resource):
     @cors.crossdomain(origin='*')
     def get(org_id):
         """Get the membership for the given org and user."""
-        token = g.jwt_oidc_token_info
-
         try:
-            user = UserService.find_by_jwt_token(token)
+            user = UserService.find_by_jwt_token()
             if not user:
                 response, status = {'message': 'User not found.'}, http_status.HTTP_404_NOT_FOUND
             else:
@@ -432,7 +421,7 @@ class UserAffidavit(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = AffidavitService.create_affidavit(token, request_json).as_dict(), http_status.HTTP_200_OK
+            response, status = AffidavitService.create_affidavit(request_json).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

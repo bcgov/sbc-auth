@@ -13,7 +13,6 @@
 # limitations under the License.
 """API endpoints for managing an Notification resource."""
 
-from flask import g
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -42,8 +41,7 @@ class Notifications(Resource):
         """Find the count of notification remaining.If any details invalid, it returns zero."""
         try:
             # todo use the user_id instead of jwt
-            pending_count = MembershipService.get_pending_member_count_for_org(org_id,
-                                                                               token_info=g.jwt_oidc_token_info)
+            pending_count = MembershipService.get_pending_member_count_for_org(org_id)
             response, status = {'count': pending_count}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

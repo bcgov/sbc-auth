@@ -30,7 +30,8 @@ from auth_api.utils.enums import (
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestJwtClaims, TestOrgInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_org_model, factory_product_model, factory_task_service, factory_user_model, factory_user_model_with_contact)
+    factory_org_model, factory_product_model, factory_task_service, factory_user_model, factory_user_model_with_contact,
+    patch_token_info)
 
 
 def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
@@ -101,14 +102,15 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
     user = factory_user_model_with_contact(user_with_token)
 
+    patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(token_info=TestJwtClaims.public_bceid_user, affidavit_info=affidavit_info)
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
 
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
+    patch_token_info(token_info, monkeypatch)
 
     tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                     page=1,
@@ -121,8 +123,7 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     }
     task: TaskModel = TaskModel.find_by_task_id(fetched_task['id'])
 
-    task = TaskService.update_task(TaskService(task), task_info=task_info,
-                                   token_info=token_info)
+    task = TaskService.update_task(TaskService(task), task_info=task_info)
     dictionary = task.as_dict()
     assert dictionary['status'] == TaskStatus.COMPLETED.value
     assert dictionary['relationship_status'] == TaskRelationshipStatus.ACTIVE.value
@@ -137,7 +138,8 @@ def test_create_task_govm(session,
     user2 = factory_user_model(TestUserInfo.user2)
     public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
                                                     roles=['gov_account_user'])
-    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
+
+    patch_token_info(token_info, monkeypatch)
     org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
     assert org
     with patch.object(RestService, 'put') as mock_post:
@@ -147,7 +149,8 @@ def test_create_task_govm(session,
             **payment_details
 
         }
-        org = OrgService.update_org(org, org_body, token_info=public_token_info)
+        patch_token_info(public_token_info, monkeypatch)
+        org = OrgService.update_org(org, org_body)
         assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org_govm['name']
@@ -167,6 +170,7 @@ def test_create_task_govm(session,
         assert expected_data == actual_data
 
         # Assert the task that is created
+        patch_token_info(token_info, monkeypatch)
         fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
                                                page=1,
                                                limit=10)

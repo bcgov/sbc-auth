@@ -33,7 +33,7 @@ def publish_activity(action: str, item_name: str,
     try:
         # find user_id if haven't passed in
         if not user_id and g and 'jwt_oidc_token_info' in g:
-            user: UserModel = UserModel.find_by_jwt_token(token=g.jwt_oidc_token_info)
+            user: UserModel = UserModel.find_by_jwt_token()
             user_id = user.id
 
         data = {
