@@ -6,21 +6,24 @@
         <v-form ref="accountInformationForm" data-test="account-information-form">
             <v-radio-group
             row
-            v-model="orgBusinessTypeLocal.isBusinessAccount"
+            v-model="isBusinessAccount"
+            @change="getUpdatedOrgBusinessType"
             mandatory
             >
                 <v-row justify="space-between">
                     <v-col cols="6">
                         <v-radio
-                        :label=AccountBusinessType.INDIVIDUAL_PERSON_NAME
-                        :value=false
+                        label="Individual Person Name"
+                        :key="false"
+                        :value="false"
                         data-test="radio-individual-account-type"
                         ></v-radio>
                     </v-col>
                     <v-col cols="6">
                         <v-radio
-                        :label=AccountBusinessType.BUSINESS_NAME
-                        :value=true
+                        label="Business Name"
+                        :key="true"
+                        :value="true"
                         data-test="radio-business-account-type"
                         ></v-radio>
                     </v-col>
@@ -28,7 +31,7 @@
             </v-radio-group>
             <fieldset class="auto-complete-relative account-name" data-test="account-name">
                 <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
-                <legend class="mb-3"  v-else-if="!orgBusinessTypeLocal.isBusinessAccount">Account Name</legend>
+                <legend class="mb-3"  v-else-if="!isBusinessAccount">Account Name</legend>
                 <v-slide-y-transition>
                     <div v-show="errorMessage">
                     <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
@@ -36,32 +39,35 @@
                 </v-slide-y-transition>
                 <v-text-field
                 filled
-                :label="govmAccount ? 'Ministry Name' : orgBusinessTypeLocal.isBusinessAccount ? 'Legal Business Name' : 'Account Name'"
-                v-model.trim="orgBusinessTypeLocal.name"
+                :label="govmAccount ? 'Ministry Name' : isBusinessAccount ? 'Legal Business Name' : 'Account Name'"
+                v-model.trim="name"
                 :rules="orgNameRules"
-                :disabled="saving"
+                :disabled="saving || orgNameReadOnly"
                 data-test="input-org-name"
                 :readonly="govmAccount"
                 autocomplete="off"
+                :error-messages="bcolDuplicateNameErrorMessage"
+                @change="getUpdatedOrgBusinessType"
                 />
                 <org-name-auto-complete
-                v-if="enableOrgNameAutoComplete && orgBusinessTypeLocal.isBusinessAccount"
+                v-if="enableOrgNameAutoComplete && isBusinessAccount"
                 :searchValue="autoCompleteSearchValue"
                 :setAutoCompleteIsActive="autoCompleteIsActive"
                 @auto-complete-value="setAutoCompleteSearchValue">
                 </org-name-auto-complete>
             </fieldset>
-            <fieldset class="branch-detail" data-test="branch-detail" v-if="govmAccount || orgBusinessTypeLocal.isBusinessAccount">
+            <fieldset class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
                 <v-text-field
                 filled
                 :label="govmAccount ? 'Branch/Division (If applicable)' : 'Branch/Division (If optional)'"
-                v-model.trim="orgBusinessTypeLocal.branchName"
+                v-model.trim="branchName"
                 :disabled="saving"
                 data-test="input-branch-name"
                 :readonly="govmAccount"
+                @change="getUpdatedOrgBusinessType"
                 />
             </fieldset>
-            <fieldset class="business-account-type-details"  data-test="business-account-type-details" v-if="orgBusinessTypeLocal.isBusinessAccount">
+            <fieldset class="business-account-type-details"  data-test="business-account-type-details" v-if="isBusinessAccount">
                 <v-row justify="space-between">
                     <v-col cols="6">
                         <v-select
@@ -70,9 +76,10 @@
                         item-text="text"
                         item-value="value"
                         :items="BusinessType"
-                        v-model="orgBusinessTypeLocal.businessType"
+                        v-model="businessType"
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
+                        @change="getUpdatedOrgBusinessType"
                         />
                     </v-col>
                     <v-col cols="6">
@@ -82,9 +89,10 @@
                         item-text="text"
                         item-value="value"
                         :items="BusinessType"
-                        v-model="orgBusinessTypeLocal.businessSize"
+                        v-model="businessSize"
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
+                        @change="getUpdatedOrgBusinessType"
                         />
                     </v-col>
                 </v-row>
@@ -94,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import { AccountBusinessType, LDFlags } from '@/util/constants'
+import { Account, LDFlags } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -108,29 +116,29 @@ const OrgModule = namespace('org')
     OrgNameAutoComplete
   }
 })
-export default class AccountInformationBusinessType extends Vue {
+export default class AccountBusinessType extends Vue {
   @Prop({ default: false }) govmAccount: boolean
   @Prop({ default: null }) errorMessage: string
   @Prop({ default: false }) saving: boolean
+  @Prop({ default: null }) bcolDuplicateNameErrorMessage: string
+  @Prop({ default: false }) premiumLinkedAccount: boolean
+  @Prop({ default: false }) orgNameReadOnly: boolean
 
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''
-  private AccountBusinessType= AccountBusinessType
 
   $refs: {
     accountInformationForm: HTMLFormElement
   }
 
-  // A local (working) copy of the address, to contain the fields edited by the component (ie, the model).
-  private orgBusinessTypeLocal : OrgBusinessType = {
-    name: '',
-    isBusinessAccount: '',
-    branchName: '',
-    businessType: '',
-    businessSize: ''
-  }
+  // input fields
+  private isBusinessAccount: boolean = false
+  private name: string = ''
+  private businessType: string = ''
+  private businessSize:string = ''
+  private branchName: string = ''
 
   // Input field rules
   private orgNameRules = [v => !!v || 'An account name is required']
@@ -150,7 +158,9 @@ export default class AccountInformationBusinessType extends Vue {
 
   mounted () {
     if (this.currentOrganization) {
-      this.orgBusinessTypeLocal = { ...this.currentOrganization }
+      this.name = this.currentOrganization.name
+      // incase it is a premium account, default business type to business account
+      this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
     }
   }
 
@@ -162,6 +172,10 @@ export default class AccountInformationBusinessType extends Vue {
   @Emit('valid')
   private emitValid (valid: boolean): void { }
 
+  /** Emits a clear errors event to parent (exclusive for premium linked account scenario). */
+  @Emit('update:org-name-clear-errors')
+  private clearErrors (): void { }
+
   private get enableOrgNameAutoComplete (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
   }
@@ -169,11 +183,11 @@ export default class AccountInformationBusinessType extends Vue {
   private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
     if (this.enableOrgNameAutoComplete) {
       this.autoCompleteIsActive = false
-      this.orgBusinessTypeLocal['name'] = autoCompleteSearchValue
+      this.name = autoCompleteSearchValue
     }
   }
 
-  @Watch('orgBusinessTypeLocal.name')
+  @Watch('name')
   getAutoCompleteValues (val: string) {
     if (this.enableOrgNameAutoComplete) {
       if (val) {
@@ -181,19 +195,27 @@ export default class AccountInformationBusinessType extends Vue {
       }
       this.autoCompleteIsActive = val !== ''
     }
-  }
-
-  @Watch('orgBusinessTypeLocal', { deep: true })
-  getLocalOrganization (newVal, oldVal) {
-    this.emitAccountInfo(this.orgBusinessTypeLocal)
-    if (oldVal.name) {
-      this.emitValid(this.$refs.accountInformationForm?.validate())
+    // Incase it is a premium linked account, we need to update org name and clear parent duplicate name error
+    if (this.premiumLinkedAccount) {
+      this.clearErrors()
     }
   }
 
-  public validateNow () {
-    const isFormValid = this.$refs.accountInformationForm?.validate()
-    this.emitValid(isFormValid)
+  getUpdatedOrgBusinessType () {
+    // Construct and emit OrgBusinessType object and valid state to parent
+    this.$nextTick(() => {
+      const orgBusinessType: OrgBusinessType = {
+        name: this.name,
+        isBusinessAccount: this.isBusinessAccount,
+        ...((this.govmAccount || this.isBusinessAccount) && { branchName: this.branchName }),
+        ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize })
+      }
+      const isFormValid = this.$refs.accountInformationForm?.validate()
+      this.emitValid(isFormValid)
+      if (isFormValid) {
+        this.emitAccountInfo(orgBusinessType)
+      }
+    })
   }
 }
 </script>

@@ -244,9 +244,4 @@ export enum FeeCodes {
     PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }
 
-export enum AccountBusinessType {
-    INDIVIDUAL_PERSON_NAME = 'Individual Person Name',
-    BUSINESS_NAME = 'Business Name'
-}
-
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5

@@ -267,7 +267,7 @@ export interface OrgWithAddress {
 export interface OrgBusinessType {
   name?: string,
   branchName?: string,
-  isBusinessAccount ?: string,
-  businessType ?: string,
-  businessSize ?: string
+  isBusinessAccount?: boolean,
+  businessType?: string,
+  businessSize?: string
 }

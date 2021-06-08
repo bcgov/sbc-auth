@@ -1,7 +1,7 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 
-import { AccountBusinessType } from '@/util/constants'
-import AccountInformationBusinessType from '@/components/auth/common/AccountInformationBusinessType.vue'
+import { Account } from '@/util/constants'
+import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -13,7 +13,7 @@ Vue.use(VueRouter)
 
 document.body.setAttribute('data-app', 'true')
 
-describe('AccountInformationBusinessType.vue', () => {
+describe('AccountBusinessType.vue', () => {
   let orgModule: any
   let wrapper: any
   let store: any
@@ -27,7 +27,8 @@ describe('AccountInformationBusinessType.vue', () => {
       namespaced: true,
       state: {
         currentOrganization: {
-          name: ''
+          name: '',
+          orgType: Account.BASIC
         }
       }
     }
@@ -44,7 +45,7 @@ describe('AccountInformationBusinessType.vue', () => {
 
   it('is a Vue instance', () => {
     const $t = () => ''
-    wrapper = mount(AccountInformationBusinessType, {
+    wrapper = mount(AccountBusinessType, {
       store,
       localVue,
       vuetify,
@@ -59,7 +60,7 @@ describe('AccountInformationBusinessType.vue', () => {
 
   it('individual account type rendering', () => {
     const $t = () => ''
-    wrapper = mount(AccountInformationBusinessType, {
+    wrapper = mount(AccountBusinessType, {
       store,
       localVue,
       vuetify,
@@ -77,7 +78,7 @@ describe('AccountInformationBusinessType.vue', () => {
 
   it('business account type rendering', () => {
     const $t = () => ''
-    wrapper = mount(AccountInformationBusinessType, {
+    wrapper = mount(AccountBusinessType, {
       store,
       localVue,
       vuetify,

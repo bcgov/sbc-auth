@@ -1,12 +1,12 @@
 <template>
   <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
-    <account-information-business-type
+    <account-business-type
     :govmAccount="govmAccount"
     :errorMessage="errorMessage"
     :saving="saving"
-    @update:org-business-type="updateorgBusinessType"
+    @update:org-business-type="updateOrgBusinessType"
     @valid="checkOrgBusinessTypeValid">
-    </account-information-business-type>
+    </account-business-type>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
       <legend class="mb-3">Mailing Address</legend>
       <base-address-form
@@ -63,7 +63,7 @@ import { Account, Actions, LDFlags, LoginSource, SessionStorageKeys } from '@/ut
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import AccountInformationBusinessType from '@/components/auth/common/AccountInformationBusinessType.vue'
+import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -75,7 +75,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
-    AccountInformationBusinessType,
+    AccountBusinessType,
     BaseAddressForm,
     ConfirmCancelButton
   },
@@ -143,7 +143,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     this.setCurrentOrganizationAddress(address)
   }
 
-  private updateorgBusinessType (orgBusinessType: OrgBusinessType) {
+  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
     this.orgBusinessTypeLocal = JSON.parse(JSON.stringify(orgBusinessType))
   }
 
