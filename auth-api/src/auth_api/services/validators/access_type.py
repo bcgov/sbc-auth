@@ -23,7 +23,7 @@ from auth_api.utils.user_context import UserContext, user_context
 def validate(**kwargs) -> ValidatorResponse:
     """Validate and return correct access type."""
     access_type: str = kwargs.get('accessType')
-    user: UserContext = kwargs['user']
+    user: UserContext = kwargs['user_context']
     error = None
     validator_response = ValidatorResponse()
     if access_type:

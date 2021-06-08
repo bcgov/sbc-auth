@@ -403,6 +403,7 @@ def test_add_org_multiple(client, jwt, session, keycloak_mock):  # pylint:disabl
     rv4 = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org4),
                       headers=headers, content_type='application/json')
 
+    # max number of orgs reached.
     assert rv4.status_code == http_status.HTTP_400_BAD_REQUEST
 
 

@@ -26,7 +26,6 @@ from auth_api.config import get_named_config
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import AccessType, IdpHint, LoginSource, OrgType, PaymentMethod, ProductCode
 
-
 fake = Faker()
 
 CONFIG = get_named_config('testing')
@@ -376,7 +375,7 @@ class TestJwtClaims(dict, Enum):
             'preferred_username': preferred_username,
             'realm_access': {
                 'roles': [
-                    'edit', 'public_user'
+                    'edit', 'public_user', *roles
                 ]
             },
             'roles': [

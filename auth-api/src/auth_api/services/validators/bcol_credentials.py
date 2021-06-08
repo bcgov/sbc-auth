@@ -28,7 +28,7 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     """Validate bcol credentials."""
     bcol_credential = kwargs.get('bcol_credential')
     org_id = kwargs.get('org_id', None)
-    user: UserContext = kwargs['user']
+    user: UserContext = kwargs['user_context']
     validator_response = ValidatorResponse()
     bcol_response = RestService.post(endpoint=current_app.config.get('BCOL_API_URL') + '/profiles',
                                      data=bcol_credential, token=user.bearer_token, raise_for_status=False)

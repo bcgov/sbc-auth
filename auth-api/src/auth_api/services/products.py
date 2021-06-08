@@ -31,12 +31,11 @@ from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
     AccessType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
-
+from .authorization import check_auth
+from .task import Task as TaskService
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
 from ..utils.roles import CLIENT_ADMIN_ROLES, STAFF
-from .authorization import check_auth
-from .task import Task as TaskService
 
 
 class Product:
@@ -65,22 +64,19 @@ class Product:
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod
-    @user_context
     def create_product_subscription(org_id, subscription_data: Dict[str, Any],  # pylint: disable=too-many-locals
-                                    is_new_transaction: bool = True,
-                                    skip_auth=False, **kwargs):
+                                    is_new_transaction: bool = True, skip_auth=False):
         """Create product subscription for the user.
 
         create product subscription first
         create the product role next if roles are given
         """
         org: OrgModel = OrgModel.find_by_org_id(org_id)
-        user_from_context: UserContext = kwargs['user']
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
         if not skip_auth:
-            check_auth(user_from_context.token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+            check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         subscriptions_list = subscription_data.get('subscriptions')
         for subscription in subscriptions_list:
@@ -109,7 +105,7 @@ class Product:
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
-                    user = UserModel.find_by_jwt_token(token=user_from_context.token_info)
+                    user = UserModel.find_by_jwt_token()
                     Product._create_review_task(org, product_model, product_subscription, user)
 
             else:
@@ -169,22 +165,20 @@ class Product:
     @user_context
     def get_products(include_hidden: bool = True, **kwargs):
         """Get a list of all products."""
-        user_from_context: UserContext = kwargs['user']
+        user_from_context: UserContext = kwargs['user_context']
         products = ProductCodeModel.get_all_products() if (user_from_context.is_staff() and include_hidden) \
             else ProductCodeModel.get_visible_products()
         return ProductCodeSchema().dump(products, many=True)
 
     @staticmethod
-    @user_context
-    def get_all_product_subscription(org_id, skip_auth=False, **kwargs):
+    def get_all_product_subscription(org_id, skip_auth=False):
         """Get a list of all products with their subscription details."""
         org = OrgModel.find_by_org_id(org_id)
-        user_from_context: UserContext = kwargs['user']
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         # Check authorization for the user
         if not skip_auth:
-            check_auth(user_from_context.token_info, one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
+            check_auth(one_of_roles=(*CLIENT_ADMIN_ROLES, STAFF), org_id=org_id)
 
         product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
