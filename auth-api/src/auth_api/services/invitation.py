@@ -35,6 +35,7 @@ from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, L
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
+from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
@@ -65,9 +66,10 @@ class Invitation:
         return obj
 
     @staticmethod
-    def create_invitation(invitation_info: Dict, user,  # pylint: disable=too-many-locals
-                          token_info: Dict, invitation_origin):
+    @user_context
+    def create_invitation(invitation_info: Dict, user, invitation_origin, **kwargs):  # pylint: disable=too-many-locals
         """Create a new invitation."""
+        user_from_context: UserContext = kwargs['user_context']
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         org_id = invitation_info['membership'][0]['orgId']
@@ -76,7 +78,7 @@ class Invitation:
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         org_name = org.name
         invitation_type = Invitation._get_inv_type(org)
@@ -103,8 +105,7 @@ class Invitation:
                                    '{}/{}'.format(invitation_origin, context_path), mandatory_login_source,
                                    org_status=org.status_code)
         # notify admin if staff adds team members
-        is_staff_access = token_info and 'staff' in token_info.get('realm_access', {}).get('roles', None)
-        if is_staff_access and invitation_type == InvitationType.STANDARD.value:
+        if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
             try:
                 current_app.logger.debug('<send_team_member_invitation_notification')
                 publish_to_mailer(notification_type='teamMemberInvited', org_id=org_id)
@@ -124,13 +125,13 @@ class Invitation:
         }
         return inv_types.get(org.access_type, InvitationType.STANDARD.value)
 
-    def update_invitation(self, user, token_info: Dict, invitation_origin):
+    def update_invitation(self, user, invitation_origin):
         """Update the specified invitation with new data."""
         # Ensure that the current user is ADMIN or COORDINATOR on each org being re-invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in self._model.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         confirmation_token = Invitation.generate_confirmation_token(self._model.id, self._model.type)
@@ -142,7 +143,7 @@ class Invitation:
         return Invitation(updated_invitation)
 
     @staticmethod
-    def delete_invitation(invitation_id, token_info: Dict = None):
+    def delete_invitation(invitation_id):
         """Delete the specified invitation."""
         # Ensure that the current user is ADMIN or COORDINATOR for each org in the invitation
         invitation = InvitationModel.find_invitation_by_id(invitation_id)
@@ -150,12 +151,14 @@ class Invitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         for membership in invitation.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
         invitation.delete()
 
     @staticmethod
-    def get_invitations_for_org(org_id, status=None, token_info: Dict = None):
+    @user_context
+    def get_invitations_for_org(org_id, status=None, **kwargs):
         """Get invitations for an org."""
+        user_from_context: UserContext = kwargs['user_context']
         org_model = OrgModel.find_by_org_id(org_id)
         if not org_model:
             return None
@@ -164,10 +167,10 @@ class Invitation:
             status = InvitationStatus[status]
 
         # If staff return full list
-        if 'staff' in token_info.get('realm_access').get('roles'):
+        if user_from_context.is_staff():
             return InvitationModel.find_pending_invitations_by_org(org_id)
 
-        current_user: UserService = UserService.find_by_jwt_token(token_info)
+        current_user: UserService = UserService.find_by_jwt_token()
         current_user_membership: MembershipModel = \
             MembershipModel.find_membership_by_user_and_org(user_id=current_user.identifier, org_id=org_id)
 
@@ -183,7 +186,7 @@ class Invitation:
         return InvitationModel.find_invitations_by_org(org_id=org_id, status=status)
 
     @staticmethod
-    def find_invitation_by_id(invitation_id, token_info: Dict = None):
+    def find_invitation_by_id(invitation_id):
         """Find an existing invitation with the provided id."""
         if invitation_id is None:
             return None
@@ -195,7 +198,7 @@ class Invitation:
         # Ensure that the current user is an ADMIN or COORDINATOR on each org in the invite being retrieved
         for membership in invitation.membership:
             org_id = membership.org_id
-            check_auth(token_info, org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         return Invitation(invitation)
 
@@ -346,10 +349,11 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True,
-                          token_info: Dict = None):
+    @user_context
+    def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True, **kwargs):
         """Add user, role and org from the invitation to membership."""
         current_app.logger.debug('>accept_invitation')
+        user_from_context: UserContext = kwargs['user_context']
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
 
         if invitation is None:
@@ -359,8 +363,7 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        if getattr(token_info, 'loginSource', None) is not None:  # bcros comes with out token
-            login_source = token_info.get('loginSource', None)
+        if (login_source := user_from_context.login_source) is not None:  # bcros comes with out token
             if invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
@@ -395,12 +398,12 @@ class Invitation:
 
         # Call keycloak to add the user to the group.
         if user:
-            group_name: str = KeycloakService.join_users_group(token_info)
+            group_name: str = KeycloakService.join_users_group()
             KeycloakService.join_account_holders_group(user.keycloak_guid)
 
             if group_name == GROUP_GOV_ACCOUNT_USERS:
                 # Add contact to the user.
-                user.add_contact(token_info, dict(email=token_info.get('email', None)),
+                user.add_contact(dict(email=user_from_context.token_info.get('email', None)),
                                  throw_error_for_duplicates=False)
 
         current_app.logger.debug('<accept_invitation')

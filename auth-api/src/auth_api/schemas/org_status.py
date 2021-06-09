@@ -15,10 +15,10 @@
 
 from auth_api.models import OrgStatus as OrgStatusModel
 
-from .base_schema import BaseSchema
+from auth_api.models import ma
 
 
-class OrgStatusSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class OrgStatusSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the OrgStatus model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

@@ -25,7 +25,8 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.services import activity_log_publisher as activity_log_publisher
 from auth_api.services.entity import Entity as EntityService
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
-from tests.utilities.factory_utils import factory_contact_model, factory_entity_model, factory_org_service
+from tests.utilities.factory_utils import (
+    factory_contact_model, factory_entity_model, factory_org_service, patch_token_info)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -79,7 +80,7 @@ def test_save_entity_existing(session):  # pylint:disable=unused-argument
     assert updated_entity.as_dict()['business_number'] == updated_entity_info['businessNumber']
 
 
-def test_update_entity_existing_success(session):  # pylint:disable=unused-argument
+def test_update_entity_existing_success(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Entity can be updated from a dictionary."""
     entity = EntityService.save_entity({
         'businessIdentifier': TestEntityInfo.bc_entity_passcode3['businessIdentifier'],
@@ -101,16 +102,15 @@ def test_update_entity_existing_success(session):  # pylint:disable=unused-argum
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
 
-    updated_entity = EntityService.update_entity(entity.as_dict().get('business_identifier'), updated_entity_info,
-                                                 {'loginSource': '', 'realm_access': {'roles': ['system']},
-                                                  'corp_type': 'BC'})
+    patch_token_info({'loginSource': '', 'realm_access': {'roles': ['system']}, 'corp_type': 'BC'}, monkeypatch)
+    updated_entity = EntityService.update_entity(entity.as_dict().get('business_identifier'), updated_entity_info)
 
     assert updated_entity
     assert updated_entity.as_dict()['name'] == updated_entity_info['name']
     assert updated_entity.as_dict()['business_number'] == updated_entity_info['businessNumber']
 
 
-def test_update_entity_existing_failures(session):  # pylint:disable=unused-argument
+def test_update_entity_existing_failures(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Entity can be updated from a dictionary."""
     entity = EntityService.save_entity({
         'businessIdentifier': TestEntityInfo.bc_entity_passcode3['businessIdentifier'],
@@ -133,9 +133,9 @@ def test_update_entity_existing_failures(session):  # pylint:disable=unused-argu
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
 
     with pytest.raises(BusinessException) as exception:
-        EntityService.update_entity('invalidbusinessnumber', updated_entity_info,
-                                    {'loginSource': '', 'realm_access': {'roles': ['system']},
-                                     'corp_type': 'INVALID_CP'})
+        patch_token_info({'loginSource': '', 'realm_access': {'roles': ['system']},
+                          'corp_type': 'INVALID_CP'}, monkeypatch)
+        EntityService.update_entity('invalidbusinessnumber', updated_entity_info)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -352,20 +352,20 @@ def test_delete_entity(app, session):  # pylint:disable=unused-argument
     assert entity is None
 
 
-def test_reset_pass_code(app, session):  # pylint:disable=unused-argument
+def test_reset_pass_code(app, session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the new passcode in not the same as old passcode."""
     entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_passcode)
 
     entity = EntityService(entity_model)
     old_passcode = entity.pass_code
-
-    entity.reset_passcode(entity.business_identifier, '', TestJwtClaims.user_test)
+    patch_token_info(TestJwtClaims.user_test, monkeypatch)
+    entity.reset_passcode(entity.business_identifier, '')
     new_passcode = entity.pass_code
 
     assert old_passcode != new_passcode
 
 
-def test_reset_pass_code_confirm_activity_log(app, session):  # pylint:disable=unused-argument
+def test_reset_pass_code_confirm_activity_log(app, session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that the new passcode in not the same as old passcode."""
     entity_model = factory_entity_model(entity_info=TestEntityInfo.entity_passcode)
 
@@ -373,7 +373,8 @@ def test_reset_pass_code_confirm_activity_log(app, session):  # pylint:disable=u
     old_passcode = entity.pass_code
 
     with patch.object(activity_log_publisher, 'publish_activity', return_value=None) as mock_send:
-        entity.reset_passcode(entity.business_identifier, '', TestJwtClaims.user_test)
+        patch_token_info(TestJwtClaims.user_test, monkeypatch)
+        entity.reset_passcode(entity.business_identifier, '')
 
         new_passcode = entity.pass_code
 

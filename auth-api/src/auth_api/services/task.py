@@ -73,13 +73,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>create_task ')
         return Task(task_model)
 
-    def update_task(self, task_info: Dict = None, token_info: Dict = None, origin_url: str = None):
+    def update_task(self, task_info: Dict = None, origin_url: str = None):
         """Update a task record."""
         current_app.logger.debug('<update_task ')
         task_model: TaskModel = self._model
         task_relationship_status = task_info.get('relationshipStatus')
 
-        user: UserModel = UserModel.find_by_jwt_token(token=token_info)
+        user: UserModel = UserModel.find_by_jwt_token()
         task_model.status = task_info.get('status', TaskStatus.COMPLETED.value)
         task_model.decision_made_by = user.username
         task_model.decision_made_on = datetime.now()
@@ -89,13 +89,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
         # Update its relationship
 
         self._update_relationship(task_relationship_status=task_relationship_status,
-                                  token_info=token_info,
                                   origin_url=origin_url)
         current_app.logger.debug('>update_task ')
         db.session.commit()
         return Task(task_model)
 
-    def _update_relationship(self, task_relationship_status: str, token_info: Dict = None, origin_url: str = None):
+    def _update_relationship(self, task_relationship_status: str, origin_url: str = None):
         """Retrieve the relationship record and update the status."""
         task_model: TaskModel = self._model
         current_app.logger.debug('<update_task_relationship ')
@@ -105,7 +104,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
             # Update Org relationship
             org_id = task_model.relationship_id
             self._update_org(is_approved=is_approved, org_id=org_id,
-                             token_info=token_info,
                              origin_url=origin_url)
 
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
@@ -118,13 +116,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
-    def _update_org(is_approved: bool, org_id: int, token_info: Dict = None, origin_url: str = None):
+    def _update_org(is_approved: bool, org_id: int, origin_url: str = None):
         """Approve/Reject Affidavit and Org."""
         from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
         current_app.logger.debug('<update_task_org ')
 
         OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                     token_info=token_info,
                                      origin_url=origin_url)
 
         current_app.logger.debug('>update_task_org ')

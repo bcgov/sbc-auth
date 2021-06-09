@@ -62,8 +62,7 @@ class BaseModel(db.Model):
         """
         try:
             from .user import User as UserModel  # pylint:disable=cyclic-import, import-outside-toplevel
-            token = g.jwt_oidc_token_info
-            user = UserModel.find_by_jwt_token(token)
+            user = UserModel.find_by_jwt_token()
             if not user:
                 return None
             return user.id
@@ -85,7 +84,6 @@ class BaseModel(db.Model):
         _excluded_fields = kwargs.pop('_exclude', ())
 
         changes = {}
-
         for key in columns:
             # don't update private/protected
             if key.startswith('_'):
@@ -95,12 +93,12 @@ class BaseModel(db.Model):
             allowed = key not in readonly and key not in _excluded_fields
             exists = key in kwargs
             is_relationship = key in relationships
+
             if allowed and exists and not is_relationship:
                 val = getattr(self, key)
                 if val != kwargs[key]:
                     changes[key] = {'old': val, 'new': kwargs[key]}
                     setattr(self, key, kwargs[key])
-
         return changes
 
     @staticmethod
@@ -164,7 +162,7 @@ class BaseModel(db.Model):
             db.session.add(activity)
 
 
-class BaseCodeModel(BaseModel):
+class BaseCodeModel(db.Model):
     """This class manages all of the base code, type or status model functions."""
 
     __abstract__ = True
@@ -183,6 +181,12 @@ class BaseCodeModel(BaseModel):
     def default(cls):  # pylint:disable=no-self-argument, # noqa: N805
         """Return column for default."""
         return Column(Boolean(), default=False, nullable=False)
+
+    def save(self):
+        """Save and commit."""
+        db.session.add(self)
+        db.session.commit()
+        return self
 
 
 class VersionedModel(BaseModel):

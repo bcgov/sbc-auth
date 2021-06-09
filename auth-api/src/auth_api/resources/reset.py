@@ -13,7 +13,6 @@
 # limitations under the License.
 """Endpoints to reset test data from database."""
 
-from flask import g
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -40,10 +39,8 @@ class Reset(Resource):
     @_jwt.has_one_of_roles([Role.TESTER.value])
     def post():
         """Cleanup test data by the provided token."""
-        token = g.jwt_oidc_token_info
-
         try:
-            ResetService.reset(token)
+            ResetService.reset()
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
