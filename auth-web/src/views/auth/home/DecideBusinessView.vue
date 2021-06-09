@@ -9,9 +9,8 @@
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
-              <a href="https://www2.gov.bc.ca/gov/content?id=3E4E169B42DF43EEA19E96383F8FD628"
-               class="learn-more-link" target="_blank" rel="noopener noreferrer">
-                {{item.linkText}}
+              <a class="list-item-link" :href="item.url" target="_blank" rel="noopener noreferrer">{{item.linkText}}
+                <v-icon class="link-icon mb-1" small color="#1a5a96">{{item.icon}}</v-icon>
               </a>
             </v-list-item-subtitle>
           </v-list-item-content>
@@ -23,8 +22,8 @@
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
-        <a :href="learnMoreUrl" target="_blank">
-          <v-img src="../../../assets/img/Step1_DecideBusiness_x2.png" aspect-ratio="1.2" contain></v-img>
+        <a :href="selectorWizardUrl" target="_blank">
+          <v-img src="@/assets/img/Step1_DecideBusinesswizard_x2.png" aspect-ratio="1.2" contain></v-img>
         </a>
       </v-col>
     </v-row>
@@ -33,6 +32,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 
 @Component({
@@ -43,11 +43,16 @@ import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 export default class DecideBusinessView extends Vue {
   private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
     'small-business/'
+  private readonly selectorWizardUrl = ConfigHelper.getEntitySelectorUrl()
   private readonly bulletPoints: Array<any> = [
-    { text: 'Decide which business structure is most appropriate for you: A few options are sole proprietorship, ' +
-      'partnership or incorporation.' },
-    { text: 'Each structure has a different legal and financial implications.',
-      linkText: 'Make sure a Benefit Company is right for you.'
+    {
+      text: `Decide which business structure is most appropriate for you. A few options are: a sole proprietorship,
+     partnership, or corporation. Each structure has different legal and financial implications.`
+    },
+    {
+      linkText: 'Use the Business Structures Wizard to help you decide.',
+      url: this.selectorWizardUrl,
+      icon: `mdi-open-in-new`
     }
   ]
 }
@@ -83,13 +88,18 @@ export default class DecideBusinessView extends Vue {
       line-height: 1.5rem;
     }
 
-    .learn-more-link {
+    .list-item-link {
       font-size: 1rem;
       color: $BCgoveBueText1;
+      cursor: pointer;
     }
 
-    .learn-more-link:hover {
+    .list-item-link:hover {
       color: $BCgoveBueText2;
+
+      .link-icon {
+        color: $BCgoveBueText2!important;
+      }
     }
   }
 </style>
