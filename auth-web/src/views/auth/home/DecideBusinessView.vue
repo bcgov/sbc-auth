@@ -23,7 +23,7 @@
       <!-- Image Column -->
       <v-col cols="12" md="6">
         <a :href="selectorWizardUrl" target="_blank">
-          <v-img src="../../../assets/img/Step1_DecideBusinesswizard_x2.png" aspect-ratio="1.2" contain></v-img>
+          <v-img src="@/assets/img/Step1_DecideBusinesswizard_x2.png" aspect-ratio="1.2" contain></v-img>
         </a>
       </v-col>
     </v-row>
@@ -45,7 +45,7 @@ export default class DecideBusinessView extends Vue {
   private readonly selectorWizardUrl = `https://entity-selection-dev.apps.silver.devops.gov.bc.ca`
   private readonly bulletPoints: Array<any> = [
     {
-      text: `Decide which business structure is most appropriate for you, a few options are: a sole proprietorship,
+      text: `Decide which business structure is most appropriate for you. A few options are: a sole proprietorship,
      partnership, or corporation. Each structure has different legal and financial implications.`
     },
     {
