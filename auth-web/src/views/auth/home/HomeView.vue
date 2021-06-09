@@ -106,11 +106,6 @@
                  target="_blank" rel="noopener noreferrer">
                 <span>Business Registry Frequently Asked Questions</span>
               </a>
-              <p class="mt-4">To learn more about Benefit Companies in British Columbia, please visit the
-                <a :href="bcCompUrl" target="_blank" rel="noopener noreferrer">
-                   Benefit Companies information page
-                </a>.
-              </p>
             </v-col>
 
             <v-col cols="12" md="5">
@@ -186,7 +181,6 @@ export default class HomeView extends Vue {
   private isDirSearchUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
   private readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
-  private readonly bcCompUrl = 'https://www2.gov.bc.ca/gov/content?id=3E4E169B42DF43EEA19E96383F8FD628'
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
   }
