@@ -7,7 +7,7 @@
             <v-radio-group
             row
             v-model="isBusinessAccount"
-            @change="getUpdatedOrgBusinessType"
+            @change="onOrgBusinessTypeChange"
             mandatory
             >
                 <v-row justify="space-between">
@@ -47,7 +47,7 @@
                 :readonly="govmAccount"
                 autocomplete="off"
                 :error-messages="bcolDuplicateNameErrorMessage"
-                @change="getUpdatedOrgBusinessType"
+                v-on:keyup="onOrgNameChange"
                 />
                 <org-name-auto-complete
                 v-if="enableOrgNameAutoComplete && isBusinessAccount"
@@ -64,7 +64,7 @@
                 :disabled="saving"
                 data-test="input-branch-name"
                 :readonly="govmAccount"
-                @change="getUpdatedOrgBusinessType"
+                @change="onOrgBusinessTypeChange()"
                 />
             </fieldset>
             <fieldset class="business-account-type-details"  data-test="business-account-type-details" v-if="isBusinessAccount">
@@ -79,7 +79,7 @@
                         v-model="businessType"
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
-                        @change="getUpdatedOrgBusinessType"
+                        @change="onOrgBusinessTypeChange"
                         />
                     </v-col>
                     <v-col cols="6">
@@ -92,7 +92,7 @@
                         v-model="businessSize"
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
-                        @change="getUpdatedOrgBusinessType"
+                        @change="onOrgBusinessTypeChange"
                         />
                     </v-col>
                 </v-row>
@@ -156,17 +156,26 @@ export default class AccountBusinessType extends Vue {
     }
   ]
 
-  mounted () {
-    if (this.currentOrganization) {
-      this.name = this.currentOrganization.name
-      // incase it is a premium account, default business type to business account
-      this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
+  @Watch('currentOrganization')
+  oncurrentOrganizationChange (value: Organization, oldValue: Organization) {
+    if (value.name !== oldValue.name) {
+      this.name = value.name
     }
   }
 
   /** Emits an update message, so that the caller can ".sync" with it. */
   @Emit('update:org-business-type')
-  private emitAccountInfo (address: object): void { }
+  private emitUpdatedOrgBusinessType () {
+    const orgBusinessType: OrgBusinessType = {
+      name: this.name,
+      isBusinessAccount: this.isBusinessAccount,
+      ...((this.govmAccount || this.isBusinessAccount) && { branchName: this.branchName }),
+      ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize })
+    }
+    const isFormValid = this.$refs.accountInformationForm?.validate()
+    this.emitValid(isFormValid)
+    return orgBusinessType
+  }
 
   /** Emits the validity of the component. */
   @Emit('valid')
@@ -175,6 +184,14 @@ export default class AccountBusinessType extends Vue {
   /** Emits a clear errors event to parent (exclusive for premium linked account scenario). */
   @Emit('update:org-name-clear-errors')
   private clearErrors (): void { }
+
+  mounted () {
+    if (this.currentOrganization) {
+      this.name = this.currentOrganization.name
+      // incase it is a premium account, default business type to business account
+      this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
+    }
+  }
 
   private get enableOrgNameAutoComplete (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
@@ -187,34 +204,29 @@ export default class AccountBusinessType extends Vue {
     }
   }
 
-  @Watch('name')
-  getAutoCompleteValues (val: string) {
-    if (this.enableOrgNameAutoComplete) {
-      if (val) {
-        this.autoCompleteSearchValue = val
+  // watches name and suggests auto completed names if it is a business account.
+  // similar to PPR - watch logic
+  onOrgNameChange () {
+    // suggest auto complete values
+    if (this.enableOrgNameAutoComplete && this.isBusinessAccount) {
+      if (this.name) {
+        this.autoCompleteSearchValue = this.name
       }
-      this.autoCompleteIsActive = val !== ''
+      this.autoCompleteIsActive = this.name !== ''
     }
-    // Incase it is a premium linked account, we need to update org name and clear parent duplicate name error
-    if (this.premiumLinkedAccount) {
+
+    // Incase it is a premium linked account, we need to update org name and clear parent duplicate name error (exclusive for linked premium sceanrio)
+    if (this.premiumLinkedAccount && this.bcolDuplicateNameErrorMessage) {
       this.clearErrors()
     }
+
+    // emit the update value to the parent
+    this.onOrgBusinessTypeChange()
   }
 
-  getUpdatedOrgBusinessType () {
-    // Construct and emit OrgBusinessType object and valid state to parent
+  onOrgBusinessTypeChange () {
     this.$nextTick(() => {
-      const orgBusinessType: OrgBusinessType = {
-        name: this.name,
-        isBusinessAccount: this.isBusinessAccount,
-        ...((this.govmAccount || this.isBusinessAccount) && { branchName: this.branchName }),
-        ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize })
-      }
-      const isFormValid = this.$refs.accountInformationForm?.validate()
-      this.emitValid(isFormValid)
-      if (isFormValid) {
-        this.emitAccountInfo(orgBusinessType)
-      }
+      this.emitUpdatedOrgBusinessType()
     })
   }
 }

@@ -50,7 +50,10 @@ export interface Organization {
   suspendedOn?: string,
   accountStatus?: string,
   suspensionReasonCode?: string,
-  branchName?: string
+  branchName?: string,
+  isBusinessAccount?: boolean,
+  businessType?: string,
+  businessSize?: string
 }
 
 export interface PADInfo {

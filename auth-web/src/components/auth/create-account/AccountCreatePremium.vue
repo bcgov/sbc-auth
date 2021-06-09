@@ -21,7 +21,6 @@
 
       <fieldset class="org-business-type">
         <account-business-type
-        :bcolAccountDetailsOrgName="bcolAccountDetailsOrgName"
         :saving="saving"
         :premiumLinkedAccount="true"
         :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
@@ -175,7 +174,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private orgBusinessTypeLocal: OrgBusinessType = {}
   private isOrgBusinessTypeValid: boolean = false
-  private bcolAccountDetailsOrgName: string = null
 
   private get isExtraProvUser () {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
@@ -223,7 +221,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private updateOrgNameAndClearErrors () {
     this.bcolDuplicateNameErrorMessage = ''
     this.errorMessage = ''
-    this.setCurrentOrganizationName(this.orgBusinessTypeLocal.name)
   }
 
   private async save () {
@@ -237,9 +234,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }) {
     // sync local tracking object and update child AccountBusinessType with new org name
     const orgName = details.bcolAccountDetails.orgName
-    this.bcolAccountDetailsOrgName = orgName
     this.orgBusinessTypeLocal.name = orgName
-    // this.orgName = details.bcolAccountDetails.orgName
     var org: Organization = {
       id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
@@ -314,6 +309,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
     this.orgBusinessTypeLocal = JSON.parse(JSON.stringify(orgBusinessType))
+    this.setCurrentOrganizationName(this.orgBusinessTypeLocal.name)
   }
 
   private checkOrgBusinessTypeValid (isValid) {
