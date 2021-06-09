@@ -1,4 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import ConfigHelper from '@/util/config-helper'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
@@ -16,6 +17,10 @@ document.body.setAttribute('data-app', 'true')
 
 describe('DecideBusinessView.vue', () => {
   let wrapper: any
+  var ob = {
+    'ENTITY_SELECTOR_URL': 'https://entity-selection-dev.apps.silver.devops.gov.bc.ca/'
+  }
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -29,6 +34,8 @@ describe('DecideBusinessView.vue', () => {
       router,
       vuetify
     })
+
+    // wrapper.vm.$data.selectorWizardUrl = ConfigHelper.getEntitySelectorUrl()
   })
 
   afterEach(() => {
