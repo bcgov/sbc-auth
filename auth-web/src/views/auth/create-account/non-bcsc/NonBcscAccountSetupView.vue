@@ -215,6 +215,8 @@ export default class NonBcscAccountSetupView extends Vue {
         this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true }
         this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true }
       }
+    } else {
+      this.setViewOnlyMode('')
     }
   }
 
