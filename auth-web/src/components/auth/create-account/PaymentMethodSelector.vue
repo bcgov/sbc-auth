@@ -9,6 +9,9 @@
       :currentSelectedPaymentMethod="currentOrgPaymentType"
       @payment-method-selected="setSelectedPayment"
       @is-pad-valid="setPADValid"
+      :isInitialTOSAccepted="readOnly"
+      :isInitialAcknowledged="readOnly"
+      v-display-mode
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
      <v-row>
@@ -77,6 +80,8 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   private readonly currentOrgPaymentType!: string
   private selectedPaymentMethod: string = ''
   private isPADValid: boolean = false
+  // need toi show TOS as checked in stepper BCEID re-upload time.
+  @Prop({ default: false }) readOnly: boolean
 
   private goBack () {
     this.stepBack()

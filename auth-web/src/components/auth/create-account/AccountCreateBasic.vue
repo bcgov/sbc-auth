@@ -1,6 +1,6 @@
 <template>
   <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
-    <fieldset class="auto-complete-relative">
+    <fieldset class="auto-complete-relative" v-display-mode>
 
       <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
       <legend class="mb-3"  v-else>Enter an Account Name</legend>
@@ -35,7 +35,7 @@
         :readonly="govmAccount"
       />
     </fieldset>
-    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
+    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep " v-display-mode>
       <legend class="mb-3">Mailing Address</legend>
       <base-address-form
         ref="mailingAddress"
@@ -162,6 +162,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       this.orgName = this.currentOrganization.name
       this.branchName = this.currentOrganization.branchName
     }
+
     if (this.enablePaymentMethodSelectorStep) {
       this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
     }
@@ -195,7 +196,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.isFormValid()) {
       // if its not account change , do check for duplicate
       // if its account change , check if user changed the already existing name
-      const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization?.name)
+      // const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization?.name)
+      // changed this for accomadating bceid account re-upload
+      const checkNameAVailability = (this.orgName !== this.currentOrganization?.name)
+
       // no need to check name if govmAccount
       if (checkNameAVailability && !this.govmAccount) {
         const available = await this.isOrgNameAvailable(this.orgName)
@@ -226,8 +230,8 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
         if (this.govmAccount) {
           org = { ...org, ...{ branchName: this.branchName, id: this.currentOrganization.id } }
         }
-
-        this.setCurrentOrganization(org)
+        // removed this to avoid over writing current or details, which need to show in all page.
+        // this.setCurrentOrganization(org)
         // check if the name is avaialble
         this.stepForward()
       }

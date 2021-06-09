@@ -14,6 +14,7 @@ import Vue from 'vue'
 import { Vue as VueIntegration } from '@sentry/integrations'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
+import displayMode from '@/directives/displayMode'
 import { getRoutes } from './routes/router'
 import i18n from './plugins/i18n'
 import router from './routes/index'
@@ -65,5 +66,6 @@ function renderVue () {
     render: (h) => h(App)
   }).$mount('#app')
   Vue.directive('can', can)
+  Vue.directive('displayMode', displayMode)
   router.addRoutes(getRoutes())
 }

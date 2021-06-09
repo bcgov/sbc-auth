@@ -12,7 +12,7 @@
     </template>
     <template v-else>
       <template v-if="productList && productList.length > 0">
-        <div v-for="product in productList" :key="product.code">
+        <div v-for="product in productList" :key="product.code" v-display-mode>
           <Product
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
@@ -92,6 +92,8 @@ const userModule = namespace('user')
 export default class SelectProductService extends Mixins(NextPageMixin, Steppable) {
   @Prop({ default: false }) isStepperView: boolean
   @Prop({ default: false }) noBackButton: boolean
+  @Prop({ default: false }) readOnly: boolean
+  @Prop({ default: undefined }) orgId: number
 
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
@@ -101,6 +103,9 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   @OrgModule.Action('getProductList') public getProductList!:() =>Promise<OrgProduct>
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
   @OrgModule.Action('resetoCurrentSelectedProducts') public resetoCurrentSelectedProducts!:() =>Promise<void>
+  @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
+  @OrgModule.Action('setSubscribedProducts') public setSubscribedProducts!:() =>Promise<OrgProduct>
+
   @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   public isLoading: boolean = false
@@ -111,7 +116,13 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   }
   private async setup () {
     this.isLoading = true
-    await this.getProductList()
+    if (this.readOnly) {
+      await this.getOrgProducts(this.orgId)
+      this.setSubscribedProducts()
+    } else {
+      await this.getProductList()
+    }
+
     this.isLoading = false
   }
 

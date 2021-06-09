@@ -244,4 +244,8 @@ export enum FeeCodes {
     PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }
 
+export enum DisplayModeValues{
+    VIEW_ONLY = 'VIEW_ONLY'
+}
+
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5

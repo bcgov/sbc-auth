@@ -9,6 +9,7 @@
         :stepper-configuration="accountStepperConfig"
         @final-step-action="verifyAndCreateAccount"
         :isLoading="isLoading"
+        ref="stepper"
       ></Stepper>
     </v-card>
     <!-- Alert Dialog (Error) -->
@@ -37,14 +38,15 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LDFlags, PaymentTypes } from '@/util/constants'
-import { Component, Vue } from 'vue-property-decorator'
-import { Member, Organization, PADInfoValidation } from '@/models/Organization'
+import { AccessType, DisplayModeValues, LDFlags, PaymentTypes } from '@/util/constants'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import { Address } from '@/models/address'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -53,6 +55,8 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
+import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -74,10 +78,16 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
       'userContact'
     ]),
     ...mapState('org', [
-      'currentOrgPaymentType'
+      'currentOrgPaymentType',
+      'currentOrganization'
     ])
+
   },
   methods: {
+    ...mapMutations('org', [
+      'setCurrentOrganizationType',
+      'setViewOnlyMode'
+    ]),
     ...mapActions('user',
       [
         'createUserContact',
@@ -91,11 +101,14 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
         'createOrg',
         'validatePADInfo',
         'syncMembership',
-        'syncOrganization'
+        'syncOrganization',
+        'syncAddress',
+        'getOrgPayments'
       ])
   }
 })
-export default class NonBcscAccountSetupView extends Vue {
+export default class NonBcscAccountSetupView extends Mixins(Steppable) {
+  @Prop({ default: '' }) private orgId: number;
   private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
@@ -108,12 +121,20 @@ export default class NonBcscAccountSetupView extends Vue {
   private readonly getUserProfile!: (identifer: string) => User
   readonly syncOrganization!: (orgId: number) => Promise<Organization>
   readonly syncMembership!: (orgId: number) => Promise<Member>
+  private readonly syncAddress!: () => Address
+  private readonly getOrgPayments!: () => OrgPaymentDetails
+  private readonly setCurrentOrganizationType!: (orgType: string) => void
+  private readonly setViewOnlyMode!: (mode: string) => void
+  private readonly currentOrganization!: Organization
+
   private errorTitle = 'Account creation failed'
   private errorText = ''
   private isLoading: boolean = false
+  private readOnly:boolean = false
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: ModalDialog,
+    stepper: HTMLFormElement,
   }
 
   private accountStepperConfig: Array<StepConfiguration> =
@@ -175,6 +196,28 @@ export default class NonBcscAccountSetupView extends Vue {
       this.accountStepperConfig[3].alternate.component = PremiumChooser
     }
   }
+  private async mounted () {
+    // on re-upload
+    this.readOnly = !!this.orgId
+    if (this.orgId) {
+      this.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
+      this.$refs.stepper.jumpToStep(3)
+      const orgId = this.orgId
+      await this.syncOrganization(orgId)
+      await this.syncAddress()
+      await this.getOrgPayments()
+
+      this.setCurrentOrganizationType(this.currentOrganization.orgType)
+
+      this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
+      this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true, orgId }
+
+      if (this.enablePaymentMethodSelectorStep) {
+        this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true }
+        this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true }
+      }
+    }
+  }
 
   private get enablePaymentMethodSelectorStep (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
@@ -221,13 +264,21 @@ export default class NonBcscAccountSetupView extends Vue {
   private async createAccount () {
     this.isLoading = true
     try {
-      await this.createAffidavit()
-      await this.updateUserFirstAndLastName()
-      const organization = await this.createOrg()
-      await this.saveOrUpdateContact()
-      await this.getUserProfile('@me')
-      await this.syncOrganization(organization.id)
-      await this.syncMembership(organization.id)
+      // normal account flow
+      if (!this.readOnly) {
+        await this.createAffidavit()
+        await this.updateUserFirstAndLastName()
+        const organization = await this.createOrg()
+        await this.saveOrUpdateContact()
+        await this.getUserProfile('@me')
+        await this.syncOrganization(organization.id)
+        await this.syncMembership(organization.id)
+      } else {
+        // re-upload final submission valeus here
+        await this.createAffidavit()
+        await this.saveOrUpdateContact()
+      }
+
       this.$store.commit('updateHeader')
       this.$router.push('/setup-non-bcsc-account-success')
     } catch (err) {

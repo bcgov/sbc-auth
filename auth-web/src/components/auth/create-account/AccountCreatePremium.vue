@@ -1,14 +1,14 @@
 <template>
-  <v-form ref="createAccountInfoForm" lazy-validation data-test="form-stepper-premium-wrapper">
-    <h3 class="mt-n1 mb-5">Link with an existing BC Online account</h3>
+  <v-form ref="createAccountInfoForm" lazy-validation data-test="form-stepper-premium-wrapper" >
+    <h3 class="mt-n1 mb-5" v-display-mode>Link with an existing BC Online account</h3>
 
-    <div v-show="!linked">
+    <div v-show="!linked" v-display-mode>
       <p class="mb-4">Linking accounts will import your organization’s contact and drawdown account information. Linking accounts <strong>will not import</strong> your existing users or any businesses you manage. You can invite team members and add businesses once your account is set up successfully.</p>
       <p class="mb-8">You must be the <strong>Prime Contact</strong> to link this account with your existing BC Online account.</p>
       <BcolLogin @account-link-successful="onLink"></BcolLogin>
     </div>
 
-    <template v-if="linked">
+    <div v-if="linked" v-display-mode>
       <p class="mb-8">
         The following information will be imported from your existing BC Online account. Review your account <br> information below and update if needed.
       </p>
@@ -67,7 +67,7 @@
       <v-alert type="error" class="mb-6" v-show="errorMessage" data-test="div-premium-error">
         {{ errorMessage }}
       </v-alert>
-    </template>
+    </div>
 
     <v-divider class="mt-4 mb-10"></v-divider>
 
@@ -174,6 +174,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
+  @Prop({ default: false }) readOnly: boolean
   private orgName = ''
   private orgNameReadOnly = true
   private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
@@ -196,7 +197,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   get grantAccess () {
-    return this.currentOrganization?.grantAccess
+    return this.readOnly ? true : this.currentOrganization?.grantAccess
   }
   set grantAccess (grantAccess: boolean) {
     this.setGrantAccess(grantAccess)
@@ -304,7 +305,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
                     'An error occurred while attempting to create your account.'
       }
     } else {
-      const isValidName = await this.validateAccountNameUnique()
+      const isValidName = this.readOnly ? true : await this.validateAccountNameUnique()
       if (isValidName) {
         this.stepForward()
       } else {
