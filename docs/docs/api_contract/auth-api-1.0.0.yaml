@@ -1074,6 +1074,9 @@ paths:
                     name: SAMPLE PREMIUM ACCOUNT
                     orgType: PREMIUM
                     orgStatus: ACTIVE
+                    businessType: LAW
+                    businessSize: 2-5
+                    businessName: SAMPLE PREMIUM ACCOUNT
         '404':
           description: Not Found
           content:
@@ -4776,6 +4779,12 @@ components:
           example:
             - ACTIVE
           pattern: ^(.*)$
+        businessName:
+          type: string
+        businessType:
+          type: string
+        businessSize:
+          type: string
       required:
         - created
         - created_by

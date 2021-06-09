@@ -60,7 +60,7 @@ class Product:
         code_from_cache = cache.get(code)
         if code_from_cache:
             return code_from_cache
-        product_code_model: ProductCodeModel = ProductCodeModel.find_by_id(code)
+        product_code_model: ProductCodeModel = ProductCodeModel.find_by_code(code)
         return getattr(product_code_model, 'type_code', '')
 
     @staticmethod

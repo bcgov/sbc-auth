@@ -52,6 +52,8 @@ from .task import Task
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
+from .business_size_code import BusinessSizeCode
+from .business_type_code import BusinessTypeCode
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)

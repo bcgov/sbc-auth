@@ -16,7 +16,6 @@
 
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
-
 import json
 from unittest.mock import patch
 
@@ -41,7 +40,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 
 
 @pytest.mark.parametrize('org_info', [TestOrgInfo.org1, TestOrgInfo.org_onlinebanking, TestOrgInfo.org_with_products,
-                                      TestOrgInfo.org_regular])
+                                      TestOrgInfo.org_regular, TestOrgInfo.org_with_all_info])
 def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -583,6 +582,18 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     actual_mailing_address = org_with_mailing_address.get('mailingAddress')
     assert actual_mailing_address.get('city') == dictionary['contacts'][0].get('city')
     assert actual_mailing_address.get('postalCode') == dictionary['contacts'][0].get('postalCode')
+
+    # Update other org details
+    # update mailing address
+    all_org_info = TestOrgInfo.org_with_all_info
+    all_org_info['name'] = 'someame'
+    rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(all_org_info), headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('businessType') == all_org_info['businessType']
+    assert rv.json.get('businessSize') == all_org_info['businessSize']
+    assert rv.json.get('isBusinessAccount') == all_org_info['isBusinessAccount']
+    assert rv.json.get('businessName') == all_org_info['name']
 
 
 def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_mock):
