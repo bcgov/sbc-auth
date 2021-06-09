@@ -1,5 +1,4 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import ConfigHelper from '@/util/config-helper'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
