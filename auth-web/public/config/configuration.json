@@ -16,5 +16,6 @@
   "AFFIDAVIT_FILE_SIZE": "73KB",
   "PAYMENT_PAYEE_NAME": "BC Registries and Online Services",
   "SENTRY_DSN": "",
-  "VON_API_URL": "https://orgbook.gov.bc.ca/api/v3"
+  "VON_API_URL": "https://orgbook.gov.bc.ca/api/v3",
+  "ENTITY_SELECTOR_URL": "https://entity-selection-dev.apps.silver.devops.gov.bc.ca/"
 }
