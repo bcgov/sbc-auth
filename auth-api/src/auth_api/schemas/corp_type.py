@@ -15,11 +15,10 @@
 from marshmallow import fields
 
 from auth_api.models import CorpType as CorpTypeModel
+from auth_api.models import ma
 
-from .base_schema import BaseSchema
 
-
-class CorpTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class CorpTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the CorpType model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

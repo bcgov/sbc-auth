@@ -782,7 +782,7 @@ def test_create_org_with_linked_bcol_account(session, keycloak_mock, monkeypatch
     dictionary = org.as_dict()
 
     assert dictionary['name'] == TestOrgInfo.bcol_linked()['name']
-    assert dictionary['orgType'] == OrgType.PREMIUM.value
+    assert dictionary['org_type'] == OrgType.PREMIUM.value
     assert dictionary['bcol_user_id'] is not None
     assert dictionary['bcol_account_id'] is not None
     assert dictionary['bcol_account_name'] is not None
@@ -807,7 +807,7 @@ def test_create_org_with_different_name_than_bcol_account(session, keycloak_mock
     dictionary = org.as_dict()
 
     assert dictionary['name'] == TestOrgInfo.bcol_linked_different_name()['name']
-    assert dictionary['orgType'] == OrgType.PREMIUM.value
+    assert dictionary['org_type'] == OrgType.PREMIUM.value
     assert dictionary['bcol_user_id'] is not None
     assert dictionary['bcol_account_id'] is not None
     assert dictionary['bcol_account_name'] is not None

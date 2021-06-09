@@ -26,6 +26,7 @@ from auth_api.config import get_named_config
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import AccessType, IdpHint, LoginSource, OrgType, PaymentMethod, ProductCode
 
+
 fake = Faker()
 
 CONFIG = get_named_config('testing')
@@ -485,6 +486,18 @@ class TestOrgInfo(dict, Enum):
             'paymentMethod': 'ONLINE_BANKING'
         },
         'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}]
+    }
+
+    org_with_all_info = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR.value,
+        'paymentInfo': {
+            'paymentMethod': 'ONLINE_BANKING'
+        },
+        'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}],
+        'businessType': 'LAW',
+        'businessSize': '2-5',
+        'isBusinessAccount': True
     }
 
     @staticmethod
