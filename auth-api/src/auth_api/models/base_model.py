@@ -93,15 +93,12 @@ class BaseModel(db.Model):
             allowed = key not in readonly and key not in _excluded_fields
             exists = key in kwargs
             is_relationship = key in relationships
-            print('key:', key, '  allowed: ', allowed, '  exists: ', exists, '  is_relationship: ', is_relationship)
 
             if allowed and exists and not is_relationship:
                 val = getattr(self, key)
-                print('key ', key, val)
                 if val != kwargs[key]:
                     changes[key] = {'old': val, 'new': kwargs[key]}
                     setattr(self, key, kwargs[key])
-        print('changes ', changes)
         return changes
 
     @staticmethod
