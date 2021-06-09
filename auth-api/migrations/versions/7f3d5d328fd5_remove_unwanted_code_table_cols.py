@@ -25,12 +25,6 @@ def upgrade():
     op.drop_column('affidavit_statuses', 'created_by_id')
     op.drop_column('affidavit_statuses', 'created')
     op.drop_column('affidavit_statuses', 'modified_by_id')
-    op.alter_column('business_size_codes', 'default',
-                    existing_type=sa.BOOLEAN(),
-                    nullable=False)
-    op.alter_column('business_type_codes', 'default',
-                    existing_type=sa.BOOLEAN(),
-                    nullable=False)
     op.drop_constraint('corp_type_created_by_id_fkey', 'corp_types', type_='foreignkey')
     op.drop_constraint('corp_type_modified_by_id_fkey', 'corp_types', type_='foreignkey')
     op.drop_column('corp_types', 'modified')
@@ -192,12 +186,6 @@ def downgrade():
     op.add_column('corp_types', sa.Column('modified', postgresql.TIMESTAMP(), autoincrement=False, nullable=True))
     op.create_foreign_key('corp_type_modified_by_id_fkey', 'corp_types', 'users', ['modified_by_id'], ['id'])
     op.create_foreign_key('corp_type_created_by_id_fkey', 'corp_types', 'users', ['created_by_id'], ['id'])
-    op.alter_column('business_type_codes', 'default',
-                    existing_type=sa.BOOLEAN(),
-                    nullable=True)
-    op.alter_column('business_size_codes', 'default',
-                    existing_type=sa.BOOLEAN(),
-                    nullable=True)
     op.add_column('affidavit_statuses', sa.Column('modified_by_id', sa.INTEGER(), autoincrement=False, nullable=True))
     op.add_column('affidavit_statuses',
                   sa.Column('created', postgresql.TIMESTAMP(), autoincrement=False, nullable=True))
