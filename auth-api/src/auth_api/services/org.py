@@ -53,6 +53,7 @@ from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
 
+
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
@@ -403,11 +404,16 @@ class Org:  # pylint: disable=too-many-public-methods
             else:
                 Org.add_contact_to_org(mailing_address, self._model)
 
+        # Check for other variables
+        if org_info:  # Once all org info are popped and variables remains, update the org.
+            has_org_updates = True
+
         if has_org_updates:
             excluded = ('type_code',) if has_status_changing else EXCLUDED_FIELDS
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
-            # send mail after the org is committed to DB
-            Org.send_staff_review_account_reminder(self._model.id, origin_url)
+            if is_govm_account_creation:
+                # send mail after the org is committed to DB
+                Org.send_staff_review_account_reminder(self._model.id, origin_url)
 
         Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         current_app.logger.debug('>update_org ')

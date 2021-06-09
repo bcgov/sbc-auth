@@ -15,10 +15,10 @@
 
 from auth_api.models import InvitationStatus as InvitationStatusModel
 
-from .base_schema import BaseSchema
+from auth_api.models import ma
 
 
-class InvitationStatusSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class InvitationStatusSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Invitation Status model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

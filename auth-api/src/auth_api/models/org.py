@@ -54,6 +54,13 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
                                                            ondelete='SET NULL',
                                                            name='orgs_suspension_reason_code_fkey'), nullable=True)
     has_api_access = Column('has_api_access', Boolean(), default=False, nullable=True)
+    business_type = Column(String(15), ForeignKey('business_type_codes.code',
+                                                  ondelete='SET NULL',
+                                                  name='orgs_business_type_fkey'), nullable=True)
+    business_size = Column(String(15), ForeignKey('business_size_codes.code',
+                                                  ondelete='SET NULL',
+                                                  name='orgs_business_size_fkey'), nullable=True)
+    is_business_account = Column('is_business_account', Boolean(), default=False)
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')

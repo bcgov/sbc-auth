@@ -15,10 +15,10 @@
 
 from auth_api.models import SuspensionReasonCode as SuspensionReasonCodeModel
 
-from .base_schema import BaseSchema
+from auth_api.models import ma
 
 
-class SuspensionReasonCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class SuspensionReasonCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the SuspensionReasonCode model."""
 
     class Meta:  # pylint: disable=too-few-public-methods
