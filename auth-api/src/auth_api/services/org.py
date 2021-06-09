@@ -41,9 +41,6 @@ from auth_api.utils.enums import (
     TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
-
-from ..utils.account_mailer import publish_to_mailer
-from ..utils.user_context import UserContext, user_context
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -52,6 +49,8 @@ from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
+from ..utils.account_mailer import publish_to_mailer
+from ..utils.user_context import UserContext, user_context
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -132,7 +131,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
                                                           AccessType.REGULAR_BCEID.value) \
-            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
+                                          and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
         if is_bceid_status_handling_needed:
             Org._handle_bceid_status_and_notification(org)
 
@@ -402,6 +401,10 @@ class Org:  # pylint: disable=too-many-public-methods
                 contact.save()
             else:
                 Org.add_contact_to_org(mailing_address, self._model)
+
+        # Check for other variables
+        if org_info:  # Once all org info are popped and variables remains, update the org.
+            has_org_updates = True
 
         if has_org_updates:
             excluded = ('type_code',) if has_status_changing else EXCLUDED_FIELDS

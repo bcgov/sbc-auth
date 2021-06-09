@@ -11,17 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Manager for membership type schema and export."""
+"""This manages a Business Size Code master records.
 
-from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
+It defines the size of business the account is primarily doing.
+"""
 
-from auth_api.models import ma
+from .base_model import BaseCodeModel
 
 
-class MembershipStatusCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
-    """This is the schema for the MembershipStatusCode model."""
+class BusinessSizeCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
+    """Business Type Code to store all the available business sizes to add to the account.
 
-    class Meta:  # pylint: disable=too-few-public-methods
-        """Maps all of the MembershipType fields to a default schema."""
+    That is supported by auth system.
+    """
 
-        model = MembershipStatusCodeModel
+    __tablename__ = 'business_size_codes'

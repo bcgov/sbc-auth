@@ -22,7 +22,6 @@ from sqlalchemy.orm import contains_eager, relationship
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
-
 from .base_model import VersionedModel
 from .contact import Contact
 from .contact_link import ContactLink
@@ -52,8 +51,15 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     suspended_on = Column(DateTime, nullable=True)
     suspension_reason_code = Column(String(15), ForeignKey('suspension_reason_codes.code',
                                                            ondelete='SET NULL',
-                                                           name='orgs_suspension_reason_code_fkey'), nullable=True)
+                                                           name='orgs_suspension_reason_fkey'), nullable=True)
     has_api_access = Column('has_api_access', Boolean(), default=False, nullable=True)
+    business_type = Column(String(15), ForeignKey('business_type_codes.code',
+                                                  ondelete='SET NULL',
+                                                  name='orgs_business_type_fkey'), nullable=True)
+    business_size = Column(String(15), ForeignKey('business_size_codes.code',
+                                                  ondelete='SET NULL',
+                                                  name='orgs_business_size_fkey'), nullable=True)
+    is_business_account = Column('is_business_account', Boolean(), default=False)
 
     contacts = relationship('ContactLink', lazy='select')
     org_type = relationship('OrgType')
@@ -82,6 +88,10 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
                 org.org_type = OrgType.get_default_type()
             org.org_status = OrgStatus.get_default_status()
             org.flush()
+
+            print(org.is_business_account)
+            print(org.business_type)
+            print(org.business_size)
 
             return org
         return None
@@ -183,6 +193,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         """Update this org with the provided dictionary."""
         # Update from provided dictionary, but specify additional fields not to update.
         self.update_from_dict(**org_info, _exclude=exclude)
+        print(self.business_size, self.business_type, self.is_business_account)
         self.save()
 
     def delete(self):

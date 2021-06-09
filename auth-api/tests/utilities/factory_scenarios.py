@@ -487,6 +487,18 @@ class TestOrgInfo(dict, Enum):
         'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}]
     }
 
+    org_with_all_info = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR.value,
+        'paymentInfo': {
+            'paymentMethod': 'ONLINE_BANKING'
+        },
+        'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}],
+        'businessType': 'LAW',
+        'businessSize': '2-5',
+        'isBusinessAccount': True
+    }
+
     @staticmethod
     def bcol_linked():
         """Return org info for bcol linked info."""
