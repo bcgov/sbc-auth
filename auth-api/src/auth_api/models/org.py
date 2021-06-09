@@ -22,6 +22,7 @@ from sqlalchemy.orm import contains_eager, relationship
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
+
 from .base_model import VersionedModel
 from .contact import Contact
 from .contact_link import ContactLink
