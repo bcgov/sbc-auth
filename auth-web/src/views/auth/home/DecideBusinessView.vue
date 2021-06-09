@@ -32,6 +32,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 
 @Component({
@@ -42,7 +43,7 @@ import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 export default class DecideBusinessView extends Vue {
   private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-' +
     'small-business/'
-  private readonly selectorWizardUrl = `https://entity-selection-dev.apps.silver.devops.gov.bc.ca`
+  private readonly selectorWizardUrl = ConfigHelper.getEntitySelectorUrl()
   private readonly bulletPoints: Array<any> = [
     {
       text: `Decide which business structure is most appropriate for you. A few options are: a sole proprietorship,
