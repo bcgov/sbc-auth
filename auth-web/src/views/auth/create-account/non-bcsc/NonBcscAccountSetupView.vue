@@ -55,7 +55,6 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
@@ -107,8 +106,8 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
       ])
   }
 })
-export default class NonBcscAccountSetupView extends Mixins(Steppable) {
-  @Prop({ default: '' }) private orgId: number;
+export default class NonBcscAccountSetupView extends Vue {
+  @Prop({ default: undefined }) private readonly orgId: number; // org id used for bceid re-uplaod
   private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
@@ -130,7 +129,7 @@ export default class NonBcscAccountSetupView extends Mixins(Steppable) {
   private errorTitle = 'Account creation failed'
   private errorText = ''
   private isLoading: boolean = false
-  private readOnly:boolean = false
+  private readOnly = false
 
   $refs: {
     errorDialog: ModalDialog,
@@ -204,8 +203,8 @@ export default class NonBcscAccountSetupView extends Mixins(Steppable) {
       this.$refs.stepper.jumpToStep(3)
       const orgId = this.orgId
       await this.syncOrganization(orgId)
-      await this.syncAddress()
-      await this.getOrgPayments()
+      this.syncAddress()
+      this.getOrgPayments()
 
       this.setCurrentOrganizationType(this.currentOrganization.orgType)
 
@@ -227,7 +226,7 @@ export default class NonBcscAccountSetupView extends Mixins(Steppable) {
     this.isLoading = true
     let isProceedToCreateAccount = false
     if (this.currentOrgPaymentType === PaymentTypes.PAD) {
-      isProceedToCreateAccount = await this.verifyPAD()
+      isProceedToCreateAccount = this.readOnly ? true : await this.verifyPAD()
     } else {
       isProceedToCreateAccount = true
     }
@@ -275,8 +274,8 @@ export default class NonBcscAccountSetupView extends Mixins(Steppable) {
         await this.syncMembership(organization.id)
       } else {
         // re-upload final submission valeus here
-        await this.createAffidavit()
         await this.saveOrUpdateContact()
+        await this.createAffidavit()
       }
 
       this.$store.commit('updateHeader')

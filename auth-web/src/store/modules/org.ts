@@ -1,4 +1,4 @@
-import { Account, AccountStatus, Actions, DisplayModeValues, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
+import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
 import {
   AccountFee,
   AddUserBody,
@@ -84,7 +84,7 @@ export default class OrgModule extends VuexModule {
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
   isCurrentSelectedProductsPremiumOnly = false
   resetAccountTypeOnSetupAccount = false // this flag use to check need to reset accounttype select when moving back and forth in stepper
-  vDisplayModeValue:string = ''// DisplayModeValues.VIEW_ONLY
+  vDisplayModeValue = ''// DisplayModeValues.VIEW_ONLY
 
   @Mutation
   public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {

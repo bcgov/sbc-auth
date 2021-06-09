@@ -1,4 +1,3 @@
-import ConfigHelper from 'sbc-common-components/src/util/config-helper'
 import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { DisplayModeValues } from '@/util/constants'
@@ -41,7 +40,7 @@ function checkViewOnlyMode (binding: DirectiveBinding, el: HTMLElement, node: VN
   }
   // if viewOnly, disable div
   if (viewOnly) {
-    // TODO tab still works.. can tab to the text field and make it work
+    // Add disable class to element
     customeEl.classList.add('v-card--disabled')
     customeEl.style.pointerEvents = 'none'
   }
