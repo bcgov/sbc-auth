@@ -1,40 +1,12 @@
 <template>
   <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
-    <fieldset class="auto-complete-relative">
-
-      <legend class="mb-3"  v-if="govmAccount">Enter Ministry Information for this account</legend>
-      <legend class="mb-3"  v-else>Enter an Account Name</legend>
-      <v-slide-y-transition>
-        <div v-show="errorMessage">
-          <v-alert type="error" icon="mdi-alert-circle-outline">{{ errorMessage }}</v-alert>
-        </div>
-      </v-slide-y-transition>
-      <v-text-field
-        filled
-        :label="govmAccount ? 'Ministry Name' : 'Account Name'"
-        v-model.trim="orgName"
-        :rules="orgNameRules"
-        :disabled="saving"
-        data-test="input-org-name"
-        :readonly="govmAccount"
-        autocomplete="off"
-      />
-      <org-name-auto-complete
-      v-if="enableOrgNameAutoComplete"
-      :searchValue="autoCompleteSearchValue"
-      :setAutoCompleteIsActive="autoCompleteIsActive"
-      @auto-complete-value="setAutoCompleteSearchValue">
-      </org-name-auto-complete>
-      <v-text-field
-        filled
-        label="Branch/Division (If applicable)"
-        v-model.trim="branchName"
-        :disabled="saving"
-        data-test="input-branch-name"
-        v-if="govmAccount"
-        :readonly="govmAccount"
-      />
-    </fieldset>
+    <account-business-type
+    :govmAccount="govmAccount"
+    :errorMessage="errorMessage"
+    :saving="saving"
+    @update:org-business-type="updateOrgBusinessType"
+    @valid="checkOrgBusinessTypeValid">
+    </account-business-type>
     <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
       <legend class="mb-3">Mailing Address</legend>
       <base-address-form
@@ -66,7 +38,7 @@
           color="primary"
           class="mr-3 save-btn"
           :loading="saving"
-          :disabled="!isFormValid() || saving  || !isBaseAddressValid"
+          :disabled="!isFormValid() || saving"
           @click="save"
           data-test="save-button"
         >
@@ -89,23 +61,23 @@
 <script lang="ts">
 import { Account, Actions, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
+import { Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgModule from '@/store/modules/org'
-import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    AccountBusinessType,
     BaseAddressForm,
-    ConfirmCancelButton,
-    OrgNameAutoComplete
+    ConfirmCancelButton
   },
   computed: {
     ...mapState('org', [
@@ -133,10 +105,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
-  private orgName: string = ''
-  private branchName: string = ''
-  private autoCompleteIsActive: boolean = false
-  private autoCompleteSearchValue: string = ''
 
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
@@ -145,23 +113,20 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  private orgBusinessTypeLocal: OrgBusinessType = {}
 
   private baseAddressSchema: {} = addressSchema
+  private isOrgBusinessTypeValid = false
 
   $refs: {
     createAccountInfoForm: HTMLFormElement
   }
 
-  private readonly orgNameRules = [v => !!v || 'An account name is required']
   private isFormValid (): boolean {
-    return !!this.orgName
+    return !!this.isOrgBusinessTypeValid && !!this.isBaseAddressValid
   }
 
   private async mounted () {
-    if (this.currentOrganization) {
-      this.orgName = this.currentOrganization.name
-      this.branchName = this.currentOrganization.branchName
-    }
     if (this.enablePaymentMethodSelectorStep) {
       this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
     }
@@ -171,15 +136,19 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
   }
 
-  private get enableOrgNameAutoComplete (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
-  }
-
   private get address () {
     return this.currentOrgAddress
   }
   private updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
+  }
+
+  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
+    this.orgBusinessTypeLocal = orgBusinessType
+  }
+
+  private checkOrgBusinessTypeValid (isValid) {
+    this.isOrgBusinessTypeValid = !!isValid
   }
 
   private checkBaseAddressValidity (isValid) {
@@ -195,10 +164,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.isFormValid()) {
       // if its not account change , do check for duplicate
       // if its account change , check if user changed the already existing name
-      const checkNameAVailability = !this.isAccountChange || (this.orgName !== this.currentOrganization?.name)
+      const checkNameAVailability = !this.isAccountChange || (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
       // no need to check name if govmAccount
       if (checkNameAVailability && !this.govmAccount) {
-        const available = await this.isOrgNameAvailable(this.orgName)
+        const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
         if (!available) {
           this.errorMessage =
                 'An account with this name already exists. Try a different account name.'
@@ -208,7 +177,13 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       const orgType = (this.isBasicAccount) ? Account.BASIC : Account.PREMIUM
       if (this.isAccountChange) {
         try {
-          const org: Organization = { name: this.orgName, orgType: orgType, id: this.currentOrganization.id }
+          const org: Organization = { name: this.orgBusinessTypeLocal.name,
+            orgType: orgType,
+            id: this.currentOrganization.id,
+            isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
+            businessType: this.orgBusinessTypeLocal.businessType,
+            businessSize: this.orgBusinessTypeLocal.businessSize
+          }
           this.setCurrentOrganization(org)
           this.saving = true
           const organization = await this.changeOrgType('downgrade')
@@ -222,9 +197,16 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           this.errorMessage = 'An error occurred while attempting to create your account.'
         }
       } else {
-        let org: Organization = { name: this.orgName, orgType: orgType }
+        let org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType }
         if (this.govmAccount) {
-          org = { ...org, ...{ branchName: this.branchName, id: this.currentOrganization.id } }
+          org = { ...org, ...{ branchName: this.orgBusinessTypeLocal.branchName, id: this.currentOrganization.id } }
+        }
+        if (this.orgBusinessTypeLocal.isBusinessAccount) {
+          org = { ...org,
+            ...{ branchName: this.orgBusinessTypeLocal.branchName,
+              isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
+              businessSize: this.orgBusinessTypeLocal.businessSize,
+              businessType: this.orgBusinessTypeLocal.businessType } }
         }
 
         this.setCurrentOrganization(org)
@@ -244,23 +226,6 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
 
   private goNext () {
     this.stepForward()
-  }
-
-  private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    if (this.enableOrgNameAutoComplete) {
-      this.autoCompleteIsActive = false
-      this.orgName = autoCompleteSearchValue
-    }
-  }
-
-  @Watch('orgName')
-  getAutoCompleteValues (val: string) {
-    if (this.enableOrgNameAutoComplete) {
-      if (val) {
-        this.autoCompleteSearchValue = val
-      }
-      this.autoCompleteIsActive = val !== ''
-    }
   }
 }
 </script>

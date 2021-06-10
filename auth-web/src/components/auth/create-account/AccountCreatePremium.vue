@@ -19,23 +19,15 @@
         @unlink-account="unlinkAccount"
       ></LinkedBCOLBanner>
 
-      <fieldset class="auto-complete-relative">
-        <v-text-field
-          filled
-          label="Account Name"
-          v-model.trim="orgName"
-          :rules="orgNameRules"
-          :disabled="orgNameReadOnly"
-          :error-messages="bcolDuplicateNameErrorMessage"
-          @change="updateOrgNameAndClearErrors"
-          data-test="input-premium-orgName"
-        />
-        <org-name-auto-complete
-        v-if="enableOrgNameAutoComplete"
-        :searchValue="autoCompleteSearchValue"
-        :setAutoCompleteIsActive="autoCompleteIsActive"
-        @auto-complete-value="setAutoCompleteSearchValue">
-        </org-name-auto-complete>
+      <fieldset class="org-business-type">
+        <account-business-type
+        :saving="saving"
+        :premiumLinkedAccount="true"
+        :bcolDuplicateNameErrorMessage="bcolDuplicateNameErrorMessage"
+        @update:org-business-type="updateOrgBusinessType"
+        @valid="checkOrgBusinessTypeValid"
+        @update:org-name-clear-errors="updateOrgNameAndClearErrors">
+        </account-business-type>
       </fieldset>
 
       <fieldset>
@@ -84,7 +76,7 @@
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn class="mr-3" large depressed color="primary" :loading="saving"
-        :disabled="!grantAccess || saving || !isBaseAddressValid || !isFormValid()"
+        :disabled="!grantAccess || saving || !isFormValid()"
         @click="save"
          data-test="btn-stepper-premium-save">
           <span v-if="!isAccountChange">Next
@@ -104,54 +96,37 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { Account, Actions, LoginSource } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, Member, Organization } from '@/models/Organization'
+import { Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
-import OrgModule from '@/store/modules/org'
-import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
+const UserModule = namespace('user')
 
 @Component({
   components: {
-    OrgNameAutoComplete,
+    AccountBusinessType,
     BcolLogin,
     BaseAddressForm,
     ConfirmCancelButton,
     LinkedBCOLBanner
-  },
-  computed: {
-    ...mapState('org', ['currentOrganization', 'currentOrgAddress']),
-    ...mapState('user', ['userProfile', 'currentUser'])
-  },
-  methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization',
-      'setCurrentOrganizationAddress',
-      'setCurrentOrganizationName',
-      'setGrantAccess',
-      'resetBcolDetails'
-    ]),
-    ...mapActions('org', [
-      'syncMembership',
-      'syncOrganization',
-      'changeOrgType',
-      'isOrgNameAvailable'
-    ])
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {
-  private orgStore = getModule(OrgModule, this.$store)
+  // private orgStore = getModule(OrgModule, this.$store)
   private username = ''
   private password = ''
   private errorMessage: string = ''
@@ -160,29 +135,36 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private bcolDuplicateNameErrorMessage = ''
   private saving = false
   private isBaseAddressValid: boolean = true
-  private readonly currentOrgAddress!: Address
-  private readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  private readonly currentOrganization!: Organization
-  private readonly currentUser!: KCUserProfile
-  private readonly setCurrentOrganization!: (organization: Organization) => void
-  private readonly setCurrentOrganizationName!: (name: string) => void
-  private readonly setCurrentOrganizationAddress!: (address: Address) => void
-  private readonly resetBcolDetails!: () => void
-  private readonly setGrantAccess!: (grantAccess: boolean) => void
-  private readonly changeOrgType!: (action:Actions) => Promise<Organization>
-  private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+
+  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
+  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
+
+  @UserModule.State('userProfile') public userProfile!: User
+  @UserModule.State('currentUser') public currentUser!: KCUserProfile
+
+  @OrgModule.Action('syncMembership') private readonly syncMembership!: (orgId: number) => Promise<Member>
+  @OrgModule.Action('syncOrganization') private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  @OrgModule.Action('changeOrgType') private readonly changeOrgType!: (action:Actions) => Promise<Organization>
+  @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+
+  @OrgModule.Mutation('setCurrentOrganization') private readonly setCurrentOrganization!: (organization: Organization) => void
+  @OrgModule.Mutation('setCurrentOrganizationAddress') private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  @OrgModule.Mutation('setCurrentOrganizationName') private readonly setCurrentOrganizationName!: (name: string) => void
+  @OrgModule.Mutation('resetBcolDetails') private readonly resetBcolDetails!: () => void
+  @OrgModule.Mutation('setGrantAccess') private readonly setGrantAccess!: (grantAccess: boolean) => void
+  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
+
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
-  private orgName = ''
   private orgNameReadOnly = true
   private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
-  private autoCompleteIsActive: boolean = false
-  private autoCompleteSearchValue: string = ''
 
   private baseAddressSchema: {} = addressSchema
 
   private readonly orgNameRules = [v => !!v || 'An account name is required']
+
+  private orgBusinessTypeLocal: OrgBusinessType = {}
+  private isOrgBusinessTypeValid = false
 
   private get isExtraProvUser () {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
@@ -208,13 +190,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly teamNameRules = [v => !!v || 'An account name is required']
 
   private isFormValid (): boolean {
-    return !!this.orgName && !this.errorMessage
-  }
-
-  private async mounted () {
-    if (this.currentOrganization) {
-      this.orgName = this.currentOrganization.name
-    }
+    return !!this.isOrgBusinessTypeValid && !this.errorMessage && !!this.isBaseAddressValid
   }
 
   private get address () {
@@ -236,7 +212,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private updateOrgNameAndClearErrors () {
     this.bcolDuplicateNameErrorMessage = ''
     this.errorMessage = ''
-    this.setCurrentOrganizationName(this.orgName)
   }
 
   private async save () {
@@ -248,7 +223,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     bcolProfile: BcolProfile
     bcolAccountDetails: BcolAccountDetails
   }) {
-    this.orgName = details.bcolAccountDetails.orgName
+    // sync local tracking object and update child AccountBusinessType with new org name
+    const orgName = details.bcolAccountDetails.orgName
+    this.orgBusinessTypeLocal.name = orgName
     var org: Organization = {
       id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
@@ -265,7 +242,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private async validateAccountNameUnique () {
-    const available = await this.isOrgNameAvailable(this.orgName)
+    const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
     if (!available) {
       this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
       this.orgNameReadOnly = false
@@ -321,25 +298,13 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.isBaseAddressValid = !!isValid
   }
 
-  private get enableOrgNameAutoComplete (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
+  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
+    this.orgBusinessTypeLocal = orgBusinessType
+    this.setCurrentOrganizationBusinessType(this.orgBusinessTypeLocal)
   }
 
-  private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
-    if (this.enableOrgNameAutoComplete) {
-      this.autoCompleteIsActive = false
-      this.orgName = autoCompleteSearchValue
-    }
-  }
-
-  @Watch('orgName')
-  getAutoCompleteValues (val: string) {
-    if (this.enableOrgNameAutoComplete) {
-      if (val) {
-        this.autoCompleteSearchValue = val
-      }
-      this.autoCompleteIsActive = val !== ''
-    }
+  private checkOrgBusinessTypeValid (isValid) {
+    this.isOrgBusinessTypeValid = !!isValid
   }
 }
 </script>
