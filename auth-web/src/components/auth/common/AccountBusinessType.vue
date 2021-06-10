@@ -39,7 +39,7 @@
                 </v-slide-y-transition>
                 <v-text-field
                 filled
-                :label="govmAccount ? 'Ministry Name' : isBusinessAccount ? 'Legal Business Name' : 'Account Name'"
+                :label="getOrgNameLabel"
                 v-model.trim="name"
                 :rules="orgNameRules"
                 :disabled="saving || orgNameReadOnly"
@@ -60,7 +60,7 @@
               <v-expand-transition class="branch-detail" data-test="branch-detail">
                 <v-text-field
                 filled
-                :label="govmAccount ? 'Branch/Division (If applicable)' : 'Branch/Division (If optional)'"
+                label="Branch/Division (If applicable)"
                 v-model.trim="branchName"
                 :disabled="saving"
                 data-test="input-branch-name"
@@ -156,14 +156,7 @@ export default class AccountBusinessType extends Vue {
   private readonly orgBusinessTypeRules = [v => !!v || 'A business type is required']
   private readonly orgBusinessSizeRules = [v => !!v || 'A business size is required']
 
-  /*   @Watch('currentOrganization')
-  oncurrentOrganizationChange (value: Organization, oldValue: Organization) {
-    if (value.name !== oldValue.name && this.) {
-      this.name = value.name
-    }
-  } */
-
-  /** Emits an update message, so that the caller can ".sync" with it. */
+  /** Emits an update message, so that we can sync with parent */
   @Emit('update:org-business-type')
   private emitUpdatedOrgBusinessType () {
     const orgBusinessType: OrgBusinessType = {
@@ -178,14 +171,10 @@ export default class AccountBusinessType extends Vue {
   }
 
   /** Emits the validity of the component. */
-  /* tslint:disable:no-empty */
   @Emit('valid')
-  private emitValid (valid: boolean): void { }
-
-  /** Emits a clear errors event to parent (exclusive for premium linked account scenario). */
-  /* tslint:disable:no-empty */
-  @Emit('update:org-name-clear-errors')
-  private clearErrors (): void { }
+  private emitValid (valid: boolean): boolean {
+    return valid
+  }
 
   async mounted () {
     try {
@@ -212,6 +201,10 @@ export default class AccountBusinessType extends Vue {
     return LaunchDarklyService.getFlag(LDFlags.EnableOrgNameAutoComplete) || false
   }
 
+  private get getOrgNameLabel (): string {
+    return this.govmAccount ? 'Ministry Name' : this.isBusinessAccount ? 'Legal Business Name' : 'Account Name'
+  }
+
   private setAutoCompleteSearchValue (autoCompleteSearchValue: string): void {
     if (this.enableOrgNameAutoComplete) {
       this.autoCompleteIsActive = false
@@ -231,8 +224,9 @@ export default class AccountBusinessType extends Vue {
     }
 
     // Incase it is a premium linked account, we need to update org name and clear parent duplicate name error (exclusive for linked premium sceanrio)
+    /** Emits a clear errors event to parent (exclusive for premium linked account scenario). */
     if (this.premiumLinkedAccount && this.bcolDuplicateNameErrorMessage) {
-      this.clearErrors()
+      this.$emit('update:org-name-clear-errors')
     }
 
     // emit the update value to the parent

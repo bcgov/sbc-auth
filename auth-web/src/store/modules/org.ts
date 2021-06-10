@@ -11,6 +11,7 @@ import {
   Member,
   MembershipStatus,
   MembershipType,
+  OrgBusinessType,
   OrgPaymentDetails,
   OrgProduct,
   OrgProductFeeCode,
@@ -285,23 +286,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setCurrentOrganizationIsBusinessAccount (isBusinessAccount: boolean) {
-    this.currentOrganization.isBusinessAccount = isBusinessAccount
-  }
-
-  @Mutation
-  public setCurrentOrganizationBusinessSize (businessSize: string) {
-    this.currentOrganization.businessSize = businessSize
-  }
-
-  @Mutation
-  public setCurrentOrganizationBusinessType (businessType: string) {
-    this.currentOrganization.businessType = businessType
-  }
-
-  @Mutation
-  public setCurrentOrganizationBranchName (branchName: string) {
-    this.currentOrganization.branchName = branchName
+  public setCurrentOrganizationBusinessType (orgBusinessType: OrgBusinessType) {
+    this.currentOrganization = { ...this.currentOrganization, ...orgBusinessType }
   }
 
   @Action({ rawError: true })

@@ -76,7 +76,7 @@
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn class="mr-3" large depressed color="primary" :loading="saving"
-        :disabled="!grantAccess || saving || !isBaseAddressValid || !isFormValid() || !isOrgBusinessTypeValid"
+        :disabled="!grantAccess || saving || !isFormValid()"
         @click="save"
          data-test="btn-stepper-premium-save">
           <span v-if="!isAccountChange">Next
@@ -123,25 +123,6 @@ const UserModule = namespace('user')
     BaseAddressForm,
     ConfirmCancelButton,
     LinkedBCOLBanner
-  },
-  computed: {
-    ...mapState('org', ['currentOrganization', 'currentOrgAddress']),
-    ...mapState('user', ['userProfile', 'currentUser'])
-  },
-  methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization',
-      'setCurrentOrganizationAddress',
-      'setCurrentOrganizationName',
-      'setGrantAccess',
-      'resetBcolDetails'
-    ]),
-    ...mapActions('org', [
-      'syncMembership',
-      'syncOrganization',
-      'changeOrgType',
-      'isOrgNameAvailable'
-    ])
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {
@@ -171,10 +152,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @OrgModule.Mutation('setCurrentOrganizationName') private readonly setCurrentOrganizationName!: (name: string) => void
   @OrgModule.Mutation('resetBcolDetails') private readonly resetBcolDetails!: () => void
   @OrgModule.Mutation('setGrantAccess') private readonly setGrantAccess!: (grantAccess: boolean) => void
-  @OrgModule.Mutation('setCurrentOrganizationIsBusinessAccount') private readonly setCurrentOrganizationIsBusinessAccount!: (isBusinessAccount: boolean) => void
-  @OrgModule.Mutation('setCurrentOrganizationBusinessSize') private readonly setCurrentOrganizationBusinessSize!: (businessSize: string) => void
-  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (businessType: string) => void
-  @OrgModule.Mutation('setCurrentOrganizationBranchName') private readonly setCurrentOrganizationBranchName!: (branchName: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
 
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
@@ -212,7 +190,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly teamNameRules = [v => !!v || 'An account name is required']
 
   private isFormValid (): boolean {
-    return !!this.orgBusinessTypeLocal.name && !this.errorMessage
+    return !!this.isOrgBusinessTypeValid && !this.errorMessage && !!this.isBaseAddressValid
   }
 
   private get address () {
@@ -321,12 +299,8 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    this.orgBusinessTypeLocal = JSON.parse(JSON.stringify(orgBusinessType))
-    this.setCurrentOrganizationName(this.orgBusinessTypeLocal?.name)
-    this.setCurrentOrganizationIsBusinessAccount(this.orgBusinessTypeLocal?.isBusinessAccount)
-    this.setCurrentOrganizationBusinessSize(this.orgBusinessTypeLocal?.businessSize)
-    this.setCurrentOrganizationBusinessType(this.orgBusinessTypeLocal?.businessType)
-    this.setCurrentOrganizationBranchName(this.orgBusinessTypeLocal.branchName)
+    this.orgBusinessTypeLocal = orgBusinessType
+    this.setCurrentOrganizationBusinessType(this.orgBusinessTypeLocal)
   }
 
   private checkOrgBusinessTypeValid (isValid) {
