@@ -56,8 +56,8 @@
                 @auto-complete-value="setAutoCompleteSearchValue">
                 </org-name-auto-complete>
             </fieldset>
-            <template class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
-              <v-expand-transition class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
+            <template v-if="govmAccount || isBusinessAccount">
+              <v-expand-transition class="branch-detail" data-test="branch-detail">
                 <v-text-field
                 filled
                 :label="govmAccount ? 'Branch/Division (If applicable)' : 'Branch/Division (If optional)'"
@@ -69,8 +69,8 @@
                 />
               </v-expand-transition>
             </template>
-            <template class="business-account-type-details"  data-test="business-account-type-details" v-if="isBusinessAccount">
-              <v-expand-transition>
+            <template v-if="isBusinessAccount">
+              <v-expand-transition class="business-account-type-details"  data-test="business-account-type-details" >
                 <v-row justify="space-between">
                     <v-col cols="6">
                         <v-select
