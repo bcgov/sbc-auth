@@ -123,7 +123,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private isFormValid (): boolean {
-    return true // !!this.orgName
+    return !!this.orgBusinessTypeLocal.name
   }
 
   private async mounted () {
