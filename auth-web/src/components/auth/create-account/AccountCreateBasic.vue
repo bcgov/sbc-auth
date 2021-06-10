@@ -144,7 +144,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    this.orgBusinessTypeLocal = JSON.parse(JSON.stringify(orgBusinessType))
+    this.orgBusinessTypeLocal = orgBusinessType
   }
 
   private checkOrgBusinessTypeValid (isValid) {
