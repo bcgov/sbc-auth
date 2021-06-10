@@ -14,6 +14,9 @@ export interface CreateRequestBody {
   mailingAddress?:Address
   paymentInfo?: PaymentInfo
   productSubscriptions?: []
+  isBusinessAccount?: boolean
+  businessType?: string
+  businessSize?: string
 }
 
 export interface PaymentInfo {
@@ -46,11 +49,14 @@ export interface Organization {
   contactEmail?: string,
   paymentSettings?: any,
   bcolAccountId?: string,
-  bcolUserId?: string
-  suspendedOn?: string
-  accountStatus?: string
-  suspensionReasonCode?: string
-  branchName?: string
+  bcolUserId?: string,
+  suspendedOn?: string,
+  accountStatus?: string,
+  suspensionReasonCode?: string,
+  branchName?: string,
+  isBusinessAccount?: boolean,
+  businessType?: string,
+  businessSize?: string
 }
 
 export interface PADInfo {
@@ -262,4 +268,12 @@ export interface OrgWithAddress {
   name: string;
   id: number;
   addressLine: string;
+}
+
+export interface OrgBusinessType {
+  name?: string,
+  branchName?: string,
+  isBusinessAccount?: boolean,
+  businessType?: string,
+  businessSize?: string
 }
