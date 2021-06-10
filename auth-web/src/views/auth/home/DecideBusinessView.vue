@@ -15,10 +15,9 @@
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
+
         <!-- Panel Btns -->
-        <learn-more-button
-          :redirectUrl="learnMoreUrl"
-        />
+        <learn-more-button class="mt-3" :redirectUrl="learnMoreUrl"/>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
