@@ -29,7 +29,7 @@ def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-a
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
-    assert rv.json.get('versionId') == '4'
+    assert rv.json.get('versionId') == '5'
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
