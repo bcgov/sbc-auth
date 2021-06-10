@@ -126,7 +126,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
                         'applicationDate': task_model.created,
                         'accountId': task_model.relationship_id,
                         'emailAddresses': admin_email,
-                        'contextUrl': f"{g.origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}/{'setup-non-bcsc-account'}/{org.id}"
+                        'contextUrl': f"{g.origin_url}/{current_app.config.get('WEB_APP_URL')}"
+                                      f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
                     }
                     publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
                     current_app.logger.debug('<send_approval_notification_to_member')
