@@ -38,7 +38,7 @@
           color="primary"
           class="mr-3 save-btn"
           :loading="saving"
-          :disabled="!isFormValid() || saving  || !isBaseAddressValid || !isOrgBusinessTypeValid"
+          :disabled="!isFormValid() || saving"
           @click="save"
           data-test="save-button"
         >
@@ -123,7 +123,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private isFormValid (): boolean {
-    return !!this.orgBusinessTypeLocal.name
+    return !!this.isOrgBusinessTypeValid && !!this.isBaseAddressValid
   }
 
   private async mounted () {
