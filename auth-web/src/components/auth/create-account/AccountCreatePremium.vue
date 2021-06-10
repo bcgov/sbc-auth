@@ -161,20 +161,20 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @UserModule.State('userProfile') public userProfile!: User
   @UserModule.State('currentUser') public currentUser!: KCUserProfile
 
-  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('changeOrgType') private changeOrgType!: (action:Actions) => Promise<Organization>
-  @OrgModule.Action('isOrgNameAvailable') private isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+  @OrgModule.Action('syncMembership') private readonly syncMembership!: (orgId: number) => Promise<Member>
+  @OrgModule.Action('syncOrganization') private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  @OrgModule.Action('changeOrgType') private readonly changeOrgType!: (action:Actions) => Promise<Organization>
+  @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
 
-  @OrgModule.Mutation('setCurrentOrganization') private setCurrentOrganization!: (organization: Organization) => void
-  @OrgModule.Mutation('setCurrentOrganizationAddress') private setCurrentOrganizationAddress!: (address: Address) => void
-  @OrgModule.Mutation('setCurrentOrganizationName') private setCurrentOrganizationName!: (name: string) => void
-  @OrgModule.Mutation('resetBcolDetails') private resetBcolDetails!: () => void
-  @OrgModule.Mutation('setGrantAccess') private setGrantAccess!: (grantAccess: boolean) => void
-  @OrgModule.Mutation('setCurrentOrganizationIsBusinessAccount') private setCurrentOrganizationIsBusinessAccount!: (isBusinessAccount: boolean) => void
-  @OrgModule.Mutation('setCurrentOrganizationBusinessSize') private setCurrentOrganizationBusinessSize!: (businessSize: string) => void
-  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private setCurrentOrganizationBusinessType!: (businessType: string) => void
-  @OrgModule.Mutation('setCurrentOrganizationBranchName') private setCurrentOrganizationBranchName!: (branchName: string) => void
+  @OrgModule.Mutation('setCurrentOrganization') private readonly setCurrentOrganization!: (organization: Organization) => void
+  @OrgModule.Mutation('setCurrentOrganizationAddress') private readonly setCurrentOrganizationAddress!: (address: Address) => void
+  @OrgModule.Mutation('setCurrentOrganizationName') private readonly setCurrentOrganizationName!: (name: string) => void
+  @OrgModule.Mutation('resetBcolDetails') private readonly resetBcolDetails!: () => void
+  @OrgModule.Mutation('setGrantAccess') private readonly setGrantAccess!: (grantAccess: boolean) => void
+  @OrgModule.Mutation('setCurrentOrganizationIsBusinessAccount') private readonly setCurrentOrganizationIsBusinessAccount!: (isBusinessAccount: boolean) => void
+  @OrgModule.Mutation('setCurrentOrganizationBusinessSize') private readonly setCurrentOrganizationBusinessSize!: (businessSize: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (businessType: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationBranchName') private readonly setCurrentOrganizationBranchName!: (branchName: string) => void
 
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
@@ -186,7 +186,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private readonly orgNameRules = [v => !!v || 'An account name is required']
 
   private orgBusinessTypeLocal: OrgBusinessType = {}
-  private isOrgBusinessTypeValid: boolean = false
+  private isOrgBusinessTypeValid = false
 
   private get isExtraProvUser () {
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID

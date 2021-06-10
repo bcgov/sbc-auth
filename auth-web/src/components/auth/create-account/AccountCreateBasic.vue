@@ -116,7 +116,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private orgBusinessTypeLocal: OrgBusinessType = {}
 
   private baseAddressSchema: {} = addressSchema
-  private isOrgBusinessTypeValid: boolean = false
+  private isOrgBusinessTypeValid = false
 
   $refs: {
     createAccountInfoForm: HTMLFormElement

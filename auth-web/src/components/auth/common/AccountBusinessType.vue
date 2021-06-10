@@ -56,8 +56,8 @@
                 @auto-complete-value="setAutoCompleteSearchValue">
                 </org-name-auto-complete>
             </fieldset>
-            <fieldset class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
-              <v-expand-transition>
+            <template class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
+              <v-expand-transition class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
                 <v-text-field
                 filled
                 :label="govmAccount ? 'Branch/Division (If applicable)' : 'Branch/Division (If optional)'"
@@ -68,8 +68,8 @@
                 v-on:keyup="onOrgBusinessTypeChange()"
                 />
               </v-expand-transition>
-            </fieldset>
-            <fieldset class="business-account-type-details"  data-test="business-account-type-details" v-if="isBusinessAccount">
+            </template>
+            <template class="business-account-type-details"  data-test="business-account-type-details" v-if="isBusinessAccount">
               <v-expand-transition>
                 <v-row justify="space-between">
                     <v-col cols="6">
@@ -100,14 +100,14 @@
                     </v-col>
                 </v-row>
               </v-expand-transition>
-            </fieldset>
+            </template>
         </v-form>
     </v-container>
 </template>
 
 <script lang="ts">
 import { Account, LDFlags } from '@/util/constants'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
 import { Code } from '@/models/Code'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -132,10 +132,10 @@ export default class AccountBusinessType extends Vue {
 
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
 
-  @CodesModule.Action('getBusinessSizeCodes') private getBusinessSizeCodes!: () => Promise<Code[]>
-  @CodesModule.Action('getBusinessTypeCodes') private getBusinessTypeCodes!: () => Promise<Code[]>
-  @CodesModule.State('businessSizeCodes') private businessSizeCodes!: Code[]
-  @CodesModule.State('businessTypeCodes') private businessTypeCodes!: Code[]
+  @CodesModule.Action('getBusinessSizeCodes') private readonly getBusinessSizeCodes!: () => Promise<Code[]>
+  @CodesModule.Action('getBusinessTypeCodes') private readonly getBusinessTypeCodes!: () => Promise<Code[]>
+  @CodesModule.State('businessSizeCodes') private readonly businessSizeCodes!: Code[]
+  @CodesModule.State('businessTypeCodes') private readonly businessTypeCodes!: Code[]
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''
@@ -145,16 +145,16 @@ export default class AccountBusinessType extends Vue {
   }
 
   // input fields
-  private isBusinessAccount: boolean = false
-  private name: string = ''
-  private businessType: string = ''
-  private businessSize:string = ''
-  private branchName: string = ''
+  private isBusinessAccount = false
+  private name = ''
+  private businessType = ''
+  private businessSize = ''
+  private branchName = ''
 
   // Input field rules
-  private orgNameRules = [v => !!v || 'An account name is required']
-  private orgBusinessTypeRules = [v => !!v || 'A business type is required']
-  private orgBusinessSizeRules = [v => !!v || 'A business size is required']
+  private readonly orgNameRules = [v => !!v || 'An account name is required']
+  private readonly orgBusinessTypeRules = [v => !!v || 'A business type is required']
+  private readonly orgBusinessSizeRules = [v => !!v || 'A business size is required']
 
   /*   @Watch('currentOrganization')
   oncurrentOrganizationChange (value: Organization, oldValue: Organization) {
@@ -178,10 +178,12 @@ export default class AccountBusinessType extends Vue {
   }
 
   /** Emits the validity of the component. */
+  /* tslint:disable:no-empty */
   @Emit('valid')
   private emitValid (valid: boolean): void { }
 
   /** Emits a clear errors event to parent (exclusive for premium linked account scenario). */
+  /* tslint:disable:no-empty */
   @Emit('update:org-name-clear-errors')
   private clearErrors (): void { }
 

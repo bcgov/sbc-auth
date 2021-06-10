@@ -8,9 +8,9 @@ export default class CodesModule extends VuexModule {
     suspensionReasonCodes: Code[] = []
     businessSizeCodes: Code[] = []
     businessTypeCodes: Code[] = []
-    private suspensionReasonCodeTable: string = 'suspension_reason_codes'
-    private businessSizeCodeTable: string = 'business_size_codes'
-    private businessTypeCodeTable: string = 'business_type_codes'
+    private suspensionReasonCodeTable = 'suspension_reason_codes'
+    private businessSizeCodeTable = 'business_size_codes'
+    private businessTypeCodeTable = 'business_type_codes'
 
     @Mutation
     public setSuspensionReasonCodes (codes: Code[]) {
@@ -33,6 +33,7 @@ export default class CodesModule extends VuexModule {
       if (response && response.data && response.status === 200) {
         return response.data
       }
+      return []
     }
 
     @Action({ commit: 'setBusinessTypeCodes', rawError: true })
@@ -41,6 +42,7 @@ export default class CodesModule extends VuexModule {
       if (response && response.data && response.status === 200) {
         return response.data
       }
+      return []
     }
 
     @Action({ commit: 'setSuspensionReasonCodes', rawError: true })
