@@ -284,6 +284,26 @@ export default class OrgModule extends VuexModule {
     this.resetAccountTypeOnSetupAccount = resetAccountTypeOnSetupAccount
   }
 
+  @Mutation
+  public setCurrentOrganizationIsBusinessAccount (isBusinessAccount: boolean) {
+    this.currentOrganization.isBusinessAccount = isBusinessAccount
+  }
+
+  @Mutation
+  public setCurrentOrganizationBusinessSize (businessSize: string) {
+    this.currentOrganization.businessSize = businessSize
+  }
+
+  @Mutation
+  public setCurrentOrganizationBusinessType (businessType: string) {
+    this.currentOrganization.businessType = businessType
+  }
+
+  @Mutation
+  public setCurrentOrganizationBranchName (branchName: string) {
+    this.currentOrganization.branchName = branchName
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
@@ -425,7 +445,8 @@ export default class OrgModule extends VuexModule {
       name: org.name,
       accessType: this.context.state['accessType'],
       typeCode: org.orgType,
-      productSubscriptions: productsSelected
+      productSubscriptions: productsSelected,
+      isBusinessAccount: org.isBusinessAccount
     }
     if (org.bcolProfile) {
       createRequestBody.bcOnlineCredential = org.bcolProfile
@@ -442,6 +463,11 @@ export default class OrgModule extends VuexModule {
       createRequestBody.paymentInfo.bankTransitNumber = padInfo.bankTransitNumber
       createRequestBody.paymentInfo.bankInstitutionNumber = padInfo.bankInstitutionNumber
       createRequestBody.paymentInfo.bankAccountNumber = padInfo.bankAccountNumber
+    }
+    if (org.isBusinessAccount) {
+      createRequestBody.businessSize = org.businessSize
+      createRequestBody.businessType = org.businessType
+      createRequestBody.branchName = org.branchName
     }
     const response = await OrgService.createOrg(createRequestBody)
     const organization = response?.data

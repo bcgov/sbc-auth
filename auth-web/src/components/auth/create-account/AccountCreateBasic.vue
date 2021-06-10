@@ -177,7 +177,13 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       const orgType = (this.isBasicAccount) ? Account.BASIC : Account.PREMIUM
       if (this.isAccountChange) {
         try {
-          const org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType, id: this.currentOrganization.id }
+          const org: Organization = { name: this.orgBusinessTypeLocal.name,
+            orgType: orgType,
+            id: this.currentOrganization.id,
+            isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
+            businessType: this.orgBusinessTypeLocal.businessType,
+            businessSize: this.orgBusinessTypeLocal.businessSize
+          }
           this.setCurrentOrganization(org)
           this.saving = true
           const organization = await this.changeOrgType('downgrade')
@@ -194,6 +200,13 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
         let org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType }
         if (this.govmAccount) {
           org = { ...org, ...{ branchName: this.orgBusinessTypeLocal.branchName, id: this.currentOrganization.id } }
+        }
+        if (this.orgBusinessTypeLocal.isBusinessAccount) {
+          org = { ...org,
+            ...{ branchName: this.orgBusinessTypeLocal.branchName,
+              isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
+              businessSize: this.orgBusinessTypeLocal.businessSize,
+              businessType: this.orgBusinessTypeLocal.businessType } }
         }
 
         this.setCurrentOrganization(org)

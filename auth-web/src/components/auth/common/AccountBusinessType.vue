@@ -57,6 +57,7 @@
                 </org-name-auto-complete>
             </fieldset>
             <fieldset class="branch-detail" data-test="branch-detail" v-if="govmAccount || isBusinessAccount">
+              <v-expand-transition>
                 <v-text-field
                 filled
                 :label="govmAccount ? 'Branch/Division (If applicable)' : 'Branch/Division (If optional)'"
@@ -64,18 +65,20 @@
                 :disabled="saving"
                 data-test="input-branch-name"
                 :readonly="govmAccount"
-                @change="onOrgBusinessTypeChange()"
+                v-on:keyup="onOrgBusinessTypeChange()"
                 />
+              </v-expand-transition>
             </fieldset>
             <fieldset class="business-account-type-details"  data-test="business-account-type-details" v-if="isBusinessAccount">
+              <v-expand-transition>
                 <v-row justify="space-between">
                     <v-col cols="6">
                         <v-select
                         filled
                         label="Business Type"
-                        item-text="text"
-                        item-value="value"
-                        :items="BusinessType"
+                        item-text="desc"
+                        item-value="code"
+                        :items="businessTypeCodes"
                         v-model="businessType"
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
@@ -86,9 +89,9 @@
                         <v-select
                         filled
                         label="Business Size"
-                        item-text="text"
-                        item-value="value"
-                        :items="BusinessType"
+                        item-text="desc"
+                        item-value="code"
+                        :items="businessSizeCodes"
                         v-model="businessSize"
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
@@ -96,6 +99,7 @@
                         />
                     </v-col>
                 </v-row>
+              </v-expand-transition>
             </fieldset>
         </v-form>
     </v-container>
@@ -105,11 +109,13 @@
 import { Account, LDFlags } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
+import { Code } from '@/models/Code'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
+const CodesModule = namespace('codes')
 
 @Component({
   components: {
@@ -125,6 +131,11 @@ export default class AccountBusinessType extends Vue {
   @Prop({ default: false }) orgNameReadOnly: boolean
 
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
+
+  @CodesModule.Action('getBusinessSizeCodes') private getBusinessSizeCodes!: () => Promise<Code[]>
+  @CodesModule.Action('getBusinessTypeCodes') private getBusinessTypeCodes!: () => Promise<Code[]>
+  @CodesModule.State('businessSizeCodes') private businessSizeCodes!: Code[]
+  @CodesModule.State('businessTypeCodes') private businessTypeCodes!: Code[]
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''
@@ -145,23 +156,12 @@ export default class AccountBusinessType extends Vue {
   private orgBusinessTypeRules = [v => !!v || 'A business type is required']
   private orgBusinessSizeRules = [v => !!v || 'A business size is required']
 
-  private BusinessType = [
-    {
-      text: 'text1',
-      value: 1
-    },
-    {
-      text: 'text2',
-      value: 2
-    }
-  ]
-
-  @Watch('currentOrganization')
+  /*   @Watch('currentOrganization')
   oncurrentOrganizationChange (value: Organization, oldValue: Organization) {
-    if (value.name !== oldValue.name) {
+    if (value.name !== oldValue.name && this.) {
       this.name = value.name
     }
-  }
+  } */
 
   /** Emits an update message, so that the caller can ".sync" with it. */
   @Emit('update:org-business-type')
@@ -170,7 +170,7 @@ export default class AccountBusinessType extends Vue {
       name: this.name,
       isBusinessAccount: this.isBusinessAccount,
       ...((this.govmAccount || this.isBusinessAccount) && { branchName: this.branchName }),
-      ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize })
+      ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize, branchName: this.branchName })
     }
     const isFormValid = this.$refs.accountInformationForm?.validate()
     this.emitValid(isFormValid)
@@ -185,11 +185,24 @@ export default class AccountBusinessType extends Vue {
   @Emit('update:org-name-clear-errors')
   private clearErrors (): void { }
 
-  mounted () {
-    if (this.currentOrganization) {
-      this.name = this.currentOrganization.name
-      // incase it is a premium account, default business type to business account
-      this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
+  async mounted () {
+    try {
+    // load business type and size codes
+      await this.getBusinessSizeCodes()
+      await this.getBusinessTypeCodes()
+      if (this.currentOrganization) {
+        this.name = this.currentOrganization.name
+        // incase if the new account is a premium account, default business type to business account
+        this.isBusinessAccount = this.currentOrganization.isBusinessAccount || this.currentOrganization.orgType !== Account.BASIC
+        this.businessType = this.currentOrganization.businessType
+        this.businessSize = this.currentOrganization.businessSize
+        this.branchName = this.currentOrganization.branchName
+      }
+      // sync with parent tracking object on mount
+      this.onOrgBusinessTypeChange()
+    } catch (ex) {
+      // eslint-disable-next-line no-console
+      console.log(`error while loading account business type -  ${ex}`)
     }
   }
 

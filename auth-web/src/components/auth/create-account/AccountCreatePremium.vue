@@ -108,10 +108,13 @@ import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
+const UserModule = namespace('user')
 
 @Component({
   components: {
@@ -142,7 +145,7 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {
-  private orgStore = getModule(OrgModule, this.$store)
+  // private orgStore = getModule(OrgModule, this.$store)
   private username = ''
   private password = ''
   private errorMessage: string = ''
@@ -151,18 +154,28 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   private bcolDuplicateNameErrorMessage = ''
   private saving = false
   private isBaseAddressValid: boolean = true
-  private readonly currentOrgAddress!: Address
-  private readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  private readonly currentOrganization!: Organization
-  private readonly currentUser!: KCUserProfile
-  private readonly setCurrentOrganization!: (organization: Organization) => void
-  private readonly setCurrentOrganizationName!: (name: string) => void
-  private readonly setCurrentOrganizationAddress!: (address: Address) => void
-  private readonly resetBcolDetails!: () => void
-  private readonly setGrantAccess!: (grantAccess: boolean) => void
-  private readonly changeOrgType!: (action:Actions) => Promise<Organization>
-  private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+
+  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
+  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
+
+  @UserModule.State('userProfile') public userProfile!: User
+  @UserModule.State('currentUser') public currentUser!: KCUserProfile
+
+  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
+  @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
+  @OrgModule.Action('changeOrgType') private changeOrgType!: (action:Actions) => Promise<Organization>
+  @OrgModule.Action('isOrgNameAvailable') private isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+
+  @OrgModule.Mutation('setCurrentOrganization') private setCurrentOrganization!: (organization: Organization) => void
+  @OrgModule.Mutation('setCurrentOrganizationAddress') private setCurrentOrganizationAddress!: (address: Address) => void
+  @OrgModule.Mutation('setCurrentOrganizationName') private setCurrentOrganizationName!: (name: string) => void
+  @OrgModule.Mutation('resetBcolDetails') private resetBcolDetails!: () => void
+  @OrgModule.Mutation('setGrantAccess') private setGrantAccess!: (grantAccess: boolean) => void
+  @OrgModule.Mutation('setCurrentOrganizationIsBusinessAccount') private setCurrentOrganizationIsBusinessAccount!: (isBusinessAccount: boolean) => void
+  @OrgModule.Mutation('setCurrentOrganizationBusinessSize') private setCurrentOrganizationBusinessSize!: (businessSize: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private setCurrentOrganizationBusinessType!: (businessType: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationBranchName') private setCurrentOrganizationBranchName!: (branchName: string) => void
+
   @Prop() cancelUrl: string
   @Prop() isAccountChange: boolean
   private orgNameReadOnly = true
@@ -309,7 +322,11 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
     this.orgBusinessTypeLocal = JSON.parse(JSON.stringify(orgBusinessType))
-    this.setCurrentOrganizationName(this.orgBusinessTypeLocal.name)
+    this.setCurrentOrganizationName(this.orgBusinessTypeLocal?.name)
+    this.setCurrentOrganizationIsBusinessAccount(this.orgBusinessTypeLocal?.isBusinessAccount)
+    this.setCurrentOrganizationBusinessSize(this.orgBusinessTypeLocal?.businessSize)
+    this.setCurrentOrganizationBusinessType(this.orgBusinessTypeLocal?.businessType)
+    this.setCurrentOrganizationBranchName(this.orgBusinessTypeLocal.branchName)
   }
 
   private checkOrgBusinessTypeValid (isValid) {

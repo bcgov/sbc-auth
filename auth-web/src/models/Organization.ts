@@ -14,6 +14,9 @@ export interface CreateRequestBody {
   mailingAddress?:Address
   paymentInfo?: PaymentInfo
   productSubscriptions?: []
+  isBusinessAccount?: boolean
+  businessType?: string
+  businessSize?: string
 }
 
 export interface PaymentInfo {
