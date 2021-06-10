@@ -35,10 +35,11 @@
           data-test="save-button"
           :disabled="!isEnableCreateBtn"
         >
-          Create Account
+         {{ readOnly ? 'Submit' : 'Create Account'}}
         </v-btn>
         <ConfirmCancelButton
           showConfirmPopup="true"
+          v-if="!readOnly"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
