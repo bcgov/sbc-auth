@@ -196,9 +196,10 @@ export default class NonBcscAccountSetupView extends Vue {
     }
   }
   private async mounted () {
-    // on re-upload
+    // on re-upload need show some pages are in view only mode
     this.readOnly = !!this.orgId
     if (this.orgId) {
+      // setting view only mode for all other pages which not need to edit
       this.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
       this.$refs.stepper.jumpToStep(3)
       const orgId = this.orgId
@@ -207,13 +208,13 @@ export default class NonBcscAccountSetupView extends Vue {
       this.getOrgPayments()
 
       this.setCurrentOrganizationType(this.currentOrganization.orgType)
-
+      // passing additional props for readonly
       this.accountStepperConfig[4].componentProps = { ...this.accountStepperConfig[4].componentProps, clearForm: true }
-      this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true, orgId }
+      this.accountStepperConfig[0].componentProps = { ...this.accountStepperConfig[0].componentProps, readOnly: true, orgId }
 
       if (this.enablePaymentMethodSelectorStep) {
-        this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true }
-        this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[4].componentProps, readOnly: true }
+        this.accountStepperConfig[3].componentProps = { ...this.accountStepperConfig[3].componentProps, readOnly: true }
+        this.accountStepperConfig[5].componentProps = { ...this.accountStepperConfig[5].componentProps, readOnly: true }
       }
     } else {
       this.setViewOnlyMode('')
@@ -228,6 +229,7 @@ export default class NonBcscAccountSetupView extends Vue {
     this.isLoading = true
     let isProceedToCreateAccount = false
     if (this.currentOrgPaymentType === PaymentTypes.PAD) {
+      // no need to validate for readonly view
       isProceedToCreateAccount = this.readOnly ? true : await this.verifyPAD()
     } else {
       isProceedToCreateAccount = true

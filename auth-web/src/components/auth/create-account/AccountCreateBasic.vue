@@ -141,6 +141,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
   @Prop({ default: false }) govmAccount: boolean
+  @Prop({ default: false }) readOnly: boolean
   private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
@@ -231,7 +232,9 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
           org = { ...org, ...{ branchName: this.branchName, id: this.currentOrganization.id } }
         }
         // removed this to avoid over writing current or details, which need to show in all page.
-        // this.setCurrentOrganization(org)
+        if (!this.readOnly) {
+          this.setCurrentOrganization(org)
+        }
         // check if the name is avaialble
         this.stepForward()
       }
