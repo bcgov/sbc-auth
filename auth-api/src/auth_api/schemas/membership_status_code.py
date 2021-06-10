@@ -14,7 +14,6 @@
 """Manager for membership type schema and export."""
 
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
-
 from auth_api.models import ma
 
 

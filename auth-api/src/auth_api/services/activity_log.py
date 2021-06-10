@@ -26,6 +26,7 @@ from auth_api.services.authorization import check_auth
 from auth_api.utils.roles import ADMIN, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
+
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 

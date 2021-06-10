@@ -32,6 +32,7 @@ from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
+
 from .activity_log_publisher import publish_activity
 from .authorization import check_auth
 

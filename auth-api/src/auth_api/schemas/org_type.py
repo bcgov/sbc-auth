@@ -14,7 +14,6 @@
 """Manager for org type schema and export."""
 
 from auth_api.models import OrgType as OrgTypeModel
-
 from auth_api.models import ma
 
 

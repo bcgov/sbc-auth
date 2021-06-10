@@ -14,7 +14,6 @@
 """Manager for suspension reason schema and export."""
 
 from auth_api.models import SuspensionReasonCode as SuspensionReasonCodeModel
-
 from auth_api.models import ma
 
 

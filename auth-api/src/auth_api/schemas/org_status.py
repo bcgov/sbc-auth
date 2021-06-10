@@ -14,7 +14,6 @@
 """Manager for org status schema and export."""
 
 from auth_api.models import OrgStatus as OrgStatusModel
-
 from auth_api.models import ma
 
 
