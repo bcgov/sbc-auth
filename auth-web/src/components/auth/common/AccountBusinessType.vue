@@ -65,7 +65,7 @@
                 :disabled="saving"
                 data-test="input-branch-name"
                 :readonly="govmAccount"
-                v-on:keyup="onOrgBusinessTypeChange()"
+                v-on:keyup="onOrgBusinessTypeChange"
                 />
               </v-expand-transition>
             </template>
