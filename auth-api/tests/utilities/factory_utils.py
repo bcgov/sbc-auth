@@ -315,4 +315,5 @@ def patch_token_info(claims, monkeypatch):
 
 
 def get_tos_latest_version():
+    """Return latest tos version."""
     return '5'
