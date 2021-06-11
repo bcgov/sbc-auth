@@ -132,7 +132,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 is_bceid = org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
                 # bceid holds need notifications
                 if is_bceid:
-                    print('-------------------------')
                     Task._notify_admin_about_hold(org, task_model)
 
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
@@ -149,14 +148,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
         data = {
             'reason': task_model.remark,
-            'applicationDate': f'{task_model.created}',
+            'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': task_model.relationship_id,
             'emailAddresses': admin_email,
             'contextUrl': f"{g.get('origin_url','')}/{current_app.config.get('WEB_APP_URL')}"
                           f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
         }
         try:
-            print('--------publish_to_mailer-----------------')
             publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
             current_app.logger.debug('<send_approval_notification_to_member')
         except Exception as e:  # noqa=B901

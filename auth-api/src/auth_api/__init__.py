@@ -72,7 +72,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     @app.before_request
     def set_origin():
         g.origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
-        print('-------------', g.origin_url)
 
     @app.after_request
     def handle_after_request(response):  # pylint: disable=unused-variable
