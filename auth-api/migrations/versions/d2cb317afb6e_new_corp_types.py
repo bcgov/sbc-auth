@@ -28,16 +28,16 @@ def upgrade():
 
     corp_type_table = table('corp_types',
                             column('code', String),
-                            column('desc', String),
+                            column('description', String),
                             column('default', Boolean)
                             )
     # Insert code values
     op.bulk_insert(
         corp_type_table,
         [
-            {'code': 'ULC', 'desc': 'Unlimited Liability Company', 'default': False},
-            {'code': 'LTD', 'desc': 'Limited companies', 'default': False},
-            {'code': 'CCC', 'desc': 'Community Contribution Companies', 'default': False}
+            {'code': 'ULC', 'description': 'BC Unlimited Liability Company', 'default': False},
+            {'code': 'LTD', 'description': 'BC Limited Company', 'default': False},
+            {'code': 'CCC', 'description': 'BC Community Contribution Company', 'default': False}
         ]
     )
 
