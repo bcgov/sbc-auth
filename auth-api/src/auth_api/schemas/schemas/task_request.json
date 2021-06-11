@@ -6,7 +6,6 @@
   "title": "Task",
   "additionalProperties": true,
   "required": [
-    "relationshipStatus"
   ],
   "properties": {
     "name": {

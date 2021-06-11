@@ -77,7 +77,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return Task(task_model)
 
     @staticmethod
-    def close_task(task_id, remark=''):
+    def close_task(task_id, remark='', do_commit: bool = True):
         """Close a task."""
         current_app.logger.debug('<close_task ')
         task_model: TaskModel = TaskModel.find_by_id(task_id)
@@ -85,6 +85,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model.remark = remark
         task_model.decision_made_on = datetime.now()
         task_model.flush()
+        if do_commit:
+            db.session.commit()
 
     def update_task(self, task_info: Dict = None, origin_url: str = None):
         """Update a task record."""
@@ -112,7 +114,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model: TaskModel = self._model
         current_app.logger.debug('<update_task_relationship ')
         is_approved: bool = task_model.relationship_status == TaskRelationshipStatus.ACTIVE.value
-        is_hold: bool = task_model.relationship_status == TaskStatus.HOLD.value
+        is_hold: bool = task_model.status == TaskStatus.HOLD.value
 
         if task_model.relationship_type == TaskRelationshipType.ORG.value:
             # Update Org relationship

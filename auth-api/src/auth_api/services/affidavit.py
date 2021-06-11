@@ -104,7 +104,6 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
             if org:
                 task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
                 if task_model:
-                    TaskService.close_task(task_model.id, 'User Uploaded New affidavit .Created New task ')
                     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
                     task_info = {'name': org.name,
                                  'relationshipId': org.id,
@@ -115,7 +114,9 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
                                  'status': TaskStatus.OPEN.value,
                                  'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                                  }
-                    TaskService.create_task(task_info=task_info, do_commit=True)
+                    new_task = TaskService.create_task(task_info=task_info, do_commit=False)
+                    remark = f'User Uploaded New affidavit .Created New task id: {new_task.identifier}'
+                    TaskService.close_task(task_model.id, remark)
 
         return Affidavit(affidavit_model)
 

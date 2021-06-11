@@ -16,7 +16,7 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from ..utils.enums import TaskRelationshipStatus
+from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType
 from .base_model import BaseModel
 from .db import db
 
@@ -74,4 +74,5 @@ class Task(BaseModel):
     @classmethod
     def find_by_task_for_account(cls, org_id, status):
         """Find a task instance that matches the provided id."""
-        return db.session.query(Task).filter_by(account_id=org_id, status=status).first()
+        return db.session.query(Task).filter_by(relationship_id=org_id,
+                                                relationship_type=TaskRelationshipType.ORG.value, status=status).first()
