@@ -14,6 +14,7 @@
 """Manager for invitation status schema and export."""
 
 from auth_api.models import InvitationStatus as InvitationStatusModel
+
 from auth_api.models import ma
 
 

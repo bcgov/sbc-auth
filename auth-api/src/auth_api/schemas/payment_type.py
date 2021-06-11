@@ -14,6 +14,7 @@
 """Manager for payment type schema and export."""
 
 from auth_api.models import PaymentType as PaymentTypeModel
+
 from auth_api.models import ma
 
 
