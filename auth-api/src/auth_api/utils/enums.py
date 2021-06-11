@@ -45,6 +45,8 @@ class CorpType(Enum):
     TMP = 'TMP'
     BC = 'BC'  # bcomp
     CR = 'CR'  # corporation
+    UL = 'UL'  # Unlimited Liability
+    CC = 'CC'  # Community Contribution
 
 
 class ProductTypeCode(Enum):
