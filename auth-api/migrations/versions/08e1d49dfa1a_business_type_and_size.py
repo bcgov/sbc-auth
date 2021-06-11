@@ -271,11 +271,6 @@ def upgrade():
                 "default": False
             },
             {
-                "code": "OTH",
-                "description": "OTHER",
-                "default": False
-            },
-            {
                 "code": "OTHCC",
                 "description": "CHAMBER OF COMMERCE",
                 "default": False
