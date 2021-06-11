@@ -19,6 +19,7 @@ Test-Suite to ensure that the Document Service is working as expected.
 
 from auth_api.models import Documents as DocumentsModel
 from auth_api.services import Documents as DocumentService
+from tests.utilities.factory_utils import get_tos_latest_version
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
@@ -50,7 +51,7 @@ def test_find_latest_version_by_invalid_type(session):  # pylint: disable=unused
 def test_find_latest_version_by_type(session):  # pylint: disable=unused-argument
     """Assert that a document is rendered correctly as a dictionary."""
     terms_of_use = DocumentService.find_latest_version_by_type('termsofuse')
-    assert terms_of_use == '4'
+    assert terms_of_use == get_tos_latest_version()
 
 
 def test_find_latest_version_for_director_search(session):  # pylint: disable=unused-argument
