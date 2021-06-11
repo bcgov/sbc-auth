@@ -99,21 +99,23 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
         if trigger_task_update:
             # find users org. ideally only one org
-            org: OrgModel = MembershipModel.find_orgs_for_user(user.identifier)[0]
-            task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
-            if task_model:
-                TaskService.close_task(task_model.id, 'User Uploaded New affidavit .Created New task ')
-                task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-                task_info = {'name': org.name,
-                             'relationshipId': org.id,
-                             'relatedTo': user.identifier,
-                             'dateSubmitted': task_model.date_submitted,
-                             'relationshipType': TaskRelationshipType.ORG.value,
-                             'type': task_type,
-                             'status': TaskStatus.OPEN.value,
-                             'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                             }
-                TaskService.create_task(task_info=task_info, do_commit=True)
+            org_list = MembershipModel.find_orgs_for_user(user.identifier)
+            org: OrgModel = next(iter(org_list or []), None)
+            if org:
+                task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
+                if task_model:
+                    TaskService.close_task(task_model.id, 'User Uploaded New affidavit .Created New task ')
+                    task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+                    task_info = {'name': org.name,
+                                 'relationshipId': org.id,
+                                 'relatedTo': user.identifier,
+                                 'dateSubmitted': task_model.date_submitted,
+                                 'relationshipType': TaskRelationshipType.ORG.value,
+                                 'type': task_type,
+                                 'status': TaskStatus.OPEN.value,
+                                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                                 }
+                    TaskService.create_task(task_info=task_info, do_commit=True)
 
         return Affidavit(affidavit_model)
 

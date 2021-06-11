@@ -111,24 +111,24 @@ class Task:  # pylint: disable=too-many-instance-attributes
         """Retrieve the relationship record and update the status."""
         task_model: TaskModel = self._model
         current_app.logger.debug('<update_task_relationship ')
-        is_approved: bool = task_model.task_relationship_status == TaskRelationshipStatus.ACTIVE.value
-        is_hold: bool = task_model.task_relationship_status == TaskStatus.HOLD.value
+        is_approved: bool = task_model.relationship_status == TaskRelationshipStatus.ACTIVE.value
+        is_hold: bool = task_model.relationship_status == TaskStatus.HOLD.value
 
         if task_model.relationship_type == TaskRelationshipType.ORG.value:
             # Update Org relationship
             if is_hold:
                 # no updates on org yet.put the task on hold and send mail to user
+                org: OrgModel = OrgModel.find_by_org_id(task_model.relationship_id)
+                admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+                data = {
+                    'reason': task_model.remark,
+                    'applicationDate': f'{task_model.created}',
+                    'accountId': task_model.relationship_id,
+                    'emailAddresses': admin_email,
+                    'contextUrl': f"{g.origin_url}/{current_app.config.get('WEB_APP_URL')}"
+                                  f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
+                }
                 try:
-                    org: OrgModel = OrgModel.find_by_org_id(task_model.relationship_id)
-                    admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-                    data = {
-                        'reason': task_model.remark,
-                        'applicationDate': task_model.created,
-                        'accountId': task_model.relationship_id,
-                        'emailAddresses': admin_email,
-                        'contextUrl': f"{g.origin_url}/{current_app.config.get('WEB_APP_URL')}"
-                                      f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
-                    }
                     publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
                     current_app.logger.debug('<send_approval_notification_to_member')
                 except Exception as e:  # noqa=B901
