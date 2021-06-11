@@ -30,8 +30,9 @@ from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
+from auth_api.utils.enums import AccessType, OrgStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.util import camelback2snake
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -118,28 +119,21 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         if task_model.relationship_type == TaskRelationshipType.ORG.value:
             # Update Org relationship
-            if is_hold:
-                # no updates on org yet.put the task on hold and send mail to user
-                org: OrgModel = OrgModel.find_by_org_id(task_model.relationship_id)
-                admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-                data = {
-                    'reason': task_model.remark,
-                    'applicationDate': f'{task_model.created}',
-                    'accountId': task_model.relationship_id,
-                    'emailAddresses': admin_email,
-                    'contextUrl': f"{g.origin_url}/{current_app.config.get('WEB_APP_URL')}"
-                                  f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
-                }
-                try:
-                    publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
-                    current_app.logger.debug('<send_approval_notification_to_member')
-                except Exception as e:  # noqa=B901
-                    current_app.logger.error('<send_notification_to_member failed')
-                    raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
-            else:
-                org_id = task_model.relationship_id
+            org_id = task_model.relationship_id
+            if not is_hold:
                 self._update_org(is_approved=is_approved, org_id=org_id,
                                  origin_url=origin_url)
+            else:
+                # no updates on org yet.put the task on hold and send mail to user
+                org: OrgModel = OrgModel.find_by_org_id(org_id)
+                if org.status_code != OrgStatus.PENDING_STAFF_REVIEW.value:
+                    org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
+                    org.flush()
+                is_bceid = org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
+                # bceid holds need notifications
+                if is_bceid:
+                    print('-------------------------')
+                    Task._notify_admin_about_hold(org, task_model)
 
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
@@ -149,6 +143,25 @@ class Task:  # pylint: disable=too-many-instance-attributes
                                               org_id=account_id)
 
         current_app.logger.debug('>update_task_relationship ')
+
+    @staticmethod
+    def _notify_admin_about_hold(org, task_model):
+        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+        data = {
+            'reason': task_model.remark,
+            'applicationDate': f'{task_model.created}',
+            'accountId': task_model.relationship_id,
+            'emailAddresses': admin_email,
+            'contextUrl': f"{g.get('origin_url','')}/{current_app.config.get('WEB_APP_URL')}"
+                          f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
+        }
+        try:
+            print('--------publish_to_mailer-----------------')
+            publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
+            current_app.logger.debug('<send_approval_notification_to_member')
+        except Exception as e:  # noqa=B901
+            current_app.logger.error('<send_notification_to_member failed')
+            raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
     def _update_org(is_approved: bool, org_id: int, origin_url: str = None):

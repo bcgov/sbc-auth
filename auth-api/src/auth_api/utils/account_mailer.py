@@ -23,6 +23,7 @@ CONFIG = get_named_config()
 
 def publish_to_mailer(notification_type, org_id: str = None, data=None, business_identifier: str = None):
     """Publish from auth to mailer."""
+    print('--------isnide')
     if data is None:
         data = {
             'accountId': org_id,
