@@ -21,7 +21,7 @@
               :rules="clientRules"
               v-model="client"
               @change="emitGLInfo"
-              v-mask="'###'"
+              v-mask="'XXX'"
               data-test="input-client-code"
               :disabled="!canSelect"
             ></v-text-field>
@@ -35,7 +35,7 @@
               :rules="responsibilityCentreRules"
               v-model="responsibilityCentre"
               @change="emitGLInfo"
-              v-mask="'#####'"
+              v-mask="'XXXXX'"
               data-test="input-responsibilityCentre"
               :disabled="!canSelect"
             ></v-text-field>
@@ -50,7 +50,7 @@
               v-model="serviceLine"
               @change="emitGLInfo"
               data-test="input-serviceLine"
-              v-mask="'#####'"
+              v-mask="'XXXXX'"
               :disabled="!canSelect"
             ></v-text-field>
           </v-col>
@@ -63,7 +63,7 @@
               :rules="stobRules"
               v-model="stob"
               data-test="input-stob"
-              v-mask="'####'"
+              v-mask="'XXXX'"
               @change="emitGLInfo"
               :disabled="!canSelect"
               >
@@ -79,7 +79,7 @@
               v-model="projectCode"
               @change="emitGLInfo"
               data-test="input-projectCode"
-              v-mask="'#######'"
+              v-mask="'XXXXXXX'"
               :disabled="!canSelect"
               >
             ></v-text-field>
@@ -122,26 +122,26 @@ export default class GLPaymentForm extends Vue {
 
   public clientRules = [
     v => !!v || 'Client Code is required',
-    v => (v.length >= 3) || 'Client Code should be of 3 digits'
+    v => (v.length >= 3) || 'Client Code should be 3 characters'
   ]
 
   public responsibilityCentreRules = [
     v => !!v || 'Responsibility Center is required',
-    v => (v.length === 5) || 'Responsibility Center should be 5 digits'
+    v => (v.length === 5) || 'Responsibility Center should be 5 characters'
   ]
 
   public serviceLineRules = [
     v => !!v || 'Account Number is required',
-    v => (v.length === 5) || 'Account Number should be 5 digits'
+    v => (v.length === 5) || 'Account Number should be 5 characters'
   ]
 
   public stobRules = [
     v => !!v || 'Standard Object is required',
-    v => (v.length === 4) || 'Standard Object should be 4 digits'
+    v => (v.length === 4) || 'Standard Object should be 4 characters'
   ]
   public projectCodeRules = [
     v => !!v || 'Project is required',
-    v => (v.length === 7) || 'Project should be 7 digits'
+    v => (v.length === 7) || 'Project should be 7 characters'
   ]
 
   @Watch('currentOrgGLInfo')
