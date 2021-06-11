@@ -493,7 +493,7 @@ def test_terms_of_service_prev_version(session, monkeypatch):  # pylint: disable
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
 
     # update TOS with latest version
-    updated_user = UserService.update_terms_of_use(True, 4)  # 4 is the latest for now
+    updated_user = UserService.update_terms_of_use(True, 5)  # 5 is the latest for now
     dictionary = updated_user.as_dict()
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
 
@@ -589,7 +589,7 @@ def test_user_find_by_token(session, monkeypatch):  # pylint: disable=unused-arg
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is False
 
     # User accepted latest version terms and conditions should return True
-    UserService.update_terms_of_use(True, 4)  # 4 is latest version
+    UserService.update_terms_of_use(True, 5)  # 5 is latest version
     found_user = UserService.find_by_jwt_token()
     dictionary = found_user.as_dict()
     assert dictionary['user_terms']['isTermsOfUseAccepted'] is True
