@@ -54,6 +54,7 @@ class MessageType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
 
+
 class SubjectType(Enum):
     """Event Types."""
 
@@ -95,7 +96,7 @@ class SubjectType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                          'Your Product Request {product_name} Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
-                                         'Update your information.'
+                                      'Update your information.'
 
 
 class TitleType(Enum):
