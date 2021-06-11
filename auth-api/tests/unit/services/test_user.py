@@ -39,7 +39,7 @@ from tests.utilities.factory_scenarios import (
     TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_membership_model, factory_org_model, factory_product_model,
-    factory_user_model, patch_token_info, get_tos_latest_version)
+    factory_user_model, get_tos_latest_version, patch_token_info)
 
 
 def test_as_dict(session):  # pylint: disable=unused-argument
