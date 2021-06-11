@@ -312,3 +312,7 @@ def patch_token_info(claims, monkeypatch):
         """Return token info."""
         return claims
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
+
+
+def get_tos_latest_version():
+    return '5'

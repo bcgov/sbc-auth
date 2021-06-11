@@ -18,6 +18,7 @@ Test-Suite to ensure that the Documents Class is working as expected.
 """
 
 from auth_api.models import Documents
+from tests.utilities.factory_utils import get_tos_latest_version
 
 
 def test_documents_with_insert(session):
@@ -26,7 +27,7 @@ def test_documents_with_insert(session):
     Start with a blank document.
     """
     doc_latest = Documents.fetch_latest_document_by_type('termsofuse')
-    assert doc_latest.version_id == '5'
+    assert doc_latest.version_id == get_tos_latest_version()
 
 
 def test_documents_with_insert_some_type(session):
