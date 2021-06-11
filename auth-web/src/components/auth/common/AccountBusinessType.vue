@@ -11,20 +11,22 @@
             mandatory
             >
                 <v-row justify="space-between">
-                    <v-col cols="6">
+                    <v-col  xs="12" md="9" class="business-radio">
                         <v-radio
                         label="Individual Person Name"
                         :key="false"
                         :value="false"
                         data-test="radio-individual-account-type"
+                        class="px-4 py-5"
                         ></v-radio>
-                    </v-col>
-                    <v-col cols="6">
+                    <!-- </v-col>
+                    <v-col cols="6"> -->
                         <v-radio
                         label="Business Name"
                         :key="true"
                         :value="true"
                         data-test="radio-business-account-type"
+                        class="px-4 py-5"
                         ></v-radio>
                     </v-col>
                 </v-row>
@@ -56,7 +58,6 @@
                 @auto-complete-value="setAutoCompleteSearchValue">
                 </org-name-auto-complete>
             </fieldset>
-            <template v-if="govmAccount || isBusinessAccount">
               <v-expand-transition class="branch-detail" data-test="branch-detail">
                 <v-text-field
                 filled
@@ -66,13 +67,14 @@
                 data-test="input-branch-name"
                 :readonly="govmAccount"
                 v-on:keyup="onOrgBusinessTypeChange"
+                v-show="govmAccount || isBusinessAccount"
+                hide-details
                 />
               </v-expand-transition>
-            </template>
-            <template v-if="isBusinessAccount">
+            <template >
               <v-expand-transition class="business-account-type-details"  data-test="business-account-type-details" >
-                <v-row justify="space-between">
-                    <v-col cols="6">
+                <v-row justify="space-between" v-show="isBusinessAccount">
+                    <v-col cols="6" >
                         <v-select
                         filled
                         label="Business Type"
@@ -242,8 +244,21 @@ export default class AccountBusinessType extends Vue {
 </script>
 
 <style lang="scss" scoped>
-
+@import '$assets/scss/theme.scss';
 .view-container {
     padding: 0 !important;
+}
+.business-radio{
+  display: flex;
+  .v-radio{
+     padding: 10px;
+    background-color: rgba(0,0,0,.06);
+    min-width: 50%;
+    border: 1px rgba(0,0,0,.06) !important;
+  }
+  .v-radio.theme--light.v-item--active {
+      border: 1px solid var(--v-primary-base) !important;
+      background-color: $BCgovInputBG !important;
+  }
 }
 </style>
