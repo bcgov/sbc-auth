@@ -71,7 +71,7 @@ def test_documents_returns_latest_always(client, jwt, session):  # pylint:disabl
     factory_document_model(version_id_1, 'termsofuse', html_content_1)
 
     html_content_2 = '<HTML>3</HTML>'
-    version_id_2 = '41'  # putting higher numbers so that version number doesnt collide with existing in db
+    version_id_2 = '51'  # putting higher numbers so that version number doesnt collide with existing in db
     factory_document_model(version_id_2, 'termsofuse', html_content_2)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
