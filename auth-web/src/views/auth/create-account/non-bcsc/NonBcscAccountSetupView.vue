@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import { AccessType, DisplayModeValues, LDFlags, PaymentTypes } from '@/util/constants'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -278,8 +278,10 @@ export default class NonBcscAccountSetupView extends Vue {
         await this.syncMembership(organization.id)
       } else {
         // re-upload final submission valeus here
+        await this.updateUserFirstAndLastName()
         await this.saveOrUpdateContact()
         await this.createAffidavit()
+        await this.getUserProfile('@me')
       }
 
       this.$store.commit('updateHeader')

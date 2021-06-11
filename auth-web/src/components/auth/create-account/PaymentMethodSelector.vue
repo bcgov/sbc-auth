@@ -49,9 +49,8 @@
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-// import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
@@ -69,9 +68,9 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   // need toi show TOS as checked in stepper BCEID re-upload time.
   @Prop({ default: false }) readOnly: boolean
 
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.State('currentOrganizationType') private currentOrganizationType!: string
-  @OrgModule.State('currentOrgPaymentType') private currentOrgPaymentType!: string
+  @OrgModule.State('currentOrganization') private readonly currentOrganization!: Organization
+  @OrgModule.State('currentOrganizationType') private readonly currentOrganizationType!: string
+  @OrgModule.State('currentOrgPaymentType') private readonly currentOrgPaymentType!: string
 
   @OrgModule.Mutation('setCurrentOrganizationPaymentType') private setCurrentOrganizationPaymentType!: (paymentType: string) => void
 
