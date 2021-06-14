@@ -40,7 +40,7 @@ export default class CodesModule extends VuexModule {
     public async getBusinessTypeCodes (): Promise<Code[]> {
       const response = await CodesService.getCodes(this.businessTypeCodeTable)
       if (response && response.data && response.status === 200) {
-        return response.data
+        return response.data.sort((a, b) => a.desc.localeCompare(b.desc))
       }
       return []
     }

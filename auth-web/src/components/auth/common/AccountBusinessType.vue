@@ -4,10 +4,10 @@
                 {{ $t('accountBusinessTypeText') }}
         </p>
         <v-form ref="accountInformationForm" data-test="account-information-form">
-            <v-radio-group
+          <v-radio-group
             row
             v-model="isBusinessAccount"
-            @change="onOrgBusinessTypeChange"
+            @change="onOrgBusinessTypeChange(false)"
             mandatory
             >
                 <v-row justify="space-between">
@@ -19,8 +19,6 @@
                         data-test="radio-individual-account-type"
                         class="px-4 py-5"
                         ></v-radio>
-                    <!-- </v-col>
-                    <v-col cols="6"> -->
                         <v-radio
                         label="Business Name"
                         :key="true"
@@ -58,7 +56,7 @@
                 @auto-complete-value="setAutoCompleteSearchValue">
                 </org-name-auto-complete>
             </fieldset>
-              <v-expand-transition class="branch-detail" data-test="branch-detail">
+              <v-expand-transition class="branch-detail">
                 <v-text-field
                 filled
                 label="Branch/Division (If applicable)"
@@ -72,8 +70,8 @@
                 />
               </v-expand-transition>
             <template >
-              <v-expand-transition class="business-account-type-details"  data-test="business-account-type-details" >
-                <v-row justify="space-between" v-show="isBusinessAccount">
+              <v-expand-transition class="business-account-type-details">
+                <v-row justify="space-between" data-test="business-account-type-details" v-if="isBusinessAccount">
                     <v-col cols="6" >
                         <v-select
                         filled
@@ -85,6 +83,7 @@
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
                         @change="onOrgBusinessTypeChange"
+                        :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         />
                     </v-col>
                     <v-col cols="6">
@@ -98,6 +97,7 @@
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
                         @change="onOrgBusinessTypeChange"
+                        :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         />
                     </v-col>
                 </v-row>
@@ -167,15 +167,14 @@ export default class AccountBusinessType extends Vue {
       ...((this.govmAccount || this.isBusinessAccount) && { branchName: this.branchName }),
       ...(this.isBusinessAccount && { businessType: this.businessType, businessSize: this.businessSize, branchName: this.branchName })
     }
-    const isFormValid = this.$refs.accountInformationForm?.validate()
-    this.emitValid(isFormValid)
     return orgBusinessType
   }
 
   /** Emits the validity of the component. */
   @Emit('valid')
-  private emitValid (valid: boolean): boolean {
-    return valid
+  private emitValid (): boolean {
+    const isFormValid = this.$refs.accountInformationForm?.validate()
+    return isFormValid
   }
 
   async mounted () {
@@ -183,16 +182,19 @@ export default class AccountBusinessType extends Vue {
     // load business type and size codes
       await this.getBusinessSizeCodes()
       await this.getBusinessTypeCodes()
-      if (this.currentOrganization) {
+      if (this.currentOrganization.name) {
         this.name = this.currentOrganization.name
         // incase if the new account is a premium account, default business type to business account
-        this.isBusinessAccount = this.currentOrganization.isBusinessAccount || this.currentOrganization.orgType !== Account.BASIC
+        this.isBusinessAccount = this.currentOrganization.isBusinessAccount
         this.businessType = this.currentOrganization.businessType
         this.businessSize = this.currentOrganization.businessSize
         this.branchName = this.currentOrganization.branchName
+      } else {
+        this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
       }
-      // sync with parent tracking object on mount
+      // sync with parent tracking object on mount and remove validation errors
       this.onOrgBusinessTypeChange()
+      this.$refs.accountInformationForm.resetValidation()
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
@@ -235,9 +237,12 @@ export default class AccountBusinessType extends Vue {
     this.onOrgBusinessTypeChange()
   }
 
-  onOrgBusinessTypeChange () {
+  onOrgBusinessTypeChange (emitValid: boolean = true) {
     this.$nextTick(() => {
       this.emitUpdatedOrgBusinessType()
+      if (emitValid) {
+        this.emitValid()
+      }
     })
   }
 }
