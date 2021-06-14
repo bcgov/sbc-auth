@@ -16,7 +16,7 @@
               class="mr-3"
               color="primary"
               outlined dark large
-              @click="goToNameRequestExisting()"
+              @click="goToNameRequest()"
           >
             <span>Request a BC Business Name</span>
             <v-icon small class="ml-2">mdi-open-in-new</v-icon>
@@ -274,7 +274,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   // open Name Request
-  private goToNameRequestExisting (): void {
+  private goToNameRequest (): void {
     window.open(
       ConfigHelper.getNameRequestUrl(),
       '_blank' // open in a new window.
