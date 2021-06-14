@@ -35,6 +35,7 @@
           data-test="save-button"
           :disabled="!isEnableCreateBtn"
         >
+        <!-- need to show submit button on review payment -->
          {{ readOnly ? 'Submit' : 'Create Account'}}
         </v-btn>
         <ConfirmCancelButton
@@ -66,6 +67,7 @@ const OrgModule = namespace('org')
 })
 export default class PaymentMethodSelector extends Mixins(Steppable) {
   // need toi show TOS as checked in stepper BCEID re-upload time.
+  // show submit button on final stepper to update info, even this page is read only
   @Prop({ default: false }) readOnly: boolean
 
   @OrgModule.State('currentOrganization') private readonly currentOrganization!: Organization

@@ -240,9 +240,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private selectAccountType (accountType) {
     // removed below code for becid re-upload. need to persisit all data in current org
     // to reset any existing details ;user might have went to user profile ;came back and selects another type scenarios
-    // if (!this.isAccountChange) {
-    //   this.resetCurrentOrganisation()
-    // }
+
     this.setSelectedAccountType(accountType)
     this.setCurrentOrganizationType(accountType)
     this.selectedAccountType = accountType
