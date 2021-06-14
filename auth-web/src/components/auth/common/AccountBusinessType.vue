@@ -7,7 +7,8 @@
           <v-radio-group
             row
             v-model="isBusinessAccount"
-            @change="onOrgBusinessTypeChange(false)"
+            ref="isBusinessAccount"
+            @change="onOrgBusinessTypeChange"
             mandatory
             >
                 <v-row justify="space-between">
@@ -48,6 +49,7 @@
                 autocomplete="off"
                 :error-messages="bcolDuplicateNameErrorMessage"
                 v-on:keyup="onOrgNameChange"
+                ref="name"
                 />
                 <org-name-auto-complete
                 v-if="enableOrgNameAutoComplete && isBusinessAccount"
@@ -84,6 +86,7 @@
                         :rules="orgBusinessTypeRules"
                         @change="onOrgBusinessTypeChange"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
+                        ref="businessType"
                         />
                     </v-col>
                     <v-col cols="6">
@@ -98,6 +101,7 @@
                         :rules="orgBusinessSizeRules"
                         @change="onOrgBusinessTypeChange"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
+                        ref="businessSize"
                         />
                     </v-col>
                 </v-row>
@@ -143,7 +147,11 @@ export default class AccountBusinessType extends Vue {
   private autoCompleteSearchValue: string = ''
 
   $refs: {
-    accountInformationForm: HTMLFormElement
+    accountInformationForm: HTMLFormElement,
+    name: HTMLFormElement,
+    businessType: HTMLFormElement,
+    businessSize: HTMLFormElement,
+    isBusinessAccount: HTMLFormElement
   }
 
   // input fields
@@ -172,8 +180,12 @@ export default class AccountBusinessType extends Vue {
 
   /** Emits the validity of the component. */
   @Emit('valid')
-  private emitValid (): boolean {
-    const isFormValid = this.$refs.accountInformationForm?.validate()
+  private emitValid () {
+    let isFormValid = false
+    isFormValid = !this.$refs.isBusinessAccount?.hasError && !this.$refs.name?.hasError
+    if (this.isBusinessAccount && isFormValid) {
+      isFormValid = isFormValid && !this.$refs.businessType?.hasError && !this.$refs.businessSize?.hasError
+    }
     return isFormValid
   }
 
@@ -194,7 +206,6 @@ export default class AccountBusinessType extends Vue {
       }
       // sync with parent tracking object on mount and remove validation errors
       this.onOrgBusinessTypeChange()
-      this.$refs.accountInformationForm.resetValidation()
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
@@ -218,7 +229,7 @@ export default class AccountBusinessType extends Vue {
 
   // watches name and suggests auto completed names if it is a business account.
   // similar to PPR - watch logic
-  onOrgNameChange () {
+  async onOrgNameChange () {
     // suggest auto complete values
     if (this.enableOrgNameAutoComplete && this.isBusinessAccount) {
       if (this.name) {
@@ -234,16 +245,13 @@ export default class AccountBusinessType extends Vue {
     }
 
     // emit the update value to the parent
-    this.onOrgBusinessTypeChange()
+    await this.onOrgBusinessTypeChange()
   }
 
-  onOrgBusinessTypeChange (emitValid: boolean = true) {
-    this.$nextTick(() => {
-      this.emitUpdatedOrgBusinessType()
-      if (emitValid) {
-        this.emitValid()
-      }
-    })
+  async onOrgBusinessTypeChange () {
+    await this.$nextTick()
+    this.emitUpdatedOrgBusinessType()
+    this.emitValid()
   }
 }
 </script>
