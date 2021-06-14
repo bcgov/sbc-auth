@@ -7,7 +7,7 @@
           <v-radio-group
             row
             v-model="isBusinessAccount"
-            @change="onOrgBusinessTypeChange(false)"
+            @change="onOrgBusinessTypeChange"
             mandatory
             >
                 <v-row justify="space-between">
@@ -237,12 +237,10 @@ export default class AccountBusinessType extends Vue {
     this.onOrgBusinessTypeChange()
   }
 
-  onOrgBusinessTypeChange (emitValid: boolean = true) {
+  onOrgBusinessTypeChange () {
     this.$nextTick(() => {
       this.emitUpdatedOrgBusinessType()
-      if (emitValid) {
-        this.emitValid()
-      }
+      this.emitValid()
     })
   }
 }
