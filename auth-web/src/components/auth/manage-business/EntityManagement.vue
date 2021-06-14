@@ -13,7 +13,7 @@
         <div class="view-header__actions">
           <v-btn
               id="add-name-request-btn"
-              class="mr-3"
+              class="mr-3 font-weight-regular"
               color="primary"
               outlined dark large
               @click="goToNameRequest()"
@@ -33,7 +33,7 @@
                 <span>{{ $t('addExistingBtnLabel') }}</span>
               </v-btn>
             </template>
-            ss<v-list>
+            <v-list>
               <v-list-item
               >
                 <v-list-item-title class="d-inline-flex">
@@ -398,10 +398,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   .view-header {
     justify-content: space-between;
-
-    #add-name-request-btn {
-      font-weight: normal;
-    }
 
     h1 {
       margin-bottom: 0;
