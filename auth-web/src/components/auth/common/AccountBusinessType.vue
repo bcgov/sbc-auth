@@ -206,7 +206,6 @@ export default class AccountBusinessType extends Vue {
       }
       // sync with parent tracking object on mount and remove validation errors
       this.onOrgBusinessTypeChange()
-      this.$refs.accountInformationForm.resetValidation()
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
