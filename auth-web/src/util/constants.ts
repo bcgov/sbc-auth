@@ -10,7 +10,10 @@ export enum SessionStorageKeys {
     InvitationToken = 'INV_TOKEN',
     PaginationOptions = 'PAGINATION_OPTIONS',
     PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
-    OrgSearchFilter = 'ORG_SEARCH_FILTER'
+    OrgSearchFilter = 'ORG_SEARCH_FILTER',
+    AuthApiUrl = 'AUTH_API_URL',
+    AuthWebUrl = 'AUTH_WEB_URL',
+    StatusApiUrl = 'STATUS_API_URL'
 }
 
 export enum Role {

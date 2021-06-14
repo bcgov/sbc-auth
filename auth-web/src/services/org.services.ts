@@ -47,47 +47,47 @@ export default class OrgService {
   }
 
   public static async createOrg (createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
-    return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs`, createRequestBody)
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs`, createRequestBody)
   }
 
   public static async upgradeOrDowngradeOrg (createRequestBody: CreateOrganizationRequestBody, orgId: number, action:Actions): Promise<AxiosResponse<Organization>> {
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}?action=${action}`, createRequestBody)
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}?action=${action}`, createRequestBody)
   }
 
   public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgId}`, createRequestBody)
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
   static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<Businesses>> {
-    return axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`)
   }
 
   static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
-    return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations`, affiliation)
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, affiliation)
   }
 
   static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
-    return axios.post(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations?newBusiness=true`, affiliation)
+    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations?newBusiness=true`, affiliation)
   }
 
   static async removeAffiliation (orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, resetPasscode?: boolean): Promise<AxiosResponse<void>> {
-    return axios.delete(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`, { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode } })
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`, { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode } })
   }
 
   static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
-    return axios.get(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/admins/affidavits`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/admins/affidavits`)
   }
 
   static async approvePendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
-    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'APPROVED' })
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: 'APPROVED' })
   }
 
   static async rejectPendingOrg (orgIdentifier: number): Promise<AxiosResponse> {
-    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
   }
 
   static async suspendOrg (orgIdentifier: number, statusCode: AccountStatus, suspensionReasonCode: string): Promise<AxiosResponse> {
-    return axios.patch(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/orgs/${orgIdentifier}/status`, { statusCode: statusCode, suspensionReasonCode: suspensionReasonCode })
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: statusCode, suspensionReasonCode: suspensionReasonCode })
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {

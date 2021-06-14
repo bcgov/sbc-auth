@@ -178,7 +178,7 @@ export default class IncorporationSearchResultView extends Vue {
   }
 
   private async entityDashboardEvent () {
-    window.location.href = `${ConfigHelper.getCoopsURL()}${this.currentBusiness.businessIdentifier}`
+    window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
   }
 
   private async manageAccountEvent () {
