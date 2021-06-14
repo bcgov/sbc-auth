@@ -275,10 +275,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   // open Name Request
   private goToNameRequest (): void {
-    window.open(
-      ConfigHelper.getNameRequestUrl(),
-      '_blank' // open in a new window.
-    )
+    window.location.href = ConfigHelper.getNameRequestUrl()
   }
 
   async showAddSuccessModal () {
