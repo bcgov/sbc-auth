@@ -2,6 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 
 import { Account } from '@/util/constants'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
+import CodesModule from '@/store/modules/codes'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -15,6 +16,7 @@ document.body.setAttribute('data-app', 'true')
 
 describe('AccountBusinessType.vue', () => {
   let orgModule: any
+  let codesModule: any
   let wrapper: any
   let store: any
   const localVue = createLocalVue()
@@ -23,6 +25,15 @@ describe('AccountBusinessType.vue', () => {
   const vuetify = new Vuetify({})
 
   beforeEach(() => {
+    codesModule = {
+      namespaced: true,
+      state: {
+      },
+      actions: CodesModule.actions,
+      mutations: CodesModule.mutations,
+      getters: CodesModule.getters
+    }
+
     orgModule = {
       namespaced: true,
       state: {
@@ -36,7 +47,8 @@ describe('AccountBusinessType.vue', () => {
       state: {},
       strict: false,
       modules: {
-        org: orgModule
+        org: orgModule,
+        codes: codesModule
       }
     })
     jest.resetModules()
@@ -72,7 +84,7 @@ describe('AccountBusinessType.vue', () => {
     })
 
     expect(wrapper.find("[data-test='account-name']").exists()).toBeTruthy()
-    expect(wrapper.find("[data-test='branch-detail']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeFalsy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeFalsy()
   })
 
@@ -90,7 +102,7 @@ describe('AccountBusinessType.vue', () => {
     })
 
     wrapper.find("[data-test='radio-business-account-type']").trigger('click')
-    expect(wrapper.find("[data-test='branch-detail']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeTruthy()
   })
 })
