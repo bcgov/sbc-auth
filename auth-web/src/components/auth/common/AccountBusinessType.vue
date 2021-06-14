@@ -174,8 +174,6 @@ export default class AccountBusinessType extends Vue {
   @Emit('valid')
   private emitValid (): boolean {
     const isFormValid = this.$refs.accountInformationForm?.validate()
-    // eslint-disable-next-line no-console
-    console.log(isFormValid)
     return isFormValid
   }
 

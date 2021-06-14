@@ -21,8 +21,8 @@
       v-model="isBcolSelected"
       data-test="radio-isBcolSelected"
     >
-      <v-radio label="Yes" value="yes" outlined data-test="radio-isBcolSelected-yes"/>
-      <v-radio label="No" value="no" outlined data-test="radio-isBcolSelected-no"/>
+      <v-radio label="Yes" value="yes" data-test="radio-isBcolSelected-yes"/>
+      <v-radio label="No" value="no" data-test="radio-isBcolSelected-no"/>
     </v-radio-group>
 
     <component class="mt-5 pa-0"
