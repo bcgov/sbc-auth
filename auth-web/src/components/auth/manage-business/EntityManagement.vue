@@ -11,6 +11,16 @@
       <div class="view-header align-center">
         <h1 class="view-header__title">Manage Businesses</h1>
         <div class="view-header__actions">
+          <v-btn
+              id="add-name-request-btn"
+              class="mr-3"
+              color="primary"
+              outlined dark large
+              @click="goToNameRequestExisting()"
+          >
+            <span>Request a BC Business Name</span>
+            <v-icon small class="ml-2">mdi-open-in-new</v-icon>
+          </v-btn>
           <v-menu>
             <template v-slot:activator="{ on }">
               <v-btn
@@ -23,7 +33,7 @@
                 <span>{{ $t('addExistingBtnLabel') }}</span>
               </v-btn>
             </template>
-            <v-list>
+            ss<v-list>
               <v-list-item
               >
                 <v-list-item-title class="d-inline-flex">
@@ -170,6 +180,7 @@ import { Address } from '@/models/address'
 import AffiliatedEntityList from '@/components/auth/manage-business/AffiliatedEntityList.vue'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -260,6 +271,14 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+  }
+
+  // open Name Request
+  private goToNameRequestExisting (): void {
+    window.open(
+      ConfigHelper.getNameRequestUrl(),
+      '_blank' // open in a new window.
+    )
   }
 
   async showAddSuccessModal () {
@@ -379,6 +398,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   .view-header {
     justify-content: space-between;
+
+    #add-name-request-btn {
+      font-weight: normal;
+    }
 
     h1 {
       margin-bottom: 0;
