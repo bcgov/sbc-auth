@@ -70,7 +70,7 @@ describe('AccountBusinessType.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('individual account type rendering', () => {
+  it('individual account type rendering', async () => {
     const $t = () => ''
     wrapper = mount(AccountBusinessType, {
       store,
@@ -82,13 +82,13 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-
+    await wrapper.setData({ isLoading: false })
     expect(wrapper.find("[data-test='account-name']").exists()).toBeTruthy()
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeFalsy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeFalsy()
   })
 
-  it('business account type rendering', () => {
+  it('business account type rendering', async () => {
     const $t = () => ''
     wrapper = mount(AccountBusinessType, {
       store,
@@ -100,7 +100,7 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-
+    await wrapper.setData({ isLoading: false })
     wrapper.find("[data-test='radio-business-account-type']").trigger('click')
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeTruthy()
