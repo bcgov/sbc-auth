@@ -2,7 +2,7 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 
 import { Code } from '@/models/Code'
 import CodesService from '@/services/codes.service'
-
+import { RejectCode } from '@/util/constants'
 @Module({ namespaced: true })
 export default class CodesModule extends VuexModule {
     suspensionReasonCodes: Code[] = []
@@ -67,11 +67,10 @@ export default class CodesModule extends VuexModule {
       if (response && response.data && response.status === 200) {
         const rejectResons = response.data
         // pushing default reject account value into array since its not included in API
-        // TODO make it better approch
+        // also use this code to send reject
         rejectResons.push({
-          'code': 'REJECTACCOUNT',
-          'default': false,
-          'desc': 'Reject Account'
+          'code': RejectCode.REJECTACCOUNT_CODE,
+          'desc': RejectCode.REJECTACCOUNT_DESC
         })
         return rejectResons
       }

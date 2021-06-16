@@ -34,7 +34,7 @@
                 v-on="component.events"
                 :ref="component.ref"
               />
-              <!-- :ref="component.ref" -->
+
               <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
             </template>
             <template v-if="canSelect" >
@@ -87,7 +87,7 @@
 
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { Pages, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
+import { Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -274,22 +274,24 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
-  private async saveSelection (remark): Promise<void> {
-    if (remark) {
+  private async saveSelection (reason): Promise<void> {
+    const { isValidForm, rejectReason } = reason
+
+    if (isValidForm) {
       this.isSaving = true
       // if account approve
       const isApprove = !this.isRejectModal && !this.isOnHoldModal
       // on rejecting there will be two scenarios
       // 1. by clicking reject for normal flow.
-      // 2. by selecting remark as Reject account ,
+      // 2. by selecting remark as Reject account ,(check by using code)
       // both cases we need to call reject API than hold
-      const isRejecting = this.isRejectModal || (remark === 'REJECTACCOUNT')
+      const isRejecting = this.isRejectModal || (rejectReason.code === RejectCode.REJECTACCOUNT_CODE)
       try {
         if (isApprove) {
           await this.approveAccountUnderReview(this.task)
         } else {
         // both reject and hold will happen here passing second argument to determine which call need to make
-          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remark })
+          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remark: rejectReason.desc })
         }
         if (this.task.type === TaskType.GOVM_REVIEW) {
           await this.createAccountFees(this.task.relationshipId)

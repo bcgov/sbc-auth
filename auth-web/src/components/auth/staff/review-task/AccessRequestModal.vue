@@ -16,8 +16,8 @@
       </template>
       <template v-slot:text>
         <div class="mx-8">
-          <v-form ref="rejectForm" lazy-validation class="reject-form">
-          <p class="mb-9" v-html="modalData.text"></p>
+          <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form">
+          <p class="mb-9" v-html="modalData.text" data-test="p-modal-text"></p>
           <v-select
             filled
             label="Reject Reason"
@@ -30,6 +30,7 @@
             class="mt-5 mb-0"
             :rules="rejectReasonRules"
             v-if="isOnHoldModal"
+            return-object
             />
 
           </v-form>
@@ -95,7 +96,7 @@ export default class AccessRequestModal extends Vue {
   @Prop({ default: '' }) private taskName: string
   @Prop() private rejectReasonCodes: []
 
-  private rejectReason:string=''
+  private rejectReason= ''
 
   $refs: {
     accessRequest: ModalDialog,
@@ -163,6 +164,12 @@ export default class AccessRequestModal extends Vue {
     }
     return { title, text }
   }
+
+  mounted () {
+    if (!this.isOnHoldModal) {
+      this.rejectReason = ''
+    }
+  }
   public open () {
     this.$refs.accessRequest.open()
   }
@@ -187,10 +194,12 @@ export default class AccessRequestModal extends Vue {
   @Emit('approve-reject-action')
   public callAction () {
     // return reject reason since we need to pass to API
+    let isValidForm = true
     if (this.isOnHoldModal) {
-      return this.$refs.rejectForm.validate() ? this.rejectReason : false
+      isValidForm = this.$refs.rejectForm.validate()
     }
-    return true
+    // all other time passing form as valid since there is no values
+    return { isValidForm, rejectReason: this.rejectReason }
   }
 }
 </script>
