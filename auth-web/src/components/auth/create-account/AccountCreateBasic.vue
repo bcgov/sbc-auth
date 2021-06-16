@@ -7,7 +7,8 @@
     @update:org-business-type="updateOrgBusinessType"
     @valid="checkOrgBusinessTypeValid">
     </account-business-type>
-    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
+
+    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep " v-display-mode>
       <legend class="mb-3">Mailing Address</legend>
       <base-address-form
         ref="mailingAddress"
