@@ -16,9 +16,9 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
+from ..utils.enums import TaskRelationshipStatus
 from .base_model import BaseModel
 from .db import db
-from ..utils.enums import TaskRelationshipStatus
 
 
 class Task(BaseModel):

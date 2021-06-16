@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for reset test data."""
-from typing import Dict
 
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.enums import LoginSource
 from auth_api.utils.roles import Role
+from auth_api.utils.user_context import UserContext, user_context
 
 
 class ResetTestData:  # pylint:disable=too-few-public-methods
@@ -28,10 +28,12 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
         """Return a reset test data service instance."""
 
     @staticmethod
-    def reset(token_info: Dict):
+    @user_context
+    def reset(**kwargs):
         """Cleanup all the data from all tables create by the provided user id."""
-        if Role.TESTER.value in token_info.get('realm_access').get('roles'):  # pylint: disable=too-many-nested-blocks
-            user = UserModel.find_by_jwt_token(token_info)
+        user_from_context: UserContext = kwargs['user_context']
+        if Role.TESTER.value in user_from_context.roles:  # pylint: disable=too-many-nested-blocks
+            user = UserModel.find_by_jwt_token()
             if user:
                 # TODO need to find a way to avoid using protected function
                 for model_class in db.Model._decl_class_registry.values():  # pylint:disable=protected-access
@@ -44,14 +46,14 @@ class ResetTestData:  # pylint:disable=too-few-public-methods
                             for model in model_class.query.filter_by(modified_by_id=user.id).all():
                                 model.reset()
                 # check the user is still exists or not
-                user = UserModel.find_by_jwt_token(token_info)
+                user = UserModel.find_by_jwt_token()
                 if user:
                     user.modified_by = None
                     user.modified_by_id = None
                     user.reset()
 
                 # Reset opt from keycloak if from BCEID
-                login_source = token_info.get('loginSource', None)
+                login_source = user_from_context.login_source
 
                 if login_source == LoginSource.BCEID.value:
-                    KeycloakService.reset_otp(token_info.get('sub'))
+                    KeycloakService.reset_otp(user_from_context.sub)

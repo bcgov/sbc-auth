@@ -35,6 +35,7 @@ from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
 
+
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 
 

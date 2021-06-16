@@ -23,6 +23,7 @@ from auth_api.models.views.authorization import Authorization as AuthorizationVi
 from auth_api.services.permissions import Permissions as PermissionsService
 from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
+from auth_api.utils.user_context import UserContext, user_context
 
 
 class Authorization:
@@ -37,12 +38,14 @@ class Authorization:
         self._model = model
 
     @staticmethod
-    def get_account_authorizations_for_org(token_info: Dict, account_id: str, corp_type_code: Optional[str],
-                                           expanded: bool = False):
+    @user_context
+    def get_account_authorizations_for_org(account_id: str, corp_type_code: Optional[str],
+                                           expanded: bool = False, **kwargs):
         """Get User authorizations for the org."""
+        user_from_context: UserContext = kwargs['user_context']
         auth_response = {}
         auth = None
-        token_roles = token_info.get('realm_access').get('roles')
+        token_roles = user_from_context.roles
 
         # todo the service account level access has not been defined
         if Role.STAFF.value in token_roles:
@@ -53,8 +56,8 @@ class Authorization:
             auth_response['roles'] = token_roles
 
         else:
-            keycloak_guid = token_info.get('sub', None)
-            account_id_claim = token_info.get('Account-Id', None)
+            keycloak_guid = user_from_context.sub
+            account_id_claim = user_from_context.account_id
             # check product based auth auth org based auth
             check_product_based_auth = Authorization._is_product_based_auth(corp_type_code)
 
@@ -81,11 +84,13 @@ class Authorization:
         return auth_response
 
     @staticmethod
-    def get_user_authorizations_for_entity(token_info: Dict, business_identifier: str, expanded: bool = False):
+    @user_context
+    def get_user_authorizations_for_entity(business_identifier: str, expanded: bool = False, **kwargs):
         """Get User authorizations for the entity."""
+        user_from_context: UserContext = kwargs['user_context']
         auth_response = {}
         auth = None
-        token_roles = token_info.get('realm_access').get('roles')
+        token_roles = user_from_context.roles
         current_app.logger.debug('check roles=:{}'.format(token_roles))
         if Role.STAFF.value in token_roles:
             if expanded:
@@ -96,7 +101,7 @@ class Authorization:
 
         elif Role.SYSTEM.value in token_roles:
             # a service account in keycloak should have product_code claim setup.
-            keycloak_product_code = token_info.get('product_code', None)
+            keycloak_product_code = user_from_context.token_info.get('product_code', None)
             if keycloak_product_code:
                 auth = AuthorizationView.find_user_authorization_by_business_number_and_product(business_identifier,
                                                                                                 keycloak_product_code)
@@ -105,10 +110,10 @@ class Authorization:
                     permissions = PermissionsService.get_permissions_for_membership(auth.status_code, 'SYSTEM')
                     auth_response['roles'] = permissions
         else:
-            keycloak_guid = token_info.get('sub', None)
+            keycloak_guid = user_from_context.sub
             if business_identifier and keycloak_guid:
                 auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, keycloak_guid,
-                                                                                    token_info.get('Account-Id', None))
+                                                                                    user_from_context.account_id)
 
             if auth:
                 permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
@@ -129,17 +134,18 @@ class Authorization:
         return authorizations_response
 
     @staticmethod
-    def get_account_authorizations_for_product(token_info: Dict, account_id: str, product_code: str,
-                                               expanded: bool = False):
+    @user_context
+    def get_account_authorizations_for_product(account_id: str, product_code: str, expanded: bool = False, **kwargs):
         """Get account authorizations for the product."""
-        account_id_claim = token_info.get('Account-Id', None)
+        user_from_context: UserContext = kwargs['user_context']
+        account_id_claim = user_from_context.account_id
         if account_id_claim:
             auth = AuthorizationView.find_account_authorization_by_org_id_and_product(
                 account_id_claim, product_code
             )
         else:
             auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
-                token_info.get('sub'), account_id, product_code
+                user_from_context.sub, account_id, product_code
             )
         auth_response = Authorization(auth).as_dict(expanded)
         auth_response['roles'] = []
@@ -189,36 +195,35 @@ class Authorization:
         return check_product_based_auth
 
 
-def check_auth(token_info: Dict, **kwargs):
+@user_context
+def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
-    if Role.STAFF.value in token_info.get('realm_access').get('roles'):
+    user_from_context: UserContext = kwargs['user_context']
+    if user_from_context.is_staff():
         _check_for_roles(STAFF, kwargs)
-    elif Role.SYSTEM.value in token_info.get('realm_access').get('roles'):
+    elif user_from_context.is_system():
         business_identifier = kwargs.get('business_identifier', None)
         org_identifier = kwargs.get('org_id', None)
 
-        product_code_in_jwt = token_info.get('product_code', None)
+        product_code_in_jwt = user_from_context.token_info.get('product_code', None)
         if product_code_in_jwt is None:
             # product code must be present in jwt
             abort(403)
 
         if business_identifier:
-            auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
+            auth = Authorization.get_user_authorizations_for_entity(business_identifier)
         elif org_identifier:
-            auth = Authorization.get_account_authorizations_for_product(token_info,
-                                                                        org_identifier,
-                                                                        product_code_in_jwt)
+            auth = Authorization.get_account_authorizations_for_product(org_identifier, product_code_in_jwt)
         if auth is None:
             abort(403)
         return
     else:
         business_identifier = kwargs.get('business_identifier', None)
-        org_identifier = kwargs.get('org_id', None) or token_info.get('Account-Id', None)
+        org_identifier = kwargs.get('org_id', None) or user_from_context.account_id
         if business_identifier:
-            auth = Authorization.get_user_authorizations_for_entity(token_info, business_identifier)
+            auth = Authorization.get_user_authorizations_for_entity(business_identifier)
         elif org_identifier:
-            auth_record = AuthorizationView.find_user_authorization_by_org_id(token_info.get('sub', None),
-                                                                              org_identifier)
+            auth_record = AuthorizationView.find_user_authorization_by_org_id(user_from_context.sub, org_identifier)
             auth = Authorization(auth_record).as_dict() if auth_record else None
 
         _check_for_roles(auth.get('orgMembership', None) if auth else None, kwargs)

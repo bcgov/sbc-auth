@@ -172,8 +172,8 @@ export default class NonBcscAccountSetupView extends Vue {
         }
       },
       {
-        title: 'User Profile',
-        stepName: 'User Profile',
+        title: 'Account Administrator Information',
+        stepName: 'Account Administrator Information',
         component: UserProfileForm,
         componentProps: {
           isStepperView: true,

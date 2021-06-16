@@ -15,10 +15,10 @@
 
 from auth_api.models import PaymentType as PaymentTypeModel
 
-from .base_schema import BaseSchema
+from auth_api.models import ma
 
 
-class PaymentTypeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class PaymentTypeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the PaymentType model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

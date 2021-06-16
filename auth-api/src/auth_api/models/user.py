@@ -25,6 +25,7 @@ from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import AccessType, Status, UserStatus
 from auth_api.utils.roles import Role
+from auth_api.utils.user_context import UserContext, user_context
 
 from .base_model import BaseModel
 from .db import db
@@ -67,7 +68,7 @@ class User(BaseModel):
     orgs = relationship('Membership',
                         primaryjoin='and_(User.id == Membership.user_id,  or_(Membership.status == ' + str(
                             Status.ACTIVE.value) + ', Membership.status == ' + str(
-                                Status.PENDING_APPROVAL.value) + '))', lazy='select')  # noqa:E127
+                            Status.PENDING_APPROVAL.value) + '))', lazy='select')  # noqa:E127
 
     terms_of_use_version = relationship('Documents', foreign_keys=[terms_of_use_accepted_version], uselist=False,
                                         lazy='select')
@@ -79,28 +80,34 @@ class User(BaseModel):
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def find_by_jwt_token(cls, token: dict):
+    @user_context
+    def find_by_jwt_token(cls, **kwargs):
         """Find an existing user by the keycloak GUID and (idpUserId is null or from token) in the provided token."""
+        user_from_context: UserContext = kwargs['user_context']
         return db.session.query(User).filter(
-            and_(User.keycloak_guid == token.get('sub'),
-                 or_(User.idp_userid == token.get('idp_userid', None), User.idp_userid.is_(None)))).one_or_none()
+            and_(User.keycloak_guid == user_from_context.sub,
+                 or_(User.idp_userid == user_from_context.token_info.get('idp_userid', None),
+                     User.idp_userid.is_(None)))).one_or_none()
 
     @classmethod
-    def create_from_jwt_token(cls, token: dict, first_name: str, last_name: str):
+    @user_context
+    def create_from_jwt_token(cls, first_name: str, last_name: str, **kwargs):
         """Create a User from the provided JWT."""
+        user_from_context: UserContext = kwargs['user_context']
+        token = user_from_context.token_info
         if token:
             user = User(
-                username=token.get('preferred_username', None),
+                username=user_from_context.user_name,
                 firstname=first_name,
                 lastname=last_name,
                 email=token.get('email', None),
-                keycloak_guid=token.get('sub', None),
+                keycloak_guid=user_from_context.sub,
                 created=datetime.datetime.now(),
-                login_source=token.get('loginSource', None),
+                login_source=user_from_context.login_source,
                 status=UserStatusCode.get_default_type(),
                 idp_userid=token.get('idp_userid', None),
                 login_time=datetime.datetime.now(),
-                type=cls._get_type(token_info=token)
+                type=cls._get_type(user_from_context=user_from_context)
             )
             current_app.logger.debug(
                 'Creating user from JWT:{}; User:{}'.format(token, user)
@@ -111,30 +118,32 @@ class User(BaseModel):
         return None
 
     @classmethod
-    def update_from_jwt_token(cls, user, token: dict,  # pylint:disable=too-many-arguments
-                              first_name: str, last_name: str, is_login: bool = False):
+    @user_context
+    def update_from_jwt_token(cls, user,  # pylint:disable=too-many-arguments
+                              first_name: str, last_name: str, is_login: bool = False, **kwargs):
         """Update a User from the provided JWT."""
-        if token is None or user is None:
+        user_from_context: UserContext = kwargs['user_context']
+        token = user_from_context.token_info
+        if not token or not user:
             return None
 
         # Do not save if nothing has been changed
         # pylint: disable=too-many-boolean-expressions
         if not is_login \
-                and user.username == token.get('preferred_username', user.username) \
+                and (user.username == user_from_context.user_name or user.username) \
                 and user.firstname == first_name \
                 and user.lastname == last_name \
                 and user.email == token.get('email', user.email) \
-                and str(user.keycloak_guid) == token.get('sub', user.keycloak_guid) \
+                and (str(user.keycloak_guid) == user_from_context.sub or user.keycloak_guid) \
                 and user.status == UserStatus.ACTIVE.value \
-                and user.login_source == token.get('login_source', user.login_source) \
+                and (user.login_source == user_from_context.login_source or user.login_source) \
                 and user.idp_userid == token.get('idp_userid', None):
             return user
 
         current_app.logger.debug(
             'Updating user from JWT:{}; User:{}'.format(token, user)
         )
-
-        user.username = token.get('preferred_username', user.username)
+        user.username = user_from_context.user_name or user.username
 
         user.firstname = first_name
         user.lastname = last_name
@@ -143,12 +152,12 @@ class User(BaseModel):
         user.modified = datetime.datetime.now()
 
         if token.get('accessType', None) == AccessType.ANONYMOUS.value:  # update kcguid for anonymous users
-            user.keycloak_guid = token.get('sub', user.keycloak_guid)
+            user.keycloak_guid = user_from_context.sub or user.keycloak_guid
 
         # If this user is marked as Inactive, this login will re-activate them
         user.status = UserStatus.ACTIVE.value
-        user.login_source = token.get('login_source', user.login_source)
-        user.type = cls._get_type(token_info=token)
+        user.login_source = user_from_context.login_source or user.login_source
+        user.type = cls._get_type(user_from_context)
 
         # If this is a request during login, update login_time
         if is_login:
@@ -169,10 +178,12 @@ class User(BaseModel):
         return cls.query.filter(or_(cls.firstname == first_name, cls.lastname == last_name, cls.email == email)).all()
 
     @classmethod
-    def update_terms_of_use(cls, token: dict, is_terms_accepted, terms_of_use_version):
+    @user_context
+    def update_terms_of_use(cls, is_terms_accepted, terms_of_use_version, **kwargs):
         """Update the terms of service for the user."""
-        if token:
-            user = cls.find_by_jwt_token(token)
+        user_from_context: UserContext = kwargs['user_context']
+        if user_from_context.token_info:
+            user = cls.find_by_jwt_token()
             user.is_terms_of_use_accepted = is_terms_accepted
             user.terms_of_use_accepted_version = terms_of_use_version
 
@@ -199,20 +210,19 @@ class User(BaseModel):
         return self
 
     @classmethod
-    def _get_type(cls, token_info: dict) -> str:
+    def _get_type(cls, user_from_context: UserContext) -> str:
         """Return type of the user from the token info."""
-        token_roles = token_info.get('roles', None)
         user_type: str = None
-        if token_roles:
-            if Role.ANONYMOUS_USER.value in token_roles:
+        if user_from_context.roles:
+            if Role.ANONYMOUS_USER.value in user_from_context.roles:
                 user_type = Role.ANONYMOUS_USER.name
-            elif Role.GOV_ACCOUNT_USER.value in token_roles:
+            elif Role.GOV_ACCOUNT_USER.value in user_from_context.roles:
                 user_type = Role.GOV_ACCOUNT_USER.name
-            elif Role.PUBLIC_USER.value in token_roles:
+            elif Role.PUBLIC_USER.value in user_from_context.roles:
                 user_type = Role.PUBLIC_USER.name
-            elif Role.STAFF.value in token_roles:
+            elif user_from_context.is_staff():
                 user_type = Role.STAFF.name
-            elif Role.SYSTEM.value in token_roles:
+            elif user_from_context.is_system():
                 user_type = Role.SYSTEM.name
 
         return user_type

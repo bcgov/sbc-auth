@@ -376,7 +376,7 @@ class TestJwtClaims(dict, Enum):
             'preferred_username': preferred_username,
             'realm_access': {
                 'roles': [
-                    'edit', 'public_user'
+                    'edit', 'public_user', *roles
                 ]
             },
             'roles': [
@@ -486,6 +486,18 @@ class TestOrgInfo(dict, Enum):
             'paymentMethod': 'ONLINE_BANKING'
         },
         'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}]
+    }
+
+    org_with_all_info = {
+        'name': 'My Test Org',
+        'accessType': AccessType.REGULAR.value,
+        'paymentInfo': {
+            'paymentMethod': 'ONLINE_BANKING'
+        },
+        'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}],
+        'businessType': 'LAW',
+        'businessSize': '2-5',
+        'isBusinessAccount': True
     }
 
     @staticmethod

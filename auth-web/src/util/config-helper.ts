@@ -92,6 +92,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('VON_API_URL')
   }
 
+  static getEntitySelectorUrl () {
+    return ConfigHelper.getValue('ENTITY_SELECTOR_URL')
+  }
+
   static getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]

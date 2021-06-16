@@ -13,7 +13,7 @@
 # limitations under the License.
 """Manager for org schema and export."""
 
-from marshmallow import fields
+from marshmallow import fields, post_dump
 
 from auth_api.models import Org as OrgModel
 
@@ -27,8 +27,21 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
         """Maps all of the Org fields to a default schema."""
 
         model = OrgModel
-        exclude = ('members', 'contacts', 'invitations', 'affiliated_entities', 'suspension_reason')
+        exclude = ('members', 'contacts', 'invitations', 'affiliated_entities', 'suspension_reason',
+                   'products', 'login_options', 'type_code')
 
-    org_type = fields.Pluck('OrgTypeSchema', 'code', data_key='orgType')
+    type_code = fields.String(data_key='org_type')
     status_code = fields.String(data_key='status_code')
     suspension_reason_code = fields.String(data_key='suspension_reason_code')
+    business_size = fields.String(data_key='business_size')
+    business_type = fields.String(data_key='business_type')
+
+    @post_dump(pass_many=False)
+    def _include_dynamic_fields(self, data, many):  # pylint: disable=no-self-use
+        """Remove all empty values and versions from the dumped dict."""
+        if not many:
+            if data.get('is_business_account', False):
+                # Adding a dynamic field businessName for making other application integrations easy.
+                data['businessName'] = data.get('name')
+
+        return data

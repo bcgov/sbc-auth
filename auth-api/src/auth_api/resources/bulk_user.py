@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing a User resource."""
 
-from flask import g, request
+from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
@@ -43,12 +43,10 @@ class BulkUser(Resource):
         try:
             request_json = request.get_json()
             valid_format, errors = schema_utils.validate(request_json, 'bulk_user')
-            token = g.jwt_oidc_token_info
             if not valid_format:
                 return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
-            users = UserService.create_user_and_add_membership(request_json['users'],
-                                                               request_json['orgId'], token)
+            users = UserService.create_user_and_add_membership(request_json['users'], request_json['orgId'])
             is_any_error = any(user['http_status'] != 201 for user in users['users'])
 
             response, status = users, http_status.HTTP_207_MULTI_STATUS if is_any_error else http_status.HTTP_200_OK

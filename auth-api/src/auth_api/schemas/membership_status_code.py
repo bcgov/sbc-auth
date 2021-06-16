@@ -15,10 +15,10 @@
 
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 
-from .base_schema import BaseSchema
+from auth_api.models import ma
 
 
-class MembershipStatusCodeSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
+class MembershipStatusCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the MembershipStatusCode model."""
 
     class Meta:  # pylint: disable=too-few-public-methods

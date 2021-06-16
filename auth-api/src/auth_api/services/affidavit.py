@@ -55,10 +55,10 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_affidavit(token_info: Dict, affidavit_info: Dict):
+    def create_affidavit(affidavit_info: Dict):
         """Create a new affidavit record."""
         current_app.logger.debug('<create_affidavit ')
-        user = UserService.find_by_jwt_token(token=token_info)
+        user = UserService.find_by_jwt_token()
         # If the user already have a pending affidavit, raise error
         existing_affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(user_id=user.identifier)
         if existing_affidavit is not None:
