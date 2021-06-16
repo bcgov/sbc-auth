@@ -14,7 +14,6 @@
             row
             v-model="isBusinessAccount"
             ref="isBusinessAccount"
-            @mouseup="onOrgBusinessTypeChange(true)"
             mandatory
             >
                 <v-row justify="space-between">
@@ -25,6 +24,7 @@
                         :value="false"
                         data-test="radio-individual-account-type"
                         class="px-4 py-5"
+                        @change="onOrgBusinessTypeChange(true)"
                         ></v-radio>
                         <v-radio
                         label="Business Name"
@@ -32,6 +32,7 @@
                         :value="true"
                         data-test="radio-business-account-type"
                         class="px-4 py-5"
+                        @change="onOrgBusinessTypeChange(true)"
                         ></v-radio>
                     </v-col>
                 </v-row>
@@ -72,7 +73,7 @@
                 :disabled="saving"
                 data-test="input-branch-name"
                 :readonly="govmAccount"
-                v-on:keyup="onOrgBusinessTypeChange(false)"
+                v-on:keyup="onOrgBusinessTypeChange()"
                 v-show="govmAccount || isBusinessAccount"
                 hide-details
                 />
@@ -90,7 +91,7 @@
                         v-model="businessType"
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
-                        @change="onOrgBusinessTypeChange(false)"
+                        @change="onOrgBusinessTypeChange()"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         ref="businessType"
                         />
@@ -105,7 +106,7 @@
                         v-model="businessSize"
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
-                        @change="onOrgBusinessTypeChange(false)"
+                        @change="onOrgBusinessTypeChange()"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         ref="businessSize"
                         />
@@ -214,7 +215,7 @@ export default class AccountBusinessType extends Vue {
         this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
       }
       // sync with parent tracking object on mount and remove validation errors
-      await this.onOrgBusinessTypeChange(false)
+      await this.onOrgBusinessTypeChange()
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
@@ -256,11 +257,11 @@ export default class AccountBusinessType extends Vue {
     }
 
     // emit the update value to the parent
-    await this.onOrgBusinessTypeChange(false)
+    await this.onOrgBusinessTypeChange()
   }
 
-  async onOrgBusinessTypeChange (clearOrgName: boolean) {
-    if (clearOrgName && !this.isLoading) {
+  async onOrgBusinessTypeChange (clearOrgName: boolean = false) {
+    if (clearOrgName) {
       // Case for isBusinessAccount - when toggling between individual and business accounts, we ought to reset org name
       this.name = ''
     }
