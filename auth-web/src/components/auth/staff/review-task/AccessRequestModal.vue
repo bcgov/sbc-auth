@@ -28,7 +28,7 @@
             data-test="reject-reason-type"
             :menu-props="{  contentClass: 'reject-reason-item' }"
             class="mt-5 mb-0"
-            :rules="rejectResonRules"
+            :rules="rejectReasonRules"
             v-if="isOnHoldModal"
             />
 
@@ -102,7 +102,7 @@ export default class AccessRequestModal extends Vue {
     accessRequestConfirmationDialog: ModalDialog,
     rejectForm: HTMLFormElement,
   }
-  private readonly rejectResonRules = [v => !!v || 'Reson required']
+  private readonly rejectReasonRules = [v => !!v || 'Reason required']
 
   get modalData () {
     const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
