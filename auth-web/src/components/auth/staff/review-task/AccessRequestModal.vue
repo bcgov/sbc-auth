@@ -15,8 +15,9 @@
         <v-icon large :color="modalData.color">{{modalData.icon}}</v-icon>
       </template>
       <template v-slot:text>
-        <div class="mx-6">
-          <p class="mb-4 mr-7" v-html="modalData.text"></p>
+        <div class="mx-8">
+          <v-form ref="rejectForm" lazy-validation class="reject-form">
+          <p class="mb-9" v-html="modalData.text"></p>
           <v-select
             filled
             label="Reject Reason"
@@ -26,11 +27,12 @@
             v-model="rejectReason"
             data-test="reject-reason-type"
             :menu-props="{  contentClass: 'reject-reason-item' }"
-            class="mt-5"
-            hide-details
+            class="mt-5 mb-0"
+            :rules="rejectResonRules"
             v-if="isOnHoldModal"
             />
 
+          </v-form>
         </div>
       </template>
       <template v-slot:actions>
@@ -74,7 +76,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { TaskRelationshipType } from '@/util/constants'
 
@@ -98,7 +100,9 @@ export default class AccessRequestModal extends Vue {
   $refs: {
     accessRequest: ModalDialog,
     accessRequestConfirmationDialog: ModalDialog,
+    rejectForm: HTMLFormElement,
   }
+  private readonly rejectResonRules = [v => !!v || 'Reson required']
 
   get modalData () {
     const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
@@ -183,7 +187,10 @@ export default class AccessRequestModal extends Vue {
   @Emit('approve-reject-action')
   public callAction () {
     // return reject reason since we need to pass to API
-    return this.rejectReason
+    if (this.isOnHoldModal) {
+      return this.$refs.rejectForm.validate() ? this.rejectReason : false
+    }
+    return true
   }
 }
 </script>
@@ -194,5 +201,8 @@ export default class AccessRequestModal extends Vue {
   .reject-reason-item .v-list-item:last-child {
       border-top: 1px solid $gray5;
     }
+  .reject-form{
+    margin-bottom: -30px !important;
+  }
 
 </style>

@@ -274,32 +274,34 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
-  private async saveSelection (remark:string): Promise<void> {
-    this.isSaving = true
-    // if account approve
-    const isApprove = !this.isRejectModal && !this.isOnHoldModal
-    // on rejecting there will be two scenarios
-    // 1. by clicking reject for normal flow.
-    // 2. by selecting remark as Reject account ,
-    // both cases we need to call reject API than hold
-    const isRejecting = this.isRejectModal || (remark && remark === 'REJECTACCOUNT')
-    try {
-      if (isApprove) {
-        await this.approveAccountUnderReview(this.task)
-      } else {
+  private async saveSelection (remark): Promise<void> {
+    if (remark) {
+      this.isSaving = true
+      // if account approve
+      const isApprove = !this.isRejectModal && !this.isOnHoldModal
+      // on rejecting there will be two scenarios
+      // 1. by clicking reject for normal flow.
+      // 2. by selecting remark as Reject account ,
+      // both cases we need to call reject API than hold
+      const isRejecting = this.isRejectModal || (remark === 'REJECTACCOUNT')
+      try {
+        if (isApprove) {
+          await this.approveAccountUnderReview(this.task)
+        } else {
         // both reject and hold will happen here passing second argument to determine which call need to make
-        await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remark })
-      }
-      if (this.task.type === TaskType.GOVM_REVIEW) {
-        await this.createAccountFees(this.task.relationshipId)
-      }
-      this.openModal(!isApprove, true)
+          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remark })
+        }
+        if (this.task.type === TaskType.GOVM_REVIEW) {
+          await this.createAccountFees(this.task.relationshipId)
+        }
+        this.openModal(!isApprove, true)
       // this.$router.push(Pages.STAFF_DASHBOARD)
-    } catch (error) {
+      } catch (error) {
       // eslint-disable-next-line no-console
-      console.log(error)
-    } finally {
-      this.isSaving = false
+        console.log(error)
+      } finally {
+        this.isSaving = false
+      }
     }
   }
 
