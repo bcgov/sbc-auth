@@ -76,6 +76,7 @@ class Error(Enum):
     GOVM_ACCOUNT_DATA_MISSING = 'GOVM account creation needs payment info , gl code and mailing address', \
                                 http_status.HTTP_400_BAD_REQUEST
     PRODUCT_SUBSCRIPTION_EXISTS = 'Org has subscription to the product exists.', http_status.HTTP_409_CONFLICT
+    MISSING_ROLES = 'Missing a role required to access this endpoint', http_status.HTTP_401_UNAUTHORIZED
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
