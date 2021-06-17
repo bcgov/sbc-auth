@@ -43,9 +43,11 @@ def validate_roles(**role_args):
             allowed_roles = role_args.get('allowed_roles', [])
             not_allowed_roles = role_args.get('not_allowed_roles', [])
             if len(set(allowed_roles).intersection(user_roles)) < 1:
-                abort(http_status.HTTP_401_UNAUTHORIZED, description='Missing the role(s) required to access this endpoint')
+                abort(http_status.HTTP_401_UNAUTHORIZED,
+                      description='Missing the role(s) required to access this endpoint')
             if len(set(not_allowed_roles).intersection(user_roles)) > 1:
-                abort(http_status.HTTP_401_UNAUTHORIZED, description='Not allowed role(s) denied access to this endpoint')
+                abort(http_status.HTTP_401_UNAUTHORIZED,
+                      description='Not allowed role(s) denied access to this endpoint')
             return f(*args, **kwargs)
 
         return wrapper
