@@ -19,10 +19,10 @@ A simple decorator to validate roles.
 from functools import wraps
 from typing import Dict
 
-from flask import g
+from flask import abort, g
 
 from auth_api.auth import jwt as _jwt
-from auth_api.exceptions import BusinessException, Error
+from auth_api import status as http_status
 
 
 def validate_roles(**role_args):
@@ -43,9 +43,9 @@ def validate_roles(**role_args):
             allowed_roles = role_args.get('allowed_roles', [])
             not_allowed_roles = role_args.get('not_allowed_roles', [])
             if len(set(allowed_roles).intersection(user_roles)) < 1:
-                raise BusinessException(Error.MISSING_ROLES, None)
+                abort(http_status.HTTP_401_UNAUTHORIZED, description='Missing the role(s) required to access this endpoint')
             if len(set(not_allowed_roles).intersection(user_roles)) > 1:
-                raise BusinessException(Error.MISSING_ROLES, None)
+                abort(http_status.HTTP_401_UNAUTHORIZED, description='Not allowed role(s) denied access to this endpoint')
             return f(*args, **kwargs)
 
         return wrapper
