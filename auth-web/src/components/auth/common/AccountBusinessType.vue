@@ -1,11 +1,11 @@
 <template>
     <v-container class="view-container">
       <v-fade-transition>
-      <div v-if="isLoading" class="loading-container">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div v-if="isLoadingAccount" class="loading-inner-container">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoadingAccount"/>
       </div>
       </v-fade-transition>
-      <div class="account-business-type-container" v-if="!isLoading">
+      <div class="account-business-type-container" v-if="!isLoadingAccount">
         <p class="mb-9" v-if="!govmAccount">
                 {{ $t('accountBusinessTypeText') }}
         </p>
@@ -153,7 +153,7 @@ export default class AccountBusinessType extends Vue {
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''
-  private isLoading = false
+  private isLoadingAccount = false
 
   $refs: {
     accountInformationForm: HTMLFormElement,
@@ -201,7 +201,7 @@ export default class AccountBusinessType extends Vue {
   async mounted () {
     try {
     // load business type and size codes
-      this.isLoading = true
+      this.isLoadingAccount = true
       await this.getBusinessSizeCodes()
       await this.getBusinessTypeCodes()
       if (this.currentOrganization.name) {
@@ -220,7 +220,7 @@ export default class AccountBusinessType extends Vue {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
     } finally {
-      this.isLoading = false
+      this.isLoadingAccount = false
     }
   }
 
