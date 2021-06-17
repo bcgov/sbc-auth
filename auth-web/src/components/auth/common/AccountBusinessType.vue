@@ -1,7 +1,7 @@
 <template>
     <v-container class="view-container">
       <v-fade-transition>
-      <div v-if="isLoading" class="loading-container">
+      <div v-if="isLoading" class="loading-inner-container">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
       </div>
       </v-fade-transition>
