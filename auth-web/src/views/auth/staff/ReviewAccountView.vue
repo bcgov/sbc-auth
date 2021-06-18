@@ -34,7 +34,7 @@
                 v-on="component.events"
                 :ref="component.ref"
               />
-              <!-- :ref="component.ref" -->
+
               <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
             </template>
             <template v-if="canSelect" >
@@ -46,7 +46,8 @@
                     <span>Approve</span>
                   </v-btn>
                   <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)">
-                    <span>Reject</span>
+                    <span v-if="isBCEIDAccountReview">Reject/On Hold</span>
+                    <span v-else>Reject</span>
                   </v-btn>
                 </div>
               </div>
@@ -69,12 +70,14 @@
           ref="accessRequest"
           :isConfirmationModal="isConfirmationModal"
           :isRejectModal="isRejectModal"
+          :isOnHoldModal="isOnHoldModal"
           :isSaving="isSaving"
           :orgName="accountUnderReview.name"
-          @approve-reject-action="saveSelection()"
+          @approve-reject-action="saveSelection"
           @after-confirm-action="goBack()"
           :accountType="taskRelationshipType"
           :taskName="task.type"
+          :rejectReasonCodes="rejectReasonCodes"
           />
 
       </v-card>
@@ -84,7 +87,7 @@
 
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { Pages, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
+import { Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -93,6 +96,7 @@ import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
+import { Code } from '@/models/Code'
 import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
@@ -112,6 +116,7 @@ import { namespace } from 'vuex-class'
 const StaffModule = namespace('staff')
 const TaskModule = namespace('task')
 const orgModule = namespace('org')
+const CodesModule = namespace('codes')
 
 @Component({
   components: {
@@ -139,7 +144,7 @@ export default class ReviewAccountView extends Vue {
 
   @StaffModule.Action('syncTaskUnderReview') public syncTaskUnderReview!: (task:Task) => Promise<void>
   @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
-  @StaffModule.Action('rejectAccountUnderReview') public rejectAccountUnderReview!: (task:Task) => Promise<void>
+  @StaffModule.Action('rejectorOnHoldAccountUnderReview') public rejectorOnHoldAccountUnderReview!: (task:any) => Promise<void>
 
   @orgModule.Action('fetchCurrentOrganizationGLInfo') public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
   @orgModule.State('currentOrgGLInfo') public currentOrgGLInfo!: GLInfo
@@ -148,6 +153,9 @@ export default class ReviewAccountView extends Vue {
   @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
   @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
   @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
+
+  @CodesModule.Action('getRejectReasonCodes') private getRejectReasonCodes!: () => Promise<Code[]>
+  @CodesModule.State('rejectReasonCodes') private readonly rejectReasonCodes!: Code[]
 
   private staffStore = getModule(StaffModuleStore, this.$store)
   public isLoading = true
@@ -158,9 +166,11 @@ export default class ReviewAccountView extends Vue {
 
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
+  private isOnHoldModal:boolean = false
   public task :Task
   public taskRelationshipType:string = ''
   private productFeeFormValid: boolean = false
+  private isBCEIDAccountReview:boolean = false
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -226,6 +236,10 @@ export default class ReviewAccountView extends Vue {
           this.resetCurrentAccountFees()
         }
       }
+      this.isBCEIDAccountReview = this.task.type === TaskType.NEW_ACCOUNT_STAFF_REVIEW
+      if (this.isBCEIDAccountReview && (!this.rejectReasonCodes || this.rejectReasonCodes.length === 0)) {
+        await this.getRejectReasonCodes()
+      }
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.error(ex)
@@ -248,7 +262,8 @@ export default class ReviewAccountView extends Vue {
       }
     }
     this.isConfirmationModal = isConfirmationModal
-    this.isRejectModal = isRejectModal
+    this.isRejectModal = this.isBCEIDAccountReview ? false : isRejectModal
+    this.isOnHoldModal = this.isBCEIDAccountReview ? isRejectModal : false
 
     if (isConfirmationModal) {
       this.$refs.accessRequest.close()
@@ -259,25 +274,36 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
-  private async saveSelection (): Promise<void> {
-    this.isSaving = true
+  private async saveSelection (reason): Promise<void> {
+    const { isValidForm, rejectReason } = reason
 
-    try {
-      if (!this.isRejectModal) {
-        await this.approveAccountUnderReview(this.task)
-      } else {
-        await this.rejectAccountUnderReview(this.task)
-      }
-      if (this.task.type === TaskType.GOVM_REVIEW) {
-        await this.createAccountFees(this.task.relationshipId)
-      }
-      this.openModal(this.isRejectModal, true)
+    if (isValidForm) {
+      this.isSaving = true
+      // if account approve
+      const isApprove = !this.isRejectModal && !this.isOnHoldModal
+      // on rejecting there will be two scenarios
+      // 1. by clicking reject for normal flow.
+      // 2. by selecting remark as Reject account ,(check by using code)
+      // both cases we need to call reject API than hold
+      const isRejecting = this.isRejectModal || (rejectReason.code === RejectCode.REJECTACCOUNT_CODE)
+      try {
+        if (isApprove) {
+          await this.approveAccountUnderReview(this.task)
+        } else {
+        // both reject and hold will happen here passing second argument to determine which call need to make
+          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remark: rejectReason.desc })
+        }
+        if (this.task.type === TaskType.GOVM_REVIEW) {
+          await this.createAccountFees(this.task.relationshipId)
+        }
+        this.openModal(!isApprove, true)
       // this.$router.push(Pages.STAFF_DASHBOARD)
-    } catch (error) {
+      } catch (error) {
       // eslint-disable-next-line no-console
-      console.log(error)
-    } finally {
-      this.isSaving = false
+        console.log(error)
+      } finally {
+        this.isSaving = false
+      }
     }
   }
 

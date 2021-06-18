@@ -51,6 +51,17 @@ def test_add_org(client, jwt, session, keycloak_mock, org_info):  # pylint:disab
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
+@pytest.mark.parametrize('org_info', [TestOrgInfo.org1, TestOrgInfo.org_onlinebanking, TestOrgInfo.org_with_products,
+                                      TestOrgInfo.org_regular, TestOrgInfo.org_with_all_info])
+def test_add_org_by_anon_user(client, jwt, session, keycloak_mock, org_info):  # pylint:disable=unused-argument
+    """Assert that an org can be POSTed."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(org_info),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
 def test_add_basic_org_with_pad_throws_error(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be POSTed."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

@@ -227,7 +227,8 @@ export enum TaskRelationshipStatus {
     REJECTED = 'REJECTED',
     PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
     PENDING_ACTIVATION = 'PENDING_ACTIVATION',
-    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
+    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT',
+    HOLD = 'HOLD'
 }
 
 export enum TaskStatus {
@@ -242,6 +243,11 @@ export enum TaskType {
 
 export enum FeeCodes {
     PPR_CHANGE_OR_AMENDMENT = 'TRF'
+}
+
+export enum RejectCode {
+    REJECTACCOUNT_CODE = 'REJECTACCOUNT',
+    REJECTACCOUNT_DESC = 'Reject Account',
 }
 
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5
