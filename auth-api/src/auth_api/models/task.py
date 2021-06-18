@@ -42,7 +42,7 @@ class Task(BaseModel):
                                    name='related_to_fkey'), nullable=False)
     # task that is assigned to the particular user
     user = relationship('User', foreign_keys=[related_to], lazy='select')
-    remark = Column(String(100), nullable=True)
+    remarks = Column(String(100), nullable=True)
 
     @classmethod
     def fetch_tasks(cls, task_type: str, task_status: str,  # pylint:disable=too-many-arguments

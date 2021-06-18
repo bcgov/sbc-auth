@@ -83,8 +83,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('<close_task ')
         task_model: TaskModel = TaskModel.find_by_id(task_id)
         task_model.status = TaskStatus.CLOSED.value
-        task_model.remark = remark
+        task_model.remarks = remark
         task_model.decision_made_on = datetime.now()
+        task_model.dec
         task_model.flush()
         if do_commit:
             db.session.commit()
@@ -97,9 +98,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         user: UserModel = UserModel.find_by_jwt_token()
         task_model.status = task_info.get('status', TaskStatus.COMPLETED.value)
-        task_model.remark = task_info.get('remark', '')
-        task_model.decision_made_by = user.username
-        task_model.decision_made_on = datetime.now()
+        task_model.remarks = task_info.get('remark', '')
         task_model.relationship_status = task_relationship_status
         task_model.flush()
 
@@ -147,7 +146,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     def _notify_admin_about_hold(org, task_model):
         admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
         data = {
-            'reason': task_model.remark,
+            'reason': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': task_model.relationship_id,
             'emailAddresses': admin_email,
