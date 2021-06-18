@@ -149,7 +149,7 @@ export default class BusinessModule extends VuexModule {
           const tempRegNum = response.data.filing?.business?.identifier
           if (tempRegNum) {
             ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
-            const redirectURL = `${ConfigHelper.getCoopsURL()}${tempRegNum}`
+            const redirectURL = `${ConfigHelper.getBusinessURL()}${tempRegNum}`
 
             window.location.href = decodeURIComponent(redirectURL)
           }

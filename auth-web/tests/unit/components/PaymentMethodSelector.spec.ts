@@ -13,9 +13,8 @@ Vue.use(VueRouter)
 describe('PaymentMethodSelector.vue', () => {
   let wrapper: any
   const config = {
-    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
-    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+    'AUTH_API_URL': 'https://localhost:8080/api/v1/11',
+    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
