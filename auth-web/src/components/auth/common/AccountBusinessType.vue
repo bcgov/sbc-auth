@@ -1,5 +1,11 @@
 <template>
-    <v-container class="view-container" v-display-mode>
+    <v-container class="view-container" v-display-mode>>
+      <v-fade-transition>
+      <div v-if="isLoading" class="loading-inner-container">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      </div>
+      </v-fade-transition>
+      <div class="account-business-type-container" v-if="!isLoading">
         <p class="mb-9" v-if="!govmAccount">
                 {{ $t('accountBusinessTypeText') }}
         </p>
@@ -8,7 +14,6 @@
             row
             v-model="isBusinessAccount"
             ref="isBusinessAccount"
-            @change="onOrgBusinessTypeChange"
             mandatory
             >
                 <v-row justify="space-between">
@@ -19,6 +24,7 @@
                         :value="false"
                         data-test="radio-individual-account-type"
                         class="px-4 py-5"
+                        @change="onOrgBusinessTypeChange(true)"
                         ></v-radio>
                         <v-radio
                         label="Business Name"
@@ -26,6 +32,7 @@
                         :value="true"
                         data-test="radio-business-account-type"
                         class="px-4 py-5"
+                        @change="onOrgBusinessTypeChange(true)"
                         ></v-radio>
                     </v-col>
                 </v-row>
@@ -66,7 +73,7 @@
                 :disabled="saving"
                 data-test="input-branch-name"
                 :readonly="govmAccount"
-                v-on:keyup="onOrgBusinessTypeChange"
+                v-on:keyup="onOrgBusinessTypeChange()"
                 v-show="govmAccount || isBusinessAccount"
                 hide-details
                 />
@@ -84,7 +91,7 @@
                         v-model="businessType"
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
-                        @change="onOrgBusinessTypeChange"
+                        @change="onOrgBusinessTypeChange()"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         ref="businessType"
                         />
@@ -99,7 +106,7 @@
                         v-model="businessSize"
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
-                        @change="onOrgBusinessTypeChange"
+                        @change="onOrgBusinessTypeChange()"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         ref="businessSize"
                         />
@@ -108,6 +115,7 @@
               </v-expand-transition>
             </template>
         </v-form>
+      </div>
     </v-container>
 </template>
 
@@ -145,6 +153,7 @@ export default class AccountBusinessType extends Vue {
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''
+  private isLoading = false
 
   $refs: {
     accountInformationForm: HTMLFormElement,
@@ -192,6 +201,7 @@ export default class AccountBusinessType extends Vue {
   async mounted () {
     try {
     // load business type and size codes
+      this.isLoading = true
       await this.getBusinessSizeCodes()
       await this.getBusinessTypeCodes()
       if (this.currentOrganization.name) {
@@ -205,10 +215,12 @@ export default class AccountBusinessType extends Vue {
         this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
       }
       // sync with parent tracking object on mount and remove validation errors
-      this.onOrgBusinessTypeChange()
+      await this.onOrgBusinessTypeChange()
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
+    } finally {
+      this.isLoading = false
     }
   }
 
@@ -248,7 +260,11 @@ export default class AccountBusinessType extends Vue {
     await this.onOrgBusinessTypeChange()
   }
 
-  async onOrgBusinessTypeChange () {
+  async onOrgBusinessTypeChange (clearOrgName: boolean = false) {
+    if (clearOrgName) {
+      // Case for isBusinessAccount - when toggling between individual and business accounts, we ought to reset org name
+      this.name = ''
+    }
     await this.$nextTick()
     this.emitUpdatedOrgBusinessType()
     this.emitValid()

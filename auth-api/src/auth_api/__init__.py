@@ -20,7 +20,7 @@ import json
 import os
 
 import sentry_sdk  # noqa: I001; pylint: disable=ungrouped-imports,wrong-import-order; conflicts with Flake8
-from flask import Flask
+from flask import Flask, g, request
 from humps.main import camelize
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
@@ -68,6 +68,10 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         setup_jwt_manager(app, jwt)
 
     ExceptionHandler(app)
+
+    @app.before_request
+    def set_origin():
+        g.origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
 
     @app.after_request
     def handle_after_request(response):  # pylint: disable=unused-variable

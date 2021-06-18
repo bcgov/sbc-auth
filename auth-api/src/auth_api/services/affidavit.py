@@ -22,15 +22,18 @@ from typing import Dict
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.exceptions import BusinessException
-from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Membership as MembershipModel
+from auth_api.models import Org as OrgModel
+from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.user import User as UserModel
 from auth_api.schemas import AffidavitSchema
 from auth_api.services.minio import MinioService
-from auth_api.utils.enums import AffidavitStatus
+from auth_api.services.task import Task as TaskService
+from auth_api.utils.enums import (
+    AffidavitStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.util import camelback2snake
 
 from .user import User as UserService
@@ -61,13 +64,12 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         user = UserService.find_by_jwt_token()
         # If the user already have a pending affidavit, raise error
         existing_affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(user_id=user.identifier)
+        trigger_task_update = False
         if existing_affidavit is not None:
-            # approved affidavit cant be changed
-            if existing_affidavit.status_code == AffidavitStatus.APPROVED.value:
-                raise BusinessException(Error.ACTIVE_AFFIDAVIT_EXISTS, None)
             # inactivate the current affidavit
             existing_affidavit.status_code = AffidavitStatus.INACTIVE.value
             existing_affidavit.flush()
+            trigger_task_update = True
 
         contact = affidavit_info.pop('contact')
         affidavit_model = AffidavitModel(
@@ -90,7 +92,33 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
         affidavit_model.save()
 
+        if trigger_task_update:
+            Affidavit._modify_task(user)
+
         return Affidavit(affidavit_model)
+
+    @staticmethod
+    def _modify_task(user):
+        # find users org. ideally only one org
+        org_list = MembershipModel.find_orgs_for_user(user.identifier)
+        org: OrgModel = next(iter(org_list or []), None)
+        if org:
+            # check if there is any holding tasks
+            task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
+            if task_model:
+                task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+                task_info = {'name': org.name,
+                             'relationshipId': org.id,
+                             'relatedTo': user.identifier,
+                             'dateSubmitted': task_model.date_submitted,
+                             'relationshipType': TaskRelationshipType.ORG.value,
+                             'type': task_type,
+                             'status': TaskStatus.OPEN.value,
+                             'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                             }
+                new_task = TaskService.create_task(task_info=task_info, do_commit=False)
+                remark = f'User Uploaded New affidavit .Created New task id: {new_task.identifier}'
+                TaskService.close_task(task_model.id, remark)
 
     @staticmethod
     def find_affidavit_by_org_id(org_id: int):

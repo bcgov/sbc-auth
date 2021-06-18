@@ -10,7 +10,10 @@ export enum SessionStorageKeys {
     InvitationToken = 'INV_TOKEN',
     PaginationOptions = 'PAGINATION_OPTIONS',
     PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
-    OrgSearchFilter = 'ORG_SEARCH_FILTER'
+    OrgSearchFilter = 'ORG_SEARCH_FILTER',
+    AuthApiUrl = 'AUTH_API_URL',
+    AuthWebUrl = 'AUTH_WEB_URL',
+    StatusApiUrl = 'STATUS_API_URL'
 }
 
 export enum Role {
@@ -227,7 +230,8 @@ export enum TaskRelationshipStatus {
     REJECTED = 'REJECTED',
     PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
     PENDING_ACTIVATION = 'PENDING_ACTIVATION',
-    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT'
+    PENDING_INVITE_ACCEPT = 'PENDING_INVITE_ACCEPT',
+    HOLD = 'HOLD'
 }
 
 export enum TaskStatus {
@@ -246,6 +250,11 @@ export enum FeeCodes {
 
 export enum DisplayModeValues{
     VIEW_ONLY = 'VIEW_ONLY'
+}
+
+export enum RejectCode {
+    REJECTACCOUNT_CODE = 'REJECTACCOUNT',
+    REJECTACCOUNT_DESC = 'Reject Account',
 }
 
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5

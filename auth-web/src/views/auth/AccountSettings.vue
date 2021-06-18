@@ -245,7 +245,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private isLoading = true
   private isDirSearchUser: boolean = false
-  private dirSearchUrl = ConfigHelper.getSearchApplicationUrl()
+  private dirSearchUrl = ConfigHelper.getDirectorSearchURL()
   private readonly pagesEnum = Pages
   private readonly permissions!: string[]
 

@@ -1,4 +1,5 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
+[![Lifecycle:Stable](https://img.shields.io/badge/Lifecycle-Stable-97ca00)](<Redirect-URL>)
 [![codecov](https://codecov.io/gh/bcgov/sbc-auth/branch/development/graph/badge.svg?flag=authweb)](https://codecov.io/gh/bcgov/sbc-auth/tree/development/auth-web)
 ![Auth Web DEV CD](https://github.com/bcgov/sbc-auth/workflows/Auth%20Web%20DEV%20CD/badge.svg)
 ![Auth Web TEST CD](https://github.com/bcgov/sbc-auth/workflows/Auth%20Web%20TEST%20CD/badge.svg)

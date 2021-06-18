@@ -30,15 +30,19 @@ Vue.use(Vuelidate)
  */
 ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
   // Initializing Launch Darkly services
-  await LaunchDarklyService.init(ConfigHelper.getValue('LAUNCH_DARKLY_ENV_KEY'));
+  await LaunchDarklyService.init(ConfigHelper.getValue('AUTH_LD_CLIENT_ID'));
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
   (<any>window).addressCompleteKey = ConfigHelper.getValue('ADDRESS_COMPLETE_KEY')
-  // initialize Sentry
-  console.info('Initializing Sentry...') // eslint-disable-line no-console
-  Sentry.init({
-    dsn: ConfigHelper.getValue('SENTRY_DSN'),
-    integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
-  })
+
+  if (ConfigHelper.getValue('SENTRY_ENABLE') === 'true') {
+    // initialize Sentry
+    console.info('Initializing Sentry...') // eslint-disable-line no-console
+    Sentry.init({
+      dsn: ConfigHelper.getValue('SENTRY_DSN'),
+      integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
+    })
+  }
+
   await syncSession()
   renderVue()
 })

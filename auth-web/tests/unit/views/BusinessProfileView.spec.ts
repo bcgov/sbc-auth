@@ -17,10 +17,9 @@ jest.mock('../../../src/services/bcol.services')
 describe('BusinessProfileView.vue', () => {
   let wrapper: Wrapper<BusinessProfileView>
   var ob = {
-    'VUE_APP_COPS_REDIRECT_URL': 'http://localhost:8081',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-    'VUE_APP_AUTH_ROOT_API': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
-    'VUE_APP_LEGAL_ROOT_API': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',
+    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+    'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
+    'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 

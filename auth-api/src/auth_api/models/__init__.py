@@ -54,6 +54,7 @@ from .task import Task
 from .user import User
 from .user_settings import UserSettings
 from .user_status_code import UserStatusCode
+from .staff_remark_code import StaffRemarkCode
 
 
 event.listen(Engine, 'before_cursor_execute', DBTracing.query_tracing)
