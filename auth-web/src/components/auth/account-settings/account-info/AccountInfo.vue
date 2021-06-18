@@ -18,7 +18,7 @@
           </div>
         </div>
 
-        <div v-show="!anonAccount">
+        <template v-show="!anonAccount">
           <div class="nv-list-item mb-10">
             <div class="name" id="accountNumber">Account Number</div>
             <div class="value" aria-labelledby="accountNumber">
@@ -70,7 +70,7 @@
               ></LinkedBCOLBanner>
             </div>
           </div>
-        </div>
+        </template>
 
         <div class="nv-list-item mb-10" v-if="isAdminContactViewable">
           <div class="name" id="adminContact">Account Contact</div>
