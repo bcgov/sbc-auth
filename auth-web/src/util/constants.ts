@@ -248,6 +248,10 @@ export enum FeeCodes {
     PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }
 
+export enum DisplayModeValues{
+    VIEW_ONLY = 'VIEW_ONLY'
+}
+
 export enum RejectCode {
     REJECTACCOUNT_CODE = 'REJECTACCOUNT',
     REJECTACCOUNT_DESC = 'Reject Account',
