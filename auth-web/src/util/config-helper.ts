@@ -11,6 +11,10 @@ export default class ConfigHelper {
   static async fetchConfig () {
     const response = await Axios.get(url)
     sessionStorage.setItem(SessionStorageKeys.ApiConfigKey, JSON.stringify(response.data))
+    // sbc common components need the following keys
+    sessionStorage.setItem(SessionStorageKeys.AuthApiUrl, ConfigHelper.getAuthAPIUrl())
+    sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())
+    sessionStorage.setItem(SessionStorageKeys.AuthWebUrl, ConfigHelper.getSelfURL())
   }
 
   /**
@@ -25,18 +29,13 @@ export default class ConfigHelper {
     // }
   }
 
-  static getCoopsURL () {
+  static getBusinessURL () {
     // this needs trailing slash
-    return `${window.location.origin}/${process.env.VUE_APP_PATH_COOPS}/`
+    return `${window.location.origin}/business/`
   }
 
   static getBcrosURL () {
     return `${ConfigHelper.getSelfURL()}/signin/bcros/`
-  }
-
-  static getNewBusinessURL () {
-    // returns new business URL
-    return ConfigHelper.getValue('VUE_APP_PATH_NEW_BUSINESS')
   }
 
   static getSelfURL () {
@@ -44,40 +43,17 @@ export default class ConfigHelper {
     return `${window.location.origin}${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
-  static getPayAPIURL () {
-    return ConfigHelper.getValue('VUE_APP_PAY_ROOT_API')
+  static getDirectorSearchURL () {
+    return ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
   }
 
-  static getBceIdOsdLink () {
-    return ConfigHelper.getValue('BCEID_OSD_LINK')
-  }
-
-  static getAffidavitSize () {
-    return ConfigHelper.getValue('AFFIDAVIT_FILE_SIZE')
-  }
-
-  static getPaymentPayeeName () {
-    return ConfigHelper.getValue('PAYMENT_PAYEE_NAME') || 'BC Registries and Online Services'
-  }
-
-  static getAuthAPIUrl () {
-    return ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')
+  static getNewBusinessURL () {
+    // returns new business URL
+    return ConfigHelper.getValue('BUSINESS_CREATE_URL')
   }
 
   static getFileServerUrl () {
     return ConfigHelper.getValue('FILE_SERVER_URL')
-  }
-
-  static getAuthResetAPIUrl () {
-    return ConfigHelper.getValue('VUE_APP_AUTH_RESET_API')
-  }
-
-  static getSearchApplicationUrl () {
-    return ConfigHelper.getValue('DIRECTOR_SEARCH_URL')
-  }
-
-  static getLegalAPIUrl () {
-    return ConfigHelper.getValue('VUE_APP_LEGAL_ROOT_API')
   }
 
   static getNroUrl () {
@@ -88,8 +64,40 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('NAME_REQUEST_URL')
   }
 
+  static getBceIdOsdLink () {
+    return ConfigHelper.getValue('BCEID_URL')
+  }
+
+  static getAffidavitSize () {
+    return ConfigHelper.getValue('AFFIDAVIT_FILE_SIZE')
+  }
+
+  static getPayAPIURL () {
+    return ConfigHelper.getValue('PAY_API_URL') + ConfigHelper.getValue('PAY_API_VERSION')
+  }
+
+  static getPaymentPayeeName () {
+    return ConfigHelper.getValue('PAYMENT_PAYEE_NAME') || 'BC Registries and Online Services'
+  }
+
+  static getAuthAPIUrl () {
+    return ConfigHelper.getValue('AUTH_API_URL') + ConfigHelper.getValue('AUTH_API_VERSION')
+  }
+
+  static getAuthResetAPIUrl () {
+    return ConfigHelper.getValue('AUTH_API_URL') + '/test/reset'
+  }
+
+  static getLegalAPIUrl () {
+    return ConfigHelper.getValue('LEGAL_API_URL') + ConfigHelper.getValue('LEGAL_API_VERSION')
+  }
+
   static getVonAPIUrl () {
-    return ConfigHelper.getValue('VON_API_URL')
+    return ConfigHelper.getValue('VON_API_URL') + ConfigHelper.getValue('VON_API_VERSION')
+  }
+
+  static getStatusAPIUrl () {
+    return ConfigHelper.getValue('STATUS_API_URL') + ConfigHelper.getValue('STATUS_API_VERSION')
   }
 
   static getEntitySelectorUrl () {

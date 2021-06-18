@@ -12,7 +12,7 @@ Vue.use(VueRouter)
 describe('SearchFilterInput.vue', () => {
   let wrapper: any
   const config = {
-    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11'
+    'AUTH_API_URL': 'https://localhost:8080/api/v1/11'
   }
 
   const filterParams = [
