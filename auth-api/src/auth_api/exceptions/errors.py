@@ -77,6 +77,9 @@ class Error(Enum):
                                 http_status.HTTP_400_BAD_REQUEST
     PRODUCT_SUBSCRIPTION_EXISTS = 'Org has subscription to the product exists.', http_status.HTTP_409_CONFLICT
 
+    OUTSTANDING_CREDIT = 'Account have credits remaining on account.', http_status.HTTP_400_BAD_REQUEST
+    TRANSACTIONS_IN_PROGRESS = 'Account have payment transactions in progress.', http_status.HTTP_400_BAD_REQUEST
+
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
         obj = object.__new__(cls)

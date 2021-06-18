@@ -62,9 +62,9 @@ class Affiliation:
         return obj
 
     @staticmethod
-    def find_affiliated_entities_by_org_id(org_id):
+    def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
-        current_app.logger.debug('<find_affiliations_by_org_id for org_id {}'.format(org_id))
+        current_app.logger.debug('<find_visible_affiliations_by_org_id for org_id {}'.format(org_id))
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -72,14 +72,7 @@ class Affiliation:
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        data = []
-        affiliation_models = AffiliationModel.find_affiliations_by_org_id(org_id)
-        if affiliation_models is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        for affiliation_model in affiliation_models:
-            affiliation = EntityService(affiliation_model.entity).as_dict()
-            data.append(affiliation)
+        data = Affiliation.find_affiliations_by_org_id(org_id)
 
         # 3806 : Filter out the NR affiliation if there is IA affiliation for the same NR.
         # Dict with key as NR number and value as name
@@ -113,8 +106,20 @@ class Affiliation:
             else:
                 filtered_affiliations.append(entity)
 
-        current_app.logger.debug('>find_affiliations_by_org_id')
+        current_app.logger.debug('>find_visible_affiliations_by_org_id')
         return filtered_affiliations
+
+    @staticmethod
+    def find_affiliations_by_org_id(org_id):
+        """Return business affiliations for the org."""
+        data = []
+        affiliation_models = AffiliationModel.find_affiliations_by_org_id(org_id)
+        if affiliation_models is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        for affiliation_model in affiliation_models:
+            affiliation = EntityService(affiliation_model.entity).as_dict()
+            data.append(affiliation)
+        return data
 
     @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None):

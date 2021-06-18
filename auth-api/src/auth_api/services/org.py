@@ -17,6 +17,7 @@ from typing import Dict, List, Tuple
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
+from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
@@ -37,8 +38,8 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
-    AccessType, ChangeType, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod, Status, TaskRelationshipStatus,
-    TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    AccessType, AffidavitStatus, ChangeType, LoginSource, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod,
+    Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
 
@@ -52,7 +53,6 @@ from .products import Product as ProductService
 from .rest_service import RestService
 from .task import Task as TaskService
 from .validators.validator_response import ValidatorResponse
-
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -450,37 +450,75 @@ class Org:  # pylint: disable=too-many-public-methods
         TaskService.create_task(task_info=task_info, do_commit=False)
 
     @staticmethod
-    @user_context
-    def delete_org(org_id, **kwargs):
+    def delete_org(org_id):
         """Soft-Deletes an Org.
 
-        It should not be deletable if there are members or business associated with the org
+        Only admin can perform this.
+        1 - All businesses gets unaffiliated.
+        2 - All team members removed.
+        3 - If there is any credit on the account then cannot be deleted.
+
+        Premium:
+        1 - If there is any active PAD transactions going on, then cannot be deleted.
+
         """
-        # Check authorization for the user
-        current_app.logger.debug('<org Inactivated')
-        user_from_context: UserContext = kwargs['user_context']
+        current_app.logger.debug('<Delete Org {}', org_id)
+        # Affiliation uses OrgService, adding as local import
+        # pylint:disable=import-outside-toplevel, cyclic-import
+        from auth_api.services.affiliation import Affiliation as AffiliationService
+
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
 
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        count_members = len([member for member in org.members if member.status in VALID_STATUSES])
-        if count_members > 1 or len(org.affiliated_entities) >= 1:
-            raise BusinessException(Error.ORG_CANNOT_BE_DISSOLVED, None)
+        # Deactivate pay account
+        Org._delete_pay_account(org_id)
 
+        # Find all active affiliations and remove them.
+        entities = AffiliationService.find_affiliations_by_org_id(org_id)
+        for entity in entities:
+            AffiliationService.delete_affiliation(
+                org_id=org_id,
+                business_identifier=entity['business_identifier'],
+                reset_passcode=True
+            )
+
+        # Deactivate all members.
+        members = MembershipModel.find_members_by_org_id(org_id)
+        for member in members:
+            member.status = Status.INACTIVE.value
+            member.flush()
+
+            user: UserModel = UserModel.find_by_id(member.user_id)
+            # Remove user from keycloak group if they are not part of any orgs
+            if len(MembershipModel.find_orgs_for_user(member.user_id)) == 0:
+                KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
+
+            # If the admin is BCeID user, mark the affidavit INACTIVE.
+            if user.login_source == LoginSource.BCEID.value and member.membership_type_code == ADMIN:
+                affidavit: AffidavitModel = AffidavitModel.find_approved_by_user_id(user.id)
+                if affidavit:
+                    affidavit.status_code = AffidavitStatus.INACTIVE.value
+                    affidavit.flush()
+
+        # Set the account as INACTIVE
         org.status_code = OrgStatus.INACTIVE.value
         org.save()
 
-        # Don't remove account if it's staff who deactivate org.
-        is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in user_from_context.roles
-        if not is_staff_admin:
-            # Remove user from thr group if the user doesn't have any other orgs membership
-            user = UserModel.find_by_jwt_token()
-            if len(MembershipModel.find_orgs_for_user(user.id)) == 0:
-                KeycloakService.remove_from_account_holders_group(user.keycloak_guid)
-
         current_app.logger.debug('org Inactivated>')
+
+    @staticmethod
+    def _delete_pay_account(org_id):
+        pay_url = current_app.config.get('PAY_API_URL')
+        try:
+            pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', raise_for_status=False)
+            response_json = pay_response.json()
+            pay_response.raise_for_status()
+        except HTTPError as pay_err:
+            current_app.logger.info(pay_err)
+            raise BusinessException(Error[response_json.get('type')], pay_err) from pay_err
 
     def get_payment_info(self):
         """Return the Payment Details for an org by calling Pay API."""

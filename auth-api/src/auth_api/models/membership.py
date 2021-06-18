@@ -16,12 +16,15 @@
 The Membership object connects User models to one or more Org models.
 """
 
+from __future__ import annotations
+
+from typing import List
+
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.enums import Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
-
 from .base_model import VersionedModel
 from .db import db
 from .membership_status_code import MembershipStatusCode
@@ -70,7 +73,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return cls.query.filter_by(id=membership_id).first()
 
     @classmethod
-    def find_members_by_org_id(cls, org_id):
+    def find_members_by_org_id(cls, org_id) -> List[Membership]:
         """Return all members of the org with a status."""
         return cls.query.filter_by(org_id=org_id).all()
 

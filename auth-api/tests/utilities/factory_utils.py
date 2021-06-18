@@ -17,6 +17,8 @@ Test Utility for creating model factory.
 """
 import datetime
 
+from requests.exceptions import HTTPError
+
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
@@ -49,7 +51,7 @@ def factory_auth_header(jwt, claims):
     return {'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)}
 
 
-def factory_entity_model(entity_info: dict = TestEntityInfo.entity1, user_id=None):
+def factory_entity_model(entity_info: dict = TestEntityInfo.entity1, user_id=None) -> EntityModel:
     """Produce a templated entity model."""
     entity = EntityModel.create_from_dict(entity_info)
     entity.created_by_id = user_id
@@ -175,7 +177,7 @@ def factory_org_service(org_info: dict = TestOrgInfo.org1,
     return org_service
 
 
-def factory_affiliation_model(entity_id, org_id):
+def factory_affiliation_model(entity_id, org_id) -> AffiliationModel:
     """Produce a templated affiliation model."""
     affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id)
     affiliation.save()
@@ -308,12 +310,42 @@ def factory_activity_log_model(actor: str, action: str, item_type: str = 'Accoun
 
 def patch_token_info(claims, monkeypatch):
     """Patch token info to mimic g."""
+
     def token_info():
         """Return token info."""
         return claims
+
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', token_info)
 
 
 def get_tos_latest_version():
     """Return latest tos version."""
     return '5'
+
+
+def patch_pay_account_delete(monkeypatch):
+    """Patch pay account delete success."""
+    class MockPayResponse:
+
+        @staticmethod
+        def json():
+            return {}
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.delete', lambda *args, **kwargs: MockPayResponse())
+
+
+def patch_pay_account_delete_error(monkeypatch):
+    """Patch pay account delete error."""
+    class MockPayResponse:
+
+        @staticmethod
+        def json():
+            return {'type': 'OUTSTANDING_CREDIT', 'title': 'OUTSTANDING_CREDIT'}
+
+        def raise_for_status(self):
+            raise HTTPError('TEST ERROR')
+
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.delete', lambda *args, **kwargs: MockPayResponse())

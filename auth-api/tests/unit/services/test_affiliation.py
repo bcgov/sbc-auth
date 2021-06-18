@@ -165,7 +165,7 @@ def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disab
                                           business_identifier2,
                                           TestEntityInfo.entity_lear_mock2['passCode'])
 
-    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+    affiliated_entities = AffiliationService.find_visible_affiliations_by_org_id(org_id)
 
     assert affiliated_entities
     assert len(affiliated_entities) == 2
@@ -175,11 +175,11 @@ def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disab
 def test_find_affiliated_entities_by_org_id_no_org(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Affiliation can not be find without org id or org id not exists."""
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.find_affiliated_entities_by_org_id(None)
+        AffiliationService.find_visible_affiliations_by_org_id(None)
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
     with pytest.raises(BusinessException) as exception:
-        AffiliationService.find_affiliated_entities_by_org_id(999999)
+        AffiliationService.find_visible_affiliations_by_org_id(999999)
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
 
@@ -191,7 +191,7 @@ def test_find_affiliated_entities_by_org_id_no_affiliation(session, auth_mock): 
 
     with patch.object(AffiliationModel, 'find_affiliations_by_org_id', return_value=None):
         with pytest.raises(BusinessException) as exception:
-            AffiliationService.find_affiliated_entities_by_org_id(org_id)
+            AffiliationService.find_visible_affiliations_by_org_id(org_id)
 
     assert exception.value.code == Error.DATA_NOT_FOUND.name
 
@@ -398,7 +398,7 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     AffiliationService.create_affiliation(org_id,
                                           business_identifier2)
 
-    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+    affiliated_entities = AffiliationService.find_visible_affiliations_by_org_id(org_id)
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
@@ -407,7 +407,7 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2,
                                           email_addresses=None)
 
-    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+    affiliated_entities = AffiliationService.find_visible_affiliations_by_org_id(org_id)
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
@@ -444,7 +444,7 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
     AffiliationService.create_affiliation(org_id,
                                           tmp_business_identifier)
 
-    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+    affiliated_entities = AffiliationService.find_visible_affiliations_by_org_id(org_id)
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
@@ -467,7 +467,7 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
     business_incorporated_identifier = entity_dictionary1['business_identifier']
     AffiliationService.create_affiliation(org_id, business_identifier=business_incorporated_identifier)
 
-    affiliated_entities = AffiliationService.find_affiliated_entities_by_org_id(org_id)
+    affiliated_entities = AffiliationService.find_visible_affiliations_by_org_id(org_id)
 
     assert affiliated_entities
     assert len(affiliated_entities) == 1
