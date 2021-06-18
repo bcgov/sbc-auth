@@ -27,7 +27,7 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
         """Maps all of the Org fields to a default schema."""
 
         model = OrgModel
-        exclude = ('members', 'contacts', 'invitations', 'affiliated_entities', 'suspension_reason',
+        exclude = ('members', 'invitations', 'affiliated_entities', 'suspension_reason',
                    'products', 'login_options', 'type_code')
 
     type_code = fields.String(data_key='org_type')
@@ -35,6 +35,7 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
     suspension_reason_code = fields.String(data_key='suspension_reason_code')
     business_size = fields.String(data_key='business_size')
     business_type = fields.String(data_key='business_type')
+    contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True, data_key='mailing_address')
 
     @post_dump(pass_many=False)
     def _include_dynamic_fields(self, data, many):  # pylint: disable=no-self-use
@@ -43,5 +44,9 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
             if data.get('is_business_account', False):
                 # Adding a dynamic field businessName for making other application integrations easy.
                 data['businessName'] = data.get('name')
+            # Map the mailing address to the first from contact as there can be only one mailing address.
+
+            if (mailing_address := data.get('mailing_address', None)) is not None and mailing_address:
+                data['mailing_address'] = mailing_address[0]
 
         return data
