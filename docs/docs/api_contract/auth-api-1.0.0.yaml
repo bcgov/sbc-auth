@@ -4738,7 +4738,7 @@ components:
           example:
             - '2020-01-09T13:49:45.244134+00:00'
           pattern: ^(.*)$
-        created_by:
+        createdBy:
           type: string
           title: The Created_by Schema
           default: ''
@@ -4785,9 +4785,10 @@ components:
           type: string
         businessSize:
           type: string
+        mailingAddress:
+          $ref: '#/components/schemas/contact'
       required:
         - created
-        - created_by
         - id
         - modified
         - name
