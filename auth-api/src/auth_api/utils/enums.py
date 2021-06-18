@@ -249,6 +249,8 @@ class TaskStatus(Enum):
 
     OPEN = 'OPEN'  # Open Task - needs to be taken action
     COMPLETED = 'COMPLETED'  # Task has been acted upon
+    HOLD = 'HOLD'
+    CLOSED = 'CLOSED'
 
 
 class TaskRelationshipStatus(Enum):

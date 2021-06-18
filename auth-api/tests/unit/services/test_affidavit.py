@@ -17,8 +17,9 @@ Test suite to ensure that the affidavit service routines are working as expected
 """
 
 from auth_api.services import Affidavit as AffidavitService
+from auth_api.models import Task as TaskModel
 from auth_api.services import Org as OrgService
-from auth_api.utils.enums import AffidavitStatus, LoginSource, OrgStatus
+from auth_api.utils.enums import AffidavitStatus, LoginSource, OrgStatus, TaskStatus
 from tests.utilities.factory_scenarios import TestAffidavit, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_user_model, factory_user_model_with_contact, patch_token_info
 
@@ -65,6 +66,25 @@ def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     assert org_dict['org_status'] == OrgStatus.ACTIVE.value
     affidavit = AffidavitService.find_affidavit_by_org_id(org_dict['id'])
     assert affidavit['status'] == AffidavitStatus.APPROVED.value
+
+
+def test_task_creation(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that affidavit reupload creates new task."""
+    user = factory_user_model_with_contact()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    patch_token_info(token_info, monkeypatch)
+
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
+    org_id = org.as_dict().get('id')
+    task_model: TaskModel = TaskModel.find_by_task_for_account(org_id, TaskStatus.OPEN.value)
+    assert task_model is not None, 'New Open should be generated'
+    task_model.status = TaskStatus.HOLD.value  # set current task to hold.Its a staff action
+    new_affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(affidavit_info=new_affidavit_info)
+    assert TaskModel.find_by_id(task_model.id).status == TaskStatus.CLOSED.value
+    assert TaskModel.find_by_task_for_account(org_id, TaskStatus.OPEN.value) is not None
 
 
 def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument

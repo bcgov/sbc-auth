@@ -16,7 +16,7 @@
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from ..utils.enums import TaskRelationshipStatus
+from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType
 from .base_model import BaseModel
 from .db import db
 
@@ -42,6 +42,7 @@ class Task(BaseModel):
                                    name='related_to_fkey'), nullable=False)
     # task that is assigned to the particular user
     user = relationship('User', foreign_keys=[related_to], lazy='select')
+    remarks = Column(String(100), nullable=True)
 
     @classmethod
     def fetch_tasks(cls, task_type: str, task_status: str,  # pylint:disable=too-many-arguments
@@ -69,3 +70,9 @@ class Task(BaseModel):
     def find_by_task_id(cls, task_id):
         """Find a task instance that matches the provided id."""
         return db.session.query(Task).filter_by(id=task_id).first()
+
+    @classmethod
+    def find_by_task_for_account(cls, org_id, status):
+        """Find a task instance that matches the provided id."""
+        return db.session.query(Task).filter_by(relationship_id=org_id,
+                                                relationship_type=TaskRelationshipType.ORG.value, status=status).first()
