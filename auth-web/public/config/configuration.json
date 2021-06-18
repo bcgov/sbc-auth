@@ -19,8 +19,8 @@
   "AUTH_API_VERSION": "/api/v1",
   "STATUS_API_URL": "https://status-api-dev.apps.silver.devops.gov.bc.ca",
   "STATUS_API_VERSION": "/api/v1",
-  "PAY_API_URL": "https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1",
+  "PAY_API_URL": "https://pay-api-dev.apps.silver.devops.gov.bc.ca",
   "PAY_API_VERSION": "/api/v1",
-  "LEGAL_API_URL": "https://legal-api-dev.apps.silver.devops.gov.bc.ca/api/v1",
+  "LEGAL_API_URL": "https://legal-api-dev.apps.silver.devops.gov.bc.ca",
   "LEGAL_API_VERSION": "/api/v1"
 }
