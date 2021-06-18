@@ -36,8 +36,11 @@ export default class TaskService {
     return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.ACTIVE })
   }
 
-  static async rejectPendingTask (task:any): Promise<AxiosResponse> {
-    const taskId = task.id
+  static async rejectPendingTask (taskId:any): Promise<AxiosResponse> {
     return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.REJECTED })
+  }
+
+  static async onHoldPendingTask (taskId, remark:string): Promise<AxiosResponse> {
+    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { status: TaskRelationshipStatus.HOLD, remark, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
   }
 }
