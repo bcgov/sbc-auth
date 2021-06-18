@@ -24,7 +24,6 @@ import sys
 
 from dotenv import find_dotenv, load_dotenv
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -151,6 +150,9 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     # url for the front end app
     WEB_APP_URL = os.getenv('WEB_APP_URL')
+
+    # url for the front end app
+    BCEID_ACCOUNT_SETUP_ROUTE = os.getenv('BCEID_ACCOUNT_SETUP_ROUTE', 'setup-non-bcsc-account')
 
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
