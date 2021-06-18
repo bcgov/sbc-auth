@@ -337,7 +337,7 @@ class OrgAffiliations(Resource):
         """Get all affiliated entities for the given org."""
         try:
             response, status = jsonify({
-                'entities': AffiliationService.find_affiliated_entities_by_org_id(org_id)}), http_status.HTTP_200_OK
+                'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id)}), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
