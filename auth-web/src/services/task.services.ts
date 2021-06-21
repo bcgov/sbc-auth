@@ -15,8 +15,9 @@ export default class TaskService {
     if (taskFilter.relationshipStatus) {
       params.append('relationshipStatus', taskFilter.relationshipStatus)
     }
-    if (taskFilter.status) {
-      params.append('status', taskFilter.status)
+    if (taskFilter.statuses) {
+      taskFilter.statuses.forEach(status =>
+        params.append('status', status))
     }
     if (taskFilter.type) {
       params.append('type', taskFilter.type)

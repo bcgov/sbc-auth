@@ -19,7 +19,7 @@ export interface Task {
     accountId?:number;
 }
 export interface TaskFilterParams {
-    status?: string;
+    statuses?: string[];
     type?: string;
     relationshipStatus?: string;
     pageNumber?: number;
