@@ -186,7 +186,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
     def fetch_tasks(**kwargs):
         """Search all tasks."""
         task_type = kwargs.get('task_type')
-        task_status = kwargs.get('task_status')
+        task_status = kwargs.get('task_status') or [TaskStatus.OPEN.value]
         task_relationship_status = kwargs.get('task_relationship_status')
 
         tasks = {'tasks': []}

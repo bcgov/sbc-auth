@@ -41,7 +41,7 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                            page=1,
                                            limit=10)
 
@@ -62,7 +62,7 @@ def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argum
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.ORG.value,
         'type': task_type_new_account,
-        'status': TaskStatus.OPEN.value,
+        'status': [TaskStatus.OPEN.value],
         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     }
     task = TaskService.create_task(test_task_info)
@@ -84,7 +84,7 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.PRODUCT.value,
         'type': product.description,
-        'status': TaskStatus.OPEN.value,
+        'status': [TaskStatus.OPEN.value],
         'accountId': test_org.id,
         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     }
@@ -112,7 +112,7 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
@@ -145,7 +145,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
@@ -207,7 +207,7 @@ def test_create_task_govm(session,
 
         # Assert the task that is created
         patch_token_info(token_info, monkeypatch)
-        fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+        fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                                page=1,
                                                limit=10)
 

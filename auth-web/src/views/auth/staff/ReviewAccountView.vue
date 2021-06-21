@@ -37,15 +37,16 @@
 
               <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
             </template>
-            <template v-if="canSelect" >
+
+            <template v-if="canSelect">
               <v-divider class="mt-11 mb-8" ></v-divider>
               <div class="form-btns d-flex justify-end" >
 
                 <div>
-                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()">
+                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" disabled="!canEdit">
                     <span>Approve</span>
                   </v-btn>
-                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)">
+                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)" disabled="!canEdit" >
                     <span v-if="isBCEIDAccountReview">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
@@ -87,7 +88,7 @@
 
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
+import { Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -175,6 +176,10 @@ export default class ReviewAccountView extends Vue {
   $refs: {
     accessRequest: AccessRequestModal,
     productFeeRef: HTMLFormElement
+  }
+
+  private get canEdit (): boolean {
+    return this.task.status === TaskStatus.OPEN
   }
 
   private get canSelect (): boolean {
