@@ -13,7 +13,7 @@ export default class CodesModule extends VuexModule {
     private suspensionReasonCodeTable = 'suspension_reason_codes'
     private businessSizeCodeTable = 'business_size_codes'
     private businessTypeCodeTable = 'business_type_codes'
-    private rejectReasonCodeTable = 'reject_reason_codes'
+    private rejectReasonCodeTable = 'staff_remark_codes'
 
     @Mutation
     public setSuspensionReasonCodes (codes: Code[]) {
