@@ -83,7 +83,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value, page=1, limit=10)
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -134,7 +134,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value, page=1, limit=10)
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -202,7 +202,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     assert len(tasks['tasks']) == 1
@@ -214,7 +214,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
