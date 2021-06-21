@@ -1,5 +1,14 @@
 /* eslint-disable no-console */
-import { Account, AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
+import {
+  ALLOWED_URIS_FOR_PENDING_ORGS,
+  Account,
+  AccountStatus,
+  LoginSource,
+  Pages,
+  Permission,
+  Role,
+  SessionStorageKeys
+} from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
 import { AccountSettings } from '@/models/account-settings'
@@ -119,8 +128,12 @@ router.beforeEach((to, from, next) => {
           return next({ path: `/${Pages.ACCOUNT_FREEZE}` })
         }
       } else if (currentOrganization?.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
-        console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
-        return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+        const substringCheck = (element:string) => to.path.indexOf(element) > -1
+        let isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
+        if (!isAllowedUrl) {
+          console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
+          return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+        }
       } else if (currentAccountSettings && currentMembership?.membershipStatus === MembershipStatus.Pending) {
         console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since users membership status is pending')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}` })
