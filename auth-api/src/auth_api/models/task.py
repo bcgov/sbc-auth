@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
+from typing import List
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -45,7 +46,7 @@ class Task(BaseModel):
     remarks = Column(String(100), nullable=True)
 
     @classmethod
-    def fetch_tasks(cls, task_type: str, task_status: str,  # pylint:disable=too-many-arguments
+    def fetch_tasks(cls, task_type: str, task_status: List[str],  # pylint:disable=too-many-arguments
                     task_relationship_status: str,
                     page: int, limit: int):
         """Fetch all tasks."""
@@ -54,7 +55,7 @@ class Task(BaseModel):
         if task_type:
             query = query.filter(Task.type == task_type)
         if task_status:
-            query = query.filter(Task.status == task_status)
+            query = query.filter(Task.status.in_(task_status))
         if task_relationship_status:
             if task_relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
                 query = query.filter(Task.relationship_status == task_relationship_status).order_by(

@@ -23,7 +23,6 @@ from auth_api.models import Task as TaskModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Task as TaskService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import TaskStatus
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
@@ -47,7 +46,7 @@ class Tasks(Resource):
             # Search based on request arguments
             task_type = request.args.get('type', None)
             task_relationship_status = request.args.get('relationshipStatus', None)
-            task_status = request.args.get('status', TaskStatus.OPEN.value)
+            task_status = request.args.getlist('status', None)
             page = request.args.get('page', 1)
             limit = request.args.get('limit', 10)
 

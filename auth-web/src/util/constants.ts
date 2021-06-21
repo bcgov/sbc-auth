@@ -236,7 +236,8 @@ export enum TaskRelationshipStatus {
 
 export enum TaskStatus {
     OPEN = 'OPEN',
-    COMPLETED = 'COMPLETED'
+    COMPLETED = 'COMPLETED',
+    HOLD = 'HOLD'
 }
 
 export enum TaskType {
