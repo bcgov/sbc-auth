@@ -42,11 +42,11 @@
               <v-divider class="mt-11 mb-8" ></v-divider>
               <div class="form-btns d-flex justify-end" >
 
-                <div>
-                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" :disabled="!canEdit">
+                <div v-display-mode="!canEdit ? viewOnly : false ">
+                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" >
                     <span>Approve</span>
                   </v-btn>
-                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)" :disabled="!canEdit" >
+                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
                     <span v-if="isBCEIDAccountReview">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
@@ -88,7 +88,7 @@
 
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+import { DisplayModeValues, Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -172,6 +172,7 @@ export default class ReviewAccountView extends Vue {
   public taskRelationshipType:string = ''
   private productFeeFormValid: boolean = false
   private isBCEIDAccountReview:boolean = false
+  private viewOnly = DisplayModeValues.VIEW_ONLY
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -258,7 +259,7 @@ export default class ReviewAccountView extends Vue {
     await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
-  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false) {
+  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false) {
     if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFormValid) {
       // validate form before showing pop-up
       (this.$refs.productFeeRef[0] as any).validateNow()
@@ -267,8 +268,14 @@ export default class ReviewAccountView extends Vue {
       }
     }
     this.isConfirmationModal = isConfirmationModal
-    this.isRejectModal = this.isBCEIDAccountReview ? false : isRejectModal
-    this.isOnHoldModal = this.isBCEIDAccountReview ? isRejectModal : false
+
+    if (rejectConfirmationModal) {
+      this.isRejectModal = true
+      this.isOnHoldModal = false
+    } else {
+      this.isRejectModal = this.isBCEIDAccountReview ? false : isRejectModal
+      this.isOnHoldModal = this.isBCEIDAccountReview ? isRejectModal : false
+    }
 
     if (isConfirmationModal) {
       this.$refs.accessRequest.close()
@@ -301,7 +308,7 @@ export default class ReviewAccountView extends Vue {
         if (this.task.type === TaskType.GOVM_REVIEW) {
           await this.createAccountFees(this.task.relationshipId)
         }
-        this.openModal(!isApprove, true)
+        this.openModal(!isApprove, true, isRejecting)
       // this.$router.push(Pages.STAFF_DASHBOARD)
       } catch (error) {
       // eslint-disable-next-line no-console
