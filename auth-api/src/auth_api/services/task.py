@@ -146,6 +146,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _notify_admin_about_hold(org, task_model):
         admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+        create_account_signin_route = urllib.parse.quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
+                                                              f'{org.id}')
         data = {
             'reason': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
@@ -153,7 +155,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             'emailAddresses': admin_email,
             'contextUrl': f"{current_app.config.get('WEB_APP_URL')}"
                           f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
-                          f"{urllib.parse.quote_plus({current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id})}"
+                          f'{create_account_signin_route}'
         }
         try:
             publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
