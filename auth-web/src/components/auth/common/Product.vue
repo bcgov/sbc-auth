@@ -10,16 +10,7 @@
       >
         <div>
           <header class="d-flex align-center">
-            <div class="d-flex align-center pr-8" v-if="hasDecisionMade">
-              <v-icon :color="getDecisionMadeColor" class="mr-2">
-                {{ getDecisionMadeIcon }}
-              </v-icon>
-              <div class="ml-2 label-color">
-                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
-                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
-              </div>
-            </div>
-            <div class="pr-8" v-else>
+            <div class="pr-8" v-if="hasDecisionNotBeenMade">
               <v-checkbox
                 class="product-check-box ma-0 pa-0"
                 hide-details
@@ -35,6 +26,15 @@
                   </div>
               </template>
               </v-checkbox>
+            </div>
+            <div class="d-flex align-center pr-8" v-else>
+              <v-icon :color="getDecisionMadeSettings.decisionMadeColorCode" class="mr-2">
+                {{ getDecisionMadeSettings.decisionMadeIcon }}
+              </v-icon>
+              <div class="ml-2 label-color">
+                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
+                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
+              </div>
             </div>
             <v-btn
               large
@@ -133,35 +133,29 @@ export default class Product extends Vue {
     return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
   }
 
-  get getDecisionMadeIcon () {
+  get getDecisionMadeSettings () {
     // returns product select check box icon based on what view it is in
-    if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.ACTIVE) {
-      return 'mdi-check-circle'
-    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.REJECTED) {
-      return 'mdi-close-circle'
-    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
-      return 'mdi-clock-outline'
+    let decisionMadeIcon = 'mdi-clock-outline'
+    let decisionMadeColorCode = null
+    if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.REJECTED) {
+      decisionMadeIcon = 'mdi-close-circle'
+      decisionMadeColorCode = 'error'
+    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.ACTIVE) {
+      decisionMadeIcon = 'mdi-check-circle'
+      decisionMadeColorCode = 'success'
     } else if (this.isAccountSettingsView && this.isBasicAccountAndPremiumProduct) {
-      return 'mdi-minus-box'
+      decisionMadeIcon = 'mdi-minus-box'
     }
-    return undefined
+    return { decisionMadeIcon, decisionMadeColorCode }
   }
 
-  get hasDecisionMade () {
-    // returns true if the product subscription status is active/ rejected / pending in account settings view
-    if (this.isAccountSettingsView && (([productStatus.ACTIVE, productStatus.REJECTED, productStatus.PENDING_STAFF_REVIEW] as Array<string>).includes(this.productDetails.subscriptionStatus) || this.isBasicAccountAndPremiumProduct)) {
+  get hasDecisionNotBeenMade () {
+    // returns true if the product subscription status is unsubscribed
+    if (([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
       return true
     }
+    this.termsAccepted = true
     return false
-  }
-
-  get getDecisionMadeColor () {
-    if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.ACTIVE) {
-      return 'success'
-    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.REJECTED) {
-      return 'error'
-    }
-    return undefined
   }
 
   public mounted () {
