@@ -1,4 +1,4 @@
-import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
 import {
   AccountFee,
   AddUserBody,
@@ -85,6 +85,7 @@ export default class OrgModule extends VuexModule {
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
   isCurrentSelectedProductsPremiumOnly = false
   resetAccountTypeOnSetupAccount = false // this flag use to check need to reset accounttype select when moving back and forth in stepper
+  vDisplayModeValue = ''// DisplayModeValues.VIEW_ONLY
 
   @Mutation
   public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {
@@ -283,6 +284,10 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setResetAccountTypeOnSetupAccount (resetAccountTypeOnSetupAccount:boolean) {
     this.resetAccountTypeOnSetupAccount = resetAccountTypeOnSetupAccount
+  }
+  @Mutation
+  public setViewOnlyMode (viewOnlyModeValue:string) {
+    this.vDisplayModeValue = viewOnlyModeValue
   }
 
   @Mutation
@@ -994,6 +999,15 @@ export default class OrgModule extends VuexModule {
   public async resetoCurrentSelectedProducts (): Promise<any> {
     this.context.commit('setCurrentSelectedProducts', [])
     this.context.dispatch('currentSelectedProductsPremiumOnly')
+  }
+
+  // set product with subscriptionStatus active to selected product
+  @Action({ rawError: true })
+  public async setSubscribedProducts (): Promise<any> {
+    const productList = this.context.state['productList']
+    let currentSelectedProducts = []
+    currentSelectedProducts = productList.filter(product => product.subscriptionStatus === productStatus.ACTIVE).map((prod) => (prod.code))
+    this.context.commit('setCurrentSelectedProducts', currentSelectedProducts)
   }
 
   @Action({ commit: 'setIsCurrentSelectedProductsPremiumOnly', rawError: true })

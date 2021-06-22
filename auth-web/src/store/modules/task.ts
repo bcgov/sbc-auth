@@ -36,12 +36,13 @@ export default class TaskModule extends VuexModule {
     @Action({ rawError: true })
     public async syncTasks () {
       let taskFilter: TaskFilterParams = {
-        relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW
+        relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
+        statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
       }
       await this.context.dispatch('fetchTasks', taskFilter)
       taskFilter = {
         relationshipStatus: TaskRelationshipStatus.REJECTED,
-        status: TaskStatus.COMPLETED
+        statuses: [TaskStatus.COMPLETED]
       }
       await this.context.dispatch('fetchTasks', taskFilter)
     }

@@ -236,7 +236,8 @@ export enum TaskRelationshipStatus {
 
 export enum TaskStatus {
     OPEN = 'OPEN',
-    COMPLETED = 'COMPLETED'
+    COMPLETED = 'COMPLETED',
+    HOLD = 'HOLD'
 }
 
 export enum TaskType {
@@ -248,9 +249,14 @@ export enum FeeCodes {
     PPR_CHANGE_OR_AMENDMENT = 'TRF'
 }
 
+export enum DisplayModeValues{
+    VIEW_ONLY = 'VIEW_ONLY'
+}
+
 export enum RejectCode {
     REJECTACCOUNT_CODE = 'REJECTACCOUNT',
     REJECTACCOUNT_DESC = 'Reject Account',
 }
 
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5
+export const ALLOWED_URIS_FOR_PENDING_ORGS: string[] = ['setup-non-bcsc-account']

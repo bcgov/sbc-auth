@@ -83,7 +83,7 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value, page=1, limit=10)
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -112,6 +112,58 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     dictionary = json.loads(rv.data)
     assert dictionary['id'] == org_id
     assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
+
+
+def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that the task can be updated."""
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Update the created task and the relationship
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
+    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user = factory_user_model_with_contact(user_with_token)
+
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
+    org_dict = org.as_dict()
+    assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+    org_id = org_dict['id']
+
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
+
+    task_type_new_account = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+    assert fetched_task['type'] == task_type_new_account
+
+    update_task_payload = {
+        'status': TaskStatus.HOLD.value,
+        'relationshipStatus': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        'remark': 'AFFIDAVIT SEAL MISSING'
+    }
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
+                    data=json.dumps(update_task_payload),
+                    headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert dictionary['status'] == TaskStatus.HOLD.value
+    assert dictionary['relationshipStatus'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get('/api/v1/orgs/{}'.format(org_id),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['id'] == org_id
+    assert rv.json.get('orgStatus') == OrgStatus.PENDING_STAFF_REVIEW.value
 
 
 def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -150,7 +202,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     assert len(tasks['tasks']) == 1
@@ -162,7 +214,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']

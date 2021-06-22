@@ -1,18 +1,18 @@
 <template>
   <v-row>
-    <v-col class="py-0" sm="8" md="6">
+    <v-col class="py-0" sm="12" md="12">
       <v-form ref="fileUploadInput" lazy-validation>
         <v-file-input
-          label="Select File"
+          label="Upload File"
           filled
           dense
           v-model="fileUpload"
           accept="image/*, .pdf"
           class="file-upload-preview"
           :rules="fileUploadRules"
-          prepend-icon=""
           show-size
           @change="fileChange"
+          color="primary"
         >
         </v-file-input>
       </v-form>
@@ -94,6 +94,13 @@ export default class FileUploadPreview extends Vue {
   .file-upload-preview {
     .v-input__append-outer {
       margin-top: 10px !important
+    }
+    .v-input__slot{
+      background-color: $BCgovInputBG !important;
+    }
+    .v-file-input__text{
+     color: var(--v-primary-base) !important;
+
     }
   }
 }

@@ -7,7 +7,8 @@
     @update:org-business-type="updateOrgBusinessType"
     @valid="checkOrgBusinessTypeValid">
     </account-business-type>
-    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep ">
+
+    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep " v-display-mode>
       <legend class="mb-3">Mailing Address</legend>
       <base-address-form
         ref="mailingAddress"
@@ -109,6 +110,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
   @Prop({ default: false }) govmAccount: boolean
+  @Prop({ default: false }) readOnly: boolean
   private isBaseAddressValid = !this.isExtraProvUser && !this.enablePaymentMethodSelectorStep
   private readonly currentOrgAddress!: Address
   private readonly currentOrganizationType!: string
@@ -164,7 +166,9 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
     if (this.isFormValid()) {
       // if its not account change , do check for duplicate
       // if its account change , check if user changed the already existing name
-      const checkNameAVailability = !this.isAccountChange || (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
+
+      // changed this for accomadating bceid account re-upload
+      const checkNameAVailability = (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
       // no need to check name if govmAccount
       if (checkNameAVailability && !this.govmAccount) {
         const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
@@ -208,8 +212,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
               businessSize: this.orgBusinessTypeLocal.businessSize,
               businessType: this.orgBusinessTypeLocal.businessType } }
         }
-
-        this.setCurrentOrganization(org)
+        // removed this to avoid over writing current or details, which need to show in all page.
+        if (!this.readOnly) {
+          this.setCurrentOrganization(org)
+        }
         // check if the name is avaialble
         this.stepForward()
       }

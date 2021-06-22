@@ -41,7 +41,7 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                            page=1,
                                            limit=10)
 
@@ -62,7 +62,7 @@ def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argum
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.ORG.value,
         'type': task_type_new_account,
-        'status': TaskStatus.OPEN.value,
+        'status': [TaskStatus.OPEN.value],
         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     }
     task = TaskService.create_task(test_task_info)
@@ -84,7 +84,7 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
         'dateSubmitted': datetime.today(),
         'relationshipType': TaskRelationshipType.PRODUCT.value,
         'type': product.description,
-        'status': TaskStatus.OPEN.value,
+        'status': [TaskStatus.OPEN.value],
         'accountId': test_org.id,
         'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
     }
@@ -112,7 +112,7 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                     page=1,
                                     limit=10)
     fetched_tasks = tasks['tasks']
@@ -127,6 +127,42 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     dictionary = task.as_dict()
     assert dictionary['status'] == TaskStatus.COMPLETED.value
     assert dictionary['relationship_status'] == TaskRelationshipStatus.ACTIVE.value
+
+
+def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that a task can be updated."""
+    user_with_token = TestUserInfo.user_bceid_tester
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user = factory_user_model_with_contact(user_with_token)
+
+    patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
+    org_dict = org.as_dict()
+    assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
+
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
+    patch_token_info(token_info, monkeypatch)
+
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
+                                    page=1,
+                                    limit=10)
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
+
+    task_info = {
+        'relationshipStatus': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        'status': TaskStatus.HOLD.value,
+        'remark': 'Test Remark'
+
+    }
+    task: TaskModel = TaskModel.find_by_task_id(fetched_task['id'])
+
+    task = TaskService.update_task(TaskService(task), task_info=task_info)
+    dictionary = task.as_dict()
+    assert dictionary['status'] == TaskStatus.HOLD.value
+    assert dictionary['relationship_status'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
 
 
 def test_create_task_govm(session,
@@ -171,7 +207,7 @@ def test_create_task_govm(session,
 
         # Assert the task that is created
         patch_token_info(token_info, monkeypatch)
-        fetched_task = TaskService.fetch_tasks(task_status=TaskStatus.OPEN.value,
+        fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
                                                page=1,
                                                limit=10)
 

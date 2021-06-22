@@ -39,7 +39,7 @@ export default class UserModule extends VuexModule {
   currentUserAccountSettings: UserSettings[] = undefined
 
   @Mutation
-  public setUserProfile (userProfile: User) {
+  public setUserProfile (userProfile: User | undefined) {
     this.userProfile = userProfile
   }
 
@@ -104,7 +104,7 @@ export default class UserModule extends VuexModule {
   }
 
   @Mutation
-  public setUserProfileData (userProfile: UserProfileData) {
+  public setUserProfileData (userProfile: UserProfileData | undefined) {
     this.userProfileData = userProfile
   }
 

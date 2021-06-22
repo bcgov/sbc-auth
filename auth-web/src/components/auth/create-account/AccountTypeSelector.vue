@@ -1,8 +1,8 @@
 <template>
-  <div  data-test="div-stepper-container">
+  <div  data-test="div-stepper-container" >
     <p class="mb-7" v-if="!isAccountChange">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
     <p class="mb-7" v-if="isAccountChange">There is no cost to change a BC Registries account type. You only pay for the services and products you purchase.</p>
-    <v-row>
+    <v-row v-display-mode>
       <v-col
         class="d-flex align-stretch"
         sm="12" md="6"
@@ -212,9 +212,12 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       // first time to the page , start afresh..this is Create New account flow
       if (!this.currentOrganization) {
         this.setCurrentOrganization({ name: '' })
+      } else {
+        // need to set org type if its re-upload bceid flow
+        this.selectAccountType(this.currentOrganization.orgType)
       }
       // when some one goes back into product page and come, this will be true and selectedAccountType as undefined.
-      if (this.resetAccountTypeOnSetupAccount) {
+      if (!this.currentOrganization && this.resetAccountTypeOnSetupAccount) {
         this.selectAccountType(undefined)
         this.setResetAccountTypeOnSetupAccount(false) // reset back flag for coming back
       }
@@ -235,10 +238,9 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   }
 
   private selectAccountType (accountType) {
+    // removed below code for becid re-upload. need to persisit all data in current org
     // to reset any existing details ;user might have went to user profile ;came back and selects another type scenarios
-    if (!this.isAccountChange) {
-      this.resetCurrentOrganisation()
-    }
+
     this.setSelectedAccountType(accountType)
     this.setCurrentOrganizationType(accountType)
     this.selectedAccountType = accountType

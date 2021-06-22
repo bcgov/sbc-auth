@@ -9,6 +9,9 @@
       :currentSelectedPaymentMethod="currentOrgPaymentType"
       @payment-method-selected="setSelectedPayment"
       @is-pad-valid="setPADValid"
+      :isInitialTOSAccepted="readOnly"
+      :isInitialAcknowledged="readOnly"
+      v-display-mode
     ></PaymentMethods>
     <v-divider class="my-10"></v-divider>
      <v-row>
@@ -32,10 +35,12 @@
           data-test="save-button"
           :disabled="!isEnableCreateBtn"
         >
-          Create Account
+        <!-- need to show submit button on review payment -->
+         {{ readOnly ? 'Submit' : 'Create Account'}}
         </v-btn>
         <ConfirmCancelButton
           showConfirmPopup="true"
+          v-if="!readOnly"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
@@ -45,36 +50,32 @@
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
+
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
 
 @Component({
   components: {
     ConfirmCancelButton,
     PaymentMethods
-  },
-  computed: {
-    ...mapState('org', [
-      'currentOrganization',
-      'currentOrganizationType',
-      'currentOrgPaymentType'
-    ])
-  },
-  methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationPaymentType'
-    ])
   }
 })
 export default class PaymentMethodSelector extends Mixins(Steppable) {
-  private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
-  private readonly currentOrganization!: Organization
-  private readonly currentOrganizationType!: string
-  private readonly currentOrgPaymentType!: string
+  // need toi show TOS as checked in stepper BCEID re-upload time.
+  // show submit button on final stepper to update info, even this page is read only
+  @Prop({ default: false }) readOnly: boolean
+
+  @OrgModule.State('currentOrganization') private readonly currentOrganization!: Organization
+  @OrgModule.State('currentOrganizationType') private readonly currentOrganizationType!: string
+  @OrgModule.State('currentOrgPaymentType') private readonly currentOrgPaymentType!: string
+
+  @OrgModule.Mutation('setCurrentOrganizationPaymentType') private setCurrentOrganizationPaymentType!: (paymentType: string) => void
+
   private selectedPaymentMethod: string = ''
   private isPADValid: boolean = false
 

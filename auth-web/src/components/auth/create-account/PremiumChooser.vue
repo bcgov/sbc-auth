@@ -1,35 +1,38 @@
 <template>
 <v-container>
   <v-form ref="premiumAccountChooser" lazy-validation data-test="form-premium-account-chooser">
-    <p class="mb-6">
-      <span>Do you want to link this account with an existing BC Online Account?</span>
-      &nbsp;
-      <v-btn
-        text
-        color="primary"
-        class="learn-more-btn"
-        @click="learnMoreDialog = true"
-        data-test="modal-learnmore-dialog"
+    <!-- v-mode is display-mode -->
+    <div v-display-mode>
+      <p class="mb-6" >
+        <span>Do you want to link this account with an existing BC Online Account?</span>
+        &nbsp;
+        <v-btn
+          text
+          color="primary"
+          class="learn-more-btn"
+          @click="learnMoreDialog = true"
+          data-test="modal-learnmore-dialog"
+        >
+          Learn more
+        </v-btn>
+      </p>
+      <v-radio-group
+        hide-details
+        class="mb-9"
+        @change="loadComponent"
+        v-model="isBcolSelected"
+        data-test="radio-isBcolSelected"
       >
-        Learn more
-      </v-btn>
-    </p>
-    <v-radio-group
-      hide-details
-      class="mb-9"
-      @change="loadComponent"
-      v-model="isBcolSelected"
-      data-test="radio-isBcolSelected"
-    >
-      <v-radio label="Yes" value="yes" data-test="radio-isBcolSelected-yes"/>
-      <v-radio label="No" value="no" data-test="radio-isBcolSelected-no"/>
-    </v-radio-group>
-
+        <v-radio label="Yes" value="yes" data-test="radio-isBcolSelected-yes"/>
+        <v-radio label="No" value="no" data-test="radio-isBcolSelected-no"/>
+      </v-radio-group>
+    </div>
     <component class="mt-5 pa-0"
       ref="activeComponent"
       :is="currentComponent"
       :step-back="stepBack"
       :step-forward="stepForward"
+      :readOnly="readOnly"
     />
 
     <template v-if="!isBcolSelected">
@@ -162,6 +165,7 @@ import Vue from 'vue'
 export default class PremiumChooser extends Mixins(Steppable) {
   @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
+   @Prop({ default: false }) readOnly: string
   private readonly currentOrganizationType!: string
   private readonly currentOrganization!: Organization
   private isBcolSelected = null
@@ -179,8 +183,9 @@ export default class PremiumChooser extends Mixins(Steppable) {
   }
 
   private mounted () {
+    this.isBcolSelected = this.readOnly ? 'no' : null
     if (!this.isAccountChange) {
-      this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) && this.currentOrganization?.bcolProfile) ? 'yes' : null
+      this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) && this.currentOrganization?.bcolAccountDetails) ? 'yes' : this.isBcolSelected
       this.isBcolSelected = ((this.currentOrganizationType === Account.UNLINKED_PREMIUM) && this.currentOrganization?.name) ? 'no' : this.isBcolSelected
       this.loadComponent(false)
     }

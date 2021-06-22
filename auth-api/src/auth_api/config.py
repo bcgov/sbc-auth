@@ -21,9 +21,9 @@ rather than reading environment variables directly or by accessing this configur
 
 import os
 import sys
+from typing import List
 
 from dotenv import find_dotenv, load_dotenv
-
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
@@ -151,6 +151,8 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     # url for the front end app
     WEB_APP_URL = os.getenv('WEB_APP_URL')
+    # url for the front end app
+    BCEID_ACCOUNT_SETUP_ROUTE = os.getenv('BCEID_ACCOUNT_SETUP_ROUTE', 'signin/bceid/setup-non-bcsc-account')
 
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
@@ -171,6 +173,9 @@ class _Config():  # pylint: disable=too-few-public-methods
     API_GW_NON_PROD_KEY = os.getenv('API_GW_NON_PROD_KEY', None)
     API_GW_EMAIL_SUFFIX = os.getenv('API_GW_EMAIL_SUFFIX', None)
     API_GW_KC_CLIENT_ID_PATTERN = os.getenv('API_GW_KC_CLIENT_ID_PATTERN', 'api-key-account-{account_id}')
+
+    # NR Supported Request types.
+    NR_SUPPORTED_REQUEST_TYPES: List[str] = os.getenv('NR_SUPPORTED_REQUEST_TYPES', 'BC').replace(' ', '').split(',')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods

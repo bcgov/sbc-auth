@@ -135,4 +135,28 @@ describe('AccountTypeSelector.vue', () => {
     expect(wrapper.find("[data-test='div-stepper-premium']").attributes('disabled')).toBeFalsy()
     expect(wrapper.find("[data-test='badge-account-premium']").exists()).toBeFalsy()
   })
+
+  it('Should set selectedAccountType as PREMIUM', () => {
+    wrapper = shallowMount(AccountTypeSelector, {
+      store,
+      localVue,
+      vuetify,
+      stubs: {
+        'ConfirmCancelButton': {
+          template: `<div></div>`
+        }
+      },
+      propsData: {
+        isAccountChange: false
+      }
+    })
+    store.commit('org/setCurrentOrganization', { currentOrganization: {
+      name: 'testOrg2',
+      statusCode: AccountStatus.ACTIVE,
+      orgStatus: AccountStatus.ACTIVE,
+      orgType: 'PREMIUM'
+    } })
+
+    expect(wrapper.vm.selectedAccountType).toEqual('PREMIUM')
+  })
 })
