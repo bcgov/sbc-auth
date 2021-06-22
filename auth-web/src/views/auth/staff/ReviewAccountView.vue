@@ -43,10 +43,10 @@
               <div class="form-btns d-flex justify-end" >
 
                 <div>
-                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" disabled="!canEdit">
+                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" :disabled="!canEdit">
                     <span>Approve</span>
                   </v-btn>
-                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)" disabled="!canEdit" >
+                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)" :disabled="!canEdit" >
                     <span v-if="isBCEIDAccountReview">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
