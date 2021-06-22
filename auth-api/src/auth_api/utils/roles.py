@@ -50,7 +50,8 @@ VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.NSF_SUSPENDED.value,
                       OrgStatus.SUSPENDED.value, OrgStatus.PENDING_INVITE_ACCEPT.value,
                       OrgStatus.PENDING_STAFF_REVIEW.value)
 VALID_SUBSCRIPTION_STATUSES = (ProductSubscriptionStatus.ACTIVE.value,
-                               ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value)
+                               ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value,
+                               ProductSubscriptionStatus.REJECTED.value)
 
 CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)

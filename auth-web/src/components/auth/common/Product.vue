@@ -10,7 +10,7 @@
       >
         <div>
           <header class="d-flex align-center">
-            <div class="pr-8" v-if="hasDecisionNotBeenMade">
+            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct">
               <v-checkbox
                 class="product-check-box ma-0 pa-0"
                 hide-details
@@ -64,6 +64,7 @@
                   v-bind="productFooter.props"
                   v-on="productFooter.events"
                   :ref="productFooter.ref"
+                  v-display-mode="hasDecisionNotBeenMade ?'': 'VIEW_ONLY'"
                 />
               </div>
             </v-expand-transition>
@@ -150,7 +151,11 @@ export default class Product extends Vue {
   }
 
   get hasDecisionNotBeenMade () {
-    // returns true if the product subscription status is unsubscribed
+    // returns true if create account flow
+    if (!this.isAccountSettingsView) {
+      return true
+    }
+    // returns true if product subscription status is unsubscribed and in account settings view
     if (([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
       return true
     }

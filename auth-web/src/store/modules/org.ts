@@ -295,6 +295,11 @@ export default class OrgModule extends VuexModule {
     this.currentOrganization = { ...this.currentOrganization, ...orgBusinessType }
   }
 
+  @Mutation
+  public resetCurrentSelectedProducts () {
+    this.currentSelectedProducts = []
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)

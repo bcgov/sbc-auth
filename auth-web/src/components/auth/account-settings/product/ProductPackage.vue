@@ -106,6 +106,8 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   @OrgModule.State('productList') public productList!: OrgProduct[]
   @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
 
+  @OrgModule.Mutation('resetCurrentSelectedProducts') public resetCurrentSelectedProducts!:() => void
+
   @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
   @OrgModule.Action('addOrgProducts') public addOrgProducts!:(product:OrgProductsRequestBody) =>Promise<OrgProduct>
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
@@ -139,6 +141,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
 
   private async setup () {
     this.isLoading = true
+    this.resetCurrentSelectedProducts()
     await this.loadProduct()
     this.isLoading = false
   }
