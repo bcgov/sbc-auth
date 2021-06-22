@@ -10,10 +10,18 @@
       >
         <div>
           <header class="d-flex align-center">
-            <div class="pr-8 ">
+            <div class="d-flex align-center pr-8" v-if="hasDecisionMade">
+              <v-icon :color="getDecisionMadeColor" class="mr-2">
+                {{ getDecisionMadeIcon }}
+              </v-icon>
+              <div class="ml-2 label-color">
+                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
+                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
+              </div>
+            </div>
+            <div class="pr-8" v-else>
               <v-checkbox
-                color="primary"
-                class="align-checkbox-label--top ma-0 pa-0"
+                class="product-check-box ma-0 pa-0"
                 hide-details
                 v-model="productSelected"
                 :data-test="`check-product-${productDetails.code}`"
@@ -70,6 +78,7 @@
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgProduct } from '@/models/Organization'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
+import { productStatus } from '@/util/constants'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
@@ -84,6 +93,8 @@ export default class Product extends Vue {
   @Prop({ default: '' }) orgName: string
   @Prop({ default: false }) isSelected: boolean
   @Prop({ default: false }) isexpandedView: boolean
+  @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
+  @Prop({ default: false }) isBasicAccountAndPremiumProduct: boolean // to confirm if the current organization is basic and the product instance is premium only
 
   private termsAccepted: boolean = false
   public productSelected:boolean = false
@@ -103,14 +114,54 @@ export default class Product extends Vue {
     // lang file have subtitle and description with product code prefix.
     // eg: pprCodeSubtitle, pprCodeDescription
     const { code } = this.productDetails
-    const subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
-    const details = `${code && code.toLowerCase()}CodeDescription` || ''
+    let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
+    let details = `${code && code.toLowerCase()}CodeDescription` || ''
+    if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.ACTIVE) {
+      subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
+    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.REJECTED) {
+      subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle` || ''
+    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
+      subTitle = 'productPendingSubtitle'
+    } else if (this.isAccountSettingsView && this.isBasicAccountAndPremiumProduct) {
+      subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle` || ''
+    }
     return { subTitle, details }
   }
 
   get isTOSNeeded () {
     // check tos needed for product
     return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
+  }
+
+  get getDecisionMadeIcon () {
+    // returns product select check box icon based on what view it is in
+    if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.ACTIVE) {
+      return 'mdi-check-circle'
+    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.REJECTED) {
+      return 'mdi-close-circle'
+    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.PENDING_STAFF_REVIEW) {
+      return 'mdi-clock-outline'
+    } else if (this.isAccountSettingsView && this.isBasicAccountAndPremiumProduct) {
+      return 'mdi-minus-box'
+    }
+    return undefined
+  }
+
+  get hasDecisionMade () {
+    // returns true if the product subscription status is active/ rejected / pending in account settings view
+    if (this.isAccountSettingsView && (([productStatus.ACTIVE, productStatus.REJECTED, productStatus.PENDING_STAFF_REVIEW] as Array<string>).includes(this.productDetails.subscriptionStatus) || this.isBasicAccountAndPremiumProduct)) {
+      return true
+    }
+    return false
+  }
+
+  get getDecisionMadeColor () {
+    if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.ACTIVE) {
+      return 'success'
+    } else if (this.isAccountSettingsView && this.productDetails.subscriptionStatus === productStatus.REJECTED) {
+      return 'error'
+    }
+    return undefined
   }
 
   public mounted () {
@@ -187,6 +238,10 @@ export default class Product extends Vue {
 
 .theme--light.v-card.v-card--outlined.selected {
   border-color: var(--v-primary-base);
+}
+
+.label-color {
+    color: rgba(0,0,0,.6) !important;
 }
 
 </style>
