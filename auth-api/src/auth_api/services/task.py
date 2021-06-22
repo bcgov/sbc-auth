@@ -15,10 +15,11 @@
 
 This module manages the tasks.
 """
+import urllib
 from datetime import datetime
 from typing import Dict
 
-from flask import current_app, g
+from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
@@ -150,8 +151,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': task_model.relationship_id,
             'emailAddresses': admin_email,
-            'contextUrl': f"{g.get('origin_url','')}/{current_app.config.get('WEB_APP_URL')}"
-                          f"/{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id}"
+            'contextUrl': f"{current_app.config.get('WEB_APP_URL')}"
+                          f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
+                          f"{urllib.parse.quote_plus({current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/{org.id})}"
         }
         try:
             publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
