@@ -31,6 +31,7 @@
             :rules="rejectReasonRules"
             v-if="isOnHoldModal"
             return-object
+            :hint="rejectHint"
             />
 
           </v-form>
@@ -78,8 +79,8 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { RejectCode, TaskRelationshipType } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { TaskRelationshipType } from '@/util/constants'
 
 @Component({
   components: {
@@ -96,7 +97,7 @@ export default class AccessRequestModal extends Vue {
   @Prop({ default: '' }) private taskName: string
   @Prop() private rejectReasonCodes: []
 
-  private rejectReason= ''
+  private rejectReason:any = ''
 
   $refs: {
     accessRequest: ModalDialog,
@@ -164,6 +165,9 @@ export default class AccessRequestModal extends Vue {
     }
     return { title, text }
   }
+  get rejectHint () {
+    return this.rejectReason.code === RejectCode.REJECTACCOUNT_CODE ? 'Rejecting the request will not activate this account' : ''
+  }
 
   mounted () {
     if (!this.isOnHoldModal) {
@@ -212,6 +216,10 @@ export default class AccessRequestModal extends Vue {
     }
   .reject-form{
     margin-bottom: -30px !important;
+  }
+  .reject-form .v-messages__message{
+    color: var(--v-error-darken2) !important;
+    caret-color: var(--v-error-darken2) !important;
   }
 
 </style>
