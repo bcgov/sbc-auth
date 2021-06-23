@@ -5,6 +5,7 @@ import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/create-account/AccountChangeSuccessView.vue'
 import AccountChangeView from '@/views/auth/create-account/AccountChangeView.vue'
 import AccountCreationSuccessView from '@/views/auth/create-account/AccountCreationSuccessView.vue'
+import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
 import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue'
 import AccountInstructions from '@/components/auth/create-account/non-bcsc/AccountInstructions.vue'
@@ -583,6 +584,13 @@ export function getRoutes (): RouteConfig[] {
       name: 'padtermsandconditions',
       props: true,
       component: PADTermsAndConditionsView,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/account-deactivate',
+      name: 'account-deactivate',
+      props: true,
+      component: AccountDeactivate,
       meta: { requiresAuth: true }
     },
     {
