@@ -196,6 +196,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     } catch (ex) {
       // open when error
       this.dialogTitle = 'Product Request Failed'
+      this.dialogText = ''
       this.dialogIcon = 'mdi-alert-circle-outline'
       this.$refs.confirmDialog.open()
 

@@ -27,7 +27,7 @@
               </template>
               </v-checkbox>
             </div>
-            <div class="d-flex align-center pr-8" v-else data-test="div-decision-made-product">
+            <div class="d-flex align-center pr-8" data-test="div-decision-made-product" v-else>
               <v-icon :color="getDecisionMadeSettings.decisionMadeColorCode" class="mr-2">
                 {{ getDecisionMadeSettings.decisionMadeIcon }}
               </v-icon>
@@ -77,9 +77,9 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { DisplayModeValues, productStatus } from '@/util/constants'
 import { OrgProduct } from '@/models/Organization'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
-import { productStatus } from '@/util/constants'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
@@ -99,6 +99,7 @@ export default class Product extends Vue {
 
   private termsAccepted: boolean = false
   public productSelected:boolean = false
+  private viewOnly = DisplayModeValues.VIEW_ONLY
 
   $refs: {
     tosForm: HTMLFormElement
