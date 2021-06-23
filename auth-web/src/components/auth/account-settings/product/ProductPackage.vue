@@ -29,7 +29,7 @@
             @toggle-product-details="toggleProductDetails"
             :isSelected="currentSelectedProducts.includes(product.code)"
             :isAccountSettingsView="true"
-            :isBasicAccountAndPremiumProduct="currentOrganization.orgType === AccountEnum.BASIC && product.premiumOnly"
+            :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
           ></Product>
         </div>
         <div class="align-right-container">
@@ -184,7 +184,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
           subscriptions: productsSelected
         }
         await this.addOrgProducts(addProductsRequestBody)
-        await this.loadProduct()
+        await this.setup()
 
         // show confirm modal
         this.productsAddSuccess = true

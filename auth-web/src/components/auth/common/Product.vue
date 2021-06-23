@@ -10,7 +10,7 @@
       >
         <div>
           <header class="d-flex align-center">
-            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct">
+            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct" data-test="div-decision-not-made-product">
               <v-checkbox
                 class="product-check-box ma-0 pa-0"
                 hide-details
@@ -27,7 +27,7 @@
               </template>
               </v-checkbox>
             </div>
-            <div class="d-flex align-center pr-8" v-else>
+            <div class="d-flex align-center pr-8" v-else data-test="div-decision-made-product">
               <v-icon :color="getDecisionMadeSettings.decisionMadeColorCode" class="mr-2">
                 {{ getDecisionMadeSettings.decisionMadeIcon }}
               </v-icon>
@@ -95,7 +95,7 @@ export default class Product extends Vue {
   @Prop({ default: false }) isSelected: boolean
   @Prop({ default: false }) isexpandedView: boolean
   @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
-  @Prop({ default: false }) isBasicAccountAndPremiumProduct: boolean // to confirm if the current organization is basic and the product instance is premium only
+  @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
 
   private termsAccepted: boolean = false
   public productSelected:boolean = false
@@ -148,6 +148,10 @@ export default class Product extends Vue {
       decisionMadeIcon = 'mdi-minus-box'
     }
     return { decisionMadeIcon, decisionMadeColorCode }
+  }
+
+  get isBasicAccountAndPremiumProduct () {
+    return this.isBasicAccount && this.productDetails.premiumOnly
   }
 
   get hasDecisionNotBeenMade () {
