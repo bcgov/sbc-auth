@@ -122,7 +122,7 @@ describe('Product.vue', () => {
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
 
-    const getDecisionMadeSettings = wrapper.vm.getDecisionMadeSettings
+    const getDecisionMadeSettings = wrapper.vm.productLabel
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-check-circle')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBe('success')
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
@@ -135,7 +135,7 @@ describe('Product.vue', () => {
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
 
-    const getDecisionMadeSettings = wrapper.vm.getDecisionMadeSettings
+    const getDecisionMadeSettings = wrapper.vm.productLabel
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-clock-outline')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
@@ -148,7 +148,7 @@ describe('Product.vue', () => {
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
 
-    const getDecisionMadeSettings = wrapper.vm.getDecisionMadeSettings
+    const getDecisionMadeSettings = wrapper.vm.productLabel
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-close-circle')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBe('error')
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
@@ -162,7 +162,7 @@ describe('Product.vue', () => {
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
 
-    const getDecisionMadeSettings = wrapper.vm.getDecisionMadeSettings
+    const getDecisionMadeSettings = wrapper.vm.productLabel
     expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
