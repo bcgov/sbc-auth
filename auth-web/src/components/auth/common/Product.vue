@@ -10,10 +10,9 @@
       >
         <div>
           <header class="d-flex align-center">
-            <div class="pr-8 ">
+            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct" data-test="div-decision-not-made-product">
               <v-checkbox
-                color="primary"
-                class="align-checkbox-label--top ma-0 pa-0"
+                class="product-check-box ma-0 pa-0"
                 hide-details
                 v-model="productSelected"
                 :data-test="`check-product-${productDetails.code}`"
@@ -27,6 +26,15 @@
                   </div>
               </template>
               </v-checkbox>
+            </div>
+            <div class="d-flex align-center pr-8" data-test="div-decision-made-product" v-else>
+              <v-icon :color="productLabel.decisionMadeColorCode" class="mr-2">
+                {{ productLabel.decisionMadeIcon }}
+              </v-icon>
+              <div class="ml-2 label-color">
+                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
+                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
+              </div>
             </div>
             <v-btn
               large
@@ -56,6 +64,7 @@
                   v-bind="productFooter.props"
                   v-on="productFooter.events"
                   :ref="productFooter.ref"
+                  v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
                 />
               </div>
             </v-expand-transition>
@@ -68,6 +77,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { DisplayModeValues, productStatus } from '@/util/constants'
 import { OrgProduct } from '@/models/Organization'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
@@ -84,9 +94,12 @@ export default class Product extends Vue {
   @Prop({ default: '' }) orgName: string
   @Prop({ default: false }) isSelected: boolean
   @Prop({ default: false }) isexpandedView: boolean
+  @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
+  @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
 
   private termsAccepted: boolean = false
   public productSelected:boolean = false
+  private viewOnly = DisplayModeValues.VIEW_ONLY
 
   $refs: {
     tosForm: HTMLFormElement
@@ -102,15 +115,65 @@ export default class Product extends Vue {
     // this is mapping product code with lang file.
     // lang file have subtitle and description with product code prefix.
     // eg: pprCodeSubtitle, pprCodeDescription
+    // Also, returns check box icon and color if the product has been reviewed.
     const { code } = this.productDetails
-    const subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
-    const details = `${code && code.toLowerCase()}CodeDescription` || ''
-    return { subTitle, details }
+    let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
+    let details = `${code && code.toLowerCase()}CodeDescription` || ''
+    let decisionMadeIcon = null
+    let decisionMadeColorCode = null
+
+    if (this.isAccountSettingsView) {
+      const status = this.productDetails.subscriptionStatus
+      switch (status) {
+        case productStatus.ACTIVE: {
+          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
+          decisionMadeIcon = 'mdi-check-circle'
+          decisionMadeColorCode = 'success'
+          break
+        }
+        case productStatus.REJECTED: {
+          subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle` || ''
+          decisionMadeIcon = 'mdi-close-circle'
+          decisionMadeColorCode = 'error'
+          break
+        }
+        case productStatus.PENDING_STAFF_REVIEW: {
+          subTitle = 'productPendingSubtitle'
+          decisionMadeIcon = 'mdi-clock-outline'
+          break
+        }
+        default: {
+          break
+        }
+      }
+      if (this.isBasicAccountAndPremiumProduct) {
+        subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle` || ''
+        decisionMadeIcon = 'mdi-minus-box'
+      }
+    }
+    return { subTitle, details, decisionMadeIcon, decisionMadeColorCode }
   }
 
   get isTOSNeeded () {
     // check tos needed for product
     return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
+  }
+
+  get isBasicAccountAndPremiumProduct () {
+    return this.isBasicAccount && this.productDetails.premiumOnly
+  }
+
+  get hasDecisionNotBeenMade () {
+    // returns true if create account flow
+    if (!this.isAccountSettingsView) {
+      return true
+    }
+    // returns true if product subscription status is unsubscribed and in account settings view
+    if (([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
+      return true
+    }
+    this.termsAccepted = true
+    return false
   }
 
   public mounted () {
@@ -187,6 +250,10 @@ export default class Product extends Vue {
 
 .theme--light.v-card.v-card--outlined.selected {
   border-color: var(--v-primary-base);
+}
+
+.label-color {
+    color: rgba(0,0,0,.6) !important;
 }
 
 </style>

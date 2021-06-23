@@ -27,8 +27,26 @@
             :orgName="currentOrganization.name"
             :isexpandedView ="product.code === expandedProductCode"
             @toggle-product-details="toggleProductDetails"
-            :isSelected="showAsSelected(product.subscriptionStatus)"
+            :isSelected="currentSelectedProducts.includes(product.code)"
+            :isAccountSettingsView="true"
+            :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
           ></Product>
+        </div>
+        <div class="align-right-container">
+          <p data-test="text-submit-request-error-message" class="text-submit-request-error-message" v-show="submitRequestValidationError"> {{ submitRequestValidationError }} </p>
+        </div>
+        <v-divider class="mb-5"></v-divider>
+        <div class="align-right-container">
+          <v-btn
+          large
+          class="submit-request-button"
+          color="primary"
+          aria-label="Submit Request"
+          data-test="btn-product-submit-request"
+          @click="submitProductRequest()"
+          >
+            <span>Submit Request</span>
+          </v-btn>
         </div>
       </template>
       <template v-else>
@@ -36,16 +54,17 @@
       </template>
     </template>
 
-        <!-- Alert Dialog (Error) -->
+        <!-- Alert / Request Confirm Dialog -->
     <ModalDialog
-      ref="errorDialog"
-      :title="errorTitle"
-      :text="errorText"
+      ref="confirmDialog"
+      :title="dialogTitle"
+      :text="dialogText"
       dialog-class="notify-dialog"
       max-width="640"
     >
       <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <v-icon large color="primary
+        ">{{dialogIcon}}</v-icon>
       </template>
       <template v-slot:actions>
         <v-btn
@@ -65,12 +84,12 @@
 
 import { Component, Mixins, Vue } from 'vue-property-decorator'
 import { OrgProduct, OrgProductCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
+import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Product from '@/components/auth/common/Product.vue'
 import { namespace } from 'vuex-class'
-import { productStatus } from '@/util/constants'
 
 const OrgModule = namespace('org')
 const userModule = namespace('user')
@@ -85,53 +104,40 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @userModule.State('currentUser') public currentUser!: KCUserProfile
   @OrgModule.State('productList') public productList!: OrgProduct[]
+  @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
+
+  @OrgModule.Mutation('resetCurrentSelectedProducts') public resetCurrentSelectedProducts!:() => void
 
   @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
   @OrgModule.Action('addOrgProducts') public addOrgProducts!:(product:OrgProductsRequestBody) =>Promise<OrgProduct>
+  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
 
   public isBtnSaved = false
   public disableSaveBtn = false
   public isLoading: boolean = false
-  public errorTitle = 'Product Request Failed'
-  public errorText = ''
-
-  public productsLoaded:boolean = null
-  public productsAddSuccess:boolean = false
+  public dialogTitle = ''
+  public dialogText = ''
+  public dialogIcon = ''
+  public submitRequestValidationError = ''
   public expandedProductCode: string = ''
+  public AccountEnum = Account
 
   $refs: {
-      errorDialog: ModalDialog
+      confirmDialog: ModalDialog
   }
 
-  public async setSelectedProduct (product) {
-    // set product and save call come here
-    if (product && product.code) {
-      try {
-        const productsSelected: OrgProductCode[] = [{
-          productCode: product.code
-        }]
-
-        const addProductsRequestBody: OrgProductsRequestBody = {
-          subscriptions: productsSelected
-        }
-        // TODO now comment to avoid requesting product on check box. revisit as a part of new ticket
-        // await this.addOrgProducts(addProductsRequestBody)
-        // this.loadProduct()
-        this.productsAddSuccess = true
-      } catch {
-        // open when error
-        this.$refs.errorDialog.open()
-      }
+  public async setSelectedProduct (productDetails) {
+    // add/remove product from the currentselectedproducts store
+    const productCode = productDetails.code
+    const forceRemove = productDetails.forceRemove
+    if (productCode) {
+      this.addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
     }
-  }
-
-  private showAsSelected (productStatusCode:string):boolean {
-    const isSubscribed = ([productStatus.ACTIVE] as Array<string>).includes(productStatusCode)
-    return isSubscribed
   }
 
   private async setup () {
     this.isLoading = true
+    this.resetCurrentSelectedProducts()
     await this.loadProduct()
     this.isLoading = false
   }
@@ -149,30 +155,60 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public async loadProduct () {
     // refactor on next ticket
     try {
-      this.getOrgProducts(this.currentOrganization.id)
-      this.productsLoaded = true
-    } catch {
-      this.productsLoaded = false
+      await this.getOrgProducts(this.currentOrganization.id)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('Error while loading products ', err)
     }
   }
 
   private closeError () {
-    this.$refs.errorDialog.close()
+    this.$refs.confirmDialog.close()
+  }
+
+  private async submitProductRequest () {
+    try {
+      if (this.currentSelectedProducts.length === 0) {
+        this.submitRequestValidationError = 'Select at least one product or service to submit request'
+      } else {
+        this.submitRequestValidationError = ''
+        const productsSelected: OrgProductCode[] = this.currentSelectedProducts.map((code: any) => {
+          return { productCode: code }
+        })
+
+        const addProductsRequestBody: OrgProductsRequestBody = {
+          subscriptions: productsSelected
+        }
+        await this.addOrgProducts(addProductsRequestBody)
+        await this.setup()
+
+        // show confirm modal
+        this.dialogTitle = 'Access Requested'
+        this.dialogText = 'Request has been submitted. Account will immediately have access to the requested product and service unless staff review is required.'
+        this.dialogIcon = 'mdi-check'
+        this.$refs.confirmDialog.open()
+      }
+    } catch (ex) {
+      // open when error
+      this.dialogTitle = 'Product Request Failed'
+      this.dialogText = ''
+      this.dialogIcon = 'mdi-alert-circle-outline'
+      this.$refs.confirmDialog.open()
+
+      // eslint-disable-next-line no-console
+      console.log('Error while trying to submit product request')
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-.form__btns {
+.align-right-container {
   display: flex;
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
   margin-top: 2rem;
-
-  .v-btn {
-    width: 6rem;
-  }
 }
 .loading-inner-container{
   display: flex;
@@ -181,5 +217,9 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
 
 .save-btn.disabled {
   pointer-events: none;
+}
+
+.text-submit-request-error-message {
+  color: var(--v-error-base);
 }
 </style>
