@@ -23,7 +23,7 @@
       {{item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ?  `Access Request (${item.type})` : item.type}}
     </template>
     <template v-slot:[`item.status`]="{ item }">
-      {{item.status == 'HOLD' ? 'On hold' :item.status }}
+      <span class="status" :class="{'onhold': item.status == 'HOLD'}">{{item.status == 'HOLD' ? `On hold` : item.status.toLowerCase() }}</span>
     </template>
     <template v-slot:[`item.action`]="{ item }">
       <div class="btn-inline">
@@ -157,5 +157,11 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
 .action-btn {
   width: 5rem;
+}
+.onhold{
+  color: var(--v-error-darken1) !important;
+}
+.status{
+  text-transform: capitalize;
 }
 </style>
