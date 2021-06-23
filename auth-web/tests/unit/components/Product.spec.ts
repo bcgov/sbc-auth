@@ -168,4 +168,13 @@ describe('Product.vue', () => {
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
     expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeTruthy()
   })
+
+  it('creation flow should display check box', async () => {
+    pprProduct.subscriptionStatus = productStatus.NOT_SUBSCRIBED
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false })
+
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='check-product-PPR']").exists()).toBeTruthy()
+  })
 })
