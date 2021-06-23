@@ -119,11 +119,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public dialogText = ''
   public dialogIcon = ''
   public submitRequestValidationError = ''
-
-  public productsLoaded:boolean = null
-  public productsAddSuccess:boolean = false
   public expandedProductCode: string = ''
-
   public AccountEnum = Account
 
   $refs: {
@@ -160,9 +156,9 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     // refactor on next ticket
     try {
       await this.getOrgProducts(this.currentOrganization.id)
-      this.productsLoaded = true
-    } catch {
-      this.productsLoaded = false
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('Error while loading products ', err)
     }
   }
 
@@ -187,7 +183,6 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
         await this.setup()
 
         // show confirm modal
-        this.productsAddSuccess = true
         this.dialogTitle = 'Access Requested'
         this.dialogText = 'Request has been submitted. Account will immediately have access to the requested product and service unless staff review is required.'
         this.dialogIcon = 'mdi-check'
