@@ -61,9 +61,6 @@ describe('SetupGovmAccountForm.vue', () => {
     })
 
     expect(wrapper.isVueInstance()).toBeTruthy()
-    const bars = wrapper.find('')
-    expect(bars).toHaveLength(1)
-
     expect(wrapper.text()).toContain('team member message')
   })
 })
