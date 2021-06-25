@@ -114,8 +114,6 @@ class Affiliation:
         """Return business affiliations for the org."""
         data = []
         affiliation_models = AffiliationModel.find_affiliations_by_org_id(org_id)
-        if affiliation_models is None:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
         for affiliation_model in affiliation_models:
             affiliation = EntityService(affiliation_model.entity).as_dict()
             data.append(affiliation)

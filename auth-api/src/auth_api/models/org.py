@@ -41,7 +41,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     type_code = Column(ForeignKey('org_types.code'), nullable=False)
     status_code = Column(ForeignKey('org_statuses.code'), nullable=False)
     name = Column(String(250), index=True)
-    branch_name = Column(String(100), nullable=True)  # to be used for any additional info as branch name etc
+    branch_name = Column(String(100), nullable=True, default='')  # used for any additional info as branch name
     access_type = Column(String(250), index=True, nullable=True)  # for ANONYMOUS ACCESS
     billable = Column('billable', Boolean(), default=True, nullable=False)
     decision_made_by = Column(String(250))
@@ -173,8 +173,10 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     @classmethod
     def find_similar_org_by_name(cls, name, org_id=None, branch_name=None):
         """Find an Org instance that matches the provided name."""
-        query = cls.query.filter(and_(Org.name == name, Org.branch_name == branch_name)). \
-            filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
+        query = cls.query.filter(and_(
+            func.upper(Org.name) == name.upper(),
+            func.upper(Org.branch_name) == (branch_name.upper() if branch_name else ''))
+        ).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.first()

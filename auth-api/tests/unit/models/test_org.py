@@ -41,6 +41,7 @@ def factory_org_model(name, session):
     org.org_type = org_type
     org.org_status = OrgStatusModel.get_default_status()
     org.preferred_payment = preferred_payment
+    org.branch_name = ''
     org.save()
 
     return org

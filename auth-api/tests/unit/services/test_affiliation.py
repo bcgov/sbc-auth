@@ -189,11 +189,9 @@ def test_find_affiliated_entities_by_org_id_no_affiliation(session, auth_mock): 
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
 
-    with patch.object(AffiliationModel, 'find_affiliations_by_org_id', return_value=None):
-        with pytest.raises(BusinessException) as exception:
-            AffiliationService.find_visible_affiliations_by_org_id(org_id)
-
-    assert exception.value.code == Error.DATA_NOT_FOUND.name
+    with patch.object(AffiliationModel, 'find_affiliations_by_org_id', return_value=[]):
+        affiliations = AffiliationService.find_visible_affiliations_by_org_id(org_id)
+        assert not affiliations
 
 
 def test_delete_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
