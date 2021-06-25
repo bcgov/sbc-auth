@@ -17,26 +17,37 @@
 Test-Suite to ensure that the /orgs endpoint is working as expected.
 """
 import json
+import uuid
 from unittest.mock import patch
 
 import pytest
+from faker import Faker
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models import Affidavit as AffidavitModel
+from auth_api.models import Affiliation as AffiliationModel
+from auth_api.models import Entity as EntityModel
+from auth_api.models import Membership as MembershipModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, OrgStatus, OrgType, PaymentMethod, ProductCode, ProductSubscriptionStatus,
+    AccessType, AffidavitStatus, OrgStatus, OrgType, PaymentMethod, ProductCode, ProductSubscriptionStatus, Status,
     SuspensionReasonCode)
 from auth_api.utils.roles import ADMIN
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload, TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims,
     TestOrgInfo, TestPaymentMethodInfo)
-from tests.utilities.factory_utils import factory_auth_header, factory_invitation, factory_invitation_anonymous
+from tests.utilities.factory_utils import (
+    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
+    factory_invitation_anonymous, factory_membership_model, factory_user_model, patch_pay_account_delete,
+    patch_pay_account_delete_error)
+
+FAKE = Faker()
 
 
 @pytest.mark.parametrize('org_info', [TestOrgInfo.org1, TestOrgInfo.org_onlinebanking, TestOrgInfo.org_with_products,
@@ -1074,90 +1085,71 @@ def test_get_members(client, jwt, session, keycloak_mock):  # pylint:disable=unu
     assert dictionary['members'][0]['membershipTypeCode'] == 'ADMIN'
 
 
-def test_delete_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_delete_org(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org can be deleted."""
+    # 1 - assert org can be deleted without any dependencies like members or business affiliations.
+    patch_pay_account_delete(monkeypatch)
+
+    org_payload = TestOrgInfo.org_with_all_info
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-    dictionary = json.loads(rv.data)
-    org_id = dictionary['id']
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(org_payload), headers=headers, content_type='application/json')
+    org_id = rv.json.get('id')
     rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
+    # 2 - Verify orgs with affiliations can be deleted and assert passcode is reset.
+    # 3 - Verify orgs with members and other admins can be deleted.
+    org_payload['name'] = FAKE.name()
+    rv = client.post('/api/v1/orgs', data=json.dumps(org_payload), headers=headers, content_type='application/json')
+    org_id = rv.json.get('id')
+    entity = factory_entity_model()
+    entity_id = entity.id
+    passcode = entity.pass_code
+    affiliation = factory_affiliation_model(entity.id, org_id)
+    member_user = factory_user_model()
+    factory_membership_model(member_user.id, org_id=org_id)
 
-def test_delete_org_failure_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an org cannnot be deleted with valid affiliation."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
-    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
-                     headers=headers, content_type='application/json')
+    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+    assert EntityModel.find_by_id(entity_id).pass_code != passcode
+    assert AffiliationModel.find_by_id(affiliation.id) is None
+    for membership in MembershipModel.find_members_by_org_id(org_id):
+        assert membership.status == Status.INACTIVE.value
+
+    # 3 - Verify bceid orgs can be deleted and assert the affidavit is INACTIVE.
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    user = client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    affidavit: AffidavitModel = AffidavitModel(
+        document_id=str(uuid.uuid4()),
+        issuer='TEST',
+        status_code=AffidavitStatus.APPROVED.value,
+        user_id=user.json.get('id')
+    ).save()
+    affidavit_id = affidavit.id
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bceid_org_with_all_info), headers=headers,
+                               content_type='application/json')
+    org_id = org_response.json.get('id')
+    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+    assert AffidavitModel.find_by_id(affidavit_id).status_code == AffidavitStatus.INACTIVE.value
+
+
+def test_delete_org_failures(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an org cannot be deleted."""
+    patch_pay_account_delete_error(monkeypatch)
+
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
-    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers,
-                     data=json.dumps(TestAffliationInfo.affiliation3), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-
     rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_406_NOT_ACCEPTABLE
-
-
-def test_delete_org_failure_members(client, jwt, session, auth_mock, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that a member of an org can have their role updated."""
-    # Set up: create/login user, create org
-    headers_invitee = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers_invitee, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers_invitee, content_type='application/json')
-    dictionary = json.loads(rv.data)
-    org_id = dictionary['id']
-
-    # Invite a user to the org
-    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id, 'abc123@email.com')),
-                     headers=headers_invitee, content_type='application/json')
-    dictionary = json.loads(rv.data)
-    invitation_id = dictionary['id']
-    invitation_id_token = InvitationService.generate_confirmation_token(invitation_id)
-
-    # Create/login as invited user
-    headers_invited = factory_auth_header(jwt=jwt, claims=TestJwtClaims.edit_role_2)
-    rv = client.post('/api/v1/users', headers=headers_invited, content_type='application/json')
-
-    # Accept invite as invited user
-    rv = client.put('/api/v1/invitations/tokens/{}'.format(invitation_id_token),
-                    headers=headers_invited, content_type='application/json')
-
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-    assert dictionary['status'] == 'ACCEPTED'
-
-    # Get pending members for the org as invitee and assert length of 1
-    rv = client.get('/api/v1/orgs/{}/members?status=PENDING_APPROVAL'.format(org_id), headers=headers_invitee)
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-    assert dictionary['members']
-    assert len(dictionary['members']) == 1
-
-    # Find the pending member
-    new_member = dictionary['members'][0]
-    assert new_member['membershipTypeCode'] == 'USER'
-    member_id = new_member['id']
-
-    # Update the new member
-    rv = client.patch('/api/v1/orgs/{}/members/{}'.format(org_id, member_id), headers=headers_invitee,
-                      data=json.dumps({'role': 'COORDINATOR'}), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-    assert dictionary['membershipTypeCode'] == 'COORDINATOR'
-
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
-    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_406_NOT_ACCEPTABLE
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+    assert rv.json.get('code') == 'OUTSTANDING_CREDIT'
 
 
 def test_get_invitations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

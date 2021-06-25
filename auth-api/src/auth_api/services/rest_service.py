@@ -27,7 +27,6 @@ from urllib3.util.retry import Retry
 from auth_api.exceptions import ServiceUnavailableException
 from auth_api.utils.enums import AuthHeaderType, ContentType
 
-
 RETRY_ADAPTER = HTTPAdapter(max_retries=Retry(total=5, backoff_factor=1, status_forcelist=[404]))
 
 
@@ -119,6 +118,16 @@ class RestService:
         """Patch service."""
         current_app.logger.debug('<patch')
         return RestService._invoke('patch', endpoint, token, auth_header_type, content_type, data, raise_for_status,
+                                   additional_headers, generate_token)
+
+    @staticmethod
+    def delete(endpoint, token=None,  # pylint: disable=too-many-arguments
+               auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
+               content_type: ContentType = ContentType.JSON, data=None, raise_for_status: bool = True,
+               additional_headers: dict = None, generate_token=True):
+        """Patch service."""
+        current_app.logger.debug('<delete')
+        return RestService._invoke('delete', endpoint, token, auth_header_type, content_type, data, raise_for_status,
                                    additional_headers, generate_token)
 
     @staticmethod
