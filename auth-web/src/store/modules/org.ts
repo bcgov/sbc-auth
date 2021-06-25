@@ -705,7 +705,8 @@ export default class OrgModule extends VuexModule {
       postalCode: contact?.postalCode,
       country: contact?.country,
       street: contact?.street,
-      streetAdditional: contact?.streetAdditional }
+      streetAdditional: contact?.streetAdditional,
+      deliveryInstructions: contact?.deliveryInstructions }
     this.context.commit('setCurrentOrganizationAddress', address)
   }
 
