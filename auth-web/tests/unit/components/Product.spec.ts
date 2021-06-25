@@ -1,8 +1,10 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+
 import Product from '@/components/auth/common/Product.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { productStatus } from '@/util/constants'
 
 Vue.use(Vuetify)
 
@@ -10,9 +12,8 @@ describe('Product.vue', () => {
   let wrapperFactory: any
   let wrapper: any
   const config = {
-    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
-    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+    'AUTH_API_URL': 'https://localhost:8080/api/v1/11',
+    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
   }
 
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
@@ -22,14 +23,15 @@ describe('Product.vue', () => {
     'description': 'test',
     'url': 'url',
     'type': 'PARTNER',
-    'subscriptionStatus': ''
+    'subscriptionStatus': productStatus.NOT_SUBSCRIBED
   }
   const pprProduct = {
     'code': 'PPR',
     'description': 'ppr',
     'url': 'url',
     'type': 'PARTNER',
-    'subscriptionStatus': ''
+    'subscriptionStatus': productStatus.NOT_SUBSCRIBED,
+    'premiumOnly': false
   }
   const isSelected = false
   const props = { productDetails, isSelected }
@@ -109,5 +111,70 @@ describe('Product.vue', () => {
     await wrapper.vm.$nextTick()
     await wrapper.vm.$nextTick()
     expect(wrapper.vm.$data.productSelected).toBe(true)
+    expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
+  })
+
+  it('active product should not display checkbox', async () => {
+    pprProduct.subscriptionStatus = productStatus.ACTIVE
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
+
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+
+    const getDecisionMadeSettings = wrapper.vm.productLabel
+    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-check-circle')
+    expect(getDecisionMadeSettings.decisionMadeColorCode).toBe('success')
+    expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
+  })
+
+  it('pending product should not display checkbox', async () => {
+    pprProduct.subscriptionStatus = productStatus.PENDING_STAFF_REVIEW
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
+
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+
+    const getDecisionMadeSettings = wrapper.vm.productLabel
+    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-clock-outline')
+    expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
+    expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
+  })
+
+  it('rejected product should not display checkbox', async () => {
+    pprProduct.subscriptionStatus = productStatus.REJECTED
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
+
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+
+    const getDecisionMadeSettings = wrapper.vm.productLabel
+    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-close-circle')
+    expect(getDecisionMadeSettings.decisionMadeColorCode).toBe('error')
+    expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
+  })
+
+  it('premium product should be disabled in basic account settings', async () => {
+    pprProduct.subscriptionStatus = productStatus.NOT_SUBSCRIBED
+    pprProduct.premiumOnly = true
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true, isBasicAccount: true })
+
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+
+    const getDecisionMadeSettings = wrapper.vm.productLabel
+    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
+    expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
+    expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
+    expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeTruthy()
+  })
+
+  it('creation flow should display check box', async () => {
+    pprProduct.subscriptionStatus = productStatus.NOT_SUBSCRIBED
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false })
+
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
+    expect(wrapper.find("[data-test='check-product-PPR']").exists()).toBeTruthy()
   })
 })

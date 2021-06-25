@@ -255,7 +255,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true }
     },
     {
-      path: '/setup-non-bcsc-account',
+      path: '/setup-non-bcsc-account/:orgId?',
       name: 'setup-non-bcsc-account',
       component: NonBcscAccountSetupView,
       props: true,

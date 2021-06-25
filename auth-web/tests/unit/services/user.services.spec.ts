@@ -6,9 +6,8 @@ import UserService from '../../../src/services/user.services'
 jest.mock('../../../src/services/user.services')
 
 var mockob = {
-  'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-  'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-  'VUE_APP_AUTH_ROOT_API': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
+  'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+  'AUTH_API_URL': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
 }
 
 const mockContact : Contact = {

@@ -343,7 +343,9 @@ class TestJwtClaims(dict, Enum):
         'loginSource': 'BCROS',
         'realm_access': {
             'roles': [
-                'edit'
+                'edit',
+                'anonymous_user',
+                'public_user'
             ]
         },
         'product_code': 'DIR_SEARCH'

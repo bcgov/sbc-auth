@@ -2,9 +2,7 @@
     {
         "vault": "shared",
         "application": [
-            "address-key",
-            "api-endpoints",
-            "web-urls"
+            "address-key"
         ]
     },
     {
@@ -13,6 +11,38 @@
             "base",
             "web-base",
             "account-web"
+        ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "auth"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+            "relationship-web"
+        ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "auth-api",
+            "status-api",
+            "pay-api",
+            "legal-api",
+            "von-api"
+        ]
+    },
+    {
+        "vault": "web-url",
+        "application": [
+            "auth-web",
+            "director-search",
+            "name-request",
+            "nro",
+            "entity-selector"
         ]
     },
     {

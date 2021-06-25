@@ -16,9 +16,8 @@ describe('Statements.vue', () => {
   let localVue
 
   const config = {
-    VUE_APP_ROOT_API: 'https://localhost:8080/api/v1/sbc',
-    VUE_APP_COPS_REDIRECT_URL: 'https://dev.gov.bc.ca/',
-    VUE_APP_PAY_ROOT_API: 'https://pay.gov.bc.ca/api/v1'
+    AUTH_API_URL: 'https://localhost:8080/api/v1/sbc',
+    PAY_API_URL: 'https://pay.gov.bc.ca/api/v1'
   }
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
