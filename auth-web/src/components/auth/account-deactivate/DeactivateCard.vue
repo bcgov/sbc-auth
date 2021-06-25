@@ -1,6 +1,6 @@
 <template>
   <v-card>
-    <v-card-title class="font-weight-bold mb-5" >
+    <v-card-title data-test="title-deactivate" class="font-weight-bold mb-5" >
       When this account is deactivated...
     </v-card-title>
 
@@ -9,7 +9,7 @@
         <div>
           <v-icon color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
         </div>
-        <div><h4 class="font-weight-bold ">  {{ $t(item.title) }}</h4>
+        <div><h4 class="font-weight-bold">  {{ $t(item.title) }}</h4>
           <p>{{ $t(item.description) }}</p>
         </div>
 
@@ -45,6 +45,8 @@ export default class DeactivateCard extends Vue {
   ]
 
   private get info () {
+    // eslint-disable-next-line no-console
+    console.log('-----')
     return this.infoArray.filter(obj => !obj.type || obj.type === this.type)
   }
 }

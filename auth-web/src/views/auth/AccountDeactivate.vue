@@ -4,7 +4,7 @@
       class="crumbs py-6"
       aria-label="breadcrumb">
       <div>
-        <router-link :to="`/account/${currentOrganization.id}`">
+        <router-link :to=accountInfoUrl>
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Account</span>
         </router-link>
@@ -17,7 +17,7 @@
       Please review the information below before deactivating your BC Registries and Online Services account.
     </div>
     <div>
-      <deactivate-card :org-type="currentOrganization.orgType"></deactivate-card>
+      <deactivate-card :org-type="orgType"></deactivate-card>
     </div>
     <v-card class="mt-10">
       <v-card-title class="font-weight-bold">
@@ -117,7 +117,7 @@
         <v-icon large color="error">mdi-information-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" data-test="deactivate-btn" class="mr-5" :to="`/account/${currentOrganization.id}`">
+        <v-btn large color="primary" data-test="deactivate-btn" class="mr-5" :to=accountInfoUrl>
           Back to Account Information
         </v-btn>
       </template>
@@ -180,19 +180,27 @@ export default class AccountDeactivate extends Vue {
   }
 
   private get confirmations () {
-    return this.confirmationsList.filter(obj => !obj.type || obj.type === this.currentOrganization.orgType)
+    return this.confirmationsList.filter(obj => !obj.type || obj.type === this.currentOrganization?.orgType)
   }
 
   private get params () {
     return {
-      'name': (this.currentMembership.user.firstname || '') + ' ' + (this.currentMembership.user.lastname || ''),
-      'id': this.currentOrganization.id,
+      'name': (this.currentMembership?.user?.firstname || '') + ' ' + (this.currentMembership?.user?.lastname || ''),
+      'id': this.currentOrganization?.id,
       'date': CommonUtil.formatCurrentDate()
     }
   }
 
+  private get accountInfoUrl ():string {
+    return `/account/${this.currentOrganization?.id}`
+  }
+
   private async closeConfirmModal () {
     this.$refs.confirmModal.close()
+  }
+
+  private get orgType () :string {
+    return this.currentOrganization?.orgType
   }
 
   private async navigateTohome () {
