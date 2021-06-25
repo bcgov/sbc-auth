@@ -2,15 +2,18 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 
 import { Code } from '@/models/Code'
 import CodesService from '@/services/codes.service'
-
+import { RejectCode } from '@/util/constants'
 @Module({ namespaced: true })
 export default class CodesModule extends VuexModule {
     suspensionReasonCodes: Code[] = []
     businessSizeCodes: Code[] = []
     businessTypeCodes: Code[] = []
+    rejectReasonCodes: Code[] = []
+
     private suspensionReasonCodeTable = 'suspension_reason_codes'
     private businessSizeCodeTable = 'business_size_codes'
     private businessTypeCodeTable = 'business_type_codes'
+    private rejectReasonCodeTable = 'staff_remark_codes'
 
     @Mutation
     public setSuspensionReasonCodes (codes: Code[]) {
@@ -25,6 +28,11 @@ export default class CodesModule extends VuexModule {
     @Mutation
     public setBusinessTypeCodes (codes: Code[]) {
       this.businessTypeCodes = codes
+    }
+
+    @Mutation
+    public setRejectReasonCodes (codes: Code[]) {
+      this.rejectReasonCodes = codes
     }
 
     @Action({ commit: 'setBusinessSizeCodes', rawError: true })
@@ -50,6 +58,21 @@ export default class CodesModule extends VuexModule {
       const response = await CodesService.getCodes(this.suspensionReasonCodeTable)
       if (response && response.data && response.status === 200) {
         return response.data
+      }
+    }
+
+    @Action({ commit: 'setRejectReasonCodes', rawError: true })
+    public async getRejectReasonCodes (): Promise<Code[]> {
+      const response = await CodesService.getCodes(this.rejectReasonCodeTable)
+      if (response && response.data && response.status === 200) {
+        const rejectResons = response.data
+        // pushing default reject account value into array since its not included in API
+        // also use this code to send reject
+        rejectResons.push({
+          'code': RejectCode.REJECTACCOUNT_CODE,
+          'desc': RejectCode.REJECTACCOUNT_DESC
+        })
+        return rejectResons
       }
     }
 }

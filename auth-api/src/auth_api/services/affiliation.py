@@ -201,7 +201,7 @@ class Affiliation:
         if nr_json:
             # Verify corp type
             corp_type_code = nr_json.get('requestTypeCd')
-            if corp_type_code not in (CorpType.BC.value, CorpType.CR.value, CorpType.UL.value, CorpType.CC.value):
+            if corp_type_code not in current_app.config.get('NR_SUPPORTED_REQUEST_TYPES'):
                 raise BusinessException(Error.NR_INVALID_CORP_TYPE, None)
 
             status = nr_json.get('state')

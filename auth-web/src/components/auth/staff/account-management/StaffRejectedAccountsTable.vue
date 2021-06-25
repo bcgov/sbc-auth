@@ -116,7 +116,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
         relationshipStatus: TaskRelationshipStatus.REJECTED,
         pageNumber: page,
         pageLimit: pageLimit,
-        status: TaskStatus.COMPLETED
+        statuses: [TaskStatus.COMPLETED]
       }
       const rejectedTasksResp = await this.fetchTasks(this.taskFilter)
       this.rejectedTasks = rejectedTasksResp.tasks

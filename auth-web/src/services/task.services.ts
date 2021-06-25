@@ -15,8 +15,9 @@ export default class TaskService {
     if (taskFilter.relationshipStatus) {
       params.append('relationshipStatus', taskFilter.relationshipStatus)
     }
-    if (taskFilter.status) {
-      params.append('status', taskFilter.status)
+    if (taskFilter.statuses) {
+      taskFilter.statuses.forEach(status =>
+        params.append('status', status))
     }
     if (taskFilter.type) {
       params.append('type', taskFilter.type)
@@ -33,11 +34,14 @@ export default class TaskService {
 
   static async approvePendingTask (task:any): Promise<AxiosResponse> {
     const taskId = task.id
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.ACTIVE })
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.ACTIVE })
   }
 
-  static async rejectPendingTask (task:any): Promise<AxiosResponse> {
-    const taskId = task.id
-    return axios.put(`${ConfigHelper.getValue('VUE_APP_AUTH_ROOT_API')}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.REJECTED })
+  static async rejectPendingTask (taskId:any): Promise<AxiosResponse> {
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.REJECTED })
+  }
+
+  static async onHoldPendingTask (taskId, remark:string): Promise<AxiosResponse> {
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { status: TaskRelationshipStatus.HOLD, remark, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
   }
 }

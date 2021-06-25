@@ -81,7 +81,7 @@ export default class BusinessProfileView extends Mixins(AccountChangeMixin, Next
         this.$router.push('/home')
       }
     } else {
-      window.location.href = `${ConfigHelper.getCoopsURL()}${this.currentBusiness.businessIdentifier}`
+      window.location.href = `${ConfigHelper.getBusinessURL()}${this.currentBusiness.businessIdentifier}`
     }
   }
 

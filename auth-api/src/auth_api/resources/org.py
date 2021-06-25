@@ -31,9 +31,9 @@ from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import Status
+from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role
 from auth_api.utils.util import cors_preflight
-
 
 API = Namespace('orgs', description='Endpoints for organization management')
 TRACER = Tracer.get_instance()
@@ -47,6 +47,8 @@ class Orgs(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
+    @validate_roles(allowed_roles=[Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value],
+                    not_allowed_roles=[Role.ANONYMOUS_USER.value])
     @_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value])
     def post():
         """Post a new org using the request body.
@@ -321,7 +323,7 @@ class OrgAffiliations(Resource):
                     bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = AffiliationService.create_affiliation(
-                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),).as_dict(), \
+                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'), ).as_dict(), \
                                    http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
