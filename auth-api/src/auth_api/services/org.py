@@ -473,6 +473,8 @@ class Org:  # pylint: disable=too-many-public-methods
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if org.status_code != OrgStatus.ACTIVE.value:
+            raise BusinessException(Error.NOT_ACTIVE_ACCOUNT, None)
 
         # Deactivate pay account
         Org._delete_pay_account(org_id)
@@ -519,7 +521,9 @@ class Org:  # pylint: disable=too-many-public-methods
             pay_response.raise_for_status()
         except HTTPError as pay_err:
             current_app.logger.info(pay_err)
-            raise BusinessException(Error[response_json.get('type')], pay_err) from pay_err
+            error_type = response_json.get('type')
+            error: Error = Error[error_type] if error_type in Error.__members__ else Error.PAY_ACCOUNT_DEACTIVATE_ERROR
+            raise BusinessException(error, pay_err) from pay_err
 
     def get_payment_info(self):
         """Return the Payment Details for an org by calling Pay API."""

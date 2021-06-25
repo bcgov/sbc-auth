@@ -79,6 +79,9 @@ class Error(Enum):
 
     OUTSTANDING_CREDIT = 'Account have credits remaining on account.', http_status.HTTP_400_BAD_REQUEST
     TRANSACTIONS_IN_PROGRESS = 'Account have payment transactions in progress.', http_status.HTTP_400_BAD_REQUEST
+    NOT_ACTIVE_ACCOUNT = 'Account is not active.', http_status.HTTP_400_BAD_REQUEST
+    PAY_ACCOUNT_DEACTIVATE_ERROR = 'An error occurred while attempting to deactivate your account.Please try again', \
+                                   http_status.HTTP_400_BAD_REQUEST
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
