@@ -1095,4 +1095,20 @@ export default class OrgModule extends VuexModule {
     const response = await OrgService.getContactForOrg(orgId)
     return response
   }
+
+  // Check if user has any accounts, if any, default the first returned value as the selected org.
+  @Action({ rawError: true })
+  public async setCurrentOrganizationFromUserAccountSettings (): Promise<void> {
+    const response = await UserService.getUserAccountSettings(this.context.rootState.user.userProfile?.keycloakGuid)
+    if (response && response.data) {
+      // filter by account type and default first returned value as the current organization
+      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
+      if (orgs && orgs.length) {
+        const orgId = +orgs[0].id
+        // sync org and add to session
+        await this.syncOrganization(orgId)
+        await this.addOrgSettings(this.context.state['currentOrganization'])
+      }
+    }
+  }
 }
