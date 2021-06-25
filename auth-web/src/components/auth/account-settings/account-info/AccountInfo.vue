@@ -113,6 +113,7 @@
                 :address="baseAddress"
                 @update:address="updateAddress"
                 @valid="checkBaseAddressValidity"
+                :key="baseAddress.postalCode"
               />
             </div>
           </template>
