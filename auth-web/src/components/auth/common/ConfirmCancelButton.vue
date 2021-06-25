@@ -68,10 +68,10 @@ export default class ConfirmCancelButton extends Vue {
   }
 
   private async confirmDialogResponse (response) {
-    this.$refs.confirmCancelDialog.close()
     if (response) {
-      await this.clickConfirm()
+      this.clickConfirm()
     }
+    this.$refs.confirmCancelDialog.close()
   }
 
   private async clickConfirm () {
