@@ -75,6 +75,16 @@
         ],
         "pattern": "^(.*)$",
         "minLength": 1
+      },
+      "deliveryInstructions": {
+        "$id": "#/properties/delivery_instructions",
+        "type": "string",
+        "title": "Delivery Instructions",
+        "default": "",
+        "examples": [
+          "Buzz code - 505"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }
