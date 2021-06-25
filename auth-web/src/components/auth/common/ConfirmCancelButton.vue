@@ -60,7 +60,7 @@ export default class ConfirmCancelButton extends Vue {
   // for not to clear current org values [for account change , while clicking on cancel , current org has to stay]
   @Prop({ default: true }) clearCurrentOrg: boolean
 
-  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings') private setCurrentOrganizationFromUserAccountSettings!: () => Promise<any>
+  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings') private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
   @OrgModule.Action('resetAccountSetupProgress') private resetAccountSetupProgress!: () => Promise<void>
 
   $refs: {

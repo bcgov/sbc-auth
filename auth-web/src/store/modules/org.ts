@@ -1096,7 +1096,7 @@ export default class OrgModule extends VuexModule {
     return response
   }
 
-  // Check if user has any accounts, if any, default the first opne as the selected org.
+  // Check if user has any accounts, if any, default the first returned value as the selected org.
   @Action({ rawError: true })
   public async setCurrentOrganizationFromUserAccountSettings (): Promise<void> {
     const response = await UserService.getUserAccountSettings(this.context.rootState.user.userProfile?.keycloakGuid)
