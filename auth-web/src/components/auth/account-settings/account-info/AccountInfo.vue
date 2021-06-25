@@ -129,6 +129,7 @@
               @click="learnMoreDialog = true"
               data-test="deactivate-btn"
               to="/account-deactivate"
+              v-can:DEACTIVATE_ACCOUNT.hide
             >
               Deactivate Account
             </v-btn>

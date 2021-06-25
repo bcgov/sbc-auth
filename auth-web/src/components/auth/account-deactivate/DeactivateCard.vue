@@ -45,8 +45,6 @@ export default class DeactivateCard extends Vue {
   ]
 
   private get info () {
-    // eslint-disable-next-line no-console
-    console.log('-----')
     return this.infoArray.filter(obj => !obj.type || obj.type === this.type)
   }
 }
