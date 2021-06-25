@@ -61,7 +61,7 @@
               depressed
               align="right"
               class="cancel-btn"
-              @click="close()"
+              @click="closeConfirmModal()"
               color="default"
               data-test="cancel-button"
             >Cancel
@@ -70,7 +70,7 @@
         </v-row>
       </v-card-actions>
     </v-card>
-    <!-- Dialog for confirming passcode generation -->
+    <!-- Dialog for confirming deactivation -->
     <ModalDialog
       ref="confirmModal"
       title="Deactivate Account?"
@@ -78,7 +78,13 @@
       max-width="640"
       text="Are you sure you want to deactivate this account?"
     >
+
       <template v-slot:icon>
+        <v-fade-transition>
+          <div class="loading-container" v-if="isLoading">
+            <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+          </div>
+        </v-fade-transition>
         <v-icon large color="primary">mdi-help-circle</v-icon>
       </template>
       <template v-slot:actions>
@@ -97,7 +103,7 @@
         <v-icon large color="primary">mdi-check</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" data-test="deactivate-btn" class="mr-5">OK</v-btn>
+        <v-btn large color="primary" data-test="deactivate-btn" class="mr-5" @click="navigateTohome()">OK</v-btn>
       </template>
     </ModalDialog>
     <ModalDialog
@@ -122,13 +128,13 @@
 
 <script lang="ts">
 
-import { AccountStatus, LDFlags, Pages } from '@/util/constants'
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import CommonUtil from '@/util/common-util'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import Vue from 'vue'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -140,12 +146,14 @@ const OrgModule = namespace('org')
     ModalDialog
   }
 })
-export default class AccountDeactivate {
+export default class AccountDeactivate extends Vue {
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @OrgModule.State('currentMembership') public currentMembership!: Member
   @Prop({ default: '' }) private name: string
   @OrgModule.Action('deactivateOrg') public deactivateOrg!: () => Promise<void>
+  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings') private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
   private message = ''
+  private isLoading = false
 
   $refs: {
     confirmModal: ModalDialog,
@@ -153,7 +161,7 @@ export default class AccountDeactivate {
     errorModal: ModalDialog
 
   }
-  private confirmationsList: { text: string, type: string, checked: boolean }[] = [
+  private confirmationsList: { text: string, type?: string, selected: boolean }[] = [
     {
       text: 'deactivateTeamConfirmation',
       selected: false
@@ -183,20 +191,29 @@ export default class AccountDeactivate {
     }
   }
 
-  private async close () {
+  private async closeConfirmModal () {
     this.$refs.confirmModal.close()
+  }
+
+  private async navigateTohome () {
+    this.$refs.successModal.close()
+    await this.setCurrentOrganizationFromUserAccountSettings()
+    // Update header
+    await this.$store.commit('updateHeader')
+    this.$router.push(`/home`)
   }
 
   private async deactivate () {
     try {
+      this.isLoading = true
       await this.deactivateOrg()
-      this.close()
+      this.isLoading = false
+      await this.closeConfirmModal()
       this.message = `The account <strong>${this.currentOrganization.name}</strong> has been deactivated.`
       this.$refs.successModal.open()
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
-      this.isLoading = false
       switch (err?.response?.status) {
         case 400:
           this.message = err.response.data.message
@@ -208,11 +225,6 @@ export default class AccountDeactivate {
       this.$refs.confirmModal.close()
       this.$refs.errorModal.open()
     }
-  }
-
-  private handleBackButton (): void {
-    const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
-    this.$router.push(backTo)
   }
 
   private get authorised (): boolean {

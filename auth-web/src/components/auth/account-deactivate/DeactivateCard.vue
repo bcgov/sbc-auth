@@ -5,7 +5,7 @@
     </v-card-title>
 
     <v-card-text>
-      <div v-for="item in info" :key="item" class="d-flex align-center">
+      <div v-for="item in info" :key="item.title" class="d-flex align-center">
         <div>
           <v-icon color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
         </div>
@@ -20,10 +20,11 @@
 
 <script lang="ts">
 import { Component, Prop } from 'vue-property-decorator'
+import Vue from 'vue'
 
 @Component({
 })
-export default class DeactivateCard {
+export default class DeactivateCard extends Vue {
   @Prop() private type: string
 
   // no type matches means show it for all types
@@ -44,7 +45,7 @@ export default class DeactivateCard {
   ]
 
   private get info () {
-    return this.infoArray.filter(obj => !obj.type || obj.type === this.orgType)
+    return this.infoArray.filter(obj => !obj.type || obj.type === this.type)
   }
 }
 </script>
