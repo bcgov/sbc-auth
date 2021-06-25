@@ -38,15 +38,13 @@ import { Component, Emit, Prop } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
 import { mapActions } from 'vuex'
+import { namespace } from 'vuex-class'
+
+const OrgModule = namespace('org')
 
 @Component({
   components: {
     ModalDialog
-  },
-  methods: {
-    ...mapActions('org', [
-      'resetAccountSetupProgress'
-    ])
   }
 })
 export default class ConfirmCancelButton extends Vue {
@@ -62,27 +60,36 @@ export default class ConfirmCancelButton extends Vue {
   // for not to clear current org values [for account change , while clicking on cancel , current org has to stay]
   @Prop({ default: true }) clearCurrentOrg: boolean
 
-  private readonly resetAccountSetupProgress!: () => Promise<void>
+  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings') private setCurrentOrganizationFromUserAccountSettings!: () => Promise<any>
+  @OrgModule.Action('resetAccountSetupProgress') private resetAccountSetupProgress!: () => Promise<void>
 
   $refs: {
       confirmCancelDialog: ModalDialog
   }
 
-  private confirmDialogResponse (response) {
-    if (response) {
-      this.clickConfirm()
-    }
+  private async confirmDialogResponse (response) {
     this.$refs.confirmCancelDialog.close()
+    if (response) {
+      await this.clickConfirm()
+    }
   }
 
   private async clickConfirm () {
-    if (this.clearCurrentOrg) {
-      await this.resetAccountSetupProgress()
-    }
-    if (this.isEmit) {
-      this.emitClickConfirm()
-    } else {
-      this.$router.push(this.targetRoute)
+    try {
+      if (this.clearCurrentOrg) {
+        await this.resetAccountSetupProgress()
+        await this.setCurrentOrganizationFromUserAccountSettings()
+        // Update header
+        await this.$store.commit('updateHeader')
+      }
+      if (this.isEmit) {
+        this.emitClickConfirm()
+      } else {
+        this.$router.push(this.targetRoute)
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('Error while cancelling account creation flow', err)
     }
   }
 
