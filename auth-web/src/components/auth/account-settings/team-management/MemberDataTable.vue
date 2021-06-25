@@ -141,8 +141,8 @@
       <!-- Leave Account -->
       <v-btn
         icon
-        :aria-label="canDissolve() ? 'Dissolve Account' : 'Leave Account'"
-        :title="canDissolve() ? 'Dissolve Account' : 'Leave Account'"
+        :aria-label="'Leave Account'"
+        :title="'Leave Account'"
         v-show="canLeave(item)"
         :data-test="getIndexedTag('leave-team-button', item.index)"
         @click="confirmLeaveTeam(item)"
@@ -471,17 +471,6 @@ export default class MemberDataTable extends Vue {
     return items
   }
 
-  private canDissolve (): boolean {
-    if (
-      this.activeOrgMembers.length === 1 &&
-      this.businesses.length === 0 &&
-      !this.isAnonymousAccount()
-    ) {
-      return true
-    }
-    return false
-  }
-
   private isAnonymousAccount (): boolean {
     return (
       this.currentOrganization &&
@@ -511,16 +500,11 @@ export default class MemberDataTable extends Vue {
   private confirmLeaveTeam (member: Member) {
     if (
       member.membershipTypeCode === MembershipType.Admin &&
-      this.ownerCount() === 1 &&
-      !this.canDissolve()
+      this.ownerCount() === 1
     ) {
       this.$emit('single-owner-error')
     } else {
-      if (this.canDissolve()) {
-        this.$emit('confirm-dissolve-team')
-      } else {
-        this.$emit('confirm-leave-team')
-      }
+      this.$emit('confirm-leave-team')
     }
   }
 
