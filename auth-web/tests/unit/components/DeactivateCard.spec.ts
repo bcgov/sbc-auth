@@ -10,34 +10,20 @@ Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 
-const mockSession = {
-  'NRO_URL': 'Mock NRO URL',
-  'NAME_REQUEST_URL': 'Mock Name Request URL'
+function assertElements (wrapper: any) {
+  expect(wrapper.text()).toContain('i8n' + 'deactivateMemberRemovalTitle')
+  expect(wrapper.text()).toContain('i8n' + 'businessRemovalTitle')
+  expect(wrapper.text()).toContain('i8n' + 'deactivateMemberRemovalDesc')
+  expect(wrapper.text()).toContain('i8n' + 'businessRemovalDesc')
 }
 
-describe('SetupGovmAccountForm.vue', () => {
+describe('Deactivated card.vue', () => {
   let wrapper: any
-  let store: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
 
-  it('Truthy', () => {
+  it('Truthy and basic test', () => {
     wrapper = mount(DeactivateCard, {
-      store,
-      vuetify,
-      localVue,
-      router,
-      mocks: {
-        $t: (mock) => mock
-      }
-    })
-
-    expect(wrapper.isVueInstance()).toBeTruthy()
-  })
-
-  it('assert title', () => {
-    wrapper = mount(DeactivateCard, {
-      store,
       vuetify,
       localVue,
       router,
@@ -49,18 +35,44 @@ describe('SetupGovmAccountForm.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
     expect(wrapper.find("[data-test='title-deactivate']").text()).toBe('When this account is deactivated...')
   })
-  it('assert subtitle', () => {
-    const $t = (params: string) => 'team member message'
+
+  it('assert subtitle for a default org', () => {
+    const $t = (params: string) => { return 'i8n' + params }
 
     wrapper = mount(DeactivateCard, {
-      store,
       vuetify,
       localVue,
       router,
       mocks: { $t }
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
-    expect(wrapper.text()).toContain('team member message')
+    assertElements(wrapper)
+    expect(wrapper.text()).not.toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
+  })
+  it('assert subtitle for a premium org', async () => {
+    const $t = (params: string) => { return 'i8n' + params }
+
+    wrapper = mount(DeactivateCard, {
+      vuetify,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    await wrapper.setProps({ type: 'PREMIUM' })
+    assertElements(wrapper)
+    expect(wrapper.text()).toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
+  })
+  it('assert subtitle for a basic org', async () => {
+    const $t = (params: string) => { return 'i8n' + params }
+
+    wrapper = mount(DeactivateCard, {
+      vuetify,
+      localVue,
+      router,
+      mocks: { $t }
+    })
+    await wrapper.setProps({ type: 'BASIC' })
+    assertElements(wrapper)
+    expect(wrapper.text()).not.toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
   })
 })
