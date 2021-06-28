@@ -140,7 +140,7 @@ class Org:  # pylint: disable=too-many-public-methods
         org.commit()
 
         if is_bceid_status_handling_needed:
-            Org.send_staff_review_account_reminder(org.id, origin_url)
+            Org.send_staff_review_account_reminder(relationship_id=org.id, origin_url=origin_url)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
@@ -413,7 +413,7 @@ class Org:  # pylint: disable=too-many-public-methods
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
             if is_govm_account_creation:
                 # send mail after the org is committed to DB
-                Org.send_staff_review_account_reminder(self._model.id, origin_url)
+                Org.send_staff_review_account_reminder(relationship_id=self._model.id, origin_url=origin_url)
 
         Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         current_app.logger.debug('>update_org ')
@@ -815,14 +815,15 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def send_staff_review_account_reminder(org_id, origin_url, task_relationship_type=TaskRelationshipType.ORG.value,
+    def send_staff_review_account_reminder(relationship_id, origin_url,
+                                           task_relationship_type=TaskRelationshipType.ORG.value,
                                            **kwargs):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         # Get task id that is related with the task. Task Relationship Type can be ORG or PRODUCT.
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
-                                                      relationship_id=org_id)
+                                                      relationship_id=relationship_id)
         context_path = f'review-account/{task.id}'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
@@ -831,14 +832,13 @@ class Org:  # pylint: disable=too-many-public-methods
         last_name = user_from_context.last_name
 
         data = {
-            'accountId': task.id,
             'emailAddresses': recipient,
             'contextUrl': review_url,
             'userFirstName': first_name,
             'userLastName': last_name
         }
         try:
-            publish_to_mailer('staffReviewAccount', org_id=task.id, data=data)
+            publish_to_mailer('staffReviewAccount', data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
