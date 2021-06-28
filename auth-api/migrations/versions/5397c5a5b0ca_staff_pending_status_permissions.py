@@ -23,14 +23,10 @@ def upgrade():
                               column('membership_type_code', sa.String(length=15)),
                               column('org_status_code', sa.String(length=25)),
                               column('actions', sa.String(length=100)))
-    conn = op.get_bind()
-    res = conn.execute(
-        f"select max(id) from permissions;")
-    latest_id = res.fetchall()[0][0]
     op.bulk_insert(
         permissions_table,
         [
-            {'id': latest_id + 1, 'membership_type_code': 'ADMIN', 'org_status_code': 'PENDING_STAFF_REVIEW',
+            {'membership_type_code': 'ADMIN', 'org_status_code': 'PENDING_STAFF_REVIEW',
              'actions': 'view'}
         ]
     )
