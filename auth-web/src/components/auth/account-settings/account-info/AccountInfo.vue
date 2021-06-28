@@ -123,6 +123,18 @@
           <v-divider class="mt-3 mb-10"></v-divider>
           <div class="form__btns">
             <v-btn
+              text
+              color="primary"
+              class="deactivate-btn font-weight-bold"
+              @click="learnMoreDialog = true"
+              data-test="deactivate-btn"
+              to="/account-deactivate"
+              v-can:DEACTIVATE_ACCOUNT.hide
+            >
+              Deactivate Account
+            </v-btn>
+
+            <v-btn
               large
               class="save-btn"
               v-bind:class="{ disabled: btnLabel == 'Saved' }"
@@ -633,6 +645,9 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     width: 6rem;
   }
 }
+.form__btns>*:first-child {
+  margin-right: auto;
+}
 
 .account-nav-container {
   height: 100%;
@@ -705,5 +720,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 .btn-dialog {
   height: 2.75em;
   width: 6.25em;
+}
+.deactivate-btn  {
+  height: auto !important;
+  padding: 0.2rem 0.2rem !important;
+  font-size: 1rem !important;
+  text-decoration: underline;
 }
 </style>

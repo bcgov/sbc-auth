@@ -11,10 +11,10 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-          <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
-            <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
-            <span>Back to Staff Dashboard</span>
-          </router-link>
+            <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
+              <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
+              <span>Back to Staff Dashboard</span>
+            </router-link>
         </div>
       </nav>
       <div class="view-header flex-column">

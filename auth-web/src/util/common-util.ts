@@ -95,6 +95,10 @@ export default class CommonUtils {
   static formatDatePickerDate (date?: Date) {
     return moment(date || new Date()).format('YYYY-MM-DD')
   }
+  // Formatting date in the desired format for vue date pickers
+  static formatCurrentDate () {
+    return moment(new Date()).format('MM/DD/YYYY')
+  }
 
   static fileDownload (data: any, fileName: string, fileType: string = 'text/plain') {
     const blob = new Blob([data], { type: fileType })
@@ -154,7 +158,8 @@ export default class CommonUtils {
       Permission.VIEW_ACTIVITYLOG,
       Permission.VIEW_ADDRESS,
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
-      Permission.EDIT_REQUEST_PRODUCT_PACKAGE
+      Permission.EDIT_REQUEST_PRODUCT_PACKAGE,
+      Permission.DEACTIVATE_ACCOUNT
     ]
   }
   static getViewOnlyPermissions (): string[] {
