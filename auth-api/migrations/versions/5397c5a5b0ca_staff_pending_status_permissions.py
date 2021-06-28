@@ -31,7 +31,7 @@ def upgrade():
         permissions_table,
         [
             {'id': latest_id + 1, 'membership_type_code': 'ADMIN', 'org_status_code': 'PENDING_STAFF_REVIEW',
-             'actions': 'view_account'}
+             'actions': 'view'}
         ]
     )
 
@@ -39,4 +39,4 @@ def upgrade():
 def downgrade():
     op.execute(
         "delete from permissions where membership_type_code='ADMIN' and org_status_code='PENDING_STAFF_REVIEW' "
-        "and actions='view_account'")
+        "and actions='view'")
