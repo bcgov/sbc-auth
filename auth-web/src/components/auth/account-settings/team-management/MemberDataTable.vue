@@ -141,8 +141,8 @@
       <!-- Leave Account -->
       <v-btn
         icon
-        :aria-label="'Leave Account'"
-        :title="'Leave Account'"
+        aria-label="Leave Account"
+        title="Leave Account"
         v-show="canLeave(item)"
         :data-test="getIndexedTag('leave-team-button', item.index)"
         @click="confirmLeaveTeam(item)"

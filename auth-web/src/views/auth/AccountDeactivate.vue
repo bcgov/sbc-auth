@@ -175,7 +175,6 @@ export default class AccountDeactivate extends Vue {
   ]
 
   private async confirm () {
-    // eslint-disable-next-line no-console
     this.$refs.confirmModal.open()
   }
 
