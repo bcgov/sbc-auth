@@ -638,8 +638,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async dissolveTeam () {
-    // Send request to remove member on server and get result
+  public async deactivateOrg () {
     const response = await OrgService.deactivateOrg(this.context.state['currentOrganization'].id)
 
     // If no response, or error code, throw exception to be caught
