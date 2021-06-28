@@ -97,7 +97,7 @@ export default class CommonUtils {
   }
   // Formatting date in the desired format for vue date pickers
   static formatCurrentDate () {
-    return moment(new Date()).format('MM/DD/YYYYs')
+    return moment(new Date()).format('MM/DD/YYYY')
   }
 
   static fileDownload (data: any, fileName: string, fileType: string = 'text/plain') {
