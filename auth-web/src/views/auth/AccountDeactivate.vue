@@ -4,7 +4,7 @@
       class="crumbs py-6"
       aria-label="breadcrumb">
       <div>
-        <router-link :to=accountInfoUrl>
+        <router-link :to="accountInfoUrl">
           <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
           <span>Back to Account</span>
         </router-link>
@@ -117,7 +117,7 @@
         <v-icon large color="error">mdi-information-outline</v-icon>
       </template>
       <template v-slot:actions>
-        <v-btn large color="primary" data-test="deactivate-btn" class="mr-5" :to=accountInfoUrl>
+        <v-btn large color="primary" data-test="deactivate-btn" class="mr-5" :to="accountInfoUrl">
           Back to Account Information
         </v-btn>
       </template>
