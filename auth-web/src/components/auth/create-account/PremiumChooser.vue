@@ -50,13 +50,12 @@
           </v-btn>
           <v-spacer></v-spacer>
           <v-btn class="mr-3" large depressed color="primary" :loading="saving" :disabled="saving || !isBcolSelected" data-test="btn-next">
-            <span v-if="!isAccountChange">Next
+            <span >Next
               <v-icon right class="ml-1">mdi-arrow-right</v-icon>
             </span>
-            <span v-if="isAccountChange">Change Account</span>
+
           </v-btn>
           <ConfirmCancelButton
-            :clear-current-org="!isAccountChange"
             :target-route="cancelUrl"
           />
         </v-col>
@@ -157,15 +156,13 @@ import Vue from 'vue'
     ...mapActions('org', [
       'syncMembership',
       'syncOrganization',
-      'changeOrgType',
       'resetAccountWhileSwitchingPremium'
     ])
   }
 })
 export default class PremiumChooser extends Mixins(Steppable) {
-  @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
-   @Prop({ default: false }) readOnly: string
+  @Prop({ default: false }) readOnly: string
   private readonly currentOrganizationType!: string
   private readonly currentOrganization!: Organization
   private isBcolSelected = null
@@ -173,7 +170,6 @@ export default class PremiumChooser extends Mixins(Steppable) {
   private saving = false
   private errorMessage: string = ''
   private readonly setCurrentOrganizationType!: (orgType: string) => void
-  private readonly changeOrgType!: (action: Actions) => Promise<Organization>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly resetAccountWhileSwitchingPremium!: () => void
   private learnMoreDialog: boolean = false
@@ -184,11 +180,10 @@ export default class PremiumChooser extends Mixins(Steppable) {
 
   private mounted () {
     this.isBcolSelected = this.readOnly ? 'no' : null
-    if (!this.isAccountChange) {
-      this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) && this.currentOrganization?.bcolAccountDetails) ? 'yes' : this.isBcolSelected
-      this.isBcolSelected = ((this.currentOrganizationType === Account.UNLINKED_PREMIUM) && this.currentOrganization?.name) ? 'no' : this.isBcolSelected
-      this.loadComponent(false)
-    }
+
+    this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) && this.currentOrganization?.bcolAccountDetails) ? 'yes' : this.isBcolSelected
+    this.isBcolSelected = ((this.currentOrganizationType === Account.UNLINKED_PREMIUM) && this.currentOrganization?.name) ? 'no' : this.isBcolSelected
+    this.loadComponent(false)
   }
 
   private loadComponent (isReset?) {

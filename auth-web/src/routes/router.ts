@@ -3,7 +3,6 @@ import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
 import AcceptInviteView from '@/views/auth/AcceptInviteView.vue'
 import AccountChangeSuccessView from '@/views/auth/create-account/AccountChangeSuccessView.vue'
-import AccountChangeView from '@/views/auth/create-account/AccountChangeView.vue'
 import AccountCreationSuccessView from '@/views/auth/create-account/AccountCreationSuccessView.vue'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import AccountFreezeUnlockView from '@/views/auth/account-freeze/AccountFreezeUnlockView.vue'
@@ -234,13 +233,6 @@ export function getRoutes (): RouteConfig[] {
           component: activityLog
         }
       ]
-    },
-    {
-      path: '/change-account',
-      name: 'changeaccount',
-      component: AccountChangeView,
-      props: true,
-      meta: { requiresAuth: true, requiresProfile: true }
     },
     {
       path: '/price-list',
