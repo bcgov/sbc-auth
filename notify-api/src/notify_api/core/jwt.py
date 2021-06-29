@@ -120,7 +120,7 @@ class JWTAuthenticationBackend(AuthenticationBackend):  # pylint: disable=too-ma
             raise AuthenticationError(f'Authorization scheme {scheme} is not supported')
         return token
 
-    async def authenticate(self, request):  # pylint: disable=arguments-differ
+    async def authenticate(self, request):  # pylint: disable=arguments-renamed
         """Authenticate the token."""
         if 'Authorization' not in request.headers:
             return None
