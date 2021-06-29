@@ -1,5 +1,6 @@
 // Vuetify Overrides
 @import 'theme.scss';
+@import '~vuetify/src/styles/settings/_variables';
 
 // Buttons
 .v-btn {
@@ -122,3 +123,18 @@ input:-webkit-autofill:active {
 .auto-complete-relative {
   position: relative;
 }
+
+
+
+
+.center-container {
+  @media #{map-get($display-breakpoints, 'md-and-up')} {
+    width: 70%;
+  }
+  @media #{map-get($display-breakpoints, 'lg-and-up')} {
+    width: 60%;
+  }
+
+}
+
+
