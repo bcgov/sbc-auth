@@ -22,19 +22,21 @@
           <div class="nv-list-item mb-10">
             <div class="name" id="accountNumber">Account Number</div>
             <div class="value" aria-labelledby="accountNumber">
-              <div class="value__title" data-test="div-account-number">{{ currentOrganization.id }}</div>
+              <div class="value__title" data-test="div-account-number">
+                {{ currentOrganization.id }}
+              </div>
             </div>
           </div>
           <div v-if="isStaff" class="nv-list-item mb-10">
             <div class="name" id="accountStatusStaff">Account Status</div>
             <div class="value-column">
-               <div class="value" aria-labelledby="accountStatusStaff">
+              <div class="value" aria-labelledby="accountStatusStaff">
                 <v-chip
                   small
                   label
                   class="font-weight-bold white--text"
                   :color="getStatusColor(currentOrganization.orgStatus)"
-                  data-test='chip-account-status'
+                  data-test="chip-account-status"
                 >
                   {{ getStatusText(currentOrganization.orgStatus) }}
                 </v-chip>
@@ -45,24 +47,37 @@
                 title="Suspend Account"
                 class="suspend-account-btn mx-1 mb-3"
                 @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
-                data-test='btn-suspend-account'
+                data-test="btn-suspend-account"
                 v-if="isSuspendButtonVisible"
               >
-                {{ isAccountStatusActive ? 'Suspend Account' : 'Unsuspend Account' }}
+                {{
+                  isAccountStatusActive
+                    ? 'Suspend Account'
+                    : 'Unsuspend Account'
+                }}
               </v-btn>
             </div>
           </div>
           <div class="nv-list-item mb-10">
             <div class="name" id="accountType">Account Type</div>
             <div class="value" aria-labelledby="accountType">
-              <div class="value__title">{{ isPremiumAccount ? 'Premium' : 'Basic' }}</div>
+              <div class="value__title">
+                {{ isPremiumAccount ? 'Premium' : 'Basic' }}
+              </div>
               <div v-can:CHANGE_ACCOUNT_TYPE.hide v-if="enableUpgradeDowngrade">
-                <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide >Change account type</router-link>
+                <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide
+                  >Change account type</router-link
+                >
               </div>
             </div>
           </div>
-          <div class="nv-list-item mb-10" v-if="currentOrganization.bcolAccountDetails">
-            <div class="name mt-3" id="accountName">Linked BC Online Account Details</div>
+          <div
+            class="nv-list-item mb-10"
+            v-if="currentOrganization.bcolAccountDetails"
+          >
+            <div class="name mt-3" id="accountName">
+              Linked BC Online Account Details
+            </div>
             <div class="value">
               <LinkedBCOLBanner
                 :bcolAccountName="currentOrganization.bcolAccountName"
@@ -80,31 +95,27 @@
         </div>
 
         <div class="nv-list-item" v-can:CHANGE_ORG_NAME.disable>
-          <div class="name">
-            Account Details
-          </div>
+          <div class="name">Account Details</div>
           <div class="value">
             <v-text-field
-            filled
-            clearable
-            required
-            label="Account Name"
-            :rules="accountNameRules"
-            v-can:CHANGE_ORG_NAME.disable
-            :disabled="!canChangeAccountName()"
-            v-model="orgName"
-            v-on:keydown="enableBtn()"
+              filled
+              clearable
+              required
+              label="Account Name"
+              :rules="accountNameRules"
+              v-can:CHANGE_ORG_NAME.disable
+              :disabled="!canChangeAccountName()"
+              v-model="orgName"
+              v-on:keydown="enableBtn()"
             >
             </v-text-field>
           </div>
         </div>
 
-        <div class="nv-list-item" v-if="(isAddressEditable || isAddressViewable)">
+        <div class="nv-list-item" v-if="isAddressEditable || isAddressViewable">
           <!-- template warpper is required here inorder to keep the placement of divs correctly(to resolve flickering issue when updating the address) -->
           <template v-if="baseAddress">
-            <div class="name">
-              Mailing Address
-            </div>
+            <div class="name">Mailing Address</div>
             <div class="value">
               <base-address-form
                 ref="mailingAddress"
@@ -157,26 +168,27 @@
               aria-label="Reset Account Information"
               @click="resetForm"
               data-test="reset-button"
-            >Reset</v-btn>
+              >Reset</v-btn
+            >
           </div>
         </div>
       </v-form>
     </div>
     <!-- Suspend Account Dialog -->
     <ModalDialog
-    ref="suspendAccountDialog"
-    icon="mdi-check"
-    :title="dialogTitle"
-    dialog-class="notify-dialog"
-    max-width="680"
-    :isPersistent="true"
-    data-test='modal-suspend-account'
+      ref="suspendAccountDialog"
+      icon="mdi-check"
+      :title="dialogTitle"
+      dialog-class="notify-dialog"
+      max-width="680"
+      :isPersistent="true"
+      data-test="modal-suspend-account"
     >
       <template v-slot:icon>
         <v-icon large color="error">mdi-alert-circle-outline</v-icon>
       </template>
       <template v-slot:text>
-        <p class="px-10">{{ dialogText }}<br/></p>
+        <p class="px-10">{{ dialogText }}<br /></p>
         <v-form ref="suspensionReasonForm" id="suspensionReasonForm">
           <v-select
             class="px-10"
@@ -189,7 +201,7 @@
             item-value="code"
             v-model="selectedSuspensionReasonCode"
             v-if="isAccountStatusActive"
-            data-test='select-suspend-account-reason'
+            data-test="select-suspend-account-reason"
           />
         </v-form>
       </template>
@@ -198,7 +210,7 @@
           large
           class="font-weight-bold white--text btn-dialog"
           :color="getDialogStatusButtonColor(currentOrganization.orgStatus)"
-          data-test='btn-suspend-dialog'
+          data-test="btn-suspend-dialog"
           @click="confirmSuspendAccount()"
         >
           {{ isAccountStatusActive ? 'Suspend' : 'Unsuspend' }}
@@ -208,7 +220,7 @@
           depressed
           class="btn-dialog"
           @click="closeSuspendAccountDialog()"
-          data-test='btn-cancel-suspend-dialog'
+          data-test="btn-cancel-suspend-dialog"
         >
           Cancel
         </v-btn>
@@ -216,13 +228,13 @@
     </ModalDialog>
     <!-- Suspend Confirmation Dialog -->
     <ModalDialog
-    ref="suspensionCompleteDialog"
-    title="Account has been suspended"
-    :text="suspensionCompleteDialogText"
-    dialog-class="notify-dialog"
-    max-width="680"
-    :isPersistent="true"
-    data-test='modal-suspension-complete'
+      ref="suspensionCompleteDialog"
+      title="Account has been suspended"
+      :text="suspensionCompleteDialogText"
+      dialog-class="notify-dialog"
+      max-width="680"
+      :isPersistent="true"
+      data-test="modal-suspension-complete"
     >
       <template v-slot:icon>
         <v-icon large color="primary">mdi-check</v-icon>
@@ -233,7 +245,7 @@
           depressed
           class="font-weight-bold white--text btn-dialog"
           @click="closeSuspensionCompleteDialog()"
-          data-test='btn-suspend-confirm-dialog'
+          data-test="btn-suspend-confirm-dialog"
           color="primary"
         >
           OK
@@ -321,9 +333,9 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   $refs: {
     editAccountForm: HTMLFormElement,
-    mailingAddress:HTMLFormElement,
-    suspendAccountDialog:ModalDialog,
-    suspensionCompleteDialog:ModalDialog,
+    mailingAddress: HTMLFormElement,
+    suspendAccountDialog: ModalDialog,
+    suspensionCompleteDialog: ModalDialog,
     suspensionReasonForm: HTMLFormElement
   }
 
@@ -531,23 +543,23 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.isBaseAddressValid = !!isValid
   }
 
-  get editEnabled () : boolean {
+  get editEnabled (): boolean {
     return [Permission.CHANGE_ADDRESS, Permission.CHANGE_ORG_NAME].some(per => this.permissions.includes(per))
   }
 
-  get isAddressEditable () : boolean {
+  get isAddressEditable (): boolean {
     return [Permission.CHANGE_ADDRESS].some(per => this.permissions.includes(per))
   }
 
-  get isAddressViewable () : boolean {
+  get isAddressViewable (): boolean {
     return [Permission.VIEW_ADDRESS].some(per => this.permissions.includes(per))
   }
 
-  get isAdminContactViewable () : boolean {
+  get isAdminContactViewable (): boolean {
     return [Permission.VIEW_ADMIN_CONTACT].some(per => this.permissions.includes(per))
   }
 
-  get isBaseAddressEditMode () : boolean {
+  get isBaseAddressEditMode (): boolean {
     if (this.isAddressEditable) {
       return true
     } else if (this.isAddressViewable) {
@@ -556,7 +568,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     return false
   }
 
-  get isAccountStatusActive () : boolean {
+  get isAccountStatusActive (): boolean {
     return this.currentOrganization.statusCode === AccountStatus.ACTIVE
   }
 
@@ -615,7 +627,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   display: flex;
   vertical-align: top;
 
-  .name, .value {
+  .name,
+  .value {
     display: inline-block;
     vertical-align: top;
   }
@@ -645,9 +658,9 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     width: 6rem;
   }
 }
-.form__btns>*:first-child {
-  margin-right: auto;
-}
+// .form__btns > *:first-child {
+//   margin-right: auto;
+// }
 
 .account-nav-container {
   height: 100%;
@@ -672,7 +685,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   li {
     position: relative;
-    display: inline-block
+    display: inline-block;
   }
 
   li + li {
@@ -721,10 +734,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   height: 2.75em;
   width: 6.25em;
 }
-.deactivate-btn  {
+.deactivate-btn {
   height: auto !important;
   padding: 0.2rem 0.2rem !important;
   font-size: 1rem !important;
   text-decoration: underline;
+  margin-right: auto;
 }
 </style>
