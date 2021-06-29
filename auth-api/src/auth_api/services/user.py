@@ -134,6 +134,8 @@ class User:  # pylint: disable=too-many-instance-attributes
             try:
                 if re_enable_user:
                     user_model.status = Status.ACTIVE.value
+                    user_model.type = Role.ANONYMOUS_USER.name
+                    user_model.login_source = LoginSource.BCROS.value
                     user_model.flush()
                     membership_model.status = Status.ACTIVE.value
                     membership_model.membership_type_code = membership['membershipType']
@@ -182,7 +184,8 @@ class User:  # pylint: disable=too-many-instance-attributes
                                           is_terms_of_use_accepted=False, status=Status.ACTIVE.value,
                                           type=Role.ANONYMOUS_USER.name,
                                           email=membership.get('email', None),
-                                          firstname=kc_user.first_name, lastname=kc_user.last_name)
+                                          firstname=kc_user.first_name, lastname=kc_user.last_name,
+                                          login_source=LoginSource.BCROS.value)
         user_model.flush()
         membership_model = MembershipModel(org_id=org_id, user_id=user_model.id,
                                            membership_type_code=membership['membershipType'],
