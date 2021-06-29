@@ -38,7 +38,7 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, ChangeType, LoginSource, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod,
+    AccessType, AffidavitStatus, LoginSource, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod,
     Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role
 from auth_api.utils.util import camelback2snake
@@ -264,60 +264,6 @@ class Org:  # pylint: disable=too-many-public-methods
         if not validator_obj.is_valid:
             raise BusinessException(validator_obj.error[0], None)
         return validator_obj.info.get('bcol_response', None)
-
-    def change_org_ype(self, org_info, action=None):
-        """Update the passed organization with the new info.
-
-        if Upgrade:
-            //TODO .Missing RULES
-            1.do bcol verification
-            2.attach mailing
-            3.change the org with bcol org name
-        If downgrade:
-            //TODO .Missing RULES
-            1.remove contact
-            2.deactivate payment settings
-            3.add new payment settings for cc
-            4.change the org with user passed org name
-
-        """
-        if self._model.access_type == AccessType.ANONYMOUS.value:
-            raise BusinessException(Error.INVALID_INPUT, None)
-        bcol_credential = org_info.pop('bcOnlineCredential', None)
-        mailing_address = org_info.pop('mailingAddress', None)
-        current_app.logger.debug('<update_org ', action)
-        if action == ChangeType.DOWNGRADE.value:
-            if org_info.get('typeCode') != OrgType.BASIC.value:
-                raise BusinessException(Error.INVALID_INPUT, None)
-            # if they have not changed the name , they can claim the name. Dont check duplicate..or else check duplicate
-            # TODO fix this
-            # if org_info.get('name') != self._model.name:
-            # Org.raise_error_if_duplicate_name(org_info['name'])
-
-            # remove the bcol payment details from payment table
-            org_info['bcol_account_id'] = ''
-            org_info['bcol_user_id'] = ''
-            org_info['bcol_account_name'] = ''
-            payment_type = Org._get_default_payment_method_for_creditcard()
-            # TODO Add the pay-api call here
-            Org.__delete_contact(self._model)
-
-        if action == ChangeType.UPGRADE.value:
-            if org_info.get('typeCode') != OrgType.PREMIUM.value or bcol_credential is None:
-                raise BusinessException(Error.INVALID_INPUT, None)
-            bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
-            Org._map_response_to_org(bcol_response, org_info)
-            ProductService.create_subscription_from_bcol_profile(self._model.id, bcol_response.get('profileFlags'))
-            payment_type = PaymentMethod.BCOL.value
-
-            # If mailing address is provided, save it
-            if mailing_address:
-                self.add_contact_to_org(mailing_address, self._model)
-
-        self._model.update_org_from_dict(camelback2snake(org_info), exclude=('status_code'))
-        # TODO pass username instead of blanks
-        Org._create_payment_settings(self._model, {}, payment_type, mailing_address, False)
-        return self
 
     @staticmethod
     def _map_response_to_org(bcol_response, org_info):
