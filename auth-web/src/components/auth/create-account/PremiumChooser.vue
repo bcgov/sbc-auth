@@ -127,9 +127,9 @@
 
 <script lang="ts">
 
-import { Account, Actions } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import { Account } from '@/util/constants'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
