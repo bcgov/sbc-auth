@@ -23,7 +23,7 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, a
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.enums import AccessType, Status, UserStatus
+from auth_api.utils.enums import AccessType, LoginSource, Status, UserStatus
 from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -214,11 +214,13 @@ class User(BaseModel):
         """Return type of the user from the token info."""
         user_type: str = None
         if user_from_context.roles:
-            if Role.ANONYMOUS_USER.value in user_from_context.roles:
+            if Role.ANONYMOUS_USER.value in user_from_context.roles \
+                    or user_from_context.login_source == LoginSource.BCROS.value:
                 user_type = Role.ANONYMOUS_USER.name
             elif Role.GOV_ACCOUNT_USER.value in user_from_context.roles:
                 user_type = Role.GOV_ACCOUNT_USER.name
-            elif Role.PUBLIC_USER.value in user_from_context.roles:
+            elif Role.PUBLIC_USER.value in user_from_context.roles \
+                    or user_from_context.login_source in [LoginSource.BCEID.value, LoginSource.BCSC.value]:
                 user_type = Role.PUBLIC_USER.name
             elif user_from_context.is_staff():
                 user_type = Role.STAFF.name
