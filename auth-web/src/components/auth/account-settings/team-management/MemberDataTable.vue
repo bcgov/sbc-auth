@@ -31,6 +31,17 @@
       </div>
     </template>
 
+    <!-- Authentication Column Template .Show it only for BCSC/BCEID -->
+    <template
+      v-slot:[`item.authentication`]="{ item }"
+      :data-test="getIndexedTag('last-active', item.index)"
+      v-if="isBceidOrBcscAccount()"
+    >
+      <div v-if="item.user.loginSource ===loginSourceEnum.BCEID "> {{item.user.username}} </div>
+      <div v-if="item.user.loginSource ===loginSourceEnum.BCSC "> BCServicesCard </div>
+      <div v-else></div>
+    </template>
+
     <!-- Role Column Template -->
     <template v-slot:[`item.role`]="{ item }">
       <v-menu
@@ -206,15 +217,9 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LoginSource } from '@/util/constants'
+import { AccessType, LoginSource, Permission } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import {
-  Member,
-  MembershipStatus,
-  MembershipType,
-  Organization,
-  RoleInfo
-} from '@/models/Organization'
+import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -234,7 +239,8 @@ export interface ChangeRolePayload {
     ...mapState('org', [
       'activeOrgMembers',
       'currentMembership',
-      'currentOrganization'
+      'currentOrganization',
+      'permissions'
     ]),
     ...mapState('user', [
       'roleInfos'
@@ -260,6 +266,8 @@ export default class MemberDataTable extends Vue {
   private confirmResetAuthDialog = false
   private showResetSnackBar = false
   private selectedUserForReset = undefined
+  private readonly loginSource:LoginSource
+  private readonly permissions!: string[]
 
   private formatDate = CommonUtils.formatDisplayDate
 
@@ -267,7 +275,11 @@ export default class MemberDataTable extends Vue {
     resetAuthenticatorDialog: ModalDialog
   }
 
-  private readonly headerMembers = [
+  private get loginSourceEnum ():LoginSource {
+    return LoginSource
+  }
+
+  private headerMembers = [
     {
       text: 'Team Member',
       align: 'left',
@@ -295,10 +307,20 @@ export default class MemberDataTable extends Vue {
     }
   ]
 
+  private readonly authHeaderMember = {
+    text: 'Authentication',
+    align: 'left',
+    sortable: false,
+    value: 'authentication'
+  }
+
   private async mounted () {
     // need not to reload everytime .roles seldom changes
     if (!this.roleInfos) {
       await this.getRoleInfo()
+    }
+    if (this.isBceidOrBcscAccount() && this.canViewLoginSource()) {
+      this.headerMembers.splice(1, 0, this.authHeaderMember)
     }
   }
 
@@ -476,6 +498,17 @@ export default class MemberDataTable extends Vue {
       this.currentOrganization &&
       this.currentOrganization.accessType === AccessType.ANONYMOUS
     )
+  }
+
+  private isBceidOrBcscAccount (): boolean {
+    return (
+      this.currentOrganization &&
+      [AccessType.ANONYMOUS.valueOf(), AccessType.GOVM.valueOf()].indexOf(this.currentOrganization.accessType) < 0
+    )
+  }
+
+  private canViewLoginSource () :boolean {
+    return [Permission.VIEW_USER_LOGINSOURCE].some(per => this.permissions.includes(per))
   }
 
   @Emit()
