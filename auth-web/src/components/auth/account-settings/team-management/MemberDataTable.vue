@@ -275,7 +275,7 @@ export default class MemberDataTable extends Vue {
     resetAuthenticatorDialog: ModalDialog
   }
 
-  private get loginSourceEnum ():LoginSource {
+  private get loginSourceEnum ():typeof LoginSource {
     return LoginSource
   }
 
