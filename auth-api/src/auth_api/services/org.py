@@ -838,7 +838,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'userLastName': last_name
         }
         try:
-            publish_to_mailer('staffReviewAccount', data=data)
+            publish_to_mailer('staffReviewAccount', org_id=relationship_id, data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')
