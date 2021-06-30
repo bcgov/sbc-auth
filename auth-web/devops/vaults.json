@@ -42,7 +42,8 @@
             "director-search",
             "name-request",
             "nro",
-            "entity-selector"
+            "entity-selector",
+            "bceid"
         ]
     },
     {
