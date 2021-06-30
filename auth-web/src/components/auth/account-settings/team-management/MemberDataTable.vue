@@ -35,7 +35,7 @@
     <template
       v-slot:[`item.authentication`]="{ item }"
       :data-test="getIndexedTag('last-active', item.index)"
-      v-if="isBceidOrBcscAccount()"
+      v-if="isRegularAccount()"
     >
       <div v-if="item.user.loginSource ===loginSourceEnum.BCEID "> {{item.user.username}} </div>
       <div v-if="item.user.loginSource ===loginSourceEnum.BCSC "> BCServicesCard </div>
@@ -319,7 +319,7 @@ export default class MemberDataTable extends Vue {
     if (!this.roleInfos) {
       await this.getRoleInfo()
     }
-    if (this.isBceidOrBcscAccount() && this.canViewLoginSource()) {
+    if (this.isRegularAccount() && this.canViewLoginSource()) {
       this.headerMembers.splice(1, 0, this.authHeaderMember)
     }
   }
@@ -500,7 +500,7 @@ export default class MemberDataTable extends Vue {
     )
   }
 
-  private isBceidOrBcscAccount (): boolean {
+  private isRegularAccount (): boolean {
     return (
       this.currentOrganization &&
       [AccessType.ANONYMOUS.valueOf(), AccessType.GOVM.valueOf()].indexOf(this.currentOrganization.accessType) < 0
