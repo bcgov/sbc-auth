@@ -133,8 +133,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # Send an email to staff to remind review the pending account
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
-                                                          AccessType.REGULAR_BCEID.value) \
-                                          and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
+                                                          AccessType.REGULAR_BCEID.value) and not \
+            AffidavitModel.find_approved_by_user_id(user_id=user_id)
         if is_bceid_status_handling_needed:
             Org._handle_bceid_status_and_notification(org)
 
