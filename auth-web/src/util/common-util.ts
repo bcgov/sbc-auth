@@ -159,7 +159,8 @@ export default class CommonUtils {
       Permission.VIEW_ADDRESS,
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE,
       Permission.EDIT_REQUEST_PRODUCT_PACKAGE,
-      Permission.DEACTIVATE_ACCOUNT
+      Permission.DEACTIVATE_ACCOUNT,
+      Permission.VIEW_USER_LOGINSOURCE
     ]
   }
   static getViewOnlyPermissions (): string[] {
