@@ -145,3 +145,22 @@ def test_fetch_pending_tasks_descending(session):  # pylint:disable=unused-argum
     assert found_tasks[0].name == 'TEST 2'
     assert found_tasks[1].name == 'TEST 1'
     assert count == 2
+
+
+def test_finding_task_by_relationship_id(session):  # pylint:disable=unused-argument
+    """Assert that we can fetch all tasks."""
+    user = factory_user_model()
+    task = TaskModel(name='TEST 1', date_submitted=datetime.now(),
+                     relationship_type=TaskRelationshipType.ORG.value,
+                     relationship_id=10, type=TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value,
+                     status=TaskStatus.OPEN.value,
+                     related_to=user.id,
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task.save()
+
+    found_task = TaskModel.find_by_task_relationship_id(
+        task_relationship_type=TaskRelationshipType.ORG.value, relationship_id=10)
+    assert found_task
+    assert found_task.name == 'TEST 1'
+    assert found_task.relationship_id == 10
+    assert found_task.status == TaskStatus.OPEN.value
