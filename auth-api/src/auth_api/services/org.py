@@ -30,6 +30,7 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
+from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.validators.access_type import validate as access_type_validate
@@ -132,15 +133,15 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # Send an email to staff to remind review the pending account
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
-                                                          AccessType.REGULAR_BCEID.value) \
-            and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
+                                                          AccessType.REGULAR_BCEID.value) and not \
+            AffidavitModel.find_approved_by_user_id(user_id=user_id)
         if is_bceid_status_handling_needed:
             Org._handle_bceid_status_and_notification(org)
 
         org.commit()
 
         if is_bceid_status_handling_needed:
-            Org.send_staff_review_account_reminder(org.id, origin_url)
+            Org.send_staff_review_account_reminder(relationship_id=org.id, origin_url=origin_url)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
@@ -413,7 +414,7 @@ class Org:  # pylint: disable=too-many-public-methods
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
             if is_govm_account_creation:
                 # send mail after the org is committed to DB
-                Org.send_staff_review_account_reminder(self._model.id, origin_url)
+                Org.send_staff_review_account_reminder(relationship_id=self._model.id, origin_url=origin_url)
 
         Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         current_app.logger.debug('>update_org ')
@@ -858,11 +859,16 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def send_staff_review_account_reminder(org_id, origin_url, **kwargs):
+    def send_staff_review_account_reminder(relationship_id, origin_url,
+                                           task_relationship_type=TaskRelationshipType.ORG.value,
+                                           **kwargs):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
-        context_path = f'review-account/{org_id}'
+        # Get task id that is related with the task. Task Relationship Type can be ORG or PRODUCT.
+        task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
+                                                      relationship_id=relationship_id)
+        context_path = f'review-account/{task.id}'
         app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
         user_from_context: UserContext = kwargs['user_context']
@@ -870,14 +876,13 @@ class Org:  # pylint: disable=too-many-public-methods
         last_name = user_from_context.last_name
 
         data = {
-            'accountId': org_id,
             'emailAddresses': recipient,
             'contextUrl': review_url,
             'userFirstName': first_name,
             'userLastName': last_name
         }
         try:
-            publish_to_mailer('staffReviewAccount', org_id=org_id, data=data)
+            publish_to_mailer('staffReviewAccount', org_id=relationship_id, data=data)
             current_app.logger.debug('<send_staff_review_account_reminder')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_staff_review_account_reminder failed')

@@ -1,18 +1,20 @@
 <template>
-  <v-card>
-    <v-card-title data-test="title-deactivate" class="font-weight-bold mb-5" >
+  <v-card class="py-4 px-4">
+    <v-card-title data-test="title-deactivate" class="font-weight-bold mb-4">
       When this account is deactivated...
     </v-card-title>
 
     <v-card-text>
-      <div v-for="item in info" :key="item.title" class="d-flex align-center">
+      <div v-for="item in info" :key="item.title" class="d-flex ml-3 mt-1">
         <div>
-          <v-icon color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
+          <v-icon size="30" color="error" class="mt-1 mr-4"
+            >mdi-alert-circle-outline</v-icon
+          >
         </div>
-        <div><h4 class="font-weight-bold">  {{ $t(item.title) }}</h4>
+        <div class="ml-3 mt-1">
+          <h4 class="font-weight-bold">{{ $t(item.title) }}</h4>
           <p>{{ $t(item.description) }}</p>
         </div>
-
       </div>
     </v-card-text>
   </v-card>
@@ -51,6 +53,5 @@ export default class DeactivateCard extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
-
+@import '$assets/scss/theme.scss';
 </style>
