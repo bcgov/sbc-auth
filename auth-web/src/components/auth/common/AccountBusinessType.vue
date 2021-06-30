@@ -75,7 +75,6 @@
                 :readonly="govmAccount"
                 v-on:keyup="onOrgBusinessTypeChange()"
                 v-show="govmAccount || isBusinessAccount"
-                hide-details
                 />
               </v-expand-transition>
             <template >
