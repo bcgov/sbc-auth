@@ -66,7 +66,7 @@ def test_fetch_tasks(session):  # pylint:disable=unused-argument
     found_tasks, count = TaskModel.fetch_tasks(
         task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
         task_type=task_type,
-        task_status=TaskStatus.OPEN.value,
+        task_status=[TaskStatus.OPEN.value],
         page=1, limit=10)
     assert found_tasks
     assert count == 1
@@ -98,7 +98,7 @@ def test_fetch_tasks_pagination(session):  # pylint:disable=unused-argument
     found_tasks, count = TaskModel.fetch_tasks(
         task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
         task_type=task_type,
-        task_status=TaskStatus.OPEN.value, page=3, limit=2)
+        task_status=[TaskStatus.OPEN.value], page=3, limit=2)
     assert found_tasks
     assert count == 6
 
@@ -140,7 +140,7 @@ def test_fetch_pending_tasks_descending(session):  # pylint:disable=unused-argum
     found_tasks, count = TaskModel.fetch_tasks(
         task_relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
         task_type=task_type,
-        task_status=TaskStatus.OPEN.value, page=1, limit=2)
+        task_status=[TaskStatus.OPEN.value], page=1, limit=2)
     assert found_tasks
     assert found_tasks[0].name == 'TEST 2'
     assert found_tasks[1].name == 'TEST 1'

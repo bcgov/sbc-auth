@@ -12,10 +12,8 @@ Vue.use(VueRouter)
 describe('Signin.vue', () => {
   let wrapper: Wrapper<Signin>
   const keyCloakConfig = {
-    'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
-    'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_AUTH_ROOT_API': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+    'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
+    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 

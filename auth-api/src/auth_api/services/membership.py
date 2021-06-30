@@ -86,7 +86,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     @staticmethod
     @user_context
-    def get_members_for_org(org_id, status=Status.ACTIVE,  # pylint:disable=too-many-return-statements
+    def get_members_for_org(org_id, status=Status.ACTIVE.name,  # pylint:disable=too-many-return-statements
                             membership_roles=ALL_ALLOWED_ROLES, **kwargs):
         """Get members of org.Fetches using status and roles."""
         org_model = OrgModel.find_by_org_id(org_id)
@@ -96,7 +96,6 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         user_from_context: UserContext = kwargs['user_context']
         status = Status.ACTIVE.value if status is None else Status[status].value
         membership_roles = ALL_ALLOWED_ROLES if membership_roles is None else membership_roles
-
         # If staff return full list
         if user_from_context.is_staff():
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)

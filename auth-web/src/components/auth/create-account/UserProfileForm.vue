@@ -277,7 +277,7 @@ import { mask } from 'vue-the-mask'
     ])
   },
   methods: {
-    ...mapMutations('user', ['setUserProfileData']),
+    ...mapMutations('user', ['setUserProfileData', 'setUserProfile']),
     ...mapActions('user',
       [
         'createUserContact',
@@ -294,7 +294,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private readonly updateUserContact!: (contact?: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
     private readonly updateUserFirstAndLastName!: (user?: User) => Contact
-    private readonly setUserProfileData!: (userProfile: UserProfileData) => void
+    private readonly setUserProfileData!: (userProfile: UserProfileData | undefined) => void
+    private readonly setUserProfile!: (userProfile: User | undefined) => void
 
     private readonly createAffidavit!: () => User
     private firstName = ''
@@ -320,6 +321,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
     @Prop({ default: AccessType.REGULAR }) stepperSource: string
+    // need to cleat user profile in stepper BCEID re-upload time. if need to reset profile pass this
+    @Prop({ default: false }) clearForm: boolean
 
     $refs: {
       deactivateUserConfirmationDialog: ModalDialog,
@@ -381,13 +384,21 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         await this.getUserProfile('@me')
       }
       let user: any = {}
-      if (this.userProfileData) {
-        user = this.userProfileData
+      // clear user profile data
+      if (!this.clearForm) {
+        // await this.setUserProfileData(undefined)
+        // await this.setUserProfile(undefined)
+
+        if (this.userProfileData) {
+          user = this.userProfileData
+        } else {
+          user = { ...this.userProfile }
+          user.email = this.userContact?.email
+          user.phone = this.userContact?.phone
+          user.phoneExtension = this.userContact?.phoneExtension
+        }
       } else {
-        user = { ...this.userProfile }
-        user.email = this.userContact?.email
-        user.phone = this.userContact?.phone
-        user.phoneExtension = this.userContact?.phoneExtension
+        user = this.userProfileData
       }
       this.firstName = user?.firstname || ''
       this.lastName = user?.lastname || ''

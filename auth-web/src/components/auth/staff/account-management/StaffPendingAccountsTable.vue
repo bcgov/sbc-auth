@@ -22,6 +22,9 @@
     <template v-slot:[`item.type`]="{ item }">
       {{item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ?  `Access Request (${item.type})` : item.type}}
     </template>
+    <template v-slot:[`item.status`]="{ item }">
+      <span class="status" :class="{'onhold': item.status == 'HOLD'}">{{item.status == 'HOLD' ? `On hold` : item.status.toLowerCase() }}</span>
+    </template>
     <template v-slot:[`item.action`]="{ item }">
       <div class="btn-inline">
         <v-btn
@@ -38,9 +41,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
-import { TaskRelationshipStatus, TaskRelationshipType } from '@/util/constants'
+import { TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
@@ -82,6 +85,12 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       value: 'type'
     },
     {
+      text: 'Status',
+      align: 'left',
+      sortable: true,
+      value: 'status'
+    },
+    {
       text: 'Actions',
       align: 'left',
       value: 'action',
@@ -114,7 +123,8 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       this.taskFilter = {
         relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
         pageNumber: page,
-        pageLimit: pageLimit
+        pageLimit: pageLimit,
+        statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
       }
       const staffTasksResp = await this.fetchTasks(this.taskFilter)
       this.staffTasks = staffTasksResp.tasks
@@ -147,5 +157,11 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
 .action-btn {
   width: 5rem;
+}
+.onhold{
+  color: var(--v-error-darken1) !important;
+}
+.status{
+  text-transform: capitalize;
 }
 </style>

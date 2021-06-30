@@ -1,4 +1,4 @@
-import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys } from '@/util/constants'
+import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
 import {
   AccountFee,
   AddUserBody,
@@ -85,6 +85,7 @@ export default class OrgModule extends VuexModule {
   currentOrgPaymentDetails:OrgPaymentDetails[] = []
   isCurrentSelectedProductsPremiumOnly = false
   resetAccountTypeOnSetupAccount = false // this flag use to check need to reset accounttype select when moving back and forth in stepper
+  vDisplayModeValue = ''// DisplayModeValues.VIEW_ONLY
 
   @Mutation
   public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {
@@ -284,10 +285,19 @@ export default class OrgModule extends VuexModule {
   public setResetAccountTypeOnSetupAccount (resetAccountTypeOnSetupAccount:boolean) {
     this.resetAccountTypeOnSetupAccount = resetAccountTypeOnSetupAccount
   }
+  @Mutation
+  public setViewOnlyMode (viewOnlyModeValue:string) {
+    this.vDisplayModeValue = viewOnlyModeValue
+  }
 
   @Mutation
   public setCurrentOrganizationBusinessType (orgBusinessType: OrgBusinessType) {
     this.currentOrganization = { ...this.currentOrganization, ...orgBusinessType }
+  }
+
+  @Mutation
+  public resetCurrentSelectedProducts () {
+    this.currentSelectedProducts = []
   }
 
   @Action({ rawError: true })
@@ -628,8 +638,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async dissolveTeam () {
-    // Send request to remove member on server and get result
+  public async deactivateOrg () {
     const response = await OrgService.deactivateOrg(this.context.state['currentOrganization'].id)
 
     // If no response, or error code, throw exception to be caught
@@ -695,7 +704,8 @@ export default class OrgModule extends VuexModule {
       postalCode: contact?.postalCode,
       country: contact?.country,
       street: contact?.street,
-      streetAdditional: contact?.streetAdditional }
+      streetAdditional: contact?.streetAdditional,
+      deliveryInstructions: contact?.deliveryInstructions }
     this.context.commit('setCurrentOrganizationAddress', address)
   }
 
@@ -996,6 +1006,15 @@ export default class OrgModule extends VuexModule {
     this.context.dispatch('currentSelectedProductsPremiumOnly')
   }
 
+  // set product with subscriptionStatus active to selected product
+  @Action({ rawError: true })
+  public async setSubscribedProducts (): Promise<any> {
+    const productList = this.context.state['productList']
+    let currentSelectedProducts = []
+    currentSelectedProducts = productList.filter(product => product.subscriptionStatus === productStatus.ACTIVE).map((prod) => (prod.code))
+    this.context.commit('setCurrentSelectedProducts', currentSelectedProducts)
+  }
+
   @Action({ commit: 'setIsCurrentSelectedProductsPremiumOnly', rawError: true })
   public async currentSelectedProductsPremiumOnly (): Promise<any> {
     const currentSelectedProducts = this.context.state['currentSelectedProducts']
@@ -1075,5 +1094,21 @@ export default class OrgModule extends VuexModule {
   public async getOrgAdminContact (orgId: number): Promise<Address> {
     const response = await OrgService.getContactForOrg(orgId)
     return response
+  }
+
+  // Check if user has any accounts, if any, default the first returned value as the selected org.
+  @Action({ rawError: true })
+  public async setCurrentOrganizationFromUserAccountSettings (): Promise<void> {
+    const response = await UserService.getUserAccountSettings(this.context.rootState.user.userProfile?.keycloakGuid)
+    if (response && response.data) {
+      // filter by account type and default first returned value as the current organization
+      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
+      if (orgs && orgs.length) {
+        const orgId = +orgs[0].id
+        // sync org and add to session
+        await this.syncOrganization(orgId)
+        await this.addOrgSettings(this.context.state['currentOrganization'])
+      }
+    }
   }
 }

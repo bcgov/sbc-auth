@@ -40,7 +40,8 @@ from tests.utilities.factory_scenarios import (
     TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact, patch_token_info)
+    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
+    patch_pay_account_delete, patch_token_info)
 
 
 def test_as_dict(session):  # pylint:disable=unused-argument
@@ -600,8 +601,8 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypat
     assert org.get_owner_count() == 2
 
 
-def test_delete_org_with_members_fail(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that an org cannot be deleted."""
+def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an org can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
@@ -613,15 +614,16 @@ def test_delete_org_with_members_fail(session, auth_mock, keycloak_mock, monkeyp
     user3 = factory_user_model(user_info=TestUserInfo.user3)
     factory_membership_model(user3.id, org._model.id, member_type='ADMIN')
 
-    with pytest.raises(BusinessException) as exception:
-        patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        OrgService.delete_org(org.as_dict()['id'])
+    patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
+    patch_pay_account_delete(monkeypatch)
+    org_id = org.as_dict()['id']
 
-    assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
+    OrgService.delete_org(org_id)
+    assert len(MembershipService.get_members_for_org(org_id)) == 0
 
 
-def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock,
-                                          monkeypatch):  # pylint:disable=unused-argument
+def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock,
+                                     monkeypatch):  # pylint:disable=unused-argument
     """Assert that an org cannot be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
@@ -637,19 +639,11 @@ def test_delete_org_with_affiliation_fail(session, auth_mock, keycloak_mock,
     AffiliationService.create_affiliation(org_id, business_identifier,
                                           TestEntityInfo.entity_lear_mock['passCode'])
 
-    with pytest.raises(BusinessException) as exception:
-        patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-        OrgService.delete_org(org_id)
-
-    assert exception.value.code == Error.ORG_CANNOT_BE_DISSOLVED.name
-
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
+    patch_pay_account_delete(monkeypatch)
+    OrgService.delete_org(org_id)
 
-    AffiliationService.delete_affiliation(org_id, business_identifier, None,
-                                          TestEntityInfo.entity_lear_mock['passCode'])
-    OrgService.delete_org(org.as_dict()['id'])
-    org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])
-    assert org_inactive.as_dict()['org_status'] == 'INACTIVE'
+    assert len(AffiliationService.find_visible_affiliations_by_org_id(org_id)) == 0
 
 
 def test_delete_org_with_members_success(session, auth_mock, keycloak_mock,
@@ -662,6 +656,7 @@ def test_delete_org_with_members_success(session, auth_mock, keycloak_mock,
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
 
+    patch_pay_account_delete(monkeypatch)
     OrgService.delete_org(org.as_dict()['id'])
     org_inactive = OrgService.find_by_org_id(org.as_dict()['id'])
     assert org_inactive.as_dict()['org_status'] == 'INACTIVE'
@@ -741,6 +736,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_pay_account_delete(monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     OrgService.delete_org(org.as_dict().get('id'))
 
@@ -762,6 +758,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
     patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_pay_account_delete(monkeypatch)
     org1 = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
     OrgService.delete_org(org1.as_dict().get('id'))

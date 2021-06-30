@@ -69,7 +69,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AffiliatedEntityList extends Vue {
-  private VUE_APP_COPS_REDIRECT_URL = ConfigHelper.getValue('VUE_APP_COPS_REDIRECT_URL')
   private orgStore = getModule(OrgModule, this.$store)
   private isLoading = true
   private readonly businesses!: Business[]
@@ -182,7 +181,7 @@ export default class AffiliatedEntityList extends Vue {
       businessIdentifier = filingResponse.data.filing.business.identifier
     }
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
-    let redirectURL = `${ConfigHelper.getCoopsURL()}${businessIdentifier}`
+    let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
 
     window.location.href = decodeURIComponent(redirectURL)
   }
