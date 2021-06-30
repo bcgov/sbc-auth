@@ -17,7 +17,7 @@ from typing import List
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType
+from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from .base_model import BaseModel
 from .db import db
 
@@ -71,6 +71,14 @@ class Task(BaseModel):
     def find_by_task_id(cls, task_id):
         """Find a task instance that matches the provided id."""
         return db.session.query(Task).filter_by(id=task_id).first()
+
+    @classmethod
+    def find_by_task_relationship_id(cls, relationship_id: int, task_relationship_type: str,
+                                     task_status: str = TaskStatus.OPEN.value):
+        """Find a task instance that related to the relationship id ( may be an ORG or a PRODUCT."""
+        return db.session.query(Task).filter(Task.relationship_id == relationship_id,
+                                             Task.relationship_type == task_relationship_type,
+                                             Task.status == task_status).first()
 
     @classmethod
     def find_by_task_for_account(cls, org_id, status):
