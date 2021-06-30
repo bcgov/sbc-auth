@@ -288,14 +288,6 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.org = org
         contact_link.add_to_session()
 
-    @staticmethod
-    def raise_error_if_duplicate_name(name, branch_name=None, org_id=None):
-        """Raise error if there is duplicate org name already."""
-        arg_dict = {'name': name,
-                    'branch_name': branch_name,
-                    'org_id': org_id}
-        duplicate_org_name_validate(is_fatal=True, **arg_dict)
-
     def update_org(self, org_info, origin_url: str = None):  # pylint: disable=too-many-locals
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
@@ -308,12 +300,6 @@ class Org:  # pylint: disable=too-many-public-methods
         is_govm_account = org_model.access_type == AccessType.GOVM.value
         is_govm_account_creation = \
             is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
-
-        # govm name is not being updated now
-        is_name_getting_updated = 'name' in org_info and not is_govm_account
-        if is_name_getting_updated:
-            self.raise_error_if_duplicate_name(name=org_info['name'], org_id=self._model.id)
-            has_org_updates = True
 
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
