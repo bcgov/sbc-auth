@@ -78,7 +78,7 @@ class Task(BaseModel):
         """Find a task instance that related to the relationship id ( may be an ORG or a PRODUCT."""
         return db.session.query(Task).filter(Task.relationship_id == relationship_id,
                                              Task.relationship_type == task_relationship_type,
-                                             task_status == task_status).first()
+                                             Task.status == task_status).first()
 
     @classmethod
     def find_by_task_for_account(cls, org_id, status):
