@@ -41,7 +41,7 @@ from auth_api.services.validators.payment_type import validate as payment_type_v
 from auth_api.utils.enums import (
     AccessType, AffidavitStatus, LoginSource, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod,
     Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
-from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role
+from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
 from ..utils.account_mailer import publish_to_mailer

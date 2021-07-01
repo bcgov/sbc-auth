@@ -584,10 +584,6 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     # assert no contacts
     assert len(dictionary.get('contacts')) == 0
 
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo-duplicate'}),
-                    headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_409_CONFLICT
-
     # update mailig address
     org_with_mailing_address = TestOrgInfo.org_with_mailing_address(name='someame')
     rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(org_with_mailing_address), headers=headers,
