@@ -15,7 +15,6 @@
 import random
 
 from starlette.config import Config
-from starlette.datastructures import Secret
 
 
 # Config will be read from environment variables and/or '.env' files.
@@ -27,18 +26,7 @@ TESTING = False
 DEBUG = False
 
 # POSTGRESQL
-DATABASE_USER = CONFIG('DATABASE_USERNAME', cast=str, default='')
-DATABASE_PASSWORD = CONFIG('DATABASE_PASSWORD', cast=Secret, default='')
-DATABASE_NAME = CONFIG('DATABASE_NAME', cast=str, default='')
-DATABASE_HOST = CONFIG('DATABASE_HOST', cast=str, default='')
-DATABASE_PORT = CONFIG('DATABASE_PORT', cast=int, default=5432)
-SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-    user=DATABASE_USER,
-    password=DATABASE_PASSWORD,
-    host=DATABASE_HOST,
-    port=int(DATABASE_PORT),
-    name=DATABASE_NAME,
-)
+SQLALCHEMY_DATABASE_URI = CONFIG('NOTIFY_DATABASE_URL', cast=str)
 
 # email server
 MAIL_SERVER = CONFIG('MAIL_SERVER', cast=str, default='abcdabcd.smtp')
@@ -50,6 +38,7 @@ MAIL_PASSWORD = CONFIG('MAIL_PASSWORD', cast=str, default='')
 MAIL_FROM_ID = CONFIG('MAIL_FROM_ID', cast=str, default='abcabc@abcdabcd.com')
 
 # Sentry Config
+SENTRY_ENABLE = CONFIG('SENTRY_ENABLE', cast=str, default=None)
 SENTRY_DSN = CONFIG('SENTRY_DSN', cast=str, default=None)
 
 NATS_CLIENT_NAME = CONFIG('NATS_CLIENT_NAME', cast=str, default='notifiations.worker')
@@ -85,14 +74,4 @@ DELIVERY_FAILURE_RETRY_TIME_FRAME = CONFIG('DELIVERY_FAILURE_RETRY_TIME_FRAME', 
 PENDING_EMAIL_TIME_FRAME = CONFIG('PENDING_EMAIL_TIME_FRAME', cast=int, default=300)
 FAILURE_EMAIL_TIME_FRAME = CONFIG('FAILURE_EMAIL_TIME_FRAME', cast=int, default=600)
 
-DB_USER = CONFIG('DATABASE_TEST_USERNAME', cast=str, default='postgres')
-DB_PASSWORD = CONFIG('DATABASE_TEST_PASSWORD', cast=Secret, default='postgres')
-DB_NAME = CONFIG('DATABASE_TEST_NAME', cast=str, default='postgres')
-DB_HOST = CONFIG('DATABASE_TEST_HOST', cast=str, default='localhost')
-DB_PORT = CONFIG('DATABASE_TEST_PORT', cast=int, default=5432)
-SQLALCHEMY_TEST_DATABASE_URI = CONFIG(
-    'DATABASE_TEST_URL',
-    default='postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=int(DB_PORT), name=DB_NAME
-    ),
-)
+SQLALCHEMY_TEST_DATABASE_URI = CONFIG('NOTIFY_DATABASE_TEST_URL', cast=str)
