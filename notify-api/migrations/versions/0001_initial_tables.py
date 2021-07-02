@@ -49,7 +49,7 @@ def upgrade():
                     sa.Column('subject', sa.String(length=2000), nullable=False),
                     sa.Column('body', sa.String(length=2000), nullable=False),
                     sa.Column('attachment_name', sa.String(length=200), nullable=True),
-                    sa.Column('attachment', sa.Binary(), nullable=True),
+                    sa.Column('attachment', sa.LargeBinary(), nullable=True),
                     sa.Column('notification_id', sa.Integer(), nullable=False),
                     sa.ForeignKeyConstraint(['notification_id'], ['notification.id'], ),
                     sa.PrimaryKeyConstraint('id')

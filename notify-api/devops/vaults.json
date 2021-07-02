@@ -8,9 +8,7 @@
     {
         "vault": "keycloak",
         "application": [
-            "base",
-            "jwt-base",
-            "sbc-auth-admin"
+            "jwt-base"
         ]
     },
     {
@@ -21,11 +19,21 @@
         ]
     },
     {
+        "vault": "sentry",
+        "application": [
+            "relationship-api"
+        ]
+    },
+    {
+        "vault": "database",
+        "application": [
+            "notify-db"
+        ]
+    },
+    {
         "vault": "relationship",
         "application": [
-            "postgres-notify",
             "notify-api",
-            "sentry",
             "jwt"
         ]
     }

@@ -50,6 +50,10 @@ install: clean ## Install python virtrual environment
 install-dev: ## Install local application
 	. venv/bin/activate && pip install -e .
 
+create-env: ## create a env file from dev
+	@oc get secret $(DOCKER_NAME)-dev-secret -n "$(OPENSHIFT_REPOSITORY)-dev" \
+		-o go-template='{{range $$k,$$v := .data}}{{printf "%s=" $$k}}{{if not $$v}}{{$$v}}{{else}}{{$$v | base64decode}}{{end}}{{"\n"}}{{end}}' > .env.dev
+
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
@@ -81,15 +85,15 @@ mac-cov: test ## Run the coverage report and display in a browser window (mac)
 #################################################################################
 cd: ## CD flow
 ifeq ($(TAG_NAME), test)
-cd: update-env
+cd: vault-env
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):dev $(DOCKER_NAME):$(TAG_NAME)
 else ifeq ($(TAG_NAME), prod)
-cd: update-env
+cd: vault-env
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)-$(shell date +%F)
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):test $(DOCKER_NAME):$(TAG_NAME)
 else
 TAG_NAME=dev
-cd: build update-env tag
+cd: build vault-env tag
 endif
 
 build: ## Build the docker container
@@ -107,7 +111,7 @@ push: #build ## Push the docker container to the registry & tag latest
     docker push $(REGISTRY_IMAGE):latest
 
 VAULTS=`cat devops/vaults.json`
-update-env: ## Update env from 1pass
+vault-env: ## Update env from 1pass
 	oc -n "$(OPS_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
 		-m "secret" \
 		-e "$(TAG_NAME)" \
