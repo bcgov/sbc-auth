@@ -128,7 +128,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
   ) => void
   private readonly setNotaryContact!: (notaryContact: NotaryContact) => void
   private readonly currentOrganization!: Organization
-  @Prop() isAccountChange: boolean
+
   @Prop() cancelUrl: string
 
   private async mounted () {

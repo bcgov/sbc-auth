@@ -1,8 +1,7 @@
 <template>
   <div  data-test="div-stepper-container" >
-    <p class="mb-7" v-if="!isAccountChange">There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
-    <p class="mb-7" v-if="isAccountChange">There is no cost to change a BC Registries account type. You only pay for the services and products you purchase.</p>
-    <v-row v-display-mode>
+    <p class="mb-7" >There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
+     <v-row v-display-mode>
       <v-col
         class="d-flex align-stretch"
         sm="12" md="6"
@@ -35,23 +34,12 @@
           </div>
 
           <!-- State Button (Create Account) -->
-          <div class="mt-10" v-if="!isAccountChange">
+          <div class="mt-10" >
             <v-btn large block depressed color="primary" class="font-weight-bold"
               data-test="btn-stepper-basic-select"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
               @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
               {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}
-            </v-btn>
-          </div>
-
-          <!-- State Button (Change Account) -->
-          <div class="mt-10" v-if="isAccountChange">
-            <v-btn large block depressed color="primary" class="font-weight-bold"
-              data-test="btn-stepper-edit-basic-select"
-              :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
-              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
-              <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.BASIC">CURRENT ACCOUNT</span>
-              <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.BASIC">{{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}</span>
             </v-btn>
           </div>
 
@@ -98,7 +86,7 @@
             </div>
 
             <!-- State Button (Create Account) -->
-            <div class="mt-10" v-if="!isAccountChange">
+            <div class="mt-10" >
               <v-btn large block depressed color="primary" class="font-weight-bold"
               data-test="btn-stepper-premium-select"
               :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
@@ -107,16 +95,6 @@
               </v-btn>
             </div>
 
-            <!-- State Button (Change Account) -->
-            <div class="mt-10" v-if="isAccountChange">
-              <v-btn large block depressed color="primary" class="font-weight-bold"
-              data-test="btn-stepper-edit-premium-select"
-              :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
-              @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                <span v-if="accountTypeBeforeChange == ACCOUNT_TYPE.PREMIUM">CURRENT ACCOUNT</span>
-                <span v-if="accountTypeBeforeChange != ACCOUNT_TYPE.PREMIUM">{{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT'}}</span>
-              </v-btn>
-            </div>
           </v-card>
         </v-badge>
       </v-col>
@@ -150,7 +128,6 @@
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="false"
-          :clear-current-org="!isAccountChange"
           :target-route="cancelUrl"
         ></ConfirmCancelButton>
       </v-col>
@@ -179,13 +156,12 @@ const UserModule = namespace('user')
 export default class AccountTypeSelector extends Mixins(Steppable) {
   private readonly ACCOUNT_TYPE = Account
   private selectedAccountType = ''
-  @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
 
   @OrgModule.State('isCurrentSelectedProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
 
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.State('accountTypeBeforeChange') private accountTypeBeforeChange!: string
+
   @OrgModule.State('currentOrganizationType') private currentOrganizationType!: string
   @OrgModule.State('resetAccountTypeOnSetupAccount') private resetAccountTypeOnSetupAccount!: string
 
@@ -195,46 +171,35 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   @OrgModule.Mutation('setCurrentOrganization') private setCurrentOrganization!: (organization: Organization) => void
   @OrgModule.Mutation('setCurrentOrganizationType') private setCurrentOrganizationType!: (orgType: string) => void
   @OrgModule.Mutation('resetCurrentOrganisation') private resetCurrentOrganisation!: () => void
-  @OrgModule.Mutation('setAccountTypeBeforeChange') private setAccountTypeBeforeChange!: (accountTypeBeforeChange: string) => void
   @OrgModule.Mutation('setAccessType') private setAccessType!: (accessType: string) => void
   @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   private async mounted () {
-    if (this.isAccountChange) {
-      // Account change needs all the org details as such..so do not clear any details...
-      // Account change doesnt create a new org
-      if (!this.accountTypeBeforeChange) { // do not reset the originalAccountType after first time..
-        this.setAccountTypeBeforeChange(this.currentOrganization.orgType)
-      }
-      this.selectedAccountType = this.currentOrganization.orgType
-      this.setCurrentOrganizationType(this.selectedAccountType)
+    // first time to the page , start afresh..this is Create New account flow
+    if (!this.currentOrganization) {
+      this.setCurrentOrganization({ name: '' })
     } else {
-      // first time to the page , start afresh..this is Create New account flow
-      if (!this.currentOrganization) {
-        this.setCurrentOrganization({ name: '' })
-      } else {
-        // need to set org type if its re-upload bceid flow
-        this.selectAccountType(this.currentOrganization.orgType)
-      }
-      // when some one goes back into product page and come, this will be true and selectedAccountType as undefined.
-      if (!this.currentOrganization && this.resetAccountTypeOnSetupAccount) {
-        this.selectAccountType(undefined)
-        this.setResetAccountTypeOnSetupAccount(false) // reset back flag for coming back
-      }
-
-      // first time stepper hits step 2 after selecting a premium product/service in step 1
-      if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
-        this.selectAccountType(this.ACCOUNT_TYPE.PREMIUM)
-      } else {
-        // come back to step 2 or after selecting basic products/services in step 1
-        this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
-          ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
-      }
-
-      this.setAccessType(this.getOrgAccessType())
-      // remove current account from session storage .Or else permission of old account will be fetched
-      ConfigHelper.removeFromSession('CURRENT_ACCOUNT')
+      // need to set org type if its re-upload bceid flow
+      this.selectAccountType(this.currentOrganization.orgType)
     }
+    // when some one goes back into product page and come, this will be true and selectedAccountType as undefined.
+    if (!this.currentOrganization && this.resetAccountTypeOnSetupAccount) {
+      this.selectAccountType(undefined)
+      this.setResetAccountTypeOnSetupAccount(false) // reset back flag for coming back
+    }
+
+    // first time stepper hits step 2 after selecting a premium product/service in step 1
+    if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
+      this.selectAccountType(this.ACCOUNT_TYPE.PREMIUM)
+    } else {
+      // come back to step 2 or after selecting basic products/services in step 1
+      this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
+        ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
+    }
+
+    this.setAccessType(this.getOrgAccessType())
+    // remove current account from session storage .Or else permission of old account will be fetched
+    ConfigHelper.removeFromSession('CURRENT_ACCOUNT')
   }
 
   private selectAccountType (accountType) {
@@ -261,11 +226,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   }
 
   private get canContinue () {
-    if (this.isAccountChange) {
-      return this.accountTypeBeforeChange !== this.selectedAccountType
-    } else {
-      return this.selectedAccountType
-    }
+    return this.selectedAccountType
   }
 
   private cancel () {
