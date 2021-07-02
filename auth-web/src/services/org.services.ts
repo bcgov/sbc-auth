@@ -1,7 +1,7 @@
-import { AccountStatus, Actions } from '@/util/constants'
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, OrgProduct, OrgProductsRequestBody, Organization, UpdateMemberPayload } from '@/models/Organization'
 
+import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
@@ -48,10 +48,6 @@ export default class OrgService {
 
   public static async createOrg (createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs`, createRequestBody)
-  }
-
-  public static async upgradeOrDowngradeOrg (createRequestBody: CreateOrganizationRequestBody, orgId: number, action:Actions): Promise<AxiosResponse<Organization>> {
-    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}?action=${action}`, createRequestBody)
   }
 
   public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {

@@ -43,14 +43,12 @@
           @click="save"
           data-test="save-button"
         >
-          <span v-if="!isAccountChange">Next
+          <span >Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
-          <span v-if="isAccountChange">Change Account</span>
         </v-btn>
         <ConfirmCancelButton
           :disabled="saving"
-          :clear-current-org="!isAccountChange"
           :target-route="cancelUrl"
           :showConfirmPopup="false"
         ></ConfirmCancelButton>
@@ -60,7 +58,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
@@ -92,7 +90,7 @@ import { getModule } from 'vuex-module-decorators'
     ...mapMutations('org', [
       'setCurrentOrganization', 'setOrgName', 'setCurrentOrganizationAddress'
     ]),
-    ...mapActions('org', ['syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'changeOrgType'])
+    ...mapActions('org', ['syncMembership', 'syncOrganization', 'isOrgNameAvailable'])
   }
 })
 export default class AccountCreateBasic extends Mixins(Steppable) {
@@ -100,14 +98,12 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private errorMessage: string = ''
   private saving = false
   private isBasicAccount: boolean = true
-  private readonly changeOrgType!: (action:Actions) => Promise<Organization>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
 
-  @Prop() isAccountChange: boolean
   @Prop() cancelUrl: string
   @Prop({ default: false }) govmAccount: boolean
   @Prop({ default: false }) readOnly: boolean
@@ -179,46 +175,24 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
         }
       }
       const orgType = (this.isBasicAccount) ? Account.BASIC : Account.PREMIUM
-      if (this.isAccountChange) {
-        try {
-          const org: Organization = { name: this.orgBusinessTypeLocal.name,
-            orgType: orgType,
-            id: this.currentOrganization.id,
-            isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
-            businessType: this.orgBusinessTypeLocal.businessType,
-            businessSize: this.orgBusinessTypeLocal.businessSize
-          }
-          this.setCurrentOrganization(org)
-          this.saving = true
-          const organization = await this.changeOrgType('downgrade')
-          await this.syncOrganization(organization.id)
-          // await this.syncMembership(organization.id)
-          this.$store.commit('updateHeader')
-          this.$router.push('/change-account-success')
-          return
-        } catch (err) {
-          this.saving = false
-          this.errorMessage = 'An error occurred while attempting to create your account.'
-        }
-      } else {
-        let org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType }
-        if (this.govmAccount) {
-          org = { ...org, ...{ branchName: this.orgBusinessTypeLocal.branchName, id: this.currentOrganization.id } }
-        }
-        if (this.orgBusinessTypeLocal.isBusinessAccount) {
-          org = { ...org,
-            ...{ branchName: this.orgBusinessTypeLocal.branchName,
-              isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
-              businessSize: this.orgBusinessTypeLocal.businessSize,
-              businessType: this.orgBusinessTypeLocal.businessType } }
-        }
-        // removed this to avoid over writing current or details, which need to show in all page.
-        if (!this.readOnly) {
-          this.setCurrentOrganization(org)
-        }
-        // check if the name is avaialble
-        this.stepForward()
+
+      let org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType }
+      if (this.govmAccount) {
+        org = { ...org, ...{ branchName: this.orgBusinessTypeLocal.branchName, id: this.currentOrganization.id } }
       }
+      if (this.orgBusinessTypeLocal.isBusinessAccount) {
+        org = { ...org,
+          ...{ branchName: this.orgBusinessTypeLocal.branchName,
+            isBusinessAccount: this.orgBusinessTypeLocal.isBusinessAccount,
+            businessSize: this.orgBusinessTypeLocal.businessSize,
+            businessType: this.orgBusinessTypeLocal.businessType } }
+      }
+      // removed this to avoid over writing current or details, which need to show in all page.
+      if (!this.readOnly) {
+        this.setCurrentOrganization(org)
+      }
+      // check if the name is avaialble
+      this.stepForward()
     }
   }
 
