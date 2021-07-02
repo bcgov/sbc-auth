@@ -110,9 +110,6 @@ export default class AffiliatedEntityTable extends Vue {
   @Prop({ default: [] })
   readonly selectedColumns: Array<string>
 
-  // Global setter
-  @Action setExistingRequestSearch!: any
-
   // Local Properties
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
