@@ -425,8 +425,6 @@ def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
     org.update_org(TestOrgInfo.update_org_with_business_type)
 
     dictionary = org.as_dict()
-    print('----------')
-    print(dictionary)
     assert dictionary['business_type'] == TestOrgInfo.update_org_with_business_type['businessType']
 
 
