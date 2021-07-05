@@ -134,7 +134,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
                                                           AccessType.REGULAR_BCEID.value) and not \
-            AffidavitModel.find_approved_by_user_id(user_id=user_id)
+                                              AffidavitModel.find_approved_by_user_id(user_id=user_id)
         if is_bceid_status_handling_needed:
             Org._handle_bceid_status_and_notification(org)
 
@@ -517,7 +517,9 @@ class Org:  # pylint: disable=too-many-public-methods
     def _delete_pay_account(org_id):
         pay_url = current_app.config.get('PAY_API_URL')
         try:
-            pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', raise_for_status=False)
+            token = RestService.get_service_account_token()
+            pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', token=token,
+                                              raise_for_status=False)
             response_json = pay_response.json()
             pay_response.raise_for_status()
         except HTTPError as pay_err:
