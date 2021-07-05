@@ -517,7 +517,9 @@ class Org:  # pylint: disable=too-many-public-methods
     def _delete_pay_account(org_id):
         pay_url = current_app.config.get('PAY_API_URL')
         try:
-            pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', raise_for_status=False)
+            token = RestService.get_service_account_token()
+            pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', token=token,
+                                              raise_for_status=False)
             response_json = pay_response.json()
             pay_response.raise_for_status()
         except HTTPError as pay_err:
