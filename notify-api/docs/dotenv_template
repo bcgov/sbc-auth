@@ -6,7 +6,7 @@
 # =====  notify-api ======================================================================================================
 
 # Connection to local database.
-DATABASE_URL="postgresql://postgres@localhost/postgres"
+NOTIFY_DATABASE_URL="postgresql://postgres@localhost/postgres"
 DATABASE_USERNAME="postgres"
 DATABASE_PASSWORD="postgres"
 DATABASE_NAME="postgres"
@@ -14,7 +14,7 @@ DATABASE_HOST="localhost"
 DATABASE_PORT="54334"
 
 # Connection to unit test database.
-DATABASE_TEST_URL="postgresql://postgres:admin@localhost:54335/postgres"
+NOTIFY_DATABASE_TEST_URL="postgresql://postgres:admin@localhost:54335/postgres"
 DATABASE_TEST_USERNAME=postgres
 DATABASE_TEST_PASSWORD=postgres
 DATABASE_TEST_HOST=localhost

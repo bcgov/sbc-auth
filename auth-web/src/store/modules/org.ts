@@ -1,4 +1,4 @@
-import { Account, AccountStatus, Actions, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
+import { Account, AccountStatus, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
 import {
   AccountFee,
   AddUserBody,
@@ -69,7 +69,6 @@ export default class OrgModule extends VuexModule {
   tokenError = false
   createdUsers: BulkUsersSuccess[] = []
   failedUsers: BulkUsersFailed[] = []
-  accountTypeBeforeChange = '' // used for detecting the original type of the account which is getting down/up graded
   permissions: string[] = []
   accessType: string
   memberLoginOption = ''
@@ -100,11 +99,6 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setMemberLoginOption (memberLoginOption:string) {
     this.memberLoginOption = memberLoginOption
-  }
-
-  @Mutation
-  public setAccountTypeBeforeChange (accountTypeBeforeChange:string) {
-    this.accountTypeBeforeChange = accountTypeBeforeChange
   }
 
   @Mutation
@@ -402,24 +396,6 @@ export default class OrgModule extends VuexModule {
     const newLoginOption = await OrgService.updateMemberLoginOption(org.id, loginOption)
     this.context.commit('setMemberLoginOption', loginOption)
     return newLoginOption
-  }
-
-  @Action({ rawError: true })
-  public async changeOrgType (action:Actions): Promise<Organization> {
-    const org:Organization = this.context.state['currentOrganization']
-    let createRequestBody: CreateRequestBody = {
-      name: org.name,
-      typeCode: org.orgType
-    }
-    if (org.orgType === Account.PREMIUM) {
-      createRequestBody.bcOnlineCredential = org.bcolProfile
-      createRequestBody.mailingAddress = this.context.state['currentOrgAddress']
-    }
-    const response = await OrgService.upgradeOrDowngradeOrg(createRequestBody, org.id, action)
-    const organization = response?.data
-    this.context.commit('setCurrentOrganization', organization)
-    this.context.commit('setAccountTypeBeforeChange', organization.orgType)
-    return response?.data
   }
 
   @Action({ rawError: true })

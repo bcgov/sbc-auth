@@ -64,11 +64,7 @@
               <div class="value__title">
                 {{ isPremiumAccount ? 'Premium' : 'Basic' }}
               </div>
-              <div v-can:CHANGE_ACCOUNT_TYPE.hide v-if="enableUpgradeDowngrade">
-                <router-link :to="editAccountUrl" v-can:CHANGE_ACCOUNT_TYPE.hide
-                  >Change account type</router-link
-                >
-              </div>
+
             </div>
           </div>
           <div
@@ -491,10 +487,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
 
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
-  }
-
-  private get enableUpgradeDowngrade (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableUpgradeDowngrade) || false
   }
 
   private enableBtn () {

@@ -104,8 +104,6 @@ export enum LoginSource {
     BCEID = 'BCEID'
 }
 
-export type Actions = 'upgrade' | 'downgrade'
-
 export enum TransactionStatus {
     COMPLETED = 'Completed',
     PENDING = 'Pending',
@@ -167,7 +165,6 @@ export enum LDFlags {
     AuthLearnMore = 'auth-options-learn-more',
     PaymentTypeAccountCreation = 'payment-type-in-account-creation',
     LinkToNewNameRequestApp ='link-to-new-name-request-app',
-    EnableUpgradeDowngrade = 'enable-upgrade-downgrade-accounts',
     EnableMandatoryAddress = 'enable-mandatory-address',
     EnableGovmInvite = 'enable-govm-account-invite',
     HideProductPackage = 'hide-product-packages',
