@@ -414,10 +414,9 @@ def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be updated."""
     org = factory_org_service()
 
-    org.update_org(TestOrgInfo.org2)
-
-    dictionary = org.as_dict()
-    assert dictionary['name'] == TestOrgInfo.org2['name']
+    with pytest.raises(BusinessException) as exception:
+        org.update_org(TestOrgInfo.org2)
+    assert exception.value.code == Error.INVALID_INPUT.name
 
 
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument

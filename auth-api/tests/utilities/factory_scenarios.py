@@ -26,7 +26,6 @@ from auth_api.config import get_named_config
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils.enums import AccessType, IdpHint, LoginSource, OrgType, PaymentMethod, ProductCode
 
-
 fake = Faker()
 
 CONFIG = get_named_config('testing')
@@ -502,6 +501,17 @@ class TestOrgInfo(dict, Enum):
         'isBusinessAccount': True
     }
 
+    update_org_with_all_info = {
+        'accessType': AccessType.REGULAR.value,
+        'paymentInfo': {
+            'paymentMethod': 'ONLINE_BANKING'
+        },
+        'productSubscriptions': [{'productCode': 'BUSINESS'}, {'productCode': 'VS'}],
+        'businessType': 'LAW',
+        'businessSize': '2-5',
+        'isBusinessAccount': True
+    }
+
     bceid_org_with_all_info = {
         'name': 'My Test Org',
         'accessType': AccessType.REGULAR_BCEID.value,
@@ -528,6 +538,18 @@ class TestOrgInfo(dict, Enum):
         }
 
     @staticmethod
+    def update_bcol_linked():
+        """Return org info for bcol linked info."""
+        return {
+            'bcOnlineCredential': {
+                'userId': 'test',
+                'password': 'password'
+            },
+            'mailingAddress': TestOrgInfo.get_mailing_address(),
+            'typeCode': OrgType.PREMIUM.value
+        }
+
+    @staticmethod
     def get_mailing_address():
         """Return mailing Address."""
         return {
@@ -543,6 +565,13 @@ class TestOrgInfo(dict, Enum):
         """Return org info for bcol linked info."""
         return {
             'name': name,
+            'mailingAddress': TestOrgInfo.get_mailing_address()
+        }
+
+    @staticmethod
+    def update_org_with_mailing_address():
+        """Return org info for update org - bcol linked info."""
+        return {
             'mailingAddress': TestOrgInfo.get_mailing_address()
         }
 

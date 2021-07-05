@@ -307,7 +307,6 @@ def test_add_govm_full_flow(client, jwt, session, keycloak_mock):  # pylint:disa
     assert len(dictionary['members']) == 1
 
     update_org_payload = {
-        'name': 'dsdss',
         'mailingAddress': {
             'city': 'Innisfail',
             'country': 'CA',
@@ -566,17 +565,7 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
-    # User will get a new role once the account is created
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo'}),
-                    headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_200_OK
-    dictionary = json.loads(rv.data)
-    assert dictionary['id'] == org_id
-    assert schema_utils.validate(rv.json, 'org_response')[0]
-
-    rv = client.post('/api/v1/orgs', data=json.dumps({'name': 'helo-duplicate'}),
-                     headers=headers, content_type='application/json')
+    # get created org and assert there is no contacts
     rv = client.get(f'/api/v1/orgs/{org_id}/contacts', headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -584,8 +573,17 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     # assert no contacts
     assert len(dictionary.get('contacts')) == 0
 
-    # update mailig address
-    org_with_mailing_address = TestOrgInfo.org_with_mailing_address(name='someame')
+    # assert updating org name raises bad request exception
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo-duplicate1'}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+    rv = client.get(f'/api/v1/orgs/{org_id}', headers=headers,
+                    content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert dictionary.get('name') == TestOrgInfo.org1['name']
+
+    # update mailing address
+    org_with_mailing_address = TestOrgInfo.update_org_with_mailing_address()
     rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(org_with_mailing_address), headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
@@ -602,16 +600,13 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     assert actual_mailing_address.get('postalCode') == dictionary['contacts'][0].get('postalCode')
 
     # Update other org details
-    # update mailing address
-    all_org_info = TestOrgInfo.org_with_all_info
-    all_org_info['name'] = 'someame'
+    all_org_info = TestOrgInfo.update_org_with_all_info
     rv = client.put(f'/api/v1/orgs/{org_id}', data=json.dumps(all_org_info), headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('businessType') == all_org_info['businessType']
     assert rv.json.get('businessSize') == all_org_info['businessSize']
     assert rv.json.get('isBusinessAccount') == all_org_info['isBusinessAccount']
-    assert rv.json.get('businessName') == all_org_info['name']
 
 
 def test_update_org_payment_method_for_basic_org(client, jwt, session, keycloak_mock):
@@ -670,7 +665,7 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
     # Update with same data
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.bcol_linked()), headers=headers,
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.update_bcol_linked()), headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'org_response')[0]

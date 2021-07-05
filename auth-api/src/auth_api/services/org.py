@@ -302,6 +302,11 @@ class Org:  # pylint: disable=too-many-public-methods
         is_govm_account_creation = \
             is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
+        # update org name should not proceed further
+        is_name_getting_updated = 'name' in org_info
+        if is_name_getting_updated:
+            raise BusinessException(Error.INVALID_INPUT, None)
+
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
@@ -329,6 +334,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         # Update mailing address Or create new one
         if mailing_address:
+            has_org_updates = True
             contacts = self._model.contacts
             if len(contacts) > 0:
                 contact = self._model.contacts[0].contact
