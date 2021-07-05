@@ -48,7 +48,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
             .filter(ProductCode.linked_product_code.isnot(None)) \
             .subquery()
 
-        return cls.query.filter_by(ProductCode.code.notin_(linked_code_subquery)).order_by(  # pylint: disable=no-member
+        return cls.query.filter(ProductCode.code.notin_(linked_code_subquery)).order_by(  # pylint: disable=no-member
             ProductCode.type_code.asc(), ProductCode.description.asc()).all()  # pylint: disable=no-member
 
     @classmethod
