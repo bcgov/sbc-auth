@@ -520,10 +520,10 @@ class Org:  # pylint: disable=too-many-public-methods
             token = RestService.get_service_account_token()
             pay_response = RestService.delete(endpoint=f'{pay_url}/accounts/{org_id}', token=token,
                                               raise_for_status=False)
-            response_json = pay_response.json()
             pay_response.raise_for_status()
         except HTTPError as pay_err:
             current_app.logger.info(pay_err)
+            response_json = pay_response.json()
             error_type = response_json.get('type')
             error: Error = Error[error_type] if error_type in Error.__members__ else Error.PAY_ACCOUNT_DEACTIVATE_ERROR
             raise BusinessException(error, pay_err) from pay_err
