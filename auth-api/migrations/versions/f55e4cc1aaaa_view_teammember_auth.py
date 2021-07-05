@@ -26,7 +26,7 @@ def upgrade():
     op.bulk_insert(
         permissions_table,
         [
-            {'membership_type_code': 'ADMIN', 'org_status_code': '',
+            {'membership_type_code': 'ADMIN', 'org_status_code': None,
              'actions': 'view_user_loginsource'}
         ]
     )
