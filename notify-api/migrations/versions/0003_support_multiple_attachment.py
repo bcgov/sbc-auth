@@ -23,7 +23,7 @@ def upgrade():
     op.create_table('attachment',
                 sa.Column('id', sa.Integer(), nullable=False),
                 sa.Column('file_name', sa.String(length=200), nullable=False),
-                sa.Column('file_bytes', sa.Binary(), nullable=False),
+                sa.Column('file_bytes', sa.LargeBinary(), nullable=False),
                 sa.Column('attach_order', sa.Integer(), nullable=True),
                 sa.Column('content_id', sa.Integer(), nullable=False),
                 sa.ForeignKeyConstraint(['content_id'], ['content.id'], ),
@@ -45,7 +45,7 @@ def downgrade():
     op.drop_column('notification', 'request_by')
 
     op.add_column('content', sa.Column('attachment_name', sa.String(length=200), nullable=True))
-    op.add_column('content', sa.Column('attachment',sa.Binary(), nullable=True))
+    op.add_column('content', sa.Column('attachment',sa.LargeBinary(), nullable=True))
 
     op.execute('UPDATE content nc '
                'SET (attachment_name, attachment) = '

@@ -79,14 +79,13 @@
         :disabled="!grantAccess || saving || !isFormValid()"
         @click="save"
          data-test="btn-stepper-premium-save">
-          <span v-if="!isAccountChange">Next
+          <span >Next
             <v-icon right class="ml-1">mdi-arrow-right</v-icon>
           </span>
-          <span v-if="isAccountChange">Change Account</span>
+
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="linked"
-          :clear-current-org="!isAccountChange"
           :target-route="cancelUrl"
         ></ConfirmCancelButton>
       </v-col>
@@ -96,7 +95,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Actions, LoginSource } from '@/util/constants'
+import { Account, LoginSource } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, OrgBusinessType, Organization } from '@/models/Organization'
@@ -144,7 +143,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   @OrgModule.Action('syncMembership') private readonly syncMembership!: (orgId: number) => Promise<Member>
   @OrgModule.Action('syncOrganization') private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('changeOrgType') private readonly changeOrgType!: (action:Actions) => Promise<Organization>
   @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
 
   @OrgModule.Mutation('setCurrentOrganization') private readonly setCurrentOrganization!: (organization: Organization) => void
@@ -155,7 +153,6 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
 
   @Prop() cancelUrl: string
-  @Prop() isAccountChange: boolean
   @Prop({ default: false }) readOnly: boolean
 
   private orgNameReadOnly = true
@@ -271,27 +268,11 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private async goNext () {
-    if (this.isAccountChange) {
-      try {
-        this.saving = true
-        const organization = await this.changeOrgType('upgrade')
-        await this.syncOrganization(organization.id)
-        // await this.syncMembership(organization.id)
-        this.$store.commit('updateHeader')
-        this.$router.push('/change-account-success')
-        return
-      } catch (err) {
-        this.saving = false
-        this.errorMessage =
-                    'An error occurred while attempting to create your account.'
-      }
+    const isValidName = this.readOnly ? true : await this.validateAccountNameUnique()
+    if (isValidName) {
+      this.stepForward()
     } else {
-      const isValidName = this.readOnly ? true : await this.validateAccountNameUnique()
-      if (isValidName) {
-        this.stepForward()
-      } else {
-        this.errorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
-      }
+      this.errorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
     }
   }
 

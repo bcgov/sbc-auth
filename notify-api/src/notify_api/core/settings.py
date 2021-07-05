@@ -26,8 +26,8 @@ class APISettings(BaseSettings):
     API_V1_STR = '/api/v1'
 
     # POSTGRESQL
-    DATABASE_URL: str = ''
-    DATABASE_TEST_URL: str = ''
+    NOTIFY_DATABASE_URL: str = ''
+    NOTIFY_DATABASE_TEST_URL: str = ''
 
     # email server
     MAIL_SERVE: str = ''
@@ -39,6 +39,7 @@ class APISettings(BaseSettings):
     MAIL_FROM_ID: str = ''
 
     # Sentry Config
+    SENTRY_ENABLE: str = False
     SENTRY_DSN: str = None
 
     NATS_CLIENT_NAME: str = 'notifiations.worker'

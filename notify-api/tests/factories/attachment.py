@@ -45,7 +45,7 @@ class AttachmentFactory():   # pylint: disable=too-few-public-methods
 
         FILE_REQUEST_1 = {'fileName': 'aaa.pdf',
                           'fileBytes': '',
-                          'fileUrl': 'https://minio-dev.pathfinder.gov.bc.ca/public/affidavit_v1.pdf',
+                          'fileUrl': 'https://minio-dev.apps.silver.devops.gov.bc.ca/public/affidavit_v1.pdf',
                           'attachOrder': 1}
 
         FILE_REQUEST_2 = {'fileName': 'bbb.text',
@@ -59,12 +59,12 @@ class AttachmentFactory():   # pylint: disable=too-few-public-methods
         # name empty
         FILE_REQUEST_BAD_1 = {'fileName': '',
                               'fileBytes': '',
-                              'fileUrl': 'https://minio-dev.pathfinder.gov.bc.ca/public/affidavit_v1.pdf',
+                              'fileUrl': 'https://minio-dev.apps.silver.devops.gov.bc.ca/public/affidavit_v1.pdf',
                               'attachOrder': 1}
 
         # without name
         FILE_REQUEST_BAD_2 = {'fileBytes': '',
-                              'fileUrl': 'https://minio-dev.pathfinder.gov.bc.ca/public/affidavit_v1.pdf',
+                              'fileUrl': 'https://minio-dev.apps.silver.devops.gov.bc.ca/public/affidavit_v1.pdf',
                               'attachOrder': 1}
 
         # file content empty

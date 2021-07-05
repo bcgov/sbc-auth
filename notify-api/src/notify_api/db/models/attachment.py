@@ -13,7 +13,7 @@
 # limitations under the License.
 """Notification contents data model."""
 from pydantic import BaseModel, validator
-from sqlalchemy import Binary, Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String
 
 from notify_api.core.utils import to_camel
 from notify_api.db.database import BASE
@@ -26,7 +26,7 @@ class AttachmentModel(BASE):  # pylint: disable=too-few-public-methods
 
     id = Column(Integer, primary_key=True)
     file_name = Column(String(200), nullable=False)
-    file_bytes = Column(Binary, nullable=False)
+    file_bytes = Column(LargeBinary, nullable=False)
     attach_order = Column(Integer, nullable=True)
     content_id = Column(ForeignKey('content.id'), nullable=False)
 

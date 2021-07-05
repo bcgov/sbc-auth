@@ -61,7 +61,7 @@ def loop_fixture():
 @pytest.fixture(scope='session', name='engine')
 def engine_fixture():
     """Connect to the database."""
-    engine = sqlalchemy.create_engine(get_api_settings().DATABASE_TEST_URL)
+    engine = sqlalchemy.create_engine(get_api_settings().NOTIFY_DATABASE_TEST_URL)
     SESSION.configure(bind=engine)
     return engine
 

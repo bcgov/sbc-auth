@@ -13,9 +13,14 @@
         ]
     },
     {
+        "vault": "database",
+        "application": [
+            "notify-db"
+        ]
+    },
+    {
         "vault": "relationship",
         "application": [
-            "postgres-notify",
             "notify-api",
             "notify-queue"
         ]
