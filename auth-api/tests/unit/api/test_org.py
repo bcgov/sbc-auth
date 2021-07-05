@@ -665,7 +665,8 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
     # Update with same data
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.update_bcol_linked()), headers=headers,
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(TestOrgInfo.update_bcol_linked()),
+                    headers=headers,
                     content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'org_response')[0]
