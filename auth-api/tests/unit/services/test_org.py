@@ -410,8 +410,8 @@ def test_create_org_with_duplicate_name_bcol(session, keycloak_mock, monkeypatch
         assert exception.value.code == Error.DATA_CONFLICT.name
 
 
-def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that an Org can be updated."""
+def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Org name cannot be updated."""
     org = factory_org_service()
 
     with pytest.raises(BusinessException) as exception:
