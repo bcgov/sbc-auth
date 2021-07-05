@@ -25,7 +25,7 @@ from humps.main import camelize
 from sbc_common_components.exception_handling.exception_handler import ExceptionHandler  # noqa: I001
 from sentry_sdk.integrations.flask import FlaskIntegration  # noqa: I001
 
-from auth_api import config  # noqa: I005
+import auth_api.config as config  # pylint:disable=consider-using-from-import
 from auth_api import models
 from auth_api.auth import jwt
 from auth_api.config import _Config
