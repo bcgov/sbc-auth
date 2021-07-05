@@ -419,6 +419,17 @@ def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argumen
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
+def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Org can be updated."""
+    org = factory_org_service()
+    org.update_org(TestOrgInfo.update_org_with_business_type)
+
+    dictionary = org.as_dict()
+    print('----------')
+    print(dictionary)
+    assert dictionary['business_type'] == TestOrgInfo.update_org_with_business_type['businessType']
+
+
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be updated."""
     org = factory_org_service()

@@ -481,6 +481,12 @@ class TestOrgInfo(dict, Enum):
         'accessType': AccessType.REGULAR.value
     }
 
+    update_org_with_business_type = {
+        'businessType': 'LAW',
+        'businessSize': '2-5',
+        'isBusinessAccount': True
+    }
+
     org_with_products = {
         'name': 'My Test Org',
         'paymentInfo': {
