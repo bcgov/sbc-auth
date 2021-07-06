@@ -410,14 +410,22 @@ def test_create_org_with_duplicate_name_bcol(session, keycloak_mock, monkeypatch
         assert exception.value.code == Error.DATA_CONFLICT.name
 
 
+def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Org name cannot be updated."""
+    org = factory_org_service()
+
+    with pytest.raises(BusinessException) as exception:
+        org.update_org(TestOrgInfo.org2)
+    assert exception.value.code == Error.INVALID_INPUT.name
+
+
 def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be updated."""
     org = factory_org_service()
-
-    org.update_org(TestOrgInfo.org2)
+    org.update_org(TestOrgInfo.update_org_with_business_type)
 
     dictionary = org.as_dict()
-    assert dictionary['name'] == TestOrgInfo.org2['name']
+    assert dictionary['business_type'] == TestOrgInfo.update_org_with_business_type['businessType']
 
 
 def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
@@ -435,18 +443,6 @@ def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
     updated_org = OrgService.change_org_status(org._model.id, OrgStatus.ACTIVE.value,
                                                SuspensionReasonCode.DISPUTE.name)
     assert updated_org.as_dict()['status_code'] == OrgStatus.ACTIVE.value
-
-
-def test_update_duplicate_org(session):  # pylint:disable=unused-argument
-    """Assert that an Org cannot be updated."""
-    org = factory_org_service()
-
-    factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
-                      payment_type_info=None)
-
-    with pytest.raises(BusinessException) as exception:
-        org.update_org(TestOrgInfo.org2)
-    assert exception.value.code == Error.DATA_CONFLICT.name
 
 
 def test_find_org_by_id(session, auth_mock):  # pylint:disable=unused-argument
@@ -477,18 +473,6 @@ def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
 
     assert found_org
     assert found_org.get('orgs')[0].get('name') == org_name
-
-
-def test_raise_error_if_duplicate_name(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that when org name is duplicate, DATA_CONFILICT error will be raised."""
-    org = factory_org_service()
-    dictionary = org.as_dict()
-    new_org_name = dictionary['name']
-
-    with pytest.raises(BusinessException) as exception:
-        OrgService.raise_error_if_duplicate_name(new_org_name)
-
-    assert exception.value.code == Error.DATA_CONFLICT.name
 
 
 def test_add_contact(session):  # pylint:disable=unused-argument
