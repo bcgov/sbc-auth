@@ -65,7 +65,7 @@
               depressed
               align="right"
               class="cancel-btn"
-              @click="closeConfirmModal()"
+              :to="accountInfoUrl"
               color="default"
               data-test="cancel-button"
               >Cancel
@@ -224,7 +224,7 @@ export default class AccountDeactivate extends Vue {
   }
 
   private get accountInfoUrl (): string {
-    return `/account/${this.currentOrganization?.id}`
+    return `/account/${this.currentOrganization?.id}/settings`
   }
 
   private async closeConfirmModal () {
