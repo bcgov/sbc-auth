@@ -28,7 +28,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, AffidavitStatus, ChangeType, NotificationType
+from auth_api.utils.enums import AccessType, AffidavitStatus, NotificationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import Status
 from auth_api.utils.role_validator import validate_roles
@@ -143,7 +143,6 @@ class Org(Resource):
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
-        action = request.args.get('action', '').upper()
         valid_format, errors = schema_utils.validate(request_json, 'org')
         token_info = g.jwt_oidc_token_info
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
@@ -156,10 +155,7 @@ class Org(Resource):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
-                if action in (ChangeType.DOWNGRADE.value, ChangeType.UPGRADE.value):
-                    response, status = org.change_org_ype(request_json, action).as_dict(), http_status.HTTP_200_OK
-                else:
-                    response, status = org.update_org(org_info=request_json, origin_url=origin).as_dict(), \
+                response, status = org.update_org(org_info=request_json, origin_url=origin).as_dict(), \
                                        http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \

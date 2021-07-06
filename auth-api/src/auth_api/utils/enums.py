@@ -91,15 +91,6 @@ class OrgType(Enum):
     BASIC = 'BASIC'
 
 
-class ChangeType(Enum):
-    """Org upgrade or downgrade."""
-
-    UPGRADE = 'UPGRADE'
-    DOWNGRADE = 'DOWNGRADE'
-    SUSPEND = 'SUSPEND'
-    UNSUSPEND = 'UNSUSPEND'
-
-
 class DocumentType(Enum):
     """Document types."""
 
