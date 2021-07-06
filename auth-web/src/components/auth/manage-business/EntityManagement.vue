@@ -317,7 +317,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private get enableBusinessTable (): boolean {
     // disabling table manually for early stages of development.
-    return true // LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false
+    return false // LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false
   }
 
   // open Name Request
