@@ -201,10 +201,10 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, LoginSource, Pages } from '@/util/constants'
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
@@ -234,7 +234,8 @@ import i18n from '@/plugins/i18n'
     ...mapState('org', [
       'currentOrgAddress'
     ]),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState('user', ['userProfile', 'currentUser']),
+    ...mapGetters('org', ['isPremiumAccount'])
   },
   methods: {
     ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
@@ -254,6 +255,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   businessIdentifier: string = null
 
   protected readonly currentAccountSettings!: AccountSettings
+  private readonly isPremiumAccount!: boolean
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
@@ -315,12 +317,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private get enableBusinessTable (): boolean {
     // disabling table manually for early stages of development.
-    return false // LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false
-  }
-
-  /** Is True if the current account is premium. */
-  private get isPremiumAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.PREMIUM
+    return true // LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false
   }
 
   // open Name Request

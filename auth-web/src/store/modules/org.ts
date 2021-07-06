@@ -87,6 +87,11 @@ export default class OrgModule extends VuexModule {
   resetAccountTypeOnSetupAccount = false // this flag use to check need to reset accounttype select when moving back and forth in stepper
   vDisplayModeValue = ''// DisplayModeValues.VIEW_ONLY
 
+  /** Is True if the current account is premium. */
+  get isPremiumAccount (): boolean {
+    return this.currentOrganization?.orgType === Account.PREMIUM
+  }
+
   @Mutation
   public setIsCurrentSelectedProductsPremiumOnly (isCurrentSelectedProductsPremiumOnly:boolean) {
     this.isCurrentSelectedProductsPremiumOnly = isCurrentSelectedProductsPremiumOnly

@@ -37,7 +37,7 @@
                   </v-btn>
                 </span>
 
-                      <!-- More Actions Menu -->
+                <!-- More Actions Menu -->
                 <span class="more-actions mr-4">
                   <v-menu
                     offset-y left nudge-bottom="4"
@@ -84,19 +84,19 @@
 </template>
 
 <script lang='ts'>
-import { Account, CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Business, BusinessRequest } from '@/models/business'
 import { Component, Emit, Prop, Watch } from 'vue-property-decorator'
+import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import { Action } from 'vuex-class'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import Vue from 'vue'
 
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['currentOrganization'])
+    ...mapState('org', ['currentOrganization']),
+    ...mapGetters('org', ['isPremiumAccount'])
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
@@ -105,7 +105,7 @@ import Vue from 'vue'
 })
 export default class AffiliatedEntityTable extends Vue {
   @Prop({ default: () => [] })
-  readonly affiliatedEntities
+  readonly affiliatedEntities: Array<any>
 
   @Prop({ default: [] })
   readonly selectedColumns: Array<string>
@@ -115,6 +115,7 @@ export default class AffiliatedEntityTable extends Vue {
   private readonly currentOrganization!: Organization
   private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
   private headers: Array<any> = []
+  private readonly isPremiumAccount!: boolean
   private isLoading: boolean = false
 
   /** V-model for dropdown menus. */
@@ -128,11 +129,6 @@ export default class AffiliatedEntityTable extends Vue {
   /** Filter the headers we want to show. */
   private get getHeaders (): Array<any> {
     return this.headers.filter(x => x.show)
-  }
-
-  /** Is True if the current account is premium. */
-  private get isPremiumAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.PREMIUM
   }
 
   /** Open the businesses dashboard.
@@ -209,7 +205,7 @@ export default class AffiliatedEntityTable extends Vue {
 #affiliated-entity-section {
   .table-header {
     display: flex;
-    background-color: $BCgovBlue5O;
+    background-color: $app-lt-blue;
     padding: .875rem;
   }
 
@@ -219,7 +215,7 @@ export default class AffiliatedEntityTable extends Vue {
 
       &:hover {
         cursor: pointer;
-        background-color: $BCgovBlue5O !important;
+        background-color: $app-lt-blue !important;
       }
 
       td {
