@@ -269,9 +269,9 @@ export default class AffiliatedEntityTable extends Vue {
 }
 
 ::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
-  color: #1669BB;
+  color: $app-blue;
   .v-icon.v-icon {
-    color: #1669BB;
+    color: $app-blue;
   }
 }
 </style>
