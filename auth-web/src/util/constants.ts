@@ -168,7 +168,8 @@ export enum LDFlags {
     EnableMandatoryAddress = 'enable-mandatory-address',
     EnableGovmInvite = 'enable-govm-account-invite',
     HideProductPackage = 'hide-product-packages',
-    EnableOrgNameAutoComplete = 'enable-org-name-auto-complete'
+    EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
+    EnableBusinessTable = 'enable-business-table'
 }
 
 export enum DateFilterCodes {
