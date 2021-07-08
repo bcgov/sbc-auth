@@ -158,7 +158,9 @@ export default class App extends Mixins(NextPageMixin) {
     this.accountFreezeRedirect()
 
     // Some edge cases where user needs to be redirected based on their account status and current location
-    if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+    if (typeof (this.currentOrganization?.isBusinessAccount) === 'undefined') {
+      this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
       this.$router.push(`/home`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {

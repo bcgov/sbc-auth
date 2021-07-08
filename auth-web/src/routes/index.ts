@@ -145,6 +145,8 @@ router.beforeEach((to, from, next) => {
           case LoginSource.BCEID:
             return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
         }
+      } else if (typeof (currentOrganization?.isBusinessAccount) === 'undefined') {
+        return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }
     originalTarget ? next(originalTarget) : next()

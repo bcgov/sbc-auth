@@ -58,6 +58,7 @@ import StaffSuspendedAccountsTable from '@/components/auth/staff/account-managem
 import TermsOfServiceDeclineView from '@/views/auth/TermsOfServiceDeclineView.vue'
 import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
+import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
 
 function mapReturnPayVars (route: any) {
@@ -257,6 +258,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/setup-govm-account',
       name: 'setupaccount',
       component: GovmAccountSetupView,
+      props: true,
+      meta: { requiresAuth: true, requiresProfile: true }
+    },
+    {
+      path: '/update-account',
+      name: 'updateaccount',
+      component: UpdateAccountView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
     },

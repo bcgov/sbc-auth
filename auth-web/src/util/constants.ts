@@ -37,6 +37,7 @@ export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
     CREATE_GOVM_ACCOUNT = 'setup-govm-account',
+    UPDATE_ACCOUNT = 'update-account',
     CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
     CHOOSE_AUTH_METHOD = 'choose-authentication-method',
     PENDING_APPROVAL = 'pendingapproval',
