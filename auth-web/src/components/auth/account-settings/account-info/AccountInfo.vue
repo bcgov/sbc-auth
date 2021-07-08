@@ -140,7 +140,6 @@
             >
               Deactivate Account
             </v-btn>
-            <span v-if="editEnabled">
             <v-btn
               large
               class="save-btn"
@@ -149,6 +148,7 @@
               :disabled="!isSaveEnabled()"
               :loading="btnLabel == 'Saving'"
               aria-label="Save Account Information"
+              v-if="editEnabled"
               @click="updateDetails()"
             >
               <v-expand-x-transition>
@@ -164,9 +164,9 @@
               aria-label="Reset Account Information"
               @click="resetForm"
               data-test="reset-button"
+              v-if="editEnabled"
               >Reset</v-btn
             >
-              </span>
           </div>
         </div>
       </v-form>
