@@ -497,9 +497,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async updateDetails () {
     this.errorMessage = ''
     this.btnLabel = 'Saving'
-    let createRequestBody: CreateRequestBody = {
-      name: this.orgName
-    }
+    const createRequestBody: CreateRequestBody = {}
     if (this.baseAddress) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
     }
