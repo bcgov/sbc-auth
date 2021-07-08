@@ -126,7 +126,7 @@
           </template>
         </div>
 
-        <div v-if="editEnabled">
+        <div>
           <v-divider class="mt-3 mb-10"></v-divider>
           <div class="form__btns">
             <v-btn
@@ -140,7 +140,6 @@
             >
               Deactivate Account
             </v-btn>
-
             <v-btn
               large
               class="save-btn"
@@ -149,6 +148,7 @@
               :disabled="!isSaveEnabled()"
               :loading="btnLabel == 'Saving'"
               aria-label="Save Account Information"
+              v-if="editEnabled"
               @click="updateDetails()"
             >
               <v-expand-x-transition>
@@ -164,6 +164,7 @@
               aria-label="Reset Account Information"
               @click="resetForm"
               data-test="reset-button"
+              v-if="editEnabled"
               >Reset</v-btn
             >
           </div>
