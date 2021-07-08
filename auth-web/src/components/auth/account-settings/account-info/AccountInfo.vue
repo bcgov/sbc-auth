@@ -126,7 +126,7 @@
           </template>
         </div>
 
-        <div v-if="editEnabled">
+        <div>
           <v-divider class="mt-3 mb-10"></v-divider>
           <div class="form__btns">
             <v-btn
@@ -140,7 +140,7 @@
             >
               Deactivate Account
             </v-btn>
-
+            <span v-if="editEnabled">
             <v-btn
               large
               class="save-btn"
@@ -166,6 +166,7 @@
               data-test="reset-button"
               >Reset</v-btn
             >
+              </span>
           </div>
         </div>
       </v-form>
