@@ -43,18 +43,17 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LoginSource, Pages, Permission, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import { MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
-import BusinessModule from '@/store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import { MembershipStatus } from '@/models/Organization'
 import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
 import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -73,7 +72,10 @@ import { getModule } from 'vuex-module-decorators'
     NavigationBar
   },
   computed: {
-    ...mapState('org', ['currentAccountSettings']),
+    ...mapState('org', [
+      'currentAccountSettings',
+      'permissions'
+    ]),
     ...mapState('user', ['currentUser']),
     ...mapGetters('auth', ['isAuthenticated'])
   },
@@ -84,10 +86,8 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class App extends Mixins(NextPageMixin) {
   private authModule = getModule(AuthModule, this.$store)
-  private readonly setCurrentOrganization!: (org: Organization) => void
-  private readonly isAuthenticated!: boolean
   private readonly loadUserInfo!: () => KCUserProfile
-  private businessStore = getModule(BusinessModule, this.$store)
+  readonly permissions!: string[]
   private showNotification = false
   private notificationText = ''
   private showLoading = true
@@ -153,7 +153,7 @@ export default class App extends Mixins(NextPageMixin) {
     this.accountFreezeRedirect()
 
     // Some edge cases where user needs to be redirected based on their account status and current location
-    if (typeof (this.currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization.accessType !== AccessType.GOVM) {
+    if (typeof (this.currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization.accessType !== AccessType.GOVM && this.canEditBusinessInfo) {
       this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
@@ -195,6 +195,10 @@ export default class App extends Mixins(NextPageMixin) {
       this.setLogOutUrl()
       callback()
     })
+  }
+
+  get canEditBusinessInfo (): boolean {
+    return [Permission.EDIT_BUSINESS_INFO].some(per => this.permissions.includes(per))
   }
 
   private setLogOutUrl () {

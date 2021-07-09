@@ -105,10 +105,10 @@
             </v-text-field>
           </div>
         </div>
-        <div class="nv-list-item">
+        <div class="nv-list-item" v-if="isBusinessAccount">
           <div class="name"></div>
           <div class="value">
-        <AccountBusinessTypePicker
+        <AccountBusinessTypePicker disabled
           @update:org-business-type="updateOrgBusinessType" ref="accountBusinessTypePickerRef">
         </AccountBusinessTypePicker>
           </div>
@@ -173,7 +173,6 @@
               v-if="editEnabled"
               >Reset</v-btn
             >
-            </span>
           </div>
         </div>
       </v-form>

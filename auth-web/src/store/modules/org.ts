@@ -300,7 +300,7 @@ export default class OrgModule extends VuexModule {
   }
 
   get isBusinessAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.PREMIUM
+    return this.currentOrganization?.isBusinessAccount === true
   }
 
   @Action({ rawError: true })
