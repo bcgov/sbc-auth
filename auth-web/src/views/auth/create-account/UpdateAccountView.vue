@@ -65,7 +65,6 @@
                     label="Branch/Division (Optional)"
                     v-model.trim="branchName"
                     data-test="input-branch-name"
-                    v-on:keyup="onOrgBusinessTypeChange()"
                   />
                 </v-expand-transition>
                 <AccountBusinessTypePicker

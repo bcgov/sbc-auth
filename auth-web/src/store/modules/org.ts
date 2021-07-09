@@ -294,6 +294,10 @@ export default class OrgModule extends VuexModule {
     this.currentSelectedProducts = []
   }
 
+  get isBusinessAccount (): boolean {
+    return this.currentOrganization?.orgType === Account.PREMIUM
+  }
+
   @Action({ rawError: true })
   public async resetCurrentOrganization (): Promise<void> {
     this.context.commit('setCurrentOrganization', undefined)
