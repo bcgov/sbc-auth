@@ -91,7 +91,6 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
-import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import { Pages } from '@/util/constants'
 import { namespace } from 'vuex-class'
@@ -99,12 +98,10 @@ import { namespace } from 'vuex-class'
 const OrgModule = namespace('org')
 
 @Component({
-  components: { AccountBusinessTypePicker, AccountBusinessType }
+  components: { AccountBusinessTypePicker }
 })
 export default class UpdateAccountView extends Vue {
   @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
   @OrgModule.Action('updateOrg') private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   private errorMessage: string = ''
   private isBusinessAccount = null

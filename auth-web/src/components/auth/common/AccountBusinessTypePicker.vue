@@ -53,7 +53,6 @@ import { OrgBusinessType, Organization } from '@/models/Organization'
 import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Code } from '@/models/Code'
-import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -61,7 +60,6 @@ const CodesModule = namespace('codes')
 
 @Component({
   components: {
-    OrgNameAutoComplete
   }
 })
 export default class AccountBusinessTypePicker extends Mixins(AccountChangeMixin) {
@@ -82,12 +80,8 @@ export default class AccountBusinessTypePicker extends Mixins(AccountChangeMixin
     businessSize: HTMLFormElement
   }
 
-  // input fields
-  private isBusinessAccount = false
-  private name = ''
   private businessType = ''
   private businessSize = ''
-  private branchName = ''
 
   // Input field rules
   private readonly orgBusinessTypeRules = [v => !!v || 'A business type is required']
@@ -116,15 +110,9 @@ export default class AccountBusinessTypePicker extends Mixins(AccountChangeMixin
       this.isLoading = true
       await this.getBusinessSizeCodes()
       await this.getBusinessTypeCodes()
-      if (this.currentOrganization.name) {
-        // incase if the new account is a premium account, default business type to business account
-        this.isBusinessAccount = this.currentOrganization.isBusinessAccount
-        this.businessType = this.currentOrganization.businessType
-        this.businessSize = this.currentOrganization.businessSize
-        this.branchName = this.currentOrganization.branchName
-      } else {
-        this.isBusinessAccount = this.currentOrganization.orgType !== Account.BASIC
-      }
+      // incase if the new account is a premium account, default business type to business account
+      this.businessType = this.currentOrganization.businessType
+      this.businessSize = this.currentOrganization.businessSize
     } catch (ex) {
       // eslint-disable-next-line no-console
       console.log(`error while loading account business type -  ${ex}`)
@@ -147,18 +135,5 @@ export default class AccountBusinessTypePicker extends Mixins(AccountChangeMixin
 @import '$assets/scss/theme.scss';
 .view-container {
     padding: 0 !important;
-}
-.business-radio{
-  display: flex;
-  .v-radio{
-     padding: 10px;
-    background-color: rgba(0,0,0,.06);
-    min-width: 50%;
-    border: 1px rgba(0,0,0,.06) !important;
-  }
-  .v-radio.theme--light.v-item--active {
-      border: 1px solid var(--v-primary-base) !important;
-      background-color: $BCgovInputBG !important;
-  }
 }
 </style>

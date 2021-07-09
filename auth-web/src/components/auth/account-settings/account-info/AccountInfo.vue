@@ -108,7 +108,7 @@
         <div class="nv-list-item" v-if="isBusinessAccount">
           <div class="name"></div>
           <div class="value">
-        <AccountBusinessTypePicker disabled
+        <AccountBusinessTypePicker
           @update:org-business-type="updateOrgBusinessType" ref="accountBusinessTypePickerRef">
         </AccountBusinessTypePicker>
           </div>
