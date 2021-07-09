@@ -7,6 +7,12 @@
           >{{ statusLabel }}
           </v-col>
     </v-row>
+    <v-row v-if="isAccountOnHold">
+      <v-col class="col-12 col-sm-5 py-2">Reason</v-col>
+      <v-col class="py-2">
+          {{ accountOnHoldRemarks }}
+      </v-col>
+    </v-row>
     <v-row v-if="!isPendingReviewPage">
       <v-col class="col-12 col-sm-5 py-2">
         <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIVE">Approved By</span>
@@ -26,8 +32,8 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import { Task } from '@/models/Task'
-import { TaskRelationshipStatus } from '@/util/constants'
 import moment from 'moment'
 
 @Component({})
@@ -45,11 +51,21 @@ export default class AccountStatusTab extends Vue {
       case TaskRelationshipStatus.REJECTED:
         return 'Rejected'
       case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
-        return 'Pending'
+        // Eg, If the task pertaining to the BCEID account review is on hold then we display the status as "on hold" else "pending"
+        return this.isAccountOnHold ? 'On Hold' : 'Pending'
       default:
         return ''
     }
   }
+
+  private get isAccountOnHold (): boolean {
+    return this.taskDetails.status === TaskStatus.HOLD
+  }
+
+  private get accountOnHoldRemarks (): string {
+    return this.taskDetails?.remarks
+  }
+
   private formatDate (date: Date): string {
     return moment(date).format('MMM DD, YYYY')
   }

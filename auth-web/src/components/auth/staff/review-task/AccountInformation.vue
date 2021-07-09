@@ -75,7 +75,7 @@ export default class AccountInformation extends Vue {
 
   @Prop({ default: 'Account Information' }) private title: string
   @Prop({ default: {} }) accountUnderReview: any
-  @Prop({ default: {} }) accountUnderReviewAddress: Address
+  @Prop({ default: null }) accountUnderReviewAddress: Address
 
   AccessType = AccessType
   Account = Account
