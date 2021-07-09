@@ -8,6 +8,7 @@ import { Organization } from '@/models/Organization'
 import Vue from 'vue'
 import { mapState } from 'vuex'
 @Component({
+  name: 'AccountMixin',
   computed: {
     ...mapState('user', [
       'currentUser'
@@ -30,6 +31,10 @@ export default class AccountMixin extends Vue {
   }
   protected get isRegularAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.REGULAR
+  }
+
+  protected get anonAccount (): boolean {
+    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 }
 </script>

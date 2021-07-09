@@ -258,19 +258,19 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, LDFlags, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
+import { AccountStatus, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
+import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
@@ -306,14 +306,13 @@ const CodesModule = namespace('codes')
     ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
-export default class AccountInfo extends Mixins(AccountChangeMixin) {
+export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin) {
   @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
 
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
-  private readonly currentOrganization!: Organization
+  readonly currentOrganization!: Organization
   private readonly currentOrgAddress!: Address
-  private readonly currentMembership!: Member
   private readonly currentUser!: KCUserProfile
   private readonly permissions!: string[]
   private dialogTitle: string = ''
@@ -349,10 +348,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     accountBusinessTypePickerRef: HTMLFormElement
   }
 
-  private isFormValid (): boolean {
-    return !!this.orgName || this.orgName === this.currentOrganization?.name
-  }
-
   @Watch('branchName')
   onBranchNameChange (newVal:string, oldVal:string) {
     if (newVal !== oldVal) {
@@ -361,22 +356,17 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private async setup () {
-    // eslint-disable-next-line no-console
-    console.log('-------I got invokle-')
-    const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
     this.branchName = this.currentOrganization?.branchName || ''
-    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
-      await this.syncAddress()
-      // show this part only when enablePaymentMethodSelectorStep= true and account is not anon
-      if (!this.anonAccount && this.enableMandatoryAddress) {
-        if (Object.keys(this.currentOrgAddress).length === 0) {
-          this.isCompleteAccountInfo = false
-          this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
-            : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
-          this.$refs.editAccountForm?.validate() // validate form fields and show error message
-          this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
-        }
+    await this.syncAddress()
+    // show this part only account is not anon
+    if (!this.anonAccount) {
+      if (Object.keys(this.currentOrgAddress).length === 0) {
+        this.isCompleteAccountInfo = false
+        this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
+          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
+        this.$refs.editAccountForm?.validate() // validate form fields and show error message
+        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
       }
     } else {
       // inorder to hide the address if not premium account
@@ -479,33 +469,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.$refs.accountBusinessTypePickerRef?.setup()
   }
 
-  get isPremiumAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.PREMIUM
-  }
-
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
-  }
-
   private isSaveEnabled () {
-    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
-      // org name is read only ;the only thing which they can change is address
-      // detect any change in address
-      return this.isBaseAddressValid
+    if (this.anonAccount) {
+      return false
     }
-    if (this.currentOrganization?.orgType === Account.BASIC) {
-      return this.isFormValid()
-    }
-    // nothing can be changed in anonymous org
-    return false
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
-  }
-
-  private get enableMandatoryAddress (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+    return this.isBaseAddressValid // address is the only field which can be invalid for now
   }
 
   private enableBtn () {
@@ -553,10 +521,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       }
     }
   }
-
-  private readonly accountNameRules = [
-    v => !!v || 'An account name is required'
-  ]
 
   private checkBaseAddressValidity (isValid) {
     this.isBaseAddressValid = !!isValid
