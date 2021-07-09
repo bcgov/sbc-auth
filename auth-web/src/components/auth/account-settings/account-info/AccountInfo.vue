@@ -146,7 +146,6 @@
             >
               Deactivate Account
             </v-btn>
-            <span v-if="editEnabled">
             <v-btn
               large
               class="save-btn"
@@ -155,6 +154,7 @@
               :disabled="!isSaveEnabled()"
               :loading="btnLabel == 'Saving'"
               aria-label="Save Account Information"
+              v-if="editEnabled"
               @click="updateDetails()"
             >
               <v-expand-x-transition>
@@ -170,6 +170,7 @@
               aria-label="Reset Account Information"
               @click="resetForm"
               data-test="reset-button"
+              v-if="editEnabled"
               >Reset</v-btn
             >
             </span>
@@ -484,6 +485,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
   private async updateDetails () {
     this.errorMessage = ''
     this.btnLabel = 'Saving'
+
     let createRequestBody: CreateRequestBody = {
     }
     if (this.baseAddress && this.addressChanged) {

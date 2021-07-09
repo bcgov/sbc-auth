@@ -56,10 +56,43 @@
         </div>
       </div>
 
-      <AffiliatedEntityList
-        @add-business="showAddBusinessModal()"
-        @remove-business="showPasscodeResetOptionsModal($event)"
-      />
+      <!-- Feature flagged future Dashboard table -->
+      <template v-if="enableBusinessTable">
+        <v-row no-gutters>
+          <v-col cols="9"></v-col>
+          <v-col class="mr-4">
+            <v-select
+                v-model="selectedColumns"
+                :items="columns"
+                label="Columns to Show"
+                class="column-selector"
+                filled
+                multiple
+            >
+              <template v-slot:selection="{ item, index }">
+                <v-chip v-if="index === 0" class="mt-2">
+                  <span>{{ item }}</span>
+                </v-chip>
+                <span v-if="index === 1" class="grey--text text-caption">
+                (+{{ selectedColumns.length - 1 }} others)
+              </span>
+              </template>
+            </v-select>
+          </v-col>
+        </v-row>
+
+        <AffiliatedEntityTable
+            :selected-columns="selectedColumns"
+            @remove-business="showPasscodeResetOptionsModal($event)"
+        />
+      </template>
+
+      <template v-else>
+        <AffiliatedEntityList
+            @add-business="showAddBusinessModal()"
+            @remove-business="showPasscodeResetOptionsModal($event)"
+        />
+      </template>
 
       <PasscodeResetOptionsModal
       ref="passcodeResetOptionsModal"
@@ -171,13 +204,14 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityList from '@/components/auth/manage-business/AffiliatedEntityList.vue'
+import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -192,6 +226,7 @@ import i18n from '@/plugins/i18n'
     AddBusinessForm,
     AddNameRequestForm,
     AffiliatedEntityList,
+    AffiliatedEntityTable,
     ModalDialog,
     PasscodeResetOptionsModal
   },
@@ -199,7 +234,8 @@ import i18n from '@/plugins/i18n'
     ...mapState('org', [
       'currentOrgAddress'
     ]),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState('user', ['userProfile', 'currentUser']),
+    ...mapGetters('org', ['isPremiumAccount'])
   },
   methods: {
     ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
@@ -219,11 +255,14 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   businessIdentifier: string = null
 
   protected readonly currentAccountSettings!: AccountSettings
+  private readonly isPremiumAccount!: boolean
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
+  private selectedColumns = ['Number', 'Type', 'Status', 'Last Modified', 'Modified By']
+  private columns = ['Number', 'Type', 'Status', 'Last Modified', 'Modified By']
 
   $refs: {
     successDialog: ModalDialog
@@ -235,6 +274,9 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   private async mounted () {
+    // Apply the folio number for premium accounts.
+    if (this.isPremiumAccount) this.applyFolio()
+
     if (this.currentMembership === undefined) {
       this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
       return
@@ -271,6 +313,11 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+  }
+
+  private get enableBusinessTable (): boolean {
+    // disabling table manually for early stages of development.
+    return false // LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false
   }
 
   // open Name Request
@@ -387,6 +434,11 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   close () {
     this.$refs.errorDialog.close()
   }
+
+  private applyFolio (): void {
+    this.selectedColumns.splice(3, 0, 'Folio')
+    this.columns.splice(3, 0, 'Folio')
+  }
 }
 </script>
 
@@ -405,6 +457,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     }
   }
 
+  // Vuetify Overrides
   ::v-deep {
     .v-data-table td {
       padding-top: 1rem;
@@ -417,6 +470,21 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
       display: block;
       font-weight: 700;
     }
-  }
 
+    .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
+    .theme--light.v-list-item:focus:before {
+      opacity: 0 !important;
+    }
+
+    .theme--light.v-text-field--filled>.v-input__control>.v-input__slot {
+      background-color: white;
+    }
+
+    .v-list-item__action {
+      margin-right: 20px !important;
+    }
+    .v-list-item .v-list-item__subtitle, .v-list-item .v-list-item__title {
+      color: $gray7;
+    }
+  }
 </style>
