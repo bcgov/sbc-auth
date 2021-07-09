@@ -17,6 +17,7 @@ export interface Task {
     user?: number;
     dueDate?: Date;
     accountId?:number;
+    remarks?: string;
 }
 export interface TaskFilterParams {
     statuses?: string[];
