@@ -37,7 +37,6 @@
                       :value="false"
                       data-test="radio-individual-account-type"
                       class="px-4 py-5"
-                      @change="onOrgBusinessTypeChange(true)"
                     ></v-radio>
                     <v-radio
                       label="Business Name"
@@ -45,7 +44,6 @@
                       :value="true"
                       data-test="radio-business-account-type"
                       class="px-4 py-5"
-                      @change="onOrgBusinessTypeChange(true)"
                     ></v-radio>
                   </v-col>
                 </v-row>
@@ -91,10 +89,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
+import { Pages } from '@/util/constants'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -107,7 +106,6 @@ export default class UpdateAccountView extends Vue {
   @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
   @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
   @OrgModule.Action('updateOrg') private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-  private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
   private errorMessage: string = ''
   private isBusinessAccount = null
   private canSubmit = false
@@ -115,28 +113,16 @@ export default class UpdateAccountView extends Vue {
   private orgBusinessType: OrgBusinessType = null
 
   private async mounted () {
-    if (this.currentOrganization?.branchName) {
-      this.branchName = this.currentOrganization.branchName
-    }
+    this.branchName = this.currentOrganization?.branchName
   }
 
-  async onOrgBusinessTypeChange (clearOrgName: boolean = false) {
-    await this.$nextTick()
-    // eslint-disable-next-line no-console
-    console.log('-------', this.isBusinessAccount)
-    if (this.isBusinessAccount === false) {
-      this.canSubmit = true
-    } else {
-      this.canSubmit = false
-    }
+  @Watch('isBusinessAccount')
+  async onOrgBusinessTypeChange () {
+    this.canSubmit = this.isBusinessAccount === false
   }
 
   private checkOrgBusinessTypeValid (isValid) {
-    // eslint-disable-next-line no-console
-    console.log('-----------isValid---', isValid)
-    if (isValid) {
-      this.canSubmit = true
-    }
+    this.canSubmit = isValid ? true : this.canSubmit
   }
 
   private async submit () {
@@ -150,15 +136,24 @@ export default class UpdateAccountView extends Vue {
     }
     try {
       await this.updateOrg(createRequestBody)
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
+      await this.$router.push(`/${Pages.HOME}`)
+    } catch (err) {
+      switch (err.response.status) {
+        case 409:
+          this.errorMessage =
+            'An account with this branch name already exists. Try a different branch name.'
+          break
+        case 400:
+          this.errorMessage = 'Invalid account name'
+          break
+        default:
+          this.errorMessage =
+            'An error occurred while attempting to update your account.'
+      }
     }
   }
 
   private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    // eslint-disable-next-line no-console
-    console.log('---------', orgBusinessType)
     this.orgBusinessType = orgBusinessType
   }
 }

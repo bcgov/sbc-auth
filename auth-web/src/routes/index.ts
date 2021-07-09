@@ -1,13 +1,13 @@
 /* eslint-disable no-console */
 import {
   ALLOWED_URIS_FOR_PENDING_ORGS,
+  AccessType,
   Account,
   AccountStatus,
   LoginSource,
   Pages,
   Permission,
-  Role,
-  SessionStorageKeys
+  Role, SessionStorageKeys
 } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import Router, { Route } from 'vue-router'
@@ -145,7 +145,7 @@ router.beforeEach((to, from, next) => {
           case LoginSource.BCEID:
             return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
         }
-      } else if (typeof (currentOrganization?.isBusinessAccount) === 'undefined') {
+      } else if (typeof (currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization.accessType !== AccessType.GOVM) {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }

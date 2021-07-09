@@ -108,7 +108,7 @@
           <div class="name"></div>
           <div class="value">
         <AccountBusinessTypePicker
-          @update:org-business-type="updateOrgBusinessType">
+          @update:org-business-type="updateOrgBusinessType" ref="accountBusinessTypePickerRef">
         </AccountBusinessTypePicker>
           </div>
         </div>
@@ -259,7 +259,7 @@
 
 <script lang="ts">
 import { AccessType, Account, AccountStatus, LDFlags, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
@@ -345,14 +345,24 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     mailingAddress: HTMLFormElement,
     suspendAccountDialog: ModalDialog,
     suspensionCompleteDialog: ModalDialog,
-    suspensionReasonForm: HTMLFormElement
+    suspensionReasonForm: HTMLFormElement,
+    accountBusinessTypePickerRef: HTMLFormElement
   }
 
   private isFormValid (): boolean {
     return !!this.orgName || this.orgName === this.currentOrganization?.name
   }
 
+  @Watch('branchName')
+  onBranchNameChange (newVal:string, oldVal:string) {
+    if (newVal !== oldVal) {
+      this.enableBtn()
+    }
+  }
+
   private async setup () {
+    // eslint-disable-next-line no-console
+    console.log('-------I got invokle-')
     const accountSettings = this.getAccountFromSession()
     this.orgName = this.currentOrganization?.name || ''
     this.branchName = this.currentOrganization?.branchName || ''
@@ -466,6 +476,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async resetForm () {
     this.setup()
     await this.syncAddress()
+    this.$refs.accountBusinessTypePickerRef?.setup()
   }
 
   get isPremiumAccount (): boolean {
@@ -509,7 +520,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     if (this.baseAddress && this.addressChanged) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
     }
-    if (this.isBusinessAccount) {
+    if (this.isBusinessAccount && this.orgBusinessType) {
       if (this.currentOrganization.businessSize !== this.orgBusinessType.businessSize) {
         createRequestBody.businessSize = this.orgBusinessType.businessSize
       }

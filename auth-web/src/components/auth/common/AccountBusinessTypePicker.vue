@@ -20,7 +20,6 @@
                         v-model="businessType"
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
-                        @change="onOrgBusinessTypeChange()"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         ref="businessType"
                         />
@@ -35,7 +34,6 @@
                         v-model="businessSize"
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
-                        @change="onOrgBusinessTypeChange()"
                         :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
                         ref="businessSize"
                         />
@@ -49,11 +47,12 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+
+import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
+import { Account } from '@/util/constants'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Code } from '@/models/Code'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import { namespace } from 'vuex-class'
 
@@ -65,7 +64,7 @@ const CodesModule = namespace('codes')
     OrgNameAutoComplete
   }
 })
-export default class AccountBusinessTypePicker extends Vue {
+export default class AccountBusinessTypePicker extends Mixins(AccountChangeMixin) {
   @Prop({ default: null }) errorMessage: string
   @Prop({ default: false }) saving: boolean
 
@@ -79,11 +78,8 @@ export default class AccountBusinessTypePicker extends Vue {
   private isLoading = false
 
   $refs: {
-    accountInformationForm: HTMLFormElement,
-    name: HTMLFormElement,
     businessType: HTMLFormElement,
-    businessSize: HTMLFormElement,
-    isBusinessAccount: HTMLFormElement
+    businessSize: HTMLFormElement
   }
 
   // input fields
@@ -111,8 +107,12 @@ export default class AccountBusinessTypePicker extends Vue {
   }
 
   async mounted () {
+    this.setAccountChangedHandler(this.setup)
+    await this.setup()
+  }
+  public async setup () {
     try {
-    // load business type and size codes
+      // load business type and size codes
       this.isLoading = true
       await this.getBusinessSizeCodes()
       await this.getBusinessTypeCodes()
@@ -133,9 +133,9 @@ export default class AccountBusinessTypePicker extends Vue {
     }
   }
 
+  @Watch('businessType')
+  @Watch('businessSize')
   async onOrgBusinessTypeChange () {
-    // eslint-disable-next-line no-console
-    console.log('-------value--------')
     await this.$nextTick()
     this.emitUpdatedOrgBusinessType()
     this.emitValid()
