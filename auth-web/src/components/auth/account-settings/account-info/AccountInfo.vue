@@ -100,6 +100,7 @@
               filled
               label="Branch/Division (Optional)"
               v-model="branchName"
+              v-can:CHANGE_ORG_NAME.disable
             >
             </v-text-field>
           </div>
