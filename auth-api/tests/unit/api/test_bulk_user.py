@@ -33,7 +33,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 
 KEYCLOAK_SERVICE = KeycloakService()
 
-CONFIG = get_named_config()
+CONFIG = get_named_config('testing')
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
