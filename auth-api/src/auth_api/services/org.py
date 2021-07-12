@@ -307,6 +307,9 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_name_getting_updated:
             raise BusinessException(Error.INVALID_INPUT, None)
 
+        if branch_name := org_info['branchNname']:
+            self._raise_error_if_duplicate_name(name=org_info['name'], branch_name=branch_name, org_id=self._model.id)
+
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
@@ -878,3 +881,11 @@ class Org:  # pylint: disable=too-many-public-methods
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_govm_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
+
+    @staticmethod
+    def _raise_error_if_duplicate_name(name, branch_name=None, org_id=None):
+        """Raise error if there is duplicate org name already."""
+        arg_dict = {'name': name,
+                    'branch_name': branch_name,
+                    'org_id': org_id}
+        duplicate_org_name_validate(is_fatal=True, **arg_dict)
