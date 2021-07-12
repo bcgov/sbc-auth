@@ -145,9 +145,7 @@ router.beforeEach((to, from, next) => {
           case LoginSource.BCEID:
             return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
         }
-      } else if (typeof (currentOrganization?.isBusinessAccount) === 'undefined' &&
-        currentOrganization?.accessType !== AccessType.GOVM &&
-        permissions.some(code => code === Permission.EDIT_BUSINESS_INFO)) {
+      } else if ((store.state as any)?.org?.needMissingBusinessDetailsRedirect) {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }

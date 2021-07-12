@@ -78,7 +78,8 @@ import { getModule } from 'vuex-module-decorators'
       'permissions'
     ]),
     ...mapState('user', ['currentUser']),
-    ...mapGetters('auth', ['isAuthenticated'])
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('org', ['needMissingBusinessDetailsRedirect'])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization']),
@@ -89,13 +90,13 @@ export default class App extends Mixins(NextPageMixin) {
   private authModule = getModule(AuthModule, this.$store)
   private businessStore = getModule(BusinessModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
-  readonly permissions!: string[]
   private showNotification = false
   private notificationText = ''
   private showLoading = true
   private toastType = 'primary'
   private toastTimeout = 6000
   private logoutUrl = ''
+  private readonly needMissingBusinessDetailsRedirect!: boolean
   private navigationBarConfig: NavigationBarConfig = {
     titleItem: {
       name: '',
@@ -155,7 +156,7 @@ export default class App extends Mixins(NextPageMixin) {
     this.accountFreezeRedirect()
 
     // Some edge cases where user needs to be redirected based on their account status and current location
-    if (typeof (this.currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization.accessType !== AccessType.GOVM && this.canEditBusinessInfo) {
+    if (this.needMissingBusinessDetailsRedirect) {
       this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
@@ -197,10 +198,6 @@ export default class App extends Mixins(NextPageMixin) {
       this.setLogOutUrl()
       callback()
     })
-  }
-
-  get canEditBusinessInfo (): boolean {
-    return [Permission.EDIT_BUSINESS_INFO].some(per => this.permissions.includes(per))
   }
 
   private setLogOutUrl () {
