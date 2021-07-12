@@ -424,7 +424,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
   }
 
   private updateAddress (address: Address) {
-    this.setCurrentOrganizationAddress(address)
     this.addressChanged = true
     this.enableBtn()
   }
@@ -487,8 +486,11 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
 
     let createRequestBody: CreateRequestBody = {
     }
-    if (this.baseAddress && this.addressChanged) {
+    if (this.baseAddress && this.addressChanged && JSON.stringify(this.baseAddress) !== JSON.stringify(this.currentOrgAddress)) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
+    }
+    if (this.branchName !== this.currentOrganization.branchName) {
+      createRequestBody.branchName = this.branchName
     }
     if (this.isBusinessAccount && this.orgBusinessType) {
       if (this.currentOrganization.businessSize !== this.orgBusinessType.businessSize) {

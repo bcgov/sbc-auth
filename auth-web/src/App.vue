@@ -47,6 +47,7 @@ import { AccessType, LoginSource, Pages, Permission, SessionStorageKeys } from '
 import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
+import BusinessModule from './store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
@@ -86,6 +87,7 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class App extends Mixins(NextPageMixin) {
   private authModule = getModule(AuthModule, this.$store)
+  private businessStore = getModule(BusinessModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
   readonly permissions!: string[]
   private showNotification = false
