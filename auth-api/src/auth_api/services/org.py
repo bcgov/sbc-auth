@@ -307,7 +307,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_name_getting_updated:
             raise BusinessException(Error.INVALID_INPUT, None)
 
-        if branch_name := org_info['branchNname']:
+        if branch_name := org_info.get('branchname', None):
             self._raise_error_if_duplicate_name(name=org_info['name'], branch_name=branch_name, org_id=self._model.id)
 
         # If the account is created using BCOL credential, verify its valid bc online account
