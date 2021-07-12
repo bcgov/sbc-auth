@@ -306,9 +306,8 @@ class Org:  # pylint: disable=too-many-public-methods
         is_name_getting_updated = 'name' in org_info
         if is_name_getting_updated:
             raise BusinessException(Error.INVALID_INPUT, None)
-
-        if branch_name := org_info.get('branchname', None):
-            self._raise_error_if_duplicate_name(name=org_info['name'], branch_name=branch_name, org_id=self._model.id)
+        if branch_name := org_info.get('branchName', None):
+            self._raise_error_if_duplicate_name(name=org_model.name, branch_name=branch_name, org_id=self._model.id)
 
         # If the account is created using BCOL credential, verify its valid bc online account
         # If it's a valid account disable the current one and add a new one
@@ -366,7 +365,7 @@ class Org:  # pylint: disable=too-many-public-methods
         """Create Or update payment info for org."""
         if not payment_info and not is_new_org:  # To ignore payment info updates if no info is passed
             return
-
+        return
         selected_payment_method = payment_info.get('paymentMethod', None)
         arg_dict = {'selected_payment_method': selected_payment_method,
                     'access_type': org.access_type,
