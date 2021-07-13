@@ -13,7 +13,7 @@ from sbc_common_components.tracing.exception_tracing import ExceptionTracing  # 
 from auth_api.exceptions.errors import Error  # noqa: I001, I003
 
 
-class BusinessException(Exception):
+class BusinessException(Exception):  # noqa: N818
     """Exception that adds error code and error name, that can be used for i18n support."""
 
     def __init__(self, error, exception, *args, **kwargs):
@@ -30,7 +30,7 @@ class BusinessException(Exception):
         ExceptionTracing.trace(self, traceback.format_exc())
 
 
-class ServiceUnavailableException(Exception):
+class ServiceUnavailableException(Exception):  # noqa: N818
     """Exception to be raised if third party service is unavailable."""
 
     def __init__(self, error, *args, **kwargs):

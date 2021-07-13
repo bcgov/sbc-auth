@@ -9,15 +9,6 @@
           {{ errorMessage }}
         </v-alert>
 
-        <div v-can:VIEW_ACCOUNT.hide>
-          <div class="nv-list-item mb-10">
-            <div class="name" id="accountName">Account Name</div>
-            <div class="value" aria-labelledby="accountName">
-              <div class="value__title">{{ currentOrganization.name }}</div>
-            </div>
-          </div>
-        </div>
-
         <template v-show="!anonAccount">
           <div class="nv-list-item mb-10">
             <div class="name" id="accountNumber">Account Number</div>
@@ -90,21 +81,36 @@
           </div>
         </div>
 
-        <div class="nv-list-item" v-can:CHANGE_ORG_NAME.disable>
+        <div class="nv-list-item">
           <div class="name">Account Details</div>
           <div class="value">
             <v-text-field
               filled
-              clearable
-              required
+              disabled
               label="Account Name"
-              :rules="accountNameRules"
-              v-can:CHANGE_ORG_NAME.disable
-              :disabled="!canChangeAccountName()"
               v-model="orgName"
-              v-on:keydown="enableBtn()"
             >
             </v-text-field>
+          </div>
+        </div>
+        <div class="nv-list-item">
+          <div class="name"></div>
+          <div class="value">
+            <v-text-field
+              filled
+              label="Branch/Division (Optional)"
+              v-model="branchName"
+              v-can:CHANGE_ORG_NAME.disable
+            >
+            </v-text-field>
+          </div>
+        </div>
+        <div class="nv-list-item" v-if="isBusinessAccount">
+          <div class="name"></div>
+          <div class="value">
+        <AccountBusinessTypePicker
+          @update:org-business-type="updateOrgBusinessType" ref="accountBusinessTypePickerRef">
+        </AccountBusinessTypePicker>
           </div>
         </div>
 
@@ -253,18 +259,19 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, LDFlags, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins } from 'vue-property-decorator'
-import { CreateRequestBody, Member, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { AccountStatus, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
@@ -280,12 +287,14 @@ const CodesModule = namespace('codes')
     BaseAddressForm,
     OrgAdminContact,
     LinkedBCOLBanner,
-    ModalDialog
+    ModalDialog,
+    AccountBusinessTypePicker
   },
   computed: {
     ...mapState('user', [
       'currentUser'
     ]),
+    ...mapGetters('org', ['isBusinessAccount']),
     ...mapState('org', [
       'currentOrganization',
       'currentMembership',
@@ -298,14 +307,13 @@ const CodesModule = namespace('codes')
     ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
-export default class AccountInfo extends Mixins(AccountChangeMixin) {
+export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin) {
   @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
 
   private orgStore = getModule(OrgModule, this.$store)
   private btnLabel = 'Save'
-  private readonly currentOrganization!: Organization
+  readonly currentOrganization!: Organization
   private readonly currentOrgAddress!: Address
-  private readonly currentMembership!: Member
   private readonly currentUser!: KCUserProfile
   private readonly permissions!: string[]
   private dialogTitle: string = ''
@@ -313,6 +321,8 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private selectedSuspensionReasonCode: string = ''
   private suspensionCompleteDialogText: string = ''
   private isSuspensionReasonFormValid: boolean = false
+  private addressChanged = false
+  private readonly isBusinessAccount!: boolean
 
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
@@ -321,10 +331,12 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
   protected readonly suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
   private orgName = ''
+  private branchName = ''
   private errorMessage: string = ''
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private isBaseAddressValid: boolean = false
   private isCompleteAccountInfo = true
+  private orgBusinessType: OrgBusinessType = null
 
   private baseAddressSchema: {} = addressSchema
 
@@ -333,15 +345,43 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     mailingAddress: HTMLFormElement,
     suspendAccountDialog: ModalDialog,
     suspensionCompleteDialog: ModalDialog,
-    suspensionReasonForm: HTMLFormElement
+    suspensionReasonForm: HTMLFormElement,
+    accountBusinessTypePickerRef: HTMLFormElement
   }
 
-  private isFormValid (): boolean {
-    return !!this.orgName || this.orgName === this.currentOrganization?.name
+  @Watch('branchName')
+  onBranchNameChange (newVal:string, oldVal:string) {
+    if (newVal !== oldVal) {
+      this.enableBtn()
+    }
+  }
+
+  private async setup () {
+    this.orgName = this.currentOrganization?.name || ''
+    this.branchName = this.currentOrganization?.branchName || ''
+    await this.syncAddress()
+    // show this part only account is not anon
+    if (!this.anonAccount) {
+      if (Object.keys(this.currentOrgAddress).length === 0) {
+        this.isCompleteAccountInfo = false
+        this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
+          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
+        this.$refs.editAccountForm?.validate() // validate form fields and show error message
+        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
+      }
+    } else {
+      // inorder to hide the address if not premium account
+      this.baseAddress = null
+    }
   }
 
   private get isStaff (): boolean {
     return this.currentUser.roles.includes(Role.Staff)
+  }
+
+  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
+    this.orgBusinessType = orgBusinessType
+    this.enableBtn()
   }
 
   private get isSuspendButtonVisible (): boolean {
@@ -384,7 +424,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   }
 
   private updateAddress (address: Address) {
-    this.setCurrentOrganizationAddress(address)
+    this.addressChanged = true
     this.enableBtn()
   }
 
@@ -419,27 +459,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
     this.$refs.suspensionCompleteDialog.close()
   }
 
-  private async setup () {
-    const accountSettings = this.getAccountFromSession()
-    this.orgName = this.currentOrganization?.name || ''
-    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
-      await this.syncAddress()
-      // show this part only when enablePaymentMethodSelectorStep= true and account is not anon
-      if (!this.anonAccount && this.enableMandatoryAddress) {
-        if (Object.keys(this.currentOrgAddress).length === 0) {
-          this.isCompleteAccountInfo = false
-          this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
-            : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
-          this.$refs.editAccountForm?.validate() // validate form fields and show error message
-          this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
-        }
-      }
-    } else {
-      // inorder to hide the address if not premium account
-      this.baseAddress = null
-    }
-  }
-
   protected getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
@@ -447,47 +466,14 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async resetForm () {
     this.setup()
     await this.syncAddress()
-  }
-
-  get isPremiumAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.PREMIUM
-  }
-
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
-  }
-
-  // todo fix it completely by using permissions
-  private canChangeAccountName (): boolean {
-    if (this.currentOrganization?.accessType === AccessType.ANONYMOUS) {
-      return false
-    }
-    // Premium account name cant be updated
-    if (this.isPremiumAccount) {
-      return false
-    }
-    return [Permission.CHANGE_ORG_NAME].some(per => this.permissions.includes(per))
+    this.$refs.accountBusinessTypePickerRef?.setup()
   }
 
   private isSaveEnabled () {
-    if (this.isPremiumAccount || this.enablePaymentMethodSelectorStep) {
-      // org name is read only ;the only thing which they can change is address
-      // detect any change in address
-      return this.isBaseAddressValid
+    if (this.anonAccount) {
+      return false
     }
-    if (this.currentOrganization?.orgType === Account.BASIC) {
-      return this.isFormValid()
-    }
-    // nothing can be changed in anonymous org
-    return false
-  }
-
-  private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
-  }
-
-  private get enableMandatoryAddress (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+    return this.isBaseAddressValid // address is the only field which can be invalid for now
   }
 
   private enableBtn () {
@@ -497,14 +483,28 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
   private async updateDetails () {
     this.errorMessage = ''
     this.btnLabel = 'Saving'
-    const createRequestBody: CreateRequestBody = {}
-    if (this.baseAddress) {
+
+    let createRequestBody: CreateRequestBody = {
+    }
+    if (this.baseAddress && this.addressChanged && JSON.stringify(this.baseAddress) !== JSON.stringify(this.currentOrgAddress)) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
+    }
+    if (this.branchName !== this.currentOrganization.branchName) {
+      createRequestBody.branchName = this.branchName
+    }
+    if (this.isBusinessAccount && this.orgBusinessType) {
+      if (this.currentOrganization.businessSize !== this.orgBusinessType.businessSize) {
+        createRequestBody.businessSize = this.orgBusinessType.businessSize
+      }
+      if (this.currentOrganization.businessType !== this.orgBusinessType.businessType) {
+        createRequestBody.businessType = this.orgBusinessType.businessType
+      }
     }
     try {
       await this.updateOrg(createRequestBody)
       this.$store.commit('updateHeader')
       this.btnLabel = 'Saved'
+      this.addressChanged = false
       // assume info is complete
       if (this.baseAddress) {
         this.isCompleteAccountInfo = true
@@ -525,10 +525,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin) {
       }
     }
   }
-
-  private readonly accountNameRules = [
-    v => !!v || 'An account name is required'
-  ]
 
   private checkBaseAddressValidity (isValid) {
     this.isBaseAddressValid = !!isValid

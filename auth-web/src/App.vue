@@ -43,30 +43,25 @@
 </template>
 
 <script lang="ts">
+import { AccessType, LoginSource, Pages, Permission, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import { AccountSettings } from '@/models/account-settings'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
-import BusinessModule from '@/store/modules/business'
+import BusinessModule from './store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { MembershipStatus } from '@/models/Organization'
 import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
 import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from '@/store/modules/org'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -78,9 +73,13 @@ import { getModule } from 'vuex-module-decorators'
     NavigationBar
   },
   computed: {
-    ...mapState('org', ['currentAccountSettings']),
+    ...mapState('org', [
+      'currentAccountSettings',
+      'permissions'
+    ]),
     ...mapState('user', ['currentUser']),
-    ...mapGetters('auth', ['isAuthenticated'])
+    ...mapGetters('auth', ['isAuthenticated']),
+    ...mapGetters('org', ['needMissingBusinessDetailsRedirect'])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization']),
@@ -89,16 +88,15 @@ import { getModule } from 'vuex-module-decorators'
 })
 export default class App extends Mixins(NextPageMixin) {
   private authModule = getModule(AuthModule, this.$store)
-  private readonly setCurrentOrganization!: (org: Organization) => void
-  private readonly isAuthenticated!: boolean
-  private readonly loadUserInfo!: () => KCUserProfile
   private businessStore = getModule(BusinessModule, this.$store)
+  private readonly loadUserInfo!: () => KCUserProfile
   private showNotification = false
   private notificationText = ''
   private showLoading = true
   private toastType = 'primary'
   private toastTimeout = 6000
   private logoutUrl = ''
+  private readonly needMissingBusinessDetailsRedirect!: boolean
   private navigationBarConfig: NavigationBarConfig = {
     titleItem: {
       name: '',
@@ -158,7 +156,9 @@ export default class App extends Mixins(NextPageMixin) {
     this.accountFreezeRedirect()
 
     // Some edge cases where user needs to be redirected based on their account status and current location
-    if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+    if (this.needMissingBusinessDetailsRedirect) {
+      this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
       this.$router.push(`/home`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
