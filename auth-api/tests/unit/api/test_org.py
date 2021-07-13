@@ -556,6 +556,36 @@ def test_get_org_no_org_returns_404(client, jwt, session):  # pylint:disable=unu
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
+def test_update_org_duplicate_branch_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be updated via PUT."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # assert updating branch name works
+    new_branch_name = FAKE.name()
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'branchName': new_branch_name}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    rv = client.get(f'/api/v1/orgs/{org_id}', headers=headers,
+                    content_type='application/json')
+    dictionary = json.loads(rv.data)
+    assert dictionary.get('branchName') == new_branch_name
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    new_org_id = dictionary['id']
+
+    # assert updating branch name to same name doesnt work
+    rv = client.put('/api/v1/orgs/{}'.format(new_org_id), data=json.dumps({'branchName': new_branch_name}),
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_409_CONFLICT
+
+
+
 def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

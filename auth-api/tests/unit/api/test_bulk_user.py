@@ -33,7 +33,7 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 
 KEYCLOAK_SERVICE = KeycloakService()
 
-CONFIG = get_named_config()
+CONFIG = get_named_config('testing')
 
 
 def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
@@ -44,8 +44,7 @@ def test_add_user(client, jwt, session):  # pylint:disable=unused-argument
     assert schema_utils.validate(rv.json, 'user_response')[0]
 
 
-@pytest.mark.skip(reason='the approach changed;should be fixed later')
-def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_add_user_admin_valid_bcros(client, jwt, session, keycloak_mock, stan_server):  # pylint:disable=unused-argument
     """Assert that an org admin can create members."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_dir_search_role)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
