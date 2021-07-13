@@ -37,6 +37,7 @@ export enum Pages {
     USER_PROFILE = 'userprofile',
     CREATE_ACCOUNT = 'setup-account',
     CREATE_GOVM_ACCOUNT = 'setup-govm-account',
+    UPDATE_ACCOUNT = 'update-account',
     CREATE_NON_BCSC_ACCOUNT = 'setup-non-bcsc-account',
     CHOOSE_AUTH_METHOD = 'choose-authentication-method',
     PENDING_APPROVAL = 'pendingapproval',
@@ -158,7 +159,8 @@ export enum Permission {
     VIEW_ACTIVITYLOG = 'VIEW_ACTIVITYLOG',
     VIEW_REQUEST_PRODUCT_PACKAGE='VIEW_REQUEST_PRODUCT_PACKAGE',
     DEACTIVATE_ACCOUNT='DEACTIVATE_ACCOUNT',
-    VIEW_USER_LOGINSOURCE='VIEW_USER_LOGINSOURCE'
+    VIEW_USER_LOGINSOURCE='VIEW_USER_LOGINSOURCE',
+    EDIT_BUSINESS_INFO = 'EDIT_BUSINESS_INFO',
 }
 
 export enum LDFlags {

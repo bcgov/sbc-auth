@@ -1,4 +1,15 @@
-import { Account, AccountStatus, FeeCodes, LoginSource, Pages, PaymentTypes, Role, SessionStorageKeys, productStatus } from '@/util/constants'
+import {
+  AccessType,
+  Account,
+  AccountStatus,
+  FeeCodes,
+  LoginSource,
+  Pages,
+  PaymentTypes,
+  Permission,
+  Role,
+  SessionStorageKeys, productStatus
+} from '@/util/constants'
 import {
   AccountFee,
   AddUserBody,
@@ -89,6 +100,14 @@ export default class OrgModule extends VuexModule {
   /** Is True if the current account is premium. */
   get isPremiumAccount (): boolean {
     return this.currentOrganization?.orgType === Account.PREMIUM
+  }
+
+  get needMissingBusinessDetailsRedirect (): boolean {
+    return typeof (this.currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization.accessType !== AccessType.GOVM && this.canEditBusinessInfo
+  }
+
+  private get canEditBusinessInfo (): boolean {
+    return [Permission.EDIT_BUSINESS_INFO].some(per => this.permissions.includes(per))
   }
 
   @Mutation
@@ -297,6 +316,10 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public resetCurrentSelectedProducts () {
     this.currentSelectedProducts = []
+  }
+
+  get isBusinessAccount (): boolean {
+    return this.currentOrganization?.isBusinessAccount === true
   }
 
   @Action({ rawError: true })
