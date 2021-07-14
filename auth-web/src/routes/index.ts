@@ -145,7 +145,7 @@ router.beforeEach((to, from, next) => {
           case LoginSource.BCEID:
             return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
         }
-      } else if ((store.state as any)?.org?.needMissingBusinessDetailsRedirect) {
+      } else if (store.getters['org/needMissingBusinessDetailsRedirect']) {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }
