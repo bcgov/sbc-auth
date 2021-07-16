@@ -39,7 +39,7 @@ class UserSettings:  # pylint: disable=too-few-public-methods
                                   '/account/' + str(org.id) + '/settings',
                                   'ACCOUNT', org.type_code, org.status_code,
                                   '/account/' + str(org.id) + '/settings/product-settings',
-                                  '/account/' + str(org.id) + '/settings/restricted-product',
+                                  '/account/' + str(org.id) + '/settings/restricted-product'
                                   ))
 
         all_settings.append(UserSettingsModel(user_id, 'USER PROFILE', url_origin, '/userprofile', 'USER_PROFILE'))
