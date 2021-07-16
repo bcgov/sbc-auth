@@ -38,7 +38,6 @@ class UserSettings:  # pylint: disable=too-few-public-methods
                 UserSettingsModel(org.id, org.name, url_origin,
                                   '/account/' + str(org.id) + '/settings',
                                   'ACCOUNT', org.type_code, org.status_code,
-                                  '/account/' + str(org.id) + '/settings/product-settings',
                                   '/account/' + str(org.id) + '/settings/restricted-product'
                                   ))
 

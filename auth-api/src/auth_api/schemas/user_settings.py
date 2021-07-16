@@ -24,8 +24,7 @@ class UserSettingsSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors,
     class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the User Settings fields to a default schema."""
 
-        fields = ('id', 'label', 'urlorigin', 'urlpath', 'type', 'account_type', 'account_status', 'product_settings',
-                  'restricted_product_url')
+        fields = ('id', 'label', 'urlorigin', 'urlpath', 'type', 'account_type', 'account_status', 'product_settings')
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):  # pylint: disable=no-self-use

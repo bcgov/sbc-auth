@@ -27,7 +27,7 @@ class UserSettings():  # pylint: disable=too-few-public-methods, too-many-instan
     """
 
     def __init__(self, id_, label, urlorigin, urlpath, type_, account_type=None,  # pylint: disable=too-many-arguments
-                 account_status=None, product_settings=None, restricted_product_url=None):
+                 account_status=None, product_settings=None):
         """Return a usersettings."""
         self.id = id_
         self.label = label
@@ -37,4 +37,3 @@ class UserSettings():  # pylint: disable=too-few-public-methods, too-many-instan
         self.account_type = account_type
         self.account_status = account_status
         self.product_settings = product_settings
-        self.restricted_product_url = restricted_product_url
