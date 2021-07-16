@@ -52,3 +52,4 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(item_list, 'user_settings_response')[0]
     assert account['productSettings'] == f'/account/{account["id"]}/settings/product-settings'
+    assert account['restricted_product_url'] == f'/account/{account["id"]}/settings/restricted-product'
