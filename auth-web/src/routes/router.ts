@@ -529,7 +529,7 @@ export function getRoutes (): RouteConfig[] {
       name: 'RestrictedProduct',
       component: RestrictedProductView,
       props: true,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: true }
     },
     {
       path: '/unauthorizedtermsdecline',

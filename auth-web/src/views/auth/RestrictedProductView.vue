@@ -6,8 +6,8 @@
         <h1>{{$t('restrictedAccess')}}</h1>
         <p class="mt-8">This account does not have permission to access to the {{productName}}. </p>
         <p class="mb-10">Go to Account Setting -> Product Package page to request access.</p>
-        <div class="btns">
-          <v-btn large link color="primary" :to="productUrl" >Request Access</v-btn>
+        <div>
+          <v-btn large link color="primary" class="btn-request-access" :to="productUrl" >Request Access</v-btn>
         </div>
       </v-col>
     </v-row>
