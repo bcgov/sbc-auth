@@ -585,7 +585,6 @@ def test_update_org_duplicate_branch_name(client, jwt, session, keycloak_mock): 
     assert rv.status_code == http_status.HTTP_409_CONFLICT
 
 
-
 def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

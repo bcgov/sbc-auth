@@ -20,7 +20,6 @@ import json
 import uuid
 from random import randint
 
-import pytest
 
 from auth_api import status as http_status
 from auth_api.config import get_named_config

@@ -42,6 +42,7 @@ import PendingApprovalView from '@/views/auth/PendingApprovalView.vue'
 import PriceListView from '@/views/auth/PriceListView.vue'
 import ProfileDeactivatedView from '@/views/auth/ProfileDeactivatedView.vue'
 import RequestNameView from '@/views/auth/home/RequestNameView.vue'
+import RestrictedProductView from '@/views/auth/RestrictedProductView.vue'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import { RouteConfig } from 'vue-router'
 import SetupAccountSuccessView from '@/views/auth/staff/SetupAccountSuccessView.vue'
@@ -522,6 +523,13 @@ export function getRoutes (): RouteConfig[] {
       component: UnauthorizedView,
       props: true,
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/account/:orgId/restricted-product/:productName?',
+      name: 'RestrictedProduct',
+      component: RestrictedProductView,
+      props: true,
+      meta: { requiresAuth: true }
     },
     {
       path: '/unauthorizedtermsdecline',

@@ -159,5 +159,7 @@
   "businessRemovalTitle": "Business that are affiliated with this account will be removed.",
   "businessRemovalDesc": "All businesses that have been affiliated with this account will be removed. Passcode used to affiliate with business will reset and you will not be able to reuse the passcode.",
   "padRemovalTitle": "The Pre-Authorized Debit Agreement associated with this account will be cancelled.",
-  "updateAccountInformation": "BC Registries and Online Service have updated the account creation flow and it's account information page. Please update your account: <span class=\"font-weight-bold\">{name}</span> information by selecting the option down below."
+  "updateAccountInformation": "BC Registries and Online Service have updated the account creation flow and it's account information page. Please update your account: <span class=\"font-weight-bold\">{name}</span> information by selecting the option down below.",
+  "restrictedAccess": "Restricted Access"
+
 }
