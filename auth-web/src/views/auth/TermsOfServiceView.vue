@@ -48,8 +48,8 @@
 </template>
 
 <script lang="ts">
+import { ALLOWED_URIS_FOR_PENDING_ORGS, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LoginSource, Pages } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -126,6 +126,17 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
         if (!isBcrosUser && this.token) {
           this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
           return
+        }
+        // special logic for handling redirection to create account page
+        // if we dont redirect back to original page , pending org update flow wont work
+        const redirectUri = this.$route?.query?.redirectUri as string
+        if (redirectUri) {
+          const substringCheck = (element:string) => redirectUri.indexOf(element) > -1
+          let isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
+          if (isAllowedUrl) {
+            await this.$router.push(redirectUri)
+            return
+          }
         }
         this.redirectTo(this.getNextPageUrl())
       }
