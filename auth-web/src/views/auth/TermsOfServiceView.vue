@@ -129,7 +129,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
         }
         // special logic for handling redirection to create account page
         // if we dont redirect back to original page , pending org update flow wont work
-        const redirectUri = this.$route?.query?.redirectUri
+        const redirectUri = this.$route?.query?.redirectUri as string
         if (redirectUri) {
           const substringCheck = (element:string) => redirectUri.indexOf(element) > -1
           let isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
