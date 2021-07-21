@@ -136,7 +136,7 @@
     </ModalDialog>
     <ModalDialog
       ref="errorModal"
-      title="You can't currently deactivate account"
+      title="This account can’t be deactivated yet"
       dialog-class="notify-dialog"
       max-width="640"
       :text="message"
@@ -253,14 +253,20 @@ export default class AccountDeactivate extends Vue {
       this.$refs.successModal.open()
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(err)
-      switch (err?.response?.status) {
-        case 400:
-          this.message = err.response.data.message
-          break
-        default:
-          this.message =
-            'An error occurred while attempting to deactivate your account.Please try again'
+      if (err?.response?.status === 400) {
+        switch (err.response.data?.code) {
+          case 'OUTSTANDING_CREDIT':
+            this.message = this.$t('deactivateCreditAccountMsg').toString()
+            break
+          case 'TRANSACTIONS_IN_PROGRESS':
+            this.message = this.$t('deactivateActiveTransactionsMsg').toString()
+            break
+          default:
+            this.message = this.$t('deactivateGenericMsg').toString()
+            break
+        }
+      } else {
+        this.message = this.$t('deactivateGenericMsg').toString()
       }
       this.$refs.confirmModal.close()
       this.$refs.errorModal.open()
