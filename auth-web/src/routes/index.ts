@@ -100,7 +100,8 @@ router.beforeEach((to, from, next) => {
           // eslint-disable-next-line no-console
           console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
           return next({
-            path: `/${Pages.USER_PROFILE_TERMS}`
+            path: `/${Pages.USER_PROFILE_TERMS}`,
+            query: { redirectUri: `${window.location.pathname.replace(process.env.VUE_APP_PATH, '')}` }
           })
         default:
           return next({
