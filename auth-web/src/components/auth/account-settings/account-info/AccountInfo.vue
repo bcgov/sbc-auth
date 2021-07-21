@@ -323,6 +323,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
   private isSuspensionReasonFormValid: boolean = false
   private addressChanged = false
   private readonly isBusinessAccount!: boolean
+  private originalAddress : Address // store the original address..do not modify it afterwards
 
   private readonly updateOrg!: (
     requestBody: CreateRequestBody
@@ -362,6 +363,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
     await this.syncAddress()
     // show this part only account is not anon
     if (!this.anonAccount) {
+      this.originalAddress = this.currentOrgAddress
       if (Object.keys(this.currentOrgAddress).length === 0) {
         this.isCompleteAccountInfo = false
         this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
@@ -426,6 +428,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
   private updateAddress (address: Address) {
     this.addressChanged = true
     this.enableBtn()
+    this.setCurrentOrganizationAddress(address)
   }
 
   private async showSuspendAccountDialog (status) {
@@ -486,7 +489,7 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
 
     let createRequestBody: CreateRequestBody = {
     }
-    if (this.baseAddress && this.addressChanged && JSON.stringify(this.baseAddress) !== JSON.stringify(this.currentOrgAddress)) {
+    if (this.baseAddress && this.addressChanged && JSON.stringify(this.originalAddress) !== JSON.stringify(this.currentOrgAddress)) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
     }
     if (this.branchName !== this.currentOrganization.branchName) {
