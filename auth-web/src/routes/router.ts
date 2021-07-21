@@ -574,7 +574,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] }
     },
     {
-      path: '/userprofileterms/:token?',
+      path: '/userprofileterms/:token?/:redirectUri?',
       name: 'userprofileterms',
       props: true,
       component: TermsOfServiceView,
