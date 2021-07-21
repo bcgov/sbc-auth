@@ -262,3 +262,9 @@ export enum RejectCode {
 
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5
 export const ALLOWED_URIS_FOR_PENDING_ORGS: string[] = ['setup-non-bcsc-account']
+
+export const DEACTIVATE_ACCOUNT_MESSAGE : Map<string, string> = new Map([
+  ['OUTSTANDING_CREDIT', 'deactivateCreditAccountMsg'],
+  ['TRANSACTIONS_IN_PROGRESS', 'deactivateActiveTransactionsMsg'],
+  ['DEFAULT', 'deactivateGenericMsg']
+])

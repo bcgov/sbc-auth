@@ -160,11 +160,11 @@
 </template>
 
 <script lang="ts">
-
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import CommonUtil from '@/util/common-util'
+import { DEACTIVATE_ACCOUNT_MESSAGE } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
@@ -253,21 +253,7 @@ export default class AccountDeactivate extends Vue {
       this.$refs.successModal.open()
     } catch (err) {
       // eslint-disable-next-line no-console
-      if (err?.response?.status === 400) {
-        switch (err.response.data?.code) {
-          case 'OUTSTANDING_CREDIT':
-            this.message = this.$t('deactivateCreditAccountMsg').toString()
-            break
-          case 'TRANSACTIONS_IN_PROGRESS':
-            this.message = this.$t('deactivateActiveTransactionsMsg').toString()
-            break
-          default:
-            this.message = this.$t('deactivateGenericMsg').toString()
-            break
-        }
-      } else {
-        this.message = this.$t('deactivateGenericMsg').toString()
-      }
+      this.message = this.$t(DEACTIVATE_ACCOUNT_MESSAGE.get(err.response?.data?.code || 'DEFAULT')).toString()
       this.$refs.confirmModal.close()
       this.$refs.errorModal.open()
     }
