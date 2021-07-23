@@ -136,7 +136,7 @@
     </ModalDialog>
     <ModalDialog
       ref="errorModal"
-      title="You can't currently deactivate account"
+      title="This account can’t be deactivated yet"
       dialog-class="notify-dialog"
       max-width="640"
       :text="message"
@@ -160,11 +160,11 @@
 </template>
 
 <script lang="ts">
-
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import CommonUtil from '@/util/common-util'
+import { DEACTIVATE_ACCOUNT_MESSAGE } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
@@ -253,15 +253,7 @@ export default class AccountDeactivate extends Vue {
       this.$refs.successModal.open()
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error(err)
-      switch (err?.response?.status) {
-        case 400:
-          this.message = err.response.data.message
-          break
-        default:
-          this.message =
-            'An error occurred while attempting to deactivate your account.Please try again'
-      }
+      this.message = this.$t(DEACTIVATE_ACCOUNT_MESSAGE.get(err.response?.data?.code || 'DEFAULT')).toString()
       this.$refs.confirmModal.close()
       this.$refs.errorModal.open()
     }
