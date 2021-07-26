@@ -19,7 +19,7 @@ This module manages the User Information.
 from datetime import datetime
 from typing import Dict
 
-from flask import current_app
+from flask import current_app, g
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import Contact as ContactModel
@@ -58,7 +58,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_affidavit(affidavit_info: Dict, origin_url: str = None):
+    def create_affidavit(affidavit_info: Dict):
         """Create a new affidavit record."""
         current_app.logger.debug('<create_affidavit ')
         user = UserService.find_by_jwt_token()
@@ -93,12 +93,12 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         affidavit_model.save()
 
         if trigger_task_update:
-            Affidavit._modify_task(user, origin_url)
+            Affidavit._modify_task(user)
 
         return Affidavit(affidavit_model)
 
     @staticmethod
-    def _modify_task(user, origin_url: str = None):
+    def _modify_task(user):
         # find users org. ideally only one org
         org_list = MembershipModel.find_orgs_for_user(user.identifier)
         org: OrgModel = next(iter(org_list or []), None)
@@ -120,7 +120,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
                 # Send notification mail to staff review task
                 from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
-                OrgService.send_staff_review_account_reminder(relationship_id=org.id, origin_url=origin_url)
+                OrgService.send_staff_review_account_reminder(relationship_id=org.id, origin_url=g.origin_url)
 
                 remark = f'User Uploaded New affidavit .Created New task id: {new_task.identifier}'
                 TaskService.close_task(task_model.id, remark)
