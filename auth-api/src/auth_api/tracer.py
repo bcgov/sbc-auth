@@ -38,4 +38,4 @@ class Tracer():  # pylint: disable=too-few-public-methods
             raise Exception('Attempt made to create multiple tracing instances')
 
         api_tracer = ApiTracer()
-        Tracer.__instance = ApiTracing(api_tracer.tracer)   # pylint: disable=unused-argument
+        Tracer.__instance = ApiTracing(api_tracer.tracer)   # pylint: disable=unused-private-member
