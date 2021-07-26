@@ -184,6 +184,10 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   private async setAppliedFilterValue (filter: SearchFilterParam[]) {
+    // changes to reset pagination option on search
+    // we dont want to reset no of page or any other option only need to reset page to first
+    // so instead of this.DEFAULT_DATA_OPTIONS we use below ways
+    this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1 }
     this.isTableLoading = true
     this.setSearchFilterToStorage(filter[0].appliedFilterValue)
     await this.getOrgs()
