@@ -15,11 +15,10 @@
 
 This module manages the User Information.
 """
-
 from datetime import datetime
 from typing import Dict
 
-from flask import current_app
+from flask import current_app, g
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import Contact as ContactModel
@@ -102,6 +101,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         # find users org. ideally only one org
         org_list = MembershipModel.find_orgs_for_user(user.identifier)
         org: OrgModel = next(iter(org_list or []), None)
+        origin_url = g.get('origin_url', None)
         if org:
             # check if there is any holding tasks
             task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
@@ -117,6 +117,11 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
                              'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                              }
                 new_task = TaskService.create_task(task_info=task_info, do_commit=False)
+
+                # Send notification mail to staff review task
+                from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+                OrgService.send_staff_review_account_reminder(relationship_id=org.id, origin_url=origin_url)
+
                 remark = f'User Uploaded New affidavit .Created New task id: {new_task.identifier}'
                 TaskService.close_task(task_model.id, remark)
 
