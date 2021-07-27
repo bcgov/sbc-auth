@@ -413,7 +413,6 @@ class UserAffidavit(Resource):
         """Create affidavit record for the user."""
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
-        origin_url = g.origin_url
 
         if token.get('sub', None) != user_guid:
             abort(403)
@@ -422,8 +421,7 @@ class UserAffidavit(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = AffidavitService.create_affidavit(request_json, origin_url=origin_url).as_dict(), \
-                               http_status.HTTP_200_OK
+            response, status = AffidavitService.create_affidavit(request_json).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

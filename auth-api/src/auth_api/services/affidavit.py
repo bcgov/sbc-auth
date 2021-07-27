@@ -15,11 +15,11 @@
 
 This module manages the User Information.
 """
-
+import json
 from datetime import datetime
 from typing import Dict
 
-from flask import current_app
+from flask import current_app, g
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import Contact as ContactModel
@@ -58,7 +58,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         return obj
 
     @staticmethod
-    def create_affidavit(affidavit_info: Dict, origin_url: str = None):
+    def create_affidavit(affidavit_info: Dict):
         """Create a new affidavit record."""
         current_app.logger.debug('<create_affidavit ')
         user = UserService.find_by_jwt_token()
@@ -93,15 +93,16 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         affidavit_model.save()
 
         if trigger_task_update:
-            Affidavit._modify_task(user, origin_url)
+            Affidavit._modify_task(user)
 
         return Affidavit(affidavit_model)
 
     @staticmethod
-    def _modify_task(user, origin_url: str = None):
+    def _modify_task(user):
         # find users org. ideally only one org
         org_list = MembershipModel.find_orgs_for_user(user.identifier)
         org: OrgModel = next(iter(org_list or []), None)
+        origin_url = g.get('origin_url', None)
         if org:
             # check if there is any holding tasks
             task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
