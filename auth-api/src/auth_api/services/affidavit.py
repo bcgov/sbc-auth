@@ -15,7 +15,6 @@
 
 This module manages the User Information.
 """
-import json
 from datetime import datetime
 from typing import Dict
 
