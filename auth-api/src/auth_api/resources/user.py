@@ -422,7 +422,8 @@ class UserAffidavit(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
-            response, status = AffidavitService.create_affidavit(request_json, origin_url=origin_url).as_dict(), http_status.HTTP_200_OK
+            response, status = AffidavitService.create_affidavit(request_json, origin_url=origin_url).as_dict(), \
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
