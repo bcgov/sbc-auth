@@ -413,6 +413,7 @@ class UserAffidavit(Resource):
         """Create affidavit record for the user."""
         token = g.jwt_oidc_token_info
         request_json = request.get_json()
+        origin_url = g.origin_url
 
         if token.get('sub', None) != user_guid:
             abort(403)
