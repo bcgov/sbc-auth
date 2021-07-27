@@ -19,7 +19,7 @@ This module manages the User Information.
 from datetime import datetime
 from typing import Dict
 
-from flask import current_app, g
+from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.models import Contact as ContactModel
