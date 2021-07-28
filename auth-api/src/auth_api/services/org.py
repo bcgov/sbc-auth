@@ -811,7 +811,7 @@ class Org:  # pylint: disable=too-many-public-methods
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
                                                       relationship_id=relationship_id)
         context_path = f'review-account/{task.id}'
-        app_url = '{}/{}'.format(g.origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        app_url = '{}/{}'.format(g.get('origin_url', ''), current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
         first_name = user.firstname
         last_name = user.lastname
