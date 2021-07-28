@@ -63,9 +63,10 @@ class Orgs(Resource):
             user = UserService.find_by_jwt_token()
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
+                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
-            response, status = OrgService.create_org(request_json, user.identifier).as_dict(), http_status.HTTP_201_CREATED
+            response, status = OrgService.create_org(request_json,
+                                                     user.identifier).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -153,7 +154,7 @@ class Org(Resource):
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
                 response, status = org.update_org(org_info=request_json).as_dict(), \
-                                       http_status.HTTP_200_OK
+                                   http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
