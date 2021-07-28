@@ -8,7 +8,8 @@ import {
   PaymentTypes,
   Permission,
   Role,
-  SessionStorageKeys, productStatus
+  SessionStorageKeys,
+  productStatus
 } from '@/util/constants'
 import {
   AccountFee,
@@ -490,9 +491,8 @@ export default class OrgModule extends VuexModule {
       }
     })
 
+    // we dont need org name and branch name as we are updating the already created org(when staff sends invite)
     const createRequestBody: CreateRequestBody = {
-      name: org.name,
-      branchName: org.branchName, // if not neede can remove
       paymentInfo: {
         revenueAccount
       },
