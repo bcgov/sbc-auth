@@ -134,7 +134,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Send an email to staff to remind review the pending account
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
                                                           AccessType.REGULAR_BCEID.value) and not \
-            AffidavitModel.find_approved_by_user_id(user_id=user_id)
+                                              AffidavitModel.find_approved_by_user_id(user_id=user_id)
         user = UserModel.find_by_jwt_token()
         if is_bceid_status_handling_needed:
             Org._handle_bceid_status_and_notification(org, user)
@@ -813,8 +813,8 @@ class Org:  # pylint: disable=too-many-public-methods
         context_path = f'review-account/{task.id}'
         app_url = '{}/{}'.format(g.get('origin_url', ''), current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
-        first_name = user.firstname
-        last_name = user.lastname
+        first_name = getattr(user, 'firstname', '')
+        last_name = getattr(user, 'lastname', '')
 
         data = {
             'emailAddresses': recipient,
