@@ -15,7 +15,7 @@
 from datetime import datetime
 from typing import Dict, List, Tuple
 
-from flask import current_app
+from flask import current_app, g
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -79,7 +79,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return obj
 
     @staticmethod
-    def create_org(org_info: dict, user_id, origin_url: str = None):
+    def create_org(org_info: dict, user_id):
         """Create a new organization."""
         current_app.logger.debug('<create_org ')
         # bcol is treated like an access type as well;so its outside the scheme
@@ -135,22 +135,22 @@ class Org:  # pylint: disable=too-many-public-methods
         is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
                                                           AccessType.REGULAR_BCEID.value) and not \
             AffidavitModel.find_approved_by_user_id(user_id=user_id)
+        user = UserModel.find_by_jwt_token()
         if is_bceid_status_handling_needed:
-            Org._handle_bceid_status_and_notification(org)
+            Org._handle_bceid_status_and_notification(org, user)
 
         org.commit()
 
         if is_bceid_status_handling_needed:
-            Org.send_staff_review_account_reminder(relationship_id=org.id, origin_url=origin_url)
+            Org.send_staff_review_account_reminder(relationship_id=org.id, user=user)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
 
     @staticmethod
-    def _handle_bceid_status_and_notification(org):
+    def _handle_bceid_status_and_notification(org, user):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
-        user = UserModel.find_by_jwt_token()
         # create a staff review task for this account
         task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
         task_info = {'name': org.name,
@@ -289,7 +289,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.org = org
         contact_link.add_to_session()
 
-    def update_org(self, org_info, origin_url: str = None):  # pylint: disable=too-many-locals
+    def update_org(self, org_info):  # pylint: disable=too-many-locals
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -357,7 +357,7 @@ class Org:  # pylint: disable=too-many-public-methods
             self._model.update_org_from_dict(camelback2snake(org_info), exclude=excluded)
             if is_govm_account_creation:
                 # send mail after the org is committed to DB
-                Org.send_staff_review_account_reminder(relationship_id=self._model.id, origin_url=origin_url)
+                Org.send_staff_review_account_reminder(relationship_id=self._model.id)
 
         Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         current_app.logger.debug('>update_org ')
@@ -802,10 +802,8 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    @user_context
-    def send_staff_review_account_reminder(relationship_id, origin_url,
-                                           task_relationship_type=TaskRelationshipType.ORG.value,
-                                           **kwargs):
+    def send_staff_review_account_reminder(relationship_id, user: UserModel = None,
+                                           task_relationship_type=TaskRelationshipType.ORG.value):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
@@ -813,11 +811,10 @@ class Org:  # pylint: disable=too-many-public-methods
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
                                                       relationship_id=relationship_id)
         context_path = f'review-account/{task.id}'
-        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        app_url = '{}/{}'.format(g.get('origin_url', ''), current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
         review_url = '{}/{}'.format(app_url, context_path)
-        user_from_context: UserContext = kwargs['user_context']
-        first_name = user_from_context.first_name
-        last_name = user_from_context.last_name
+        first_name = getattr(user, 'firstname', '')
+        last_name = getattr(user, 'lastname', '')
 
         data = {
             'emailAddresses': recipient,
