@@ -63,11 +63,10 @@ class Orgs(Resource):
             user = UserService.find_by_jwt_token()
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
+                    http_status.HTTP_401_UNAUTHORIZED
                 return response, status
-            origin_url = request.environ.get('HTTP_ORIGIN', 'localhost')
-            response, status = OrgService.create_org(request_json, user.identifier,
-                                                     origin_url=origin_url).as_dict(), http_status.HTTP_201_CREATED
+            response, status = OrgService.create_org(request_json,
+                                                     user.identifier).as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
@@ -145,7 +144,6 @@ class Org(Resource):
         request_json = request.get_json()
         valid_format, errors = schema_utils.validate(request_json, 'org')
         token_info = g.jwt_oidc_token_info
-        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
         try:
@@ -155,8 +153,8 @@ class Org(Resource):
                 return {'message': 'The organisation can only be updated by a staff admin.'}, \
                        http_status.HTTP_401_UNAUTHORIZED
             if org:
-                response, status = org.update_org(org_info=request_json, origin_url=origin).as_dict(), \
-                                       http_status.HTTP_200_OK
+                response, status = org.update_org(org_info=request_json).as_dict(), \
+                                   http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested organization could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
