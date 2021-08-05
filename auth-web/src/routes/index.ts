@@ -101,7 +101,7 @@ router.beforeEach((to, from, next) => {
           console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
           // if there's redirectUri in query string, keep existing redirectUri, otherwise use current location
           const urlParams = new URLSearchParams(window.location.search)
-          var uriRedirectTo = urlParams.get('redirectUri')
+          let uriRedirectTo = urlParams.get('redirectUri')
           if (uriRedirectTo === '' || uriRedirectTo === null) {
             uriRedirectTo = window.location.pathname.replace(process.env.VUE_APP_PATH, '')
           }
