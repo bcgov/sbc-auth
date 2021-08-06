@@ -196,7 +196,7 @@ export interface OrgFilterParams {
 
 export interface OrgPaymentDetails {
   accountId: string
-  authAccountName: string
+  accountName: string
   bcolAccount: string
   bcolUserId: string
   billable: boolean
