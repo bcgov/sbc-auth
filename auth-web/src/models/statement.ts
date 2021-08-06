@@ -37,7 +37,7 @@ export interface StatementRecipient {
 }
 
 export interface StatementNotificationSettings {
-  authAccountName?: string
+  accountName?: string
   statementNotificationEnabled: boolean
   recipients: StatementRecipient[]
 }
