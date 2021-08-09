@@ -90,7 +90,7 @@ jobs:
           file: ./queue_services/business-events-listener/coverage.xml
           flags: businesseventlistenerqueue
           name: codecov-business-events-listener
-          fail_ci_if_error: true
+          fail_ci_if_error: false
 
   build-check:
     needs: setup-job
