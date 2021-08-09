@@ -296,7 +296,7 @@ export default class StatementsSettings extends Vue {
         const statementNotification: StatementNotificationSettings = {
           statementNotificationEnabled: this.sendStatementNotifications,
           recipients: recipientList,
-          authAccountName: this.currentOrganization.name
+          accountName: this.currentOrganization.name
         }
         await this.updateStatementNotifications(statementNotification)
       }

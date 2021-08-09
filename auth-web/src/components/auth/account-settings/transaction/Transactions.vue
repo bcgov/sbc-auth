@@ -83,8 +83,8 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   }
 
   private async getPaymentDetails () {
-    const { authAccountId, credit } = this.currentOrgPaymentDetails
-    if (!authAccountId || Number(authAccountId) !== this.currentOrganization?.id) {
+    const { accountId, credit } = this.currentOrgPaymentDetails
+    if (!accountId || Number(accountId) !== this.currentOrganization?.id) {
       const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(this.currentOrganization?.id)
       this.credit = paymentDetails.credit && paymentDetails.credit !== null ? paymentDetails.credit : 0
     } else {
