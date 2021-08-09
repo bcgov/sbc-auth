@@ -65,11 +65,7 @@ async def process_event(event_message, flask_app):
         message_type = event_message.get('type', None)
 
         if message_type == 'bc.registry.names.events':
-            try:
-                await process_name_events(event_message)
-            except Exception as e:
-                print(e)
-                raise e
+            await process_name_events(event_message)
 
 
 async def process_name_events(event_message: Dict[str, any]):
