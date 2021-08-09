@@ -75,6 +75,8 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
         return response
 
     monkeypatch.setattr('auth_api.services.rest_service.RestService.get', get_invoices_mock)
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.get_service_account_token',
+                        lambda *args, **kwargs: None)
 
     # add an event to queue
     await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
