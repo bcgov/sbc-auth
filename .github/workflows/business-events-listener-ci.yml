@@ -54,6 +54,8 @@ jobs:
       DATABASE_TEST_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
       TEST_NATS_DOCKER: "YES"
       STAN_CLUSTER_NAME: "test-cluster"
+      PAY_API_URL: "https://localhost:5000"
+      PAY_API_VERSION: "/api/v1"
 
     runs-on: ubuntu-20.04
 
