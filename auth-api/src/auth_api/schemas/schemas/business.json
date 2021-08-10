@@ -147,6 +147,30 @@
             "examples": [
                 true
             ]
+        },
+        "status": {
+            "$id": "#/properties/status",
+            "type": "string",
+            "title": "Status",
+            "default": "",
+            "examples": [
+                "DRAFT", "APPROVED"
+            ]
+        },
+        "lastModifiedBy": {
+            "$id": "#/properties/lastModifiedBy",
+            "type": "string",
+            "title": "Last Modified By User",
+            "default": ""
+        },
+        "lastModified": {
+            "$id": "#/properties/lastModified",
+            "type": "string",
+            "title": "Last Modified",
+            "default": "",
+            "examples": [
+                "2020-11-06T19:15:21.970169+00:00"
+            ]
         }
     },
     "additionalProperties": true

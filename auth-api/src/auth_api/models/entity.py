@@ -17,12 +17,11 @@ The class and schema are both present in this module.
 """
 
 from flask import current_app
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.util import camelback2snake
-
 from .base_model import BaseModel
 
 
@@ -39,6 +38,9 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
     name = Column('name', String(250), nullable=True)
     corp_type_code = Column(String(15), ForeignKey('corp_types.code'), nullable=False)
     folio_number = Column('folio_number', String(50), nullable=True, index=True)
+    status = Column(String(), nullable=True)
+    last_modified_by = Column(String(), nullable=True)
+    last_modified = Column(DateTime, default=None, nullable=True)
 
     contacts = relationship('ContactLink', back_populates='entity')
     corp_type = relationship('CorpType', foreign_keys=[corp_type_code], lazy='joined', innerjoin=True)
