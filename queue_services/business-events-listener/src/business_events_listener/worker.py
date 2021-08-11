@@ -120,17 +120,17 @@ async def process_name_events(event_message: Dict[str, any]):
         ).json()
 
         # Ideally there should be only one or two (priority fees) payment request for the NR.
-        if invoices:
-            auth_account_id = invoices['invoices'][0].get('paymentAccount').get('accountId')
+        if invoices and (auth_account_id := invoices['invoices'][0].get('paymentAccount').get('accountId')) \
+                and str(auth_account_id).isnumeric():
             logger.info('Account ID received : %s', auth_account_id)
             # Auth account id can be service account value too, so doing a query lookup than find_by_id
             org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == auth_account_id).one_or_none()
-
-            nr_entity.pass_code_claimed = True
-            # Create an affiliation.
-            logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
-            affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
-            affiliation.flush()
+            if org:
+                nr_entity.pass_code_claimed = True
+                # Create an affiliation.
+                logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
+                affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
+                affiliation.flush()
 
     nr_entity.save()
     logger.debug('<<<<<<<process_name_events<<<<<<<<<<')

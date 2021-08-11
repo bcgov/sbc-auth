@@ -94,3 +94,29 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
     await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
     affiliations: [AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
     assert len(affiliations) == 1
+
+    # Publish message for an NR which was done using a service account or staff with no user account.
+    def get_invoices_mock(nr_number, token):
+        response_content = json.dumps({
+            'invoices': [{
+                'businessIdentifier': nr_number,
+                'paymentAccount': {
+                    'accountId': 'SERVICE-ACCOUNT-NAME-REQUEST-SERVICE-ACCOUNT'
+                }
+            }]
+        })
+
+        response = Response()
+        response.status_code = 200
+        response._content = str.encode(response_content)
+        return response
+
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.get', get_invoices_mock)
+    # add an event to queue
+    nr_number = 'NR 000001'
+    await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
+
+    # Query the entity and assert the entity is not affiliated.
+    entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
+    assert entity
+    assert not entity.pass_code_claimed
