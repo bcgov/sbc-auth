@@ -1,0 +1,29 @@
+[
+    {
+        "vault": "nats",
+        "application": [
+            "base",
+            "business-events-listener"
+        ]
+    },
+    {
+        "vault": "relationship",
+        "application": [
+            "postgres-auth",
+            "sentry"
+        ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "pay-api"
+        ]
+    },
+    {
+        "vault": "keycloak",
+        "application": [
+            "jwt-base",
+            "sbc-auth-admin"
+        ]
+    }
+]
