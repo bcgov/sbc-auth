@@ -80,7 +80,7 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     NATS_CONNECTION_OPTIONS = {
         'servers': os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(','),
-        'name': os.getenv('NATS_ACCOUNT_CLIENT_NAME', 'business.events.worker')
+        'name': os.getenv('NATS_BUSINESS_EVENTS_CLIENT_NAME', 'business.events.worker')
     }
 
     STAN_CONNECTION_OPTIONS = {
