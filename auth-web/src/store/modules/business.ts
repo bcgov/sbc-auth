@@ -35,9 +35,43 @@ export default class BusinessModule extends VuexModule {
       return []
     }
     const response = await OrgService.getAffiliatiatedEntities(organization.id)
+
     if (response && response.data && response.status === 200) {
-      return response.data.entities
+      // Fetch and populate data for Name Request affiliations
+      const affiliatedEntities = response.data.entities
+      for (const entity of affiliatedEntities) {
+        if (entity.corpType.code === CorpType.NAME_REQUEST) {
+          await BusinessService.getNrData(entity.businessIdentifier)
+            .then(response => {
+              if (response?.status >= 200 && response?.status < 300) {
+                // entity.name = response.data.names[0].name
+
+                BusinessService.updateBusinessName({
+                  businessIdentifier: entity.businessIdentifier,
+                  name: response.data.names[0].name
+                })
+                // eslint-disable-next-line no-console
+                console.log(response)
+                entity.nameRequest = {
+                  names: response.data.names,
+                  id: response.data.id,
+                  legalType: response.data.legalType,
+                  nrNumber: response.data.nrNum,
+                  state: response.data.state,
+                  applicantEmail: response.data.applicants?.emailAddress,
+                  applicantPhone: response.data.applicants?.phoneNumber
+                }
+              }
+            }).catch(err => {
+              // eslint-disable-next-line no-console
+              console.log(`Error fetching Name Request: ${err}`)
+            })
+        }
+      }
     }
+    // eslint-disable-next-line no-console
+    console.log(response.data.entities)
+    return response.data.entities
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

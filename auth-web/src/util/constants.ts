@@ -128,6 +128,11 @@ export enum CorpType {
     NAME_REQUEST = 'NR'
 }
 
+export enum NrState {
+    APPROVED = 'APPROVED',
+    DRAFT = 'DRAFT',
+}
+
 export enum AccessType {
     REGULAR = 'REGULAR',
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',

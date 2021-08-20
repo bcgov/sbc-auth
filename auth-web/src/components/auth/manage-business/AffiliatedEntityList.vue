@@ -29,15 +29,73 @@
             <div class="meta">
               <v-list-item-title v-if="isNumberedIncorporationApplication(item)">Numbered Benefit Company</v-list-item-title>
               <v-list-item-title v-if="!isNumberedIncorporationApplication(item)">{{ item.name }}</v-list-item-title>
+              <v-list-item-title v-if="!item.name && isNameRequest(item.corpType.code)">{{ item.nameRequest.names[0].name }}</v-list-item-title>
               <v-list-item-subtitle v-if="isIncorporationNumber(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
               <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">Name Request ({{ item.businessIdentifier }})</v-list-item-subtitle>
               <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">Incorporation Application</v-list-item-subtitle>
             </div>
           </template>
-          <template v-slot:[`item.action`]="{ item }">
+
+          <!-- Actions -->
+          <template v-slot:[`item.action`]="{ item, index }">
             <div class="actions">
-              <v-btn small color="primary" @click="goToDashboard(item)" title="Go to Business Dashboard" data-test="goto-dashboard-button">Open</v-btn>
-              <v-btn v-can:REMOVE_BUSINESS.disable small depressed @click="removeBusiness(item)" title="Remove Business" data-test="remove-button">Remove</v-btn>
+              <span class="open-action">
+                <v-btn
+                    small
+                    color="primary"
+                    min-width="5rem"
+                    min-height="2rem"
+                    class="open-action-btn"
+                    data-test="open-action-button"
+                    @click="open(item)"
+                >
+                  Open
+                </v-btn>
+              </span>
+
+              <!-- More Actions Menu -->
+              <span class="more-actions mr-4">
+                <v-menu
+                    offset-y left nudge-bottom="4"
+                    v-model="index"
+                >
+                  <template v-slot:activator="{ on }">
+                    <v-btn
+                        small
+                        color="primary"
+                        min-height="2rem"
+                        class="more-actions-btn"
+                        v-on="on"
+                    >
+                      <v-icon>{{index ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item
+                        v-if="isNameRequest(item.corpType.code) && isApprovedForIA(item)"
+                        class="actions-dropdown_item"
+                        data-test="use-name-request-button"
+                        @click="createDraftGoToDashboard(item)"
+                    >
+                      <v-list-item-subtitle>
+                        <v-icon small>mdi-file-certificate-outline</v-icon>
+                        <span class="pl-1">Use this Name Request</span>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item
+                        class="actions-dropdown_item"
+                        data-test="remove-button"
+                        v-can:REMOVE_BUSINESS.disable
+                        @click="removeBusiness(item)"
+                    >
+                      <v-list-item-subtitle>
+                        <v-icon small>mdi-delete</v-icon>
+                        <span class="pl-1">Remove</span>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </span>
             </div>
           </template>
         </v-data-table>
@@ -47,9 +105,9 @@
 </template>
 
 <script lang="ts">
-import { Business, BusinessRequest } from '@/models/business'
+import { Business, BusinessRequest, NameRequest } from '@/models/business'
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
@@ -111,6 +169,10 @@ export default class AffiliatedEntityList extends Vue {
     return corpType === CorpType.NAME_REQUEST
   }
 
+  private isApprovedForIA (business: Business): boolean {
+    return business.nameRequest?.state === NrState.APPROVED && business.nameRequest?.legalType === CorpType.BCOMP
+  }
+
   private isTemporaryBusinessRegistration (corpType: string): boolean {
     return corpType === CorpType.NEW_BUSINESS
   }
@@ -152,38 +214,12 @@ export default class AffiliatedEntityList extends Vue {
     this.$router.push({ path: '/businessprofile', query: { redirect: `/account/${this.currentOrganization.id}` } })
   }
 
-  async goToDashboard (business: Business) {
-    let businessIdentifier = business.businessIdentifier
-    // 3806 : Create new IA if the selected item is Name Request
-    // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
+  private open (business: Business): void {
     if (business.corpType.code === CorpType.NAME_REQUEST) {
-      this.isLoading = true
-      const filingBody: BusinessRequest = {
-        filing: {
-          header: {
-            name: FilingTypes.INCORPORATION_APPLICATION,
-            accountId: this.currentOrganization.id
-          },
-          business: {
-            legalType: LegalTypes.BCOMP
-          },
-          incorporationApplication: {
-            nameRequest: {
-              legalType: LegalTypes.BCOMP,
-              nrNumber: business.businessIdentifier
-            }
-          }
-        }
-      }
-      const filingResponse = await this.createNamedBusiness(filingBody)
-      this.isLoading = false
-      // Find business with name as the NR number and use it for redirection
-      businessIdentifier = filingResponse.data.filing.business.identifier
+      this.goToNameRequest(business.nameRequest)
+    } else {
+      this.goToDashboard(business.businessIdentifier)
     }
-    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
-    let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
-
-    window.location.href = decodeURIComponent(redirectURL)
   }
 
   private manageTeam (business: Business) {
@@ -191,6 +227,58 @@ export default class AffiliatedEntityList extends Vue {
     // Not ideal, as this makes the component less reusable
     // TODO: Come up with a better solution: global event bus?
     this.$parent.$emit('change-to', TeamManagement)
+  }
+
+  async createDraftGoToDashboard (business: Business) {
+    let businessIdentifier = business.businessIdentifier
+    // 3806 : Create new IA if the selected item is Name Request
+    // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
+    if (business.corpType.code === CorpType.NAME_REQUEST && business.nameRequest.state === NrState.APPROVED) {
+      this.isLoading = true
+      // Find business with name as the NR number and use it for redirection
+      businessIdentifier = await this.createBusinessRecord(business)
+      this.isLoading = false
+    }
+    this.goToDashboard(businessIdentifier)
+  }
+
+  private goToDashboard (businessIdentifier: string): void {
+    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
+    let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
+
+    window.location.href = decodeURIComponent(redirectURL)
+  }
+
+  private goToNameRequest (nameRequest: NameRequest): void {
+    ConfigHelper.setNrCredentials(nameRequest)
+    window.location.href = `${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`
+  }
+
+  private async createBusinessRecord (business: Business): Promise<string> {
+    const filingBody: BusinessRequest = {
+      filing: {
+        header: {
+          name: FilingTypes.INCORPORATION_APPLICATION,
+          accountId: this.currentOrganization.id
+        },
+        business: {
+          legalType: business.nameRequest.legalType
+        },
+        incorporationApplication: {
+          nameRequest: {
+            legalType: business.nameRequest.legalType,
+            nrNumber: business.businessIdentifier
+          }
+        }
+      }
+    }
+    const filingResponse = await this.createNamedBusiness(filingBody)
+
+    if (filingResponse?.errorMsg) {
+      this.$emit('add-unknown-error')
+    } else {
+      return filingResponse.data.filing.business.identifier
+    }
   }
 }
 </script>
@@ -215,9 +303,27 @@ export default class AffiliatedEntityList extends Vue {
 }
 
 .actions {
-  .v-btn + .v-btn {
-    margin-left: 0.4rem;
+  .open-action {
+    border-right: 1px solid $gray1;
   }
+
+  .open-action-btn {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .more-actions-btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  .v-btn + .v-btn {
+    margin-left: 0.5rem;
+  }
+}
+
+.actions-dropdown_item:hover {
+  background-color: $app-background-blue;
 }
 
 dd,
@@ -262,6 +368,26 @@ dd {
   .v-data-table td {
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
+  }
+}
+
+// Vuetify Overrides
+::v-deep .v-list-item {
+  min-height: 2rem !important;
+
+  :hover {
+    cursor: pointer;
+  }
+}
+
+::v-deep .theme--light.v-data-table thead tr:last-child th:last-child span {
+  padding-right: 85px;
+}
+
+::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
+  color: $app-blue;
+  .v-icon.v-icon {
+    color: $app-blue;
   }
 }
 </style>
