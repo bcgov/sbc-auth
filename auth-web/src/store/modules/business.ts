@@ -1,6 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
-import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -16,6 +16,10 @@ import OrgService from '@/services/org.services'
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
   businesses: Business[] = []
+
+  public get businessAffiliations (): Business[] {
+    return this.businesses
+  }
 
   @Mutation
   public setCurrentBusiness (business: Business) {
@@ -43,11 +47,21 @@ export default class BusinessModule extends VuexModule {
         if (entity.corpType.code === CorpType.NAME_REQUEST) {
           await BusinessService.getNrData(entity.businessIdentifier)
             .then(response => {
+              // Keep the approved name in Sync, in the event of changes in Namex
+              const approvedName = () => {
+                for (const nameItem of response.data.names) {
+                  if (nameItem.state === NrState.APPROVED) {
+                    return nameItem.name
+                  }
+                }
+              }
+
               if (response?.status >= 200 && response?.status < 300) {
                 BusinessService.updateBusinessName({
                   businessIdentifier: entity.businessIdentifier,
-                  name: response.data.names[0].name
+                  name: approvedName()
                 })
+
                 entity.nameRequest = {
                   names: response.data.names,
                   id: response.data.id,
@@ -64,9 +78,9 @@ export default class BusinessModule extends VuexModule {
             })
         }
       }
-    }
 
-    return response.data.entities
+      return affiliatedEntities
+    }
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

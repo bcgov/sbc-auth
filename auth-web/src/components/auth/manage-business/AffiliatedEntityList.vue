@@ -29,7 +29,7 @@
             <div class="meta">
               <v-list-item-title v-if="isNumberedIncorporationApplication(item)">Numbered Benefit Company</v-list-item-title>
               <v-list-item-title v-if="!isNumberedIncorporationApplication(item)">{{ item.name }}</v-list-item-title>
-              <v-list-item-title v-if="!item.name && isNameRequest(item.corpType.code)">{{ item.nameRequest.names[0].name }}</v-list-item-title>
+              <v-list-item-title v-if="!item.name && isNameRequest(item.corpType.code)">{{ getApprovedName(item) }}</v-list-item-title>
               <v-list-item-subtitle v-if="isIncorporationNumber(item.corpType.code)">Incorporation Number: {{ item.businessIdentifier }}</v-list-item-subtitle>
               <v-list-item-subtitle v-if="isNameRequest(item.corpType.code)">Name Request ({{ item.businessIdentifier }})</v-list-item-subtitle>
               <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">Incorporation Application</v-list-item-subtitle>
@@ -182,8 +182,20 @@ export default class AffiliatedEntityList extends Vue {
   private isTemporaryBusinessRegistration (corpType: string): boolean {
     return corpType === CorpType.NEW_BUSINESS
   }
+
   private isNumberedIncorporationApplication (item: Business): boolean {
     return item.corpType.code === CorpType.NEW_BUSINESS && item.name === item.businessIdentifier
+  }
+
+  private getApprovedName (item: Business): any {
+    const approvedName = item => {
+      for (const nameItem of item.nameRequest?.names) {
+        if (nameItem.state === NrState.APPROVED) {
+          return nameItem.name
+        }
+      }
+    }
+    return approvedName(item) || item.nameRequest.names[0].name // Return first name if DRAFT (None Approved)
   }
 
   private customSort (items, index, isDescending) {
