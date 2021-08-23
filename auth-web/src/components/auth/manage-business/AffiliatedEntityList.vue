@@ -72,7 +72,7 @@
                   </template>
                   <v-list>
                     <v-list-item
-                        v-if="isNameRequest(item.corpType.code) && isApprovedForIA(item)"
+                        v-if="isApprovedForIA(item)"
                         class="actions-dropdown_item"
                         data-test="use-name-request-button"
                         @click="createDraftGoToDashboard(item)"
@@ -171,8 +171,9 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   private isApprovedForIA (business: Business): boolean {
-    return business.nameRequest?.state === NrState.APPROVED &&
-        LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.includes(business.nameRequest?.legalType)
+    return this.isNameRequest(business.corpType.code) &&
+      business.nameRequest?.state === NrState.APPROVED &&
+      LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.includes(business.nameRequest?.legalType)
   }
 
   private isTemporaryBusinessRegistration (corpType: string): boolean {

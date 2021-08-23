@@ -58,7 +58,7 @@ export interface NameRequest {
     applicantPhone?: string
 }
 
-// Names interface to match external data provided from namex.
+// Names interface to match external data provided from lear.
 export interface Names {
     /* eslint-disable camelcase */
     decision_text: string,

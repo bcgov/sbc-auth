@@ -44,14 +44,10 @@ export default class BusinessModule extends VuexModule {
           await BusinessService.getNrData(entity.businessIdentifier)
             .then(response => {
               if (response?.status >= 200 && response?.status < 300) {
-                // entity.name = response.data.names[0].name
-
                 BusinessService.updateBusinessName({
                   businessIdentifier: entity.businessIdentifier,
                   name: response.data.names[0].name
                 })
-                // eslint-disable-next-line no-console
-                console.log(response)
                 entity.nameRequest = {
                   names: response.data.names,
                   id: response.data.id,
@@ -69,8 +65,7 @@ export default class BusinessModule extends VuexModule {
         }
       }
     }
-    // eslint-disable-next-line no-console
-    console.log(response.data.entities)
+
     return response.data.entities
   }
 
