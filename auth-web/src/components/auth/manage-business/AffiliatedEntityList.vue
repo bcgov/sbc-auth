@@ -171,9 +171,12 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   private isApprovedForIA (business: Business): boolean {
+    // Split string tokens into an array to avoid false string matching
+    const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ')
+
     return this.isNameRequest(business.corpType.code) &&
       business.nameRequest?.state === NrState.APPROVED &&
-      LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.includes(business.nameRequest?.legalType)
+        supportedEntityFlags?.includes(business.nameRequest?.legalType)
   }
 
   private isTemporaryBusinessRegistration (corpType: string): boolean {
