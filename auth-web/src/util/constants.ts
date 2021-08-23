@@ -128,6 +128,11 @@ export enum CorpType {
     NAME_REQUEST = 'NR'
 }
 
+export enum NrState {
+    APPROVED = 'APPROVED',
+    DRAFT = 'DRAFT',
+}
+
 export enum AccessType {
     REGULAR = 'REGULAR',
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
@@ -171,7 +176,8 @@ export enum LDFlags {
     EnableGovmInvite = 'enable-govm-account-invite',
     HideProductPackage = 'hide-product-packages',
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
-    EnableBusinessTable = 'enable-business-table'
+    EnableBusinessTable = 'enable-business-table',
+    IaSupportedEntities = 'ia-supported-entities'
 }
 
 export enum DateFilterCodes {
