@@ -156,32 +156,10 @@ export default class AddNameRequestForm extends Vue {
           email: this.applicantEmail
         })
         if (nrResponse?.status === 201) {
-          // update the legal api if the status is success
-          const filingBody: BusinessRequest = {
-            filing: {
-              header: {
-                name: FilingTypes.INCORPORATION_APPLICATION,
-                accountId: this.currentOrganization.id
-              },
-              business: {
-                legalType: LegalTypes.BCOMP
-              },
-              incorporationApplication: {
-                nameRequest: {
-                  legalType: LegalTypes.BCOMP,
-                  nrNumber: this.nrNumber
-                }
-              }
-            }
-          }
-
-          const filingResponse = await this.createNamedBusiness(filingBody)
-          if (filingResponse?.errorMsg) {
-            this.$emit('add-unknown-error')
-          } else {
-            // emit event to let parent know business added
-            this.$emit('add-success')
-          }
+          // emit event to let parent know business added
+          this.$emit('add-success')
+        } else {
+          this.$emit('add-unknown-error')
         }
       } catch (exception) {
         if (exception.response?.status === StatusCodes.BAD_REQUEST) {
