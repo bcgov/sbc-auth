@@ -107,10 +107,11 @@
 <script lang="ts">
 import { Business, BusinessRequest, NameRequest } from '@/models/business'
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { CorpType, FilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LDFlags, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgModule from '@/store/modules/org'
 import TeamManagement from '@/components/auth/account-settings/team-management/TeamManagement.vue'
 import { getModule } from 'vuex-module-decorators'
@@ -170,7 +171,8 @@ export default class AffiliatedEntityList extends Vue {
   }
 
   private isApprovedForIA (business: Business): boolean {
-    return business.nameRequest?.state === NrState.APPROVED && business.nameRequest?.legalType === CorpType.BCOMP
+    return business.nameRequest?.state === NrState.APPROVED &&
+        LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.includes(business.nameRequest?.legalType)
   }
 
   private isTemporaryBusinessRegistration (corpType: string): boolean {
