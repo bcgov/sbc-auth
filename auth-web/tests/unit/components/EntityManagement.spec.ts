@@ -108,7 +108,7 @@ describe('Entity Management Component', () => {
   })
   it('calls the Passcode reset open modal with correct buttons', async () => {
     const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('CP')
-    let mockedPasscodeResetMethod = jest.fn()
+    const mockedPasscodeResetMethod = jest.fn()
     wrapper.vm.$refs.passcodeResetOptionsModal.open = mockedPasscodeResetMethod
     wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
     expect(mockedNrMethod).toHaveBeenCalledTimes(0)
