@@ -105,7 +105,7 @@
       v-slot:[`item.lastActive`]="{ item }"
       :data-test="getIndexedTag('last-active', item.index)"
     >
-      {{ formatDate(item.user.modified) }}
+      {{ formatDate(item.user.modified, 'MMMM DD, YYYY') }}
     </template>
 
     <!-- Actions Column Template -->

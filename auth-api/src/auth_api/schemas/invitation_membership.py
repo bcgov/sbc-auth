@@ -23,7 +23,7 @@ from .base_schema import BaseSchema
 class InvitationMembershipSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Invitation Membership model."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta(BaseSchema.Meta):  # pylint: disable=too-few-public-methods
         """Maps all of the Membership fields to a default schema."""
 
         model = InvitationMembershipModel
