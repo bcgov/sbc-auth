@@ -71,7 +71,7 @@
                         v-if="isApprovedForIA(item)"
                         class="actions-dropdown_item"
                         data-test="use-name-request-button"
-                        @click="createDraftGoToDashboard(item)"
+                        @click="createDraft(item)"
                       >
                         <v-list-item-subtitle>
                           <v-icon>mdi-file-certificate-outline</v-icon>
@@ -106,9 +106,19 @@
 </template>
 
 <script lang='ts'>
+import {
+  AffiliationTypes,
+  BusinessState,
+  CorpType,
+  CorpTypeCd,
+  FilingTypes,
+  GetCorpFullDescription,
+  LDFlags,
+  NrState,
+  SessionStorageKeys
+} from '@/util/constants'
 import { Business, BusinessRequest, NameRequest, Names } from '@/models/business'
 import { Component, Emit, Prop, Watch } from 'vue-property-decorator'
-import { CorpType, CorpTypeCd, FilingTypes, GetCorpFullDescription, LDFlags, NrState, SessionStorageKeys } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
@@ -144,32 +154,37 @@ export default class AffiliatedEntityTable extends Vue {
   /** V-model for dropdown menus. */
   private dropdown: Array<boolean> = []
 
-  /** The number of affiliated entities or name requests. **/
+  /** The number of affiliated entities or name requests. */
   private get entityCount (): number {
     return this.businesses.length
   }
 
-  /** Filter the headers we want to show. */
+  /** The headers we want to show. */
   private get getHeaders (): Array<any> {
     return this.headers.filter(x => x.show)
   }
 
+  /** The set height when affiliation count exceeds 5 */
   private get getMaxHeight (): string {
     return this.entityCount > 5 ? '25rem' : null
   }
 
+  /** Returns true if the affiliation is a Name Request */
   private isNameRequest (corpType: string): boolean {
     return corpType === CorpType.NAME_REQUEST
   }
 
+  /** Returns true if the affiliation is a Temp Registration */
   private isTemporaryBusinessRegistration (corpType: string): boolean {
     return corpType === CorpType.NEW_BUSINESS
   }
 
+  /** Returns true if the affiliation is a Numbered Company */
   private isNumberedIncorporationApplication (item: Business): boolean {
     return item.corpType.code === CorpType.NEW_BUSINESS && item.name === item.businessIdentifier
   }
 
+  /** Returns true if the affiliation is approved to start an IA */
   private isApprovedForIA (business: Business): boolean {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ')
@@ -179,45 +194,70 @@ export default class AffiliatedEntityTable extends Vue {
         supportedEntityFlags?.includes(business.nameRequest?.legalType)
   }
 
+  /** Returns the Name value for the affiliation */
   private name (item: Business): string {
     return this.isNumberedIncorporationApplication(item) ? 'Numbered Benefit Company' : item.name
   }
 
+  /** Returns true if the Name Request is approved */
   private isApprovedName (name: Names): boolean {
     return name.state === NrState.APPROVED
   }
 
+  /** Returns true if the Name Request is rejected */
   private isRejectedName (name: Names): boolean {
     return name.state === NrState.REJECTED
   }
 
+  /** Returns the identifier for the affiliation */
   private number (item: Business): string {
-    if (this.isNumberedIncorporationApplication(item)) return 'Pending'
-    if (this.isNameRequest(item.corpType.code)) return item.nameRequest.nrNumber
-    if (this.isTemporaryBusinessRegistration(item.corpType.code)) return 'Pending'
-    return item.businessIdentifier
+    switch (true) {
+      // This case is subject to change once the NR Number is available in the Affiliation Response ALWAYS
+      case (this.isNumberedIncorporationApplication(item) || this.isTemporaryBusinessRegistration(item.corpType.code)):
+        return 'Pending'
+      case this.isNameRequest(item.corpType.code):
+        return item.nameRequest.nrNumber
+      default:
+        return item.businessIdentifier
+    }
   }
 
-  private type (item: Business): string {
-    if (this.isNameRequest(item.corpType.code)) return 'Name Request'
-    if (this.isTemporaryBusinessRegistration(item.corpType.code)) return 'Incorporation Application'
-    return 'Corporation'
+  /** Returns the type of the affiliation */
+  private type (item: Business): AffiliationTypes {
+    switch (true) {
+      case (this.isNameRequest(item.corpType.code)):
+        return AffiliationTypes.NAME_REQUEST
+      case this.isTemporaryBusinessRegistration(item.corpType.code):
+        return AffiliationTypes.INCORPORATION_APPLICATION
+      default:
+        return AffiliationTypes.CORPORATION
+    }
   }
 
+  /** Returns the corp full description for display */
   private typeDescription (corpType: CorpTypeCd): string {
     return GetCorpFullDescription(corpType)
   }
 
+  /** Returns the status for the affiliation */
   private status (item: Business): string {
-    if (this.isNameRequest(item.corpType.code)) return item.nameRequest.state
-    if (this.isTemporaryBusinessRegistration(item.corpType.code)) return 'Draft'
-    return 'Active'
+    switch (true) {
+      case (this.isNameRequest(item.corpType.code)):
+        // Format name request state value for Display
+        return item.nameRequest.state.charAt(0).toUpperCase() + item.nameRequest.state.slice(1).toLowerCase()
+      case this.isTemporaryBusinessRegistration(item.corpType.code):
+        return BusinessState.DRAFT
+      default:
+        return BusinessState.ACTIVE
+    }
   }
 
+  /** Returns the folio number or a default message */
   private folio (item: Business): string {
     return item.folioNumber || 'Not Available'
   }
 
+  /** Returns the last modified date string or a default message */
   private lastModified (item: Business): string {
     return item.lastModified
       ? new Date(item.lastModified).toLocaleDateString('en-CA', {
@@ -226,32 +266,40 @@ export default class AffiliatedEntityTable extends Vue {
       : 'Not Available'
   }
 
+  /** Returns the modified by value or a default message */
   private modifiedBy (item: Business): string {
-    if (item.modifiedBy === 'None None' || !item.modifiedBy) return 'Not Available'
-    return item.modifiedBy
-  }
-
-  private open (business: Business): void {
-    if (business.corpType.code === CorpType.NAME_REQUEST) {
-      this.goToNameRequest(business.nameRequest)
-    } else {
-      this.goToDashboard(business.businessIdentifier)
+    switch (true) {
+      case (item.modifiedBy === 'None None' || !item.modifiedBy):
+        return 'Not Available'
+      default:
+        return item.modifiedBy
     }
   }
 
-  async createDraftGoToDashboard (business: Business) {
-    let businessIdentifier = business.businessIdentifier
+  /** Redirect handler for Dashboard OPEN action */
+  private open (item: Business): void {
+    if (item.corpType.code === CorpType.NAME_REQUEST) {
+      this.goToNameRequest(item.nameRequest)
+    } else {
+      this.goToDashboard(item.businessIdentifier)
+    }
+  }
+
+  /** Handler method for draft IA creation and navigation */
+  async createDraft (item: Business) {
+    let businessIdentifier = item.businessIdentifier
     // 3806 : Create new IA if the selected item is Name Request
     // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
-    if (business.corpType.code === CorpType.NAME_REQUEST && business.nameRequest.state === NrState.APPROVED) {
+    if (item.corpType.code === CorpType.NAME_REQUEST && item.nameRequest.state === NrState.APPROVED) {
       this.isLoading = true
       // Find business with name as the NR number and use it for redirection
-      businessIdentifier = await this.createBusinessRecord(business)
+      businessIdentifier = await this.createBusinessRecord(item)
       this.isLoading = false
     }
     this.goToDashboard(businessIdentifier)
   }
 
+  /** Navigation handler for entities dashboard */
   private goToDashboard (businessIdentifier: string): void {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
     let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
@@ -259,11 +307,13 @@ export default class AffiliatedEntityTable extends Vue {
     window.location.href = decodeURIComponent(redirectURL)
   }
 
+  /** Navigation handler for name request application */
   private goToNameRequest (nameRequest: NameRequest): void {
     ConfigHelper.setNrCredentials(nameRequest)
     window.location.href = `${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`
   }
 
+  /** Create a business record in Lear */
   private async createBusinessRecord (business: Business): Promise<string> {
     const filingBody: BusinessRequest = {
       filing: {
@@ -291,6 +341,11 @@ export default class AffiliatedEntityTable extends Vue {
     }
   }
 
+  /** Is true when the selected columns includes the column argument. */
+  private showCol = (col): boolean => {
+    return this.selectedColumns.includes(col)
+  }
+
   /** Emit business/nr information to be unaffiliated. */
   @Emit()
   removeBusiness (business: Business): RemoveBusinessPayload {
@@ -313,11 +368,6 @@ export default class AffiliatedEntityTable extends Vue {
       { text: 'Modified By', value: 'modifiedBy', sortable: false, show: this.showCol('Modified By') },
       { text: 'Actions', align: 'end', value: 'action', sortable: false, show: true }
     ]
-  }
-
-  /** Is true when the selected columns includes the column argument. */
-  private showCol = (col): boolean => {
-    return this.selectedColumns.includes(col)
   }
 }
 </script>

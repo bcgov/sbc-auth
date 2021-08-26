@@ -100,7 +100,7 @@ export default class OrgModule extends VuexModule {
 
   /** Is True if the current account is premium. */
   get isPremiumAccount (): boolean {
-    return true // this.currentOrganization?.orgType === Account.PREMIUM
+    return this.currentOrganization?.orgType === Account.PREMIUM
   }
 
   get needMissingBusinessDetailsRedirect (): boolean {

@@ -111,6 +111,12 @@ export enum TransactionStatus {
     CANCELLED = 'Cancelled'
 }
 
+export enum AffiliationTypes {
+    NAME_REQUEST ='Name Request',
+    INCORPORATION_APPLICATION = 'Incorporation Application',
+    CORPORATION = 'Corporation'
+}
+
 export enum FilingTypes {
     INCORPORATION_APPLICATION = 'incorporationApplication'
 }
@@ -132,6 +138,11 @@ export enum NrState {
     APPROVED = 'APPROVED',
     DRAFT = 'DRAFT',
     REJECTED = 'REJECTED'
+}
+
+export enum BusinessState {
+    ACTIVE = 'Active',
+    DRAFT = 'Draft'
 }
 
 export enum AccessType {
