@@ -106,4 +106,12 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.primaryBtnText).toBe('Delete Incorporation Application')
     expect(wrapper.vm.secondaryBtnText).toBe('Keep Incorporation Application')
   })
+  it('calls the Passcode reset open modal with correct buttons', async () => {
+    const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('CP')
+    let mockedPasscodeResetMethod = jest.fn()
+    wrapper.vm.$refs.passcodeResetOptionsModal.open = mockedPasscodeResetMethod
+    wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
+    expect(mockedNrMethod).toHaveBeenCalledTimes(0)
+    expect(mockedPasscodeResetMethod).toHaveBeenCalled()
+  })
 })
