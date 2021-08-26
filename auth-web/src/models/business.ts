@@ -57,7 +57,8 @@ export interface NameRequest {
     nrNumber?: string,
     state?: string,
     applicantEmail?: string,
-    applicantPhone?: string
+    applicantPhone?: string,
+    enableIncorporation?: boolean
 }
 
 // Names interface to match external data provided from lear.

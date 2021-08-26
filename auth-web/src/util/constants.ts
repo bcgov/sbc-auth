@@ -121,6 +121,11 @@ export enum FilingTypes {
     INCORPORATION_APPLICATION = 'incorporationApplication'
 }
 
+export enum LearFilingTypes {
+    INCORPORATION = 'Incorporation',
+    REGISTRATION = 'Registration'
+}
+
 export enum LegalTypes {
     BCOMP = 'BEN',
     COOP = 'CP',
