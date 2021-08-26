@@ -163,5 +163,14 @@
   "restrictedAccess": "Restricted Access",
   "deactivateGenericMsg": "An error occurred while attempting to deactivate your account.Please try again",
   "deactivateCreditAccountMsg": "There’s a credit that needs to be refunded before you can deactivate <br/>this account. Email <b>BCRegistries@gov.bc.ca</b> to request a refund.<br/>They’ll let you know how long it will take.",
-  "deactivateActiveTransactionsMsg": "There’s a transaction still in progress. You can deactivate this account<br/>once it has completed. It takes <b>10 business days</b> to complete a<br/>transaction. Even if a transaction appears on your bank statement, it<br/>may not be fully completed yet."
+  "deactivateActiveTransactionsMsg": "There’s a transaction still in progress. You can deactivate this account<br/>once it has completed. It takes <b>10 business days</b> to complete a<br/>transaction. Even if a transaction appears on your bank statement, it<br/>may not be fully completed yet.",
+  "removeBusiness": "Remove Business",
+  "removeNRConfirmTitle": "Remove Name Request?",
+  "removeNRConfirmText": "Removing this Name Request will remove the request from your Business Registry list. You can add it back at a later time by selecting Add an Existing... Name Request. This Name Request will still be valid until it is used or cancelled, or it expires.",
+  "removeNRSuccessTitle": "Name Request Removed",
+  "removeNRSuccessText": "You have successfully removed a name request",
+  "removeIASuccessTitle": "Incorporation Application Deleted",
+  "removeIASuccessText": "You have successfully deleted a incorporation application",
+  "removeIAConfirmTitle": "Delete Incorporation Application?",
+  "removeIAConfirmText": "Deleting this incorporation application will remove the application from your Business Registry list. The business associated with this application will not be incorporated. If this incorporation application was associated with a Name Request, the Name Request can still be used to incorporate a business."
 }
