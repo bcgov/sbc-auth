@@ -131,6 +131,7 @@ export enum CorpType {
 export enum NrState {
     APPROVED = 'APPROVED',
     DRAFT = 'DRAFT',
+    REJECTED = 'REJECTED'
 }
 
 export enum AccessType {
@@ -274,3 +275,6 @@ export const DEACTIVATE_ACCOUNT_MESSAGE : Map<string, string> = new Map([
   ['TRANSACTIONS_IN_PROGRESS', 'deactivateActiveTransactionsMsg'],
   ['DEFAULT', 'deactivateGenericMsg']
 ])
+
+// external enums
+export { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'

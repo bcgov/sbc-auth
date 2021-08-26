@@ -24,6 +24,8 @@ export interface Business {
     contacts?: Contact[]
     corpType: CorpType,
     folioNumber: string,
+    lastModified?: string,
+    modifiedBy?: string
     nameRequest?: NameRequest
 }
 

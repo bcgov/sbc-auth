@@ -9,96 +9,120 @@
     </div>
     <v-container class="view-container">
       <div class="view-header align-center">
-        <h1 class="view-header__title">Manage Businesses</h1>
+        <h1 class="view-header__title">My Business Registry<br>
+          <span class="subtitle">Start BC-based businesses and keep business records up to date.</span>
+        </h1>
         <div class="view-header__actions">
           <v-btn
-              id="add-name-request-btn"
-              class="mr-3 font-weight-regular"
-              color="primary"
-              outlined dark large
-              @click="goToNameRequest()"
+            id="add-name-request-btn"
+            class="font-weight-regular"
+            color="primary"
+            outlined dark large
+            @click="goToNameRequest()"
           >
             <span>Request a BC Business Name</span>
             <v-icon small class="ml-2">mdi-open-in-new</v-icon>
           </v-btn>
-          <v-menu>
-            <template v-slot:activator="{ on }">
-              <v-btn
-                color="primary"
-                dark
-                large
-                v-on="on"
-              >
-                <v-icon small>mdi-plus</v-icon>
-                <span>{{ $t('addExistingBtnLabel') }}</span>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
-              >
-                <v-list-item-title class="d-inline-flex">
+          <template v-if="!enableBusinessTable">
+            <v-menu>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                    class="ml-3"
+                    color="primary"
+                    dark
+                    large
+                    v-on="on"
+                >
                   <v-icon small>mdi-plus</v-icon>
-                  <div class="ml-1">{{ $t('addExistingBtnLabel') }}</div>
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item
-                @click="showAddNRModal()"
-              >
-                Name Request
-              </v-list-item>
-              <v-list-item
-                @click="showAddBusinessModal()"
-              >
-                Business
-              </v-list-item>
-            </v-list>
-          </v-menu>
+                  <span>{{ $t('addExistingBtnLabel') }}</span>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item
+                >
+                  <v-list-item-title class="d-inline-flex">
+                    <v-icon small>mdi-plus</v-icon>
+                    <div class="ml-1">{{ $t('addExistingBtnLabel') }}</div>
+                  </v-list-item-title>
+                </v-list-item>
+                <v-list-item
+                    @click="showAddNRModal()"
+                >
+                  Name Request
+                </v-list-item>
+                <v-list-item
+                    @click="showAddBusinessModal()"
+                >
+                  Business
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </template>
         </div>
       </div>
 
       <!-- Feature flagged future Dashboard table -->
       <template v-if="enableBusinessTable">
-        <v-row no-gutters>
-          <v-col cols="9"></v-col>
+        <v-row no-gutters id="dashboard-actions" class="mb-n3 pl-4">
+          <v-col cols="9">
+            <!-- Add Existing Name Request or Business -->
+            <v-menu>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  class="mt-2"
+                  color="primary"
+                  dark
+                  large
+                  v-on="on"
+                >
+                  <v-icon small>mdi-plus</v-icon>
+                  <span>Add an Existing Business or Name Request</span>
+                </v-btn>
+              </template>
+              <v-list>
+                <v-list-item>
+                  <v-list-item-title class="d-inline-flex">
+                    <v-icon>mdi-plus</v-icon>
+                    <div class="ml-1 mt-1">Add an Existing...</div>
+                  </v-list-item-title>
+                </v-list-item>
+                <v-list-item class="mt-4" @click="showAddBusinessModal()">Business</v-list-item>
+                <v-list-item class="my-2" @click="showAddNRModal()">Name Request</v-list-item>
+              </v-list>
+            </v-menu>
+          </v-col>
           <v-col class="mr-4">
             <v-select
-                v-model="selectedColumns"
-                :items="columns"
-                label="Columns to Show"
-                class="column-selector"
-                filled
-                multiple
+              dense filled multiple
+              class="column-selector"
+              label="Columns to Show"
+              v-model="selectedColumns"
+              :items="columns"
+              :menu-props="{ bottom: true, offsetY: true }"
             >
-              <template v-slot:selection="{ item, index }">
-                <v-chip v-if="index === 0" class="mt-2">
-                  <span>{{ item }}</span>
-                </v-chip>
-                <span v-if="index === 1" class="grey--text text-caption">
-                (+{{ selectedColumns.length - 1 }} others)
-              </span>
-              </template>
+              <template v-slot:selection="{ item }"></template>
             </v-select>
           </v-col>
         </v-row>
 
         <AffiliatedEntityTable
-            :selected-columns="selectedColumns"
-            @remove-business="showConfirmationOptionsModal($event)"
+          :selected-columns="selectedColumns"
+          @remove-business="showConfirmationOptionsModal($event)"
         />
       </template>
 
       <template v-else>
         <AffiliatedEntityList
-            @add-business="showAddBusinessModal()"
-            @remove-business="showConfirmationOptionsModal($event)"
-            @add-failed-show-msg="showNRErrorModal"
+          @add-business="showAddBusinessModal()"
+          @remove-business="showConfirmationOptionsModal($event)"
+          @add-failed-show-msg="showNRErrorModal"
         />
       </template>
 
       <PasscodeResetOptionsModal
-      ref="passcodeResetOptionsModal"
-      data-test="dialog-passcode-reset-options"
-      @confirm-passcode-reset-options="remove($event)"
+        ref="passcodeResetOptionsModal"
+        data-test="dialog-passcode-reset-options"
+        @confirm-passcode-reset-options="remove($event)"
       />
 
       <!-- Add Business Dialog -->
@@ -201,12 +225,12 @@
 
       <!-- Dialog for confirming business removal -->
       <ModalDialog
-      ref="removedBusinessSuccessDialog"
-      :title="dialogTitle"
-      :text="dialogText"
-      dialog-class="notify-dialog"
-      max-width="640"
-      :isPersistent="true"
+        ref="removedBusinessSuccessDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+        :isPersistent="true"
       >
         <template v-slot:icon>
           <v-icon large color="primary">mdi-check</v-icon>
@@ -339,8 +363,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   private get enableBusinessTable (): boolean {
-    // disabling table manually for early stages of development.
-    return false // LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false
+    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false // Default to false
   }
 
   // open Name Request
@@ -514,7 +537,13 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     justify-content: space-between;
 
     h1 {
-      margin-bottom: 0;
+      margin-bottom: -10px;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: $gray7;
+      font-weight: normal;
     }
 
     .v-btn {
@@ -522,8 +551,21 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     }
   }
 
+  .column-selector {
+    float: right;
+    width: 200px
+  }
+
   // Vuetify Overrides
   ::v-deep {
+
+    #dashboard-actions {
+      .v-input .v-label {
+        top: 30px;
+        color: $gray7;
+      }
+    }
+
     .v-data-table td {
       padding-top: 1rem;
       padding-bottom: 1rem;
@@ -534,6 +576,11 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     .v-list-item__title {
       display: block;
       font-weight: 700;
+    }
+
+    .v-list-item {
+      min-height: 0 !important;
+      height: 32px !important;
     }
 
     .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
