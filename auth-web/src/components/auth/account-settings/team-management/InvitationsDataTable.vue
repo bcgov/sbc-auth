@@ -18,14 +18,14 @@
       <span
         :data-test="getIndexedTag('invitation-sent', item.index)"
       >
-        {{ formatDate (item.sentDate) }}
+        {{ formatDate (item.sentDate, 'MMMM DD, YYYY') }}
       </span>
     </template>
     <template v-slot:[`item.expiresOn`]="{ item }">
       <span
         :data-test="getIndexedTag('invitation-expires', item.index)"
       >
-        {{ formatDate (item.expiresOn) }}
+        {{ formatDate (item.expiresOn, 'MMMM DD, YYYY') }}
       </span>
     </template>
     <template v-slot:[`item.action`]="{ item }">
