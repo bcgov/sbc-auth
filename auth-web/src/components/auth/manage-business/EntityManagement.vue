@@ -83,14 +83,14 @@
 
         <AffiliatedEntityTable
             :selected-columns="selectedColumns"
-            @remove-business="showPasscodeResetOptionsModal($event)"
+            @remove-business="showConfirmationOptionsModal($event)"
         />
       </template>
 
       <template v-else>
         <AffiliatedEntityList
             @add-business="showAddBusinessModal()"
-            @remove-business="showPasscodeResetOptionsModal($event)"
+            @remove-business="showConfirmationOptionsModal($event)"
             @add-failed-show-msg="showNRErrorModal"
         />
       </template>
@@ -165,6 +165,24 @@
         max-width="640"
       />
 
+      <!-- NR/IA removal confirm Dialog/A generic one -->
+      <ModalDialog
+        ref="removalConfirmDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+        data-test="remove-confirm-dialog"
+      >
+        <template v-slot:icon>
+          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="primary" @click="primaryBtnHandler()" data-test="dialog-ok-button">{{primaryBtnText}}</v-btn>
+          <v-btn large @click="secondaryBtnHandler()" data-test="dialog-ok-button">{{ secondaryBtnText }}</v-btn>
+        </template>
+      </ModalDialog>
+
       <!-- Error Dialog -->
       <ModalDialog
         ref="errorDialog"
@@ -184,8 +202,8 @@
       <!-- Dialog for confirming business removal -->
       <ModalDialog
       ref="removedBusinessSuccessDialog"
-      title="Remove Business"
-      :text="$t('removedBusinessSuccessText')"
+      :title="dialogTitle"
+      :text="dialogText"
       dialog-class="notify-dialog"
       max-width="640"
       :isPersistent="true"
@@ -203,7 +221,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LDFlags, LoginSource, Pages } from '@/util/constants'
+import { CorpType, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -220,7 +238,6 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
-import i18n from '@/plugins/i18n'
 
 @Component({
   components: {
@@ -250,10 +267,13 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
-  private messageTextList = i18n.messages[i18n.locale]
   private isLoading = true
   private resetPasscodeEmail: string = null
   businessIdentifier: string = null
+  private primaryBtnText = ''
+  private secondaryBtnText = ''
+  private primaryBtnHandler: () => void = undefined
+  private secondaryBtnHandler: () => void = undefined
 
   protected readonly currentAccountSettings!: AccountSettings
   private readonly isPremiumAccount!: boolean
@@ -271,7 +291,9 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     addBusinessDialog: ModalDialog
     addNRDialog: ModalDialog
     passcodeResetOptionsModal: PasscodeResetOptionsModal,
-    removedBusinessSuccessDialog: ModalDialog
+    removedBusinessSuccessDialog: ModalDialog,
+    removalConfirmDialog: ModalDialog
+
   }
 
   private async mounted () {
@@ -371,7 +393,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   showPasscodeClaimedModal () {
-    const contactNumber = (this.messageTextList && this.messageTextList.techSupportTollFree) ? this.messageTextList.techSupportTollFree : 'helpdesk'
+    const contactNumber = this.$t('techSupportTollFree').toString()
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Passcode Already Claimed'
     this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
@@ -401,9 +423,49 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.open()
   }
 
-  showPasscodeResetOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
+  showConfirmationOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
     this.removeBusinessPayload = removeBusinessPayload
-    this.$refs.passcodeResetOptionsModal.open()
+    if (removeBusinessPayload.business.corpType.code === CorpType.NAME_REQUEST) {
+      this.populateNRmodalValues()
+      this.$refs.removalConfirmDialog.open()
+    } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_BUSINESS) {
+      this.populateIAmodalValues()
+      this.$refs.removalConfirmDialog.open()
+    } else {
+      this.$refs.passcodeResetOptionsModal.open()
+    }
+  }
+
+  private populateNRmodalValues () {
+    this.dialogTitle = this.$t('removeNRConfirmTitle').toString()
+    this.dialogText = this.$t('removeNRConfirmText').toString()
+    this.primaryBtnText = 'Remove Name Request'
+    this.secondaryBtnText = 'Keep Name Request'
+    this.primaryBtnHandler = this.confirmRemovalNr
+    this.secondaryBtnHandler = this.cancelRemoval
+  }
+
+  private populateIAmodalValues () {
+    this.dialogTitle = this.$t('removeIAConfirmTitle').toString()
+    this.dialogText = this.$t('removeIAConfirmText').toString()
+    this.primaryBtnText = 'Delete Incorporation Application'
+    this.secondaryBtnText = 'Keep Incorporation Application'
+    this.primaryBtnHandler = this.confirmRemovalIA
+    this.secondaryBtnHandler = this.cancelRemoval
+  }
+
+  cancelRemoval () {
+    this.$refs.removalConfirmDialog.close()
+  }
+
+  confirmRemovalIA () {
+    this.$refs.removalConfirmDialog.close()
+    this.remove('', false, 'removeIASuccessTitle', 'removeIASuccessText')
+  }
+
+  confirmRemovalNr () {
+    this.$refs.removalConfirmDialog.close()
+    this.remove('', false, 'removeNRSuccessTitle', 'removeNRSuccessText')
   }
 
   cancelAddBusiness () {
@@ -414,12 +476,14 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.close()
   }
 
-  async remove (resetPasscodeEmail: string) {
+  async remove (resetPasscodeEmail: string, resetPasscode = true, dialogTitleKey = 'removeBusiness', dialogTextKey = 'removedBusinessSuccessText') {
     try {
       this.removeBusinessPayload.passcodeResetEmail = resetPasscodeEmail
-      this.removeBusinessPayload.resetPasscode = true
+      this.removeBusinessPayload.resetPasscode = resetPasscode
       this.$refs.passcodeResetOptionsModal.close()
       await this.removeBusiness(this.removeBusinessPayload)
+      this.dialogText = this.$t(dialogTextKey).toString()
+      this.dialogTitle = this.$t(dialogTitleKey).toString()
       await this.syncBusinesses()
       this.$refs.removedBusinessSuccessDialog.open()
     } catch (ex) {
