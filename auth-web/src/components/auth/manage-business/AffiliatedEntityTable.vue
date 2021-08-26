@@ -214,7 +214,9 @@ export default class AffiliatedEntityTable extends Vue {
   private number (item: Business): string {
     switch (true) {
       // This case is subject to change once the NR Number is available in the Affiliation Response ALWAYS
-      case (this.isNumberedIncorporationApplication(item) || this.isTemporaryBusinessRegistration(item.corpType.code)):
+      case (this.isNumberedIncorporationApplication(item)):
+        return 'Pending'
+      case (this.isTemporaryBusinessRegistration(item.corpType.code)):
         return 'Pending'
       case this.isNameRequest(item.corpType.code):
         return item.nameRequest.nrNumber
@@ -270,7 +272,9 @@ export default class AffiliatedEntityTable extends Vue {
   /** Returns the modified by value or a default message */
   private modifiedBy (item: Business): string {
     switch (true) {
-      case (item.modifiedBy === 'None None' || !item.modifiedBy):
+      case (item.modifiedBy === 'None None'):
+        return 'Not Available'
+      case (!item.modifiedBy):
         return 'Not Available'
       default:
         return item.modifiedBy

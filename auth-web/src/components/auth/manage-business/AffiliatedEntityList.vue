@@ -175,9 +175,9 @@ export default class AffiliatedEntityList extends Vue {
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ')
 
     return this.isNameRequest(business.corpType.code) &&
-        business.nameRequest.enableIncorporation &&
-        business.nameRequest?.state === NrState.APPROVED &&
-        supportedEntityFlags?.includes(business.nameRequest?.legalType)
+      business.nameRequest.enableIncorporation &&
+      business.nameRequest?.state === NrState.APPROVED &&
+      supportedEntityFlags?.includes(business.nameRequest?.legalType)
   }
 
   private isTemporaryBusinessRegistration (corpType: string): boolean {
