@@ -1,6 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
-import { CorpType, FilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -16,6 +16,10 @@ import OrgService from '@/services/org.services'
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
   businesses: Business[] = []
+
+  public get businessAffiliations (): Business[] {
+    return this.businesses
+  }
 
   @Mutation
   public setCurrentBusiness (business: Business) {
@@ -35,8 +39,47 @@ export default class BusinessModule extends VuexModule {
       return []
     }
     const response = await OrgService.getAffiliatiatedEntities(organization.id)
+
     if (response && response.data && response.status === 200) {
-      return response.data.entities
+      // Fetch and populate data for Name Request affiliations
+      const affiliatedEntities = response.data.entities
+      for (const entity of affiliatedEntities) {
+        if (entity.corpType.code === CorpType.NAME_REQUEST) {
+          await BusinessService.getNrData(entity.businessIdentifier)
+            .then(response => {
+              // Keep the approved name in Sync, in the event of changes in Namex
+              const approvedName = () => {
+                for (const nameItem of response.data.names) {
+                  if (nameItem.state === NrState.APPROVED) {
+                    return nameItem.name
+                  }
+                }
+              }
+
+              if (response?.status >= 200 && response?.status < 300) {
+                BusinessService.updateBusinessName({
+                  businessIdentifier: entity.businessIdentifier,
+                  name: approvedName()
+                })
+
+                entity.nameRequest = {
+                  names: response.data.names,
+                  id: response.data.id,
+                  legalType: response.data.legalType,
+                  nrNumber: response.data.nrNum,
+                  state: response.data.state,
+                  applicantEmail: response.data.applicants?.emailAddress,
+                  applicantPhone: response.data.applicants?.phoneNumber
+                }
+              }
+            }).catch(err => {
+              // eslint-disable-next-line no-console
+              console.log(`Error fetching Name Request: ${err}`)
+            })
+        }
+      }
+
+      return affiliatedEntities
     }
   }
 

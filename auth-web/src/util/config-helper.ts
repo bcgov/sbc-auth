@@ -1,6 +1,7 @@
 import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 
 import Axios from 'axios'
+import { NameRequest } from '@/models/business'
 
 /**
  * the configs are used since process.env doesnt play well when we hae only one build config and multiple deployments..so going for this
@@ -135,5 +136,12 @@ export default class ConfigHelper {
       [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
       [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
     }
+  }
+
+  static async setNrCredentials (nameRequest: NameRequest) {
+    // Set name request applicant info to retrieve on redirect
+    sessionStorage.setItem('BCREG-nrNum', nameRequest.nrNumber)
+    sessionStorage.setItem('BCREG-emailAddress', nameRequest.applicantEmail)
+    sessionStorage.setItem('BCREG-phoneNumber', nameRequest.applicantPhone)
   }
 }

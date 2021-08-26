@@ -91,6 +91,7 @@
         <AffiliatedEntityList
             @add-business="showAddBusinessModal()"
             @remove-business="showPasscodeResetOptionsModal($event)"
+            @add-failed-show-msg="showNRErrorModal"
         />
       </template>
 

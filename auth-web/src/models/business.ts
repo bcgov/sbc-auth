@@ -23,7 +23,8 @@ export interface Business {
     name?: string
     contacts?: Contact[]
     corpType: CorpType,
-    folioNumber: string
+    folioNumber: string,
+    nameRequest?: NameRequest
 }
 
 export interface BusinessSearchResultDto {
@@ -48,8 +49,24 @@ export interface UpdateBusinessNamePayload {
 
 // see https://github.com/bcgov/business-schemas/blob/master/src/registry_schemas/schemas/name_request.json
 export interface NameRequest {
+    names?: Array<Names>
+    id?: number,
     legalType: string,
-    nrNumber?: string
+    nrNumber?: string,
+    state?: string,
+    applicantEmail?: string,
+    applicantPhone?: string
+}
+
+// Names interface to match external data provided from lear.
+export interface Names {
+    /* eslint-disable camelcase */
+    decision_text: string,
+    name_type_cd: string,
+    designation: string,
+    name: string,
+    state: string
+    /* eslint-disable camelcase */
 }
 
 export interface BusinessRequest {
