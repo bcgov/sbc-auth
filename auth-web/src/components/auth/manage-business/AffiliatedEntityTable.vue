@@ -147,10 +147,10 @@ export default class AffiliatedEntityTable extends Vue {
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
   private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
-  private headers: Array<any> = []
   private readonly isPremiumAccount!: boolean
+  private readonly notAvailableMsg: string = this.$t('notAvailable').toString()
+  private headers: Array<any> = []
   private isLoading: boolean = false
-  private notAvailableMsg: string = this.$t('notAvailable').toString()
 
   /** V-model for dropdown menus. */
   private dropdown: Array<boolean> = []
