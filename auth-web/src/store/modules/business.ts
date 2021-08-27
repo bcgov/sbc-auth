@@ -1,6 +1,13 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
-import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, SessionStorageKeys } from '@/util/constants'
+import {
+  Business,
+  BusinessRequest,
+  FolioNumberload,
+  LoginPayload,
+  NameRequest,
+  PasscodeResetLoad
+} from '@/models/business'
+import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -47,14 +54,18 @@ export default class BusinessModule extends VuexModule {
         if (entity.corpType.code === CorpType.NAME_REQUEST) {
           await BusinessService.getNrData(entity.businessIdentifier)
             .then(response => {
-              if (response?.status >= 200 && response?.status < 300 && response.data) {
+              if (response?.status >= 200 && response?.status < 300 && response?.data) {
                 // Verify incorporation is supported
-                let approvedForIa = false
+                let isSupportedFiling
                 for (const item of response.data.actions) {
                   if (item.filingName === LearFilingTypes.INCORPORATION) {
-                    approvedForIa = true
+                    isSupportedFiling = true
+                    break
                   }
                 }
+
+                const isIaEnabled = response.data.state === NrState.APPROVED ||
+                    (response.data.state === NrState.CONDITIONAL && response.data.consentFlag === 'R')
 
                 entity.nameRequest = {
                   names: response.data.names,
@@ -64,7 +75,7 @@ export default class BusinessModule extends VuexModule {
                   state: response.data.state,
                   applicantEmail: response.data.applicants?.emailAddress,
                   applicantPhone: response.data.applicants?.phoneNumber,
-                  enableIncorporation: approvedForIa
+                  enableIncorporation: isSupportedFiling && isIaEnabled
                 }
               }
             }).catch(err => {

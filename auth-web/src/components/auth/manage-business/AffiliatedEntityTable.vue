@@ -187,8 +187,7 @@ export default class AffiliatedEntityTable extends Vue {
 
     return this.isNameRequest(business.corpType.code) &&
       business.nameRequest?.enableIncorporation &&
-      (business.nameRequest?.state === NrState.APPROVED || business.nameRequest?.state === NrState.CONDITIONAL) &&
-      supportedEntityFlags?.includes(business.nameRequest?.legalType)
+      supportedEntityFlags.includes(business.nameRequest?.legalType)
   }
 
   /** Returns the Name value for the affiliation */

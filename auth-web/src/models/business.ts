@@ -1,4 +1,5 @@
 import { Contact } from './contact'
+import { LearFilingTypes } from '@/util/constants'
 
 export interface LoginPayload {
     businessIdentifier: string
@@ -51,6 +52,8 @@ export interface UpdateBusinessNamePayload {
 
 // see https://github.com/bcgov/business-schemas/blob/master/src/registry_schemas/schemas/name_request.json
 export interface NameRequest {
+    actions?: Array<Actions>
+    consentFlag?: string
     names?: Array<Names>
     id?: number,
     legalType: string,
@@ -70,6 +73,13 @@ export interface Names {
     name: string,
     state: string
     /* eslint-disable camelcase */
+}
+
+// Actions interface to match external data provided from lear.
+export interface Actions {
+    URL: string,
+    entitiesFilingName: string,
+    filingName: LearFilingTypes,
 }
 
 export interface BusinessRequest {
