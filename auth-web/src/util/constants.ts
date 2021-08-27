@@ -142,7 +142,8 @@ export enum CorpType {
 export enum NrState {
     APPROVED = 'APPROVED',
     DRAFT = 'DRAFT',
-    REJECTED = 'REJECTED'
+    REJECTED = 'REJECTED',
+    CONDITIONAL = 'CONDITIONAL'
 }
 
 export enum BusinessState {

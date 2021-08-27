@@ -47,7 +47,7 @@ export default class BusinessModule extends VuexModule {
         if (entity.corpType.code === CorpType.NAME_REQUEST) {
           await BusinessService.getNrData(entity.businessIdentifier)
             .then(response => {
-              if (response?.status >= 200 && response?.status < 300) {
+              if (response?.status >= 200 && response?.status < 300 && response.data) {
                 // Verify incorporation is supported
                 let approvedForIa = false
                 for (const item of response.data.actions) {
