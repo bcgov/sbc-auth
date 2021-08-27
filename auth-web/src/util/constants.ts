@@ -143,6 +143,7 @@ export enum NrState {
     APPROVED = 'APPROVED',
     DRAFT = 'DRAFT',
     REJECTED = 'REJECTED',
+    CONDITION = 'CONDITION',
     CONDITIONAL = 'CONDITIONAL'
 }
 

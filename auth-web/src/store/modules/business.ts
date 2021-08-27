@@ -55,6 +55,19 @@ export default class BusinessModule extends VuexModule {
           await BusinessService.getNrData(entity.businessIdentifier)
             .then(response => {
               if (response?.status >= 200 && response?.status < 300 && response?.data) {
+                // Keep the approved name in Sync, in the event of changes in Namex
+                const approvedName = () => {
+                  for (const nameItem of response.data.names) {
+                    if ([NrState.APPROVED, NrState.CONDITION].includes(nameItem.state)) {
+                      return nameItem.name
+                    }
+                  }
+                }
+                BusinessService.updateBusinessName({
+                  businessIdentifier: entity.businessIdentifier,
+                  name: approvedName()
+                })
+
                 // Verify incorporation is supported
                 let isSupportedFiling
                 for (const item of response.data.actions) {
@@ -63,7 +76,6 @@ export default class BusinessModule extends VuexModule {
                     break
                   }
                 }
-
                 const isIaEnabled = response.data.state === NrState.APPROVED ||
                     (response.data.state === NrState.CONDITIONAL &&
                     [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
