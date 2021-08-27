@@ -4,7 +4,6 @@ import {
   BusinessRequest,
   FolioNumberload,
   LoginPayload,
-  NameRequest,
   PasscodeResetLoad
 } from '@/models/business'
 import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, NrConditionalStates, NrState, SessionStorageKeys } from '@/util/constants'
