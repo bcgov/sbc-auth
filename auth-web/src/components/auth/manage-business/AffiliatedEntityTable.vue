@@ -290,7 +290,7 @@ export default class AffiliatedEntityTable extends Vue {
     let businessIdentifier = item.businessIdentifier
     // 3806 : Create new IA if the selected item is Name Request
     // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
-    if (item.corpType.code === CorpType.NAME_REQUEST && item.nameRequest.state === NrState.APPROVED) {
+    if (item.corpType.code === CorpType.NAME_REQUEST) {
       this.isLoading = true
       // Find business with name as the NR number and use it for redirection
       businessIdentifier = await this.createBusinessRecord(item)

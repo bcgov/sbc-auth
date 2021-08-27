@@ -146,6 +146,12 @@ export enum NrState {
     CONDITIONAL = 'CONDITIONAL'
 }
 
+export enum NrConditionalStates {
+    RECIEVED = 'R',
+    WAIVED = 'N',
+    REQUIRED = 'Y',
+}
+
 export enum BusinessState {
     ACTIVE = 'Active',
     DRAFT = 'Draft'

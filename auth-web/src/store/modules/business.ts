@@ -7,7 +7,7 @@ import {
   NameRequest,
   PasscodeResetLoad
 } from '@/models/business'
-import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, NrConditionalStates, NrState, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -65,7 +65,8 @@ export default class BusinessModule extends VuexModule {
                 }
 
                 const isIaEnabled = response.data.state === NrState.APPROVED ||
-                    (response.data.state === NrState.CONDITIONAL && response.data.consentFlag === 'R')
+                    (response.data.state === NrState.CONDITIONAL &&
+                    [NrConditionalStates.RECIEVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
 
                 entity.nameRequest = {
                   names: response.data.names,
