@@ -110,15 +110,14 @@ import {
   AffiliationTypes,
   BusinessState,
   CorpType,
-  CorpTypeCd,
   FilingTypes,
-  GetCorpFullDescription,
   LDFlags,
   NrState,
   SessionStorageKeys
 } from '@/util/constants'
 import { Business, BusinessRequest, NameRequest, Names } from '@/models/business'
 import { Component, Emit, Prop, Watch } from 'vue-property-decorator'
+import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
@@ -137,9 +136,6 @@ import Vue from 'vue'
   }
 })
 export default class AffiliatedEntityTable extends Vue {
-  @Prop({ default: () => [] })
-  readonly affiliatedEntities: Array<any>
-
   @Prop({ default: [] })
   readonly selectedColumns: Array<string>
 
@@ -148,7 +144,6 @@ export default class AffiliatedEntityTable extends Vue {
   private readonly currentOrganization!: Organization
   private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
   private readonly isPremiumAccount!: boolean
-  private readonly notAvailableMsg: string = this.$t('notAvailable').toString()
   private headers: Array<any> = []
   private isLoading: boolean = false
 
@@ -162,7 +157,7 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** The headers we want to show. */
   private get getHeaders (): Array<any> {
-    return this.headers.filter(x => x.show)
+    return this.headers?.filter(x => x.show)
   }
 
   /** The set height when affiliation count exceeds 5 */
@@ -258,7 +253,7 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** Returns the folio number or a default message */
   private folio (item: Business): string {
-    return item.folioNumber || this.notAvailableMsg
+    return item.folioNumber || this.$t('notAvailable').toString()
   }
 
   /** Returns the last modified date string or a default message */
@@ -267,16 +262,16 @@ export default class AffiliatedEntityTable extends Vue {
       ? new Date(item.lastModified).toLocaleDateString('en-CA', {
         timeZone: 'America/Vancouver'
       })
-      : this.notAvailableMsg
+      : this.$t('notAvailable').toString()
   }
 
   /** Returns the modified by value or a default message */
   private modifiedBy (item: Business): string {
     switch (true) {
       case (item.modifiedBy === 'None None'):
-        return this.notAvailableMsg
+        return this.$t('notAvailable').toString()
       case (!item.modifiedBy):
-        return this.notAvailableMsg
+        return this.$t('notAvailable').toString()
       default:
         return item.modifiedBy
     }
