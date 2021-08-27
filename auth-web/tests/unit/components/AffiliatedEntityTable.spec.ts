@@ -1,7 +1,5 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
-import BusinessModule from '@/store/modules/business'
-import UserService from '../../../src/services/user.services'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
