@@ -49,6 +49,7 @@
   "pendingInvitationTitle": "Thanks for joining the account {team} at BC Registries and Online Services.",
   "pendingInvitationMsg": "The administrator for this account needs to verify your invitation before you can access this application.",
   "notAuthorized": "Not Authorized",
+  "notAvailable": "Not Available",
   "deniedInvitationMsg": "Your invitation to join the {team} account has been revoked by the administrator",
   "noActiveUsersLabel": "No Active Users",
   "noActiveAccountsLabel": "No Active Accounts",

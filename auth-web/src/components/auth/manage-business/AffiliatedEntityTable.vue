@@ -150,6 +150,7 @@ export default class AffiliatedEntityTable extends Vue {
   private headers: Array<any> = []
   private readonly isPremiumAccount!: boolean
   private isLoading: boolean = false
+  private notAvailableMsg: string = this.$t('notAvailable').toString()
 
   /** V-model for dropdown menus. */
   private dropdown: Array<boolean> = []
@@ -166,7 +167,7 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** The set height when affiliation count exceeds 5 */
   private get getMaxHeight (): string {
-    return this.entityCount > 5 ? '25rem' : null
+    return this.entityCount > 5 ? '30rem' : null
   }
 
   /** Returns true if the affiliation is a Name Request */
@@ -257,7 +258,7 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** Returns the folio number or a default message */
   private folio (item: Business): string {
-    return item.folioNumber || 'Not Available'
+    return item.folioNumber || this.notAvailableMsg
   }
 
   /** Returns the last modified date string or a default message */
@@ -266,16 +267,16 @@ export default class AffiliatedEntityTable extends Vue {
       ? new Date(item.lastModified).toLocaleDateString('en-CA', {
         timeZone: 'America/Vancouver'
       })
-      : 'Not Available'
+      : this.notAvailableMsg
   }
 
   /** Returns the modified by value or a default message */
   private modifiedBy (item: Business): string {
     switch (true) {
       case (item.modifiedBy === 'None None'):
-        return 'Not Available'
+        return this.notAvailableMsg
       case (!item.modifiedBy):
-        return 'Not Available'
+        return this.notAvailableMsg
       default:
         return item.modifiedBy
     }
@@ -341,6 +342,7 @@ export default class AffiliatedEntityTable extends Vue {
 
     if (filingResponse?.errorMsg) {
       this.$emit('add-unknown-error')
+      return ''
     } else {
       return filingResponse.data.filing.business.identifier
     }

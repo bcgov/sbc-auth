@@ -49,11 +49,10 @@ export default class BusinessModule extends VuexModule {
             .then(response => {
               if (response?.status >= 200 && response?.status < 300) {
                 // Verify incorporation is supported
-                const approvedForIA = () => {
-                  for (const item of response.data.actions) {
-                    if (item.filingName === LearFilingTypes.INCORPORATION) {
-                      return true
-                    }
+                let approvedForIa = false
+                for (const item of response.data.actions) {
+                  if (item.filingName === LearFilingTypes.INCORPORATION) {
+                    approvedForIa = true
                   }
                 }
 
@@ -65,7 +64,7 @@ export default class BusinessModule extends VuexModule {
                   state: response.data.state,
                   applicantEmail: response.data.applicants?.emailAddress,
                   applicantPhone: response.data.applicants?.phoneNumber,
-                  enableIncorporation: approvedForIA() || false
+                  enableIncorporation: approvedForIa
                 }
               }
             }).catch(err => {
