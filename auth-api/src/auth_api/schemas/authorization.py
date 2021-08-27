@@ -22,7 +22,7 @@ from auth_api.models.views.authorization import Authorization as AuthorizationMo
 class AuthorizationSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Authorization model."""
 
-    class Meta(BaseSchema.Meta):  # pylint: disable=too-few-public-methods
+    class Meta:  # pylint: disable=too-few-public-methods
         """Maps all of the Authorization fields to a default schema."""
 
         model = AuthorizationModel
