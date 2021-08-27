@@ -66,7 +66,7 @@ export default class BusinessModule extends VuexModule {
 
                 const isIaEnabled = response.data.state === NrState.APPROVED ||
                     (response.data.state === NrState.CONDITIONAL &&
-                    [NrConditionalStates.RECIEVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
+                    [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
 
                 entity.nameRequest = {
                   names: response.data.names,

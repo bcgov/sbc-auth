@@ -147,7 +147,7 @@ export enum NrState {
 }
 
 export enum NrConditionalStates {
-    RECIEVED = 'R',
+    RECEIVED = 'R',
     WAIVED = 'N',
     REQUIRED = 'Y',
 }
