@@ -26,11 +26,13 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
         datetimeformat = '%Y-%m-%dT%H:%M:%S+00:00'  # Default output date format.
 
-    created_by = fields.Function(lambda obj: '{} {}'.format(obj.created_by.firstname, obj.created_by.lastname)
-    if obj.created_by else None)
+    created_by = fields.Function(
+        lambda obj: '{} {}'.format(obj.created_by.firstname, obj.created_by.lastname) if obj.created_by else None
+    )
 
-    modified_by = fields.Function(lambda obj: '{} {}'.format(obj.modified_by.firstname, obj.modified_by.lastname)
-    if obj.modified_by else None)
+    modified_by = fields.Function(
+        lambda obj: '{} {}'.format(obj.modified_by.firstname, obj.modified_by.lastname) if obj.modified_by else None
+    )
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):  # pylint: disable=no-self-use
