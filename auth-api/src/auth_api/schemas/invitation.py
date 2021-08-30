@@ -24,7 +24,7 @@ from .invitation_membership import InvitationMembershipSchema
 class InvitationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the invitation model."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta(BaseSchema.Meta):  # pylint: disable=too-few-public-methods
         """Maps all of the invitation fields to a default schema."""
 
         model = InvitationModel

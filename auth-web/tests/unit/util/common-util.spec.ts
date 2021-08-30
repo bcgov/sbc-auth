@@ -145,7 +145,7 @@ describe('Common Util Test', () => {
   })
 
   it('is format display date correctly', () => {
-    expect(CommonUtil.formatDisplayDate(dateStr)).toBe('10-22-2020')
+    expect(CommonUtil.formatDisplayDate(dateStr)).toBe('2020-10-22')
     expect(CommonUtil.formatDisplayDate(dateStr, 'DD/MM/YYYY')).toBe('22/10/2020')
     expect(CommonUtil.formatDisplayDate(null)).toBe('')
   })

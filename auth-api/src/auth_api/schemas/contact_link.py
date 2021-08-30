@@ -24,7 +24,7 @@ from .contact import ContactSchema
 class ContactLinkSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
     """This is the schema for the Contact link model."""
 
-    class Meta:  # pylint: disable=too-few-public-methods
+    class Meta(BaseSchema.Meta):  # pylint: disable=too-few-public-methods
         """Maps all of the User fields to a default schema."""
 
         model = ContactLinkModel

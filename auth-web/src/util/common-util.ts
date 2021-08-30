@@ -88,7 +88,7 @@ export default class CommonUtils {
 
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date, format?: string) {
-    return (date) ? moment(date).format(format || 'MM-DD-YYYY') : ''
+    return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' })).format(format || 'YYYY-MM-DD') : ''
   }
 
   // Formatting date in the desired format for vue date pickers
@@ -97,7 +97,7 @@ export default class CommonUtils {
   }
   // Formatting date in the desired format for vue date pickers
   static formatCurrentDate () {
-    return moment(new Date()).format('MM/DD/YYYY')
+    return moment(new Date()).format('MMMM DD, YYYY')
   }
 
   static fileDownload (data: any, fileName: string, fileType: string = 'text/plain') {

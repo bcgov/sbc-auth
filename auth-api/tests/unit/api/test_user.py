@@ -18,6 +18,7 @@ Test-Suite to ensure that the /users endpoint is working as expected.
 """
 import copy
 import json
+import time
 import uuid
 
 from auth_api import status as http_status
@@ -39,6 +40,7 @@ from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model, patch_token_info)
+
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -820,6 +822,7 @@ def test_user_post_during_login(client, jwt, session):  # pylint:disable=unused-
     assert login_time == rv.json.get('loginTime')
 
     # Call same endpoint with login flag and assert login time is different
+    time.sleep(1)
     rv = client.post('/api/v1/users', headers=headers, data=json.dumps({'isLogin': True}),
                      content_type='application/json')
     assert schema_utils.validate(rv.json, 'user_response')[0]
