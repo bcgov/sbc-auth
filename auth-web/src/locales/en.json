@@ -173,5 +173,6 @@
   "removeIASuccessTitle": "Incorporation Application Deleted",
   "removeIASuccessText": "You have successfully deleted a incorporation application",
   "removeIAConfirmTitle": "Delete Incorporation Application?",
-  "removeIAConfirmText": "Deleting this incorporation application will remove the application from your Business Registry list. The business associated with this application will not be incorporated. If this incorporation application was associated with a Name Request, the Name Request can still be used to incorporate a business."
+  "removeIAConfirmText": "Deleting this incorporation application will remove the application from your Business Registry list. The business associated with this application will not be incorporated. If this incorporation application was associated with a Name Request, the Name Request can still be used to incorporate a business.",
+  "myBusinessDashSubtitle": "Start BC-based businesses and keep business records up to date."
 }

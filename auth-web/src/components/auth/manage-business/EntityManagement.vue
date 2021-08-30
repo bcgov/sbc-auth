@@ -10,7 +10,7 @@
     <v-container class="view-container">
       <div class="view-header align-center">
         <h1 class="view-header__title">My Business Registry<br>
-          <span class="subtitle">Start BC-based businesses and keep business records up to date.</span>
+          <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
           <v-btn
