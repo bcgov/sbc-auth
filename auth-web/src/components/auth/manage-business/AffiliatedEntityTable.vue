@@ -266,8 +266,9 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** Returns the modified by value or a default message */
   private modifiedBy (item: Business): string {
-    if (item.modifiedBy === 'None None' || !item.modifiedBy) return this.$t('notAvailable').toString()
-    else return item.modifiedBy
+    if (item.modifiedBy === 'None None' || !item.modifiedBy) {
+      return this.$t('notAvailable').toString()
+    } else { return item.modifiedBy }
   }
 
   /** Redirect handler for Dashboard OPEN action */
