@@ -141,7 +141,7 @@ export default class DateRangeFilter extends Vue {
   private formatDateFilter (dateStr) {
     if (!dateStr) return null
     const [year, month, day] = dateStr.split('-')
-    return `${month}/${day}/${year}`
+    return `${year}-${month}-${day}`
   }
 
   dateFilterChange (val) {

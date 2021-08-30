@@ -67,7 +67,7 @@ describe('DateRangeFilter.vue', () => {
   })
 
   it('is formatting date filter correctly', () => {
-    expect(wrapper.vm.formatDateFilter('2020-09-14')).toEqual('09/14/2020')
+    expect(wrapper.vm.formatDateFilter('2020-09-14')).toEqual('2020-09-14')
   })
 
   it('[neg] is formatting date filter correctly', () => {

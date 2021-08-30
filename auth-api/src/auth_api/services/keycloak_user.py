@@ -23,7 +23,7 @@ class KeycloakUser:  # pylint: disable=too-many-instance-attributes
 
     def __init__(self, user: Dict = None):
         """Create user."""
-        self._user = user if user else dict()
+        self._user = user or {}
 
     @property
     def user_name(self) -> str:

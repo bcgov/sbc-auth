@@ -50,7 +50,7 @@
             </td>
             <td>{{item.folioNumber}}</td>
             <td><span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span></td>
-            <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate)}}</span></td>
+            <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate, 'MMMM DD, YYYY')}}</span></td>
             <td>
               <div class="font-weight-bold text-right">
                 ${{item.totalAmount}}
