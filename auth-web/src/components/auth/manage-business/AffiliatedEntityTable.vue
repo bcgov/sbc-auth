@@ -123,7 +123,6 @@ import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Vue from 'vue'
-import moment from 'moment'
 
 @Component({
   computed: {
@@ -258,9 +257,9 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** Returns the last modified date string or a default message */
   private lastModified (item: Business): string {
-    moment.locale('en-CA')
     return item.lastModified
-      ? moment(item.lastModified).format('YYYY-MM-DD')
+      ? new Date(item.lastModified).toLocaleDateString('en-CA', {
+        timeZone: 'America/Vancouver' })
       : this.$t('notAvailable').toString()
   }
 
