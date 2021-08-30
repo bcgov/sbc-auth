@@ -1,6 +1,12 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
-import { CorpType, FilingTypes, LegalTypes, NrState, SessionStorageKeys } from '@/util/constants'
+import {
+  Business,
+  BusinessRequest,
+  FolioNumberload,
+  LoginPayload,
+  PasscodeResetLoad
+} from '@/models/business'
+import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, NrConditionalStates, NrState, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -47,20 +53,31 @@ export default class BusinessModule extends VuexModule {
         if (entity.corpType.code === CorpType.NAME_REQUEST) {
           await BusinessService.getNrData(entity.businessIdentifier)
             .then(response => {
-              // Keep the approved name in Sync, in the event of changes in Namex
-              const approvedName = () => {
-                for (const nameItem of response.data.names) {
-                  if (nameItem.state === NrState.APPROVED) {
-                    return nameItem.name
+              if (response?.status >= 200 && response?.status < 300 && response?.data) {
+                // Keep the approved name in Sync, in the event of changes in Namex
+                const approvedName = () => {
+                  for (const nameItem of response.data.names) {
+                    if ([NrState.APPROVED, NrState.CONDITION].includes(nameItem.state)) {
+                      return nameItem.name
+                    }
                   }
                 }
-              }
-
-              if (response?.status >= 200 && response?.status < 300) {
                 BusinessService.updateBusinessName({
                   businessIdentifier: entity.businessIdentifier,
                   name: approvedName()
                 })
+
+                // Verify incorporation is supported
+                let isSupportedFiling
+                for (const item of response.data.actions) {
+                  if (item.filingName === LearFilingTypes.INCORPORATION) {
+                    isSupportedFiling = true
+                    break
+                  }
+                }
+                const isIaEnabled = response.data.state === NrState.APPROVED ||
+                    (response.data.state === NrState.CONDITIONAL &&
+                    [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
 
                 entity.nameRequest = {
                   names: response.data.names,
@@ -69,7 +86,8 @@ export default class BusinessModule extends VuexModule {
                   nrNumber: response.data.nrNum,
                   state: response.data.state,
                   applicantEmail: response.data.applicants?.emailAddress,
-                  applicantPhone: response.data.applicants?.phoneNumber
+                  applicantPhone: response.data.applicants?.phoneNumber,
+                  enableIncorporation: isSupportedFiling && isIaEnabled
                 }
               }
             }).catch(err => {

@@ -111,8 +111,19 @@ export enum TransactionStatus {
     CANCELLED = 'Cancelled'
 }
 
+export enum AffiliationTypes {
+    NAME_REQUEST ='Name Request',
+    INCORPORATION_APPLICATION = 'Incorporation Application',
+    CORPORATION = 'Corporation'
+}
+
 export enum FilingTypes {
     INCORPORATION_APPLICATION = 'incorporationApplication'
+}
+
+export enum LearFilingTypes {
+    INCORPORATION = 'Incorporation',
+    REGISTRATION = 'Registration'
 }
 
 export enum LegalTypes {
@@ -131,6 +142,20 @@ export enum CorpType {
 export enum NrState {
     APPROVED = 'APPROVED',
     DRAFT = 'DRAFT',
+    REJECTED = 'REJECTED',
+    CONDITION = 'CONDITION',
+    CONDITIONAL = 'CONDITIONAL'
+}
+
+export enum NrConditionalStates {
+    RECEIVED = 'R',
+    WAIVED = 'N',
+    REQUIRED = 'Y',
+}
+
+export enum BusinessState {
+    ACTIVE = 'Active',
+    DRAFT = 'Draft'
 }
 
 export enum AccessType {
