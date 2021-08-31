@@ -95,7 +95,7 @@ async def process_name_events(event_message: Dict[str, any]):
             }
     """
     logger.debug('>>>>>>>process_name_events>>>>>')
-    request_data = event_message.get('data').get('request')
+    request_data = event_message.get('data').get('request') or event_message.get('data').get('name')
     nr_number = request_data['nrNum']
     nr_status = request_data['newState']
     nr_entity = EntityModel.find_by_business_identifier(nr_number)
