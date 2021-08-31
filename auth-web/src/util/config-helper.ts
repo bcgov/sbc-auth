@@ -105,6 +105,14 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('ENTITY_SELECTOR_URL')
   }
 
+  static getOneStopUrl () {
+    return ConfigHelper.getValue('ONE_STOP_URL')
+  }
+
+  static getCorporateOnlineUrl () {
+    return ConfigHelper.getValue('CORPORATE_ONLINE_URL')
+  }
+
   static getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]

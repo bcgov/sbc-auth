@@ -122,6 +122,7 @@ export enum FilingTypes {
 }
 
 export enum LearFilingTypes {
+    AMALGAMATION = 'Amalgamation',
     INCORPORATION = 'Incorporation',
     REGISTRATION = 'Registration'
 }
@@ -151,6 +152,12 @@ export enum NrConditionalStates {
     RECEIVED = 'R',
     WAIVED = 'N',
     REQUIRED = 'Y',
+}
+
+export enum NrTargetTypes {
+    LEAR = 'lear',
+    COLIN = 'colin',
+    ONESTOP = 'onestop'
 }
 
 export enum BusinessState {

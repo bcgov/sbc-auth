@@ -71,7 +71,7 @@
                         v-if="isApprovedForIA(item)"
                         class="actions-dropdown_item"
                         data-test="use-name-request-button"
-                        @click="createDraft(item)"
+                        @click="useNameRequest(item)"
                       >
                         <v-list-item-subtitle>
                           <v-icon>mdi-file-certificate-outline</v-icon>
@@ -113,6 +113,7 @@ import {
   FilingTypes,
   LDFlags,
   NrState,
+  NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
 import { Business, BusinessRequest, NameRequest, Names } from '@/models/business'
@@ -185,9 +186,9 @@ export default class AffiliatedEntityTable extends Vue {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
 
-    return this.isNameRequest(business.corpType.code) &&
-      business.nameRequest?.enableIncorporation &&
-      supportedEntityFlags.includes(business.nameRequest?.legalType)
+    return this.isNameRequest(business.corpType.code) && // Is this a Name Request
+      business.nameRequest?.enableIncorporation && // Is the Nr state approved or conditionally approved
+      supportedEntityFlags.includes(business.nameRequest?.legalType) // Feature flagged Nr types
   }
 
   /** Returns the Name value for the affiliation */
@@ -280,17 +281,25 @@ export default class AffiliatedEntityTable extends Vue {
   }
 
   /** Handler method for draft IA creation and navigation */
-  async createDraft (item: Business) {
-    let businessIdentifier = item.businessIdentifier
-    // 3806 : Create new IA if the selected item is Name Request
-    // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
-    if (item.corpType.code === CorpType.NAME_REQUEST) {
-      this.isLoading = true
-      // Find business with name as the NR number and use it for redirection
-      businessIdentifier = await this.createBusinessRecord(item)
-      this.isLoading = false
+  async useNameRequest (item: Business) {
+    switch (item.nameRequest.target) {
+      case NrTargetTypes.LEAR:
+        // Create new IA if the selected item is Name Request
+        let businessIdentifier = item.businessIdentifier
+        if (item.corpType.code === CorpType.NAME_REQUEST) {
+          this.isLoading = true
+          businessIdentifier = await this.createBusinessRecord(item)
+          this.isLoading = false
+        }
+        this.goToDashboard(businessIdentifier)
+        break
+      case NrTargetTypes.ONESTOP:
+        this.goToOneStop() // Navigate to onestop for firms
+        break
+      case NrTargetTypes.COLIN:
+        this.goToCorpOnline() // Navigate to Corporate Online for Corps
+        break
     }
-    this.goToDashboard(businessIdentifier)
   }
 
   /** Navigation handler for entities dashboard */
@@ -305,6 +314,16 @@ export default class AffiliatedEntityTable extends Vue {
   private goToNameRequest (nameRequest: NameRequest): void {
     ConfigHelper.setNrCredentials(nameRequest)
     window.location.href = `${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`
+  }
+
+  /** Navigation handler for OneStop application */
+  private goToOneStop (): void {
+    window.location.href = ConfigHelper.getOneStopUrl()
+  }
+
+  /** Navigation handler for Corporate Online application */
+  private goToCorpOnline (): void {
+    window.location.href = ConfigHelper.getCorporateOnlineUrl()
   }
 
   /** Create a business record in Lear */

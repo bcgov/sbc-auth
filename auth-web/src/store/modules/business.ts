@@ -6,7 +6,7 @@ import {
   LoginPayload,
   PasscodeResetLoad
 } from '@/models/business'
-import { CorpType, FilingTypes, LearFilingTypes, LegalTypes, NrConditionalStates, NrState, SessionStorageKeys } from '@/util/constants'
+import { CorpType, FilingTypes, LegalTypes, NrConditionalStates, NrState, SessionStorageKeys } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -62,19 +62,12 @@ export default class BusinessModule extends VuexModule {
                     }
                   }
                 }
+
                 BusinessService.updateBusinessName({
                   businessIdentifier: entity.businessIdentifier,
                   name: approvedName()
                 })
 
-                // Verify incorporation is supported
-                let isSupportedFiling
-                for (const item of response.data.actions) {
-                  if (item.filingName === LearFilingTypes.INCORPORATION) {
-                    isSupportedFiling = true
-                    break
-                  }
-                }
                 const isIaEnabled = response.data.state === NrState.APPROVED ||
                     (response.data.state === NrState.CONDITIONAL &&
                     [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
@@ -87,7 +80,8 @@ export default class BusinessModule extends VuexModule {
                   state: response.data.state,
                   applicantEmail: response.data.applicants?.emailAddress,
                   applicantPhone: response.data.applicants?.phoneNumber,
-                  enableIncorporation: isSupportedFiling && isIaEnabled
+                  enableIncorporation: isIaEnabled,
+                  target: response.data.target
                 }
               }
             }).catch(err => {

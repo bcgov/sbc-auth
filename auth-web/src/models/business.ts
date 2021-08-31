@@ -1,5 +1,5 @@
+import { LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { Contact } from './contact'
-import { LearFilingTypes } from '@/util/constants'
 
 export interface LoginPayload {
     businessIdentifier: string
@@ -61,7 +61,8 @@ export interface NameRequest {
     state?: string,
     applicantEmail?: string,
     applicantPhone?: string,
-    enableIncorporation?: boolean
+    enableIncorporation?: boolean,
+    target?: NrTargetTypes
 }
 
 // Names interface to match external data provided from lear.
