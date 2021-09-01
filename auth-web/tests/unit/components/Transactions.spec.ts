@@ -1,4 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+
+import { MembershipType } from '@/models/Organization'
 import Transactions from '@/components/auth/account-settings/transaction/Transactions.vue'
 import UserService from '../../../src/services/user.services'
 import Vue from 'vue'
@@ -38,7 +40,7 @@ describe('Transactions.vue', () => {
         currentMembership: {
           'id': 3457,
           'membershipStatus': 'ACTIVE',
-          'membershipTypeCode': 'USER',
+          'membershipTypeCode': MembershipType.Admin,
           'user': {
             'contacts': [
               {
@@ -85,6 +87,10 @@ describe('Transactions.vue', () => {
             'accountNumber': '126316',
             'userId': 'PA32881'
           }
+        },
+        currentOrgPaymentDetails: {
+          credit: 0,
+          accountId: 2662
         }
       }
     }
