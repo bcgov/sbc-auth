@@ -100,6 +100,7 @@ class Affiliation:
                 if entity['name'] in nr_numbers or entity['name'] == entity['business_identifier']:
                     # If temp affiliation is for an NR, change the name to NR's name
                     if entity['name'] in nr_numbers:
+                        entity['nr_number'] = entity['name']
                         entity['name'] = nr_number_name_dict[entity['name']]
 
                     filtered_affiliations.append(entity)
@@ -197,11 +198,6 @@ class Affiliation:
         nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
 
         if nr_json:
-            # Verify corp type
-            corp_type_code = nr_json.get('requestTypeCd')
-            if corp_type_code not in current_app.config.get('NR_SUPPORTED_REQUEST_TYPES'):
-                raise BusinessException(Error.NR_INVALID_CORP_TYPE, None)
-
             status = nr_json.get('state')
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
