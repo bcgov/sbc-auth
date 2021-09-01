@@ -379,11 +379,11 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     entity_service1 = factory_entity_service(entity_info=TestEntityInfo.name_request)
     entity_dictionary1 = entity_service1.as_dict()
     business_identifier1 = entity_dictionary1['business_identifier']
+    name1 = entity_dictionary1['name']
 
     entity_service2 = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
     entity_dictionary2 = entity_service2.as_dict()
     business_identifier2 = entity_dictionary2['business_identifier']
-    nr_number_in_name = entity_dictionary2['name']
 
     org_service = factory_org_service()
     org_dictionary = org_service.as_dict()
@@ -402,7 +402,8 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     assert affiliated_entities
     assert len(affiliated_entities) == 1
     assert affiliated_entities[0]['business_identifier'] == business_identifier2
-    assert affiliated_entities[0]['name'] == nr_number_in_name
+    assert affiliated_entities[0]['nr_number'] == business_identifier1
+    assert affiliated_entities[0]['name'] == name1
 
     AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier2,
                                           email_addresses=None)
