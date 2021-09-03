@@ -16,7 +16,7 @@
           <v-btn
             id="add-name-request-btn"
             class="font-weight-regular"
-            color="#1669BB"
+            color="primary"
             outlined dark large
             @click="goToNameRequest()"
           >
@@ -580,7 +580,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
       .v-input .v-label {
         top: 30px;
         color: $gray7;
-        font-size: .875rem
+        font-size: .875rem;
       }
     }
 
