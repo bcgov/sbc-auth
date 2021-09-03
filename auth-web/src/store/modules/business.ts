@@ -81,6 +81,7 @@ export default class BusinessModule extends VuexModule {
                   applicantEmail: response.data.applicants?.emailAddress,
                   applicantPhone: response.data.applicants?.phoneNumber,
                   enableIncorporation: isIaEnabled,
+                  folioNumber: response.data.folioNumber,
                   target: response.data.target
                 }
               }

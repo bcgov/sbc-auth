@@ -26,8 +26,10 @@ export interface Business {
     corpType: CorpType,
     folioNumber: string,
     lastModified?: string,
+    modified?: string
     modifiedBy?: string
     nameRequest?: NameRequest
+    nrNumber?: string
 }
 
 export interface BusinessSearchResultDto {
@@ -62,6 +64,7 @@ export interface NameRequest {
     applicantEmail?: string,
     applicantPhone?: string,
     enableIncorporation?: boolean,
+    folioNumber?: string,
     target?: NrTargetTypes
 }
 
