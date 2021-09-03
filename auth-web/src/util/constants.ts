@@ -122,6 +122,7 @@ export enum FilingTypes {
 }
 
 export enum LearFilingTypes {
+    AMALGAMATION = 'Amalgamation',
     INCORPORATION = 'Incorporation',
     REGISTRATION = 'Registration'
 }
@@ -142,15 +143,36 @@ export enum CorpType {
 export enum NrState {
     APPROVED = 'APPROVED',
     DRAFT = 'DRAFT',
+    HOLD = 'HOLD',
     REJECTED = 'REJECTED',
     CONDITION = 'CONDITION',
-    CONDITIONAL = 'CONDITIONAL'
+    CONDITIONAL = 'CONDITIONAL',
+    REFUND_REQUESTED = 'REFUND_REQUESTED',
+    CANCELLED = 'CANCELLED',
+    EXPIRED = 'EXPIRED'
+}
+
+export enum NrDisplayStates {
+    APPROVED = 'Approved',
+    HOLD = 'Pending Staff Review',
+    DRAFT = 'Pending Staff Review',
+    REJECTED = 'Rejected',
+    CONDITIONAL = 'Conditional Approval',
+    REFUND_REQUESTED = 'Cancelled, Refund Requested',
+    CANCELLED = 'Cancelled',
+    EXPIRED = 'Expired'
 }
 
 export enum NrConditionalStates {
     RECEIVED = 'R',
     WAIVED = 'N',
     REQUIRED = 'Y',
+}
+
+export enum NrTargetTypes {
+    LEAR = 'lear',
+    COLIN = 'colin',
+    ONESTOP = 'onestop'
 }
 
 export enum BusinessState {

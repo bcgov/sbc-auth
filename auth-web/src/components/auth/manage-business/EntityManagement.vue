@@ -66,28 +66,32 @@
         <v-row no-gutters id="dashboard-actions" class="mb-n3 pl-4">
           <v-col cols="9">
             <!-- Add Existing Name Request or Business -->
-            <v-menu>
+            <v-menu
+              v-model="addAffiliationDropdown"
+            >
               <template v-slot:activator="{ on }">
                 <v-btn
+                  id="add-existing-btn"
                   class="mt-2"
                   color="primary"
                   dark
                   large
                   v-on="on"
                 >
-                  <v-icon small>mdi-plus</v-icon>
-                  <span>Add an Existing Business or Name Request</span>
+                  <v-icon>mdi-plus</v-icon>
+                  <span><strong>Add an Existing Business or Name Request</strong></span>
+                  <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
                 </v-btn>
               </template>
               <v-list>
                 <v-list-item>
                   <v-list-item-title class="d-inline-flex">
                     <v-icon>mdi-plus</v-icon>
-                    <div class="ml-1 mt-1">Add an Existing...</div>
+                    <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
                   </v-list-item-title>
                 </v-list-item>
-                <v-list-item class="mt-4" @click="showAddBusinessModal()">Business</v-list-item>
-                <v-list-item class="my-2" @click="showAddNRModal()">Name Request</v-list-item>
+                <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
+                <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
               </v-list>
             </v-menu>
           </v-col>
@@ -106,7 +110,7 @@
         </v-row>
 
         <AffiliatedEntityTable
-          :selected-columns="selectedColumns"
+          :selectedColumns="selectedColumns"
           @remove-business="showConfirmationOptionsModal($event)"
         />
       </template>
@@ -299,6 +303,9 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
 
+  /** V-model for dropdown menu. */
+  private addAffiliationDropdown: boolean = false
+
   protected readonly currentAccountSettings!: AccountSettings
   private readonly isPremiumAccount!: boolean
   private readonly syncBusinesses!: () => Promise<Business[]>
@@ -321,9 +328,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   private async mounted () {
-    // Apply the folio number for premium accounts.
-    if (this.isPremiumAccount) this.applyFolio()
-
     if (this.currentMembership === undefined) {
       this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
       return
@@ -522,11 +526,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   close () {
     this.$refs.errorDialog.close()
   }
-
-  private applyFolio (): void {
-    this.selectedColumns.splice(3, 0, 'Folio')
-    this.columns.splice(3, 0, 'Folio')
-  }
 }
 </script>
 
@@ -551,18 +550,37 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     }
   }
 
+  #add-existing-btn {
+    box-shadow: none;
+    background-color: $app-blue !important;
+  }
+
+  .add-existing-title {
+    font-size: .875rem;
+  }
+
+  .add-existing-item {
+    height: 40px !important;
+    font-size: .875rem;
+    color: $gray7;
+
+    &:hover {
+      background-color: $app-background-blue;
+    }
+  }
+
   .column-selector {
     float: right;
-    width: 200px
+    width: 200px;
   }
 
   // Vuetify Overrides
   ::v-deep {
-
     #dashboard-actions {
       .v-input .v-label {
         top: 30px;
         color: $gray7;
+        font-size: .875rem;
       }
     }
 
@@ -578,9 +596,19 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
       font-weight: 700;
     }
 
+    .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled):hover {
+      color: $app-blue !important;
+    }
+
+    .v-list .v-list-item--active, .v-list .v-list-item--active {
+      &:hover {
+        background-color: $app-background-blue;
+      }
+    }
+
     .v-list-item {
       min-height: 0 !important;
-      height: 32px !important;
+      height: 32px;
     }
 
     .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
@@ -595,8 +623,12 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     .v-list-item__action {
       margin-right: 20px !important;
     }
+
     .v-list-item .v-list-item__subtitle, .v-list-item .v-list-item__title {
       color: $gray7;
-    }
+      &:hover {
+        color: $app-blue !important;
+      }
+     }
   }
 </style>

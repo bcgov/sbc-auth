@@ -2,27 +2,32 @@
   <div id="affiliated-entity-section">
     <v-card flat>
       <div class="table-header">
-        <label><strong>My List ({{ entityCount }})</strong></label>
+        <label><strong>My List </strong>({{ entityCount }})</label>
       </div>
       <v-data-table
         id="affiliated-entity-table"
+        :class="{ 'header-high-layer': dropdown.includes(true) }"
         :headers="getHeaders"
         :items="businesses"
-        :items-per-page="1000"
         :height="getMaxHeight"
         fixed-header
+        disable-pagination
         hide-default-footer
       >
         <template v-slot:item="{ item, index }">
           <tr>
-            <td class="header" v-if="isNameRequest(item.corpType.code)">
+            <td
+              v-if="isNameRequest(item.corpType.code) && item.nameRequest"
+              class="header"
+              :class="{ 'col-wide': getHeaders.length < 7 }"
+            >
               <div v-for="(name, i) in item.nameRequest.names" :key="`nrName: ${i}`" class="pb-1 names-block">
-                <v-icon v-if="isRejectedName(name)" color="red" class="names-text pr-1">mdi-close</v-icon>
-                <v-icon v-if="isApprovedName(name)" color="green" class="names-text pr-1">mdi-check</v-icon>
+                <v-icon v-if="isRejectedName(name)" color="red" class="names-text pr-1" small>mdi-close</v-icon>
+                <v-icon v-if="isApprovedName(name)" color="green" class="names-text pr-1" small>mdi-check</v-icon>
                 <strong class="names-text">{{ name.name }}</strong><br>
               </div>
             </td>
-            <td class="header" v-else>
+            <td v-else class="header" :class="{ 'col-wide': getHeaders.length < 7 }">
               <strong>{{ name(item) }}</strong>
             </td>
             <td v-if="showCol(headers[1].text)">{{ number(item) }}</td>
@@ -31,11 +36,11 @@
               <span v-if="isNameRequest(item.corpType.code)">{{ typeDescription(item.nameRequest.legalType) }}</span>
             </td>
             <td v-if="showCol(headers[3].text)">{{ status(item) }}</td>
-            <td v-if="showCol(headers[4].text) && isPremiumAccount">{{ folio(item) }}</td>
+            <td v-if="showCol(headers[4].text)">{{ folio(item) }}</td>
             <td v-if="showCol(headers[5].text)">{{ lastModified(item) }}</td>
             <td v-if="showCol(headers[6].text)">{{ modifiedBy(item) }}</td>
             <td class="action-cell">
-              <div class="actions">
+              <div class="actions" :id="`action-menu-${index}`">
                 <span class="open-action">
                   <v-btn
                     small
@@ -52,7 +57,7 @@
                 <!-- More Actions Menu -->
                 <span class="more-actions mr-4">
                   <v-menu
-                    offset-y left nudge-bottom="4"
+                    :attach="`#action-menu-${index}`"
                     v-model="dropdown[index]"
                   >
                     <template v-slot:activator="{ on }">
@@ -69,23 +74,27 @@
                     <v-list>
                       <v-list-item
                         v-if="isApprovedForIA(item)"
-                        class="actions-dropdown_item"
+                        class="actions-dropdown_item my-1"
                         data-test="use-name-request-button"
-                        @click="createDraft(item)"
+                        @click="useNameRequest(item)"
                       >
                         <v-list-item-subtitle>
-                          <v-icon>mdi-file-certificate-outline</v-icon>
-                          <span class="pl-1">Use this Name Request</span>
+                          <v-icon small>mdi-file-certificate-outline</v-icon>
+                          <span class="pl-1">Use this Name Request Now</span>
                         </v-list-item-subtitle>
                       </v-list-item>
                       <v-list-item
-                        class="actions-dropdown_item"
+                        class="actions-dropdown_item my-1"
                         data-test="remove-button"
                         v-can:REMOVE_BUSINESS.disable
                         @click="removeBusiness(item)"
                       >
-                        <v-list-item-subtitle>
-                          <v-icon>mdi-delete</v-icon>
+                        <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">
+                          <v-icon small>mdi-delete-forever</v-icon>
+                          <span class="pl-1">Delete Incorporation Application</span>
+                        </v-list-item-subtitle>
+                        <v-list-item-subtitle v-else>
+                          <v-icon small>mdi-delete</v-icon>
                           <span class="pl-1">Remove From Table</span>
                         </v-list-item-subtitle>
                       </v-list-item>
@@ -112,30 +121,31 @@ import {
   CorpType,
   FilingTypes,
   LDFlags,
+  NrDisplayStates,
   NrState,
+  NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
 import { Business, BusinessRequest, NameRequest, Names } from '@/models/business'
-import { Component, Emit, Prop, Watch } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
+import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import Vue from 'vue'
 
 @Component({
   computed: {
     ...mapState('business', ['businesses']),
-    ...mapState('org', ['currentOrganization']),
-    ...mapGetters('org', ['isPremiumAccount'])
+    ...mapState('org', ['currentOrganization'])
   },
   methods: {
     ...mapMutations('business', ['setCurrentBusiness']),
     ...mapActions('business', ['createNamedBusiness'])
   }
 })
-export default class AffiliatedEntityTable extends Vue {
+export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   @Prop({ default: [] })
   readonly selectedColumns: Array<string>
 
@@ -143,7 +153,6 @@ export default class AffiliatedEntityTable extends Vue {
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
   private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
-  private readonly isPremiumAccount!: boolean
   private headers: Array<any> = []
   private isLoading: boolean = false
 
@@ -162,7 +171,7 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** The set height when affiliation count exceeds 5 */
   private get getMaxHeight (): string {
-    return this.entityCount > 5 ? '30rem' : null
+    return this.entityCount > 5 ? '32rem' : null
   }
 
   /** Returns true if the affiliation is a Name Request */
@@ -185,9 +194,9 @@ export default class AffiliatedEntityTable extends Vue {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
 
-    return this.isNameRequest(business.corpType.code) &&
-      business.nameRequest?.enableIncorporation &&
-      supportedEntityFlags.includes(business.nameRequest?.legalType)
+    return this.isNameRequest(business.corpType.code) && // Is this a Name Request
+      business.nameRequest?.enableIncorporation && // Is the Nr state approved or conditionally approved
+      supportedEntityFlags.includes(business.nameRequest?.legalType) // Feature flagged Nr types
   }
 
   /** Returns the Name value for the affiliation */
@@ -212,9 +221,9 @@ export default class AffiliatedEntityTable extends Vue {
       case (this.isNumberedIncorporationApplication(item)):
         return 'Pending'
       case (this.isTemporaryBusinessRegistration(item.corpType.code)):
-        return 'Pending'
+        return item.nrNumber
       case this.isNameRequest(item.corpType.code):
-        return item.nameRequest.nrNumber
+        return item.nameRequest?.nrNumber
       default:
         return item.businessIdentifier
     }
@@ -242,7 +251,7 @@ export default class AffiliatedEntityTable extends Vue {
     switch (true) {
       case (this.isNameRequest(item.corpType.code)):
         // Format name request state value for Display
-        return item.nameRequest.state.charAt(0).toUpperCase() + item.nameRequest.state.slice(1).toLowerCase()
+        return NrDisplayStates[NrState[item.nameRequest.state]]
       case this.isTemporaryBusinessRegistration(item.corpType.code):
         return BusinessState.DRAFT
       default:
@@ -252,22 +261,25 @@ export default class AffiliatedEntityTable extends Vue {
 
   /** Returns the folio number or a default message */
   private folio (item: Business): string {
-    return item.folioNumber || this.$t('notAvailable').toString()
+    return item.nameRequest && (item.nameRequest.folioNumber || '')
   }
 
   /** Returns the last modified date string or a default message */
   private lastModified (item: Business): string {
-    return item.lastModified
-      ? new Date(item.lastModified).toLocaleDateString('en-CA', {
-        timeZone: 'America/Vancouver' })
-      : this.$t('notAvailable').toString()
+    switch (true) {
+      case (!!item.lastModified):
+        return this.dateToPacificDate(new Date(item.lastModified))
+      case (!!item.modified):
+        return this.dateToPacificDate(new Date(item.modified))
+      default: return this.$t('notAvailable').toString()
+    }
   }
 
   /** Returns the modified by value or a default message */
   private modifiedBy (item: Business): string {
     if (item.modifiedBy === 'None None' || !item.modifiedBy) {
       return this.$t('notAvailable').toString()
-    } else { return item.modifiedBy }
+    } else { return item.modifiedBy || this.$t('notAvailable').toString() }
   }
 
   /** Redirect handler for Dashboard OPEN action */
@@ -280,17 +292,25 @@ export default class AffiliatedEntityTable extends Vue {
   }
 
   /** Handler method for draft IA creation and navigation */
-  async createDraft (item: Business) {
-    let businessIdentifier = item.businessIdentifier
-    // 3806 : Create new IA if the selected item is Name Request
-    // If the business is NR, indicates there is no temporary business. Create a new IA for this NR and navigate.
-    if (item.corpType.code === CorpType.NAME_REQUEST) {
-      this.isLoading = true
-      // Find business with name as the NR number and use it for redirection
-      businessIdentifier = await this.createBusinessRecord(item)
-      this.isLoading = false
+  async useNameRequest (item: Business) {
+    switch (item.nameRequest.target) {
+      case NrTargetTypes.LEAR:
+        // Create new IA if the selected item is Name Request
+        let businessIdentifier = item.businessIdentifier
+        if (item.corpType.code === CorpType.NAME_REQUEST) {
+          this.isLoading = true
+          businessIdentifier = await this.createBusinessRecord(item)
+          this.isLoading = false
+        }
+        this.goToDashboard(businessIdentifier)
+        break
+      case NrTargetTypes.ONESTOP:
+        this.goToOneStop() // Navigate to onestop for firms
+        break
+      case NrTargetTypes.COLIN:
+        this.goToCorpOnline() // Navigate to Corporate Online for Corps
+        break
     }
-    this.goToDashboard(businessIdentifier)
   }
 
   /** Navigation handler for entities dashboard */
@@ -305,6 +325,16 @@ export default class AffiliatedEntityTable extends Vue {
   private goToNameRequest (nameRequest: NameRequest): void {
     ConfigHelper.setNrCredentials(nameRequest)
     window.location.href = `${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`
+  }
+
+  /** Navigation handler for OneStop application */
+  private goToOneStop (): void {
+    window.location.href = ConfigHelper.getOneStopUrl()
+  }
+
+  /** Navigation handler for Corporate Online application */
+  private goToCorpOnline (): void {
+    window.location.href = ConfigHelper.getCorporateOnlineUrl()
   }
 
   /** Create a business record in Lear */
@@ -358,7 +388,7 @@ export default class AffiliatedEntityTable extends Vue {
       { text: 'Number', value: 'number', sortable: false, show: this.showCol('Number') },
       { text: 'Type', value: 'type', sortable: false, show: this.showCol('Type') },
       { text: 'Status', value: 'status', sortable: false, show: this.showCol('Status') },
-      { text: 'Folio', value: 'folio', sortable: false, show: this.showCol('Folio') && this.isPremiumAccount },
+      { text: 'Folio', value: 'folio', sortable: false, show: this.showCol('Folio') },
       { text: 'Last Modified', value: 'lastModified', sortable: false, show: this.showCol('Last Modified') },
       { text: 'Modified By', value: 'modifiedBy', sortable: false, show: this.showCol('Modified By') },
       { text: 'Actions', align: 'end', value: 'action', sortable: false, show: true }
@@ -385,8 +415,8 @@ export default class AffiliatedEntityTable extends Vue {
     vertical-align: top;
   }
 
-  th {
-    font-weight: bold;
+  .v-btn {
+    background-color: $app-blue !important;
   }
 
   tbody {
@@ -402,42 +432,56 @@ export default class AffiliatedEntityTable extends Vue {
       }
 
       td {
+        height: 90px !important;
         color: $gray7;
-        padding: 1rem .875rem;
         line-height: 1.125rem;
       }
 
       td:first-child {
-        width: 250px
+        width: 250px;
+      }
+
+      .col-wide {
+        width: 325px !important;
       }
 
       td:not(:first-child):not(:last-child) {
-        max-width: 5rem;
+        max-width: 8rem;
       }
 
       .type-col {
         min-width: 12rem;
       }
+
+      td:last-child {
+        padding-right: 5px;
+      }
     }
   }
 
   .action-cell {
-    width: 0;
+    max-width: 0;
+    max-height: 30px !important;
     text-align: end !important;
     padding-right: 0;
   }
 
   .actions {
+    height:30px;
+
     .open-action {
       border-right: 1px solid $gray1;
     }
 
     .open-action-btn {
+      font-size: .875rem;
+      box-shadow: none;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
     }
 
     .more-actions-btn {
+      box-shadow: none;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
     }
@@ -449,15 +493,16 @@ export default class AffiliatedEntityTable extends Vue {
 }
 
 // Vuetify Overrides
-::v-deep .v-list-item {
-  min-height: 2rem !important;
-
-  :hover {
-    cursor: pointer;
+::v-deep .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
+  &:hover {
+    background-color: $app-background-blue;
   }
 }
 
 ::v-deep .v-data-table--fixed-header thead th {
+  position: sticky;
+  padding-top: 20px;
+  padding-bottom: 20px;
   color: $gray9 !important;
   font-size: 0.875rem;
   z-index: 1;
@@ -471,6 +516,51 @@ export default class AffiliatedEntityTable extends Vue {
   color: $app-blue;
   .v-icon.v-icon {
     color: $app-blue;
+  }
+}
+
+// Class binding a vuetify override.
+// To handle the sticky elements overlap in the custom scrolling data table.
+.header-high-layer {
+  ::v-deep {
+    th {
+      z-index: 2 !important;
+    }
+  }
+}
+
+::v-deep .theme--light.v-data-table .v-data-table__empty-wrapper {
+  color: $gray7;
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+// Custom Scroll bars
+#affiliated-entity-table {
+  ::v-deep .v-menu__content {
+    margin-left: -6rem;
+    margin-right: 1rem;
+    text-align: left;
+    position: sticky;
+    max-width: none;
+    z-index: 1 !important;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar {
+    width: .625rem;
+    overflow-x: hidden
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar-track {
+    margin-top: 60px;
+    box-shadow: inset 0 0 2px rgba(0,0,0,.3);
+    overflow: auto;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: lightgray;
   }
 }
 </style>
