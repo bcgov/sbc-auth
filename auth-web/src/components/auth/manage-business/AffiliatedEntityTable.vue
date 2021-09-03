@@ -16,7 +16,11 @@
       >
         <template v-slot:item="{ item, index }">
           <tr>
-            <td v-if="isNameRequest(item.corpType.code)" class="header" :class="{ 'col-wide': getHeaders.length < 7 }">
+            <td
+              v-if="isNameRequest(item.corpType.code) && item.nameRequest"
+              class="header"
+              :class="{ 'col-wide': getHeaders.length < 7 }"
+            >
               <div v-for="(name, i) in item.nameRequest.names" :key="`nrName: ${i}`" class="pb-1 names-block">
                 <v-icon v-if="isRejectedName(name)" color="red" class="names-text pr-1" small>mdi-close</v-icon>
                 <v-icon v-if="isApprovedName(name)" color="green" class="names-text pr-1" small>mdi-check</v-icon>
@@ -116,7 +120,8 @@ import {
   BusinessState,
   CorpType,
   FilingTypes,
-  LDFlags, NrDisplayStates,
+  LDFlags,
+  NrDisplayStates,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
@@ -218,7 +223,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       case (this.isTemporaryBusinessRegistration(item.corpType.code)):
         return item.nrNumber
       case this.isNameRequest(item.corpType.code):
-        return item.nameRequest.nrNumber
+        return item.nameRequest?.nrNumber
       default:
         return item.businessIdentifier
     }
@@ -521,6 +526,13 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     th {
       z-index: 2 !important;
     }
+  }
+}
+
+::v-deep .theme--light.v-data-table .v-data-table__empty-wrapper {
+  color: $gray7;
+  &:hover {
+    background-color: transparent;
   }
 }
 
