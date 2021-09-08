@@ -371,9 +371,10 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return this.selectedColumns.includes(col)
   }
 
+  /** Custom sorting method to handle consolidated Nr and Affiliations data. */
   private customSort (items, index, isDesc): any {
     items.sort((a, b) => {
-      if (index[0] === 'lastModified') { // Date Sorting
+      if (index[0] === 'lastModified') {
         let dateA, dateB
         if (a.lastModified) {
           dateA = a.lastModified
@@ -387,7 +388,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         } else {
           return +new Date(dateA) - +new Date(dateB)
         }
-      } else if (index[0] === 'name') { // Name Sorting
+      } else if (index[0] === 'name') {
         let nameA, nameB
         if (a.nameRequest) {
           nameA = a.nameRequest?.names[0].name
@@ -401,25 +402,25 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         } else {
           return nameB.toLowerCase().localeCompare(nameA.toLowerCase())
         }
-      } else if (index[0] === 'number') { // Number Sorting
+      } else if (index[0] === 'number') {
         if (!isDesc[0]) {
           return this.number(a).toLowerCase().localeCompare(this.number(b).toLowerCase())
         } else {
           return this.number(b).toLowerCase().localeCompare(this.number(a).toLowerCase())
         }
-      } else if (index[0] === 'type') { // Type Sorting
+      } else if (index[0] === 'type') {
         if (!isDesc[0]) {
           return this.type(a).toLowerCase().localeCompare(this.type(b).toLowerCase())
         } else {
           return this.type(b).toLowerCase().localeCompare(this.type(a).toLowerCase())
         }
-      } else if (index[0] === 'status') { // Status Sorting
+      } else if (index[0] === 'status') {
         if (!isDesc[0]) {
           return this.status(a).toLowerCase().localeCompare(this.status(b).toLowerCase())
         } else {
           return this.status(b).toLowerCase().localeCompare(this.status(a).toLowerCase())
         }
-      } else if (index[0] === 'modifiedBy') { // ModifiedBy Sorting
+      } else if (index[0] === 'modifiedBy') {
         if (!isDesc[0]) {
           return this.modifiedBy(a).toLowerCase().localeCompare(this.modifiedBy(b).toLowerCase())
         } else {
