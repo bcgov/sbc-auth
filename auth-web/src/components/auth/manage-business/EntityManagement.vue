@@ -578,6 +578,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   ::v-deep {
     #dashboard-actions {
       .v-input .v-label {
+        transform: translateY(-10px) scale(1);
         top: 30px;
         color: $gray7;
         font-size: .875rem;
