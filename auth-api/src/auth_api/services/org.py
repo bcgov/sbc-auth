@@ -657,9 +657,8 @@ class Org:  # pylint: disable=too-many-public-methods
         """Search for orgs based on input parameters."""
         orgs = {'orgs': []}
         if kwargs.get('business_identifier', None):
-            affiliation: AffiliationModel = AffiliationModel. \
-                find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
-            if affiliation:
+            affiliations = AffiliationModel.find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
+            for affiliation in affiliations:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
             include_invitations: bool = False
