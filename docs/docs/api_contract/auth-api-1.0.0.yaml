@@ -4,9 +4,9 @@ info:
   description: BC Registries Auth API reference documentation
   version: 1.0.1
   contact:
-    name: Auth API Support
-    url: BC Registries
-    email: BC Registries
+    name: Auth API 
+    url: https://www.bcregistry.ca/
+    email: "BC Registries"
   license:
     name: Apache 2.0
 paths:
@@ -5302,3 +5302,9 @@ components:
             minLength: 1
         required:
           - type
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+security:
+  - JWT: []
