@@ -34,7 +34,9 @@
             <td v-if="showCol(headers[1].text)">{{ number(item) }}</td>
             <td v-if="showCol(headers[2].text)" class="type-col">
               <span class="header"><strong>{{ type(item) }}</strong></span><br>
-              <span v-if="isNameRequest(item.corpType.code)">{{ typeDescription(item.nameRequest.legalType) }}</span>
+              <span v-if="isNameRequest(item.corpType.code) && item.nameRequest">
+                {{ typeDescription(item.nameRequest.legalType) }}
+              </span>
             </td>
             <td v-if="showCol(headers[3].text)">{{ status(item) }}</td>
             <td v-if="showCol(headers[4].text)">{{ folio(item) }}</td>
@@ -249,7 +251,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Returns the status for the affiliation */
   private status (item: Business): string {
     switch (true) {
-      case (this.isNameRequest(item.corpType.code)):
+      case (this.isNameRequest(item.corpType.code) && !!item.nameRequest):
         // Format name request state value for Display
         return NrDisplayStates[NrState[item.nameRequest.state]]
       case this.isTemporaryBusinessRegistration(item.corpType.code):
