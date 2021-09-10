@@ -376,58 +376,67 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Custom sorting method to handle consolidated Nr and Affiliations data. */
   private customSort (items, index, isDesc): any {
     items.sort((a, b) => {
-      if (index[0] === 'lastModified') {
-        let dateA, dateB
-        if (a.lastModified) {
-          dateA = a.lastModified
-        } else dateA = a.modified
-        if (b.lastModified) {
-          dateB = b.lastModified
-        } else dateB = b.modified
+      switch (index[0]) {
+        case 'lastModified':
+          let dateA, dateB
+          if (a.lastModified) {
+            dateA = a.lastModified
+          } else {
+            dateA = a.modified
+          }
+          if (b.lastModified) {
+            dateB = b.lastModified
+          } else {
+            dateB = b.modified
+          }
 
-        if (!isDesc[0]) {
-          return +new Date(dateB) - +new Date(dateA)
-        } else {
-          return +new Date(dateA) - +new Date(dateB)
-        }
-      } else if (index[0] === 'name') {
-        let nameA, nameB
-        if (a.nameRequest) {
-          nameA = a.nameRequest?.names[0].name
-        } else nameA = this.isNumberedIncorporationApplication(a) ? 'Numbered Benefit Company' : a.name
-        if (b.nameRequest) {
-          nameB = b.nameRequest?.names[0].name
-        } else nameB = this.isNumberedIncorporationApplication(b) ? 'Numbered Benefit Company' : b.name
+          if (!isDesc[0]) {
+            return +new Date(dateB) - +new Date(dateA)
+          } else {
+            return +new Date(dateA) - +new Date(dateB)
+          }
+        case 'name':
+          let nameA, nameB
+          if (a.nameRequest) {
+            nameA = a.nameRequest?.names[0].name
+          } else {
+            nameA = this.isNumberedIncorporationApplication(a) ? 'Numbered Benefit Company' : a.name
+          }
+          if (b.nameRequest) {
+            nameB = b.nameRequest?.names[0].name
+          } else {
+            nameB = this.isNumberedIncorporationApplication(b) ? 'Numbered Benefit Company' : b.name
+          }
 
-        if (!isDesc[0]) {
-          return nameA.toLowerCase().localeCompare(nameB.toLowerCase())
-        } else {
-          return nameB.toLowerCase().localeCompare(nameA.toLowerCase())
-        }
-      } else if (index[0] === 'number') {
-        if (!isDesc[0]) {
-          return this.number(a).toLowerCase().localeCompare(this.number(b).toLowerCase())
-        } else {
-          return this.number(b).toLowerCase().localeCompare(this.number(a).toLowerCase())
-        }
-      } else if (index[0] === 'type') {
-        if (!isDesc[0]) {
-          return this.type(a).toLowerCase().localeCompare(this.type(b).toLowerCase())
-        } else {
-          return this.type(b).toLowerCase().localeCompare(this.type(a).toLowerCase())
-        }
-      } else if (index[0] === 'status') {
-        if (!isDesc[0]) {
-          return this.status(a).toLowerCase().localeCompare(this.status(b).toLowerCase())
-        } else {
-          return this.status(b).toLowerCase().localeCompare(this.status(a).toLowerCase())
-        }
-      } else if (index[0] === 'modifiedBy') {
-        if (!isDesc[0]) {
-          return this.modifiedBy(a).toLowerCase().localeCompare(this.modifiedBy(b).toLowerCase())
-        } else {
-          return this.modifiedBy(b).toLowerCase().localeCompare(this.modifiedBy(a).toLowerCase())
-        }
+          if (!isDesc[0]) {
+            return nameA.toLowerCase().localeCompare(nameB.toLowerCase())
+          } else {
+            return nameB.toLowerCase().localeCompare(nameA.toLowerCase())
+          }
+        case 'number':
+          if (!isDesc[0]) {
+            return this.number(a).toLowerCase().localeCompare(this.number(b).toLowerCase())
+          } else {
+            return this.number(b).toLowerCase().localeCompare(this.number(a).toLowerCase())
+          }
+        case 'type':
+          if (!isDesc[0]) {
+            return this.type(a).toLowerCase().localeCompare(this.type(b).toLowerCase())
+          } else {
+            return this.type(b).toLowerCase().localeCompare(this.type(a).toLowerCase())
+          }
+        case 'status':
+          if (!isDesc[0]) {
+            return this.status(a).toLowerCase().localeCompare(this.status(b).toLowerCase())
+          } else {
+            return this.status(b).toLowerCase().localeCompare(this.status(a).toLowerCase())
+          }
+        case 'modifiedBy':
+          if (!isDesc[0]) {
+            return this.modifiedBy(a).toLowerCase().localeCompare(this.modifiedBy(b).toLowerCase())
+          } else {
+            return this.modifiedBy(b).toLowerCase().localeCompare(this.modifiedBy(a).toLowerCase())
+          }
       }
     })
     return items
