@@ -1,8 +1,7 @@
 openapi: 3.0.0
 info:
   title: BC Registries Accounts API
-  description: |-
-    <p>BC Registries Accounts system is used to manage the BC Registries accounts. The system manages the authorizations related data and does integration with keycloak. </p>
+  description: <p>BC Registries Accounts system is used to manage the BC Registries accounts. The system manages the authorizations related data and does integration with keycloak. </p>
   version: 1.0.1
   contact:
     name: BC Registries
@@ -61,190 +60,6 @@ paths:
         - users
       summary: Return the user profile associated with the provided username.
       description: Return the user profile associated with the provided username.
-  /users/orgs:
-    get:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/org'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Identifier representing the type of error that occurred.
-                  message:
-                    type: string
-                    description: Description of the error.
-                description: Contains details of an error that was encountered.
-      operationId: get_user_orgs
-      tags:
-        - users
-      summary: Get a list of orgs that the current user is associated with.
-      description: Get a list of orgs that the current user is associated with.
-  /users/contacts:
-    put:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/contact'
-      operationId: put_user_contacts
-      tags:
-        - users
-      summary: Update an existing contact for the user associated with the JWT in the authorization header.
-      description: Update an existing contact for the user associated with the JWT in the authorization header.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/contact'
-    post:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/user'
-      operationId: post_user_contacts
-      tags:
-        - users
-      summary: Create a new contact for the user associated with the JWT in the authorization header."
-      description: Create a new contact for the user associated with the JWT in the authorization header."
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/user'
-    delete:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-      operationId: delete_user_contacts
-      tags:
-        - users
-      summary: Delete the contact info for the user associated with the JWT in the authorization header.
-      description: Delete the contact info for the user associated with the JWT in the authorization header.
-    get:
-      summary: Retrieve the set of contacts asociated with the current user identifier by the JWT in the header.
-      operationId: get-users-contacts
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/contact'
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Identifier representing the type of error that occurred.
-                  message:
-                    type: string
-                    description: Description of the error.
-                description: Contains details of an error that was encountered.
-      description: Retrieve the set of contacts asociated with the current user identifier by the JWT in the header.
   /users/authorizations:
     get:
       responses:
@@ -589,43 +404,6 @@ paths:
         - orgs
       summary: Retrieve the set of members for the given org.
       description: Retrieve the set of members for the given org.
-  '/orgs/{org_id}/invitations':
-    parameters:
-      - name: org_id
-        in: path
-        required: true
-        schema:
-          type: string
-    get:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/invitation'
-      operationId: get_org_invitations
-      tags:
-        - orgs
-      summary: Retrieve the set of invitations for the given org
-      description: Retrieve the set of invitations for the given org.
   '/orgs/{org_id}/contacts':
     parameters:
       - name: org_id
@@ -903,7 +681,7 @@ paths:
                   type: string
                   title: Business Identifier
                   default: ''
-                  example: 'CP1234567'
+                  example: CP1234567
                   pattern: ^(.*)$
                 passCode:
                   type: string
@@ -1021,7 +799,7 @@ paths:
                 name:
                   type: string
                   title: Organization Name
-                  example: 'Foobar Inc.'
+                  example: Foobar Inc.
                   pattern: '^[^\s]+(\s+[^\s]+)*$'
                 typeCode:
                   type: string
@@ -1143,10 +921,12 @@ paths:
                 name:
                   type: string
                   title: Organization Name
+                  example: Foobar Inc.
                   pattern: '^[^\s]+(\s+[^\s]+)*$'
                 typeCode:
                   type: string
                   title: Organizational Type
+                  example: IMPLICIT
                   pattern: ^(.*)$
               required:
                 - name
@@ -1175,28 +955,28 @@ paths:
               schema:
                 type: string
               description: X-Application-Context
-              example:
+              examples:
                 example1:
                   value: 'application:prod'
             Access-Control-Allow-Origin:
               schema:
                 type: string
               description: Access-Control-Allow-Origin
-              example:
+              examples:
                 example1:
                   value: '*'
             Access-Control-Allow-Methods:
               schema:
                 type: string
               description: Access-Control-Allow-Methods
-              example:
+              examples:
                 example1:
                   value: 'GET, OPTIONS'
             Access-Control-Allow-Headers:
               schema:
                 type: string
               description: Access-Control-Allow-Headers
-              example:
+              examples:
                 example1:
                   value: 'Content-Type, api_key, Authorization'
           content:
@@ -1209,68 +989,51 @@ paths:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T13:49:45.244134+00:00'
+                    example: '2020-01-09T13:49:45.244134+00:00'
                     pattern: ^(.*)$
                   created_by:
                     type: string
                     title: The Created_by Schema
                     default: ''
-                    example:
-                      - sbc-auth admin
+                    example: sbc-auth admin
                     pattern: ^(.*)$
                   id:
                     type: integer
                     title: The Id Schema
                     default: 0
-                    example:
-                      - 103
+                    example: 103
                   modified:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
-                      - '2020-01-09T13:49:45.244148+00:00'
+                    example: '2020-01-09T13:49:45.244148+00:00'
                     pattern: ^(.*)$
                   name:
                     type: string
                     title: The Name Schema
                     default: ''
-                    example:
-                      - AOT
+                    example: Foo
                     pattern: ^(.*)$
                   orgType:
                     type: string
                     title: The Orgtype Schema
                     default: ''
-                    example:
-                      - IMPLICIT
+                    example: IMPLICIT
                     pattern: ^(.*)$
                   org_status:
                     type: string
                     title: The Org_status Schema
                     default: ''
-                    example:
-                      - ACTIVE
+                    example: ACTIVE
                     pattern: ^(.*)$
                   preferred_payment:
                     type: string
                     title: The Preferred_payment Schema
                     default: ''
-                    example:
-                      - CC
+                    example: CC
                     pattern: ^(.*)$
                   modified_by:
                     type: string
-                required:
-                  - created
-                  - created_by
-                  - id
-                  - modified
-                  - name
-                  - orgType
-                  - org_status
-                  - preferred_payment
               examples:
                 example1:
                   value:
@@ -1278,12 +1041,15 @@ paths:
                       - id: '1234'
                         name: Mock Account
                         preferred_payment: CC
+                        created: '2020-01-09T13:49:45.244148+00:00'
                 CP0002000:
                   value:
-                    - id: '2000'
-                      name: Mock Account
-                      preferred_payment: DRAWDOWN
-                      bc_online_user_id: PB25020
+                    orgs:
+                      - id: '2000'
+                        name: Mock Account
+                        preferred_payment: DRAWDOWN
+                        bc_online_user_id: PB25020
+                        created: '2020-01-09T13:49:45.244148+00:00'
         default:
           description: unexpected error
           content:
@@ -1298,843 +1064,11 @@ paths:
         in: query
         required: true
         description: Corp Num/Incorporation Number of the entity
-      examples:
-        example1:
-          value: CP0001234
-        CP0002000:
-          value: CP0002000
-  
-  '/invitations/{invitation_id}':
-    parameters:
-      - name: invitation_id
-        in: path
-        required: true
-        schema:
-          type: string
-    patch:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-      operationId: patch_invitation
-      tags:
-        - invitations
-    delete:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-      operationId: delete_invitation
-      tags:
-        - invitations
-      summary: Delete the specified invitation.
-      description: Delete the specified invitation.
-    get:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                title: invitation
-                type: object
-                properties:
-                  expiresOn:
-                    type: string
-                    title: The Expireson Schema
-                    default: ''
-                    example:
-                      - '2020-01-16T13:55:05.960809+00:00'
-                    pattern: ^(.*)$
-                  id:
-                    type: integer
-                    title: The Id Schema
-                    default: 0
-                    example:
-                      - 30
-                  membership:
-                    type: array
-                    title: The Membership Schema
-                    items:
-                      title: membership
-                      type: object
-                      properties:
-                        user:
-                          title: user
-                          type: object
-                          properties:
-                            created:
-                              type: string
-                              title: The Created Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T11:13:59.293603+00:00'
-                              pattern: ^(.*)$
-                            email:
-                              type: string
-                              title: The Email Schema
-                              default: ''
-                              example:
-                                - service-account-sbc-auth-admin@placeholder.org
-                              pattern: ^(.*)$
-                            firstname:
-                              type: string
-                              title: The Firstname Schema
-                              default: ''
-                              example:
-                                - sbc-auth
-                              pattern: ^(.*)$
-                            keycloakGuid:
-                              type: string
-                              title: The Keycloakguid Schema
-                              default: ''
-                              example:
-                                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                              pattern: ^(.*)$
-                            lastname:
-                              type: string
-                              title: The Lastname Schema
-                              default: ''
-                              example:
-                                - admin
-                              pattern: ^(.*)$
-                            modified:
-                              type: string
-                              title: The Modified Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T11:13:59.295264+00:00'
-                              pattern: ^(.*)$
-                            userStatus:
-                              type: integer
-                              title: The Userstatus Schema
-                              default: 0
-                              example:
-                                - 1
-                            userTerms:
-                              title: userTerms
-                              type: object
-                              properties:
-                                isTermsOfUseAccepted:
-                                  type: boolean
-                                termsOfUseAcceptedVersion:
-                                  type: string
-                            username:
-                              type: string
-                              title: The Username Schema
-                              default: ''
-                              example:
-                                - service-account-sbc-auth-admin
-                              pattern: ^(.*)$
-                          required:
-                            - created
-                            - email
-                            - firstname
-                            - keycloakGuid
-                            - lastname
-                            - modified
-                            - userStatus
-                            - userTerms
-                            - username
-                        org:
-                          title: org
-                          type: object
-                          properties:
-                            created:
-                              type: string
-                              title: The Created Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T13:49:45.244134+00:00'
-                              pattern: ^(.*)$
-                            created_by:
-                              type: string
-                              title: The Created_by Schema
-                              default: ''
-                              example:
-                                - sbc-auth admin
-                              pattern: ^(.*)$
-                            id:
-                              type: integer
-                              title: The Id Schema
-                              default: 0
-                              example:
-                                - 103
-                            modified:
-                              type: string
-                              title: The Modified Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T13:49:45.244148+00:00'
-                              pattern: ^(.*)$
-                            name:
-                              type: string
-                              title: The Name Schema
-                              default: ''
-                              example:
-                                - AOT
-                              pattern: ^(.*)$
-                            orgType:
-                              type: string
-                              title: The Orgtype Schema
-                              default: ''
-                              example:
-                                - IMPLICIT
-                              pattern: ^(.*)$
-                            org_status:
-                              type: string
-                              title: The Org_status Schema
-                              default: ''
-                              example:
-                                - ACTIVE
-                              pattern: ^(.*)$
-                            preferred_payment:
-                              type: string
-                              title: The Preferred_payment Schema
-                              default: ''
-                              example:
-                                - CC
-                              pattern: ^(.*)$
-                            modified_by:
-                              type: string
-                          required:
-                            - created
-                            - created_by
-                            - id
-                            - modified
-                            - name
-                            - orgType
-                            - org_status
-                            - preferred_payment
-                        membershipType:
-                          type: string
-                        membershipStatus:
-                          type: string
-                        id:
-                          type: string
-                  recipientEmail:
-                    type: string
-                    title: The Recipientemail Schema
-                    default: ''
-                    example:
-                      - saravanpa@gmai.com
-                    pattern: ^(.*)$
-                  sentDate:
-                    type: string
-                    title: The Sentdate Schema
-                    default: ''
-                    example:
-                      - '2020-01-09T13:55:05.960809+00:00'
-                    pattern: ^(.*)$
-                  status:
-                    type: string
-                    title: The Status Schema
-                    default: ''
-                    example:
-                      - PENDING
-                    pattern: ^(.*)$
-                  token:
-                    type: string
-                    title: The Token Schema
-                    default: ''
-                    example:
-                      - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-                    pattern: ^(.*)$
-                required:
-                  - expiresOn
-                  - id
-                  - membership
-                  - recipientEmail
-                  - sentDate
-                  - status
-                  - token
-      operationId: get_invitation
-      tags:
-        - invitations
-      summary: Update the invitation specified by the provided id as retried.
-      description: Update the invitation specified by the provided id as retried.
-  '/invitations/tokens/{invitation_token}':
-    parameters:
-      - name: invitation_token
-        in: path
-        required: true
-        schema:
-          type: string
-    put:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                title: invitation
-                type: object
-                properties:
-                  expiresOn:
-                    type: string
-                    title: The Expireson Schema
-                    default: ''
-                    example:
-                      - '2020-01-16T13:55:05.960809+00:00'
-                    pattern: ^(.*)$
-                  id:
-                    type: integer
-                    title: The Id Schema
-                    default: 0
-                    example:
-                      - 30
-                  membership:
-                    type: array
-                    title: The Membership Schema
-                    items:
-                      title: membership
-                      type: object
-                      properties:
-                        user:
-                          title: user
-                          type: object
-                          properties:
-                            created:
-                              type: string
-                              title: The Created Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T11:13:59.293603+00:00'
-                              pattern: ^(.*)$
-                            email:
-                              type: string
-                              title: The Email Schema
-                              default: ''
-                              example:
-                                - service-account-sbc-auth-admin@placeholder.org
-                              pattern: ^(.*)$
-                            firstname:
-                              type: string
-                              title: The Firstname Schema
-                              default: ''
-                              example:
-                                - sbc-auth
-                              pattern: ^(.*)$
-                            keycloakGuid:
-                              type: string
-                              title: The Keycloakguid Schema
-                              default: ''
-                              example:
-                                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                              pattern: ^(.*)$
-                            lastname:
-                              type: string
-                              title: The Lastname Schema
-                              default: ''
-                              example:
-                                - admin
-                              pattern: ^(.*)$
-                            modified:
-                              type: string
-                              title: The Modified Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T11:13:59.295264+00:00'
-                              pattern: ^(.*)$
-                            userStatus:
-                              type: integer
-                              title: The Userstatus Schema
-                              default: 0
-                              example:
-                                - 1
-                            userTerms:
-                              title: userTerms
-                              type: object
-                              properties:
-                                isTermsOfUseAccepted:
-                                  type: boolean
-                                termsOfUseAcceptedVersion:
-                                  type: string
-                            username:
-                              type: string
-                              title: The Username Schema
-                              default: ''
-                              example:
-                                - service-account-sbc-auth-admin
-                              pattern: ^(.*)$
-                          required:
-                            - created
-                            - email
-                            - firstname
-                            - keycloakGuid
-                            - lastname
-                            - modified
-                            - userStatus
-                            - userTerms
-                            - username
-                        org:
-                          title: org
-                          type: object
-                          properties:
-                            created:
-                              type: string
-                              title: The Created Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T13:49:45.244134+00:00'
-                              pattern: ^(.*)$
-                            created_by:
-                              type: string
-                              title: The Created_by Schema
-                              default: ''
-                              example:
-                                - sbc-auth admin
-                              pattern: ^(.*)$
-                            id:
-                              type: integer
-                              title: The Id Schema
-                              default: 0
-                              example:
-                                - 103
-                            modified:
-                              type: string
-                              title: The Modified Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T13:49:45.244148+00:00'
-                              pattern: ^(.*)$
-                            name:
-                              type: string
-                              title: The Name Schema
-                              default: ''
-                              example:
-                                - AOT
-                              pattern: ^(.*)$
-                            orgType:
-                              type: string
-                              title: The Orgtype Schema
-                              default: ''
-                              example:
-                                - IMPLICIT
-                              pattern: ^(.*)$
-                            org_status:
-                              type: string
-                              title: The Org_status Schema
-                              default: ''
-                              example:
-                                - ACTIVE
-                              pattern: ^(.*)$
-                            preferred_payment:
-                              type: string
-                              title: The Preferred_payment Schema
-                              default: ''
-                              example:
-                                - CC
-                              pattern: ^(.*)$
-                            modified_by:
-                              type: string
-                          required:
-                            - created
-                            - created_by
-                            - id
-                            - modified
-                            - name
-                            - orgType
-                            - org_status
-                            - preferred_payment
-                        membershipType:
-                          type: string
-                        membershipStatus:
-                          type: string
-                        id:
-                          type: string
-                  recipientEmail:
-                    type: string
-                    title: The Recipientemail Schema
-                    default: ''
-                    example:
-                      - saravanpa@gmai.com
-                    pattern: ^(.*)$
-                  sentDate:
-                    type: string
-                    title: The Sentdate Schema
-                    default: ''
-                    example:
-                      - '2020-01-09T13:55:05.960809+00:00'
-                    pattern: ^(.*)$
-                  status:
-                    type: string
-                    title: The Status Schema
-                    default: ''
-                    example:
-                      - PENDING
-                    pattern: ^(.*)$
-                  token:
-                    type: string
-                    title: The Token Schema
-                    default: ''
-                    example:
-                      - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-                    pattern: ^(.*)$
-                required:
-                  - expiresOn
-                  - id
-                  - membership
-                  - recipientEmail
-                  - sentDate
-                  - status
-                  - token
-      operationId: put_invitation_action
-      tags:
-        - invitations
-      summary: 'Check whether the passed token is valid and add user, role and org from invitation to membership.'
-      description: 'Check whether the passed token is valid and add user, role and org from invitation to membership.'
-    get:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-      operationId: get_invitation_action
-      tags:
-        - invitations
-      summary: Check whether the passed token is valid
-      description: Check whether the passed token is valid
-  /invitations:
-    post:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-          content:
-            application/json:
-              schema:
-                title: invitation
-                type: object
-                properties:
-                  expiresOn:
-                    type: string
-                    title: The Expireson Schema
-                    default: ''
-                    example:
-                      - '2020-01-16T13:55:05.960809+00:00'
-                    pattern: ^(.*)$
-                  id:
-                    type: integer
-                    title: The Id Schema
-                    default: 0
-                    example:
-                      - 30
-                  membership:
-                    type: array
-                    title: The Membership Schema
-                    items:
-                      title: membership
-                      type: object
-                      properties:
-                        user:
-                          title: user
-                          type: object
-                          properties:
-                            created:
-                              type: string
-                              title: The Created Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T11:13:59.293603+00:00'
-                              pattern: ^(.*)$
-                            email:
-                              type: string
-                              title: The Email Schema
-                              default: ''
-                              example:
-                                - service-account-sbc-auth-admin@placeholder.org
-                              pattern: ^(.*)$
-                            firstname:
-                              type: string
-                              title: The Firstname Schema
-                              default: ''
-                              example:
-                                - sbc-auth
-                              pattern: ^(.*)$
-                            keycloakGuid:
-                              type: string
-                              title: The Keycloakguid Schema
-                              default: ''
-                              example:
-                                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
-                              pattern: ^(.*)$
-                            lastname:
-                              type: string
-                              title: The Lastname Schema
-                              default: ''
-                              example:
-                                - admin
-                              pattern: ^(.*)$
-                            modified:
-                              type: string
-                              title: The Modified Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T11:13:59.295264+00:00'
-                              pattern: ^(.*)$
-                            userStatus:
-                              type: integer
-                              title: The Userstatus Schema
-                              default: 0
-                              example:
-                                - 1
-                            userTerms:
-                              title: userTerms
-                              type: object
-                              properties:
-                                isTermsOfUseAccepted:
-                                  type: boolean
-                                termsOfUseAcceptedVersion:
-                                  type: string
-                            username:
-                              type: string
-                              title: The Username Schema
-                              default: ''
-                              example:
-                                - service-account-sbc-auth-admin
-                              pattern: ^(.*)$
-                          required:
-                            - created
-                            - email
-                            - firstname
-                            - keycloakGuid
-                            - lastname
-                            - modified
-                            - userStatus
-                            - userTerms
-                            - username
-                        org:
-                          title: org
-                          type: object
-                          properties:
-                            created:
-                              type: string
-                              title: The Created Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T13:49:45.244134+00:00'
-                              pattern: ^(.*)$
-                            created_by:
-                              type: string
-                              title: The Created_by Schema
-                              default: ''
-                              example:
-                                - sbc-auth admin
-                              pattern: ^(.*)$
-                            id:
-                              type: integer
-                              title: The Id Schema
-                              default: 0
-                              example:
-                                - 103
-                            modified:
-                              type: string
-                              title: The Modified Schema
-                              default: ''
-                              example:
-                                - '2020-01-09T13:49:45.244148+00:00'
-                              pattern: ^(.*)$
-                            name:
-                              type: string
-                              title: The Name Schema
-                              default: ''
-                              example:
-                                - AOT
-                              pattern: ^(.*)$
-                            orgType:
-                              type: string
-                              title: The Orgtype Schema
-                              default: ''
-                              example:
-                                - IMPLICIT
-                              pattern: ^(.*)$
-                            org_status:
-                              type: string
-                              title: The Org_status Schema
-                              default: ''
-                              example:
-                                - ACTIVE
-                              pattern: ^(.*)$
-                            preferred_payment:
-                              type: string
-                              title: The Preferred_payment Schema
-                              default: ''
-                              example:
-                                - CC
-                              pattern: ^(.*)$
-                            modified_by:
-                              type: string
-                          required:
-                            - created
-                            - created_by
-                            - id
-                            - modified
-                            - name
-                            - orgType
-                            - org_status
-                            - preferred_payment
-                        membershipType:
-                          type: string
-                        membershipStatus:
-                          type: string
-                        id:
-                          type: string
-                  recipientEmail:
-                    type: string
-                    title: The Recipientemail Schema
-                    default: ''
-                    example:
-                      - saravanpa@gmai.com
-                    pattern: ^(.*)$
-                  sentDate:
-                    type: string
-                    title: The Sentdate Schema
-                    default: ''
-                    example:
-                      - '2020-01-09T13:55:05.960809+00:00'
-                    pattern: ^(.*)$
-                  status:
-                    type: string
-                    title: The Status Schema
-                    default: ''
-                    example:
-                      - PENDING
-                    pattern: ^(.*)$
-                  token:
-                    type: string
-                    title: The Token Schema
-                    default: ''
-                    example:
-                      - MzA.XhehOQ._bPUJGr5f7-5NLjUqJ39OeUPtjQ
-                    pattern: ^(.*)$
-                required:
-                  - expiresOn
-                  - id
-                  - membership
-                  - recipientEmail
-                  - sentDate
-                  - status
-                  - token
-      operationId: post_invitations
-      tags:
-        - invitations
-      requestBody:
-        content:
-          application/json:
-            schema:
-              title: invitationRequest
-              type: object
-              required:
-                - recipientEmail
-                - membership
-              properties:
-                recipientEmail:
-                  type: string
-                  title: The recipient email id.
-                sentDate:
-                  type: string
-                  format: datetime
-                  title: The date invitation is sent.
-      summary: Send a new invitation using the details in request and saves the invitation.
-      description: Send a new invitation using the details in request and saves the invitation.
+        examples:
+          example1:
+            value: CP0001234
+          CP0002000:
+            value: CP0002000
   '/entities/{business_identifier}/contacts':
     parameters:
       - name: business_identifier
@@ -2173,15 +1107,13 @@ paths:
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
-                    example:
-                      - CP0001578
+                    example: CP0001578
                     pattern: ^(.*)$
                   businessNumber:
                     type: string
                     title: The Businessnumber Schema
                     default: ''
-                    example:
-                      - CP0001847
+                    example: CP0001847
                     pattern: ^(.*)$
                   contacts:
                     type: array
@@ -2193,114 +1125,96 @@ paths:
                         email:
                           type: string
                           title: Email
-                          default: ''
-                          example:
-                            - abc123@mail.com
+                          example: abc123@mail.com
                           pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
-                          default: ''
-                          example:
-                            - '123'
+                          example: '123'
                           pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
-                          example:
-                            - 111-222-3333
+                          example: 111-222-3333
                           pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
-                          example:
-                            - Ring buzzer 123
+                          example: Ring buzzer 123
                           pattern: ^(.*)$
                         postalCode:
                           type: string
                           title: Postal Code
                           default: ''
-                          example:
-                            - V1A 1A1
+                          example: V1A 1A1
                           pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
-                          example:
-                            - CA
+                          example: CA
                           pattern: ^(.*)$
                         region:
                           type: string
                           title: Region
                           default: ''
-                          example:
-                            - British Columbia
+                          example: British Columbia
                           pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
-                          example:
-                            - Victoria
+                          example: Victoria
                           pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
-                          example:
-                            - Unit 1
+                          example: Unit 1
                           pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
-                          example:
-                            - 123 Roundabout Lane
+                          example: 123 Roundabout Lane
                           pattern: ^(.*)$
                   corpType:
                     type: string
                     title: The Corptype Schema
                     default: ''
-                    example:
-                      - CP
+                    example: CP
                     pattern: ^(.*)$
                   created:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:11:31.303521+00:00'
+                    example: '2020-01-09T11:11:31.303521+00:00'
                     pattern: ^(.*)$
                   modified:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:14:06.560862+00:00'
+                    example: '2020-01-09T11:14:06.560862+00:00'
                     pattern: ^(.*)$
                   modifiedBy:
                     type: string
                     title: The Modifiedby Schema
                     default: ''
-                    example:
-                      - sbc-auth admin
+                    example: sbc-auth admin
                     pattern: ^(.*)$
                   name:
                     type: string
                     title: The Name Schema
                     default: ''
-                    example:
-                      - Business
+                    example: Business
                     pattern: ^(.*)$
                   passCodeClaimed:
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
-                    example:
-                      - false
+                    example: false
                 required:
                   - businessIdentifier
                   - businessNumber
@@ -2356,72 +1270,42 @@ paths:
                 email:
                   type: string
                   title: Email
-                  default: ''
-                  example:
-                    - abc123@mail.com
                   pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                 phoneExtension:
                   type: string
                   title: Phone Extension
-                  default: ''
-                  example:
-                    - '123'
                   pattern: ^(.*)$
                 phone:
                   type: string
                   title: Phone
-                  default: ''
-                  example:
-                    - 111-222-3333
                   pattern: ^(.*)$
                 deliveryInstructions:
                   type: string
                   title: Delivery Instructions
-                  default: ''
-                  example:
-                    - Ring buzzer 123
                   pattern: ^(.*)$
                 postalCode:
                   type: string
                   title: Postal Code
-                  default: ''
-                  example:
-                    - V1A 1A1
                   pattern: ^(.*)$
                 country:
                   type: string
                   title: Country
-                  default: ''
-                  example:
-                    - CA
                   pattern: ^(.*)$
                 region:
                   type: string
                   title: Region
-                  default: ''
-                  example:
-                    - British Columbia
                   pattern: ^(.*)$
                 city:
                   type: string
                   title: City
-                  default: ''
-                  example:
-                    - Victoria
                   pattern: ^(.*)$
                 streetAdditional:
                   type: string
                   title: Street Additional
-                  default: ''
-                  example:
-                    - Unit 1
                   pattern: ^(.*)$
                 street:
                   type: string
                   title: Street
-                  default: ''
-                  example:
-                    - 123 Roundabout Lane
                   pattern: ^(.*)$
     post:
       responses:
@@ -2437,15 +1321,11 @@ paths:
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
-                    example:
-                      - CP0001578
                     pattern: ^(.*)$
                   businessNumber:
                     type: string
                     title: The Businessnumber Schema
                     default: ''
-                    example:
-                      - CP0001847
                     pattern: ^(.*)$
                   contacts:
                     type: array
@@ -2457,114 +1337,67 @@ paths:
                         email:
                           type: string
                           title: Email
-                          default: ''
-                          example:
-                            - abc123@mail.com
                           pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
-                          default: ''
-                          example:
-                            - '123'
                           pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
-                          default: ''
-                          example:
-                            - 111-222-3333
                           pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
-                          default: ''
-                          example:
-                            - Ring buzzer 123
                           pattern: ^(.*)$
                         postalCode:
                           type: string
                           title: Postal Code
-                          default: ''
-                          example:
-                            - V1A 1A1
                           pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
-                          default: ''
-                          example:
-                            - CA
                           pattern: ^(.*)$
                         region:
                           type: string
                           title: Region
-                          default: ''
-                          example:
-                            - British Columbia
                           pattern: ^(.*)$
                         city:
                           type: string
                           title: City
-                          default: ''
-                          example:
-                            - Victoria
                           pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
-                          default: ''
-                          example:
-                            - Unit 1
                           pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
-                          default: ''
-                          example:
-                            - 123 Roundabout Lane
                           pattern: ^(.*)$
                   corpType:
                     type: string
                     title: The Corptype Schema
-                    default: ''
-                    example:
-                      - CP
                     pattern: ^(.*)$
                   created:
                     type: string
                     title: The Created Schema
-                    default: ''
-                    example:
-                      - '2020-01-09T11:11:31.303521+00:00'
                     pattern: ^(.*)$
                   modified:
                     type: string
                     title: The Modified Schema
-                    default: ''
-                    example:
-                      - '2020-01-09T11:14:06.560862+00:00'
                     pattern: ^(.*)$
                   modifiedBy:
                     type: string
                     title: The Modifiedby Schema
-                    default: ''
-                    example:
-                      - sbc-auth admin
                     pattern: ^(.*)$
                   name:
                     type: string
                     title: The Name Schema
-                    default: ''
-                    example:
-                      - Business
                     pattern: ^(.*)$
                   passCodeClaimed:
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
-                    example:
-                      - false
                 required:
                   - businessIdentifier
                   - businessNumber
@@ -2591,7 +1424,6 @@ paths:
                     modifiedBy: sbc-auth admin
                     name: Business
                     passCodeClaimed: false
-              example: {}
           headers:
             X-Application-Context:
               schema:
@@ -2624,72 +1456,51 @@ paths:
                 email:
                   type: string
                   title: Email
-                  default: ''
-                  example:
-                    - abc123@mail.com
                   pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                 phoneExtension:
                   type: string
                   title: Phone Extension
                   default: ''
-                  example:
-                    - '123'
                   pattern: ^(.*)$
                 phone:
                   type: string
                   title: Phone
                   default: ''
-                  example:
-                    - 111-222-3333
                   pattern: ^(.*)$
                 deliveryInstructions:
                   type: string
                   title: Delivery Instructions
                   default: ''
-                  example:
-                    - Ring buzzer 123
                   pattern: ^(.*)$
                 postalCode:
                   type: string
                   title: Postal Code
                   default: ''
-                  example:
-                    - V1A 1A1
                   pattern: ^(.*)$
                 country:
                   type: string
                   title: Country
                   default: ''
-                  example:
-                    - CA
                   pattern: ^(.*)$
                 region:
                   type: string
                   title: Region
                   default: ''
-                  example:
-                    - British Columbia
                   pattern: ^(.*)$
                 city:
                   type: string
                   title: City
                   default: ''
-                  example:
-                    - Victoria
                   pattern: ^(.*)$
                 streetAdditional:
                   type: string
                   title: Street Additional
                   default: ''
-                  example:
-                    - Unit 1
                   pattern: ^(.*)$
                 street:
                   type: string
                   title: Street
                   default: ''
-                  example:
-                    - 123 Roundabout Lane
                   pattern: ^(.*)$
           application/xml:
             schema:
@@ -2699,72 +1510,50 @@ paths:
                 email:
                   type: string
                   title: Email
-                  default: ''
-                  example:
-                    - abc123@mail.com
                   pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                 phoneExtension:
                   type: string
                   title: Phone Extension
                   default: ''
-                  example:
-                    - '123'
                   pattern: ^(.*)$
                 phone:
                   type: string
                   title: Phone
                   default: ''
-                  example:
-                    - 111-222-3333
                   pattern: ^(.*)$
                 deliveryInstructions:
                   type: string
                   title: Delivery Instructions
                   default: ''
-                  example:
-                    - Ring buzzer 123
                   pattern: ^(.*)$
                 postalCode:
                   type: string
                   title: Postal Code
                   default: ''
-                  example:
-                    - V1A 1A1
                   pattern: ^(.*)$
                 country:
                   type: string
                   title: Country
                   default: ''
-                  example:
-                    - CA
                   pattern: ^(.*)$
                 region:
                   type: string
                   title: Region
-                  default: ''
-                  example:
-                    - British Columbia
                   pattern: ^(.*)$
                 city:
                   type: string
                   title: City
                   default: ''
-                  example:
-                    - Victoria
                   pattern: ^(.*)$
                 streetAdditional:
                   type: string
                   title: Street Additional
                   default: ''
-                  example:
-                    - Unit 1
                   pattern: ^(.*)$
                 street:
                   type: string
                   title: Street
                   default: ''
-                  example:
-                    - 123 Roundabout Lane
                   pattern: ^(.*)$
         description: ''
     delete:
@@ -2781,15 +1570,10 @@ paths:
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
-                    example:
-                      - CP0001578
-                    pattern: ^(.*)$
                   businessNumber:
                     type: string
                     title: The Businessnumber Schema
                     default: ''
-                    example:
-                      - CP0001847
                     pattern: ^(.*)$
                   contacts:
                     type: array
@@ -2801,114 +1585,81 @@ paths:
                         email:
                           type: string
                           title: Email
-                          default: ''
-                          example:
-                            - abc123@mail.com
                           pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
-                          example:
-                            - '123'
                           pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
-                          example:
-                            - 111-222-3333
                           pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
-                          example:
-                            - Ring buzzer 123
                           pattern: ^(.*)$
                         postalCode:
                           type: string
                           title: Postal Code
                           default: ''
-                          example:
-                            - V1A 1A1
                           pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
-                          example:
-                            - CA
                           pattern: ^(.*)$
                         region:
                           type: string
                           title: Region
                           default: ''
-                          example:
-                            - British Columbia
                           pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
-                          example:
-                            - Victoria
                           pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
-                          example:
-                            - Unit 1
                           pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
-                          example:
-                            - 123 Roundabout Lane
                           pattern: ^(.*)$
                   corpType:
                     type: string
                     title: The Corptype Schema
                     default: ''
-                    example:
-                      - CP
                     pattern: ^(.*)$
                   created:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:11:31.303521+00:00'
                     pattern: ^(.*)$
                   modified:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:14:06.560862+00:00'
                     pattern: ^(.*)$
                   modifiedBy:
                     type: string
                     title: The Modifiedby Schema
                     default: ''
-                    example:
-                      - sbc-auth admin
                     pattern: ^(.*)$
                   name:
                     type: string
                     title: The Name Schema
                     default: ''
-                    example:
-                      - Business
                     pattern: ^(.*)$
                   passCodeClaimed:
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
-                    example:
-                      - false
                 required:
                   - businessIdentifier
                   - businessNumber
@@ -3109,6 +1860,7 @@ paths:
                       - view
                       - edit
                       - make_payment
+                    orgMembership: MEMBER
                 CP0000000:
                   value: {}
                 CP0002000:
@@ -3260,16 +2012,16 @@ paths:
         in: path
         required: true
         description: Account ID
-        example:
+        examples:
           example1:
-            value: 1234
+            value: '1234'
       - schema:
           type: string
         name: product_code
         in: path
         required: true
         description: Product code
-        example:
+        examples:
           example1:
             value: PPR
   '/orgs/{account_id}/authorizations':
@@ -3361,9 +2113,9 @@ paths:
         in: path
         required: true
         description: Corp Num/Incorporation Number of the entity
-        example:
+        examples:
           example1:
-            value: 1234
+            value: '1234'
   '/entities/{business_identifier}':
     parameters:
       - name: business_identifier
@@ -3402,15 +2154,11 @@ paths:
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
-                    example:
-                      - CP0001578
                     pattern: ^(.*)$
                   businessNumber:
                     type: string
                     title: The Businessnumber Schema
                     default: ''
-                    example:
-                      - CP0001847
                     pattern: ^(.*)$
                   contacts:
                     type: array
@@ -3422,114 +2170,81 @@ paths:
                         email:
                           type: string
                           title: Email
-                          default: ''
-                          example:
-                            - abc123@mail.com
                           pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
-                          example:
-                            - '123'
                           pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
-                          example:
-                            - 111-222-3333
                           pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
-                          example:
-                            - Ring buzzer 123
                           pattern: ^(.*)$
                         postalCode:
                           type: string
                           title: Postal Code
                           default: ''
-                          example:
-                            - V1A 1A1
                           pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
-                          example:
-                            - CA
                           pattern: ^(.*)$
                         region:
                           type: string
                           title: Region
                           default: ''
-                          example:
-                            - British Columbia
                           pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
-                          example:
-                            - Victoria
                           pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
-                          example:
-                            - Unit 1
                           pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
-                          example:
-                            - 123 Roundabout Lane
                           pattern: ^(.*)$
                   corpType:
                     type: string
                     title: The Corptype Schema
                     default: ''
-                    example:
-                      - CP
                     pattern: ^(.*)$
                   created:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:11:31.303521+00:00'
                     pattern: ^(.*)$
                   modified:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:14:06.560862+00:00'
                     pattern: ^(.*)$
                   modifiedBy:
                     type: string
                     title: The Modifiedby Schema
                     default: ''
-                    example:
-                      - sbc-auth admin
                     pattern: ^(.*)$
                   name:
                     type: string
                     title: The Name Schema
                     default: ''
-                    example:
-                      - Business
                     pattern: ^(.*)$
                   passCodeClaimed:
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
-                    example:
-                      - false
                 required:
                   - businessIdentifier
                   - businessNumber
@@ -3591,15 +2306,11 @@ paths:
                     type: string
                     title: The Businessidentifier Schema
                     default: ''
-                    example:
-                      - CP0001578
                     pattern: ^(.*)$
                   businessNumber:
                     type: string
                     title: The Businessnumber Schema
                     default: ''
-                    example:
-                      - CP0001847
                     pattern: ^(.*)$
                   contacts:
                     type: array
@@ -3611,114 +2322,81 @@ paths:
                         email:
                           type: string
                           title: Email
-                          default: ''
-                          example:
-                            - abc123@mail.com
                           pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                         phoneExtension:
                           type: string
                           title: Phone Extension
                           default: ''
-                          example:
-                            - '123'
                           pattern: ^(.*)$
                         phone:
                           type: string
                           title: Phone
                           default: ''
-                          example:
-                            - 111-222-3333
                           pattern: ^(.*)$
                         deliveryInstructions:
                           type: string
                           title: Delivery Instructions
                           default: ''
-                          example:
-                            - Ring buzzer 123
                           pattern: ^(.*)$
                         postalCode:
                           type: string
                           title: Postal Code
                           default: ''
-                          example:
-                            - V1A 1A1
                           pattern: ^(.*)$
                         country:
                           type: string
                           title: Country
                           default: ''
-                          example:
-                            - CA
                           pattern: ^(.*)$
                         region:
                           type: string
                           title: Region
                           default: ''
-                          example:
-                            - British Columbia
                           pattern: ^(.*)$
                         city:
                           type: string
                           title: City
                           default: ''
-                          example:
-                            - Victoria
                           pattern: ^(.*)$
                         streetAdditional:
                           type: string
                           title: Street Additional
                           default: ''
-                          example:
-                            - Unit 1
                           pattern: ^(.*)$
                         street:
                           type: string
                           title: Street
                           default: ''
-                          example:
-                            - 123 Roundabout Lane
                           pattern: ^(.*)$
                   corpType:
                     type: string
                     title: The Corptype Schema
                     default: ''
-                    example:
-                      - CP
                     pattern: ^(.*)$
                   created:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:11:31.303521+00:00'
                     pattern: ^(.*)$
                   modified:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:14:06.560862+00:00'
                     pattern: ^(.*)$
                   modifiedBy:
                     type: string
                     title: The Modifiedby Schema
                     default: ''
-                    example:
-                      - sbc-auth admin
                     pattern: ^(.*)$
                   name:
                     type: string
                     title: The Name Schema
                     default: ''
-                    example:
-                      - Business
                     pattern: ^(.*)$
                   passCodeClaimed:
                     type: boolean
                     title: The Passcodeclaimed Schema
                     default: false
-                    example:
-                      - false
                 required:
                   - businessIdentifier
                   - businessNumber
@@ -3790,101 +2468,32 @@ paths:
                   type: string
                   title: Business Identifier
                   default: ''
-                  example:
-                    - CP1234567
                   pattern: ^(.*)$
                 businessNumber:
                   type: string
                   title: Business Number
                   default: ''
-                  example:
-                    - 791861073BC0001
                   pattern: ^(.*)$
                 name:
                   type: string
                   title: Business Name
                   default: ''
-                  example:
-                    - 'Foobar, Inc.'
                   pattern: ^(.*)$
                 passCode:
                   type: string
                   title: Passcode
                   default: ''
-                  example:
-                    - '12345'
                   pattern: ^(.*)$
                 corpTypeCode:
                   type: string
                   title: corpTypeCode
                   default: ''
-                  example:
-                    - '12345'
                   pattern: ^(.*)$
               required:
                 - businessIdentifier
         description: ''
       summary: Create a new entity for the provided information
       description: Create a new entity for the provided information
-  '/api/v1/documents/{document_type}':
-    parameters:
-      - name: document_type
-        in: path
-        required: true
-        schema:
-          type: string
-    get:
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                title: document
-                type: object
-                properties:
-                  content:
-                    type: string
-                  type:
-                    type: string
-                  version_id:
-                    type: string
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  code:
-                    type: string
-                    description: Identifier representing the type of error that occurred.
-                  message:
-                    type: string
-                    description: Description of the error.
-                description: Contains details of an error that was encountered.
-      operationId: get_documents
-      tags:
-        - documents
-      description: Endpoint for get the latest terms of use document.
-      summary: Get document by type
   '/api/v1/codes/{code_type}':
     parameters:
       - name: code_type
@@ -4066,24 +2675,14 @@ servers:
   - url: 'https://auth-api.apps.silver.devops.gov.bc.ca/'
     description: Prod
 tags:
-  - name: Meta
-    description: Metadata
-  - name: token
-    description: Authentication System - Passcode login
-  - name: users
-    description: Endpoints for user profile management
-  - name: logout
-    description: Authentication System - Logout User
-  - name: entities
-    description: Entities
-  - name: orgs
-    description: Endpoints for organization management
-  - name: invitations
-    description: Endpoints for invitations management
-  - name: documents
-    description: Endpoints for document management
   - name: codes
-    description: Endpoints for get codes from database
+  - name: documents
+  - name: entities
+  - name: invitations
+  - name: Meta
+  - name: orgs
+  - name: token
+  - name: users
 components:
   schemas:
     codes:
@@ -4185,15 +2784,11 @@ components:
           type: string
           title: The Businessidentifier Schema
           default: ''
-          example:
-            - CP0001578
           pattern: ^(.*)$
         businessNumber:
           type: string
           title: The Businessnumber Schema
           default: ''
-          example:
-            - CP0001847
           pattern: ^(.*)$
         contacts:
           type: array
@@ -4205,114 +2800,81 @@ components:
               email:
                 type: string
                 title: Email
-                default: ''
-                example:
-                  - abc123@mail.com
                 pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
               phoneExtension:
                 type: string
                 title: Phone Extension
                 default: ''
-                example:
-                  - '123'
                 pattern: ^(.*)$
               phone:
                 type: string
                 title: Phone
                 default: ''
-                example:
-                  - 111-222-3333
                 pattern: ^(.*)$
               deliveryInstructions:
                 type: string
                 title: Delivery Instructions
                 default: ''
-                example:
-                  - Ring buzzer 123
                 pattern: ^(.*)$
               postalCode:
                 type: string
                 title: Postal Code
                 default: ''
-                example:
-                  - V1A 1A1
                 pattern: ^(.*)$
               country:
                 type: string
                 title: Country
                 default: ''
-                example:
-                  - CA
                 pattern: ^(.*)$
               region:
                 type: string
                 title: Region
                 default: ''
-                example:
-                  - British Columbia
                 pattern: ^(.*)$
               city:
                 type: string
                 title: City
                 default: ''
-                example:
-                  - Victoria
                 pattern: ^(.*)$
               streetAdditional:
                 type: string
                 title: Street Additional
                 default: ''
-                example:
-                  - Unit 1
                 pattern: ^(.*)$
               street:
                 type: string
                 title: Street
                 default: ''
-                example:
-                  - 123 Roundabout Lane
                 pattern: ^(.*)$
         corpType:
           type: string
           title: The Corptype Schema
           default: ''
-          example:
-            - CP
           pattern: ^(.*)$
         created:
           type: string
           title: The Created Schema
           default: ''
-          example:
-            - '2020-01-09T11:11:31.303521+00:00'
           pattern: ^(.*)$
         modified:
           type: string
           title: The Modified Schema
           default: ''
-          example:
-            - '2020-01-09T11:14:06.560862+00:00'
           pattern: ^(.*)$
         modifiedBy:
           type: string
           title: The Modifiedby Schema
           default: ''
-          example:
-            - sbc-auth admin
           pattern: ^(.*)$
         name:
           type: string
           title: The Name Schema
           default: ''
-          example:
-            - Business
           pattern: ^(.*)$
         passCodeClaimed:
           type: boolean
           title: The Passcodeclaimed Schema
           default: false
-          example:
-            - false
       required:
         - businessIdentifier
         - businessNumber
@@ -4347,36 +2909,26 @@ components:
           type: string
           title: Business Identifier
           default: ''
-          example:
-            - CP1234567
           pattern: ^(.*)$
         businessNumber:
           type: string
           title: Business Number
           default: ''
-          example:
-            - 791861073BC0001
           pattern: ^(.*)$
         name:
           type: string
           title: Business Name
           default: ''
-          example:
-            - 'Foobar, Inc.'
           pattern: ^(.*)$
         passCode:
           type: string
           title: Passcode
           default: ''
-          example:
-            - '12345'
           pattern: ^(.*)$
         corpTypeCode:
           type: string
           title: corpTypeCode
           default: ''
-          example:
-            - '12345'
           pattern: ^(.*)$
       required:
         - businessIdentifier
@@ -4387,15 +2939,11 @@ components:
           type: string
           title: Business Identifier
           default: ''
-          example:
-            - CP1234567
           pattern: ^(.*)$
         passCode:
           type: string
           title: Passcode
           default: ''
-          example:
-            - '12345'
           pattern: ^(.*)$
       required:
         - businessIdentifier
@@ -4419,10 +2967,6 @@ components:
             type: string
             title: The Items Schema
             default: ''
-            example:
-              - edit
-              - view
-              - make_payment
             pattern: ^(.*)$
     orgRequest:
       title: orgRequest
@@ -4431,17 +2975,11 @@ components:
         name:
           type: string
           title: Organization Name
-          default: ''
-          example:
-            - Foobar Inc.
           pattern: '^[^\s]+(\s+[^\s]+)*$'
         typeCode:
           type: string
           title: Organizational Type
           default: IMPLICIT
-          example:
-            - IMPLICIT
-            - EXPLICIT
           pattern: ^(.*)$
       required:
         - name
@@ -4461,50 +2999,36 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          example:
-            - '2020-01-09T11:13:59.293603+00:00'
           pattern: ^(.*)$
         email:
           type: string
           title: The Email Schema
           default: ''
-          example:
-            - service-account-sbc-auth-admin@placeholder.org
           pattern: ^(.*)$
         firstname:
           type: string
           title: The Firstname Schema
           default: ''
-          example:
-            - sbc-auth
           pattern: ^(.*)$
         keycloakGuid:
           type: string
           title: The Keycloakguid Schema
           default: ''
-          example:
-            - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
           pattern: ^(.*)$
         lastname:
           type: string
           title: The Lastname Schema
           default: ''
-          example:
-            - admin
           pattern: ^(.*)$
         modified:
           type: string
           title: The Modified Schema
           default: ''
-          example:
-            - '2020-01-09T11:13:59.295264+00:00'
           pattern: ^(.*)$
         userStatus:
           type: integer
           title: The Userstatus Schema
           default: 0
-          example:
-            - 1
         userTerms:
           title: userTerms
           type: object
@@ -4517,8 +3041,6 @@ components:
           type: string
           title: The Username Schema
           default: ''
-          example:
-            - service-account-sbc-auth-admin
           pattern: ^(.*)$
       required:
         - created
@@ -4542,50 +3064,36 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
-                - '2020-01-09T11:13:59.293603+00:00'
               pattern: ^(.*)$
             email:
               type: string
               title: The Email Schema
               default: ''
-              example:
-                - service-account-sbc-auth-admin@placeholder.org
               pattern: ^(.*)$
             firstname:
               type: string
               title: The Firstname Schema
               default: ''
-              example:
-                - sbc-auth
               pattern: ^(.*)$
             keycloakGuid:
               type: string
               title: The Keycloakguid Schema
               default: ''
-              example:
-                - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
               pattern: ^(.*)$
             lastname:
               type: string
               title: The Lastname Schema
               default: ''
-              example:
-                - admin
               pattern: ^(.*)$
             modified:
               type: string
               title: The Modified Schema
               default: ''
-              example:
-                - '2020-01-09T11:13:59.295264+00:00'
               pattern: ^(.*)$
             userStatus:
               type: integer
               title: The Userstatus Schema
               default: 0
-              example:
-                - 1
             userTerms:
               title: userTerms
               type: object
@@ -4598,8 +3106,6 @@ components:
               type: string
               title: The Username Schema
               default: ''
-              example:
-                - service-account-sbc-auth-admin
               pattern: ^(.*)$
           required:
             - created
@@ -4619,56 +3125,40 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
-                - '2020-01-09T13:49:45.244134+00:00'
               pattern: ^(.*)$
             created_by:
               type: string
               title: The Created_by Schema
               default: ''
-              example:
-                - sbc-auth admin
               pattern: ^(.*)$
             id:
               type: integer
               title: The Id Schema
               default: 0
-              example:
-                - 103
             modified:
               type: string
               title: The Modified Schema
               default: ''
-              example:
-                - '2020-01-09T13:49:45.244148+00:00'
               pattern: ^(.*)$
             name:
               type: string
               title: The Name Schema
               default: ''
-              example:
-                - AOT
               pattern: ^(.*)$
             orgType:
               type: string
               title: The Orgtype Schema
               default: ''
-              example:
-                - IMPLICIT
               pattern: ^(.*)$
             org_status:
               type: string
               title: The Org_status Schema
               default: ''
-              example:
-                - ACTIVE
               pattern: ^(.*)$
             preferred_payment:
               type: string
               title: The Preferred_payment Schema
               default: ''
-              example:
-                - CC
               pattern: ^(.*)$
             modified_by:
               type: string
@@ -4695,49 +3185,35 @@ components:
           type: string
           title: The Created Schema
           default: ''
-          example:
-            - '2020-01-09T13:49:45.244134+00:00'
           pattern: ^(.*)$
         createdBy:
           type: string
           title: The Created_by Schema
           default: ''
-          example:
-            - sbc-auth admin
           pattern: ^(.*)$
         id:
           type: integer
           title: The Id Schema
           default: 0
-          example:
-            - 103
         modified:
           type: string
           title: The Modified Schema
           default: ''
-          example:
-            - '2020-01-09T13:49:45.244148+00:00'
           pattern: ^(.*)$
         name:
           type: string
           title: The Name Schema
           default: ''
-          example:
-            - AOT
           pattern: ^(.*)$
         orgType:
           type: string
           title: The Orgtype Schema
           default: ''
-          example:
-            - IMPLICIT
           pattern: ^(.*)$
         orgStatus:
           type: string
           title: The Org_status Schema
           default: ''
-          example:
-            - ACTIVE
           pattern: ^(.*)$
         businessName:
           type: string
@@ -4748,9 +3224,7 @@ components:
         mailingAddress:
           $ref: '#/components/schemas/contact'
       required:
-        - created
         - id
-        - modified
         - name
         - orgType
         - orgStatus
@@ -4762,8 +3236,6 @@ components:
           type: string
           title: The Orgmembership Schema
           default: ''
-          example:
-            - OWNER
           pattern: ^(.*)$
         roles:
           type: array
@@ -4772,14 +3244,7 @@ components:
             type: string
             title: The Items Schema
             default: ''
-            example:
-              - edit
-              - view
-              - make_payment
             pattern: ^(.*)$
-      required:
-        - orgMembership
-        - roles
     affiliation:
       title: affiliation
       type: object
@@ -4792,15 +3257,11 @@ components:
               type: string
               title: The Businessidentifier Schema
               default: ''
-              example:
-                - CP0001578
               pattern: ^(.*)$
             businessNumber:
               type: string
               title: The Businessnumber Schema
               default: ''
-              example:
-                - CP0001847
               pattern: ^(.*)$
             contacts:
               type: array
@@ -4812,114 +3273,81 @@ components:
                   email:
                     type: string
                     title: Email
-                    default: ''
-                    example:
-                      - abc123@mail.com
                     pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
                   phoneExtension:
                     type: string
                     title: Phone Extension
                     default: ''
-                    example:
-                      - '123'
                     pattern: ^(.*)$
                   phone:
                     type: string
                     title: Phone
                     default: ''
-                    example:
-                      - 111-222-3333
                     pattern: ^(.*)$
                   deliveryInstructions:
                     type: string
                     title: Delivery Instructions
                     default: ''
-                    example:
-                      - Ring buzzer 123
                     pattern: ^(.*)$
                   postalCode:
                     type: string
                     title: Postal Code
                     default: ''
-                    example:
-                      - V1A 1A1
                     pattern: ^(.*)$
                   country:
                     type: string
                     title: Country
                     default: ''
-                    example:
-                      - CA
                     pattern: ^(.*)$
                   region:
                     type: string
                     title: Region
                     default: ''
-                    example:
-                      - British Columbia
                     pattern: ^(.*)$
                   city:
                     type: string
                     title: City
                     default: ''
-                    example:
-                      - Victoria
                     pattern: ^(.*)$
                   streetAdditional:
                     type: string
                     title: Street Additional
                     default: ''
-                    example:
-                      - Unit 1
                     pattern: ^(.*)$
                   street:
                     type: string
                     title: Street
                     default: ''
-                    example:
-                      - 123 Roundabout Lane
                     pattern: ^(.*)$
             corpType:
               type: string
               title: The Corptype Schema
               default: ''
-              example:
-                - CP
               pattern: ^(.*)$
             created:
               type: string
               title: The Created Schema
               default: ''
-              example:
-                - '2020-01-09T11:11:31.303521+00:00'
               pattern: ^(.*)$
             modified:
               type: string
               title: The Modified Schema
               default: ''
-              example:
-                - '2020-01-09T11:14:06.560862+00:00'
               pattern: ^(.*)$
             modifiedBy:
               type: string
               title: The Modifiedby Schema
               default: ''
-              example:
-                - sbc-auth admin
               pattern: ^(.*)$
             name:
               type: string
               title: The Name Schema
               default: ''
-              example:
-                - Business
               pattern: ^(.*)$
             passCodeClaimed:
               type: boolean
               title: The Passcodeclaimed Schema
               default: false
-              example:
-                - false
           required:
             - businessIdentifier
             - businessNumber
@@ -4964,56 +3392,40 @@ components:
               type: string
               title: The Created Schema
               default: ''
-              example:
-                - '2020-01-09T13:49:45.244134+00:00'
               pattern: ^(.*)$
             created_by:
               type: string
               title: The Created_by Schema
               default: ''
-              example:
-                - sbc-auth admin
               pattern: ^(.*)$
             id:
               type: integer
               title: The Id Schema
               default: 0
-              example:
-                - 103
             modified:
               type: string
               title: The Modified Schema
               default: ''
-              example:
-                - '2020-01-09T13:49:45.244148+00:00'
               pattern: ^(.*)$
             name:
               type: string
               title: The Name Schema
               default: ''
-              example:
-                - AOT
               pattern: ^(.*)$
             orgType:
               type: string
               title: The Orgtype Schema
               default: ''
-              example:
-                - IMPLICIT
               pattern: ^(.*)$
             org_status:
               type: string
               title: The Org_status Schema
               default: ''
-              example:
-                - ACTIVE
               pattern: ^(.*)$
             preferred_payment:
               type: string
               title: The Preferred_payment Schema
               default: ''
-              example:
-                - CC
               pattern: ^(.*)$
             modified_by:
               type: string
@@ -5034,15 +3446,11 @@ components:
           type: string
           title: The Expireson Schema
           default: ''
-          example:
-            - '2020-01-16T13:55:05.960809+00:00'
           pattern: ^(.*)$
         id:
           type: integer
           title: The Id Schema
           default: 0
-          example:
-            - 30
         membership:
           type: array
           title: The Membership Schema
@@ -5058,50 +3466,36 @@ components:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:13:59.293603+00:00'
                     pattern: ^(.*)$
                   email:
                     type: string
                     title: The Email Schema
                     default: ''
-                    example:
-                      - service-account-sbc-auth-admin@placeholder.org
                     pattern: ^(.*)$
                   firstname:
                     type: string
                     title: The Firstname Schema
                     default: ''
-                    example:
-                      - sbc-auth
                     pattern: ^(.*)$
                   keycloakGuid:
                     type: string
                     title: The Keycloakguid Schema
                     default: ''
-                    example:
-                      - a8626cd0-09bd-4a7c-8454-481c04bcc3e0
                     pattern: ^(.*)$
                   lastname:
                     type: string
                     title: The Lastname Schema
                     default: ''
-                    example:
-                      - admin
                     pattern: ^(.*)$
                   modified:
                     type: string
                     title: The Modified Schema
                     default: ''
-                    example:
-                      - '2020-01-09T11:13:59.295264+00:00'
                     pattern: ^(.*)$
                   userStatus:
                     type: integer
                     title: The Userstatus Schema
                     default: 0
-                    example:
-                      - 1
                   userTerms:
                     title: userTerms
                     type: object
@@ -5114,8 +3508,6 @@ components:
                     type: string
                     title: The Username Schema
                     default: ''
-                    example:
-                      - service-account-sbc-auth-admin
                     pattern: ^(.*)$
                 required:
                   - created
@@ -5135,15 +3527,11 @@ components:
                     type: string
                     title: The Created Schema
                     default: ''
-                    example:
-                      - '2020-01-09T13:49:45.244134+00:00'
                     pattern: ^(.*)$
                   created_by:
                     type: string
                     title: The Created_by Schema
                     default: ''
-                    example:
-                      - sbc-auth admin
                     pattern: ^(.*)$
                   id:
                     type: integer
