@@ -1143,16 +1143,10 @@ paths:
                 name:
                   type: string
                   title: Organization Name
-                  examples:
-                    - Foobar Inc.
                   pattern: '^[^\s]+(\s+[^\s]+)*$'
                 typeCode:
                   type: string
                   title: Organizational Type
-                  default: IMPLICIT
-                  example:
-                    - IMPLICIT
-                    - EXPLICIT
                   pattern: ^(.*)$
               required:
                 - name
@@ -1304,38 +1298,12 @@ paths:
         in: query
         required: true
         description: Corp Num/Incorporation Number of the entity
-        examples:
-          example1:
-            value: CP0001234
-          CP0002000:
-            value: CP0002000
-  /logout:
-    post:
-      responses:
-        '200':
-          description: Success
-          headers:
-            X-Application-Context:
-              schema:
-                type: string
-              description: X-Application-Context
-            Access-Control-Allow-Origin:
-              schema:
-                type: string
-              description: Access-Control-Allow-Origin
-            Access-Control-Allow-Methods:
-              schema:
-                type: string
-              description: Access-Control-Allow-Methods
-            Access-Control-Allow-Headers:
-              schema:
-                type: string
-              description: Access-Control-Allow-Headers
-      operationId: post_logout
-      tags:
-        - logout
-      summary: Logout user from keycloak by refresh token.
-      description: Logout user from keycloak by refresh token.
+      examples:
+        example1:
+          value: CP0001234
+        CP0002000:
+          value: CP0002000
+  
   '/invitations/{invitation_id}':
     parameters:
       - name: invitation_id
