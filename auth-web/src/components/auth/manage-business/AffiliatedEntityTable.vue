@@ -10,6 +10,7 @@
         :headers="getHeaders"
         :items="businesses"
         :height="getMaxHeight"
+        :custom-sort="customSort"
         fixed-header
         disable-pagination
         hide-default-footer
@@ -33,7 +34,9 @@
             <td v-if="showCol(headers[1].text)">{{ number(item) }}</td>
             <td v-if="showCol(headers[2].text)" class="type-col">
               <span class="header"><strong>{{ type(item) }}</strong></span><br>
-              <span v-if="isNameRequest(item.corpType.code)">{{ typeDescription(item.nameRequest.legalType) }}</span>
+              <span v-if="isNameRequest(item.corpType.code) && item.nameRequest">
+                {{ typeDescription(item.nameRequest.legalType) }}
+              </span>
             </td>
             <td v-if="showCol(headers[3].text)">{{ status(item) }}</td>
             <td v-if="showCol(headers[4].text)">{{ folio(item) }}</td>
@@ -217,7 +220,6 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Returns the identifier for the affiliation */
   private number (item: Business): string {
     switch (true) {
-      // This case is subject to change once the NR Number is available in the Affiliation Response ALWAYS
       case (this.isNumberedIncorporationApplication(item)):
         return 'Pending'
       case (this.isTemporaryBusinessRegistration(item.corpType.code)):
@@ -249,7 +251,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Returns the status for the affiliation */
   private status (item: Business): string {
     switch (true) {
-      case (this.isNameRequest(item.corpType.code)):
+      case (this.isNameRequest(item.corpType.code) && !!item.nameRequest):
         // Format name request state value for Display
         return NrDisplayStates[NrState[item.nameRequest.state]]
       case this.isTemporaryBusinessRegistration(item.corpType.code):
@@ -371,6 +373,75 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return this.selectedColumns.includes(col)
   }
 
+  /** Custom sorting method to handle consolidated Nr and Affiliations data. */
+  private customSort (items, index, isDesc): any {
+    items.sort((a, b) => {
+      switch (index[0]) {
+        case 'lastModified':
+          let dateA, dateB
+          if (a.lastModified) {
+            dateA = a.lastModified
+          } else {
+            dateA = a.modified
+          }
+          if (b.lastModified) {
+            dateB = b.lastModified
+          } else {
+            dateB = b.modified
+          }
+
+          if (!isDesc[0]) {
+            return +new Date(dateB) - +new Date(dateA)
+          } else {
+            return +new Date(dateA) - +new Date(dateB)
+          }
+        case 'name':
+          let nameA, nameB
+          if (a.nameRequest) {
+            nameA = a.nameRequest?.names[0].name
+          } else {
+            nameA = this.isNumberedIncorporationApplication(a) ? 'Numbered Benefit Company' : a.name
+          }
+          if (b.nameRequest) {
+            nameB = b.nameRequest?.names[0].name
+          } else {
+            nameB = this.isNumberedIncorporationApplication(b) ? 'Numbered Benefit Company' : b.name
+          }
+
+          if (!isDesc[0]) {
+            return nameA.toLowerCase().localeCompare(nameB.toLowerCase())
+          } else {
+            return nameB.toLowerCase().localeCompare(nameA.toLowerCase())
+          }
+        case 'number':
+          if (!isDesc[0]) {
+            return this.number(a).toLowerCase().localeCompare(this.number(b).toLowerCase())
+          } else {
+            return this.number(b).toLowerCase().localeCompare(this.number(a).toLowerCase())
+          }
+        case 'type':
+          if (!isDesc[0]) {
+            return this.type(a).toLowerCase().localeCompare(this.type(b).toLowerCase())
+          } else {
+            return this.type(b).toLowerCase().localeCompare(this.type(a).toLowerCase())
+          }
+        case 'status':
+          if (!isDesc[0]) {
+            return this.status(a).toLowerCase().localeCompare(this.status(b).toLowerCase())
+          } else {
+            return this.status(b).toLowerCase().localeCompare(this.status(a).toLowerCase())
+          }
+        case 'modifiedBy':
+          if (!isDesc[0]) {
+            return this.modifiedBy(a).toLowerCase().localeCompare(this.modifiedBy(b).toLowerCase())
+          } else {
+            return this.modifiedBy(b).toLowerCase().localeCompare(this.modifiedBy(a).toLowerCase())
+          }
+      }
+    })
+    return items
+  }
+
   /** Emit business/nr information to be unaffiliated. */
   @Emit()
   removeBusiness (business: Business): RemoveBusinessPayload {
@@ -384,13 +455,13 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   @Watch('selectedColumns', { immediate: true })
   private applyHeaders (): void {
     this.headers = [
-      { text: 'Business Name', align: 'start', value: 'name', sortable: false, show: true },
-      { text: 'Number', value: 'number', sortable: false, show: this.showCol('Number') },
-      { text: 'Type', value: 'type', sortable: false, show: this.showCol('Type') },
-      { text: 'Status', value: 'status', sortable: false, show: this.showCol('Status') },
+      { text: 'Business Name', align: 'start', value: 'name', sortable: true, show: true },
+      { text: 'Number', value: 'number', sortable: true, show: this.showCol('Number') },
+      { text: 'Type', value: 'type', sortable: true, show: this.showCol('Type') },
+      { text: 'Status', value: 'status', sortable: true, show: this.showCol('Status') },
       { text: 'Folio', value: 'folio', sortable: false, show: this.showCol('Folio') },
-      { text: 'Last Modified', value: 'lastModified', sortable: false, show: this.showCol('Last Modified') },
-      { text: 'Modified By', value: 'modifiedBy', sortable: false, show: this.showCol('Modified By') },
+      { text: 'Last Modified', value: 'lastModified', sortable: true, show: this.showCol('Last Modified') },
+      { text: 'Modified By', value: 'modifiedBy', sortable: true, show: this.showCol('Modified By') },
       { text: 'Actions', align: 'end', value: 'action', sortable: false, show: true }
     ]
   }
@@ -432,7 +503,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       }
 
       td {
-        height: 90px !important;
+        height: 80px !important;
         color: $gray7;
         line-height: 1.125rem;
       }

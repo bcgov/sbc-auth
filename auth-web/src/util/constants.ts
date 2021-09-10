@@ -137,7 +137,8 @@ export enum CorpType {
     COOP = 'CP',
     NEW_BUSINESS = 'TMP',
     BCOMP = 'BEN',
-    NAME_REQUEST = 'NR'
+    NAME_REQUEST = 'NR',
+    TEMP = 'TMP'
 }
 
 export enum NrState {
