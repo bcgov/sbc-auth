@@ -15,6 +15,7 @@
 from typing import List
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
 from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
@@ -41,9 +42,11 @@ class Task(BaseModel):
     # org id for pending product subscriptions
     related_to = Column(ForeignKey('users.id', ondelete='SET NULL',
                                    name='related_to_fkey'), nullable=False)
+    # python list of remarks <- -> postgres array of remarks: seamless transformation
+    remarks = Column(ARRAY(String, dimensions=1), nullable=True)
+
     # task that is assigned to the particular user
     user = relationship('User', foreign_keys=[related_to], lazy='select')
-    remarks = Column(String(100), nullable=True)
 
     @classmethod
     def fetch_tasks(cls, task_type: str, task_status: List[str],  # pylint:disable=too-many-arguments
