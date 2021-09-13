@@ -31,7 +31,7 @@ def upgrade():
 
     for task in task_list:
         task_id = task.id
-        remarks = task.remarks.split(',')
+        remarks = task.remarks.split(',')  # to handle edge case, where we upgrade, downgrade and then upgrade again
         # Now updating the new remarks value back in the table
         update_sql = text("UPDATE tasks SET remarks = :remarks where id = :task_id") \
             .params(
