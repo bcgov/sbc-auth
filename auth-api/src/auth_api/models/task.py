@@ -42,7 +42,7 @@ class Task(BaseModel):
     # org id for pending product subscriptions
     related_to = Column(ForeignKey('users.id', ondelete='SET NULL',
                                    name='related_to_fkey'), nullable=False)
-    # python list of remarks <- -> postgres array of remarks: seamless transformation
+    # python list of remarks <- -> postgres array of remarks
     remarks = Column(ARRAY(String, dimensions=1), nullable=True)
 
     # task that is assigned to the particular user
