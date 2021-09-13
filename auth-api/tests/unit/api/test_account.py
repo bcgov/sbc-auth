@@ -74,8 +74,7 @@ def test_authorizations_with_multiple_accounts_returns_200(client, jwt, session)
     factory_membership_model(user.id, org.id)
     factory_product_model(org.id)
 
-    org2 = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
-                             payment_type_info=None)
+    org2 = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit)
     factory_membership_model(user.id, org.id)
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)

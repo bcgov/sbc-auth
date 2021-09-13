@@ -24,7 +24,7 @@ from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import Affiliation as AffiliationService
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgTypeInfo
+from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo
 from tests.utilities.factory_utils import factory_entity_service, factory_org_service, patch_token_info
 
 
@@ -123,7 +123,7 @@ def test_create_affiliation_with_passcode_no_passcode_input(session, auth_mock):
 
 
 def test_create_affiliation_exists(session, auth_mock):  # pylint:disable=unused-argument
-    """Assert that an Affiliation can not be created affiliation exists."""
+    """Assert that multiple affiliation is allowed."""
     entity_service1 = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
     entity_dictionary1 = entity_service1.as_dict()
     business_identifier1 = entity_dictionary1['business_identifier']
@@ -132,14 +132,18 @@ def test_create_affiliation_exists(session, auth_mock):  # pylint:disable=unused
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
 
+    org_service_2 = factory_org_service(org_info=TestOrgInfo.org2)
+    org_dictionary_2 = org_service_2.as_dict()
+    org_id_2 = org_dictionary_2['id']
+
     pass_code = TestEntityInfo.entity_lear_mock['passCode']
 
     # create first row in affiliation table
     AffiliationService.create_affiliation(org_id, business_identifier1, pass_code)
 
-    with pytest.raises(BusinessException) as exception:
-        AffiliationService.create_affiliation(org_id, business_identifier1, pass_code)
-    assert exception.value.code == Error.ALREADY_CLAIMED_PASSCODE.name
+    affiliation = AffiliationService.create_affiliation(org_id_2, business_identifier1, pass_code)
+
+    assert affiliation
 
 
 def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument
