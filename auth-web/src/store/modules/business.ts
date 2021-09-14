@@ -1,12 +1,14 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import {
-  Business,
-  BusinessRequest,
-  FolioNumberload,
-  LoginPayload,
-  PasscodeResetLoad
-} from '@/models/business'
-import { CorpType, FilingTypes, LegalTypes, NrConditionalStates, NrState, SessionStorageKeys } from '@/util/constants'
+  CorpType,
+  FilingTypes,
+  LearFilingTypes,
+  LegalTypes,
+  NrConditionalStates,
+  NrState,
+  SessionStorageKeys
+} from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 
@@ -68,9 +70,19 @@ export default class BusinessModule extends VuexModule {
                   name: approvedName()
                 })
 
-                const isIaEnabled = response.data.state === NrState.APPROVED ||
-                    (response.data.state === NrState.CONDITIONAL &&
-                    [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag))
+                // Is a supported IA
+                const isApprovedForIa =
+                  response.data.actions.some(e => e.filingName === LearFilingTypes.INCORPORATION) &&
+                  response.data.state === NrState.APPROVED
+
+                // Conditional State Checks
+                const isConditionallyApproved =
+                  response.data.state === NrState.CONDITIONAL &&
+                  [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag)
+
+                // Is approved for one stop registration
+                const isApprovedForRegistration =
+                    response.data.actions.some(e => e.filingName === LearFilingTypes.REGISTRATION)
 
                 entity.nameRequest = {
                   names: response.data.names,
@@ -80,7 +92,7 @@ export default class BusinessModule extends VuexModule {
                   state: response.data.state,
                   applicantEmail: response.data.applicants?.emailAddress,
                   applicantPhone: response.data.applicants?.phoneNumber,
-                  enableIncorporation: isIaEnabled,
+                  enableIncorporation: isApprovedForIa || isConditionallyApproved || isApprovedForRegistration,
                   folioNumber: response.data.folioNumber,
                   target: response.data.target
                 }
