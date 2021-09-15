@@ -150,7 +150,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
                                                               f'{org.id}')
         data = {
             'remarks': task_model.remarks,
-            'lengthRemarks': len(task_model.remarks),
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': task_model.relationship_id,
             'emailAddresses': admin_email,
