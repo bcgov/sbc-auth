@@ -77,9 +77,9 @@ describe('AccountStatus.vue', () => {
   })
 
   it('renders remarks properly', () => {
-    expect(wrapper.find('[data-test="text-number-0"]').text()).toBe('00.')
+    expect(wrapper.find('[data-test="text-number-0"]').text()).toBe('01.')
     expect(wrapper.find('[data-test="text-remark-0"]').text()).toBe('Affidavit is missing seal')
-    expect(wrapper.find('[data-test="text-number-1"]').text()).toBe('01.')
+    expect(wrapper.find('[data-test="text-number-1"]').text()).toBe('02.')
     expect(wrapper.find('[data-test="text-remark-1"]').text()).toBe('Affidavit is blank / affidavit is not attached')
   })
 })
