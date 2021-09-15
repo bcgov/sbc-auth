@@ -13,7 +13,7 @@
         <ul class="remark-display pl-0">
           <li v-for="(remark, index) in accountOnHoldRemarks"
           :key="index" class="pb-1">
-            <span class="font-weight-bold" :data-test="getIndexedTag('text-number', index)"> {{ formatNumberToTwoPlaces(index) }}. </span>
+            <span class="font-weight-bold" :data-test="getIndexedTag('text-number', index)"> {{ formatNumberToTwoPlaces(index+1) }}. </span>
             <span class="pl-1" :data-test="getIndexedTag('text-remark', index)"> {{ remark }} </span>
           </li>
         </ul>

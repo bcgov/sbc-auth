@@ -44,6 +44,11 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         'logo_url': logo_url,
         **kwargs
     }
+
+    # if bceid resubmit request, get remarks length and pass along in template
+    length_remarks = len(kwargs.get('remarks'))
+    jinja_kwargs['length_remarks'] = length_remarks
+
     html_out = jnja_template.render(jinja_kwargs)
 
     return {
