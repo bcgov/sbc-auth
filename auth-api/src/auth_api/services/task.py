@@ -149,7 +149,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         create_account_signin_route = urllib.parse.quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
                                                               f'{org.id}')
         data = {
-            'remark': task_model.remarks,
+            'remarks': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': task_model.relationship_id,
             'emailAddresses': admin_email,

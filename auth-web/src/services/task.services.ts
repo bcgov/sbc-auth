@@ -41,7 +41,8 @@ export default class TaskService {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.REJECTED })
   }
 
-  static async onHoldPendingTask (taskId, remark:string): Promise<AxiosResponse> {
-    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { status: TaskRelationshipStatus.HOLD, remark, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
+  static async onHoldPendingTask (taskId, remarks:string[]): Promise<AxiosResponse> {
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
+      { status: TaskRelationshipStatus.HOLD, remarks, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
   }
 }
