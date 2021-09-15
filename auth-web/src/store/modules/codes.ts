@@ -10,10 +10,10 @@ export default class CodesModule extends VuexModule {
     businessTypeCodes: Code[] = []
     onholdReasonCodes: Code[] = []
 
-    private suspensionReasonCodeTable = 'suspension_reason_codes'
-    private businessSizeCodeTable = 'business_size_codes'
-    private businessTypeCodeTable = 'business_type_codes'
-    private onholdReasonCodeTable = 'staff_remark_codes'
+    suspensionReasonCodeTable = 'suspension_reason_codes'
+    businessSizeCodeTable = 'business_size_codes'
+    businessTypeCodeTable = 'business_type_codes'
+    onholdReasonCodeTable = 'staff_remark_codes'
 
     @Mutation
     public setSuspensionReasonCodes (codes: Code[]) {
@@ -65,8 +65,7 @@ export default class CodesModule extends VuexModule {
     public async getOnholdReasonCodes (): Promise<Code[]> {
       const response = await CodesService.getCodes(this.onholdReasonCodeTable)
       if (response && response.data && response.status === 200) {
-        const onholdReasons = response.data
-        return onholdReasons
+        return response.data
       }
     }
 }

@@ -265,9 +265,8 @@ export default class CommonUtils {
   }
 
   // format number to two places - for eg 2 => 02, 10 => 10.
-  static formatNumberToTwoPlaces (value: number): string {
-    const onesPlace = Math.floor(value % 10).toString()
-    const tensPlace = Math.floor(value / 10 % 10).toString()
-    return `${tensPlace}${onesPlace}`
+  static formatNumberToTwoPlaces (index: number): string {
+    const stringIndexValue: string = index.toString()
+    return stringIndexValue.padStart(2, '0')
   }
 }

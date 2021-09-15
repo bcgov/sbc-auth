@@ -119,10 +119,10 @@ export default class AccessRequestModal extends Vue {
   @Prop({ default: '' }) private orgName: string
   @Prop({ default: '' }) private accountType: string
   @Prop({ default: '' }) private taskName: string
-  @Prop() private onholdReasonCodes: []
+  @Prop() public onholdReasonCodes: []
 
-  private onholdReasons: any[] = []
-  private accountToBeOnholdOrRejected: string = ''
+  public onholdReasons: any[] = []
+  public accountToBeOnholdOrRejected = ''
 
   OnholdOrRejectCode = OnholdOrRejectCode
 

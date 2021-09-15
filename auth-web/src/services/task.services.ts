@@ -42,6 +42,7 @@ export default class TaskService {
   }
 
   static async onHoldPendingTask (taskId, remarks:string[]): Promise<AxiosResponse> {
-    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { status: TaskRelationshipStatus.HOLD, remarks, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
+      { status: TaskRelationshipStatus.HOLD, remarks, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
   }
 }
