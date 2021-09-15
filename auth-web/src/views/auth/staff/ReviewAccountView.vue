@@ -155,7 +155,7 @@ export default class ReviewAccountView extends Vue {
   @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
   @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
 
-  @CodesModule.Action('getOnholdReasonCodes') private getOnholdReasonCodes!: () => Promise<Code[]>
+  @CodesModule.Action('getOnholdReasonCodes') public getOnholdReasonCodes!: () => Promise<Code[]>
   @CodesModule.State('onholdReasonCodes') private readonly onholdReasonCodes!: Code[]
 
   private staffStore = getModule(StaffModuleStore, this.$store)
