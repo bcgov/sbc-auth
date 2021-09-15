@@ -30,11 +30,8 @@
                             <ul style="list-style-type:none; padding-left: 0;">
                                 {%for i in range(0, length_remarks)%}
                                     <li style="font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                                        <span style="font-weight: bold; font-size: 0px;">
-                                            {% if i <= 9 %}
-                                            <span style="font-size: 16px;">0</span>
-                                            {% endif %}
-                                            <span style="font-size: 16px;">{{i+1}}. </span>
+                                        <span style="font-weight: bold; font-size: 16px;">
+                                            {{'%02d' % (i+1)}}.
                                         </span>
                                         <span>{{remarks[i]}}</span>
                                     </li>

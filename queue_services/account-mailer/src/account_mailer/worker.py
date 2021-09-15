@@ -220,6 +220,7 @@ async def process_event(event_message: dict, flask_app):
                 'product_name': email_msg.get('productName'),
                 'remarks': email_msg.get('remarks'),
                 'applicationDate': email_msg.get('applicationDate'),
+                'length_remarks': email_msg.get('lengthRemarks')
             }
 
             org_id = email_msg.get('accountId')
