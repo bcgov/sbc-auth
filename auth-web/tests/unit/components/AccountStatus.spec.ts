@@ -1,8 +1,7 @@
-
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 import AccountStatus from '@/components/auth/staff/review-task/AccountStatus.vue'
-
+import { TaskStatus } from '@/util/constants'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -30,9 +29,10 @@ describe('AccountStatus.vue', () => {
       'relationshipId': 3674,
       'relationshipStatus': 'PENDING_STAFF_REVIEW',
       'relationshipType': 'PRODUCT',
-      'status': 'OPEN',
+      'status': TaskStatus.HOLD,
       'type': 'Wills Registry',
-      'user': 32
+      'user': 32,
+      'remarks': ['Affidavit is missing seal', 'Affidavit is blank / affidavit is not attached']
     }
 
   }
@@ -74,5 +74,12 @@ describe('AccountStatus.vue', () => {
 
   it('renders proper header content', () => {
     expect(wrapper.find('h2').text()).toBe(`${props.tabNumber}. ${props.title}`)
+  })
+
+  it('renders remarks properly', () => {
+    expect(wrapper.find('[data-test="text-number-0"]').text()).toBe('00.')
+    expect(wrapper.find('[data-test="text-remark-0"]').text()).toBe('Affidavit is missing seal')
+    expect(wrapper.find('[data-test="text-number-1"]').text()).toBe('01.')
+    expect(wrapper.find('[data-test="text-remark-1"]').text()).toBe('Affidavit is blank / affidavit is not attached')
   })
 })

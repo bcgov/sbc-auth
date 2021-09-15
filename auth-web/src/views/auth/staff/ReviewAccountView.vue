@@ -78,7 +78,7 @@
           @after-confirm-action="goBack()"
           :accountType="taskRelationshipType"
           :taskName="task.type"
-          :rejectReasonCodes="rejectReasonCodes"
+          :onholdReasonCodes="onholdReasonCodes"
           />
 
       </v-card>
@@ -87,8 +87,8 @@
 </template>
 
 <script lang="ts">
-import { AccountFee, AccountFeeDTO, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { DisplayModeValues, Pages, RejectCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
+import { DisplayModeValues, OnholdOrRejectCode, Pages, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -155,8 +155,8 @@ export default class ReviewAccountView extends Vue {
   @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
   @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
 
-  @CodesModule.Action('getRejectReasonCodes') private getRejectReasonCodes!: () => Promise<Code[]>
-  @CodesModule.State('rejectReasonCodes') private readonly rejectReasonCodes!: Code[]
+  @CodesModule.Action('getOnholdReasonCodes') private getOnholdReasonCodes!: () => Promise<Code[]>
+  @CodesModule.State('onholdReasonCodes') private readonly onholdReasonCodes!: Code[]
 
   private staffStore = getModule(StaffModuleStore, this.$store)
   public isLoading = true
@@ -243,8 +243,8 @@ export default class ReviewAccountView extends Vue {
         }
       }
       this.isBCEIDAccountReview = this.task.type === TaskType.NEW_ACCOUNT_STAFF_REVIEW
-      if (this.isBCEIDAccountReview && (!this.rejectReasonCodes || this.rejectReasonCodes.length === 0)) {
-        await this.getRejectReasonCodes()
+      if (this.isBCEIDAccountReview && (!this.onholdReasonCodes || this.onholdReasonCodes.length === 0)) {
+        await this.getOnholdReasonCodes()
       }
     } catch (ex) {
       // eslint-disable-next-line no-console
@@ -287,7 +287,7 @@ export default class ReviewAccountView extends Vue {
   }
 
   private async saveSelection (reason): Promise<void> {
-    const { isValidForm, rejectReason } = reason
+    const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
 
     if (isValidForm) {
       this.isSaving = true
@@ -297,13 +297,13 @@ export default class ReviewAccountView extends Vue {
       // 1. by clicking reject for normal flow.
       // 2. by selecting remark as Reject account ,(check by using code)
       // both cases we need to call reject API than hold
-      const isRejecting = this.isRejectModal || (rejectReason.code === RejectCode.REJECTACCOUNT_CODE)
+      const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
       try {
         if (isApprove) {
           await this.approveAccountUnderReview(this.task)
         } else {
         // both reject and hold will happen here passing second argument to determine which call need to make
-          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remark: rejectReason.desc })
+          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remarks: onholdReasons })
         }
         if (this.task.type === TaskType.GOVM_REVIEW) {
           await this.createAccountFees(this.task.relationshipId)

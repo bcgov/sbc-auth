@@ -8,9 +8,15 @@
           </v-col>
     </v-row>
     <v-row v-if="isAccountOnHold">
-      <v-col class="col-12 col-sm-5 py-2">Reason</v-col>
+      <v-col class="col-12 col-sm-5 py-2">Reason(s)</v-col>
       <v-col class="py-2">
-          {{ accountOnHoldRemarks }}
+        <ul class="remark-display pl-0">
+          <li v-for="(remark, index) in accountOnHoldRemarks"
+          :key="index" class="pb-1">
+            <span class="font-weight-bold" :data-test="getIndexedTag('text-number', index)"> {{ formatNumberToTwoPlaces(index) }}. </span>
+            <span class="pl-1" :data-test="getIndexedTag('text-remark', index)"> {{ remark }} </span>
+          </li>
+        </ul>
       </v-col>
     </v-row>
     <v-row v-if="!isPendingReviewPage">
@@ -33,6 +39,7 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
+import CommonUtils from '@/util/common-util'
 import { Task } from '@/models/Task'
 import moment from 'moment'
 
@@ -43,6 +50,8 @@ export default class AccountStatusTab extends Vue {
   @Prop({ default: 'Account Status' }) private title: string
   @Prop({ default: {} }) taskDetails: Task
   public TaskRelationshipStatusEnum = TaskRelationshipStatus
+
+  public formatNumberToTwoPlaces = CommonUtils.formatNumberToTwoPlaces
 
   private get statusLabel (): string {
     switch (this.taskDetails.relationshipStatus) {
@@ -66,8 +75,17 @@ export default class AccountStatusTab extends Vue {
     return this.taskDetails?.remarks
   }
 
+  private getIndexedTag (tag, index): string {
+    return `${tag}-${index}`
+  }
+
   private formatDate (date: Date): string {
     return moment(date).format('MMM DD, YYYY')
   }
 }
 </script>
+<style lang="scss" scoped>
+  .remark-display {
+    list-style-type: none;
+  }
+</style>

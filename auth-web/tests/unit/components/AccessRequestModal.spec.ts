@@ -1,8 +1,7 @@
-
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
-
+import { OnholdOrRejectCode } from '@/util/constants'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -22,16 +21,16 @@ describe('AccessRequestModal.vue', () => {
     isSaving: false,
     isOnHoldModal: false,
     taskName: 'testprod',
-    rejectReasonCodes: [
+    onholdReasons: [
       {
         'code': 'BLANKAFFIDAVIT',
         'default': false,
         'desc': 'Affidavit is blank / affidavit is not attached'
       },
       {
-        'code': 'REJECTACCOUNT',
+        'code': 'MISSINGSEAL',
         'default': false,
-        'desc': 'Reject Account'
+        'desc': 'Affidavit is missing seal'
       }
     ]
 
@@ -46,6 +45,8 @@ describe('AccessRequestModal.vue', () => {
 
     })
 
+    const $t = (onHoldOrRejectModalText: string) => 'To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose "Reject Account"'
+
     wrapperFactory = (propsData) => {
       return mount(AccessRequestModal, {
         localVue,
@@ -53,7 +54,8 @@ describe('AccessRequestModal.vue', () => {
         vuetify,
         propsData: {
           ...propsData
-        }
+        },
+        mocks: { $t }
       })
     }
 
@@ -104,5 +106,37 @@ describe('AccessRequestModal.vue', () => {
     await wrapper.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Access Request ?`)
+  })
+
+  it('render on hold reasons properly ', async () => {
+    await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
+    await wrapper.vm.open()
+
+    expect(wrapper.vm.accountToBeOnholdOrRejected).toBe('')
+
+    await wrapper.find('[data-test="radio-reject"]').trigger('click')
+    expect(wrapper.vm.accountToBeOnholdOrRejected).toBe(OnholdOrRejectCode.REJECTED)
+    await wrapper.find('[data-test="radio-on-hold"]').trigger('click')
+    expect(wrapper.vm.accountToBeOnholdOrRejected).toBe(OnholdOrRejectCode.ONHOLD)
+
+    expect(wrapper.find('[data-test="hold-reason-type"]').exists()).toBe(true)
+  })
+
+  it('emit valid on hold reasons properly ', async () => {
+    await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
+    await wrapper.vm.open()
+
+    await wrapper.find('[data-test="radio-on-hold"]').trigger('click')
+    expect(wrapper.vm.accountToBeOnholdOrRejected).toBe(OnholdOrRejectCode.ONHOLD)
+
+    const remarks = 'Affidavit is missing seal'
+    const select = wrapper.find('[data-test="hold-reason-type"]')
+    await select.setValue(remarks)
+    expect(wrapper.vm.onholdReasons).toBe(remarks)
+
+    await wrapper.find('[data-test="btn-access-request"]').trigger('click')
+
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('approve-reject-action')).toBeTruthy()
   })
 })
