@@ -20,9 +20,16 @@ import i18n from './plugins/i18n'
 import router from './routes/index'
 import store from './store'
 import vuetify from './plugins/vuetify'
+// eslint-disable-next-line sort-imports
+// import VueCompositionAPI from '@vue/composition-api'
+// eslint-disable-next-line sort-imports
+// import Clock from 'fas-ui'
+// eslint-disable-next-line sort-imports
+import Search from 'fas-ui/src/components/Search'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
+Vue.use(Search, { store })
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
@@ -71,5 +78,7 @@ function renderVue () {
   }).$mount('#app')
   Vue.directive('can', can)
   Vue.directive('displayMode', displayMode)
+  // Vue.use(VueCompositionAPI)
+
   router.addRoutes(getRoutes())
 }
