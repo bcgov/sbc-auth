@@ -1,23 +1,24 @@
 <template>
   <v-container class="view-container">
-
     <div class="view-header flex-column">
       <h1 class="view-header__title">Staff Dashboard</h1>
-      <p class="mt-3 mb-0">Search for businesses and manage BC Registries accounts</p>
+      <p class="mt-3 mb-0">
+        Search for businesses and manage BC Registries accounts
+      </p>
     </div>
 
     <v-card flat class="mb-4 pa-8">
       <div class="view-header flex-column mb-10">
         <h2 class="view-header__title">Search Entities</h2>
-        <p class="mt-3 mb-0">Enter the Entity's Incorporation Number below to access their dashboard.</p>
+        <p class="mt-3 mb-0">
+          Enter the Entity's Incorporation Number below to access their
+          dashboard.
+        </p>
       </div>
       <v-expand-transition>
         <div v-show="errorMessage">
-          <v-alert
-            type="error"
-            icon="mdi-alert-circle"
-            class="mb-0"
-          >{{errorMessage}} <strong>{{searchedBusinessNumber}}</strong>
+          <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
+            >{{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
           </v-alert>
         </div>
       </v-expand-transition>
@@ -42,11 +43,15 @@
           depressed
           :disabled="!isFormValid()"
           :loading="searchActive"
-        >Search</v-btn>
+          >Search</v-btn
+        >
       </v-form>
 
       <template>
-        <IncorporationSearchResultView :isVisible = "canViewIncorporationSearchResult" :affiliatedOrg = "affiliatedOrg"></IncorporationSearchResultView>
+        <IncorporationSearchResultView
+          :isVisible="canViewIncorporationSearchResult"
+          :affiliatedOrg="affiliatedOrg"
+        ></IncorporationSearchResultView>
       </template>
     </v-card>
 
@@ -57,15 +62,19 @@
 
     <!-- GL Codes -->
 
-     <v-card flat class="mb-4 pa-8">
+    <v-card flat class="mb-4 pa-8">
       <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
     </v-card>
-
+    <v-card flat class="mb-4 pa-8">
+      <v-search />
+      <!-- <Search /> -->
+      <!-- <Search /> -->
+    </v-card>
   </v-container>
 </template>
 
 <script lang="ts">
-
+/* eslint-disable */
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -74,7 +83,10 @@ import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearc
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import { Role } from '@/util/constants'
+
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
+
+
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
@@ -82,24 +94,30 @@ import { namespace } from 'vuex-class'
 const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
 const userModule = namespace('user')
-
+// Vue.use('Clock')
 @Component({
   components: {
     GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement,
-    IncorporationSearchResultView
+    IncorporationSearchResultView,
   }
 })
 export default class StaffDashboardView extends Vue {
-  @OrgModule.Action('getOrganizationForAffiliate') private getOrganizationForAffiliate!: () => Promise<Organization>
+  @OrgModule.Action('getOrganizationForAffiliate')
+  private getOrganizationForAffiliate!: () => Promise<Organization>
 
   @userModule.State('currentUser') private currentUser!: KCUserProfile
 
-  @BusinessModule.Action('searchBusiness') private searchBusiness!: (businessIdentifier: string) => Promise<any>
-  @BusinessModule.Action('resetCurrentBusiness') private resetCurrentBusiness!: () => Promise<any>
+  @BusinessModule.Action('searchBusiness') private searchBusiness!: (
+    businessIdentifier: string
+  ) => Promise<any>
+  @BusinessModule.Action('resetCurrentBusiness')
+  private resetCurrentBusiness!: () => Promise<any>
   @BusinessModule.State('currentBusiness') private currentBusiness!: Business
-  @BusinessModule.Action('loadBusiness') private loadBusiness!: () => Promise<Business>
+  @BusinessModule.Action('loadBusiness') private loadBusiness!: () => Promise<
+    Business
+  >
 
   private businessNumber = ''
   private searchedBusinessNumber = ''
@@ -110,30 +128,32 @@ export default class StaffDashboardView extends Vue {
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number is invalid'
+    v =>
+      CommonUtils.validateIncorporationNumber(v) ||
+      'Incorporation Number is invalid'
   ]
 
   $refs: {
     searchBusinessForm: HTMLFormElement
   }
 
-  private get canViewAccounts (): boolean {
-    return (this.currentUser?.roles?.includes(Role.StaffViewAccounts))
+  private get canViewAccounts(): boolean {
+    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
-  private get canViewGLCodes (): boolean {
-    return (this.currentUser?.roles?.includes(Role.ManageGlCodes))
+  private get canViewGLCodes(): boolean {
+    return this.currentUser?.roles?.includes(Role.ManageGlCodes)
   }
 
-  private isFormValid (): boolean {
+  private isFormValid(): boolean {
     return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
   }
 
-  private clearError () {
+  private clearError() {
     this.searchedBusinessNumber = ''
   }
 
-  async search () {
+  async search() {
     if (this.isFormValid()) {
       this.searchActive = true
 
@@ -153,7 +173,7 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  async updateCurrentBusiness () {
+  async updateCurrentBusiness() {
     try {
       // Search for business, action will set session storage
       await this.loadBusiness()
@@ -167,11 +187,13 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  incorpNumFormat () {
-    this.businessNumber = CommonUtils.formatIncorporationNumber(this.businessNumber)
+  incorpNumFormat() {
+    this.businessNumber = CommonUtils.formatIncorporationNumber(
+      this.businessNumber
+    )
   }
 
-  gotToGLCodes () {
+  gotToGLCodes() {
     this.$router.push('/glcodelist')
   }
 }
