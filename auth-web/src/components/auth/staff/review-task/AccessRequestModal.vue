@@ -56,7 +56,17 @@
             :rules="onholdReasonRules"
             multiple
             v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
-            />
+            >
+              <template v-slot:selection="{ item, index }">
+                <span v-if="index === 0">{{ item.desc }}</span>
+                <span
+                  v-if="index === 1"
+                  class="grey--text text-caption"
+                >
+                  (+{{ onholdReasons.length - 1 }} {{ onholdReasons.length > 2 ? 'others' : 'other' }})
+                </span>
+              </template>
+          </v-select>
 
           </v-form>
         </div>
