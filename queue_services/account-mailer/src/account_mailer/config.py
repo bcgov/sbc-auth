@@ -73,13 +73,7 @@ class _Config():  # pylint: disable=too-few-public-methods
     DB_NAME = os.getenv('DATABASE_NAME', '')
     DB_HOST = os.getenv('DATABASE_HOST', '')
     DB_PORT = os.getenv('DATABASE_PORT', '5432')
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-        user=DB_USER,
-        password=DB_PASSWORD,
-        host=DB_HOST,
-        port=int(DB_PORT),
-        name=DB_NAME,
-    )
+    SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
     # Keycloak & Jwt
     JWT_OIDC_ISSUER = os.getenv('JWT_OIDC_ISSUER')
@@ -173,9 +167,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_PORT = os.getenv('DATABASE_TEST_PORT', '5432')
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_TEST_URL',
-        default='postgresql://{user}:{password}@{host}:{port}/{name}'.format(
-            user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=int(DB_PORT), name=DB_NAME
-        ),
+        default=f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}',
     )
 
     STAN_CLUSTER_NAME = 'test-cluster'
