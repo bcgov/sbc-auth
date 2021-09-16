@@ -50,6 +50,6 @@ def generate_template(template_path: str, template_file_name: str) -> str:
         template_part_path = Path(f'{template_path}/common/{template_part}.html')
         if os.path.exists(template_part_path) and os.path.getsize(template_part_path) > 0:
             template_part_code = template_part_path.read_text()
-            template_code = template_code.replace('[[{}.html]]'.format(template_part), template_part_code)
+            template_code = template_code.replace(f'[[{template_part}.html]]', template_part_code)
 
     return template_code
