@@ -20,6 +20,7 @@
     "@vue/composition-api": "^1.1.5",
     "axios": "^0.21.1",
     "core-js": "^3.3.3",
+    "fas-ui": "git+https://github.com/bcgov/fas-ui.git#feature/8605",
     "http-status-codes": "^2.1.4",
     "keycloak-js": "^9.0.3",
     "mime-types": "^2.1.27",

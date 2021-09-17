@@ -23,9 +23,11 @@ import vuetify from './plugins/vuetify'
 // eslint-disable-next-line sort-imports
 // import VueCompositionAPI from '@vue/composition-api'
 // eslint-disable-next-line sort-imports
-// import Clock from 'fas-ui'
+// import Search from 'fas-ui'
 // eslint-disable-next-line sort-imports
-import Search from 'fas-ui/src/components/Search'
+// import Search from 'fas-ui/src/components/Search'
+// eslint-disable-next-line sort-imports
+import Search from 'fas-ui/src/components/Dashboard/plugin.js'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
