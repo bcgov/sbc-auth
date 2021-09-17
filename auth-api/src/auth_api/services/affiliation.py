@@ -64,7 +64,7 @@ class Affiliation:
     @staticmethod
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
-        current_app.logger.debug('<find_visible_affiliations_by_org_id for org_id {}'.format(org_id))
+        current_app.logger.debug(f'<find_visible_affiliations_by_org_id for org_id {org_id}')
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 

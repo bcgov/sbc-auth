@@ -58,8 +58,8 @@ class RestService:
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
-        current_app.logger.debug('Endpoint : {}'.format(endpoint))
-        current_app.logger.debug('headers : {}'.format(headers))
+        current_app.logger.debug(f'Endpoint : {endpoint}')
+        current_app.logger.debug(f'headers : {headers}')
         response = None
         try:
             invoke_rest_method = getattr(requests, rest_method)
@@ -72,8 +72,7 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(
-                'HTTPError on POST with status code {}'.format(response.status_code if response else ''))
+            current_app.logger.error(f"HTTPError on POST with status code {response.status_code if response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
@@ -86,11 +85,11 @@ class RestService:
     @staticmethod
     def __log_response(response):
         if response is not None:
-            current_app.logger.info('Response Headers {}'.format(response.headers))
+            current_app.logger.info(f'Response Headers {response.headers}')
             if response.headers and isinstance(response.headers, Iterable) and \
                     'Content-Type' in response.headers and \
                     response.headers['Content-Type'] == ContentType.JSON.value:
-                current_app.logger.info('response : {}'.format(response.text if response else ''))
+                current_app.logger.info(f"response : {response.text if response else ''}")
 
     @staticmethod
     def post(endpoint, token=None,  # pylint: disable=too-many-arguments
@@ -147,8 +146,8 @@ class RestService:
         if token:
             headers['Authorization'] = auth_header_type.value.format(token)
 
-        current_app.logger.debug('Endpoint : {}'.format(endpoint))
-        current_app.logger.debug('headers : {}'.format(headers))
+        current_app.logger.debug(f'Endpoint : {endpoint}')
+        current_app.logger.debug(f'headers : {headers}')
         session = requests.Session()
         if retry_on_failure:
             session.mount(endpoint, RETRY_ADAPTER)
@@ -161,14 +160,13 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(
-                'HTTPError on GET with status code {}'.format(response.status_code if response else ''))
+            current_app.logger.error(f"HTTPError on GET with status code {response.status_code if response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
         finally:
             current_app.logger.debug(response.headers if response else 'Empty Response Headers')
-            current_app.logger.info('response : {}'.format(response.text if response else ''))
+            current_app.logger.info(f"response : {response.text if response else ''}")
 
         current_app.logger.debug('>GET')
         return response
