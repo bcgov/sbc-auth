@@ -151,8 +151,7 @@ class UserOtp(Resource):
         try:
             user = UserService.find_by_username(username)
             if user is None:
-                response, status = {'message': 'User {} does not exist.'.format(username)}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': f'User {username} does not exist.'}, http_status.HTTP_404_NOT_FOUND
             elif user.as_dict().get('login_source', None) != LoginSource.BCEID.value:
                 response, status = {'Only BCEID users has OTP', http_status.HTTP_400_BAD_REQUEST}
             else:
@@ -177,7 +176,7 @@ class UserStaff(Resource):
         """Return the user profile associated with the provided username."""
         user = UserService.find_by_username(username)
         if user is None:
-            response, status = {'message': 'User {} does not exist.'.format(username)}, http_status.HTTP_404_NOT_FOUND
+            response, status = {'message': f'User {username} does not exist.'}, http_status.HTTP_404_NOT_FOUND
         else:
             response, status = user.as_dict(), http_status.HTTP_200_OK
         return response, status
@@ -191,8 +190,7 @@ class UserStaff(Resource):
         try:
             user = UserService.find_by_username(username)
             if user is None:
-                response, status = {'message': 'User {} does not exist.'.format(username)}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': f'User {username} does not exist.'}, http_status.HTTP_404_NOT_FOUND
             elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
@@ -220,8 +218,7 @@ class UserStaff(Resource):
             user = UserService.find_by_username(username)
 
             if user is None:
-                response, status = {'message': 'User {} does not exist.'.format(username)}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                response, status = {'message': f'User {username} does not exist.'}, http_status.HTTP_404_NOT_FOUND
             elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
                 response, status = {'Normal users cant be patched', http_status.HTTP_501_NOT_IMPLEMENTED}
             else:
