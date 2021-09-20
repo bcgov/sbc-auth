@@ -17,7 +17,6 @@
     "@mdi/font": "^4.5.95",
     "@sentry/browser": "^5.27.2",
     "@sentry/integrations": "^5.27.2",
-    "@vue/composition-api": "^1.1.5",
     "axios": "^0.21.1",
     "core-js": "^3.3.3",
     "fas-ui": "git+https://github.com/bcgov/fas-ui.git#feature/8605",
@@ -37,8 +36,7 @@
     "vuelidate": "^0.7.5",
     "vuetify": "2.2.7",
     "vuex": "^3.2.0",
-    "vuex-class": "^0.3.2",
-    "vuex-composition-helpers": "^1.0.23"
+    "vuex-class": "^0.3.2"
   },
   "devDependencies": {
     "@kazupon/vue-i18n-loader": "^0.3.0",
