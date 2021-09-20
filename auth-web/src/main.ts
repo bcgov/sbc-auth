@@ -31,7 +31,7 @@ import Search from 'fas-ui/src/components/Dashboard/plugin.js'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
-Vue.use(Search, { store })
+Vue.use(Search, { store, i18n })
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all

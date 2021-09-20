@@ -66,7 +66,7 @@
       <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
     </v-card>
     <v-card flat class="mb-4 pa-8">
-      <v-search />
+      <fas-search-component />
       <!-- <Search /> -->
       <!-- <Search /> -->
     </v-card>
