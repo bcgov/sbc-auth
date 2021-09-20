@@ -326,8 +326,7 @@ def test_create_user_add_membership_reenable(session, auth_mock, keycloak_mock,
     update_user_request.enabled = False
     KeycloakService.update_user(update_user_request)
 
-    org2 = factory_org_model(org_info=TestOrgInfo.org_anonymous_2, org_type_info={'code': 'BASIC'},
-                             org_status_info=None, payment_type_info=None)
+    org2 = factory_org_model(org_info=TestOrgInfo.org_anonymous_2, org_type_info={'code': 'BASIC'})
 
     factory_membership_model(user.id, org2.id)
     factory_product_model(org2.id, product_code=ProductCode.DIR_SEARCH.value)

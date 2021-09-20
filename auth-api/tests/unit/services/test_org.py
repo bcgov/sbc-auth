@@ -367,8 +367,7 @@ def test_create_org_with_duplicate_name(session, monkeypatch):  # pylint:disable
     user = factory_user_model()
     org = factory_org_service()
 
-    factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
-                      payment_type_info=None)
+    factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit)
 
     with pytest.raises(BusinessException) as exception:
         patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
@@ -392,8 +391,7 @@ def test_create_org_with_duplicate_name_bcol(session, keycloak_mock, monkeypatch
     """Assert that an Org linking to bcol retrun exception if there's duplicated names."""
     org = factory_org_service()
 
-    factory_org_model({'name': 'BC ONLINE TECHNICAL TEAM DEVL'}, org_type_info=TestOrgTypeInfo.implicit,
-                      org_status_info=None, payment_type_info=None)
+    factory_org_model({'name': 'BC ONLINE TECHNICAL TEAM DEVL'}, org_type_info=TestOrgTypeInfo.implicit)
     bcol_response = Mock(spec=Response)
     bcol_response.json.return_value = {'userId': 'PB25020', 'accountNumber': '180670',
                                        'orgName': 'BC ONLINE TECHNICAL TEAM DEVL'}

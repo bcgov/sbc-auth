@@ -15,7 +15,8 @@
 
 An Affiliation is between an Org and an Entity.
 """
-
+from __future__ import annotations
+from typing import List
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
@@ -37,22 +38,22 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
 
     @classmethod
-    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id):
+    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id) -> Affiliation:
         """Return an affiliation for the provided org and entity ids."""
-        return cls.query.filter_by(org_id=org_id, entity_id=entity_id).first()
+        return cls.query.filter_by(org_id=org_id, entity_id=entity_id).one_or_none()
 
     @classmethod
-    def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int):
+    def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int) -> Affiliation:
         """Return the first Affiliation with the provided ids."""
-        return cls.query.filter_by(org_id=org_id).filter_by(id=affiliation_id).first()
+        return cls.query.filter_by(org_id=org_id).filter_by(id=affiliation_id).one_or_none()
 
     @classmethod
-    def find_affiliations_by_org_id(cls, org_id: int):
+    def find_affiliations_by_org_id(cls, org_id: int) -> List[Affiliation]:
         """Return the affiliations with the provided org id."""
-        return db.session.query(Affiliation).filter(Affiliation.org_id == org_id).order_by(
-            Affiliation.created.desc()).all()
+        return db.session.query(Affiliation).filter(Affiliation.org_id == org_id)\
+            .order_by(Affiliation.created.desc()).all()
 
     @classmethod
     def find_affiliations_by_business_identifier(cls, business_identifier: str):
-        """Return the affiliation with the provided business identifier."""
-        return cls.query.join(EntityModel).filter(EntityModel.business_identifier == business_identifier).one_or_none()
+        """Return the affiliations with the provided business identifier."""
+        return cls.query.join(EntityModel).filter(EntityModel.business_identifier == business_identifier).all()
