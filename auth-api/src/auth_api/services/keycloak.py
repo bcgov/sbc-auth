@@ -154,11 +154,9 @@ class KeycloakService:
         try:
             base_url = current_app.config.get('KEYCLOAK_BASE_URL')
             realm = current_app.config.get('KEYCLOAK_REALMNAME')
-            token_request = 'client_id={}&client_secret={}&username={}&password={}&grant_type=password'.format(
-                current_app.config.get('JWT_OIDC_AUDIENCE'),
-                current_app.config.get('JWT_OIDC_CLIENT_SECRET'),
-                username,
-                password)
+            token_request = f"client_id={current_app.config.get('JWT_OIDC_AUDIENCE')}" \
+                            f"&client_secret={current_app.config.get('JWT_OIDC_CLIENT_SECRET')}" \
+                            f'&username={username}&password={password}&grant_type=password'
 
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -282,8 +280,9 @@ class KeycloakService:
         }
         token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
 
-        response = requests.post(token_url, data='client_id={}&grant_type=client_credentials&client_secret={}'.format(
-            admin_client_id, admin_secret), headers=headers)
+        response = requests.post(token_url,
+                                 data=f'client_id={admin_client_id}&grant_type=client_credentials'
+                                      f'&client_secret={admin_secret}', headers=headers)
         return response.json().get('access_token')
 
     @staticmethod

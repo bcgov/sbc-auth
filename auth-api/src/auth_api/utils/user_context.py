@@ -43,7 +43,7 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
             else []
         self._sub: str = token_info.get('sub', None)
         self._login_source: str = token_info.get('loginSource', None)
-        self._name: str = '{} {}'.format(token_info.get('firstname', None), token_info.get('lastname', None))
+        self._name: str = f"{token_info.get('firstname', None)} {token_info.get('lastname', None)}"
 
     @property
     def user_name(self) -> str:
