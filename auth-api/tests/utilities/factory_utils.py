@@ -28,7 +28,6 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
-from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.membership import Membership as MembershipModel
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
@@ -42,8 +41,7 @@ from auth_api.utils.enums import (
     TaskTypePrefix)
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import (
-    JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgStatusInfo, TestOrgTypeInfo,
-    TestPaymentTypeInfo, TestUserInfo)
+    JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgTypeInfo, TestUserInfo)
 
 
 def factory_auth_header(jwt, claims):
@@ -125,28 +123,21 @@ def factory_membership_model(user_id, org_id, member_type='ADMIN', member_status
 
 
 def factory_org_model(org_info: dict = TestOrgInfo.org1,
-                      org_type_info: dict = TestOrgTypeInfo.test_type,
-                      org_status_info: dict = TestOrgStatusInfo.test_status,
-                      payment_type_info: dict = TestPaymentTypeInfo.test_type,
+                      org_type_info: dict = None,
+                      org_status_info: dict = None,
                       user_id=None,
                       bcol_info: dict = TestBCOLInfo.bcol1):
     """Produce a templated org model."""
     org_type = OrgTypeModel.get_default_type()
-    if org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
+    if org_type_info and org_type_info['code'] != TestOrgTypeInfo.implicit['code']:
         org_type = OrgTypeModel(code=org_type_info['code'], description=org_type_info['desc'])
         org_type.save()
 
-    if org_status_info:
+    if org_status_info is not None:
         org_status = OrgStatusModel(code=org_status_info['code'], description=org_status_info['desc'])
         org_status.save()
     else:
         org_status = OrgStatusModel.get_default_status()
-
-    if payment_type_info:
-        preferred_payment = PaymentTypeModel(code=payment_type_info['code'], description=payment_type_info['desc'])
-        preferred_payment.save()
-    else:
-        preferred_payment = PaymentTypeModel.get_default_payment_type()
 
     org = OrgModel(name=org_info['name'])
     org.org_type = org_type
@@ -157,21 +148,17 @@ def factory_org_model(org_info: dict = TestOrgInfo.org1,
     org.bcol_user_id = bcol_info.get('bcol_user_id', '')
     org.save()
 
-    org.bcol_account_id = bcol_info['bcol_account_id']
-
     return org
 
 
 def factory_org_service(org_info: dict = TestOrgInfo.org1,
-                        org_type_info: dict = TestOrgTypeInfo.implicit,
-                        org_status_info: dict = TestOrgStatusInfo.test_status,
-                        payment_type_info: dict = TestPaymentTypeInfo.test_type,
+                        org_type_info: dict = None,
+                        org_status_info: dict = None,
                         bcol_info: dict = TestBCOLInfo.bcol1):
     """Produce a templated org service."""
     org_model = factory_org_model(org_info=org_info,
                                   org_type_info=org_type_info,
                                   org_status_info=org_status_info,
-                                  payment_type_info=payment_type_info,
                                   bcol_info=bcol_info)
     org_service = OrgService(org_model)
     return org_service
