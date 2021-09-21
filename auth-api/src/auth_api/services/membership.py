@@ -116,8 +116,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
         # If active status for current user, then check organizational role
         if current_user_membership.status == Status.ACTIVE.value:
-            if current_user_membership.membership_type_code == ADMIN or \
-                    current_user_membership.membership_type_code == COORDINATOR:
+            if current_user_membership.membership_type_code in (ADMIN, COORDINATOR):
                 return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status)
 
             return MembershipModel.find_members_by_org_id_by_status_by_roles(org_id, membership_roles, status) \
@@ -152,7 +151,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         org_id = self._model.org.id
         recipient = self._model.user.contacts[0].contact.email
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
-        app_url = '{}/{}'.format(origin_url, context_path)
+        app_url = f'{origin_url}/{context_path}'
         notification_type_for_mailer = ''
         data = {}
         if notification_type == NotificationType.ROLE_CHANGED.value:

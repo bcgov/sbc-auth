@@ -218,8 +218,8 @@ async def process_event(event_message: dict, flask_app):
                 'role': email_msg.get('role'),
                 'label': email_msg.get('label'),
                 'product_name': email_msg.get('productName'),
-                'remark': email_msg.get('remark'),
-                'applicationDate': email_msg.get('applicationDate'),
+                'remarks': email_msg.get('remarks'),
+                'applicationDate': email_msg.get('applicationDate')
             }
 
             org_id = email_msg.get('accountId')

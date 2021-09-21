@@ -91,7 +91,7 @@ class Authorization:
         auth_response = {}
         auth = None
         token_roles = user_from_context.roles
-        current_app.logger.debug('check roles=:{}'.format(token_roles))
+        current_app.logger.debug(f'check roles=:{token_roles}')
         if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
@@ -112,8 +112,11 @@ class Authorization:
         else:
             keycloak_guid = user_from_context.sub
             if business_identifier and keycloak_guid:
-                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, keycloak_guid,
-                                                                                    user_from_context.account_id)
+                auth = AuthorizationView.find_user_authorization_by_business_number(
+                    business_identifier=business_identifier,
+                    keycloak_guid=keycloak_guid,
+                    org_id=user_from_context.account_id
+                )
 
             if auth:
                 permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)

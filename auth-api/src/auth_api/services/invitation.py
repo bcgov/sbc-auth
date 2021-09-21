@@ -102,7 +102,7 @@ class Invitation:
         invitation.login_source = mandatory_login_source
         invitation.save()
         Invitation.send_invitation(invitation, org_name, org.id, user.as_dict(),
-                                   '{}/{}'.format(invitation_origin, context_path), mandatory_login_source,
+                                   f'{invitation_origin}/{context_path}', mandatory_login_source,
                                    org_status=org.status_code)
         # notify admin if staff adds team members
         if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
@@ -139,7 +139,7 @@ class Invitation:
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
         Invitation.send_invitation(updated_invitation, org_name, self._model.membership[0].org_id, user.as_dict(),
-                                   '{}/{}'.format(invitation_origin, context_path), self._model.login_source)
+                                   f'{invitation_origin}/{context_path}', self._model.login_source)
         return Invitation(updated_invitation)
 
     @staticmethod
@@ -228,7 +228,7 @@ class Invitation:
         current_app.logger.debug('<send_invitation')
         mail_configs = Invitation._get_invitation_configs(org_name, login_source, org_status)
         recipient = invitation.recipient_email
-        token_confirm_url = '{}/{}/{}'.format(app_url, mail_configs.get('token_confirm_path'), invitation.token)
+        token_confirm_url = f"{app_url}/{mail_configs.get('token_confirm_path')}/{invitation.token}"
         role = invitation.membership[0].membership_type.display_name
         data = {
             'accountId': org_id,
@@ -341,7 +341,7 @@ class Invitation:
 
         if admin_emails != '':
             Invitation.send_admin_notification(user.as_dict(),
-                                               '{}/{}'.format(invitation_origin, context_path),
+                                               f'{invitation_origin}/{context_path}',
                                                admin_emails, invitation.membership[0].org.name,
                                                invitation.membership[0].org.id)
             current_app.logger.debug('>notify_admin')

@@ -64,7 +64,7 @@ class Affiliation:
     @staticmethod
     def find_visible_affiliations_by_org_id(org_id):
         """Given an org_id, this will return the entities affiliated with it."""
-        current_app.logger.debug('<find_visible_affiliations_by_org_id for org_id {}'.format(org_id))
+        current_app.logger.debug(f'<find_visible_affiliations_by_org_id for org_id {org_id}')
         if not org_id:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
@@ -136,15 +136,14 @@ class Affiliation:
         entity_id = entity.identifier
 
         authorized = True
-        already_claimed = False
 
-        # Authorized if the entity has been claimed
-        if entity.as_dict()['pass_code_claimed']:
-            authorized = False
-            already_claimed = True
-
+        # Unauthorized if the entity has been claimed
+        # Leaving the code as it may come back. Removing as part of #8863
+        # if entity.as_dict()['pass_code_claimed']:
+        #     authorized = False
+        #     already_claimed = True
         # If a passcode was provided...
-        elif pass_code:
+        if pass_code:
             # ... and the entity has a passcode on it, check that they match
             authorized = validate_passcode(pass_code, entity.pass_code)
         # If a passcode was not provided...
@@ -153,13 +152,15 @@ class Affiliation:
             if entity.pass_code:
                 authorized = False
 
+        # show a different message when the passcode is already claimed
+        # if already_claimed:
+        #     current_app.logger.debug('<create_affiliation passcode already claimed')
+        #     raise BusinessException(Error.ALREADY_CLAIMED_PASSCODE, None)
+
         if not authorized:
-            # show a different message when the passcode is already claimed
-            if already_claimed:
-                current_app.logger.debug('<create_affiliation passcode already claimed')
-                raise BusinessException(Error.ALREADY_CLAIMED_PASSCODE, None)
             current_app.logger.debug('<create_affiliation not authorized')
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+
         current_app.logger.debug('<create_affiliation find affiliation')
         # Ensure this affiliation does not already exist
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
@@ -178,19 +179,18 @@ class Affiliation:
                                         business_identifier=None, email=None, phone=None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
-        # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        affiliation_model = None
 
         if not email and not phone:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
+        # Validate if org_id is valid by calling Org Service.
         org = OrgService.find_by_org_id(org_id, allowed_roles=CLIENT_AUTH_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-        # If entity already exists and is already affiliated to an org, throw error
+        # If entity already exists and passcode is already claimed, throw error
         if entity and entity.as_dict()['pass_code_claimed']:
             raise BusinessException(Error.NR_CONSUMED, None)
 

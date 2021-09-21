@@ -263,4 +263,10 @@ export default class CommonUtils {
       ]
     }
   }
+
+  // format number to two places - for eg 2 => 02, 10 => 10.
+  static formatNumberToTwoPlaces (index: number): string {
+    const stringIndexValue: string = index.toString()
+    return stringIndexValue.padStart(2, '0')
+  }
 }

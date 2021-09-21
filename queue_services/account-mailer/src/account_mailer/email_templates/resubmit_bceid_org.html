@@ -26,7 +26,17 @@
                         Your Account Creation Request is On hold .
                         </h1>
                         <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                           Thank you for your interest with BC Registries and Online Services.  Our office was attempting to approve your application sent on {{ applicationDate }} but, had to place your account creation request on hold for the following reason: {{ remark }}.
+                           Thank you for your interest with BC Registries and Online Services.  Our office was attempting to approve your application sent on {{ applicationDate }} but, had to place your account creation request on hold for the following reason(s):
+                            <ul style="list-style-type:none; padding-left: 0; margin-top: 0; margin-bottom: 0;">
+                                {%for i in range(0, remarks|length)%}
+                                    <li style="font-family: Verdana, Arial, sans-serif; font-size: 16px; margin-top: 8px;">
+                                        <span style="font-weight: bold; font-size: 16px;">
+                                            {{'%02d' % (i+1)}}.
+                                        </span>
+                                        <span>{{remarks[i]}}</span>
+                                    </li>
+                                {%endfor%}
+                            </ul>
                         </p>
                          <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
                             By clicking on the button below, you will be directed to log in. Log in using your BCeID. You will require a one time passcode from your 2 factor authenticator. After log in you will be navigated to the account creation process. You will only be able to edit step 3: “Upload Affidavit” and step 4: ”User Profile”. After resolving the issue in step 3 and 4, press “submit” on step 5.
