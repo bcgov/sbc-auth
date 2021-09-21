@@ -88,8 +88,7 @@ import StaffAccountManagement from '@/components/auth/staff/account-management/S
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
-// for fas search styles
-import 'fas-ui/src/assets/scss/search.scss'
+
 
 
 const OrgModule = namespace('org')
@@ -202,6 +201,8 @@ export default class StaffDashboardView extends Vue {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+// importing FAS styles
+@import '~fas-ui/fas-lib/fas-ui.css';
 .v-input {
   display: inline-block;
   width: 20rem;
