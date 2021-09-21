@@ -19,43 +19,51 @@
         <div class="mx-8">
           <p class="mb-4 text-color sub-text-size" v-html="modalData.text" data-test="p-modal-text"></p>
           <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isOnHoldModal">
-          <v-radio-group
-            v-model="accountToBeOnholdOrRejected"
-            :rules="accountToBeOnholdOrRejectedRules"
-            data-test="radio-group-hold-or-reject"
-          >
-            <v-row dense class="d-flex flex-column align-items-center">
-              <v-col>
-                <v-radio
-                label="Reject Account"
-                :key="OnholdOrRejectCode.REJECTED"
-                :value="OnholdOrRejectCode.REJECTED"
-                data-test="radio-reject"
+            <v-row justify="center">
+              <v-col cols="6" class="pa-0">
+                <v-radio-group
+                  v-model="accountToBeOnholdOrRejected"
+                  :rules="accountToBeOnholdOrRejectedRules"
+                  data-test="radio-group-hold-or-reject"
+                  class="mt-0"
                 >
-                </v-radio>
-              </v-col>
-              <v-col>
-                <v-radio
-                label="On Hold"
-                :key="OnholdOrRejectCode.ONHOLD"
-                :value="OnholdOrRejectCode.ONHOLD"
-                data-test="radio-on-hold"
-                ></v-radio>
+                  <v-row dense class="d-flex flex-column align-items-center">
+                    <v-col>
+                      <v-radio
+                        label="Reject Account"
+                        :key="OnholdOrRejectCode.REJECTED"
+                        :value="OnholdOrRejectCode.REJECTED"
+                        data-test="radio-reject"
+                      >
+                      </v-radio>
+                    </v-col>
+                    <v-col>
+                      <v-radio
+                        label="On Hold"
+                        :key="OnholdOrRejectCode.ONHOLD"
+                        :value="OnholdOrRejectCode.ONHOLD"
+                        data-test="radio-on-hold"
+                      ></v-radio>
+                    </v-col>
+                  </v-row>
+                  <template v-slot:message="{ message }">
+                    <span class="error-size"> {{ message }} </span>
+                  </template>
+                </v-radio-group>
               </v-col>
             </v-row>
-        </v-radio-group>
-          <v-select
-            filled
-            label="Reason(s) why account is on hold "
-            :items="onholdReasonCodes"
-            item-text="desc"
-            item-value="desc"
-            v-model="onholdReasons"
-            data-test="hold-reason-type"
-            class="my-0"
-            :rules="onholdReasonRules"
-            multiple
-            v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
+            <v-select
+              filled
+              label="Reason(s) why account is on hold "
+              :items="onholdReasonCodes"
+              item-text="desc"
+              item-value="desc"
+              v-model="onholdReasons"
+              data-test="hold-reason-type"
+              class="my-0"
+              :rules="onholdReasonRules"
+              multiple
+              v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
             >
               <template v-slot:selection="{ item, index }">
                 <span v-if="index === 0">{{ item.desc }}</span>
@@ -264,5 +272,7 @@ export default class AccessRequestModal extends Vue {
   .align-items-center {
     align-self: center !important;
   }
-
+  .error-size {
+    font-size: 16px;
+  }
 </style>
