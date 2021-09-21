@@ -10,7 +10,7 @@
       </template>
       <template v-else>
         <div v-if="teamName">
-          <interim-landing :summary="$t(title, { team: teamName })" :description="$t(description)" icon="mdi-information-outline">
+          <interim-landing :summary="$t(title, { team: teamName })" :description="$t(description, descriptionParams)" icon="mdi-information-outline">
           </interim-landing>
         </div>
         <div v-if="!teamName">
@@ -25,6 +25,7 @@
 <script lang="ts">
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus } from '@/models/Organization'
+import ConfigHelper from '@/util/config-helper'
 import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAccountCreationSuccessView.vue'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -47,6 +48,8 @@ import { mapState } from 'vuex'
 export default class PendingApprovalView extends Vue {
   protected readonly currentMembership!: Member
   protected readonly currentUser!: KCUserProfile
+
+  private readonly descriptionParams: any = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
 
   private isDenied: boolean = false
   public isGVMUser: boolean = false
