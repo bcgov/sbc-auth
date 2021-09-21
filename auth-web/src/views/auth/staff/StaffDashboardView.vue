@@ -67,8 +67,6 @@
     </v-card>
     <v-card flat class="mb-4 pa-8">
       <fas-search-component />
-      <!-- <Search /> -->
-      <!-- <Search /> -->
     </v-card>
   </v-container>
 </template>
@@ -90,11 +88,14 @@ import StaffAccountManagement from '@/components/auth/staff/account-management/S
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
+// for fas search styles
+import 'fas-ui/src/assets/scss/search.scss'
+
 
 const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
 const userModule = namespace('user')
-// Vue.use('Clock')
+
 @Component({
   components: {
     GLCodesListView,
