@@ -153,6 +153,6 @@ export default class ConfigHelper {
     sessionStorage.setItem('BCREG-phoneNumber', nameRequest.applicantPhone)
   }
   static getAccountApprovalSlaInDays () {
-    return ConfigHelper.getValue('APPROVE_ACCOUNT_SLA_DAYS')
+    return ConfigHelper.getValue('APPROVE_ACCOUNT_SLA_DAYS') || '5'
   }
 }
