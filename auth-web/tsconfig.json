@@ -20,7 +20,7 @@
         "src/*"
       ],
       "@fas/*": [
-        "./node_modules/fas-ui/src/*"
+        "./node_modules/fas-lib/src/*"
       ]
     },
     "lib": [

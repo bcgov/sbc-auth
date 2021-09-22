@@ -202,7 +202,7 @@ export default class StaffDashboardView extends Vue {
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 // importing FAS styles
-@import '~fas-ui/fas-lib/fas-ui.css';
+@import '~fas-lib/fas-lib/fas-lib.css';
 .v-input {
   display: inline-block;
   width: 20rem;

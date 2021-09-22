@@ -23,7 +23,7 @@ import vuetify from './plugins/vuetify'
 // eslint-disable-next-line sort-imports
 // import VueCompositionAPI from '@vue/composition-api'
 // eslint-disable-next-line sort-imports
-import Search from 'fas-ui'
+import Search from 'fas-lib'
 // eslint-disable-next-line sort-imports
 // import Search from 'fas-ui/src/components/Search'
 // eslint-disable-next-line sort-imports
