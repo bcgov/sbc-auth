@@ -232,14 +232,14 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 
   /** Returns the type of the affiliation */
-  private type (item: Business): AffiliationTypes {
+  private type (item: Business): string {
     switch (true) {
       case (this.isNameRequest(item.corpType.code)):
         return AffiliationTypes.NAME_REQUEST
       case this.isTemporaryBusinessRegistration(item.corpType.code):
         return AffiliationTypes.INCORPORATION_APPLICATION
       default:
-        return AffiliationTypes.CORPORATION
+        return this.typeDescription(item.corpType.code as CorpTypeCd)
     }
   }
 
