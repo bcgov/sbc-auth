@@ -65,9 +65,23 @@
     <v-card flat class="mb-4 pa-8">
       <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
     </v-card>
-    <v-card flat class="mb-4 pa-8">
-      <fas-search-component />
-    </v-card>
+
+    <!-- FAS UI  -->
+    <v-expansion-panels class="mb-4" accordion>
+      <v-expansion-panel class="pa-8">
+        <v-expansion-panel-header class="px-0">
+          <header>
+            <h2 class="view-header__title">Fee Accounting System</h2>
+            <p class="mt-3 mb-0">
+              Search and manage routing slips
+            </p>
+          </header>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+            <fas-search-component :isLibraryMode="true"/>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-container>
 </template>
 
@@ -220,6 +234,10 @@ export default class StaffDashboardView extends Vue {
     font-weight: bold;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+  }
+
+  .v-expansion-panel-content__wrap {
+  padding: 0px !important;
   }
 }
 </style>
