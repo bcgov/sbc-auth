@@ -5,9 +5,7 @@ module.exports = {
     resolve: {
       alias: {
         'vue': path.resolve('./node_modules/vue'),
-        '$assets': path.resolve('./src/assets/'),
-        '@fas': path.resolve('./node_modules/fas-lib/src')
-
+        '$assets': path.resolve('./src/assets/')
       }
     }
   },

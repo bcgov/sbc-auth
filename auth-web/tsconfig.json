@@ -18,9 +18,6 @@
     "paths": {
       "@/*": [
         "src/*"
-      ],
-      "@fas/*": [
-        "./node_modules/fas-lib/src/*"
       ]
     },
     "lib": [
