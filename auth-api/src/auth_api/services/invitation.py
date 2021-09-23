@@ -234,8 +234,8 @@ class Invitation:
             'accountId': org_id,
             'emailAddresses': recipient,
             'contextUrl': token_confirm_url,
-            'userFirstName': user['firstname'],
-            'userLastName': user['lastname'],
+            'userFirstName': user.get('firstname', None),
+            'userLastName': user.get('lastname', None),
             'orgName': org_name,
             'role': role
         }
