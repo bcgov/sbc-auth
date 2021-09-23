@@ -24,7 +24,6 @@ import vuetify from './plugins/vuetify'
 // eslint-disable-next-line sort-imports
 import Search from 'fas-ui'
 
-
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
 Vue.use(Search, { store, i18n })
