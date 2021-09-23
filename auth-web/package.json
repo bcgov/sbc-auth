@@ -19,7 +19,7 @@
     "@sentry/integrations": "^5.27.2",
     "axios": "^0.21.1",
     "core-js": "^3.3.3",
-    "fas-lib": "git+https://github.com/bcgov/fas-ui.git#feature/8605",
+    "fas-ui": "git+https://github.com/bcgov/fas-ui.git#feature/8605",
     "http-status-codes": "^2.1.4",
     "keycloak-js": "^9.0.3",
     "mime-types": "^2.1.27",
