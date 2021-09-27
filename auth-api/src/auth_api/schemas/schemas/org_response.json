@@ -12,7 +12,6 @@
       "bcolAccountId": "106700",
       "bcolAccountName": "BC ONLINE TECHNICAL TEAM DEVL",
       "bcolUserId": "PB99999",
-      "billable": true,
       "created": "2020-11-12T21:42:30.850904+00:00",
       "createdBy": "abc-auth sbc-auth",
       "id": 2390,
@@ -26,7 +25,6 @@
   ],
   "required": [
     "accessType",
-    "billable",
     "id",
     "name",
     "orgType",
@@ -74,15 +72,6 @@
       "default": "",
       "examples": [
         "PB99999"
-      ]
-    },
-    "billable": {
-      "$id": "#/properties/billable",
-      "type": "boolean",
-      "title": "Billable",
-      "default": false,
-      "examples": [
-        true
       ]
     },
     "created": {
