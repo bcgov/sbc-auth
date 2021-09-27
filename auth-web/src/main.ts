@@ -21,8 +21,12 @@ import router from './routes/index'
 import store from './store'
 import vuetify from './plugins/vuetify'
 
+// eslint-disable-next-line sort-imports
+import Search from 'fas-ui'
+
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
+Vue.use(Search, { store, i18n })
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
@@ -71,5 +75,6 @@ function renderVue () {
   }).$mount('#app')
   Vue.directive('can', can)
   Vue.directive('displayMode', displayMode)
+
   router.addRoutes(getRoutes())
 }
