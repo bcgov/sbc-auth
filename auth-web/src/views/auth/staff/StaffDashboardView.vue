@@ -86,7 +86,6 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable */
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -95,15 +94,10 @@ import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearc
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import { Role } from '@/util/constants'
-
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
-
-
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
-
-
 
 const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
@@ -114,11 +108,12 @@ const userModule = namespace('user')
     GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement,
-    IncorporationSearchResultView,
+    IncorporationSearchResultView
   }
 })
 export default class StaffDashboardView extends Vue {
   @OrgModule.Action('getOrganizationForAffiliate')
+
   private getOrganizationForAffiliate!: () => Promise<Organization>
 
   @userModule.State('currentUser') private currentUser!: KCUserProfile
@@ -151,23 +146,23 @@ export default class StaffDashboardView extends Vue {
     searchBusinessForm: HTMLFormElement
   }
 
-  private get canViewAccounts(): boolean {
+  private get canViewAccounts (): boolean {
     return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
-  private get canViewGLCodes(): boolean {
+  private get canViewGLCodes (): boolean {
     return this.currentUser?.roles?.includes(Role.ManageGlCodes)
   }
 
-  private isFormValid(): boolean {
+  private isFormValid (): boolean {
     return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
   }
 
-  private clearError() {
+  private clearError () {
     this.searchedBusinessNumber = ''
   }
 
-  async search() {
+  async search () {
     if (this.isFormValid()) {
       this.searchActive = true
 
@@ -187,7 +182,7 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  async updateCurrentBusiness() {
+  async updateCurrentBusiness () {
     try {
       // Search for business, action will set session storage
       await this.loadBusiness()
@@ -201,13 +196,13 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  incorpNumFormat() {
+  incorpNumFormat () {
     this.businessNumber = CommonUtils.formatIncorporationNumber(
       this.businessNumber
     )
   }
 
-  gotToGLCodes() {
+  gotToGLCodes () {
     this.$router.push('/glcodelist')
   }
 }
