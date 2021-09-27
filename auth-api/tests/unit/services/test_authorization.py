@@ -24,7 +24,7 @@ from werkzeug.exceptions import HTTPException
 from auth_api.services.authorization import Authorization, check_auth
 from auth_api.utils.enums import ProductCode
 from auth_api.utils.roles import ADMIN, STAFF, USER
-from tests.utilities.factory_scenarios import TestJwtClaims
+from tests.utilities.factory_scenarios import TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     TestOrgInfo, TestOrgTypeInfo, factory_affiliation_model, factory_entity_model, factory_membership_model,
     factory_org_model, factory_product_model, factory_user_model, patch_token_info)
@@ -295,8 +295,7 @@ def test_get_account_authorizations_for_product(session, monkeypatch):  # pylint
     assert len(authorization.get('roles')) > 0
 
     # Create another org and assert that the roles are empty
-    org = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
-                            payment_type_info=None)
+    org = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit)
     factory_membership_model(user.id, org.id)
     patch_token_info(TestJwtClaims.get_test_real_user(user.keycloak_guid), monkeypatch)
     authorization = Authorization.get_account_authorizations_for_product(org.id, 'PPR')
@@ -308,3 +307,35 @@ def test_get_account_authorizations_for_product(session, monkeypatch):  # pylint
     authorization = Authorization.get_account_authorizations_for_product(org.id, 'PPR')
     assert authorization is not None
     assert len(authorization.get('roles')) > 0
+
+
+def test_get_user_authorizations_for_entity_with_multiple_affiliations(session,  # pylint:disable=unused-argument
+                                                                       monkeypatch):
+    """Assert that user authorizations for entity is working."""
+    user = factory_user_model()
+    org = factory_org_model()
+    membership = factory_membership_model(user.id, org.id)
+    entity = factory_entity_model()
+    factory_affiliation_model(entity.id, org.id)
+    patch_token_info({
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, monkeypatch)
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
+
+    # Affiliate same entity to another org and user, and assert both authorizations works
+    user_2 = factory_user_model(user_info=TestUserInfo.user2)
+    org_2 = factory_org_model(org_info=TestOrgInfo.org2)
+    membership = factory_membership_model(user_2.id, org_2.id)
+    factory_affiliation_model(entity.id, org_2.id)
+    patch_token_info({
+        'sub': str(user_2.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, monkeypatch)
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code

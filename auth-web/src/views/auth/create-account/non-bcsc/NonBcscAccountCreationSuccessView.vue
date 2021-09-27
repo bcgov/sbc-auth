@@ -4,7 +4,7 @@
       <v-col cols="12" sm="6" class="text-center">
         <v-icon size="42" color="grey darken-3" class="mb-6">mdi-check</v-icon>
         <h1 class="mb-5">{{$t('extraProdOrgSuccessTitle')}}</h1>
-        <p class="mb-9">{{$t('extraProdOrgSuccessMessage')}}</p>
+        <p class="mb-9">{{$t('pendingAffidvitReviewMessage', descriptionParams)}}</p>
         <div>
           <v-btn large color="primary" @click="goTo('home')">
             <strong>BC Registries Home</strong>
@@ -17,6 +17,7 @@
 
 <script lang="ts">
 import { Component } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Vue from 'vue'
@@ -29,6 +30,7 @@ import { mapState } from 'vuex'
 })
 export default class NonBcscAccountCreationSuccessView extends Vue {
   protected readonly currentOrganization!: Organization
+  private readonly descriptionParams: any = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
 
   private goTo (page) {
     switch (page) {

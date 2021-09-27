@@ -26,7 +26,8 @@ AFFIDAVIT_FOLDER_NAME = 'Affidavits'
 # BCol profile to product mapping, this will grow as and when more products are onboarded.
 BCOL_PROFILE_PRODUCT_MAP = {
     'VS': 'VS',
-    'PPR': 'RPPR'
+    'PPR': 'RPPR',
+    'RURLPROP': 'RPT'
           # 'COURT_SERVICES': 'CSO',
           # "OSBR":'',
           #     "ADS",

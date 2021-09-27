@@ -1,38 +1,80 @@
 <template>
 <div>
  <ModalDialog
-    max-width="680"
+    max-width="643"
     :isPersistent="true"
     ref="accessRequest"
     icon="mdi-check"
-    :title="modalData.title"
     data-test="dialog-access-request"
     dialog-class="notify-dialog"
-
     >
 
       <template v-slot:icon>
         <v-icon large :color="modalData.color">{{modalData.icon}}</v-icon>
       </template>
+      <template v-slot:title>
+        <span class="font-weight-bold text-size mb-1" data-test="dialog-header"> {{ modalData.title }} </span>
+      </template>
       <template v-slot:text>
         <div class="mx-8">
-          <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form">
-          <p class="mb-9" v-html="modalData.text" data-test="p-modal-text"></p>
-          <v-select
-            filled
-            label="Reject Reason"
-            :items="rejectReasonCodes"
-            item-text="desc"
-            item-value="code"
-            v-model="rejectReason"
-            data-test="reject-reason-type"
-            :menu-props="{  contentClass: 'reject-reason-item' }"
-            class="mt-5 mb-0"
-            :rules="rejectReasonRules"
-            v-if="isOnHoldModal"
-            return-object
-            :hint="rejectHint"
-            />
+          <p class="mb-4 text-color sub-text-size" v-html="modalData.text" data-test="p-modal-text"></p>
+          <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isOnHoldModal">
+            <v-row justify="center">
+              <v-col cols="6" class="pa-0">
+                <v-radio-group
+                  v-model="accountToBeOnholdOrRejected"
+                  :rules="accountToBeOnholdOrRejectedRules"
+                  data-test="radio-group-hold-or-reject"
+                  class="mt-0"
+                >
+                  <v-row dense class="d-flex flex-column align-items-center">
+                    <v-col>
+                      <v-radio
+                        label="Reject Account"
+                        :key="OnholdOrRejectCode.REJECTED"
+                        :value="OnholdOrRejectCode.REJECTED"
+                        data-test="radio-reject"
+                      >
+                      </v-radio>
+                    </v-col>
+                    <v-col>
+                      <v-radio
+                        label="On Hold"
+                        :key="OnholdOrRejectCode.ONHOLD"
+                        :value="OnholdOrRejectCode.ONHOLD"
+                        data-test="radio-on-hold"
+                      ></v-radio>
+                    </v-col>
+                  </v-row>
+                  <template v-slot:message="{ message }">
+                    <span class="error-size"> {{ message }} </span>
+                  </template>
+                </v-radio-group>
+              </v-col>
+            </v-row>
+            <v-select
+              filled
+              label="Reason(s) why account is on hold "
+              :items="onholdReasonCodes"
+              item-text="desc"
+              item-value="desc"
+              v-model="onholdReasons"
+              data-test="hold-reason-type"
+              class="my-0"
+              :rules="onholdReasonRules"
+              multiple
+              v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
+            >
+              <template v-slot:selection="{ item, index }">
+                <span v-if="index === 0">{{ item.desc }}</span>
+                <span
+                  v-if="index === 1"
+                  class="grey--text text-caption"
+                >
+                  (+{{ onholdReasons.length - 1 }} {{ onholdReasons.length > 2 ? 'others' : 'other' }})
+                </span>
+              </template>
+          </v-select>
 
           </v-form>
         </div>
@@ -50,7 +92,7 @@
     <!-- confirmation modal -->
     <ModalDialog
       ref="accessRequestConfirmationDialog"
-       :isPersistent="true"
+      :isPersistent="true"
       :title="confirmModalData.title"
       :text="confirmModalData.text"
       dialog-class="notify-dialog"
@@ -79,7 +121,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { RejectCode, TaskRelationshipType } from '@/util/constants'
+import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 
 @Component({
@@ -95,16 +137,20 @@ export default class AccessRequestModal extends Vue {
   @Prop({ default: '' }) private orgName: string
   @Prop({ default: '' }) private accountType: string
   @Prop({ default: '' }) private taskName: string
-  @Prop() private rejectReasonCodes: []
+  @Prop() public onholdReasonCodes: []
 
-  private rejectReason:any = ''
+  public onholdReasons: any[] = []
+  public accountToBeOnholdOrRejected = ''
+
+  OnholdOrRejectCode = OnholdOrRejectCode
 
   $refs: {
     accessRequest: ModalDialog,
     accessRequestConfirmationDialog: ModalDialog,
     rejectForm: HTMLFormElement,
   }
-  private readonly rejectReasonRules = [v => !!v || 'Reason required']
+  readonly onholdReasonRules = [v => v.length > 0 || 'This field is required']
+  readonly accountToBeOnholdOrRejectedRules = [v => !!v || 'Choose reject or on hold to proceed.']
 
   get modalData () {
     const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
@@ -132,7 +178,7 @@ export default class AccessRequestModal extends Vue {
     } else if (this.isOnHoldModal) { // if we need to show on hold modal
       title = 'Reject or Hold Account Creation Request'
 
-      text = 'To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose "Reject Account" in the drop down to reject the request'
+      text = this.$t('onHoldOrRejectModalText').toString()
 
       btnLabel = 'Confirm'
     }
@@ -165,13 +211,10 @@ export default class AccessRequestModal extends Vue {
     }
     return { title, text }
   }
-  get rejectHint () {
-    return this.rejectReason.code === RejectCode.REJECTACCOUNT_CODE ? 'Rejecting the request will not activate this account' : ''
-  }
 
   mounted () {
     if (!this.isOnHoldModal) {
-      this.rejectReason = ''
+      this.onholdReasons = []
     }
   }
   public open () {
@@ -203,17 +246,13 @@ export default class AccessRequestModal extends Vue {
       isValidForm = this.$refs.rejectForm.validate()
     }
     // all other time passing form as valid since there is no values
-    return { isValidForm, rejectReason: this.rejectReason }
+    return { isValidForm, accountToBeOnholdOrRejected: this.accountToBeOnholdOrRejected, onholdReasons: this.onholdReasons }
   }
 }
 </script>
 
 <style lang="scss" >
   @import '$assets/scss/theme.scss';
-
-  .reject-reason-item .v-list-item:last-child {
-      border-top: 1px solid $gray5;
-    }
   .reject-form{
     margin-bottom: -30px !important;
   }
@@ -221,5 +260,19 @@ export default class AccessRequestModal extends Vue {
     color: var(--v-error-darken2) !important;
     caret-color: var(--v-error-darken2) !important;
   }
-
+  .text-color {
+    color: $TextColorGray;
+  }
+  .text-size {
+    font-size: 1.7142rem !important;
+  }
+  .sub-text-size {
+    font-size: 1.1428rem !important;
+  }
+  .align-items-center {
+    align-self: center !important;
+  }
+  .error-size {
+    font-size: 16px;
+  }
 </style>

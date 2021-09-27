@@ -154,7 +154,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     task_info = {
         'relationshipStatus': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
         'status': TaskStatus.HOLD.value,
-        'remark': 'Test Remark'
+        'remarks': ['Test Remark']
 
     }
     task: TaskModel = TaskModel.find_by_task_id(fetched_task['id'])
@@ -163,6 +163,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     dictionary = task.as_dict()
     assert dictionary['status'] == TaskStatus.HOLD.value
     assert dictionary['relationship_status'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+    assert dictionary['remarks'] == ['Test Remark']
 
 
 def test_create_task_govm(session,

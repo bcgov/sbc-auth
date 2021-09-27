@@ -92,9 +92,8 @@
   "govm_tos_updated": "We have updated our Memorandum of Understanding. Please review and accept the new MOU to proceed.",
   "createBCRegistriesAccount": "Create a BC Registries and Online Services Account",
   "pendingAffidavitReviewTitle": "Thanks for creating the account {team} at BC Registries and Online Services.",
-  "pendingAffidvitReviewMessage": "Once your account has been reviewed and approved you will receive\n\nan email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
+  "pendingAffidvitReviewMessage": "Once your account has been reviewed and approved you will receive\n\nan email allowing you to activate and manage the account. \n\nPlease allow {days} business days for this process.",
   "extraProdOrgSuccessTitle": "Your BC Registries and Online Services account has been created and is being reviewed.",
-  "extraProdOrgSuccessMessage": "Once your account has been reviewed and approved you will receive an email allowing you to activate and manage the account. \n\nPlease allow 5 business days for this process.",
   "noPendingAccountsLabel": "No Pending Invitations",
   "generatePasscodeText": "A new passcode will be generated and will be sent to the email address provided below:",
   "paymentErrorTitle": "Payment Error",
@@ -174,5 +173,6 @@
   "removeIASuccessText": "You have successfully deleted a incorporation application",
   "removeIAConfirmTitle": "Delete Incorporation Application?",
   "removeIAConfirmText": "Deleting this incorporation application will remove the application from your Business Registry list. The business associated with this application will not be incorporated. If this incorporation application was associated with a Name Request, the Name Request can still be used to incorporate a business.",
-  "myBusinessDashSubtitle": "Start BC-based businesses and keep business records up to date."
+  "myBusinessDashSubtitle": "Start BC-based businesses and keep business records up to date.",
+  "onHoldOrRejectModalText": "To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose \"Reject Account\""
 }

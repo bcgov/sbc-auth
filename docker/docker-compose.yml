@@ -60,19 +60,19 @@ services:
       - "6832:6832/udp"
 
   #################### Nats Service Definition ####################
-    nats:
-        image: nats-streaming
-        restart: always
-        mem_limit: 512m
-        expose:
-          - 4222
-          - 8222
-        labels:
-          - entity.services=nats
-        ports:
-          - 4222:4222
-          - 8222:8222
-        tty: true
+  nats:
+      image: nats-streaming
+      restart: always
+      mem_limit: 512m
+      expose:
+        - 4222
+        - 8222
+      labels:
+        - entity.services=nats
+      ports:
+        - 4222:4222
+        - 8222:8222
+      tty: true
 
 volumes:
   db-data:

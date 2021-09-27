@@ -51,15 +51,15 @@ class Authorization(db.Model):
                                                    org_id: int = None):
         """Return authorization view object."""
         auth = None
-        if org_id and business_identifier:
-            auth = cls.query.filter_by(org_id=org_id, business_identifier=business_identifier,
-                                       org_membership=ADMIN).first()
+        if keycloak_guid and business_identifier and org_id:
+            auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
+                                       business_identifier=business_identifier,
+                                       org_id=org_id).one_or_none()
         elif keycloak_guid and business_identifier:
             auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
                                        business_identifier=business_identifier).one_or_none()
         elif not keycloak_guid and business_identifier:
-            auth = cls.query.filter_by(business_identifier=business_identifier).first()
-
+            auth = cls.query.filter_by(business_identifier=business_identifier).one_or_none()
         return auth
 
     @classmethod
