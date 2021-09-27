@@ -1,23 +1,24 @@
 <template>
   <v-container class="view-container">
-
     <div class="view-header flex-column">
       <h1 class="view-header__title">Staff Dashboard</h1>
-      <p class="mt-3 mb-0">Search for businesses and manage BC Registries accounts</p>
+      <p class="mt-3 mb-0">
+        Search for businesses and manage BC Registries accounts
+      </p>
     </div>
 
     <v-card flat class="mb-4 pa-8">
       <div class="view-header flex-column mb-10">
         <h2 class="view-header__title">Search Entities</h2>
-        <p class="mt-3 mb-0">Enter the Entity's Incorporation Number below to access their dashboard.</p>
+        <p class="mt-3 mb-0">
+          Enter the Entity's Incorporation Number below to access their
+          dashboard.
+        </p>
       </div>
       <v-expand-transition>
         <div v-show="errorMessage">
-          <v-alert
-            type="error"
-            icon="mdi-alert-circle"
-            class="mb-0"
-          >{{errorMessage}} <strong>{{searchedBusinessNumber}}</strong>
+          <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
+            >{{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
           </v-alert>
         </div>
       </v-expand-transition>
@@ -42,11 +43,15 @@
           depressed
           :disabled="!isFormValid()"
           :loading="searchActive"
-        >Search</v-btn>
+          >Search</v-btn
+        >
       </v-form>
 
       <template>
-        <IncorporationSearchResultView :isVisible = "canViewIncorporationSearchResult" :affiliatedOrg = "affiliatedOrg"></IncorporationSearchResultView>
+        <IncorporationSearchResultView
+          :isVisible="canViewIncorporationSearchResult"
+          :affiliatedOrg="affiliatedOrg"
+        ></IncorporationSearchResultView>
       </template>
     </v-card>
 
@@ -57,15 +62,30 @@
 
     <!-- GL Codes -->
 
-     <v-card flat class="mb-4 pa-8">
+    <v-card flat class="mb-4 pa-8">
       <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
     </v-card>
 
+    <!-- FAS UI  -->
+    <v-expansion-panels class="mb-4" accordion>
+      <v-expansion-panel class="pa-8">
+        <v-expansion-panel-header class="px-0">
+          <header>
+            <h2 class="view-header__title">Fee Accounting System</h2>
+            <p class="mt-3 mb-0">
+              Search and manage routing slips
+            </p>
+          </header>
+        </v-expansion-panel-header>
+        <v-expansion-panel-content>
+            <fas-search-component :isLibraryMode="true"/>
+        </v-expansion-panel-content>
+      </v-expansion-panel>
+    </v-expansion-panels>
   </v-container>
 </template>
 
 <script lang="ts">
-
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -92,14 +112,21 @@ const userModule = namespace('user')
   }
 })
 export default class StaffDashboardView extends Vue {
-  @OrgModule.Action('getOrganizationForAffiliate') private getOrganizationForAffiliate!: () => Promise<Organization>
+  @OrgModule.Action('getOrganizationForAffiliate')
+
+  private getOrganizationForAffiliate!: () => Promise<Organization>
 
   @userModule.State('currentUser') private currentUser!: KCUserProfile
 
-  @BusinessModule.Action('searchBusiness') private searchBusiness!: (businessIdentifier: string) => Promise<any>
-  @BusinessModule.Action('resetCurrentBusiness') private resetCurrentBusiness!: () => Promise<any>
+  @BusinessModule.Action('searchBusiness') private searchBusiness!: (
+    businessIdentifier: string
+  ) => Promise<any>
+  @BusinessModule.Action('resetCurrentBusiness')
+  private resetCurrentBusiness!: () => Promise<any>
   @BusinessModule.State('currentBusiness') private currentBusiness!: Business
-  @BusinessModule.Action('loadBusiness') private loadBusiness!: () => Promise<Business>
+  @BusinessModule.Action('loadBusiness') private loadBusiness!: () => Promise<
+    Business
+  >
 
   private businessNumber = ''
   private searchedBusinessNumber = ''
@@ -110,7 +137,9 @@ export default class StaffDashboardView extends Vue {
 
   private incorpNumRules = [
     v => !!v || 'Incorporation Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number is invalid'
+    v =>
+      CommonUtils.validateIncorporationNumber(v) ||
+      'Incorporation Number is invalid'
   ]
 
   $refs: {
@@ -118,11 +147,11 @@ export default class StaffDashboardView extends Vue {
   }
 
   private get canViewAccounts (): boolean {
-    return (this.currentUser?.roles?.includes(Role.StaffViewAccounts))
+    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
   private get canViewGLCodes (): boolean {
-    return (this.currentUser?.roles?.includes(Role.ManageGlCodes))
+    return this.currentUser?.roles?.includes(Role.ManageGlCodes)
   }
 
   private isFormValid (): boolean {
@@ -168,7 +197,9 @@ export default class StaffDashboardView extends Vue {
   }
 
   incorpNumFormat () {
-    this.businessNumber = CommonUtils.formatIncorporationNumber(this.businessNumber)
+    this.businessNumber = CommonUtils.formatIncorporationNumber(
+      this.businessNumber
+    )
   }
 
   gotToGLCodes () {
@@ -176,9 +207,14 @@ export default class StaffDashboardView extends Vue {
   }
 }
 </script>
+<style lang="scss" >
+// importing FAS styles need no scope
+@import '~fas-ui/src/assets/scss/search.scss';
+</style>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+
 .v-input {
   display: inline-block;
   width: 20rem;
@@ -197,6 +233,9 @@ export default class StaffDashboardView extends Vue {
     font-weight: bold;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+  }
+  .v-expansion-panel-content__wrap {
+  padding: 0px !important;
   }
 }
 </style>
