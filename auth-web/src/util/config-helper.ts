@@ -16,6 +16,7 @@ export default class ConfigHelper {
     sessionStorage.setItem(SessionStorageKeys.AuthApiUrl, ConfigHelper.getAuthAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.AuthWebUrl, ConfigHelper.getSelfURL())
+    sessionStorage.setItem(SessionStorageKeys.FasWebUrl, ConfigHelper.getFasWebUrl())
   }
 
   /**
@@ -111,6 +112,10 @@ export default class ConfigHelper {
 
   static getCorporateOnlineUrl () {
     return ConfigHelper.getValue('CORPORATE_ONLINE_URL')
+  }
+
+  static getFasWebUrl () {
+    return ConfigHelper.getValue('FAS_WEB_URL')
   }
 
   static getValue (key: String) {

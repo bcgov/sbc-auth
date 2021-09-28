@@ -13,7 +13,8 @@ export enum SessionStorageKeys {
     OrgSearchFilter = 'ORG_SEARCH_FILTER',
     AuthApiUrl = 'AUTH_API_URL',
     AuthWebUrl = 'AUTH_WEB_URL',
-    StatusApiUrl = 'STATUS_API_URL'
+    StatusApiUrl = 'STATUS_API_URL',
+    FasWebUrl = 'FAS_WEB_URL'
 }
 
 export enum Role {
