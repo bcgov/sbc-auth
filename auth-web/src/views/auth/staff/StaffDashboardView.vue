@@ -95,15 +95,10 @@ import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearc
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import { Role } from '@/util/constants'
-
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
-
-
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
-
-
 
 const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
@@ -114,7 +109,7 @@ const userModule = namespace('user')
     GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement,
-    IncorporationSearchResultView,
+    IncorporationSearchResultView
   }
 })
 export default class StaffDashboardView extends Vue {
@@ -219,8 +214,6 @@ export default class StaffDashboardView extends Vue {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-// importing FAS styles
-@import '~fas-ui/lib/lib.css';
 .v-input {
   display: inline-block;
   width: 20rem;
