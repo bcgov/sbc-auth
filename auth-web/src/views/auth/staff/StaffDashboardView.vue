@@ -86,6 +86,7 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable */
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -113,7 +114,6 @@ const userModule = namespace('user')
 })
 export default class StaffDashboardView extends Vue {
   @OrgModule.Action('getOrganizationForAffiliate')
-
   private getOrganizationForAffiliate!: () => Promise<Organization>
 
   @userModule.State('currentUser') private currentUser!: KCUserProfile
@@ -154,15 +154,15 @@ export default class StaffDashboardView extends Vue {
     return this.currentUser?.roles?.includes(Role.ManageGlCodes)
   }
 
-  private isFormValid (): boolean {
+  private isFormValid(): boolean {
     return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
   }
 
-  private clearError () {
+  private clearError() {
     this.searchedBusinessNumber = ''
   }
 
-  async search () {
+  async search() {
     if (this.isFormValid()) {
       this.searchActive = true
 
@@ -182,7 +182,7 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  async updateCurrentBusiness () {
+  async updateCurrentBusiness() {
     try {
       // Search for business, action will set session storage
       await this.loadBusiness()
@@ -202,7 +202,7 @@ export default class StaffDashboardView extends Vue {
     )
   }
 
-  gotToGLCodes () {
+  gotToGLCodes() {
     this.$router.push('/glcodelist')
   }
 }
@@ -214,7 +214,6 @@ export default class StaffDashboardView extends Vue {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-
 .v-input {
   display: inline-block;
   width: 20rem;
