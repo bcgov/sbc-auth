@@ -213,9 +213,9 @@ class User:  # pylint: disable=too-many-instance-attributes
     def send_otp_authenticator_reset_notification(recipient_email, origin_url, org_id):
         """Send Authenticator reset notification to the user."""
         current_app.logger.debug('<send_otp_authenticator_reset_notification')
-        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
         context_path = 'signin/bceid'
-        login_url = '{}/{}'.format(app_url, context_path)
+        login_url = f'{app_url}/{context_path}'
         data = {
             'accountId': org_id,
             'emailAddresses': recipient_email,
@@ -556,7 +556,7 @@ class User:  # pylint: disable=too-many-instance-attributes
 
         user_orgs: List[OrgModel] = MembershipModel.find_orgs_for_user(user.id)
 
-        current_app.logger.info('Found {} orgs for the user'.format(len(user_orgs) if user_orgs else 0))
+        current_app.logger.info(f'Found {len(user_orgs or [])} orgs for the user')
 
         if user_orgs:
             for org in user_orgs:
@@ -597,7 +597,7 @@ class User:  # pylint: disable=too-many-instance-attributes
         current_app.logger.info(
             f'Org :{org.name} --> User Owner : {is_user_an_owner},Has other owners :{org_has_other_owners}')
         if is_user_an_owner and not org_has_other_owners:
-            current_app.logger.info('Affiliated entities : {}'.format(len(org.affiliated_entities)))
+            current_app.logger.info(f'Affiliated entities : {len(org.affiliated_entities)}')
             if len(org.affiliated_entities) == 0:
                 org.status_code = OrgStatus.INACTIVE.value
                 org.flush()

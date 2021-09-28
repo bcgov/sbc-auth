@@ -80,9 +80,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if org_info:
 
             org = Org(**org_info)
-            current_app.logger.debug(
-                'Creating org from dictionary {}'.format(org_info)
-            )
+            current_app.logger.debug(f'Creating org from dictionary {org_info}')
             if org.type_code:
                 org.org_type = OrgType.get_type_for_code(org.type_code)
             else:

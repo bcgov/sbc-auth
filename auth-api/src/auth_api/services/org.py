@@ -657,9 +657,8 @@ class Org:  # pylint: disable=too-many-public-methods
         """Search for orgs based on input parameters."""
         orgs = {'orgs': []}
         if kwargs.get('business_identifier', None):
-            affiliation: AffiliationModel = AffiliationModel. \
-                find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
-            if affiliation:
+            affiliations = AffiliationModel.find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
+            for affiliation in affiliations:
                 orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
         else:
             include_invitations: bool = False
@@ -811,8 +810,8 @@ class Org:  # pylint: disable=too-many-public-methods
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
                                                       relationship_id=relationship_id)
         context_path = f'review-account/{task.id}'
-        app_url = '{}/{}'.format(g.get('origin_url', ''), current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
-        review_url = '{}/{}'.format(app_url, context_path)
+        app_url = f"{g.get('origin_url', '')}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
+        review_url = f'{app_url}/{context_path}'
         first_name = getattr(user, 'firstname', '')
         last_name = getattr(user, 'lastname', '')
 
@@ -840,7 +839,7 @@ class Org:  # pylint: disable=too-many-public-methods
             notification_type = 'nonbcscOrgRejectedNotification'
         else:
             return  # Don't send mail for any other status change
-        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
         data = {
             'accountId': org_id,
             'emailAddresses': receipt_admin_email,
@@ -866,7 +865,7 @@ class Org:  # pylint: disable=too-many-public-methods
             notification_type = 'govmRejectedNotification'
         else:
             return  # Don't send mail for any other status change
-        app_url = '{}/{}'.format(origin_url, current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH'))
+        app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
         data = {
             'accountId': org_id,
             'emailAddresses': receipt_admin_email,

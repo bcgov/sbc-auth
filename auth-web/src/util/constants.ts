@@ -310,9 +310,9 @@ export enum DisplayModeValues{
     VIEW_ONLY = 'VIEW_ONLY'
 }
 
-export enum RejectCode {
-    REJECTACCOUNT_CODE = 'REJECTACCOUNT',
-    REJECTACCOUNT_DESC = 'Reject Account',
+export enum OnholdOrRejectCode {
+    ONHOLD = 'On Hold',
+    REJECTED = 'Reject Account'
 }
 
 export const ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT = 5

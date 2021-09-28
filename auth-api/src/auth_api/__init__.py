@@ -35,7 +35,6 @@ from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
 
-
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 
 
@@ -46,7 +45,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
     # Configure Sentry
     if app.config.get('SENTRY_DSN', None):
-        sentry_sdk.init(
+        sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
             dsn=app.config.get('SENTRY_DSN'),
             integrations=[FlaskIntegration()]
         )

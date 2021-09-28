@@ -776,8 +776,7 @@ def test_delete_otp_for_user(client, jwt, session):  # pylint:disable=unused-arg
 
     # another org admin cant do
     admin_user1 = factory_user_model(user_info=TestUserInfo.user_test)
-    org1 = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit, org_status_info=None,
-                             payment_type_info=None)
+    org1 = factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit)
     factory_membership_model(admin_user1.id, org1.id)
     admin_claims = TestJwtClaims.get_test_real_user(admin_user1.keycloak_guid)
     admin1_headers = factory_auth_header(jwt=jwt, claims=admin_claims)

@@ -652,6 +652,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/affiliation'
+              examples: {}
         '400':
           description: Bad Request
           content:
@@ -676,6 +677,7 @@ paths:
           application/json:
             schema:
               title: affiliationRequest
+              type: object
               properties:
                 businessIdentifier:
                   type: string
@@ -689,8 +691,6 @@ paths:
                   default: ''
                   example: '12345'
                   pattern: ^(.*)$
-              required:
-                - businessIdentifier
     get:
       responses:
         '200':
@@ -3252,6 +3252,22 @@ components:
         business:
           title: entity
           type: object
+          x-example:
+            CP0001578:
+              businessIdentifier: CP0001578
+              businessNumber: CP0001847
+              contacts:
+                - created: '2020-01-09T11:11:41.353569+00:00'
+                  email: saravanpa@gmail.com
+                  modified: '2020-01-09T11:11:41.353578+00:00'
+                  phone: '1111'
+                  phoneExtension: '11111'
+              corpType: CP
+              created: '2020-01-09T11:11:31.303521+00:00'
+              modified: '2020-01-09T11:14:06.560862+00:00'
+              modifiedBy: sbc-auth admin
+              name: Business
+              passCodeClaimed: false
           properties:
             businessIdentifier:
               type: string
@@ -3263,62 +3279,6 @@ components:
               title: The Businessnumber Schema
               default: ''
               pattern: ^(.*)$
-            contacts:
-              type: array
-              title: The Contacts Schema
-              items:
-                title: contact
-                type: object
-                properties:
-                  email:
-                    type: string
-                    title: Email
-                    pattern: '(^[a-zA-Z0-9!#$%&''*+-/=?^_`{|.]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)'
-                  phoneExtension:
-                    type: string
-                    title: Phone Extension
-                    default: ''
-                    pattern: ^(.*)$
-                  phone:
-                    type: string
-                    title: Phone
-                    default: ''
-                    pattern: ^(.*)$
-                  deliveryInstructions:
-                    type: string
-                    title: Delivery Instructions
-                    default: ''
-                    pattern: ^(.*)$
-                  postalCode:
-                    type: string
-                    title: Postal Code
-                    default: ''
-                    pattern: ^(.*)$
-                  country:
-                    type: string
-                    title: Country
-                    default: ''
-                    pattern: ^(.*)$
-                  region:
-                    type: string
-                    title: Region
-                    default: ''
-                    pattern: ^(.*)$
-                  city:
-                    type: string
-                    title: City
-                    default: ''
-                    pattern: ^(.*)$
-                  streetAdditional:
-                    type: string
-                    title: Street Additional
-                    default: ''
-                    pattern: ^(.*)$
-                  street:
-                    type: string
-                    title: Street
-                    default: ''
-                    pattern: ^(.*)$
             corpType:
               type: string
               title: The Corptype Schema
@@ -3348,32 +3308,6 @@ components:
               type: boolean
               title: The Passcodeclaimed Schema
               default: false
-          required:
-            - businessIdentifier
-            - businessNumber
-            - contacts
-            - corpType
-            - created
-            - modified
-            - modifiedBy
-            - name
-            - passCodeClaimed
-          x-example:
-            CP0001578:
-              businessIdentifier: CP0001578
-              businessNumber: CP0001847
-              contacts:
-                - created: '2020-01-09T11:11:41.353569+00:00'
-                  email: saravanpa@gmail.com
-                  modified: '2020-01-09T11:11:41.353578+00:00'
-                  phone: '1111'
-                  phoneExtension: '11111'
-              corpType: CP
-              created: '2020-01-09T11:11:31.303521+00:00'
-              modified: '2020-01-09T11:14:06.560862+00:00'
-              modifiedBy: sbc-auth admin
-              name: Business
-              passCodeClaimed: false
         created:
           type: string
         created_by:
@@ -3429,15 +3363,6 @@ components:
               pattern: ^(.*)$
             modified_by:
               type: string
-          required:
-            - created
-            - created_by
-            - id
-            - modified
-            - name
-            - orgType
-            - org_status
-            - preferred_payment
     invitation:
       title: invitation
       type: object

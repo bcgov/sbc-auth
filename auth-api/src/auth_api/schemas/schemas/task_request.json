@@ -91,13 +91,19 @@
         "APPROVED"
       ]
     },
-    "remark": {
-      "$id": "#/properties/remark",
-      "type": "string",
+    "remarks": {
+      "$id": "#/properties/remarks",
+      "type": "array",
       "title": "Remark for task change.",
       "default": "",
       "examples": [
+        [
         "Affidavit is Blank"
+        ],
+        [
+          "Affidavit is Blank",
+          "Affidavit is Missing Seal"
+        ]
       ]
     }
   }

@@ -151,11 +151,11 @@ export default class StaffDashboardView extends Vue {
     searchBusinessForm: HTMLFormElement
   }
 
-  private get canViewAccounts(): boolean {
+  private get canViewAccounts (): boolean {
     return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
-  private get canViewGLCodes(): boolean {
+  private get canViewGLCodes (): boolean {
     return this.currentUser?.roles?.includes(Role.ManageGlCodes)
   }
 
@@ -201,7 +201,7 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  incorpNumFormat() {
+  incorpNumFormat () {
     this.businessNumber = CommonUtils.formatIncorporationNumber(
       this.businessNumber
     )
@@ -212,6 +212,10 @@ export default class StaffDashboardView extends Vue {
   }
 }
 </script>
+<style lang="scss" >
+// importing FAS styles need no scope
+@import '~fas-ui/src/assets/scss/search.scss';
+</style>
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';

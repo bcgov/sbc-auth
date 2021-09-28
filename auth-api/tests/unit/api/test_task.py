@@ -144,7 +144,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     update_task_payload = {
         'status': TaskStatus.HOLD.value,
         'relationshipStatus': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-        'remark': 'AFFIDAVIT SEAL MISSING'
+        'remarks': ['AFFIDAVIT SEAL MISSING']
     }
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
@@ -156,6 +156,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert rv.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == TaskStatus.HOLD.value
     assert dictionary['relationshipStatus'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+    assert isinstance(['relationshipStatus'], list)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get('/api/v1/orgs/{}'.format(org_id),

@@ -79,12 +79,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return Task(task_model)
 
     @staticmethod
-    def close_task(task_id, remark='', do_commit: bool = True):
+    def close_task(task_id, remarks: [] = None, do_commit: bool = True):
         """Close a task."""
         current_app.logger.debug('<close_task ')
         task_model: TaskModel = TaskModel.find_by_id(task_id)
         task_model.status = TaskStatus.CLOSED.value
-        task_model.remarks = remark
+        task_model.remarks = remarks
         task_model.flush()
         if do_commit:
             db.session.commit()
@@ -97,7 +97,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         user: UserModel = UserModel.find_by_jwt_token()
         task_model.status = task_info.get('status', TaskStatus.COMPLETED.value)
-        task_model.remarks = task_info.get('remark', '')
+        task_model.remarks = task_info.get('remarks', None)
         task_model.decision_made_by = user.username
         task_model.decision_made_on = datetime.now()
         task_model.relationship_status = task_relationship_status
@@ -149,7 +149,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         create_account_signin_route = urllib.parse.quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
                                                               f'{org.id}')
         data = {
-            'remark': task_model.remarks,
+            'remarks': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': task_model.relationship_id,
             'emailAddresses': admin_email,
