@@ -43,7 +43,8 @@
             "name-request",
             "nro",
             "entity-selector",
-            "bceid"
+            "bceid",
+            "fas-ui"
         ]
     },
     {
