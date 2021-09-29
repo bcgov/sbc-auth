@@ -1941,7 +1941,7 @@ paths:
             value: CP0002000
           CP0001239:
             value: CP0001239
-  '/api/v1/accounts/{account_id}/products/{product_code}/authorizations':
+  '/accounts/{account_id}/products/{product_code}/authorizations':
     get:
       summary: Get authorizations for the account per product
       operationId: getAccAuthorizations
@@ -2494,7 +2494,7 @@ paths:
         description: ''
       summary: Create a new entity for the provided information
       description: Create a new entity for the provided information
-  '/api/v1/codes/{code_type}':
+  '/codes/{code_type}':
     parameters:
       - name: code_type
         in: path
