@@ -67,7 +67,7 @@
     </v-card>
 
     <!-- FAS UI  -->
-    <v-expansion-panels class="mb-4" accordion>
+    <v-expansion-panels class="mb-4" accordion v-show="isFasDashboardEnabled">
       <v-expansion-panel class="pa-8">
         <v-expansion-panel-header class="px-0">
           <header>
@@ -91,10 +91,11 @@ import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
-import { Role } from '@/util/constants'
+import { LDFlags, Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
@@ -204,6 +205,10 @@ export default class StaffDashboardView extends Vue {
 
   gotToGLCodes() {
     this.$router.push('/glcodelist')
+  }
+
+  get isFasDashboardEnabled (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false
   }
 }
 </script>
