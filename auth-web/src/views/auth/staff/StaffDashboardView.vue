@@ -67,7 +67,7 @@
     </v-card>
 
     <!-- FAS UI  -->
-    <v-expansion-panels class="mb-4" accordion v-show="isFasDashboardEnabled">
+    <v-expansion-panels class="mb-4" accordion v-if="canSearchFAS && isFasDashboardEnabled">
       <v-expansion-panel class="pa-8">
         <v-expansion-panel-header class="px-0">
           <header>
@@ -153,6 +153,10 @@ export default class StaffDashboardView extends Vue {
 
   private get canViewGLCodes (): boolean {
     return this.currentUser?.roles?.includes(Role.ManageGlCodes)
+  }
+
+  get canSearchFAS (): boolean {
+    return this.currentUser?.roles?.includes(Role.FasSearch)
   }
 
   private isFormValid(): boolean {

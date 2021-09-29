@@ -31,7 +31,8 @@ export enum Role {
     PublicUser = 'public_user',
     StaffSuspendAccounts = 'suspend_accounts',
     GOVMAccountUser = 'gov_account_user',
-    ManageGlCodes = 'manage_gl_codes'
+    ManageGlCodes = 'manage_gl_codes',
+    FasSearch = 'fas_search'
 }
 
 export enum Pages {
