@@ -56,14 +56,14 @@
     </v-card>
 
     <!-- Director search -->
-    <v-card flat class="mb-4 pa-8">
-      <StaffAccountManagement v-if="canViewAccounts"></StaffAccountManagement>
+    <v-card flat class="mb-4 pa-8" v-if="canViewAccounts">
+      <StaffAccountManagement></StaffAccountManagement>
     </v-card>
 
     <!-- GL Codes -->
 
-    <v-card flat class="mb-4 pa-8">
-      <GLCodesListView v-if="canViewGLCodes"></GLCodesListView>
+    <v-card flat class="mb-4 pa-8" v-if="canViewGLCodes">
+      <GLCodesListView></GLCodesListView>
     </v-card>
 
     <!-- FAS UI  -->
