@@ -65,7 +65,6 @@ describe('Transactions.vue', () => {
           'bcolAccountId': '126316',
           'bcolAccountName': 'NEW BC ONLINE TECH TEAM',
           'bcolUserId': 'PA32881',
-          'billable': true,
           'created': '2021-04-30T20:54:15.936923+00:00',
           'createdBy': 'BCREGTEST Bena TEST',
           'hasApiAccess': false,

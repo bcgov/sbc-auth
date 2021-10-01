@@ -103,8 +103,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
-        # If the account is anonymous or govm set the billable value as False else True
-        org.billable = access_type not in [AccessType.ANONYMOUS.value, AccessType.GOVM.value]
+
         # Set the status based on access type
         # Check if the user is APPROVED else set the org status to PENDING
 
@@ -190,8 +189,7 @@ class Org:  # pylint: disable=too-many-public-methods
             # pay needs the most unique idenitfier.So combine name and branch name
             'accountName': org_name_for_pay,
             'paymentInfo': {
-                'methodOfPayment': payment_method,
-                'billable': org_model.billable
+                'methodOfPayment': payment_method
             }
         }
         if mailing_address:

@@ -11,7 +11,6 @@
             "orgs": [
                 {
                     "accessType": "ANONYMOUS",
-                    "billable": false,
                     "contacts": [],
                     "created": "2020-11-23T11:49:43.900310+00:00",
                     "createdBy": "Susan Stewart",
@@ -40,7 +39,6 @@
                 },
                 {
                     "accessType": "ANONYMOUS",
-                    "billable": false,
                     "contacts": [],
                     "created": "2020-11-23T11:49:42.735027+00:00",
                     "createdBy": "Susan Stewart",

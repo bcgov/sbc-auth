@@ -198,7 +198,6 @@ def test_create_task_govm(session,
             'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
             'paymentInfo': {
                 'methodOfPayment': 'EJV',
-                'billable': False,
                 'revenueAccount': payment_details.get('paymentInfo').get('revenueAccount')
             },
             'contactInfo': TestOrgInfo.get_mailing_address()
