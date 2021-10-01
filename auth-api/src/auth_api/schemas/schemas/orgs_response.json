@@ -10,7 +10,6 @@
             "orgs": [
                 {
                     "accessType": "REGULAR",
-                    "billable": true,
                     "created": "2020-11-17T14:58:14.701596+00:00",
                     "createdBy": "Gilbert Campbell",
                     "id": 1,

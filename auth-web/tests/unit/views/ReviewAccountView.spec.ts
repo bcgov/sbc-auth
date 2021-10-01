@@ -62,7 +62,6 @@ describe('ReviewAccountView.vue', () => {
       state: {
         accountUnderReview: {
           'accessType': 'REGULAR',
-          'billable': true,
           'created': '2019-11-28T22:38:55.157811+00:00',
           'createdBy': 'test user',
           'id': 11,
