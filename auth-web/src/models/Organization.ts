@@ -199,7 +199,6 @@ export interface OrgPaymentDetails {
   accountName: string
   bcolAccount: string
   bcolUserId: string
-  billable: boolean
   cfsAccount: CFSAccountDetails
   credit: string
   paymentMethod: string

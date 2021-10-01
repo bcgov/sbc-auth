@@ -79,8 +79,7 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
             'paymentInfo': {
-                'methodOfPayment': OrgService._get_default_payment_method_for_creditcard(),
-                'billable': True
+                'methodOfPayment': OrgService._get_default_payment_method_for_creditcard()
             }
 
         }
@@ -103,8 +102,7 @@ def test_pay_request_is_correct_with_branch_name(session,
             'accountId': dictionary.get('id'),
             'accountName': f"{dictionary.get('name')}-{TestOrgInfo.org_branch_name['branchName']}",
             'paymentInfo': {
-                'methodOfPayment': OrgService._get_default_payment_method_for_creditcard(),
-                'billable': True
+                'methodOfPayment': OrgService._get_default_payment_method_for_creditcard()
             }
 
         }
@@ -131,8 +129,7 @@ def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentMethod.ONLINE_BANKING.value,
-                'billable': True
+                'methodOfPayment': PaymentMethod.ONLINE_BANKING.value
             }
 
         }
@@ -149,8 +146,7 @@ def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentMethod.DIRECT_PAY.value,
-                'billable': True
+                'methodOfPayment': PaymentMethod.DIRECT_PAY.value
             }
 
         }
@@ -174,8 +170,7 @@ def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentMethod.ONLINE_BANKING.value,
-                'billable': True
+                'methodOfPayment': PaymentMethod.ONLINE_BANKING.value
             }
 
         }
@@ -201,8 +196,7 @@ def test_create_basic_org_assert_pay_request_is_govm(session,
             'accountId': dictionary.get('id'),
             'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentMethod.EJV.value,
-                'billable': False
+                'methodOfPayment': PaymentMethod.EJV.value
             }
 
         }
@@ -241,7 +235,6 @@ def test_put_basic_org_assert_pay_request_is_govm(session,
             'accountName': dictionary.get('name') + '-' + dictionary.get('branch_name'),
             'paymentInfo': {
                 'methodOfPayment': 'EJV',
-                'billable': False,
                 'revenueAccount': payment_details.get('paymentInfo').get('revenueAccount')
             },
             'contactInfo': TestOrgInfo.get_mailing_address()
@@ -273,8 +266,7 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
             'accountId': dictionary.get('id'),
             'accountName': TestOrgInfo.bcol_linked().get('name'),
             'paymentInfo': {
-                'methodOfPayment': PaymentMethod.BCOL.value,
-                'billable': True
+                'methodOfPayment': PaymentMethod.BCOL.value
             },
             'bcolAccountNumber': dictionary.get('bcol_account_id'),
             'bcolUserId': dictionary.get('bcol_user_id'),

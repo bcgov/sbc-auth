@@ -34,7 +34,6 @@ describe('Statements.vue', () => {
       state: {
         currentOrganization: {
           'accessType': 'REGULAR',
-          'billable': true,
           'created': '2021-05-02T20:54:15.936923+00:00',
           'createdBy': 'user1',
           'hasApiAccess': false,
