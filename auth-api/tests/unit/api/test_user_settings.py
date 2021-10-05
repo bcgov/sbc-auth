@@ -52,3 +52,18 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(item_list, 'user_settings_response')[0]
     assert account['productSettings'] == f'/account/{account["id"]}/restricted-product'
+
+    kc_id_no_user = TestUserInfo.user1.get('keycloak_guid')
+    claims = copy.deepcopy(TestJwtClaims.updated_test.value)
+    claims['sub'] = str(kc_id_no_user)
+    patch_token_info(claims, monkeypatch)
+    # post token with updated claims
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.get(f'/api/v1/users/{kc_id_no_user}/settings', headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(item_list, 'user_settings_response')[0]
+    item_list = rv.json
+    account = next((obj for obj in item_list if obj['type'] == 'ACCOUNT'), None)
+    assert account is None
+    user_profile = next(obj for obj in item_list if obj['type'] == 'USER_PROFILE')
+    assert '/userprofile' in user_profile.get('urlpath')

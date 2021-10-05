@@ -492,6 +492,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         user_model = UserModel.find_by_jwt_token()
 
         if not user_model:
+            if kwargs.get('silent_mode', False):
+                return None
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value

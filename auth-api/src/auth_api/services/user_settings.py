@@ -30,16 +30,18 @@ class UserSettings:  # pylint: disable=too-few-public-methods
     def fetch_user_settings(user_id):
         """Create a new organization."""
         current_app.logger.debug('<fetch_user_settings ')
-        all_orgs = OrgService.get_orgs(user_id)
+
         all_settings = []
         url_origin = current_app.config.get('WEB_APP_URL')
-        for org in all_orgs:
-            all_settings.append(
-                UserSettingsModel(org.id, org.name, url_origin,
-                                  '/account/' + str(org.id) + '/settings',
-                                  'ACCOUNT', org.type_code, org.status_code,
-                                  '/account/' + str(org.id) + '/restricted-product'
-                                  ))
+        if user_id:
+            all_orgs = OrgService.get_orgs(user_id)
+            for org in all_orgs:
+                all_settings.append(
+                    UserSettingsModel(org.id, org.name, url_origin,
+                                      '/account/' + str(org.id) + '/settings',
+                                      'ACCOUNT', org.type_code, org.status_code,
+                                      '/account/' + str(org.id) + '/restricted-product'
+                                      ))
 
         all_settings.append(UserSettingsModel(user_id, 'USER PROFILE', url_origin, '/userprofile', 'USER_PROFILE'))
         all_settings.append(
