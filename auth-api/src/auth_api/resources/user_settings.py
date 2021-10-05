@@ -52,12 +52,10 @@ class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
             return {'message': 'Unauthorized'}, http_status.HTTP_401_UNAUTHORIZED
 
         try:
-            user = UserService.find_by_jwt_token()
-            if not user:
-                response, status = json.dumps([]), http_status.HTTP_200_OK
-            else:
-                all_settings = UserSettingsService.fetch_user_settings(user.identifier)
-                response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), http_status.HTTP_200_OK
+            user = UserService.find_by_jwt_token(silent_mode=True)
+            user_id = user.identifier if user else None
+            all_settings = UserSettingsService.fetch_user_settings(user_id)
+            response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), http_status.HTTP_200_OK
 
         except BusinessException:
             response, status = json.dumps([]), http_status.HTTP_200_OK
