@@ -76,6 +76,11 @@
               Search and manage routing slips
             </p>
           </header>
+          <template v-slot:actions>
+            <v-icon large>
+              mdi-chevron-down
+            </v-icon>
+          </template>
         </v-expansion-panel-header>
         <v-expansion-panel-content>
             <fas-search-component :isLibraryMode="true"/>
