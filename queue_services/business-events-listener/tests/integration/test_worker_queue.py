@@ -21,15 +21,22 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
+from auth_api.utils.enums import AccessType
 from entity_queue_common.service_utils import subscribe_to_queue
 from requests.models import Response
 
-from .utils import helper_add_event_to_queue
+from .utils import get_random_number, helper_add_event_to_queue
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(['access_type', 'is_auto_affiliate_expected'], [
+    (AccessType.REGULAR.value, True),
+    (AccessType.REGULAR_BCEID.value, True),
+    (AccessType.EXTRA_PROVINCIAL.value, True),
+    (AccessType.GOVM.value, False)
+])
 async def test_events_listener_queue(app, session, stan_server, event_loop, client_id, events_stan, future,
-                                     monkeypatch):
+                                     monkeypatch, access_type, is_auto_affiliate_expected):
     """Assert that events can be retrieved and decoded from the Queue."""
     # Call back for the subscription
     from business_events_listener.worker import cb_nr_subscription_handler
@@ -40,7 +47,8 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
     org = OrgModel(
         name='Test',
         org_type=OrgTypeModel.get_default_type(),
-        org_status=OrgStatusModel.get_default_status()
+        org_status=OrgStatusModel.get_default_status(),
+        access_type=access_type
     ).save()
     org_id = org.id
 
@@ -48,7 +56,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
     events_queue = 'test_queue'
     events_durable_name = 'test_durable'
 
-    nr_number = 'NR 1234'
+    nr_number = f'NR {get_random_number()}'
     nr_state = 'DRAFT'
 
     # register the handler to test it
@@ -81,19 +89,20 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
     # add an event to queue
     await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
 
-    # Query the affiliations and assert the org has affiliation for the NR.
     entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
     assert entity
-    assert entity.pass_code_claimed
-    affiliations: [AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
-    assert len(affiliations) == 1
-    assert affiliations[0].entity_id == entity.id
-    assert affiliations[0].org_id == org_id
+    # Query the affiliations and assert the org has affiliation for the NR.
+    if is_auto_affiliate_expected:
+        assert entity.pass_code_claimed
+        affiliations: [AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
+        assert len(affiliations) == 1
+        assert affiliations[0].entity_id == entity.id
+        assert affiliations[0].org_id == org_id
 
-    # Publish message again and assert it doesn't create duplicate affiliation.
-    await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
-    affiliations: [AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
-    assert len(affiliations) == 1
+        # Publish message again and assert it doesn't create duplicate affiliation.
+        await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
+        affiliations: [AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
+        assert len(affiliations) == 1
 
     # Publish message for an NR which was done using a service account or staff with no user account.
     def get_invoices_mock(nr_number, token):
@@ -113,7 +122,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
 
     monkeypatch.setattr('auth_api.services.rest_service.RestService.get', get_invoices_mock)
     # add an event to queue
-    nr_number = 'NR 000001'
+    nr_number = f'NR {get_random_number()}'
     await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
 
     # Query the entity and assert the entity is not affiliated.
