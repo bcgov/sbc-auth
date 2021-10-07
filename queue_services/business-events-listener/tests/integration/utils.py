@@ -14,6 +14,7 @@
 """Utilities used by the integration tests."""
 import json
 from datetime import datetime
+from random import randint
 
 import stan
 
@@ -43,3 +44,8 @@ async def helper_add_event_to_queue(stan_client: stan.aio.client.Client,
 
     await stan_client.publish(subject=subject,
                               payload=json.dumps(payload).encode('utf-8'))
+
+
+def get_random_number():
+    """Generate a random and return."""
+    return randint(100000000, 999999999)
