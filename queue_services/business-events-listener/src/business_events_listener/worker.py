@@ -35,7 +35,7 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import CorpType
+from auth_api.utils.enums import AccessType, CorpType
 from dateutil import parser
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
@@ -110,8 +110,7 @@ async def process_name_events(event_message: Dict[str, any]):
     nr_entity.name = request_data.get('name', '')  # its not part of event now, this is to handle if they include it.
     nr_entity.last_modified_by = None  # TODO not present in event message.
     nr_entity.last_modified = parser.parse(event_message.get('time'))
-
-    if nr_status == 'DRAFT' and AffiliationModel.find_affiliations_by_business_identifier(nr_number) is None:
+    if nr_status == 'DRAFT' and not AffiliationModel.find_affiliations_by_business_identifier(nr_number):
         logger.info('Status is DRAFT, getting invoices for account')
         # Find account details for the NR.
         invoices = RestService.get(
@@ -120,12 +119,14 @@ async def process_name_events(event_message: Dict[str, any]):
         ).json()
 
         # Ideally there should be only one or two (priority fees) payment request for the NR.
-        if invoices and (auth_account_id := invoices['invoices'][0].get('paymentAccount').get('accountId')) \
+        if invoices and invoices['invoices'] \
+                and (auth_account_id := invoices['invoices'][0].get('paymentAccount').get('accountId')) \
                 and str(auth_account_id).isnumeric():
             logger.info('Account ID received : %s', auth_account_id)
             # Auth account id can be service account value too, so doing a query lookup than find_by_id
             org: OrgModel = db.session.query(OrgModel).filter(OrgModel.id == auth_account_id).one_or_none()
-            if org:
+            # If account is present and is not a gov account, then affiliate.
+            if org and org.access_type != AccessType.GOVM.value:
                 nr_entity.pass_code_claimed = True
                 # Create an affiliation.
                 logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
