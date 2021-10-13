@@ -48,7 +48,7 @@ class Authorization(db.Model):
 
     @classmethod
     def find_user_authorization_by_business_number(cls, business_identifier: str, keycloak_guid: uuid = None,
-                                                   org_id: int = None):
+                                                   org_id: int = None, is_staff=None):
         """Return authorization view object."""
         auth = None
         if keycloak_guid and business_identifier and org_id:
@@ -58,8 +58,8 @@ class Authorization(db.Model):
         elif keycloak_guid and business_identifier:
             auth = cls.query.filter_by(keycloak_guid=keycloak_guid,
                                        business_identifier=business_identifier).one_or_none()
-        elif not keycloak_guid and business_identifier:
-            auth = cls.query.filter_by(business_identifier=business_identifier).one_or_none()
+        elif is_staff and business_identifier:
+            auth = cls.query.filter_by(business_identifier=business_identifier).first()
         return auth
 
     @classmethod

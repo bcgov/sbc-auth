@@ -95,7 +95,7 @@ class Authorization:
         if Role.STAFF.value in token_roles:
             if expanded:
                 # Query Authorization view by business identifier
-                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier)
+                auth = AuthorizationView.find_user_authorization_by_business_number(business_identifier, is_staff=True)
                 auth_response = Authorization(auth).as_dict(expanded)
             auth_response['roles'] = token_roles
 
