@@ -150,7 +150,7 @@
   "vsCodeRejectedSubtitle": "This account has been rejected to access Wills Registry Contact: <b>bconline@gov.bc.ca</b> to discuss further actions.",
   "productPendingSubtitle": "Your request is under review.",
   "businessCodeUnselectableSubtitle": "Business Registry & Name Request is <b>only available for premium account type</b>. Create another premium account inorder to access Business Registry & Name Request.",
-  "pprCodeUnselectableSubtitle": "Personal Property Registry is <b>only available for premium account type</b>. Create another premium account inorder to access Personal Property Registry.",
+  "pprCodeUnselectableSubtitle": "Under construction, launch date: early 2022.<br />You can subscribe now so your account will be ready for the launch.",
   "vsCodeUnselectableSubtitle": "Wills Registry is <b>only available for premium account type</b>. Create another premium account inorder to access Wills Registry.",
   "deactivateTeamConfirmation": "I understand that all team members, businesses and payment methods associated with this account will be permanently removed from this account immediately. ",
   "deactivatePadConfirmation": "I,  {name},  cancel authorization to issue pre-authorized debits against the account number {id} effective on {date}. I acknowledge that this cancellation does not terminate any other obligation that this account may have with the Payee.",
