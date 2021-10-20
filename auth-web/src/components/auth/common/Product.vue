@@ -33,7 +33,7 @@
               </v-icon>
               <div class="ml-2 label-color">
                 <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
-                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
+                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"  />
               </div>
             </div>
             <v-btn
@@ -56,7 +56,7 @@
           <div class="product-card-contents ml-9">
             <v-expand-transition>
               <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
-                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"/>
+                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
                 <component
                   v-if="isTOSNeeded"
                   :key="productFooter.id"
