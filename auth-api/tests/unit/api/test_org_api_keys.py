@@ -79,7 +79,7 @@ def test_list_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=u
 def test_revoke_api_key(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that api keys can be revoked."""
     # First create an account
-    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
     rv = client.post('/api/v1/users', headers=user_headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1), headers=user_headers,
                      content_type='application/json')
