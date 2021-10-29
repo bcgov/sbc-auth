@@ -19,10 +19,12 @@ from flask import current_app
 from requests.exceptions import HTTPError
 
 from auth_api.models.org import Org as OrgModel
+from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.api_gateway import generate_client_representation
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_API_GW_USERS
+from auth_api.utils.roles import ADMIN, STAFF
 
 
 class ApiGateway:
@@ -83,6 +85,7 @@ class ApiGateway:
     def revoke_key(cls, org_id: int, api_key: str):
         """Revoke api key."""
         current_app.logger.debug('<revoke_key ')
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
         gw_api_key: str = current_app.config.get('API_GW_KEY')
         email_id = cls._get_email_id(org_id)
