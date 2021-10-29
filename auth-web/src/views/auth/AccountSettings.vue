@@ -197,6 +197,34 @@
               </v-list-item>
             </v-list-item-group>
           </v-list>
+
+          <!-- ADVANCED SETTINGS -->
+          <v-list
+            role="navigation"
+            aria-label="ADVANCED SETTINGS"
+          >
+          <!-- add inside permission when adding menu items in this list -->
+            <v-list-item-group color="primary" role="list">
+              <v-subheader class="mt-2 px-0">ADVANCED SETTINGS</v-subheader>
+               <!-- v-can:MANAGE_STATEMENTS.hide -->
+              <v-list-item
+                dense
+                class="py-1 px-4"
+                aria-label="Developer Access"
+                role="listitem"
+                :to="developerAccessUrl"
+                data-test="dev-nav-item"
+                v-if="isPremiumAccount"
+              >
+                <v-list-item-icon>
+                  <!-- TODO: update mdi to get this icon -->
+                  <v-icon color="link" left>mdi-table-cog</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Developer Access</v-list-item-title>
+              </v-list-item>
+
+            </v-list-item-group>
+          </v-list>
         </v-navigation-drawer>
       </v-container>
       <transition name="fade" mode="out-in">
@@ -279,6 +307,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   }
   private get activityLogUrl (): string {
     return `/account/${this.orgId}/settings/activity-log`
+  }
+
+  private get developerAccessUrl (): string {
+    return `/account/${this.orgId}/settings/developer-access`
   }
 
   private get backToTab () {
