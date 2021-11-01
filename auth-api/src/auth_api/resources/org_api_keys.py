@@ -25,7 +25,6 @@ from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
 
-
 API = Namespace('keys', description='Endpoints for API Keys management')
 TRACER = Tracer.get_instance()
 
@@ -38,7 +37,7 @@ class OrgKeys(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
     def get(org_id):
         """Get all API keys for the account."""
         return ApiGatewayService.get_api_keys(org_id), http_status.HTTP_200_OK
@@ -69,7 +68,7 @@ class OrgKey(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles([Role.SYSTEM.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
     def delete(org_id, key):
         """Revoke API Key."""
         try:
