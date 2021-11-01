@@ -103,7 +103,7 @@ class ApiGateway:
         current_app.logger.debug('<get_api_keys ')
         consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
         gw_api_key: str = current_app.config.get('API_GW_KEY')
-
+        check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         email_id = cls._get_email_id(org_id)
         try:
             consumers_response = RestService.get(
