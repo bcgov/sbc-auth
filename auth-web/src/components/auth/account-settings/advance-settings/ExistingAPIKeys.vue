@@ -129,8 +129,8 @@ const OrgModule = namespace('org')
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @OrgModule.Action('getOrgApiKeys') public getOrgApiKeys!:(filterParams:any) =>Promise<any>
-  @OrgModule.Action('revokeOrgApiKeys') public revokeOrgApiKeys!:(filterParams:any) =>Promise<any>
+  @OrgModule.Action('getOrgApiKeys') public getOrgApiKeys!:(orgId:any) =>Promise<any>
+  @OrgModule.Action('revokeOrgApiKeys') public revokeOrgApiKeys!:(orgId:any) =>Promise<any>
 
   public isLoading = true
   public confirmActionTitle ='Revoke API Key?'
@@ -217,7 +217,6 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     try {
       const resp:any = await this.revokeOrgApiKeys(apiKeys)
       if (resp) {
-        this.selectedApi = {}
         this.alertIcon = 'mdi-check'
         this.alertTitle = 'API key has been Revoked'
         this.successText = `<strong>${apiKeyName}</strong> API Key has been Revoked`
@@ -229,6 +228,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     }
     this.isLoading = false
     await this.loadApiKeys()
+    this.selectedApi = {}
     this.$refs.confirmActionDialog.close()
     this.$refs.successDialog.open()
   }

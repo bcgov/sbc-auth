@@ -202,6 +202,7 @@
           <v-list
             role="navigation"
             aria-label="ADVANCED SETTINGS"
+            v-if="advancedSettingsPermission"
           >
           <!-- add inside permission when adding menu items in this list -->
             <v-list-item-group color="primary" role="list">
@@ -214,7 +215,7 @@
                 role="listitem"
                 :to="developerAccessUrl"
                 data-test="dev-nav-item"
-                v-if="isPremiumAccount"
+                v-can:VIEW_DEVELOPER_ACCESS.hide
               >
                 <v-list-item-icon>
                   <!-- TODO: update mdi to get this icon -->
@@ -331,6 +332,11 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   get accountActivityMenuPermission () {
     return [Permission.VIEW_ACTIVITYLOG, Permission.MANAGE_STATEMENTS].some(per => this.permissions.includes(per))
   }
+  // show menu header if developer acvess and premium account
+  get advancedSettingsPermission () {
+    return this.isPremiumAccount && [Permission.VIEW_DEVELOPER_ACCESS].some(per => this.permissions.includes(per))
+  }
+
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
     return this.isStaff && (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED || this.currentOrganization?.statusCode === AccountStatus.SUSPENDED)
