@@ -107,7 +107,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
       type: LoginSource.BCSC,
       title: this.$t('bCSCLoginOptionTitle'),
       description: this.$t('bCSCLoginOptionDescription'),
-      icon: 'mdi-account-card-details-outline'
+      icon: 'mdi-card-account-details-outline'
     },
     {
       type: LoginSource.BCEID,

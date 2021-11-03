@@ -1115,4 +1115,20 @@ export default class OrgModule extends VuexModule {
       }
     }
   }
+
+  @Action({ rawError: true })
+  public async getOrgApiKeys (orgId) {
+    // eslint-disable-next-line no-console
+    console.log('getOrgApiKeys action: ', orgId)
+    const response = await OrgService.getOrgApiKeys(orgId)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async revokeOrgApiKeys (ApiDetails) {
+    // eslint-disable-next-line no-console
+    console.log('revokeOrgApiKeys action: ', ApiDetails)
+    const response = await OrgService.revokeOrgApiKeys(ApiDetails)
+    return response?.data || {}
+  }
 }

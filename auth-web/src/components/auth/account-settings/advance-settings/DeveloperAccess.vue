@@ -12,10 +12,10 @@
       <v-btn
         large
         color="primary"
-        class="font-weight-bold "
-        data-test="btn-export-csv"
-      >Enable API Services</v-btn>
-
+        class="font-weight-bold mb-12 "
+        data-test="btn-create-api"
+      >Create an API Key</v-btn>
+<ExistingAPIKeys/>
   </v-container>
 </template>
 
@@ -25,10 +25,11 @@ import { Component, Mixins } from 'vue-property-decorator'
 
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import ConfigHelper from '@/util/config-helper'
+import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 
 @Component({
   components: {
-
+    ExistingAPIKeys
   }
 })
 export default class DeveloperAccess extends Mixins(AccountChangeMixin) {
