@@ -34,7 +34,7 @@
         title="Revoke"
         color="primary"
         @click="confirmationModal(item)"
-        :data-test="getIndexedTag('confirm-button', item.index)"
+        :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
       >
        Revoke
       </v-btn>
@@ -50,6 +50,8 @@
       :text="confirmActionText"
       dialog-class="notify-dialog"
       max-width="680"
+      data-test="confirmation-modal"
+
     >
       <template v-slot:icon>
         <v-icon
@@ -85,9 +87,10 @@
     <ModalDialog
       ref="successDialog"
       :title="alertTitle"
-      :text="successText"
+      :text="alertText"
       dialog-class="notify-dialog"
       max-width="600"
+      data-test="alert-modal"
     >
      <template v-slot:icon>
         <v-icon
@@ -135,7 +138,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public isLoading = true
   public confirmActionTitle ='Revoke API Key?'
   public confirmActionText=''
-  public successText=''
+  public alertText=''
   public alertTitle=''
   public alertIcon = 'mdi-check'
   public notificationColor = 'success'
@@ -211,7 +214,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     const apiKeys = { orgId, apiKey }
     this.alertIcon = 'mdi-alert-circle-outline'
     this.alertTitle = 'API key has not been Revoked'
-    this.successText = `<strong>${apiKeyName}</strong> API Key has not been Revoked`
+    this.alertText = `<strong>${apiKeyName}</strong> API Key has not been Revoked`
     this.notificationColor = 'error'
     this.isLoading = true
     try {
@@ -219,7 +222,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       if (resp) {
         this.alertIcon = 'mdi-check'
         this.alertTitle = 'API key has been Revoked'
-        this.successText = `<strong>${apiKeyName}</strong> API Key has been Revoked`
+        this.alertText = `<strong>${apiKeyName}</strong> API Key has been Revoked`
         this.notificationColor = 'success'
       }
     } catch (e) {
@@ -238,7 +241,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   }
 
   public getIndexedTag (tag, idx) {
-    return `btn-${tag}-${idx}`
+    return `${tag}-${idx}`
   }
 }
 </script>
