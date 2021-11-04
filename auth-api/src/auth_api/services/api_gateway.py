@@ -91,7 +91,7 @@ class ApiGateway:
         email_id = cls._get_email_id(org_id)
 
         RestService.patch(
-            f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apiKeys/{api_key}?action=removeAccess',
+            f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apikeys/{api_key}?action=revoke',
             additional_headers={'x-apikey': gw_api_key},
             data=dict(apiAccess='ALL_API'),
             generate_token=False
