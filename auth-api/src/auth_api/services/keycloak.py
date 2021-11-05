@@ -297,7 +297,17 @@ class KeycloakService:
             'Authorization': f'Bearer {admin_token}'
         }
         response = requests.get(get_group_url, headers=headers)
-        return response.json()[0].get('id')
+        return KeycloakService._find_group_or_subgroup_id(response.json(), group_name)
+
+    @staticmethod
+    def _find_group_or_subgroup_id(groups: list, group_name: str):
+        """Return group id by searching main and sub groups."""
+        for group in groups:
+            if group['name'] == group_name:
+                return group['id']
+            if group_id := KeycloakService._find_group_or_subgroup_id(group['subGroups'], group_name):
+                return group_id
+        return None
 
     @staticmethod
     def _reset_otp(user_id: str):

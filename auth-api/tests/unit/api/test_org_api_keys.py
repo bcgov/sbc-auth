@@ -24,7 +24,7 @@ from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header
 
 
-def test_create_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that api keys can be generated."""
     # First create an account
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
@@ -37,12 +37,15 @@ def test_create_api_keys(client, jwt, session, keycloak_mock):  # pylint:disable
 
     # Create a system token and create an API key for this account.
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    # Patch to return has_consumer as False, so that it would create a new consumer.
+    monkeypatch.setattr('auth_api.services.api_gateway.ApiGateway._consumer_exists', lambda *args, **kwargs: None)
+
     rv = client.post(f'/api/v1/orgs/{org_id}/api-keys', headers=headers, content_type='application/json',
                      data=json.dumps({
                          'environment': 'dev',
                          'keyName': 'TEST'
                      }))
-    assert rv.json.get('apiKey')
+    assert rv.json['consumer']['consumerKey']
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get(f'/api/v1/orgs/{org_id}', headers=headers, content_type='application/json')
@@ -97,10 +100,12 @@ def test_revoke_api_key(client, jwt, session, keycloak_mock):  # pylint:disable=
                      }))
 
     rv = client.get(f'/api/v1/orgs/{org_id}/api-keys', headers=headers, content_type='application/json')
-    key = '7SmDGL4233wnp2dyXGSGGq7xutYlTzIN'  # from mock
+    key = rv.json['consumer']['consumerKey'][0]['apiKey']
 
     rv = client.delete(f'/api/v1/orgs/{org_id}/api-keys/{key}', headers=headers, content_type='application/json')
     assert rv.status_code == 200
 
-    rv = client.delete(f'/api/v1/orgs/{org_id}/api-keys/{key}', headers=user_headers, content_type='application/json')
-    assert rv.status_code == 200
+    # Revoke an invalid key
+    rv = client.delete(f'/api/v1/orgs/{org_id}/api-keys/{key}-INVALID', headers=user_headers,
+                       content_type='application/json')
+    assert rv.status_code == 404
