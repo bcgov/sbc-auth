@@ -60,6 +60,13 @@
         "containerId": "demo"
       },
       {
+        "name": "sandbox",
+        "description": "Role to distinguish sandbox keys",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "demo"
+      },
+      {
         "name": "gov_account_user",
         "composite": false,
         "clientRole": false,
@@ -303,8 +310,9 @@
       "path": "/public_users",
       "attributes": {},
       "realmRoles": [
-        "edit",
-        "public_user"
+        "ppr",
+        "public_user",
+        "edit"
       ],
       "clientRoles": {},
       "subGroups": [
@@ -313,6 +321,16 @@
           "path": "/public_users/api_gateway_users",
           "attributes": {},
           "realmRoles": [],
+          "clientRoles": {},
+          "subGroups": []
+        },
+        {
+          "name": "api_gateway_sandbox_users",
+          "path": "/public_users/api_gateway_sandbox_users",
+          "attributes": {},
+          "realmRoles": [
+            "sandbox"
+          ],
           "clientRoles": {},
           "subGroups": []
         }
