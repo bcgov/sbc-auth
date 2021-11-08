@@ -24,4 +24,4 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('delete from permissions where actions="VIEW_DEVELOPER_ACCESS"')
+    op.execute("delete from permissions where actions='VIEW_DEVELOPER_ACCESS'")
