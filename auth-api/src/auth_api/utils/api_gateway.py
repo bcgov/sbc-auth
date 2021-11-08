@@ -16,10 +16,12 @@ import secrets
 import uuid
 
 
-def generate_client_representation(account_id: int, client_id_pattern: str):
+def generate_client_representation(account_id: int, client_id_pattern: str, env: str) -> dict:
     """Return dictionary for api gateway client user."""
     _id = str(uuid.uuid4())
     _secret = secrets.token_urlsafe(36)
+    if env != 'prod':
+        client_id_pattern += '-sandbox'
     _client_id = client_id_pattern.format(account_id=account_id)
 
     client_json: dict = {
