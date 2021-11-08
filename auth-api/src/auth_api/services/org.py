@@ -187,11 +187,12 @@ class Org:  # pylint: disable=too-many-public-methods
         pay_request = {
             'accountId': org_model.id,
             # pay needs the most unique idenitfier.So combine name and branch name
-            'accountName': org_name_for_pay,
-            'paymentInfo': {
-                'methodOfPayment': payment_method
-            }
+            'accountName': org_name_for_pay
         }
+
+        if payment_method:
+            pay_request['paymentInfo'] = {'methodOfPayment': payment_method}
+
         if mailing_address:
             pay_request['contactInfo'] = mailing_address
 
@@ -300,12 +301,10 @@ class Org:  # pylint: disable=too-many-public-methods
         is_govm_account_creation = \
             is_govm_account and org_model.status_code == OrgStatus.PENDING_INVITE_ACCEPT.value
 
-        # update org name should not proceed further
-        is_name_getting_updated = 'name' in org_info
-        if is_name_getting_updated:
-            raise BusinessException(Error.INVALID_INPUT, None)
-        if branch_name := org_info.get('branchName', None):
-            arg_dict = {'name': org_model.name,
+        # validate if name or branch name is getting updated
+        name_updated = (branch_name := org_info.get('branchName', None)) or (org_name := org_info.get('name', None))
+        if name_updated:
+            arg_dict = {'name': org_name or org_model.name,
                         'branch_name': branch_name,
                         'org_id': org_model.id}
             duplicate_org_name_validate(is_fatal=True, **arg_dict)
@@ -357,15 +356,14 @@ class Org:  # pylint: disable=too-many-public-methods
                 # send mail after the org is committed to DB
                 Org.send_staff_review_account_reminder(relationship_id=self._model.id)
 
-        Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+        if name_updated or not payment_info:
+            Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         current_app.logger.debug('>update_org ')
         return self
 
     @staticmethod
     def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True):
         """Create Or update payment info for org."""
-        if not payment_info and not is_new_org:  # To ignore payment info updates if no info is passed
-            return
         selected_payment_method = payment_info.get('paymentMethod', None)
         arg_dict = {'selected_payment_method': selected_payment_method,
                     'access_type': org.access_type,
