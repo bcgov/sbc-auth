@@ -19,6 +19,7 @@ GROUP_ACCOUNT_HOLDERS = 'account_holders'
 GROUP_ANONYMOUS_USERS = 'anonymous_users'
 GROUP_GOV_ACCOUNT_USERS = 'gov_account_users'
 GROUP_API_GW_USERS = 'api_gateway_users'
+GROUP_API_GW_SANDBOX_USERS = 'api_gateway_sandbox_users'
 
 # Affidavit folder
 AFFIDAVIT_FOLDER_NAME = 'Affidavits'
