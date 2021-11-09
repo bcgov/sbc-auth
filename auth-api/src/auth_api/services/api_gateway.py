@@ -117,16 +117,14 @@ class ApiGateway:
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
         gw_api_key: str = current_app.config.get('API_GW_KEY')
-        env = None
         # Find the environment for this key, based on it consumer changes.
+        email_id: str = None
         for key in cls.get_api_keys(org_id)['consumer']['consumerKey']:
             if key['apiKey'] == api_key:
-                env = 'prod' if key['environment'] == 'prod' else 'sandbox'
+                email_id = key['email']
                 break
-        if not env:
+        if not email_id:
             raise BusinessException(Error.DATA_NOT_FOUND, Exception())
-
-        email_id = cls._get_email_id(org_id, env)
 
         RestService.patch(
             f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apikeys/{api_key}?action=revoke',
@@ -144,14 +142,13 @@ class ApiGateway:
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {'consumer': {'consumerKey': []}}
         for email in cls._get_email_id(org_id, 'sandbox'), cls._get_email_id(org_id, 'prod'):
-
             try:
                 consumers_response = RestService.get(
                     f'{consumer_endpoint}/mc/v1/consumers/{email}',
                     additional_headers={'x-apikey': gw_api_key}
                 )
                 keys = consumers_response.json()['consumer']['consumerKey']
-                cls._filter_and_add_keys(api_keys_response, keys)
+                cls._filter_and_add_keys(api_keys_response, keys, email)
             except HTTPError as exc:
                 if exc.response.status_code != 404:  # If consumer doesn't exist
                     raise exc
@@ -159,14 +156,17 @@ class ApiGateway:
         return api_keys_response
 
     @classmethod
-    def _filter_and_add_keys(cls, api_keys_response, keys):
+    def _filter_and_add_keys(cls, api_keys_response, keys, email):
+        def _add_key_to_response(_key):
+            if _key['keyStatus'] == 'approved':
+                _key['email'] = email
+                api_keys_response['consumer']['consumerKey'].append(_key)
+
         if isinstance(keys, dict):
-            if keys['keyStatus'] == 'approved':
-                api_keys_response['consumer']['consumerKey'].append(keys)
+            _add_key_to_response(keys)
         elif isinstance(keys, list):
             for key in keys:
-                if key['keyStatus'] == 'approved':
-                    api_keys_response['consumer']['consumerKey'].append(key)
+                _add_key_to_response(key)
 
     @classmethod
     def _get_email_id(cls, org_id, env) -> str:
