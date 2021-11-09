@@ -160,6 +160,7 @@ class ApiGateway:
         def _add_key_to_response(_key):
             if _key['keyStatus'] == 'approved':
                 _key['email'] = email
+                _key['environment'] = 'prod' if _key['environment'] == 'prod' else 'sandbox'
                 api_keys_response['consumer']['consumerKey'].append(_key)
 
         if isinstance(keys, dict):
