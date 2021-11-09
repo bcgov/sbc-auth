@@ -40,9 +40,18 @@ def test_create_api_keys(client, jwt, session, keycloak_mock, monkeypatch):  # p
     # Patch to return has_consumer as False, so that it would create a new consumer.
     monkeypatch.setattr('auth_api.services.api_gateway.ApiGateway._consumer_exists', lambda *args, **kwargs: None)
 
+    def get_pay_account_mock(org, user):
+        return {
+            'paymentMethod': 'PAD'
+        }
+
+    monkeypatch.setattr('auth_api.services.api_gateway.ApiGateway._get_pay_account', get_pay_account_mock)
+    monkeypatch.setattr('auth_api.services.api_gateway.ApiGateway._create_sandbox_pay_account',
+                        lambda *args, **kwargs: None)
+
     rv = client.post(f'/api/v1/orgs/{org_id}/api-keys', headers=headers, content_type='application/json',
                      data=json.dumps({
-                         'environment': 'dev',
+                         'environment': 'sandbox',
                          'keyName': 'TEST'
                      }))
     assert rv.json['consumer']['consumerKey']
