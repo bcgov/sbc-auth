@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@bcrs-shared-components/corp-type-module": "1.0.4",
-    "@mdi/font": "^4.5.95",
+    "@mdi/font": "^6.4.95",
     "@sentry/browser": "^5.27.2",
     "@sentry/integrations": "^5.27.2",
     "axios": "^0.21.1",

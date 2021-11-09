@@ -1115,4 +1115,16 @@ export default class OrgModule extends VuexModule {
       }
     }
   }
+
+  @Action({ rawError: true })
+  public async getOrgApiKeys (orgId) {
+    const response = await OrgService.getOrgApiKeys(orgId)
+    return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async revokeOrgApiKeys (ApiDetails) {
+    const response = await OrgService.revokeOrgApiKeys(ApiDetails)
+    return response?.data || {}
+  }
 }

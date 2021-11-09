@@ -117,4 +117,12 @@ export default class OrgService {
   public static async avialbelProducts (): Promise<AxiosResponse<OrgProduct>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/products`)
   }
+
+  public static async getOrgApiKeys (orgId: number): Promise<AxiosResponse<OrgProduct>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys`)
+  }
+  public static async revokeOrgApiKeys (ApiDetails): Promise<AxiosResponse<OrgProduct>> {
+    const { orgId, apiKey } = ApiDetails
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/api-keys/${apiKey}`)
+  }
 }
