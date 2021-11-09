@@ -110,6 +110,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     LEGAL_API_URL = os.getenv('LEGAL_API_URL')
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     BCOL_API_URL = os.getenv('BCOL_API_URL')
+    PAY_API_SANDBOX_URL = os.getenv('PAY_API_SANDBOX_URL')
 
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
@@ -273,6 +274,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     NOTIFY_API_URL = 'http://localhost:8080/notify-api/api/v1'
     BCOL_API_URL = 'http://localhost:8080/bcol-api/api/v1'
     PAY_API_URL = 'http://localhost:8080/pay-api/api/v1'
+    PAY_API_SANDBOX_URL = 'http://localhost:8080/pay-api/api/v1'
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)
