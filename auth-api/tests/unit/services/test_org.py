@@ -404,9 +404,17 @@ def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argumen
     """Assert that an Org name cannot be updated."""
     org = factory_org_service()
 
-    with pytest.raises(BusinessException) as exception:
-        org.update_org(TestOrgInfo.org2)
-    assert exception.value.code == Error.INVALID_INPUT.name
+    with patch.object(RestService, 'put') as mock_put:
+        org = org.update_org({'name': 'My Test'})
+        assert org
+        dictionary = org.as_dict()
+        mock_put.assert_called()
+        actual_data = mock_put.call_args.kwargs.get('data')
+        expected_data = {
+            'accountId': dictionary.get('id'),
+            'accountName': dictionary.get('name'),
+        }
+        assert expected_data == actual_data, 'name update work.'
 
 
 def test_update_org(session, monkeypatch):  # pylint:disable=unused-argument
