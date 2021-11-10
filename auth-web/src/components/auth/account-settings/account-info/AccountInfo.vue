@@ -97,8 +97,8 @@
           @update:viewOnlyMode="viewOnlyMode"
         />
 
-        <v-divider class="mt-3 mb-10"></v-divider>
-        <template v-if="baseAddress">
+        <template v-if="baseAddress" v-can:VIEW_ADDRESS.hide>
+          <v-divider class="mt-3 mb-10"></v-divider>
           <!-- TODO: can use v-can instead of v-if if all user with change permisson have view also -->
           <AccountMailingAddress
             ref="mailingAddress"
@@ -106,7 +106,6 @@
             @update:address="updateAddress"
             @valid="checkBaseAddressValidity"
             @update:updateDetails="updateDetails"
-            v-if="isAddressEditable || isAddressViewable"
             @update:resetAddress="resetAddress"
             :viewOnlyMode="isAddressViewOnly"
             @update:viewOnlyMode="viewOnlyMode"
@@ -508,17 +507,12 @@ export default class AccountInfo extends Mixins(
     this.isBaseAddressValid = !!isValid
   }
 
-  // use v-can
-
   get isAddressEditable (): boolean {
     return [Permission.CHANGE_ADDRESS].some(per =>
       this.permissions.includes(per)
     )
   }
 
-  get isAddressViewable (): boolean {
-    return [Permission.VIEW_ADDRESS].some(per => this.permissions.includes(per))
-  }
   // SBTODO May be v-can
   get isAdminContactViewable (): boolean {
     return [Permission.VIEW_ADMIN_CONTACT].some(per =>
