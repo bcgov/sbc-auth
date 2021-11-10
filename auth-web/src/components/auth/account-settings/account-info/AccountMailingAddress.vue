@@ -10,17 +10,18 @@
             <div class="mb-3">
               <base-address-form
                 ref="mailingAddress"
-                :editing="!viewOnly"
+                :editing="!viewOnlyMode"
                 :schema="baseAddressSchema"
                 :address="baseAddress"
                 @update:address="updateAddress"
                 @valid="checkBaseAddressValidity"
+                :key="baseAddress.postalCode"
               />
             </div>
-            <div v-can:CHANGE_ADDRESS.disable v-if="viewOnly">
+            <div v-can:CHANGE_ADDRESS.disable v-if="viewOnlyMode">
               <span
                 class="primary--text cursor-pointer"
-                @click="toggleEdit(false)"
+                @click="$emit('update:viewOnlyMode', {component:'address',mode:false })"
                 data-test="btn-edit"
               >
                 <v-icon color="primary" size="20"> mdi-pencil</v-icon>
@@ -28,7 +29,7 @@
               </span>
             </div>
           </div>
-          <v-card-actions class="pt-1 pr-0" v-if="!viewOnly">
+          <v-card-actions class="pt-1 pr-0" v-if="!viewOnlyMode">
             <v-spacer></v-spacer>
             <v-btn
               large
@@ -36,7 +37,7 @@
               color="primary"
               :loading="false"
               aria-label="Save Account Information"
-              @click="saveAddressUpdate()"
+              @click="$emit('update:updateDetails')"
             >
               <span class="save-btn__label">Save</span>
             </v-btn>
@@ -47,7 +48,8 @@
               class="ml-2 px-9"
               color="primary"
               aria-label="Cancel"
-              @click="toggleEdit(true)"
+              @click="$emit('update:viewOnlyMode', {component:'address',mode:true })"
+
               data-test="cancel-button"
               >Cancel</v-btn
             >
@@ -70,15 +72,12 @@ import { addressSchema } from '@/schemas'
 })
 export default class AccountMailingAddress extends Vue {
   @Prop({ default: null }) baseAddress: any
-  public viewOnly = true
+  @Prop({ default: true }) viewOnlyMode: boolean
+
   public baseAddressSchema: {} = addressSchema
 
   $refs: {
     mailingAddress: HTMLFormElement
-  }
-
-  toggleEdit (value) {
-    this.viewOnly = value
   }
 
   /** Emits an update message, so that we can sync with parent */
@@ -92,8 +91,10 @@ export default class AccountMailingAddress extends Vue {
     return isValid
   }
 
-  @Emit('update:updateDetails')
-  public saveAddressUpdate () {}
+  triggerValidate (): boolean {
+    // validate form fields and show error message for address component from sbc-common-component
+    return this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate()
+  }
 }
 </script>
 

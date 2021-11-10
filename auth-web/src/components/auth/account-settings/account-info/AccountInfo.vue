@@ -87,12 +87,14 @@
             <OrgAdminContact></OrgAdminContact>
           </div>
         </div>
+
         <!-- show/edit account details -->
         <AccountDetails
           :accountDetails="accountDetails"
-          :key="accountDetails.branchName"
           :isBusinessAccount="isBusinessAccount"
           @update:updateAndSaveAccountDetails="updateAndSaveAccountDetails"
+          :viewOnlyMode="isAccountInfoViewOnly"
+          @update:viewOnlyMode="viewOnlyMode"
         />
 
         <v-divider class="mt-3 mb-10"></v-divider>
@@ -105,6 +107,9 @@
             @valid="checkBaseAddressValidity"
             @update:updateDetails="updateDetails"
             v-if="isAddressEditable || isAddressViewable"
+            @update:resetAddress="resetAddress"
+            :viewOnlyMode="isAddressViewOnly"
+            @update:viewOnlyMode="viewOnlyMode"
           />
         </template>
         <div>
@@ -214,13 +219,13 @@ import {
   Role,
   SessionStorageKeys
 } from '@/util/constants'
-import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import {
   CreateRequestBody,
   OrgBusinessType,
   Organization
 } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
@@ -228,48 +233,28 @@ import AccountMailingAddress from '@/components/auth/account-settings/account-in
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
-import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
-import OrgModule from '@/store/modules/org'
-import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
+
 import { namespace } from 'vuex-class'
 
 const CodesModule = namespace('codes')
+const OrgModule = namespace('org')
+const userModule = namespace('user')
 
 @Component({
   components: {
-    BaseAddressForm,
+
     OrgAdminContact,
     LinkedBCOLBanner,
     ModalDialog,
     AccountBusinessTypePicker,
     AccountDetails,
     AccountMailingAddress
-  },
-  computed: {
-    ...mapState('user', ['currentUser']),
-    ...mapGetters('org', ['isBusinessAccount']),
-    ...mapState('org', [
-      'currentOrganization',
-      'currentMembership',
-      'currentOrgAddress',
-      'permissions'
-    ])
-  },
-  methods: {
-    ...mapActions('org', [
-      'updateOrg',
-      'syncAddress',
-      'syncOrganization',
-      'suspendOrganization'
-    ]),
-    ...mapMutations('org', ['setCurrentOrganizationAddress'])
   }
 })
 export default class AccountInfo extends Mixins(
@@ -279,38 +264,47 @@ export default class AccountInfo extends Mixins(
   @CodesModule.State('suspensionReasonCodes')
   private suspensionReasonCodes!: Code[]
 
-  private orgStore = getModule(OrgModule, this.$store)
-  // private btnLabel = 'Save'
-  readonly currentOrganization!: Organization
-  private readonly currentOrgAddress!: Address
-  private readonly currentUser!: KCUserProfile
-  private readonly permissions!: string[]
+  @OrgModule.State('currentOrganization')
+  public currentOrganization!: Organization
+  @OrgModule.State('currentMembership') public currentMembership!: Organization
+  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
+  @OrgModule.State('permissions') public permissions!: string[]
+
+  @userModule.State('currentUser') public currentUser!: KCUserProfile
+
+  @OrgModule.Getter('isBusinessAccount') public isBusinessAccount!: boolean
+  @OrgModule.Mutation('setCurrentOrganizationAddress')
+  public setCurrentOrganizationAddress!: (address: Address) => void
+
+  @OrgModule.Action('updateOrg') public updateOrg!: (
+    requestBody: CreateRequestBody
+  ) => Promise<Organization>
+
+  @OrgModule.Action('syncAddress') syncAddress!: () => Address
+
+  @OrgModule.Action('syncOrganization') syncOrganization!: (
+    currentAccount: number
+  ) => Promise<Organization>
+  @OrgModule.Action('suspendOrganization') suspendOrganization!: (
+    selectedSuspensionReasonCode: string
+  ) => Promise<Organization>
+
   private dialogTitle: string = ''
   private dialogText: string = ''
   private selectedSuspensionReasonCode: string = ''
   private suspensionCompleteDialogText: string = ''
   private isSuspensionReasonFormValid: boolean = false
   private addressChanged = false
-  private readonly isBusinessAccount!: boolean
+  // private readonly isBusinessAccount!: boolean
   private originalAddress: Address // store the original address..do not modify it afterwards
 
-  private readonly updateOrg!: (
-    requestBody: CreateRequestBody
-  ) => Promise<Organization>
-  private readonly syncAddress!: () => Address
-  protected readonly syncOrganization!: (
-    currentAccount: number
-  ) => Promise<Organization>
-  protected readonly suspendOrganization!: (
-    selectedSuspensionReasonCode: string
-  ) => Promise<Organization>
-  // private orgName = ''
-  // private branchName = ''
   private errorMessage: string = ''
-  private readonly setCurrentOrganizationAddress!: (address: Address) => void
+
   private isBaseAddressValid: boolean = false
   private isCompleteAccountInfo = true
-  private accountDetails: any = {}
+  private accountDetails: OrgBusinessType = {}
+  public isAddressViewOnly = true
+  public isAccountInfoViewOnly = true
 
   $refs: {
     editAccountForm: HTMLFormElement
@@ -321,15 +315,18 @@ export default class AccountInfo extends Mixins(
     accountBusinessTypePickerRef: HTMLFormElement
   }
 
-  private async setup () {
+  private setAccountDetails () {
     this.accountDetails.name = this.currentOrganization?.name || ''
     this.accountDetails.branchName = this.currentOrganization?.branchName || ''
     this.accountDetails.businessType =
       this.currentOrganization.businessType || ''
     this.accountDetails.businessSize =
       this.currentOrganization?.businessSize || ''
-
+  }
+  private async setup () {
+    this.setAccountDetails()
     await this.syncAddress()
+
     // show this part only account is not anon
     if (!this.anonAccount) {
       this.originalAddress = this.currentOrgAddress
@@ -340,7 +337,7 @@ export default class AccountInfo extends Mixins(
           : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
         this.$refs.editAccountForm?.validate() // validate form fields and show error message
         // SBTODO create a method in child comp
-        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
+        this.$refs.mailingAddress?.triggerValidate() // validate form fields and show error message for address component from sbc-common-comp
       }
     } else {
       // inorder to hide the address if not premium account
@@ -385,9 +382,25 @@ export default class AccountInfo extends Mixins(
     return this.currentOrgAddress
   }
 
+  resetAddress () {
+    this.baseAddress = this.originalAddress
+    this.viewOnlyMode('address')
+  }
+  // use same funtion to toggle both account info and mailer view mode
+  public viewOnlyMode (details) {
+    const { component, mode } = details
+    if (component === 'address') {
+      this.isAddressViewOnly = mode
+    }
+    if (component === 'account') {
+      this.isAccountInfoViewOnly = mode
+    }
+  }
+
   private set baseAddress (address) {
     this.setCurrentOrganizationAddress(address)
   }
+
   async beforeRouteLeave (to, from, next) {
     if (!this.isAddressEditable || this.isCompleteAccountInfo) {
       next()
@@ -473,6 +486,8 @@ export default class AccountInfo extends Mixins(
       if (this.baseAddress) {
         this.isCompleteAccountInfo = true
       }
+      this.viewOnlyMode({ component: 'address', mode: true })
+      this.viewOnlyMode({ component: 'account', mode: true })
     } catch (err) {
       switch (err.response.status) {
         case 409:

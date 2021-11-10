@@ -5,16 +5,21 @@
         <div class="account-label">
           <div class="nav-list-title font-weight-bold">Account Details</div>
           <div class="details">
-            <div v-if="viewOnly" class="view-only">
+            <div v-if="viewOnlyMode" class="view-only">
               <div class="with-change-icon">
                 <div>
                   <span class="font-weight-bold">Account Name:</span>
                   {{ orgName }}
                 </div>
-                <div v-can:CHANGE_ORG_NAME.disable v-if="viewOnly">
+                <div v-can:CHANGE_ORG_NAME.disable v-if="viewOnlyMode">
                   <span
                     class="primary--text cursor-pointer"
-                    @click="toggleEdit(false)"
+                    @click="
+                      $emit('update:viewOnlyMode', {
+                        component: 'account',
+                        mode: false
+                      })
+                    "
                     data-test="btn-edit"
                   >
                     <v-icon color="primary" size="20"> mdi-pencil</v-icon>
@@ -27,12 +32,12 @@
                 {{ branchName != '' ? branchName : '-' }}
               </div>
 
-              <div>
+              <div v-if="isBusinessAccount">
                 <span class="font-weight-bold">Business Type:</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
-              <div>
+              <div v-if="isBusinessAccount">
                 <span class="font-weight-bold">Business Size:</span>
                 {{ getBusinessSizeLabel }}
               </div>
@@ -78,7 +83,7 @@
                   class="ml-2 px-9"
                   color="primary"
                   aria-label="Cancel Account Information"
-                  @click="toggleEdit(true)"
+                  @click="cancelEdit()"
                   data-test="reset-button"
                   >Cancel</v-btn
                 >
@@ -110,6 +115,7 @@ const CodesModule = namespace('codes')
 })
 export default class AccountDetails extends Mixins(AccountChangeMixin) {
   @Prop({ default: null }) accountDetails: OrgBusinessType
+  @Prop({ default: true }) viewOnlyMode: boolean
 
   @Prop({ default: false }) isBusinessAccount: boolean
   // @Prop({ default: null }) updateOrgBusinessType: any
@@ -124,7 +130,7 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
   public orgName = ''
   public branchName = ''
-  public viewOnly = true
+  // public viewOnly = true
 
   public orgBusinessType: OrgBusinessType = {
     businessType: '',
@@ -166,8 +172,17 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     return (codeArray && codeArray[0] && codeArray[0]?.desc) || ''
   }
 
-  toggleEdit (value) {
-    this.viewOnly = value
+  // toggleEdit (value) {
+  //   this.viewOnly = value
+  // }
+
+  @Emit('update:viewOnlyMode')
+  cancelEdit () {
+    this.updateAccountDetails()
+    return {
+      component: 'account',
+      mode: true
+    }
   }
 
   public updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
@@ -196,5 +211,4 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-
 </style>
