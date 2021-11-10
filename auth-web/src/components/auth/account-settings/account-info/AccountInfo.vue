@@ -321,13 +321,6 @@ export default class AccountInfo extends Mixins(
     accountBusinessTypePickerRef: HTMLFormElement
   }
 
-  // @Watch('branchName')
-  // onBranchNameChange (newVal: string, oldVal: string) {
-  //   if (newVal !== oldVal) {
-  //     this.enableBtn()
-  //   }
-  // }
-
   private async setup () {
     this.accountDetails.name = this.currentOrganization?.name || ''
     this.accountDetails.branchName = this.currentOrganization?.branchName || ''
@@ -335,10 +328,7 @@ export default class AccountInfo extends Mixins(
       this.currentOrganization.businessType || ''
     this.accountDetails.businessSize =
       this.currentOrganization?.businessSize || ''
-    // // eslint-disable-next-line no-console
-    // console.log('this.accountDetails', this.accountDetails)
-    // // eslint-disable-next-line no-console
-    // console.log('inside setup')
+
     await this.syncAddress()
     // show this part only account is not anon
     if (!this.anonAccount) {
@@ -364,16 +354,9 @@ export default class AccountInfo extends Mixins(
   // update account detaisl from child component
   public updateAndSaveAccountDetails (accountDetails) {
     this.accountDetails = accountDetails
-    // eslint-disable-next-line no-console
-    console.log('after settingaccountDetails', accountDetails)
     // once we got the values , set to values and save
     this.updateDetails()
   }
-
-  // private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-  //   this.orgBusinessType = orgBusinessType
-  //   this.enableBtn()
-  // }
 
   private get isSuspendButtonVisible (): boolean {
     return (
@@ -398,10 +381,6 @@ export default class AccountInfo extends Mixins(
     await this.setup()
   }
 
-  // private keyDown (address: Address) {
-  //   this.enableBtn()
-  // }
-
   private get baseAddress () {
     return this.currentOrgAddress
   }
@@ -420,7 +399,6 @@ export default class AccountInfo extends Mixins(
 
   private updateAddress (address: Address) {
     this.addressChanged = true
-    // this.enableBtn()
     this.setCurrentOrganizationAddress(address)
   }
 
@@ -487,8 +465,7 @@ export default class AccountInfo extends Mixins(
         createRequestBody.businessType = businessType
       }
     }
-    // eslint-disable-next-line no-console
-    console.log('createRequestBody', createRequestBody)
+
     try {
       await this.updateOrg(createRequestBody)
       this.$store.commit('updateHeader')
@@ -517,11 +494,6 @@ export default class AccountInfo extends Mixins(
   }
 
   // use v-can
-  // get editEnabled (): boolean {
-  //   return [Permission.CHANGE_ADDRESS, Permission.CHANGE_ORG_NAME].some(per =>
-  //     this.permissions.includes(per)
-  //   )
-  // }
 
   get isAddressEditable (): boolean {
     return [Permission.CHANGE_ADDRESS].some(per =>
