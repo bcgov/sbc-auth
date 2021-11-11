@@ -43,6 +43,30 @@
               </div>
             </div>
             <div v-else>
+              isBusinessAccount{{isBusinessAccount}}
+              <v-radio-group
+                row
+                v-model="accountTypeBusiness"
+
+              >
+                <div class="business-radio">
+                  <v-radio
+                    label="Individual Person Name"
+                    :key="false"
+                    :value="false"
+                    data-test="radio-individual-account-type"
+                    class="px-4 py-5"
+                  ></v-radio>
+                  <v-radio
+                    label="Business Name"
+                    :key="true"
+                    :value="true"
+                    data-test="radio-business-account-type"
+                    class="px-4 py-5"
+                  ></v-radio>
+                </div>
+              </v-radio-group>
+
               <v-text-field
                 filled
                 label="Account Name"
@@ -57,7 +81,7 @@
                 ></v-text-field>
               </div>
 
-              <div class="value" v-if="isBusinessAccount">
+              <div class="value" v-if="accountTypeBusiness">
                 <AccountBusinessTypePicker
                   @update:org-business-type="updateOrgBusinessType"
                   ref="accountBusinessTypePickerRef"
@@ -130,7 +154,7 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
   public orgName = ''
   public branchName = ''
-  // public viewOnly = true
+  public accountTypeBusiness = true
 
   public orgBusinessType: OrgBusinessType = {
     businessType: '',
@@ -139,6 +163,11 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
   $refs: {
     editAccountForm: HTMLFormElement
+  }
+
+  @Watch('isBusinessAccount')
+  onAccountTypeChange (businessType) {
+    this.accountTypeBusiness = businessType
   }
 
   @Watch('accountDetails', { deep: true })
@@ -151,6 +180,7 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     this.branchName = this.accountDetails?.branchName
     this.orgBusinessType.businessType = this.accountDetails?.businessType
     this.orgBusinessType.businessSize = this.accountDetails?.businessSize
+    this.accountTypeBusiness = this.isBusinessAccount
   }
 
   get getBusinessTypeLabel () {
@@ -211,4 +241,19 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+.business-radio {
+  display: flex;
+  width: 90%;
+  .v-radio {
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.06);
+    min-width: 50%;
+    border: 1px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  .v-radio.theme--light.v-item--active {
+    border: 1px solid var(--v-primary-base) !important;
+    background-color: $BCgovInputBG !important;
+  }
+}
 </style>
