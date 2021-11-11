@@ -43,7 +43,6 @@
               </div>
             </div>
             <div v-else>
-              isBusinessAccount{{isBusinessAccount}}
               <v-radio-group
                 row
                 v-model="accountTypeBusiness"
