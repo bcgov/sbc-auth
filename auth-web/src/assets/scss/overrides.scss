@@ -138,3 +138,22 @@ input:-webkit-autofill:active {
 }
 
 
+
+.nav-list-title {
+  flex: 0 0 auto;
+  width: 12rem;
+}
+
+.account-label{
+  display: flex;
+  .view-only > div {
+    margin-bottom: 10px
+}
+  .with-change-icon{
+    display: flex;
+    justify-content: space-between;
+  }
+  .details{
+    width: 100%;
+  }
+}
