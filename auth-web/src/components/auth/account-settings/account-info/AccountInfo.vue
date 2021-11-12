@@ -10,8 +10,10 @@
         </v-alert>
 
         <template v-show="!anonAccount">
-          <div class="nv-list-item mb-10">
-            <div class="name" id="accountNumber">Account Number</div>
+          <div class="nv-list-item mb-6">
+            <div class="name font-weight-bold" id="accountNumber">
+              Account Number
+            </div>
             <div class="value" aria-labelledby="accountNumber">
               <div class="value__title" data-test="div-account-number">
                 {{ currentOrganization.id }}
@@ -19,7 +21,9 @@
             </div>
           </div>
           <div v-if="isStaff" class="nv-list-item mb-10">
-            <div class="name" id="accountStatusStaff">Account Status</div>
+            <div class="name font-weight-bold" id="accountStatusStaff">
+              Account Status
+            </div>
             <div class="value-column">
               <div class="value" aria-labelledby="accountStatusStaff">
                 <v-chip
@@ -49,20 +53,22 @@
               </v-btn>
             </div>
           </div>
-          <div class="nv-list-item mb-10">
-            <div class="name" id="accountType">Account Type</div>
+          <div class="nv-list-item mb-6">
+            <div class="name font-weight-bold" id="accountType">
+              Account Type
+            </div>
             <div class="value" aria-labelledby="accountType">
               <div class="value__title">
                 {{ isPremiumAccount ? 'Premium' : 'Basic' }}
               </div>
-
             </div>
           </div>
+
           <div
-            class="nv-list-item mb-10"
+            class="nv-list-item mb-6"
             v-if="currentOrganization.bcolAccountDetails"
           >
-            <div class="name mt-3" id="accountName">
+            <div class="name mt-3 font-weight-bold" id="accountName">
               Linked BC Online Account Details
             </div>
             <div class="value">
@@ -72,6 +78,7 @@
               ></LinkedBCOLBanner>
             </div>
           </div>
+          <v-divider class="my-6"></v-divider>
         </template>
 
         <div class="nv-list-item mb-10" v-if="isAdminContactViewable">
@@ -81,57 +88,29 @@
           </div>
         </div>
 
-        <div class="nv-list-item">
-          <div class="name">Account Details</div>
-          <div class="value">
-            <v-text-field
-              filled
-              disabled
-              label="Account Name"
-              v-model="orgName"
-            >
-            </v-text-field>
-          </div>
-        </div>
-        <div class="nv-list-item">
-          <div class="name"></div>
-          <div class="value">
-            <v-text-field
-              filled
-              label="Branch/Division (Optional)"
-              v-model="branchName"
-              v-can:CHANGE_ORG_NAME.disable
-            >
-            </v-text-field>
-          </div>
-        </div>
-        <div class="nv-list-item" v-if="isBusinessAccount">
-          <div class="name"></div>
-          <div class="value">
-        <AccountBusinessTypePicker
-          @update:org-business-type="updateOrgBusinessType" ref="accountBusinessTypePickerRef">
-        </AccountBusinessTypePicker>
-          </div>
-        </div>
+        <!-- show/edit account details -->
+        <AccountDetails
+          :accountDetails="accountDetails"
+          :isBusinessAccount="isBusinessAccount"
+          @update:updateAndSaveAccountDetails="updateAndSaveAccountDetails"
+          :viewOnlyMode="isAccountInfoViewOnly"
+          @update:viewOnlyMode="viewOnlyMode"
+        />
 
-        <div class="nv-list-item" v-if="isAddressEditable || isAddressViewable">
-          <!-- template warpper is required here inorder to keep the placement of divs correctly(to resolve flickering issue when updating the address) -->
-          <template v-if="baseAddress">
-            <div class="name">Mailing Address</div>
-            <div class="value">
-              <base-address-form
-                ref="mailingAddress"
-                :editing="isBaseAddressEditMode"
-                :schema="baseAddressSchema"
-                :address="baseAddress"
-                @update:address="updateAddress"
-                @valid="checkBaseAddressValidity"
-                :key="baseAddress.postalCode"
-              />
-            </div>
-          </template>
-        </div>
-
+        <template v-if="baseAddress" v-can:VIEW_ADDRESS.hide>
+          <v-divider class="mt-3 mb-10"></v-divider>
+          <!-- TODO: can use v-can instead of v-if if all user with change permisson have view also -->
+          <AccountMailingAddress
+            ref="mailingAddress"
+            :baseAddress="baseAddress"
+            @update:address="updateAddress"
+            @valid="checkBaseAddressValidity"
+            @update:updateDetails="updateDetails"
+            @update:resetAddress="resetAddress"
+            :viewOnlyMode="isAddressViewOnly"
+            @update:viewOnlyMode="viewOnlyMode"
+          />
+        </template>
         <div>
           <v-divider class="mt-3 mb-10"></v-divider>
           <div class="form__btns">
@@ -146,33 +125,6 @@
             >
               Deactivate Account
             </v-btn>
-            <v-btn
-              large
-              class="save-btn"
-              v-bind:class="{ disabled: btnLabel == 'Saved' }"
-              :color="btnLabel == 'Saved' ? 'success' : 'primary'"
-              :disabled="!isSaveEnabled()"
-              :loading="btnLabel == 'Saving'"
-              aria-label="Save Account Information"
-              v-if="editEnabled"
-              @click="updateDetails()"
-            >
-              <v-expand-x-transition>
-                <v-icon v-show="btnLabel == 'Saved'">mdi-check</v-icon>
-              </v-expand-x-transition>
-              <span class="save-btn__label">{{ btnLabel }}</span>
-            </v-btn>
-            <v-btn
-              large
-              depressed
-              class="ml-2"
-              color="default"
-              aria-label="Reset Account Information"
-              @click="resetForm"
-              data-test="reset-button"
-              v-if="editEnabled"
-              >Reset</v-btn
-            >
           </div>
         </div>
       </v-form>
@@ -259,117 +211,132 @@
 </template>
 
 <script lang="ts">
-import { AccountStatus, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import {
+  AccountStatus,
+  Pages,
+  Permission,
+  Role,
+  SessionStorageKeys
+} from '@/util/constants'
+import { Component, Mixins } from 'vue-property-decorator'
+import {
+  CreateRequestBody,
+  OrgBusinessType,
+  Organization
+} from '@/models/Organization'
+
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
+import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
-import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
-import OrgModule from '@/store/modules/org'
-import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
+
 import { namespace } from 'vuex-class'
 
 const CodesModule = namespace('codes')
+const OrgModule = namespace('org')
+const userModule = namespace('user')
 
 @Component({
   components: {
-    BaseAddressForm,
+
     OrgAdminContact,
     LinkedBCOLBanner,
     ModalDialog,
-    AccountBusinessTypePicker
-  },
-  computed: {
-    ...mapState('user', [
-      'currentUser'
-    ]),
-    ...mapGetters('org', ['isBusinessAccount']),
-    ...mapState('org', [
-      'currentOrganization',
-      'currentMembership',
-      'currentOrgAddress',
-      'permissions'
-    ])
-  },
-  methods: {
-    ...mapActions('org', ['updateOrg', 'syncAddress', 'syncOrganization', 'suspendOrganization']),
-    ...mapMutations('org', ['setCurrentOrganizationAddress'])
+    AccountBusinessTypePicker,
+    AccountDetails,
+    AccountMailingAddress
   }
 })
-export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin) {
-  @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
+export default class AccountInfo extends Mixins(
+  AccountChangeMixin,
+  AccountMixin
+) {
+  @CodesModule.State('suspensionReasonCodes')
+  private suspensionReasonCodes!: Code[]
 
-  private orgStore = getModule(OrgModule, this.$store)
-  private btnLabel = 'Save'
-  readonly currentOrganization!: Organization
-  private readonly currentOrgAddress!: Address
-  private readonly currentUser!: KCUserProfile
-  private readonly permissions!: string[]
+  @OrgModule.State('currentOrganization')
+  public currentOrganization!: Organization
+  @OrgModule.State('currentMembership') public currentMembership!: Organization
+  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
+  @OrgModule.State('permissions') public permissions!: string[]
+
+  @userModule.State('currentUser') public currentUser!: KCUserProfile
+
+  @OrgModule.Getter('isBusinessAccount') public isBusinessAccount!: boolean
+  @OrgModule.Mutation('setCurrentOrganizationAddress')
+  public setCurrentOrganizationAddress!: (address: Address) => void
+
+  @OrgModule.Action('updateOrg') public updateOrg!: (
+    requestBody: CreateRequestBody
+  ) => Promise<Organization>
+
+  @OrgModule.Action('syncAddress') syncAddress!: () => Address
+
+  @OrgModule.Action('syncOrganization') syncOrganization!: (
+    currentAccount: number
+  ) => Promise<Organization>
+  @OrgModule.Action('suspendOrganization') suspendOrganization!: (
+    selectedSuspensionReasonCode: string
+  ) => Promise<Organization>
+
   private dialogTitle: string = ''
   private dialogText: string = ''
   private selectedSuspensionReasonCode: string = ''
   private suspensionCompleteDialogText: string = ''
   private isSuspensionReasonFormValid: boolean = false
   private addressChanged = false
-  private readonly isBusinessAccount!: boolean
-  private originalAddress : Address // store the original address..do not modify it afterwards
+  // private readonly isBusinessAccount!: boolean
+  private originalAddress: Address // store the original address..do not modify it afterwards
 
-  private readonly updateOrg!: (
-    requestBody: CreateRequestBody
-  ) => Promise<Organization>
-  private readonly syncAddress!: () => Address
-  protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  protected readonly suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
-  private orgName = ''
-  private branchName = ''
   private errorMessage: string = ''
-  private readonly setCurrentOrganizationAddress!: (address: Address) => void
+
   private isBaseAddressValid: boolean = false
   private isCompleteAccountInfo = true
-  private orgBusinessType: OrgBusinessType = null
-
-  private baseAddressSchema: {} = addressSchema
+  private accountDetails: OrgBusinessType = {}
+  public isAddressViewOnly = true
+  public isAccountInfoViewOnly = true
 
   $refs: {
-    editAccountForm: HTMLFormElement,
-    mailingAddress: HTMLFormElement,
-    suspendAccountDialog: ModalDialog,
-    suspensionCompleteDialog: ModalDialog,
-    suspensionReasonForm: HTMLFormElement,
+    editAccountForm: HTMLFormElement
+    mailingAddress: HTMLFormElement
+    suspendAccountDialog: ModalDialog
+    suspensionCompleteDialog: ModalDialog
+    suspensionReasonForm: HTMLFormElement
     accountBusinessTypePickerRef: HTMLFormElement
   }
 
-  @Watch('branchName')
-  onBranchNameChange (newVal:string, oldVal:string) {
-    if (newVal !== oldVal) {
-      this.enableBtn()
-    }
+  private setAccountDetails () {
+    this.accountDetails.name = this.currentOrganization?.name || ''
+    this.accountDetails.branchName = this.currentOrganization?.branchName || ''
+    this.accountDetails.businessType =
+      this.currentOrganization.businessType || ''
+    this.accountDetails.businessSize =
+      this.currentOrganization?.businessSize || ''
   }
-
   private async setup () {
-    this.orgName = this.currentOrganization?.name || ''
-    this.branchName = this.currentOrganization?.branchName || ''
+    this.setAccountDetails()
     await this.syncAddress()
+
     // show this part only account is not anon
     if (!this.anonAccount) {
       this.originalAddress = this.currentOrgAddress
       if (Object.keys(this.currentOrgAddress).length === 0) {
         this.isCompleteAccountInfo = false
-        this.errorMessage = this.isAddressEditable ? 'Your account info is incomplete. Please enter your address in order to proceed.'
+        this.errorMessage = this.isAddressEditable
+          ? 'Your account info is incomplete. Please enter your address in order to proceed.'
           : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
         this.$refs.editAccountForm?.validate() // validate form fields and show error message
-        this.$refs.mailingAddress?.$refs.baseAddress?.$refs.addressForm?.validate() // validate form fields and show error message for address component from sbc-common-comp
+        // SBTODO create a method in child comp
+        this.$refs.mailingAddress?.triggerValidate() // validate form fields and show error message for address component from sbc-common-comp
       }
     } else {
       // inorder to hide the address if not premium account
@@ -380,14 +347,19 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
   private get isStaff (): boolean {
     return this.currentUser.roles.includes(Role.Staff)
   }
-
-  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    this.orgBusinessType = orgBusinessType
-    this.enableBtn()
+  // update account detaisl from child component
+  public updateAndSaveAccountDetails (accountDetails) {
+    this.accountDetails = accountDetails
+    // once we got the values , set to values and save
+    this.updateDetails()
   }
 
   private get isSuspendButtonVisible (): boolean {
-    return (this.currentOrganization.statusCode === AccountStatus.ACTIVE || this.currentOrganization.statusCode === AccountStatus.SUSPENDED) && this.currentUser.roles.includes(Role.StaffSuspendAccounts)
+    return (
+      (this.currentOrganization.statusCode === AccountStatus.ACTIVE ||
+        this.currentOrganization.statusCode === AccountStatus.SUSPENDED) &&
+      this.currentUser.roles.includes(Role.StaffSuspendAccounts)
+    )
   }
 
   get editAccountUrl () {
@@ -405,17 +377,29 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
     await this.setup()
   }
 
-  private keyDown (address: Address) {
-    this.enableBtn()
-  }
-
   private get baseAddress () {
     return this.currentOrgAddress
+  }
+
+  resetAddress () {
+    this.baseAddress = this.originalAddress
+    this.viewOnlyMode('address')
+  }
+  // use same funtion to toggle both account info and mailer view mode
+  public viewOnlyMode (details) {
+    const { component, mode } = details
+    if (component === 'address') {
+      this.isAddressViewOnly = mode
+    }
+    if (component === 'account') {
+      this.isAccountInfoViewOnly = mode
+    }
   }
 
   private set baseAddress (address) {
     this.setCurrentOrganizationAddress(address)
   }
+
   async beforeRouteLeave (to, from, next) {
     if (!this.isAddressEditable || this.isCompleteAccountInfo) {
       next()
@@ -427,7 +411,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
 
   private updateAddress (address: Address) {
     this.addressChanged = true
-    this.enableBtn()
     this.setCurrentOrganizationAddress(address)
   }
 
@@ -463,57 +446,48 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
   }
 
   protected getAccountFromSession (): AccountSettings {
-    return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
-  }
-
-  private async resetForm () {
-    this.setup()
-    await this.syncAddress()
-    this.$refs.accountBusinessTypePickerRef?.setup()
-  }
-
-  private isSaveEnabled () {
-    if (this.anonAccount) {
-      return false
-    }
-    return this.isBaseAddressValid // address is the only field which can be invalid for now
-  }
-
-  private enableBtn () {
-    this.btnLabel = 'Save'
+    return JSON.parse(
+      ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}')
+    )
   }
 
   private async updateDetails () {
     this.errorMessage = ''
-    this.btnLabel = 'Saving'
-
-    let createRequestBody: CreateRequestBody = {
-    }
-    if (this.baseAddress && this.addressChanged && JSON.stringify(this.originalAddress) !== JSON.stringify(this.currentOrgAddress)) {
+    const { branchName, businessSize, businessType, name } = this.accountDetails
+    let createRequestBody: CreateRequestBody = {}
+    if (
+      this.baseAddress &&
+      this.addressChanged &&
+      JSON.stringify(this.originalAddress) !==
+        JSON.stringify(this.currentOrgAddress)
+    ) {
       createRequestBody.mailingAddress = { ...this.baseAddress }
     }
-    if (this.branchName !== this.currentOrganization.branchName) {
-      createRequestBody.branchName = this.branchName
+    if (name !== this.currentOrganization.name) {
+      createRequestBody.name = name
     }
-    if (this.isBusinessAccount && this.orgBusinessType) {
-      if (this.currentOrganization.businessSize !== this.orgBusinessType.businessSize) {
-        createRequestBody.businessSize = this.orgBusinessType.businessSize
+    if (branchName !== this.currentOrganization.branchName) {
+      createRequestBody.branchName = branchName
+    }
+    if (this.isBusinessAccount && this.accountDetails) {
+      if (this.currentOrganization.businessSize !== businessSize) {
+        createRequestBody.businessSize = businessSize
       }
-      if (this.currentOrganization.businessType !== this.orgBusinessType.businessType) {
-        createRequestBody.businessType = this.orgBusinessType.businessType
+      if (this.currentOrganization.businessType !== businessType) {
+        createRequestBody.businessType = businessType
       }
     }
+
     try {
       await this.updateOrg(createRequestBody)
       this.$store.commit('updateHeader')
-      this.btnLabel = 'Saved'
       this.addressChanged = false
-      // assume info is complete
       if (this.baseAddress) {
         this.isCompleteAccountInfo = true
       }
+      this.viewOnlyMode({ component: 'address', mode: true })
+      this.viewOnlyMode({ component: 'account', mode: true })
     } catch (err) {
-      this.btnLabel = 'Save'
       switch (err.response.status) {
         case 409:
           this.errorMessage =
@@ -533,29 +507,17 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
     this.isBaseAddressValid = !!isValid
   }
 
-  get editEnabled (): boolean {
-    return [Permission.CHANGE_ADDRESS, Permission.CHANGE_ORG_NAME].some(per => this.permissions.includes(per))
-  }
-
   get isAddressEditable (): boolean {
-    return [Permission.CHANGE_ADDRESS].some(per => this.permissions.includes(per))
+    return [Permission.CHANGE_ADDRESS].some(per =>
+      this.permissions.includes(per)
+    )
   }
 
-  get isAddressViewable (): boolean {
-    return [Permission.VIEW_ADDRESS].some(per => this.permissions.includes(per))
-  }
-
+  // SBTODO May be v-can
   get isAdminContactViewable (): boolean {
-    return [Permission.VIEW_ADMIN_CONTACT].some(per => this.permissions.includes(per))
-  }
-
-  get isBaseAddressEditMode (): boolean {
-    if (this.isAddressEditable) {
-      return true
-    } else if (this.isAddressViewable) {
-      return false
-    }
-    return false
+    return [Permission.VIEW_ADMIN_CONTACT].some(per =>
+      this.permissions.includes(per)
+    )
   }
 
   get isAccountStatusActive (): boolean {
@@ -597,7 +559,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
     }
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
@@ -690,15 +651,6 @@ export default class AccountInfo extends Mixins(AccountChangeMixin, AccountMixin
       text-align: center;
     }
   }
-}
-
-.save-btn.disabled {
-  pointer-events: none;
-}
-
-.save-btn__label {
-  padding-left: 0.2rem;
-  padding-right: 0.2rem;
 }
 
 .change-account-link {
