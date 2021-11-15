@@ -95,6 +95,7 @@
           @update:updateAndSaveAccountDetails="updateAndSaveAccountDetails"
           :viewOnlyMode="isAccountInfoViewOnly"
           @update:viewOnlyMode="viewOnlyMode"
+          :nameChangeNotAllowed="nameChangeNotAllowed"
         />
 
         <template v-if="baseAddress" v-can:VIEW_ADDRESS.hide>
@@ -380,6 +381,9 @@ export default class AccountInfo extends Mixins(
   private get baseAddress () {
     return this.currentOrgAddress
   }
+  private get nameChangeNotAllowed () {
+    return (this.anonAccount || this.isGovmAccount)
+  }
 
   resetAddress () {
     this.baseAddress = this.originalAddress
@@ -453,7 +457,8 @@ export default class AccountInfo extends Mixins(
 
   private async updateDetails () {
     this.errorMessage = ''
-    const { branchName, businessSize, businessType, name } = this.accountDetails
+    const { branchName, businessSize, businessType, name, isBusinessAccount } = this.accountDetails
+
     let createRequestBody: CreateRequestBody = {}
     if (
       this.baseAddress &&
@@ -468,6 +473,11 @@ export default class AccountInfo extends Mixins(
     }
     if (branchName !== this.currentOrganization.branchName) {
       createRequestBody.branchName = branchName
+    }
+    // need to check type since we need to send false also
+    // eslint-disable-next-line valid-typeof
+    if (typeof isBusinessAccount !== undefined) {
+      createRequestBody.isBusinessAccount = isBusinessAccount
     }
     if (this.isBusinessAccount && this.accountDetails) {
       if (this.currentOrganization.businessSize !== businessSize) {
