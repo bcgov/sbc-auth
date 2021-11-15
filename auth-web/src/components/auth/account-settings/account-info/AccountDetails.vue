@@ -134,11 +134,6 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     editAccountForm: HTMLFormElement
   }
 
-  // @Watch('isBusinessAccount')
-  // onAccountTypeChange (businessType) {
-  //   this.accountTypeBusiness = businessType
-  // }
-
   @Watch('accountDetails', { deep: true })
   onAccountDetailsChange () {
     this.updateAccountDetails()
@@ -181,8 +176,6 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   }
 
   public updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    // eslint-disable-next-line no-console
-    console.log('this.orgBusinessType', orgBusinessType)
     this.orgBusinessType = orgBusinessType
   }
   // emit to par3ent only on save click
