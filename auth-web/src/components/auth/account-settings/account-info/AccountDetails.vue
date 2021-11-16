@@ -31,17 +31,17 @@
                   </span>
                 </div>
               </div>
-              <div>
+              <div  v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Branch/Division:</span>
                 {{ branchName != '' ? branchName : '-' }}
               </div>
 
-              <div v-if="isBusinessAccount">
+              <div v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Business Type:</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
-              <div v-if="isBusinessAccount">
+              <div v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Business Size:</span>
                 {{ getBusinessSizeLabel }}
               </div>
@@ -122,7 +122,7 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
   public orgName = ''
   public branchName = ''
-  // public accountTypeBusiness = true
+  public accountTypeBusiness = false
   private isOrgBusinessTypeValid = false
 
   public orgBusinessType: OrgBusinessType = {
@@ -138,13 +138,17 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   onAccountDetailsChange () {
     this.updateAccountDetails()
   }
+  @Watch('isBusinessAccount')
+  onAccountTypeChange (businessType) {
+    this.accountTypeBusiness = businessType
+  }
 
   updateAccountDetails () {
     this.orgName = this.accountDetails?.name
     this.branchName = this.accountDetails?.branchName
     this.orgBusinessType.businessType = this.accountDetails?.businessType
     this.orgBusinessType.businessSize = this.accountDetails?.businessSize
-    // this.accountTypeBusiness = this.isBusinessAccount
+    this.accountTypeBusiness = this.isBusinessAccount
   }
 
   get getBusinessTypeLabel () {
@@ -183,8 +187,6 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   // arrange data and emit to parent on save click
   @Emit('update:updateAndSaveAccountDetails')
   public updateDetails () {
-    // eslint-disable-next-line no-console
-    console.log('this.orgBusinessType', this.orgBusinessType)
     if (this.isOrgBusinessTypeValid) {
       return this.orgBusinessType
     }
