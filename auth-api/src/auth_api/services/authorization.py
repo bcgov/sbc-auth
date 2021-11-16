@@ -226,7 +226,11 @@ def check_auth(**kwargs):
         if business_identifier:
             auth = Authorization.get_user_authorizations_for_entity(business_identifier)
         elif org_identifier:
-            auth_record = AuthorizationView.find_user_authorization_by_org_id(user_from_context.sub, org_identifier)
+            # If the account id is part of claim (api gw users), then no need to lookup using keycloak guid.
+            if user_from_context.account_id:
+                auth_record = AuthorizationView.find_authorization_for_admin_by_org_id(user_from_context.account_id)
+            else:
+                auth_record = AuthorizationView.find_user_authorization_by_org_id(user_from_context.sub, org_identifier)
             auth = Authorization(auth_record).as_dict() if auth_record else None
 
         _check_for_roles(auth.get('orgMembership', None) if auth else None, kwargs)
