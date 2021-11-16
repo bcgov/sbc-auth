@@ -62,7 +62,7 @@ class Authorization:
             check_product_based_auth = Authorization._is_product_based_auth(corp_type_code)
 
             if check_product_based_auth:
-                if account_id_claim:
+                if account_id_claim and account_id == account_id_claim:
                     auth = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id_claim,
                                                                                               corp_type_code)
                 else:
@@ -70,7 +70,7 @@ class Authorization:
                         keycloak_guid, account_id, corp_type_code
                     )
             else:
-                if account_id_claim:
+                if account_id_claim and account_id == account_id_claim:
                     auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id_claim)
                 elif account_id and keycloak_guid:
                     auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
@@ -227,7 +227,7 @@ def check_auth(**kwargs):
             auth = Authorization.get_user_authorizations_for_entity(business_identifier)
         elif org_identifier:
             # If the account id is part of claim (api gw users), then no need to lookup using keycloak guid.
-            if user_from_context.account_id:
+            if user_from_context.account_id and user_from_context.account_id == kwargs.get('org_id', None):
                 auth_record = AuthorizationView.find_authorization_for_admin_by_org_id(user_from_context.account_id)
             else:
                 auth_record = AuthorizationView.find_user_authorization_by_org_id(user_from_context.sub, org_identifier)
