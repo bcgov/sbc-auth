@@ -5,13 +5,17 @@
         <div class="account-label">
           <div class="nav-list-title font-weight-bold">Account Details</div>
           <div class="details">
+
             <div v-if="viewOnlyMode" class="view-only">
               <div class="with-change-icon">
                 <div>
                   <span class="font-weight-bold">Account Name:</span>
                   {{ orgName }}
                 </div>
-                <div v-can:CHANGE_ORG_NAME.disable v-if="viewOnlyMode">
+                <div
+                  v-can:CHANGE_ORG_NAME.disable
+                  v-if="!nameChangeNotAllowed && viewOnlyMode"
+                >
                   <span
                     class="primary--text cursor-pointer"
                     @click="
@@ -27,65 +31,29 @@
                   </span>
                 </div>
               </div>
-              <div>
+              <div  v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Branch/Division:</span>
                 {{ branchName != '' ? branchName : '-' }}
               </div>
 
-              <div v-if="isBusinessAccount">
+              <div v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Business Type:</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
-              <div v-if="isBusinessAccount">
+              <div v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Business Size:</span>
                 {{ getBusinessSizeLabel }}
               </div>
             </div>
             <div v-else>
-              <v-radio-group
-                row
-                v-model="accountTypeBusiness"
-
+              <account-business-type
+                :saving="false"
+                @update:org-business-type="updateOrgBusinessType"
+                @valid="checkOrgBusinessTypeValid"
+                :isEditAccount="true"
               >
-                <div class="business-radio">
-                  <v-radio
-                    label="Individual Person Name"
-                    :key="false"
-                    :value="false"
-                    data-test="radio-individual-account-type"
-                    class="px-4 py-5"
-                  ></v-radio>
-                  <v-radio
-                    label="Business Name"
-                    :key="true"
-                    :value="true"
-                    data-test="radio-business-account-type"
-                    class="px-4 py-5"
-                  ></v-radio>
-                </div>
-              </v-radio-group>
-
-              <v-text-field
-                filled
-                label="Account Name"
-                v-model="orgName"
-              ></v-text-field>
-              <div class="value">
-                <v-text-field
-                  filled
-                  label="Branch/Division (Optional)"
-                  v-model="branchName"
-                  v-can:CHANGE_ORG_NAME.disable
-                ></v-text-field>
-              </div>
-
-              <div class="value" v-if="accountTypeBusiness">
-                <AccountBusinessTypePicker
-                  @update:org-business-type="updateOrgBusinessType"
-                  ref="accountBusinessTypePickerRef"
-                ></AccountBusinessTypePicker>
-              </div>
+              </account-business-type>
 
               <v-card-actions class="pt-1 pr-0">
                 <v-spacer></v-spacer>
@@ -121,8 +89,7 @@
 
 <script lang="ts">
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
-
-import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
+import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 
 import { Code } from '@/models/Code'
@@ -133,7 +100,7 @@ const CodesModule = namespace('codes')
 
 @Component({
   components: {
-    AccountBusinessTypePicker
+    AccountBusinessType
   }
 })
 export default class AccountDetails extends Mixins(AccountChangeMixin) {
@@ -141,6 +108,8 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   @Prop({ default: true }) viewOnlyMode: boolean
 
   @Prop({ default: false }) isBusinessAccount: boolean
+  @Prop({ default: false }) nameChangeNotAllowed: boolean
+
   // @Prop({ default: null }) updateOrgBusinessType: any
   @CodesModule.Action('getBusinessSizeCodes')
   private readonly getBusinessSizeCodes!: () => Promise<Code[]>
@@ -153,7 +122,8 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
 
   public orgName = ''
   public branchName = ''
-  public accountTypeBusiness = true
+  public accountTypeBusiness = false
+  private isOrgBusinessTypeValid = false
 
   public orgBusinessType: OrgBusinessType = {
     businessType: '',
@@ -164,14 +134,13 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     editAccountForm: HTMLFormElement
   }
 
-  @Watch('isBusinessAccount')
-  onAccountTypeChange (businessType) {
-    this.accountTypeBusiness = businessType
-  }
-
   @Watch('accountDetails', { deep: true })
   onAccountDetailsChange () {
     this.updateAccountDetails()
+  }
+  @Watch('isBusinessAccount')
+  onAccountTypeChange (businessType) {
+    this.accountTypeBusiness = businessType
   }
 
   updateAccountDetails () {
@@ -196,14 +165,10 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     )
   }
 
-  getCodeLabel (codeList, Code) {
-    const codeArray = codeList.filter(type => type.code === Code)
+  getCodeLabel (codeList, code) {
+    const codeArray = codeList.filter(type => type.code === code)
     return (codeArray && codeArray[0] && codeArray[0]?.desc) || ''
   }
-
-  // toggleEdit (value) {
-  //   this.viewOnly = value
-  // }
 
   @Emit('update:viewOnlyMode')
   cancelEdit () {
@@ -222,11 +187,13 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   // arrange data and emit to parent on save click
   @Emit('update:updateAndSaveAccountDetails')
   public updateDetails () {
-    return {
-      name: this.orgName,
-      branchName: this.branchName,
-      ...this.orgBusinessType
+    if (this.isOrgBusinessTypeValid) {
+      return this.orgBusinessType
     }
+  }
+
+  private checkOrgBusinessTypeValid (isValid) {
+    this.isOrgBusinessTypeValid = !!isValid
   }
 
   private async mounted () {
