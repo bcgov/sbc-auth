@@ -9,12 +9,12 @@
       </p>
 
     </div>
-      <v-btn
+      <!-- <v-btn
         large
         color="primary"
         class="font-weight-bold mb-12 "
         data-test="btn-create-api"
-      >Create an API Key</v-btn>
+      >Create an API Key</v-btn> -->
 <ExistingAPIKeys/>
   </v-container>
 </template>
