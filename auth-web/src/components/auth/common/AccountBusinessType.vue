@@ -5,6 +5,7 @@
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
       </div>
       </v-fade-transition>
+
       <div class="account-business-type-container" v-if="!isLoading">
         <p class="mb-9" v-if="!govmAccount">
                 {{ $t('accountBusinessTypeText') }}
@@ -24,7 +25,7 @@
                         :value="false"
                         data-test="radio-individual-account-type"
                         class="px-4 py-5"
-                        @change="onOrgBusinessTypeChange(true)"
+                        @change="onOrgBusinessTypeChange(!isEditAccount)"
                         ></v-radio>
                         <v-radio
                         label="Business Name"
@@ -32,7 +33,7 @@
                         :value="true"
                         data-test="radio-business-account-type"
                         class="px-4 py-5"
-                        @change="onOrgBusinessTypeChange(true)"
+                        @change="onOrgBusinessTypeChange(!isEditAccount)"
                         ></v-radio>
                     </v-col>
                 </v-row>
@@ -142,6 +143,7 @@ export default class AccountBusinessType extends Vue {
   @Prop({ default: null }) bcolDuplicateNameErrorMessage: string
   @Prop({ default: false }) premiumLinkedAccount: boolean
   @Prop({ default: false }) orgNameReadOnly: boolean
+  @Prop({ default: false }) isEditAccount: boolean // hide some details for update account
 
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
 
@@ -236,6 +238,8 @@ export default class AccountBusinessType extends Vue {
       this.autoCompleteIsActive = false
       this.name = autoCompleteSearchValue
     }
+    // emit the update value to the parent
+    this.emitUpdatedOrgBusinessType()
   }
 
   // watches name and suggests auto completed names if it is a business account.

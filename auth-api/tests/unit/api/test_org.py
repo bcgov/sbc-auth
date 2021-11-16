@@ -602,14 +602,15 @@ def test_update_org(client, jwt, session, keycloak_mock):  # pylint:disable=unus
     # assert no contacts
     assert len(dictionary.get('contacts')) == 0
 
-    # assert updating org name raises bad request exception
-    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': 'helo-duplicate1'}),
+    # assert updating org name works alrite
+    name = FAKE.name()
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps({'name': name}),
                     headers=headers, content_type='application/json')
-    assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
+    assert rv.status_code == http_status.HTTP_200_OK
     rv = client.get(f'/api/v1/orgs/{org_id}', headers=headers,
                     content_type='application/json')
     dictionary = json.loads(rv.data)
-    assert dictionary.get('name') == TestOrgInfo.org1['name']
+    assert dictionary.get('name') == name
 
     # update mailing address
     org_with_mailing_address = TestOrgInfo.update_org_with_mailing_address()
