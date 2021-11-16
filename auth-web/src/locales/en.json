@@ -174,5 +174,6 @@
   "removeIAConfirmTitle": "Delete Incorporation Application?",
   "removeIAConfirmText": "Deleting this incorporation application will remove the application from your Business Registry list. The business associated with this application will not be incorporated. If this incorporation application was associated with a Name Request, the Name Request can still be used to incorporate a business.",
   "myBusinessDashSubtitle": "Start BC-based businesses and keep business records up to date.",
-  "onHoldOrRejectModalText": "To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose \"Reject Account\""
+  "onHoldOrRejectModalText": "To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose \"Reject Account\"",
+  "developerAccessSubtitle":"Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>."
 }
