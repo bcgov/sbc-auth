@@ -4,8 +4,16 @@
       <v-card elevation="0">
         <div class="account-label">
           <div class="nav-list-title font-weight-bold">Account Details</div>
-          <div class="details">
+          <div v-if="isLoading" class="loading-inner-container loading-center">
+            <v-progress-circular
+              size="50"
+              width="5"
+              color="primary"
+              :indeterminate="isLoading"
+            />
+          </div>
 
+          <div class="details" v-else>
             <div v-if="viewOnlyMode" class="view-only">
               <div class="with-change-icon">
                 <div>
@@ -31,7 +39,7 @@
                   </span>
                 </div>
               </div>
-              <div  v-if="accountTypeBusiness">
+              <div v-if="accountTypeBusiness">
                 <span class="font-weight-bold">Branch/Division:</span>
                 {{ branchName != '' ? branchName : '-' }}
               </div>
@@ -124,6 +132,7 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   public branchName = ''
   public accountTypeBusiness = false
   private isOrgBusinessTypeValid = false
+  public isLoading =false
 
   public orgBusinessType: OrgBusinessType = {
     businessType: '',
@@ -197,10 +206,12 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
   }
 
   private async mounted () {
+    this.isLoading = true
     // to show businsss type valeu neeed to get all code
     await this.getBusinessTypeCodes()
     await this.getBusinessSizeCodes()
     this.updateAccountDetails()
+    this.isLoading = false
   }
 }
 </script>
@@ -222,4 +233,5 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     background-color: $BCgovInputBG !important;
   }
 }
+
 </style>
