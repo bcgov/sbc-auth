@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "queue_services/activity-log-listener/**"
+      - "auth-api/src/auth_api/models/**"
   workflow_dispatch:
     inputs:
       environment:
