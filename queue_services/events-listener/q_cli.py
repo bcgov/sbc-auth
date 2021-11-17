@@ -28,7 +28,6 @@ import signal
 import sys
 from datetime import datetime
 
-from entity_queue_common.service_utils import error_cb, logger, signal_handler
 from nats.aio.client import Client as NATS  # noqa N814; by convention the name is NATS
 from stan.aio.client import Client as STAN  # noqa N814; by convention the name is STAN
 
@@ -39,6 +38,8 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
 
     This runs the main top level service functions for working with the Queue.
     """
+    from entity_queue_common.service_utils import error_cb, logger, signal_handler
+
     # NATS client connections
     nc = NATS()
     sc = STAN()
@@ -86,43 +87,33 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
             payload = {
                 'specversion': '1.x-wip',
                 'type': 'bc.registry.payment.lockAccount',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{pay_account.auth_account_id}',
+                'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{auth_account_id}',
                 'id': f'{auth_account_id}',
                 'time': f'{datetime.now()}',
                 'datacontenttype': 'application/json',
                 'data': {
                     'accountId': auth_account_id,
-                    'accountName': auth_account_name,
-                    'paymentInfo': {
-                        'bankInstitutionNumber': bank_number,
-                        'bankTransitNumber': bank_branch_number,
-                        'bankAccountNumber': bank_account_number,
-                        'paymentStartDate': '-----',
-                        'bankName': 'XXX'
-                    }
+                    'paymentMethod': 'PAD',
+                    'outstandingAmount': transaction_amount,
+                    'originalAmount': transaction_amount,
+                    'amount': -float(transaction_amount)
                 }
             }
         elif mode == 'unlock':
             payload = {
                 'specversion': '1.x-wip',
                 'type': 'bc.registry.payment.unlockAccount',
-                'source': 'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{pay_account.auth_account_id}',
+                'source': f'https://api.pay.bcregistry.gov.bc.ca/v1/accounts/{auth_account_id}',
                 'id': f'{auth_account_id}',
                 'time': f'{datetime.now()}',
                 'datacontenttype': 'application/json',
                 'data': {
                     'accountId': auth_account_id,
                     'accountName': auth_account_name,
-                    'paymentInfo': {
-                        'bankInstitutionNumber': bank_number,
-                        'bankTransitNumber': bank_branch_number,
-                        'bankAccountNumber': bank_account_number,
-                        'paymentStartDate': '-----',
-                        'bankName': 'XXX'
-                    }
+                    'padTosAcceptedBy': ''
                 }
             }
-
+        print(payload)
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
 

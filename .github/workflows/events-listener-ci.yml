@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "queue_services/events-listener/**"
+      - "auth-api/src/auth_api/models/**"
 
 defaults:
   run:
