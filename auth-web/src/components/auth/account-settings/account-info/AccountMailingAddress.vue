@@ -3,7 +3,7 @@
     <div class="account-label" v-can:VIEW_ADDRESS.disable>
       <!-- template warpper is required here inorder to keep the placement of divs correctly(to resolve flickering issue when updating the address) -->
       <div class="nav-list-title font-weight-bold" data-test="title">Mailing Address</div>
-baseAddress:{{baseAddress}}
+
       <template v-if="baseAddress">
         <div class="details">
           <div class="with-change-icon">
