@@ -106,6 +106,11 @@ class UserContext:  # pylint: disable=too-many-instance-attributes
         return self._token_info
 
     @property
+    def account_id_claim(self) -> Dict:
+        """Return the account id."""
+        return _get_token_info().get('Account-Id', None)
+
+    @property
     def account_id(self) -> Dict:
         """Return the account id."""
         account_id = _get_token_info().get('Account-Id', None)
