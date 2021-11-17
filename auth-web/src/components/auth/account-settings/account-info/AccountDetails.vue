@@ -3,7 +3,7 @@
     <v-form ref="editAccountForm">
       <v-card elevation="0">
         <div class="account-label">
-          <div class="nav-list-title font-weight-bold">Account Details</div>
+          <div class="nav-list-title font-weight-bold" data-test="title">Account Details</div>
           <div v-if="isLoading" class="loading-inner-container loading-center">
             <v-progress-circular
               size="50"
