@@ -113,7 +113,7 @@ async def run(loop, mode, auth_account_id, auth_account_name, bank_number, bank_
                     'padTosAcceptedBy': ''
                 }
             }
-        print(payload)
+        logger.info(payload)
         await sc.publish(subject=subscription_options().get('subject'),
                          payload=json.dumps(payload).encode('utf-8'))
 
