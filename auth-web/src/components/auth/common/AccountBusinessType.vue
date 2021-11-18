@@ -92,7 +92,10 @@
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
                         @change="onOrgBusinessTypeChange()"
-                        :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
+                        :menu-props="{
+                          bottom: true,
+                          offsetY: true
+                        }"
                         ref="businessType"
                         />
                     </v-col>
@@ -107,7 +110,10 @@
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
                         @change="onOrgBusinessTypeChange()"
-                        :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
+                        :menu-props="{
+                          bottom: true,
+                          offsetY: true
+                        }"
                         ref="businessSize"
                         />
                     </v-col>
