@@ -2,11 +2,9 @@
   <div>
     <header class="view-header align-center mt-n1 mb-7">
       <h2 class="view-header__title">Existing API Keys</h2>
-
     </header>
 
-      <div>
-
+    <div>
       <v-data-table
         class="apikey-list"
         :headers="activityHeader"
@@ -16,7 +14,6 @@
         loading-text="loading text"
         disable-pagination
         hide-default-footer
-
       >
         <template v-slot:loading>
           Loading...
@@ -24,22 +21,26 @@
         <template v-slot:[`item.apiKeyName`]="{ item }">
           <div class=" font-weight-bold">
             {{ item.apiKeyName }}
-        </div>
-       </template>
-       <template v-slot:[`item.action`]="{ item }">
-      <!-- Revoke -->
-      <v-btn
-        outlined
-        aria-label="Revoke"
-        title="Revoke"
-        color="primary"
-        @click="confirmationModal(item)"
-        :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
-      >
-       Revoke
-      </v-btn>
-
-    </template>
+          </div>
+        </template>
+          <template v-slot:[`item.environment`]="{ item }">
+          <div class="text-capitalize">
+            {{ item.environment }}
+          </div>
+        </template>
+        <template v-slot:[`item.action`]="{ item }">
+          <!-- Revoke -->
+          <v-btn
+            outlined
+            aria-label="Revoke"
+            title="Revoke"
+            color="primary"
+            @click="confirmationModal(item)"
+            :data-test="getIndexedTag('confirm-button', item.apiKeyName)"
+          >
+            Revoke
+          </v-btn>
+        </template>
       </v-data-table>
     </div>
 
@@ -47,39 +48,41 @@
     <ModalDialog
       ref="confirmActionDialog"
       :title="confirmActionTitle"
-      :text="confirmActionText"
       dialog-class="notify-dialog"
-      max-width="680"
+      max-width="650"
       data-test="confirmation-modal"
-
     >
       <template v-slot:icon>
-        <v-icon
-          large
-          color="error"
-        >
+        <v-icon large color="error">
           mdi-alert-circle-outline
         </v-icon>
       </template>
+      <template v-slot:text>
+        <p class="mb-0 px-6" v-html="confirmActionTextLine1"></p>
+        <p class="mx-4 px-10 mb-0" v-html="confirmActionTextLine2"></p>
+      </template>
       <template v-slot:actions>
-        <v-btn
-          large
-          color="primary"
-          class="font-weight-bold"
-          @click="revokeApi()"
-          :loading="isLoading"
-        >
-          Revoke
-        </v-btn>
-        <v-btn
-          outlined
-          large
-          depressed
-          color="primary"
-          @click="close($refs.confirmActionDialog)"
-        >
-          Cancel
-        </v-btn>
+        <div class="modal-class-override">
+          <v-btn
+            large
+            color="primary"
+            class="font-weight-bold px-8"
+            @click="revokeApi()"
+            :loading="isLoading"
+          >
+            Revoke
+          </v-btn>
+          <v-btn
+            outlined
+            large
+            depressed
+            color="primary"
+            @click="close($refs.confirmActionDialog)"
+            class="ml-3 px-7"
+          >
+            Cancel
+          </v-btn>
+        </div>
       </template>
     </ModalDialog>
 
@@ -92,26 +95,22 @@
       max-width="600"
       data-test="alert-modal"
     >
-     <template v-slot:icon>
-        <v-icon
-          large
-          :color="notificationColor"
-        >
-        {{alertIcon}}
+      <template v-slot:icon>
+        <v-icon large :color="notificationColor">
+          {{ alertIcon }}
         </v-icon>
       </template>
-    <template v-slot:actions>
+      <template v-slot:actions>
         <v-btn
           large
           depressed
           color="primary"
           @click="close($refs.successDialog)"
         >
-         Ok
+          Ok
         </v-btn>
       </template>
-      </ModalDialog>
-
+    </ModalDialog>
   </div>
 </template>
 
@@ -131,27 +130,32 @@ const OrgModule = namespace('org')
   }
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @OrgModule.Action('getOrgApiKeys') public getOrgApiKeys!:(orgId:any) =>Promise<any>
-  @OrgModule.Action('revokeOrgApiKeys') public revokeOrgApiKeys!:(orgId:any) =>Promise<any>
+  @OrgModule.State('currentOrganization')
+  public currentOrganization!: Organization
+  @OrgModule.Action('getOrgApiKeys') public getOrgApiKeys!: (
+    orgId: any
+  ) => Promise<any>
+  @OrgModule.Action('revokeOrgApiKeys') public revokeOrgApiKeys!: (
+    orgId: any
+  ) => Promise<any>
 
   public isLoading = true
-  public confirmActionTitle ='Revoke API Key?'
-  public confirmActionText=''
-  public alertText=''
-  public alertTitle=''
+  public confirmActionTitle = 'Revoke API Key?'
+  public confirmActionTextLine1 = ''
+  public confirmActionTextLine2 = ''
+  public alertText = ''
+  public alertTitle = ''
   public alertIcon = 'mdi-check'
   public notificationColor = 'success'
   public totalApiKeyCount: number = 0
-  public selectedApi:any = {}
+  public selectedApi: any = {}
 
   $refs: {
     successDialog: ModalDialog
     confirmActionDialog: ModalDialog
-
   }
 
-  public apliKeyList=[]
+  public apliKeyList = []
 
   public readonly activityHeader = [
     {
@@ -180,6 +184,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 
   public async mounted () {
     this.setAccountChangedHandler(this.initialize)
+    this.initialize()
   }
 
   public async initialize () {
@@ -191,7 +196,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.apliKeyList = []
     this.totalApiKeyCount = 0
     try {
-      const resp:any = await this.getOrgApiKeys(this.currentOrganization.id)
+      const resp: any = await this.getOrgApiKeys(this.currentOrganization.id)
       this.apliKeyList = resp?.consumer?.consumerKey || []
       this.totalApiKeyCount = resp?.consumer?.consumerKey.length || 0
       this.isLoading = false
@@ -204,7 +209,9 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.selectedApi = apiKey
     const { apiKeyName } = apiKey
     // eslint-disable-next-line no-irregular-whitespace
-    this.confirmActionText = `Revoking an API key will immediately disable and remove this API key.<br /> This action cannot be reversed. Are you sure you wish to remove <strong>${apiKeyName}</strong> API key?`
+    this.confirmActionTextLine1 = `Revoking an API key will immediately disable and remove this API key.`
+    // eslint-disable-next-line no-irregular-whitespace
+    this.confirmActionTextLine2 = `This action cannot be reversed. Are you sure you wish to remove <strong>${apiKeyName}</strong> API key?`
     this.$refs.confirmActionDialog.open()
   }
 
@@ -218,7 +225,7 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
     this.notificationColor = 'error'
     this.isLoading = true
     try {
-      const resp:any = await this.revokeOrgApiKeys(apiKeys)
+      const resp: any = await this.revokeOrgApiKeys(apiKeys)
       if (resp) {
         this.alertIcon = 'mdi-check'
         this.alertTitle = 'API key has been Revoked'
@@ -247,38 +254,40 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
 </script>
 
 <style lang="scss" scoped>
-  .view-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+.view-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+::v-deep {
+  .v-data-table th {
+    white-space: nowrap;
   }
+
+  .v-data-table td {
+    height: 71px;
+  }
+
+  .v-badge--inline .v-badge__wrapper {
+    margin-left: 0;
+
+    .v-badge__badge {
+      margin-right: -0.25rem;
+      margin-left: 0.25rem;
+    }
+  }
+}
+.modal-class-override{
+  margin-top: -13px;
+}
+.notify-checkbox {
+  justify-content: center;
 
   ::v-deep {
-    .v-data-table th {
-      white-space: nowrap;
-    }
-
-    .v-data-table td {
-      height: 71px;
-    }
-
-    .v-badge--inline .v-badge__wrapper {
-      margin-left: 0;
-
-      .v-badge__badge {
-        margin-right: -0.25rem;
-        margin-left: 0.25rem;
-      }
+    .v-input__slot {
+      margin-bottom: 0 !important;
     }
   }
-
-  .notify-checkbox {
-    justify-content: center;
-
-    ::v-deep {
-      .v-input__slot {
-        margin-bottom: 0 !important;
-      }
-    }
-  }
+}
 </style>

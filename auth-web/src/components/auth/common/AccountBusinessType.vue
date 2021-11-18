@@ -81,7 +81,7 @@
             <template >
               <v-expand-transition class="business-account-type-details">
                 <v-row justify="space-between" data-test="business-account-type-details" v-if="isBusinessAccount">
-                    <v-col cols="6" >
+                    <v-col cols="6" class="py-0">
                         <v-select
                         filled
                         label="Business Type"
@@ -92,11 +92,14 @@
                         data-test="select-business-type"
                         :rules="orgBusinessTypeRules"
                         @change="onOrgBusinessTypeChange()"
-                        :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
+                        :menu-props="{
+                          bottom: true,
+                          offsetY: true
+                        }"
                         ref="businessType"
                         />
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="6" class="py-0">
                         <v-select
                         filled
                         label="Business Size"
@@ -107,7 +110,10 @@
                         data-test="select-business-size"
                         :rules="orgBusinessSizeRules"
                         @change="onOrgBusinessTypeChange()"
-                        :menu-props="{ auto:true, offsetY: true, maxHeight: 400 }"
+                        :menu-props="{
+                          bottom: true,
+                          offsetY: true
+                        }"
                         ref="businessSize"
                         />
                     </v-col>

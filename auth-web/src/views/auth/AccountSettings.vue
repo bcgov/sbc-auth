@@ -219,7 +219,7 @@
               >
                 <v-list-item-icon>
                   <!-- TODO: update mdi to get this icon -->
-                  <v-icon color="link" left>mdi-table-cog</v-icon>
+                  <v-icon color="link" left>mdi-settings-transfer-outline</v-icon>
                 </v-list-item-icon>
                 <v-list-item-title>Developer Access</v-list-item-title>
               </v-list-item>
