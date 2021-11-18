@@ -90,11 +90,9 @@ class Invitation:
         else:
             default_login_option_based_on_accesstype = LoginSource.BCSC.value if \
                 org.access_type == AccessType.REGULAR.value else LoginSource.BCEID.value
-            role = invitation_info['membership'][0]['membershipType']
             account_login_options = AccountLoginOptionsModel.find_active_by_org_id(org.id)
-            mandatory_login_source = LoginSource.BCSC.value if \
-                role == ADMIN else getattr(account_login_options, 'login_source',
-                                           default_login_option_based_on_accesstype)
+            mandatory_login_source = getattr(account_login_options, 'login_source',
+                                             default_login_option_based_on_accesstype)
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier, invitation_type)
         confirmation_token = Invitation.generate_confirmation_token(invitation.id, invitation.type)

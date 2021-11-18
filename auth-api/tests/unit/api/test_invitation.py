@@ -32,15 +32,22 @@ from tests.utilities.factory_utils import factory_auth_header, factory_invitatio
 KEYCLOAK_SERVICE = KeycloakService()
 
 
-def test_add_invitation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('org_info, role, claims', [
+    (TestOrgInfo.org_regular, 'ADMIN', TestJwtClaims.public_user_role),
+    (TestOrgInfo.org_regular, 'USER', TestJwtClaims.public_user_role),
+    (TestOrgInfo.org_regular, 'COORDINATOR', TestJwtClaims.public_user_role),
+    (TestOrgInfo.org_regular_bceid, 'ADMIN', TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.org_regular_bceid, 'USER', TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.org_regular_bceid, 'COORDINATOR', TestJwtClaims.public_bceid_user)
+])
+def test_add_invitation(client, jwt, session, keycloak_mock, org_info, role, claims):  # pylint:disable=unused-argument
     """Assert that an invitation can be POSTed."""
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    headers = factory_auth_header(jwt=jwt, claims=claims)
     rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
-    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
-                     headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(org_info), headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
-    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id=org_id)),
+    rv = client.post('/api/v1/invitations', data=json.dumps(factory_invitation(org_id=org_id, membership_type=role)),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     assert dictionary.get('token') is not None
