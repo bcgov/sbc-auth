@@ -78,13 +78,13 @@ export default class BusinessModule extends VuexModule {
 
     // get only NR affiliations
     const nameRequests = affiliatedEntities.map(entity => {
-      if (entity.corpType.code === CorpType.NAME_REQUEST) return entity
+      return (entity.corpType.code === CorpType.NAME_REQUEST) ? entity : null
     })
     // console.log('*** name requests =', nameRequests) // eslint-disable-line no-console
 
     // get data for all NRs
     const getNrDataPromises = nameRequests.map(nameRequest => {
-      if (nameRequest) return BusinessService.getNrData(nameRequest.businessIdentifier)
+      return nameRequest ? BusinessService.getNrData(nameRequest.businessIdentifier) : null
     })
     // console.log('*** nr data promises =', getNrDataPromises) // eslint-disable-line no-console
 
@@ -97,7 +97,6 @@ export default class BusinessModule extends VuexModule {
       .map(response => response['value']?.data || null)
       .map((nr, i) => {
         if (nr) {
-          const approvedName = getApprovedName(nr)
           affiliatedEntities[i].nameRequest = {
             names: nr.names,
             id: nr.id,
@@ -122,6 +121,7 @@ export default class BusinessModule extends VuexModule {
           const name = getApprovedName(data)
           return BusinessService.updateBusinessName({ businessIdentifier, name })
         }
+        return null
       })
     // console.log('*** update business name promises =', updateBusinessNamePromises) // eslint-disable-line no-console
 
