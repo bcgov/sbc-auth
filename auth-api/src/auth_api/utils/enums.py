@@ -141,6 +141,7 @@ class Status(Enum):
     INACTIVE = 2
     REJECTED = 3
     PENDING_APPROVAL = 4
+    PENDING_STAFF_REVIEW = 5
 
 
 class UserStatus(Enum):

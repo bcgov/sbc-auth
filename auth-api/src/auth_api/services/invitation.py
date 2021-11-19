@@ -14,6 +14,7 @@
 """Service for managing Invitation data."""
 from datetime import datetime
 from typing import Dict
+from urllib.parse import urlencode
 
 from flask import current_app
 from itsdangerous import URLSafeTimedSerializer
@@ -73,6 +74,7 @@ class Invitation:
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         org_id = invitation_info['membership'][0]['orgId']
+        token_email_query_params: Dict = {}
         # get the org and check the access_type
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
@@ -93,6 +95,9 @@ class Invitation:
             account_login_options = AccountLoginOptionsModel.find_active_by_org_id(org.id)
             mandatory_login_source = getattr(account_login_options, 'login_source',
                                              default_login_option_based_on_accesstype)
+            role = invitation_info['membership'][0]['membershipType']
+            if role == ADMIN and mandatory_login_source == LoginSource.BCEID.value:
+                token_email_query_params['affidavit'] = 'true'
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier, invitation_type)
         confirmation_token = Invitation.generate_confirmation_token(invitation.id, invitation.type)
@@ -101,7 +106,7 @@ class Invitation:
         invitation.save()
         Invitation.send_invitation(invitation, org_name, org.id, user.as_dict(),
                                    f'{invitation_origin}/{context_path}', mandatory_login_source,
-                                   org_status=org.status_code)
+                                   org_status=org.status_code, query_params=token_email_query_params)
         # notify admin if staff adds team members
         if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
             try:
@@ -221,12 +226,14 @@ class Invitation:
 
     @staticmethod
     def send_invitation(invitation: InvitationModel, org_name, org_id, user,  # pylint: disable=too-many-arguments
-                        app_url, login_source, org_status=None):
+                        app_url, login_source, org_status=None, query_params: Dict[str, any] = None):
         """Send the email notification."""
         current_app.logger.debug('<send_invitation')
         mail_configs = Invitation._get_invitation_configs(org_name, login_source, org_status)
         recipient = invitation.recipient_email
         token_confirm_url = f"{app_url}/{mail_configs.get('token_confirm_path')}/{invitation.token}"
+        if query_params:
+            token_confirm_url += f'?{urlencode(query_params)}'
         role = invitation.membership[0].membership_type.display_name
         data = {
             'accountId': org_id,
@@ -350,6 +357,7 @@ class Invitation:
     @user_context
     def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True, **kwargs):
         """Add user, role and org from the invitation to membership."""
+        print('accept_invitation')
         current_app.logger.debug('>accept_invitation')
         user_from_context: UserContext = kwargs['user_context']
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -364,7 +372,7 @@ class Invitation:
         if (login_source := user_from_context.login_source) is not None:  # bcros comes with out token
             if invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-
+        print(' add_membership ', add_membership)
         if add_membership:
             for membership in invitation.membership:
                 membership_model = MembershipModel()
@@ -381,8 +389,9 @@ class Invitation:
                 org_model: OrgModel = OrgModel.find_by_org_id(membership.org_id)
 
                 # GOVM users gets direct approval since they are IDIR users.
-                membership_model.status = Invitation._get_status_based_on_org(org_model)
+                membership_model.status = Invitation._get_status_based_on_org(org_model, login_source, membership_model)
                 membership_model.save()
+
                 try:
                     # skip notifying admin if it auto approved
                     # for now , auto approval happens for GOVM.If more auto approval comes , just check if its GOVM
@@ -390,6 +399,7 @@ class Invitation:
                         Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
                 except BusinessException as exception:
                     current_app.logger.error('<send_notification_to_admin failed', exception.message)
+
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()
@@ -408,7 +418,9 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def _get_status_based_on_org(org_model: OrgModel):
+    def _get_status_based_on_org(org_model: OrgModel, login_source: str, membership_model: MembershipModel) -> str:
         if org_model.access_type == AccessType.GOVM.value:
             return Status.ACTIVE.value
+        if login_source == LoginSource.BCEID.value and membership_model.membership_type.code == ADMIN:
+            return Status.PENDING_STAFF_REVIEW.value
         return Status.PENDING_APPROVAL.value
