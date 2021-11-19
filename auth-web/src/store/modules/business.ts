@@ -32,7 +32,7 @@ export default class BusinessModule extends VuexModule {
 
   @Mutation
   public setBusinesses (businesses: Business[]) {
-    this.businesses = businesses
+    this.businesses = [...businesses]
   }
 
   @Action({ rawError: true })
@@ -55,6 +55,9 @@ export default class BusinessModule extends VuexModule {
     const isApprovedForRegistration = (nr): boolean =>
       nr.actions.some(action => action.filingName === LearFilingTypes.REGISTRATION)
 
+    // initialize store
+    this.setBusinesses([])
+
     // get current organization
     const organization = this.context.rootState.org.currentOrganization as Organization
     if (!organization) {
@@ -62,7 +65,7 @@ export default class BusinessModule extends VuexModule {
       return
     }
 
-    // fetch affiliated entities for this organization
+    // get affiliated entities for this organization
     const affiliatedEntities = await OrgService.getAffiliatiatedEntities(organization.id)
       .then(response => {
         if (response?.data?.entities && response?.status === 200) {
@@ -74,66 +77,53 @@ export default class BusinessModule extends VuexModule {
         console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
         return [] as Business[]
       })
-    // console.log('*** affiliated entities =', affiliatedEntities) // eslint-disable-line no-console
 
     // update store with initial results
     this.setBusinesses(affiliatedEntities)
 
-    // get only NR affiliations
-    const nameRequests = affiliatedEntities.map(entity => {
-      return (entity.corpType.code === CorpType.NAME_REQUEST) ? entity : null
+    // get data for NR entities
+    const getNrDataPromises = affiliatedEntities.map(entity => {
+      if (entity.corpType.code === CorpType.NAME_REQUEST) {
+        return BusinessService.getNrData(entity.businessIdentifier)
+      }
+      return null
     })
-    // console.log('*** name requests =', nameRequests) // eslint-disable-line no-console
-
-    // get data for all NRs
-    const getNrDataPromises = nameRequests.map(nameRequest => {
-      return nameRequest ? BusinessService.getNrData(nameRequest.businessIdentifier) : null
-    })
-    // console.log('*** nr data promises =', getNrDataPromises) // eslint-disable-line no-console
 
     // wait for all calls to finish
     const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
-    // console.log('*** get nr data responses =', getNrDataResponses) // eslint-disable-line no-console
 
-    // attach NR data to NR affiliations
-    getNrDataResponses
-      .map(response => response['value']?.data || null)
-      .map((nr, i) => {
-        if (nr) {
-          affiliatedEntities[i].nameRequest = {
-            names: nr.names,
-            id: nr.id,
-            legalType: nr.legalType,
-            nrNumber: nr.nrNum,
-            state: nr.state,
-            applicantEmail: nr.applicants?.emailAddress,
-            applicantPhone: nr.applicants?.phoneNumber,
-            enableIncorporation: isApprovedForIa(nr) || isConditionallyApproved(nr) || isApprovedForRegistration(nr),
-            folioNumber: nr.folioNumber,
-            target: nr.target
-          }
+    // attach NR data to affiliated entities
+    getNrDataResponses.forEach((resp, i) => {
+      const nr = resp['value']?.data
+      if (nr) {
+        affiliatedEntities[i].nameRequest = {
+          names: nr.names,
+          id: nr.id,
+          legalType: nr.legalType,
+          nrNumber: nr.nrNum,
+          state: nr.state,
+          applicantEmail: nr.applicants?.emailAddress,
+          applicantPhone: nr.applicants?.phoneNumber,
+          enableIncorporation: isApprovedForIa(nr) || isConditionallyApproved(nr) || isApprovedForRegistration(nr),
+          folioNumber: nr.folioNumber,
+          target: nr.target
         }
-      })
-
-    // update business name for all NRs
-    const updateBusinessNamePromises = getNrDataResponses
-      .map(response => response['value']?.data || null)
-      .map((data, i) => {
-        if (data) {
-          const businessIdentifier = nameRequests[i].businessIdentifier
-          const name = getApprovedName(data)
-          return BusinessService.updateBusinessName({ businessIdentifier, name })
-        }
-        return null
-      })
-    // console.log('*** update business name promises =', updateBusinessNamePromises) // eslint-disable-line no-console
-
-    // wait for all calls to finish
-    const updateBusinessNameResponses = await Promise.allSettled(updateBusinessNamePromises)
-    // console.log('*** update business name responses =', getNrDataResponses) // eslint-disable-line no-console
+      }
+    })
 
     // update store with final results
     this.setBusinesses(affiliatedEntities)
+
+    // update business name for all NRs
+    // NB: don't wait for all calls to finish
+    getNrDataResponses.forEach((resp, i) => {
+      const nr = resp['value']?.data
+      if (nr) {
+        const businessIdentifier = affiliatedEntities[i].businessIdentifier
+        const name = getApprovedName(nr) || ''
+        BusinessService.updateBusinessName({ businessIdentifier, name })
+      }
+    })
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
