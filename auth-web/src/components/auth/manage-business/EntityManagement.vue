@@ -241,7 +241,7 @@ import PasscodeResetOptionsModal from '@/components/auth/manage-business/Passcod
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
   readonly CommonUtils = CommonUtils
 
-  @Prop({ default: '' }) private orgId: string
+  @Prop({ default: '' }) readonly orgId: string
 
   private removeBusinessPayload = null
   private dialogTitle = ''
@@ -307,10 +307,14 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private async setup () {
     // ensure syncBusinesses isn't already running
-    if (this.isLoading === 1) return
+    if (this.isLoading === 1) {
+      return
+    }
 
     // ensure syncBusinesses hasn't just been run
-    if (Date.now() - this.lastSyncBusinesses < 2000) return
+    if (Date.now() - this.lastSyncBusinesses < 2000) {
+      return
+    }
 
     this.isLoading = 1 // truthy
     this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
