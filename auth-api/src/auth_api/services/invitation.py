@@ -30,11 +30,12 @@ from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import InvitationSchema
+from auth_api.services.task import Task
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, LoginSource
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
-from auth_api.utils.enums import Status
+from auth_api.utils.enums import Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -95,8 +96,9 @@ class Invitation:
             account_login_options = AccountLoginOptionsModel.find_active_by_org_id(org.id)
             mandatory_login_source = getattr(account_login_options, 'login_source',
                                              default_login_option_based_on_accesstype)
-            role = invitation_info['membership'][0]['membershipType']
-            if role == ADMIN and mandatory_login_source == LoginSource.BCEID.value:
+
+            if invitation_info['membership'][0]['membershipType'] == ADMIN \
+                    and mandatory_login_source == LoginSource.BCEID.value:
                 token_email_query_params['affidavit'] = 'true'
 
         invitation = InvitationModel.create_from_dict(invitation_info, user.identifier, invitation_type)
@@ -357,7 +359,6 @@ class Invitation:
     @user_context
     def accept_invitation(invitation_id, user: UserService, origin, add_membership: bool = True, **kwargs):
         """Add user, role and org from the invitation to membership."""
-        print('accept_invitation')
         current_app.logger.debug('>accept_invitation')
         user_from_context: UserContext = kwargs['user_context']
         invitation: InvitationModel = InvitationModel.find_invitation_by_id(invitation_id)
@@ -372,7 +373,7 @@ class Invitation:
         if (login_source := user_from_context.login_source) is not None:  # bcros comes with out token
             if invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-        print(' add_membership ', add_membership)
+
         if add_membership:
             for membership in invitation.membership:
                 membership_model = MembershipModel()
@@ -392,6 +393,8 @@ class Invitation:
                 membership_model.status = Invitation._get_status_based_on_org(org_model, login_source, membership_model)
                 membership_model.save()
 
+                # Create staff review task.
+                Invitation._create_affidavit_review_task(org_model, membership_model)
                 try:
                     # skip notifying admin if it auto approved
                     # for now , auto approval happens for GOVM.If more auto approval comes , just check if its GOVM
@@ -424,3 +427,19 @@ class Invitation:
         if login_source == LoginSource.BCEID.value and membership_model.membership_type.code == ADMIN:
             return Status.PENDING_STAFF_REVIEW.value
         return Status.PENDING_APPROVAL.value
+
+    @staticmethod
+    def _create_affidavit_review_task(org: OrgModel, membership: MembershipModel):
+        """Create a task for staff to review the affidavit."""
+        if membership.status == Status.PENDING_STAFF_REVIEW.value:
+            task_info = {
+                'name': org.name,
+                'relationshipType': TaskRelationshipType.USER.value,
+                'relationshipId': membership.user_id,
+                'relatedTo': membership.user_id,
+                'dateSubmitted': datetime.today(),
+                'type': TaskTypePrefix.BCEID_ADMIN.value,
+                'status': TaskStatus.OPEN.value,
+                'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+            }
+            Task.create_task(task_info=task_info, do_commit=False)
