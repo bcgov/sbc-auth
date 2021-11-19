@@ -227,9 +227,7 @@ import PasscodeResetOptionsModal from '@/components/auth/manage-business/Passcod
     PasscodeResetOptionsModal
   },
   computed: {
-    ...mapState('org', [
-      'currentOrgAddress'
-    ]),
+    ...mapState('org', ['currentOrgAddress']),
     ...mapState('user', ['userProfile', 'currentUser']),
     ...mapGetters('org', ['isPremiumAccount'])
   },
@@ -259,7 +257,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private addAffiliationDropdown: boolean = false
 
   private readonly isPremiumAccount!: boolean
-  private readonly syncBusinesses!: () => Promise<Business[]>
+  private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
   private readonly currentOrgAddress!: Address
