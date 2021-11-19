@@ -234,6 +234,7 @@ class TaskRelationshipType(Enum):
     ORG = 'ORG'  # Task related to Org staff review
     AFFIDAVIT = 'AFFIDAVIT'
     PRODUCT = 'PRODUCT'
+    USER = 'USER'
 
 
 class TaskStatus(Enum):
@@ -263,6 +264,7 @@ class TaskTypePrefix(Enum):
 
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
     GOVM_REVIEW = 'GovM'
+    BCEID_ADMIN = 'BCeID Admin'
 
 
 class ActivityAction(Enum):
