@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-fade-transition>
-      <div class="loading-container" v-if="!!isLoading">
+      <div class="loading-container grayed-out" v-show="!!isLoading">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="!!isLoading"/>
       </div>
     </v-fade-transition>
@@ -488,6 +488,13 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
 <style lang="scss" scoped>
   @import '$assets/scss/theme.scss';
+
+  .loading-container.grayed-out {
+    // these are the same styles as dialog overlay:
+    opacity: 0.46;
+    background-color: rgb(33, 33, 33); // grey darken-4
+    border-color: rgb(33, 33, 33); // grey darken-4
+  }
 
   .view-header {
     justify-content: space-between;

@@ -76,6 +76,9 @@ export default class BusinessModule extends VuexModule {
       })
     // console.log('*** affiliated entities =', affiliatedEntities) // eslint-disable-line no-console
 
+    // update store with initial results
+    this.setBusinesses(affiliatedEntities)
+
     // get only NR affiliations
     const nameRequests = affiliatedEntities.map(entity => {
       return (entity.corpType.code === CorpType.NAME_REQUEST) ? entity : null
@@ -129,7 +132,7 @@ export default class BusinessModule extends VuexModule {
     const updateBusinessNameResponses = await Promise.allSettled(updateBusinessNamePromises)
     // console.log('*** update business name responses =', getNrDataResponses) // eslint-disable-line no-console
 
-    // update store
+    // update store with final results
     this.setBusinesses(affiliatedEntities)
   }
 
