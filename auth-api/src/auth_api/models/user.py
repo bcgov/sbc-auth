@@ -63,6 +63,7 @@ class User(BaseModel):
     idp_userid = Column('idp_userid', String(256), index=True)
     login_source = Column('login_source', String(200), nullable=True)
     login_time = Column(DateTime, default=None, nullable=True)
+    verified = Column(Boolean())
 
     contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
     orgs = relationship('Membership',
