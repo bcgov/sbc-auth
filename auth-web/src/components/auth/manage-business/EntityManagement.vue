@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div>
-      <v-fade-transition>
-        <div class="loading-container" v-if="isLoading">
-          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
-        </div>
-      </v-fade-transition>
-    </div>
+    <v-fade-transition>
+      <div class="loading-container" v-if="!!isLoading">
+        <v-progress-circular size="50" width="5" color="primary" :indeterminate="!!isLoading"/>
+      </div>
+    </v-fade-transition>
+
     <v-container class="view-container">
       <div class="view-header align-center">
         <h1 class="view-header__title">My Business Registry<br>
@@ -23,105 +22,59 @@
             <span>Request a BC Business Name</span>
             <v-icon small class="ml-2">mdi-open-in-new</v-icon>
           </v-btn>
-          <template v-if="!enableBusinessTable">
-            <v-menu>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                    class="ml-3"
-                    color="primary"
-                    dark
-                    large
-                    v-on="on"
-                >
-                  <v-icon small>mdi-plus</v-icon>
-                  <span>{{ $t('addExistingBtnLabel') }}</span>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item
-                >
-                  <v-list-item-title class="d-inline-flex">
-                    <v-icon small>mdi-plus</v-icon>
-                    <div class="ml-1">{{ $t('addExistingBtnLabel') }}</div>
-                  </v-list-item-title>
-                </v-list-item>
-                <v-list-item
-                    @click="showAddNRModal()"
-                >
-                  Name Request
-                </v-list-item>
-                <v-list-item
-                    @click="showAddBusinessModal()"
-                >
-                  Business
-                </v-list-item>
-              </v-list>
-            </v-menu>
-          </template>
         </div>
       </div>
 
-      <!-- Feature flagged future Dashboard table -->
-      <template v-if="enableBusinessTable">
-        <v-row no-gutters id="dashboard-actions" class="mb-n3 pl-4">
-          <v-col cols="9">
-            <!-- Add Existing Name Request or Business -->
-            <v-menu
-              v-model="addAffiliationDropdown"
-            >
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  id="add-existing-btn"
-                  class="mt-2"
-                  color="primary"
-                  dark
-                  large
-                  v-on="on"
-                >
+      <v-row no-gutters id="dashboard-actions" class="mb-n3 pl-4">
+        <v-col cols="9">
+          <!-- Add Existing Name Request or Business -->
+          <v-menu
+            v-model="addAffiliationDropdown"
+          >
+            <template v-slot:activator="{ on }">
+              <v-btn
+                id="add-existing-btn"
+                class="mt-2"
+                color="primary"
+                dark
+                large
+                v-on="on"
+              >
+                <v-icon>mdi-plus</v-icon>
+                <span><strong>Add an Existing Business or Name Request</strong></span>
+                <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item>
+                <v-list-item-title class="d-inline-flex">
                   <v-icon>mdi-plus</v-icon>
-                  <span><strong>Add an Existing Business or Name Request</strong></span>
-                  <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item>
-                  <v-list-item-title class="d-inline-flex">
-                    <v-icon>mdi-plus</v-icon>
-                    <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
-                  </v-list-item-title>
-                </v-list-item>
-                <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
-                <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
-              </v-list>
-            </v-menu>
-          </v-col>
-          <v-col class="mr-4">
-            <v-select
-              dense filled multiple
-              class="column-selector"
-              label="Columns to Show"
-              v-model="selectedColumns"
-              :items="columns"
-              :menu-props="{ bottom: true, offsetY: true }"
-            >
-              <template v-slot:selection="{ item }"></template>
-            </v-select>
-          </v-col>
-        </v-row>
+                  <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
+              <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
+            </v-list>
+          </v-menu>
+        </v-col>
+        <v-col class="mr-4">
+          <v-select
+            dense filled multiple
+            class="column-selector"
+            label="Columns to Show"
+            v-model="selectedColumns"
+            :items="columns"
+            :menu-props="{ bottom: true, offsetY: true }"
+          >
+            <template v-slot:selection="{ item }"></template>
+          </v-select>
+        </v-col>
+      </v-row>
 
-        <AffiliatedEntityTable
-          :selectedColumns="selectedColumns"
-          @remove-business="showConfirmationOptionsModal($event)"
-        />
-      </template>
-
-      <template v-else>
-        <AffiliatedEntityList
-          @add-business="showAddBusinessModal()"
-          @remove-business="showConfirmationOptionsModal($event)"
-          @add-failed-show-msg="showNRErrorModal"
-        />
-      </template>
+      <AffiliatedEntityTable
+        :selectedColumns="selectedColumns"
+        @remove-business="showConfirmationOptionsModal($event)"
+      />
 
       <PasscodeResetOptionsModal
         ref="passcodeResetOptionsModal"
@@ -253,11 +206,9 @@ import { CorpType, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import { AccountSettings } from '@/models/account-settings'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
-import AffiliatedEntityList from '@/components/auth/manage-business/AffiliatedEntityList.vue'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
@@ -271,7 +222,6 @@ import PasscodeResetOptionsModal from '@/components/auth/manage-business/Passcod
   components: {
     AddBusinessForm,
     AddNameRequestForm,
-    AffiliatedEntityList,
     AffiliatedEntityTable,
     ModalDialog,
     PasscodeResetOptionsModal
@@ -291,22 +241,23 @@ import PasscodeResetOptionsModal from '@/components/auth/manage-business/Passcod
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
   readonly CommonUtils = CommonUtils
 
-  @Prop({ default: '' }) private orgId: string;
+  @Prop({ default: '' }) private orgId: string
+
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
-  private isLoading = true
+  private isLoading = -1 // truthy
   private resetPasscodeEmail: string = null
   businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
+  private lastSyncBusinesses = 0
 
   /** V-model for dropdown menu. */
   private addAffiliationDropdown: boolean = false
 
-  protected readonly currentAccountSettings!: AccountSettings
   private readonly isPremiumAccount!: boolean
   private readonly syncBusinesses!: () => Promise<Business[]>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
@@ -324,7 +275,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     passcodeResetOptionsModal: PasscodeResetOptionsModal,
     removedBusinessSuccessDialog: ModalDialog,
     removalConfirmDialog: ModalDialog
-
   }
 
   private async mounted () {
@@ -352,22 +302,25 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     }
 
     this.setAccountChangedHandler(this.setup)
-    this.setup()
+    // this.setup() // not needed since an account change event is forthcoming
   }
 
   private async setup () {
-    this.isLoading = true
+    // ensure syncBusinesses isn't already running
+    if (this.isLoading === 1) return
+
+    // ensure syncBusinesses hasn't just been run
+    if (Date.now() - this.lastSyncBusinesses < 2000) return
+
+    this.isLoading = 1 // truthy
     this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
-    this.isLoading = false
+    this.lastSyncBusinesses = Date.now()
+    this.isLoading = 0 // falsy
   }
 
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
-  }
-
-  private get enableBusinessTable (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessTable) || false // Default to false
   }
 
   // open Name Request

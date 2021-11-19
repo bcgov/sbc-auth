@@ -11,7 +11,6 @@ import {
 } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -25,10 +24,6 @@ export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
   businesses: Business[] = []
 
-  public get businessAffiliations (): Business[] {
-    return this.businesses
-  }
-
   @Mutation
   public setCurrentBusiness (business: Business) {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business?.businessIdentifier)
@@ -40,72 +35,102 @@ export default class BusinessModule extends VuexModule {
     this.businesses = businesses
   }
 
-  @Action({ commit: 'setBusinesses', rawError: true })
-  public async syncBusinesses (): Promise<Business[]> {
-    const organization = this.context.rootState.org.currentOrganization
+  @Action({ rawError: true })
+  public async syncBusinesses (): Promise<void> {
+    /** Returns NR's approved name. */
+    const getApprovedName = (nr): string =>
+      nr.names.find(name => [NrState.APPROVED, NrState.CONDITION].includes(name.state))?.name
+
+    /** Returns True if NR is approved for incorporation. */
+    const isApprovedForIa = (nr): boolean =>
+      (nr.state === NrState.APPROVED &&
+        nr.actions.some(action => action.filingName === LearFilingTypes.INCORPORATION))
+
+    /** Returns True if NR is conditionally approved. */
+    const isConditionallyApproved = (nr): boolean =>
+      (nr.state === NrState.CONDITIONAL &&
+        [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(nr.consentFlag))
+
+    /** Returns True if NR is approved for one stop registration. */
+    const isApprovedForRegistration = (nr): boolean =>
+      nr.actions.some(action => action.filingName === LearFilingTypes.REGISTRATION)
+
+    // get current organization
+    const organization = this.context.rootState.org.currentOrganization as Organization
     if (!organization) {
-      return []
+      console.log('Invalid organization') // eslint-disable-line no-console
+      return
     }
-    const response = await OrgService.getAffiliatiatedEntities(organization.id)
 
-    if (response && response.data && response.status === 200) {
-      // Fetch and populate data for Name Request affiliations
-      const affiliatedEntities = response.data.entities
-      for (const entity of affiliatedEntities) {
-        if (entity.corpType.code === CorpType.NAME_REQUEST) {
-          await BusinessService.getNrData(entity.businessIdentifier)
-            .then(response => {
-              if (response?.status >= 200 && response?.status < 300 && response?.data) {
-                // Keep the approved name in Sync, in the event of changes in Namex
-                const approvedName = () => {
-                  for (const nameItem of response.data.names) {
-                    if ([NrState.APPROVED, NrState.CONDITION].includes(nameItem.state)) {
-                      return nameItem.name
-                    }
-                  }
-                }
-
-                BusinessService.updateBusinessName({
-                  businessIdentifier: entity.businessIdentifier,
-                  name: approvedName()
-                })
-
-                // Is a supported IA
-                const isApprovedForIa =
-                  response.data.actions.some(e => e.filingName === LearFilingTypes.INCORPORATION) &&
-                  response.data.state === NrState.APPROVED
-
-                // Conditional State Checks
-                const isConditionallyApproved =
-                  response.data.state === NrState.CONDITIONAL &&
-                  [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(response.data.consentFlag)
-
-                // Is approved for one stop registration
-                const isApprovedForRegistration =
-                    response.data.actions.some(e => e.filingName === LearFilingTypes.REGISTRATION)
-
-                entity.nameRequest = {
-                  names: response.data.names,
-                  id: response.data.id,
-                  legalType: response.data.legalType,
-                  nrNumber: response.data.nrNum,
-                  state: response.data.state,
-                  applicantEmail: response.data.applicants?.emailAddress,
-                  applicantPhone: response.data.applicants?.phoneNumber,
-                  enableIncorporation: isApprovedForIa || isConditionallyApproved || isApprovedForRegistration,
-                  folioNumber: response.data.folioNumber,
-                  target: response.data.target
-                }
-              }
-            }).catch(err => {
-              // eslint-disable-next-line no-console
-              console.log(`Error fetching Name Request: ${err}`)
-            })
+    // fetch affiliated entities for this organization
+    const affiliatedEntities = await OrgService.getAffiliatiatedEntities(organization.id)
+      .then(response => {
+        if (response?.data?.entities && response?.status === 200) {
+          return response.data.entities
         }
-      }
+        throw new Error(`Invalid response = ${response}`)
+      })
+      .catch(error => {
+        console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
+        return [] as Business[]
+      })
+    // console.log('*** affiliated entities =', affiliatedEntities) // eslint-disable-line no-console
 
-      return affiliatedEntities
-    }
+    // get only NR affiliations
+    const nameRequests = affiliatedEntities.map(entity => {
+      if (entity.corpType.code === CorpType.NAME_REQUEST) return entity
+    })
+    // console.log('*** name requests =', nameRequests) // eslint-disable-line no-console
+
+    // get data for all NRs
+    const getNrDataPromises = nameRequests.map(nameRequest => {
+      if (nameRequest) return BusinessService.getNrData(nameRequest.businessIdentifier)
+    })
+    // console.log('*** nr data promises =', getNrDataPromises) // eslint-disable-line no-console
+
+    // wait for all calls to finish
+    const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
+    // console.log('*** get nr data responses =', getNrDataResponses) // eslint-disable-line no-console
+
+    // attach NR data to NR affiliations
+    getNrDataResponses
+      .map(response => response['value']?.data || null)
+      .map((nr, i) => {
+        if (nr) {
+          const approvedName = getApprovedName(nr)
+          affiliatedEntities[i].nameRequest = {
+            names: nr.names,
+            id: nr.id,
+            legalType: nr.legalType,
+            nrNumber: nr.nrNum,
+            state: nr.state,
+            applicantEmail: nr.applicants?.emailAddress,
+            applicantPhone: nr.applicants?.phoneNumber,
+            enableIncorporation: isApprovedForIa(nr) || isConditionallyApproved(nr) || isApprovedForRegistration(nr),
+            folioNumber: nr.folioNumber,
+            target: nr.target
+          }
+        }
+      })
+
+    // update business name for all NRs
+    const updateBusinessNamePromises = getNrDataResponses
+      .map(response => response['value']?.data || null)
+      .map((data, i) => {
+        if (data) {
+          const businessIdentifier = nameRequests[i].businessIdentifier
+          const name = getApprovedName(data)
+          return BusinessService.updateBusinessName({ businessIdentifier, name })
+        }
+      })
+    // console.log('*** update business name promises =', updateBusinessNamePromises) // eslint-disable-line no-console
+
+    // wait for all calls to finish
+    const updateBusinessNameResponses = await Promise.allSettled(updateBusinessNamePromises)
+    // console.log('*** update business name responses =', getNrDataResponses) // eslint-disable-line no-console
+
+    // update store
+    this.setBusinesses(affiliatedEntities)
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

@@ -227,7 +227,6 @@ export enum LDFlags {
     EnableGovmInvite = 'enable-govm-account-invite',
     HideProductPackage = 'hide-product-packages',
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
-    EnableBusinessTable = 'enable-business-table',
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard'
 }
