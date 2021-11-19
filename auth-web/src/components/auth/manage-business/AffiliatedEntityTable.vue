@@ -204,7 +204,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   /** Returns the Name value for the affiliation */
   private name (item: Business): string {
-    return this.isNumberedIncorporationApplication(item) ? 'Numbered Benefit Company' : item.name
+    return this.isNumberedIncorporationApplication(item) ? 'Numbered Benefit Company' : item.name || ''
   }
 
   /** Returns true if the Name Request is approved */
@@ -225,7 +225,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       case (this.isTemporaryBusinessRegistration(item.corpType.code)):
         return item.nrNumber
       case this.isNameRequest(item.corpType.code):
-        return item.nameRequest?.nrNumber
+        return item.nameRequest?.nrNumber || ''
       default:
         return item.businessIdentifier
     }
