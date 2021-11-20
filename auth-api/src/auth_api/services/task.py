@@ -147,6 +147,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
             if is_approved:
                 membership = MembershipModel.find_membership_by_userid(user_id)
                 membership.status = Status.ACTIVE.value
+                user: UserModel = UserModel.find_by_id(user_id)
+                user.verified = True
 
         current_app.logger.debug('>update_task_relationship ')
 

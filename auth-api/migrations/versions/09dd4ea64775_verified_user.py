@@ -5,9 +5,13 @@ Revises: d00101759be4
 Create Date: 2021-11-19 13:05:57.935908
 
 """
+from typing import List
+
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.sql import column, table
+
+from auth_api.models import Affidavit
 
 # revision identifiers, used by Alembic.
 revision = '09dd4ea64775'
@@ -34,6 +38,14 @@ def upgrade():
             }
         ]
     )
+
+    # Find approved BCeID affidavit users.
+    conn = op.get_bind()
+    affidavits: List[Affidavit] = conn.execute("select * from affidavits where status_code='APPROVED' ").fetchall()
+    for affidavit in affidavits:
+        op.execute(f"update users set verified=true where user_id = {affidavit.user_id};")
+
+    op.execute("update users set verified=true where login_source='BCSC'")
 
 
 def downgrade():
