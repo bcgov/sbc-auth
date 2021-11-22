@@ -73,6 +73,7 @@
 
       <AffiliatedEntityTable
         :selectedColumns="selectedColumns"
+        :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
       />
 

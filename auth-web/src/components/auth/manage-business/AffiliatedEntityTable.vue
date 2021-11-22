@@ -109,8 +109,9 @@
           </tr>
         </template>
         <template v-slot:no-data>
-        <span>Add an existing company, cooperative or society to manage it or<br> add a Name Request to complete your
-          incorporation or registration.</span>
+          <span v-if="loading">Loading...</span>
+          <span v-else>Add an existing company, cooperative or society to manage it or<br> add a Name Request to
+            complete your incorporation or registration.</span>
         </template>
       </v-data-table>
     </v-card>
@@ -148,8 +149,8 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
   }
 })
 export default class AffiliatedEntityTable extends Mixins(DateMixin) {
-  @Prop({ default: [] })
-  readonly selectedColumns: Array<string>
+  @Prop({ default: [] }) readonly selectedColumns: Array<string>
+  @Prop({ default: false }) readonly loading: boolean
 
   // Local Properties
   private readonly businesses!: Business[]
