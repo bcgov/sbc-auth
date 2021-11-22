@@ -210,7 +210,6 @@ import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.v
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
-import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'

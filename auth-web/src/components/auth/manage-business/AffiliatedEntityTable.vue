@@ -133,7 +133,7 @@ import { Business, BusinessRequest, NameRequest, Names } from '@/models/business
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -144,7 +144,6 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapMutations('business', ['setCurrentBusiness']),
     ...mapActions('business', ['createNamedBusiness'])
   }
 })
