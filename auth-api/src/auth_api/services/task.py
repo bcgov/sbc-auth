@@ -134,7 +134,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 # bceid holds need notifications
                 if is_bceid:
                     Task._notify_admin_about_hold(org, task_model)
-
+            # TODO Update user.verified flag
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
@@ -149,7 +149,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 membership.status = Status.ACTIVE.value
                 user: UserModel = UserModel.find_by_id(user_id)
                 user.verified = True
-
+            # TODO Update affidavit status
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
