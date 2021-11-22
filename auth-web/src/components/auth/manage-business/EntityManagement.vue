@@ -300,7 +300,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     }
 
     this.setAccountChangedHandler(this.setup)
-    // this.setup() // not needed since an account change event is forthcoming
+    this.setup()
   }
 
   private async setup () {
