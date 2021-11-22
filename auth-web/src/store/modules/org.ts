@@ -566,6 +566,9 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async updateOrg (createRequestBody: CreateOrgRequestBody) {
+    if (createRequestBody?.paymentInfo?.paymentMethod === PaymentTypes.CREDIT_CARD) {
+      createRequestBody.paymentInfo.paymentMethod = PaymentTypes.DIRECT_PAY
+    }
     const response = await OrgService.updateOrg(this.context.state['currentOrganization'].id, createRequestBody)
     this.context.commit('setCurrentOrganization', response.data)
     return response?.data
