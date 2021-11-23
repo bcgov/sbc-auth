@@ -35,7 +35,7 @@
     </v-alert>
     <v-row class="mt-8">
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
-        <v-btn large depressed color="default" @click="goBack">
+        <v-btn large depressed color="default" @click="goBack" v-if="!isAdminAffidavitMode">
           <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
           <span>Back</span>
         </v-btn>
@@ -58,6 +58,7 @@
           :disabled="saving"
           :target-route="cancelUrl"
           :showConfirmPopup="true"
+          v-if="!isAdminAffidavitMode"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
@@ -108,6 +109,7 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class UploadAffidavitStep extends Mixins(Steppable) {
+  @Prop({ default: false }) isAdminAffidavitMode: boolean
   private orgStore = getModule(OrgModule, this.$store)
   private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
@@ -144,7 +146,12 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
       this.saving = true
       // save the file here so that in the final steps its less network calls to make
       await this.uploadPendingDocsToStorage()
-      this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+      if (this.isAdminAffidavitMode) {
+        // emit event to let parent know the upload affidavit step is complete
+        this.$emit('emit-admin-affidavit-complete')
+      } else {
+        this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
+      }
     } catch (error) {
       this.saving = false
       this.errorMessage = `Something happend while uploading the document, please try again`

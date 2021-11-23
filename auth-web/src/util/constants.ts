@@ -72,7 +72,8 @@ export enum Pages {
     MAKE_PAD_PAYMENT = '/make-cc-payment/',
     STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
     SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success',
-    DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning'
+    DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning',
+    AFFIDAVIT_COMPLETE='/upload-affidavit'
 }
 
 export enum Account {
