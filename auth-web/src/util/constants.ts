@@ -14,7 +14,8 @@ export enum SessionStorageKeys {
     AuthApiUrl = 'AUTH_API_URL',
     AuthWebUrl = 'AUTH_WEB_URL',
     StatusApiUrl = 'STATUS_API_URL',
-    FasWebUrl = 'FAS_WEB_URL'
+    FasWebUrl = 'FAS_WEB_URL',
+    AffidavitNeeded = 'AFFIDAVIT_NEEDED'
 }
 
 export enum Role {
@@ -72,7 +73,8 @@ export enum Pages {
     MAKE_PAD_PAYMENT = '/make-cc-payment/',
     STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
     SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success',
-    DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning'
+    DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning',
+    AFFIDAVIT_COMPLETE='/upload-affidavit'
 }
 
 export enum Account {

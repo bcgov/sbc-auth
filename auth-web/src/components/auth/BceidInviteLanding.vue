@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
@@ -107,14 +107,30 @@ export default class BceidInviteLanding extends Vue {
 
   @Prop() token: string
   @Prop({ default: '' }) orgName: string
+  @Prop({ default: false }) affidavitNeeded: boolean
+
+  // if affidavit=true present in URL redirect to affidavit download page by setting token and affidavit in session
+  @Watch('affidavitNeeded')
+  onAffidavitNeededChange (newValue) {
+    // watching affidavitNeeded to redirect set values into session and rediret user to upload affidavit flow
+    if (newValue) {
+      this.setStorage()
+      this.$router.push('/nonbcsc-info')
+    }
+  }
 
   private registerForBceid () {
-    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
+    this.setStorage()
     window.location.href = ConfigHelper.getBceIdOsdLink()
   }
   private loginWithBceid () {
-    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
+    this.setStorage()
     this.$router.push('/signin/bceid/')
+  }
+
+  private setStorage () {
+    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
+    ConfigHelper.addToSession(SessionStorageKeys.AffidavitNeeded, this.affidavitNeeded)
   }
 
   private async mounted () {

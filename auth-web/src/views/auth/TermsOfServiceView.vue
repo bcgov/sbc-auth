@@ -82,6 +82,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   private isLoading: boolean = false
   private atBottom = false
   @Prop() token: string
+
   protected readonly currentUser!: KCUserProfile
   private showTosBanner = false
   private isGovmUser: boolean = false
@@ -105,6 +106,8 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
 
   private async clickAccepted () {
     this.isLoading = true
+    const affidavitNeeded = !!this.$route.query.affidavit
+
     try {
       await this.updateCurrentUserTerms({
         termsOfUseAcceptedVersion: this.termsOfUse.versionId,
@@ -124,6 +127,11 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
         // so after TOS , dont create accont , rather let him create profile if he is not bcros user
         const isBcrosUser = this.currentUser?.loginSource === LoginSource.BCROS
         if (!isBcrosUser && this.token) {
+        // if user is in affidavit flow we need redirect to affidavit upload instead of user profile
+          if (affidavitNeeded) {
+            await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}`)
+            return
+          }
           this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
           return
         }

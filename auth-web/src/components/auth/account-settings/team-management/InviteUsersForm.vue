@@ -117,8 +117,7 @@ export default class InviteUsersForm extends TeamManagementMixin {
   }
 
   private get availableRoles () {
-    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin) ||
-      (this.currentUser?.loginSource === LoginSource.BCEID)) {
+    if ((this.currentMembership.membershipTypeCode !== MembershipType.Admin)) {
       return this.roles.filter(role => role.name !== MembershipType.Admin)
     }
     return this.roles
