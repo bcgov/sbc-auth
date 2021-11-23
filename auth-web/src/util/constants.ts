@@ -14,7 +14,8 @@ export enum SessionStorageKeys {
     AuthApiUrl = 'AUTH_API_URL',
     AuthWebUrl = 'AUTH_WEB_URL',
     StatusApiUrl = 'STATUS_API_URL',
-    FasWebUrl = 'FAS_WEB_URL'
+    FasWebUrl = 'FAS_WEB_URL',
+    AffidavitNeeded = 'AFFIDAVIT_NEEDED'
 }
 
 export enum Role {
@@ -228,7 +229,6 @@ export enum LDFlags {
     EnableGovmInvite = 'enable-govm-account-invite',
     HideProductPackage = 'hide-product-packages',
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
-    EnableBusinessTable = 'enable-business-table',
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard'
 }

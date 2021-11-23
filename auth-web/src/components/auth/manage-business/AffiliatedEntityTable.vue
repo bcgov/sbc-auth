@@ -109,8 +109,9 @@
           </tr>
         </template>
         <template v-slot:no-data>
-        <span>Add an existing company, cooperative or society to manage it or<br> add a Name Request to complete your
-          incorporation or registration.</span>
+          <span v-if="loading">Loading...</span>
+          <span v-else>Add an existing company, cooperative or society to manage it or<br> add a Name Request to
+            complete your incorporation or registration.</span>
         </template>
       </v-data-table>
     </v-card>
@@ -133,7 +134,7 @@ import { Business, BusinessRequest, NameRequest, Names } from '@/models/business
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -144,13 +145,12 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
     ...mapState('org', ['currentOrganization'])
   },
   methods: {
-    ...mapMutations('business', ['setCurrentBusiness']),
     ...mapActions('business', ['createNamedBusiness'])
   }
 })
 export default class AffiliatedEntityTable extends Mixins(DateMixin) {
-  @Prop({ default: [] })
-  readonly selectedColumns: Array<string>
+  @Prop({ default: [] }) readonly selectedColumns: Array<string>
+  @Prop({ default: false }) readonly loading: boolean
 
   // Local Properties
   private readonly businesses!: Business[]

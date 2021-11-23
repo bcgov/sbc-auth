@@ -11,6 +11,7 @@
         <bceid-invite-landing
                 :token="token"
                 :orgName="orgName"
+                :affidavitNeeded="affidavitNeeded"
         ></bceid-invite-landing>
       </div>
       <div  v-if="loginSource == loginSourceenum.BCSC">
@@ -70,8 +71,12 @@ export default class AcceptInviteLandingView extends Vue {
 
   private otherError: boolean = false
   private isCreateUserProfile: boolean = false
+  private affidavitNeeded: boolean = false
 
   public async mounted () {
+    // if user need to go through affidavit upload. invitation URL will have ?affidavit=truetype
+    // take that value and set in session storage inchild component
+    this.affidavitNeeded = this.$route.query.affidavit ? true : this.affidavitNeeded
     // if no value for loginSource , defaulted to bcsc
     // if loginSource =bcros , take them to create user profile
     // if loginSource bcsc , stay in the page , show inivtation accept screen
