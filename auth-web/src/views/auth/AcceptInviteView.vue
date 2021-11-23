@@ -63,11 +63,13 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private async accept () {
     try {
       const affidavitNeeded = !!this.$route.query.affidavit
+      // if affidavit needed we will append that also in URL so we can refirect user to new flow after TOS accept
+      const affidavitNeededURL = affidavitNeeded ? `?affidavit=true` : ''
       if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
-        await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}`)
+        await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}${affidavitNeededURL}`)
         return
       } else if (this.token && affidavitNeeded) {
-        this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}`)
+        await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}`)
         return
       } else if (!this.userContact && this.isProfileNeeded()) {
         await this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
