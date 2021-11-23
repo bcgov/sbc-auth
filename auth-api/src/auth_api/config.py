@@ -168,6 +168,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     # API gateway config
     API_GW_CONSUMERS_API_URL = os.getenv('API_GW_CONSUMERS_API_URL', None)
     API_GW_KEY = os.getenv('API_GW_KEY', None)
+    API_GW_CONSUMERS_SANDBOX_API_URL = os.getenv('API_GW_CONSUMERS_SANDBOX_API_URL', None)
     API_GW_NON_PROD_KEY = os.getenv('API_GW_NON_PROD_KEY', None)
     API_GW_EMAIL_SUFFIX = os.getenv('API_GW_EMAIL_SUFFIX', None)
     API_GW_KC_CLIENT_ID_PATTERN = os.getenv('API_GW_KC_CLIENT_ID_PATTERN', 'api-key-account-{account_id}')
@@ -294,6 +295,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     NATS_MAILER_CLIENT_NAME = 'account.mailer.worker'
 
     API_GW_CONSUMERS_API_URL = 'https://bcregistry-bcregistry-mock.apigee.net/mockTarget'
+    API_GW_CONSUMERS_SANDBOX_API_URL = 'https://bcregistry-bcregistry-mock.apigee.net/mockTarget'
     API_GW_CONSUMER_EMAIL = 'test.all.mc@gov.bc.ca'
 
 
