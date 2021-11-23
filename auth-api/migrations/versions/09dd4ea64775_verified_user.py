@@ -43,7 +43,7 @@ def upgrade():
     conn = op.get_bind()
     affidavits: List[Affidavit] = conn.execute("select * from affidavits where status_code='APPROVED' ").fetchall()
     for affidavit in affidavits:
-        op.execute(f"update users set verified=true where user_id = {affidavit.user_id};")
+        op.execute(f"update users set verified=true where id = {affidavit.user_id};")
 
     op.execute("update users set verified=true where login_source='BCSC'")
 
