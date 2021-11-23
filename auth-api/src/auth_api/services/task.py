@@ -25,13 +25,14 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException, Error
 from auth_api.models import ContactLink as ContactLinkModel
+from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import AccessType, OrgStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
+from auth_api.utils.enums import AccessType, OrgStatus, Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.util import camelback2snake
 
 
@@ -133,7 +134,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 # bceid holds need notifications
                 if is_bceid:
                     Task._notify_admin_about_hold(org, task_model)
-
+            # TODO Update user.verified flag
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
@@ -141,6 +142,14 @@ class Task:  # pylint: disable=too-many-instance-attributes
             self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id,
                                               org_id=account_id)
 
+        elif task_model.relationship_type == TaskRelationshipType.USER.value:
+            user_id = task_model.relationship_id
+            if is_approved:
+                membership = MembershipModel.find_membership_by_userid(user_id)
+                membership.status = Status.ACTIVE.value
+                user: UserModel = UserModel.find_by_id(user_id)
+                user.verified = True
+            # TODO Update affidavit status
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod

@@ -26,7 +26,12 @@
                             You have been invited to join the <strong>{{ account_name }}</strong> account at Business Registry.
                         </h1>
                         <p style="margin-top: 25px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                            <strong>{{ user_first_name }} {{ user_last_name }}</strong> has invited you to join the <strong>{{ account_name }}</strong> account at Business Registry. You will need to log in using your BCEID to join this account.
+                            <strong>{{ user_first_name }} {{ user_last_name }}</strong> has invited you to join the <strong>{{ account_name }}</strong> account at Business Registry.
+                            {% if role == 'ADMIN' %}
+                            <span>You will need to log in with a registered BCeID account, and verify your identity by a notarized affidavit. After submitting your information, staff will review your affidavit. If approved you will be able to join the account.</span>
+                            {% else %}
+                            <span>You will need to log in using your BCEID to join this account.</span>
+                            {% endif %}
                         </p>
                         <div style="margin-top: 45px;">
                             <!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ context_url }}" style="height:55px; v-text-anchor:middle; width:150px;" arcsize="10%" stroke="f" fillcolor="#003366" alias="CTA1">Join Team<w:anchorlock/> <center> <![endif]-->

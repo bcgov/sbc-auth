@@ -117,6 +117,23 @@ class TestJwtClaims(dict, Enum):
         'loginSource': LoginSource.BCEID.value
     }
 
+    public_bceid_account_holder_user = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'public_user',
+                'edit',
+                'account_holder'
+            ]
+        },
+        'email': 'test@test.com',
+        'loginSource': LoginSource.BCEID.value
+    }
+
     edit_user_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',

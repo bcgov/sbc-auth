@@ -68,7 +68,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
             self.status = kwargs.get('membership_type_status')
 
     @classmethod
-    def find_membership_by_id(cls, membership_id):
+    def find_membership_by_id(cls, membership_id) -> Membership:
         """Find the first membership with the given id and return it."""
         return cls.query.filter_by(id=membership_id).first()
 
@@ -78,7 +78,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return cls.query.filter_by(org_id=org_id).all()
 
     @classmethod
-    def get_pending_members_count_by_org_id(cls, org_id):
+    def get_pending_members_count_by_org_id(cls, org_id) -> int:
         """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.status == Status.PENDING_APPROVAL.value)). \
@@ -88,14 +88,14 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return count
 
     @classmethod
-    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value):
+    def find_members_by_org_id_by_status_by_roles(cls, org_id, roles, status=Status.ACTIVE.value) -> List[Membership]:
         """Return all members of the org with a status."""
         return db.session.query(Membership).filter(
             and_(Membership.status == status, Membership.membership_type_code.in_(roles))). \
             join(OrgModel).filter(OrgModel.id == org_id).all()
 
     @classmethod
-    def find_orgs_for_user(cls, user_id, valid_statuses=VALID_STATUSES):
+    def find_orgs_for_user(cls, user_id, valid_statuses=VALID_STATUSES) -> List[OrgModel]:
         """Find the orgs for a user."""
         records = cls.query \
             .join(OrgModel) \
@@ -107,7 +107,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return list(map(lambda x: x.org, records))
 
     @classmethod
-    def find_membership_by_user_and_org(cls, user_id, org_id):
+    def find_membership_by_user_and_org(cls, user_id, org_id) -> Membership:
         """Get the membership for the specified user and org."""
         records = cls.query \
             .filter(cls.user_id == user_id) \
@@ -119,7 +119,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return records
 
     @classmethod
-    def find_membership_by_userid(cls, user_id):
+    def find_membership_by_userid(cls, user_id) -> Membership:
         """Get the membership for the specified user and org."""
         records = cls.query \
             .filter(cls.user_id == user_id) \
@@ -129,7 +129,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return records
 
     @classmethod
-    def find_membership_by_user_and_org_all_status(cls, user_id, org_id):
+    def find_membership_by_user_and_org_all_status(cls, user_id, org_id) -> Membership:
         """Get the membership for the specified user and org with all membership statuses."""
         records = cls.query \
             .filter(cls.user_id == user_id) \
@@ -140,7 +140,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return records
 
     @classmethod
-    def get_count_active_owner_org_id(cls, org_id):
+    def get_count_active_owner_org_id(cls, org_id) -> int:
         """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
@@ -151,7 +151,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         return count
 
     @classmethod
-    def check_if_active_admin_or_owner_org_id(cls, org_id, user_id):
+    def check_if_active_admin_or_owner_org_id(cls, org_id, user_id) -> int:
         """Return the count of pending members."""
         query = db.session.query(Membership).filter(
             and_(Membership.user_id == user_id, Membership.org_id == org_id, Membership.status == Status.ACTIVE.value,
