@@ -1,7 +1,7 @@
 <template>
   <v-form ref="form" lazy-validation data-test="form-profile">
     <p class="mb-9" v-if="isStepperView">Enter your contact information. Once your account is created, you may add additional users and assign roles.</p>
-    <p class="mb-7" v-if="isAdminAffidavitMode">
+    <p class="mb-7" v-if="isAffidavitUpload">
       This will be reviewed by Registries staff and the account will be approved
       when authenticated.
     </p>
@@ -119,7 +119,7 @@
           depressed
           color="default"
           class="deactivate-btn"
-          v-show="editing && !isStepperView && !isAdminAffidavitMode"
+          v-show="editing && !isStepperView && !isAffidavitUpload"
           @click="$refs.deactivateUserConfirmationDialog.open()"
           data-test="btn-profile-deactivate"
         >Deactivate my profile</v-btn>
@@ -129,14 +129,14 @@
           depressed
           color="default"
           class="reset-btn"
-          v-show="editing && !isStepperView && isTester && !isAdminAffidavitMode"
+          v-show="editing && !isStepperView && isTester && !isAffidavitUpload"
           @click="$refs.resetDialog.open()"
           data-test="btn-profile-reset"
         >Reset</v-btn>
         <v-btn
           large
           depressed
-          v-if="isStepperView || isAdminAffidavitMode"
+          v-if="isStepperView || isAffidavitUpload"
           color="default"
           @click="goBack"
           data-test="btn-back"
@@ -150,11 +150,11 @@
           color="primary"
           class="save-continue-button mr-2"
           :disabled='!isFormValid()'
-          v-if="!isStepperView || isAdminAffidavitMode"
+          v-if="!isStepperView || isAffidavitUpload"
           @click="save"
           data-test="save-button"
         >
-          {{ isAdminAffidavitMode ? 'Submit' :  'Save' }}
+          {{ isAffidavitUpload ? 'Submit' :  'Save' }}
         </v-btn>
         <v-btn
           large
@@ -175,7 +175,7 @@
           :showConfirmPopup="isStepperView"
           :isEmit="true"
           @click-confirm="cancel"
-          v-if="!isAdminAffidavitMode"
+          v-if="!isAffidavitUpload"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
@@ -293,7 +293,7 @@ import { mask } from 'vue-the-mask'
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
-    @Prop({ default: false }) isAdminAffidavitMode: boolean
+    @Prop({ default: false }) isAffidavitUpload: boolean
     private readonly createUserContact!: (contact?: Contact) => Contact
     private readonly updateUserContact!: (contact?: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
@@ -438,7 +438,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         await this.getUserProfile('@me')
         // If a token was provided, that means we are in the accept invitation flow for users and account coordinators
         // Incase if it is accept invitation flow for account admin emit event for parent to let know user profile process is done
-        if (this.isAdminAffidavitMode) {
+        if (this.isAffidavitUpload) {
           this.$emit('emit-admin-profile-complete')
           return
         }
@@ -502,7 +502,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private goBack () {
-      if (this.isAdminAffidavitMode) {
+      if (this.isAffidavitUpload) {
         // emit event to let parent know about the previous step request
         this.$emit('emit-admin-profile-previous-step')
       } else {

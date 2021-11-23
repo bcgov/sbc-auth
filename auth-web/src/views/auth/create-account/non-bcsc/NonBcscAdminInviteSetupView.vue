@@ -11,11 +11,11 @@
         </v-card-title>
         <v-card-text class="pa-0">
           <!-- Step 1: upload affidavit-->
-          <upload-affidavit-step v-if="currentStep === 1" :isAdminAffidavitMode="true"
+          <upload-affidavit-step v-if="currentStep === 1" :isAffidavitUpload="true"
             @emit-admin-affidavit-complete="goToNextStep">
           </upload-affidavit-step>
           <!-- Step 2: upload user profile -->
-          <user-profile-form  v-if="currentStep === 2" :isAdminAffidavitMode="true"
+          <user-profile-form  v-if="currentStep === 2" :isAffidavitUpload="true"
             @emit-admin-profile-previous-step="goBackPreviousStep"
             @emit-admin-profile-complete="goToNextStep">
           </user-profile-form>

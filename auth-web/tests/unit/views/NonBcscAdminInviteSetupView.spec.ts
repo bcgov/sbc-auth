@@ -18,7 +18,7 @@ describe('NonBcscAdminInviteSetupView.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    let wrapper = shallowMount(NonBcscAdminInviteSetupView, {
+    wrapper = shallowMount(NonBcscAdminInviteSetupView, {
       localVue,
       router,
       vuetify
