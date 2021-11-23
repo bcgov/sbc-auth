@@ -145,7 +145,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
       this.errorMessage = ''
       this.saving = true
       // save the file here so that in the final steps its less network calls to make
-      await this.uploadPendingDocsToStorage()
+      // await this.uploadPendingDocsToStorage()
       if (this.isAdminAffidavitMode) {
         // emit event to let parent know the upload affidavit step is complete
         this.$emit('emit-admin-affidavit-complete')
@@ -153,10 +153,11 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
         this.stepForward(this.currentOrganization?.orgType === Account.PREMIUM)
       }
     } catch (error) {
-      this.saving = false
       this.errorMessage = `Something happend while uploading the document, please try again`
       // eslint-disable-next-line no-console
       console.error(error)
+    } finally {
+      this.saving = false
     }
   }
 

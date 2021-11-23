@@ -1,6 +1,10 @@
 <template>
   <v-form ref="form" lazy-validation data-test="form-profile">
     <p class="mb-9" v-if="isStepperView">Enter your contact information. Once your account is created, you may add additional users and assign roles.</p>
+    <p class="mb-7" v-if="isAdminAffidavitMode">
+      This will be reviewed by Registries staff and the account will be approved
+      when authenticated.
+    </p>
     <v-expand-transition>
       <div class="form_alert-container" v-show="formError">
         <v-alert type="error" class="mb-3"
@@ -109,30 +113,30 @@
 
     <v-row>
       <v-col cols="12" class="form__btns py-0 d-inline-flex">
-        <!-- The deactivate profile button should be hidden for account stepper view -->
+        <!-- The deactivate profile button should be hidden for account stepper view and for admin affidavit BCeId flow -->
         <v-btn
           large
           depressed
           color="default"
           class="deactivate-btn"
-          v-show="editing && !isStepperView"
+          v-show="editing && !isStepperView && !isAdminAffidavitMode"
           @click="$refs.deactivateUserConfirmationDialog.open()"
           data-test="btn-profile-deactivate"
         >Deactivate my profile</v-btn>
-        <!-- The reset button should be hidden in Production environment and who doesn't have tester role -->
+        <!-- The reset button should be hidden in Production environment and who doesn't have tester role and for admin affidavit BCeId flow  -->
         <v-btn
           large
           depressed
           color="default"
           class="reset-btn"
-          v-show="editing && !isStepperView && isTester"
+          v-show="editing && !isStepperView && isTester && !isAdminAffidavitMode"
           @click="$refs.resetDialog.open()"
           data-test="btn-profile-reset"
         >Reset</v-btn>
         <v-btn
           large
           depressed
-          v-if="isStepperView"
+          v-if="isStepperView || isAdminAffidavitMode"
           color="default"
           @click="goBack"
           data-test="btn-back"
@@ -146,11 +150,11 @@
           color="primary"
           class="save-continue-button mr-2"
           :disabled='!isFormValid()'
-          v-if="!isStepperView"
+          v-if="!isStepperView || isAdminAffidavitMode"
           @click="save"
           data-test="save-button"
         >
-          Save
+          {{ isAdminAffidavitMode ? 'Submit' :  'Save' }}
         </v-btn>
         <v-btn
           large
@@ -171,6 +175,7 @@
           :showConfirmPopup="isStepperView"
           :isEmit="true"
           @click-confirm="cancel"
+          v-if="!isAdminAffidavitMode"
         ></ConfirmCancelButton>
       </v-col>
     </v-row>
@@ -246,7 +251,7 @@
 
 import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, Organization } from '@/models/Organization'
+import { Member, Organization } from '@/models/Organization'
 import { User, UserProfileData } from '@/models/user'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -256,10 +261,8 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import UserModule from '@/store/modules/user'
 import UserService from '@/services/user.services'
 import configHelper from '@/util/config-helper'
-import { getModule } from 'vuex-module-decorators'
 import { mask } from 'vue-the-mask'
 
 @Component({
@@ -290,6 +293,7 @@ import { mask } from 'vue-the-mask'
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
+    @Prop({ default: false }) isAdminAffidavitMode: boolean
     private readonly createUserContact!: (contact?: Contact) => Contact
     private readonly updateUserContact!: (contact?: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
@@ -432,7 +436,12 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
         }
         await this.saveOrUpdateContact(contact)
         await this.getUserProfile('@me')
-        // If a token was provided, that means we are in the accept invitation flow
+        // If a token was provided, that means we are in the accept invitation flow for users and account coordinators
+        // Incase if it is accept invitation flow for account admin emit event for parent to let know user profile process is done
+        if (this.isAdminAffidavitMode) {
+          this.$emit('emit-admin-profile-complete')
+          return
+        }
         // so redirect to /confirmtoken
         if (this.token) {
           this.$router.push('/confirmtoken/' + this.token)
@@ -493,7 +502,12 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private goBack () {
-      this.stepBack(this.currentOrganization!.orgType === this.ACCOUNT_TYPE.PREMIUM)
+      if (this.isAdminAffidavitMode) {
+        // emit event to let parent know about the previous step request
+        this.$emit('emit-admin-profile-previous-step')
+      } else {
+        this.stepBack(this.currentOrganization!.orgType === this.ACCOUNT_TYPE.PREMIUM)
+      }
     }
 
     private async deactivate (): Promise<void> {
