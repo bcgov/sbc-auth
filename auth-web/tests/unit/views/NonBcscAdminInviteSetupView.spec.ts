@@ -6,27 +6,19 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-const mockSession = {
-  'NRO_URL': 'Mock NRO URL',
-  'NAME_REQUEST_URL': 'Mock Name Request URL'
-}
-
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-document.body.setAttribute('data-app', 'true')
 
-const router = new VueRouter()
 const vuetify = new Vuetify({})
+const router = new VueRouter()
 
 describe('NonBcscAdminInviteSetupView.vue', () => {
   let wrapper: any
-
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    wrapper = shallowMount(NonBcscAdminInviteSetupView, {
+    let wrapper = shallowMount(NonBcscAdminInviteSetupView, {
       localVue,
       router,
       vuetify
