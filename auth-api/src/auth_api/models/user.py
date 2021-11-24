@@ -63,6 +63,7 @@ class User(BaseModel):
     idp_userid = Column('idp_userid', String(256), index=True)
     login_source = Column('login_source', String(200), nullable=True)
     login_time = Column(DateTime, default=None, nullable=True)
+    verified = Column(Boolean())
 
     contacts = relationship('ContactLink', primaryjoin='User.id == ContactLink.user_id', lazy='select')
     orgs = relationship('Membership',
@@ -107,7 +108,8 @@ class User(BaseModel):
                 status=UserStatusCode.get_default_type(),
                 idp_userid=token.get('idp_userid', None),
                 login_time=datetime.datetime.now(),
-                type=cls._get_type(user_from_context=user_from_context)
+                type=cls._get_type(user_from_context=user_from_context),
+                verified=cls._is_verified(user_from_context.login_source)
             )
             current_app.logger.debug(f'Creating user from JWT:{token}; User:{user}')
 
@@ -222,3 +224,8 @@ class User(BaseModel):
                 user_type = Role.SYSTEM.name
 
         return user_type
+
+    @classmethod
+    def _is_verified(cls, login_source):
+        """Return if user is a verified user by checking login source."""
+        return login_source == LoginSource.BCSC.value
