@@ -118,6 +118,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('FAS_WEB_URL')
   }
 
+  static getPPRWebUrl () {
+    return ConfigHelper.getValue('PPR_WEB_URL')
+  }
+
   static apiDocumentationUrl () {
     return ConfigHelper.getValue('API_DOCUMENTATION_URL')
   }
