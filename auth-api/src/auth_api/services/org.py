@@ -141,7 +141,7 @@ class Org:  # pylint: disable=too-many-public-methods
         org.commit()
 
         if is_bceid_status_handling_needed:
-            Org.send_staff_review_account_reminder(relationship_id=org.id, user=user)
+            Org.send_staff_review_account_reminder(relationship_id=org.id)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
@@ -802,10 +802,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def send_staff_review_account_reminder(relationship_id, user: UserModel = None,
+    def send_staff_review_account_reminder(relationship_id,
                                            task_relationship_type=TaskRelationshipType.ORG.value):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
+        user = UserModel.find_by_jwt_token()
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         # Get task id that is related with the task. Task Relationship Type can be ORG or PRODUCT.
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,

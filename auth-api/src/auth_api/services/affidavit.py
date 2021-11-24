@@ -119,8 +119,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
                 # Send notification mail to staff review task
                 from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
-                user = UserModel.find_by_jwt_token()
-                OrgService.send_staff_review_account_reminder(relationship_id=org.id, user=user)
+                OrgService.send_staff_review_account_reminder(relationship_id=org.id)
 
                 remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
                 TaskService.close_task(task_model.id, remarks)
