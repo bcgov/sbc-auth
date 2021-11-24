@@ -803,8 +803,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def send_staff_review_account_reminder(relationship_id,
-                                           task_relationship_type=TaskRelationshipType.ORG.value,
-                                           **kwargs):  # pylint: disable=too-many-locals
+                                           task_relationship_type=TaskRelationshipType.ORG.value):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
         user: UserModel = UserModel.find_by_jwt_token()
