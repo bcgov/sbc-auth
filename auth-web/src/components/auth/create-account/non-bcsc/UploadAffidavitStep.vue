@@ -145,7 +145,7 @@ export default class UploadAffidavitStep extends Mixins(Steppable) {
       this.errorMessage = ''
       this.saving = true
       // save the file here so that in the final steps its less network calls to make
-      // await this.uploadPendingDocsToStorage()
+      await this.uploadPendingDocsToStorage()
       if (this.isAffidavitUpload) {
         // emit event to let parent know the upload affidavit step is complete
         this.$emit('emit-admin-affidavit-complete')
