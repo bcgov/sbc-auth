@@ -1,18 +1,13 @@
 <template>
-  <v-card
-    :class="{ 'product-container': true, 'border-left': addBorder }"
-    :href="pprUrl"
-    @mouseover="addBorder = true"
-    @mouseleave="addBorder = false"
-  >
+  <v-card class="product-container" :href="pprUrl">
     <v-row align="center" no-gutters>
       <v-col cols="auto">
         <!-- to use a dynamic src use 'require(<path>)' -->
         <img class="product-img" src="@/assets/img/PPR_dashboard_thumbnail_image.jpg" />
       </v-col>
       <v-col class="product-info">
-        <h2>{{ title }}</h2>
-        <p class="pt-3 ma-0">{{ text }}</p>
+        <h2>{{ $t('pprLauncherTitle') }}</h2>
+        <p class="pt-3 ma-0">{{ $t('pprLauncherText') }}</p>
         <v-btn class="primary action-btn px-5">
           Open
           <v-icon>mdi-chevron-right</v-icon>
@@ -30,7 +25,6 @@ import Vue from 'vue'
 // - this is converted statically from UserProduct.vue in bcgov/bcregistry repo
 @Component({})
 export default class PPRLauncher extends Vue {
-  private addBorder = false
   private text = 'Register or search for legal claims on personal property.'
   private title = 'Staff Personal Property Registry'
 
@@ -49,9 +43,6 @@ export default class PPRLauncher extends Vue {
   text-transform: none;
   pointer-events: none;
 }
-.border-left {
-  border-left: 3px solid $app-blue !important;
-}
 .product-container {
   border-left: 3px solid transparent;
   box-shadow: none;
@@ -59,6 +50,10 @@ export default class PPRLauncher extends Vue {
   height: 100%;
   max-width: none;
   padding: 30px;
+
+  &:hover {
+    border-left: 3px solid $app-blue !important;
+  }
 }
 .product-img {
   height: 196px;

@@ -1,15 +1,19 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import Vue from 'vue'
+import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
+Vue.use(VueI18n)
 
 describe('PPRLauncher.vue', () => {
   let wrapper: Wrapper<any>
+  const title = 'Staff Personal Property Registry'
+  const text = 'Register or search for legal claims on personal property.'
   const pprUrl = 'ppr-web'
   const config = {
     'PPR_WEB_URL': pprUrl
@@ -27,11 +31,16 @@ describe('PPRLauncher.vue', () => {
       strict: false,
       modules: {}
     })
-
+    const $t = (val: string) => {
+      if (val === 'pprLauncherTitle') return title
+      if (val === 'pprLauncherText') return text
+      return ''
+    }
     wrapper = mount(PPRLauncher, {
       store,
       localVue,
-      vuetify
+      vuetify,
+      mocks: { $t }
     })
   })
   afterEach(() => {
