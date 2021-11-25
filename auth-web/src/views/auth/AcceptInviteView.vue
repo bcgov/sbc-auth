@@ -69,7 +69,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}${affidavitNeededURL}`)
         return
       } else if (this.token && affidavitNeeded) {
-        await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}`)
+        await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
         return
       } else if (!this.userContact && this.isProfileNeeded()) {
         await this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)

@@ -129,10 +129,10 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
         if (!isBcrosUser && this.token) {
         // if user is in affidavit flow we need redirect to affidavit upload instead of user profile
           if (affidavitNeeded) {
-            await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}`)
+            await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
             return
           }
-          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}/${this.token}`)
           return
         }
         // special logic for handling redirection to create account page
