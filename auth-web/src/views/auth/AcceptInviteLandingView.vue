@@ -168,8 +168,11 @@ export default class AcceptInviteLandingView extends Vue {
     this.$router.push('/confirmtoken/' + this.token)
   }
 
-  private bceidAcceptinviteWithAffidavit (loginSourceUrl: string) {
-    this.setStorage()
+  private bceidAcceptinviteWithAffidavit () {
+    if (!this.isUserSignedIn()) {
+      this.setStorage()
+    }
+
     this.$router.push('/nonbcsc-info')
   }
 
