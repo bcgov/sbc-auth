@@ -395,7 +395,7 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
     },
     {
-      path: '/upload-affidavit',
+      path: '/upload-affidavit/:token?',
       name: 'uploadaffidavit',
       component: NonBcscAdminInviteSetupView,
       props: true,
