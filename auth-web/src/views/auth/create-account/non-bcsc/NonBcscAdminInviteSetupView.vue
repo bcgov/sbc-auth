@@ -47,7 +47,7 @@ export default class NonBcscAdminInviteSetupView extends Vue {
 
   private currentStep: number = 1
 
-  public async goToNextStep (): void {
+  public async goToNextStep () {
     // Update currentstep
     if (!this.isLastStep) {
       this.currentStep++
