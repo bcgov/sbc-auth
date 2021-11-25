@@ -7,53 +7,60 @@
       </p>
     </div>
 
-    <v-card flat class="mb-4 pa-8">
-      <div class="view-header flex-column mb-10">
-        <h2 class="view-header__title">Search Entities</h2>
-        <p class="mt-3 mb-0">
-          Enter the Entity's Incorporation Number below to access their
-          dashboard.
-        </p>
-      </div>
-      <v-expand-transition>
-        <div v-show="errorMessage">
-          <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
-            >{{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
-          </v-alert>
-        </div>
-      </v-expand-transition>
-      <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
-        <v-text-field
-          filled
-          label="Incorporation Number"
-          hint="example: CP0001234"
-          persistent-hint
-          dense
-          req
-          @blur="incorpNumFormat"
-          :rules="incorpNumRules"
-          v-model="businessNumber"
-          id="txtBusinessNumber"
-        >
-        </v-text-field>
-        <v-btn
-          color="primary"
-          class="search-btn mt-0"
-          type="submit"
-          depressed
-          :disabled="!isFormValid()"
-          :loading="searchActive"
-          >Search</v-btn
-        >
-      </v-form>
+    <v-row class="ma-0 mb-4" no-gutters>
+      <v-col class="pr-2" cols="6">
+        <v-card class="pa-8" flat style="height: 100%;">
+          <div class="view-header flex-column mb-10">
+            <h2 class="view-header__title">Search Entities</h2>
+            <p class="mt-3 mb-0">
+              Enter the Entity's Incorporation Number below to access their
+              dashboard.
+            </p>
+          </div>
+          <v-expand-transition>
+            <div v-show="errorMessage">
+              <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
+                >{{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
+              </v-alert>
+            </div>
+          </v-expand-transition>
+          <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
+            <v-text-field
+              filled
+              label="Incorporation Number"
+              hint="example: CP0001234"
+              persistent-hint
+              dense
+              req
+              @blur="incorpNumFormat"
+              :rules="incorpNumRules"
+              v-model="businessNumber"
+              id="txtBusinessNumber"
+            >
+            </v-text-field>
+            <v-btn
+              color="primary"
+              class="search-btn mt-0"
+              type="submit"
+              depressed
+              :disabled="!isFormValid()"
+              :loading="searchActive"
+              >Search</v-btn
+            >
+          </v-form>
 
-      <template>
-        <IncorporationSearchResultView
-          :isVisible="canViewIncorporationSearchResult"
-          :affiliatedOrg="affiliatedOrg"
-        ></IncorporationSearchResultView>
-      </template>
-    </v-card>
+          <template>
+            <IncorporationSearchResultView
+              :isVisible="canViewIncorporationSearchResult"
+              :affiliatedOrg="affiliatedOrg"
+            ></IncorporationSearchResultView>
+          </template>
+        </v-card>
+      </v-col>
+      <v-col class="pl-2" cols="6">
+        <PPRLauncher />
+      </v-col>
+    </v-row>
 
     <!-- Director search -->
     <v-card flat class="mb-4 pa-8" v-if="canViewAccounts">
@@ -92,7 +99,7 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { Component, Emit, Prop } from 'vue-property-decorator'
+import { Component } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
@@ -102,6 +109,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import { LDFlags, Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
+import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
@@ -115,7 +123,8 @@ const userModule = namespace('user')
     GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement,
-    IncorporationSearchResultView
+    IncorporationSearchResultView,
+    PPRLauncher
   }
 })
 export default class StaffDashboardView extends Vue {

@@ -1,5 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 
+import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -78,9 +79,10 @@ describe('StaffDashboardView.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('searchbusiness screen enter button exists', () => {
+  it('searchbusiness screen enter button exists, ppr launcher exists', () => {
     expect(cmp.find('.search-btn').text().startsWith('Search')).toBeTruthy()
     expect(cmp.isVueInstance()).toBeTruthy()
+    expect(cmp.find(PPRLauncher).exists()).toBe(true)
   })
 
   it('incorporation number is empty', () => {
