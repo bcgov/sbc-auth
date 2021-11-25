@@ -28,7 +28,11 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
+import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { namespace } from 'vuex-class'
+
+const UserModule = namespace('user')
 
 @Component({
   components: {
@@ -38,14 +42,21 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
 })
 export default class NonBcscAdminInviteSetupView extends Vue {
   @Prop({ default: undefined }) private readonly orgId: number; // org id used for bceid re-upload
+  @Prop() token: string
+  @UserModule.Action('createAffidavit') private createAffidavit!: () => User
+
   private currentStep: number = 1
 
-  public goToNextStep (): void {
+  public async goToNextStep () {
     // Update currentstep
     if (!this.isLastStep) {
       this.currentStep++
     } else {
-      // TODO: add submit action
+      // save all trh details and mark invitation as accepted
+      //  user details will be saved from userprofile before emitting this event
+      // redirect to confirmtoken will set invitation accepted
+      await this.createAffidavit()
+      this.$router.push('/confirmtoken/' + this.token)
     }
   }
 

@@ -162,7 +162,7 @@ export default class AffidavitDownload extends Vue {
     const affidavitNeeded = ConfigHelper.getFromSession(SessionStorageKeys.AffidavitNeeded)
     // if affidavit flow we need to redirect user to upload affidavit
     if (invToken && affidavitNeeded === 'true') {
-      this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}`)
+      this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${invToken}`)
     } else {
       this.$router.push(`/${Pages.CREATE_NON_BCSC_ACCOUNT}`)
     }

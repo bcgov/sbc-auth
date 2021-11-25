@@ -107,17 +107,6 @@ export default class BceidInviteLanding extends Vue {
 
   @Prop() token: string
   @Prop({ default: '' }) orgName: string
-  @Prop({ default: false }) affidavitNeeded: boolean
-
-  // if affidavit=true present in URL redirect to affidavit download page by setting token and affidavit in session
-  @Watch('affidavitNeeded')
-  onAffidavitNeededChange (newValue) {
-    // watching affidavitNeeded to redirect set values into session and rediret user to upload affidavit flow
-    if (newValue) {
-      this.setStorage()
-      this.$router.push('/nonbcsc-info')
-    }
-  }
 
   private registerForBceid () {
     this.setStorage()
@@ -130,7 +119,6 @@ export default class BceidInviteLanding extends Vue {
 
   private setStorage () {
     ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
-    ConfigHelper.addToSession(SessionStorageKeys.AffidavitNeeded, this.affidavitNeeded)
   }
 
   private async mounted () {
