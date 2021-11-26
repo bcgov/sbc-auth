@@ -362,7 +362,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     private get isInEditNameMode () {
       // isExtraProvStepperOr
-      return this.token || (this.isStepperView && (this.stepperSource === AccessType.EXTRA_PROVINCIAL))
+      return this.isAffidavitUpload || this.token || (this.isStepperView && (this.stepperSource === AccessType.EXTRA_PROVINCIAL))
     }
 
     private get isBCEIDUser (): boolean {
