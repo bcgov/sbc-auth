@@ -133,7 +133,7 @@ export default class NextPageMixin extends Vue {
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${orgName}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
-        } else if ([MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(this.currentMembership.membershipStatus)) {
+        } else if ([MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(this.currentMembership?.membershipStatus)) {
           // if user is pending show pending page.
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${orgName}`
         } else {

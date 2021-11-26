@@ -178,5 +178,7 @@
   "developerAccessSubtitle":"Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>.",
   "pprLauncherText": "Register or search for legal claims on personal property.",
   "pprLauncherTitle": "Staff Personal Property Registry",
-  "acceptInviteLandingMessageBCEID": "To accept the invitation to this account, log in to Business Registry with a registered BCeID account, and verify your identity by a notarized affidavit."
+  "acceptInviteLandingMessageBCEID": "To accept the invitation to this account, log in to Business Registry with a registered BCeID account, and verify your identity by a notarized affidavit.",
+  "pendingAffidavitAdminReviewTitle":"Your submission to join {team} has been requested ",
+  "pendingAffidvitAdminReviewMessage":"Once your information has been reviewed and approved, you will receive an email allowing you to join the account. Please allow {days} business days for this process"
 }
