@@ -169,10 +169,7 @@ export default class AcceptInviteLandingView extends Vue {
   }
 
   private bceidAcceptinviteWithAffidavit () {
-    if (!this.isUserSignedIn()) {
-      this.setStorage()
-    }
-
+    this.setStorage()
     this.$router.push('/nonbcsc-info')
   }
 
