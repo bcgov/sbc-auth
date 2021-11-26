@@ -45,7 +45,7 @@ COORDINATOR = 'COORDINATOR'
 ADMIN = 'ADMIN'
 USER = 'USER'
 
-VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value)
+VALID_STATUSES = (Status.ACTIVE.value, Status.PENDING_APPROVAL.value, Status.PENDING_STAFF_REVIEW.value)
 VALID_ORG_STATUSES = (OrgStatus.ACTIVE.value, OrgStatus.NSF_SUSPENDED.value,
                       OrgStatus.SUSPENDED.value, OrgStatus.PENDING_INVITE_ACCEPT.value,
                       OrgStatus.PENDING_STAFF_REVIEW.value)
