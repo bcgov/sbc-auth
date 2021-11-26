@@ -49,10 +49,10 @@ class ApiGateway:
         name = request_json.get('keyName')
         org: OrgModel = OrgModel.find_by_id(org_id)
         # first find if there is a consumer created for this account.
-        consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
-        gw_api_key = ApiGateway._get_api_gw_key(env)
+        consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
+        gw_api_key = cls._get_api_gw_key(env)
         email = cls._get_email_id(org_id, env)
-        if not cls._consumer_exists(email):  # If the account doesn't have api access, add it
+        if not cls._consumer_exists(email, env):  # If the account doesn't have api access, add it
             # If env is sandbox; then create a sandbox payment account.
             if env != 'prod':
                 cls._create_payment_account(org)
@@ -77,13 +77,14 @@ class ApiGateway:
 
     @classmethod
     def _get_api_gw_key(cls, env):
+        current_app.logger.info('_get_api_gw_key %s', env)
         return current_app.config.get('API_GW_KEY') if env == 'prod' else current_app.config.get(
             'API_GW_NON_PROD_KEY')
 
     @classmethod
     def _create_consumer(cls, name, org, env):
         """Create an API Gateway consumer."""
-        consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
+        consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
         gw_api_key = cls._get_api_gw_key(env)
         email = cls._get_email_id(org.id, env)
         client_rep = generate_client_representation(org.id, current_app.config.get('API_GW_KC_CLIENT_ID_PATTERN'), env)
@@ -115,8 +116,6 @@ class ApiGateway:
         """Revoke api key."""
         current_app.logger.debug('<revoke_key ')
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
-        consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
-        gw_api_key: str = current_app.config.get('API_GW_KEY')
         # Find the environment for this key, based on it consumer changes.
         email_id: str = None
         for key in cls.get_api_keys(org_id)['consumer']['consumerKey']:
@@ -125,6 +124,11 @@ class ApiGateway:
                 break
         if not email_id:
             raise BusinessException(Error.DATA_NOT_FOUND, Exception())
+        env = 'sandbox'
+        if email_id == cls._get_email_id(org_id, 'prod'):
+            env = 'prod'
+        consumer_endpoint = cls._get_api_consumer_endpoint(env)
+        gw_api_key = cls._get_api_gw_key(env)
 
         RestService.patch(
             f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apikeys/{api_key}?action=revoke',
@@ -137,11 +141,13 @@ class ApiGateway:
     def get_api_keys(cls, org_id: int) -> List[Dict[str, any]]:
         """Get all api keys."""
         current_app.logger.debug('<get_api_keys ')
-        consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
-        gw_api_key: str = current_app.config.get('API_GW_KEY')
         check_auth(one_of_roles=(ADMIN, STAFF), org_id=org_id)
         api_keys_response = {'consumer': {'consumerKey': []}}
-        for email in cls._get_email_id(org_id, 'sandbox'), cls._get_email_id(org_id, 'prod'):
+        for env in ('sandbox', 'prod'):
+            email = cls._get_email_id(org_id, env)
+            consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
+            gw_api_key: str = cls._get_api_gw_key(env)
+
             try:
                 consumers_response = RestService.get(
                     f'{consumer_endpoint}/mc/v1/consumers/{email}',
@@ -180,10 +186,10 @@ class ApiGateway:
         return email_id
 
     @classmethod
-    def _consumer_exists(cls, email):
+    def _consumer_exists(cls, email, env):
         """Return if customer exists with this email."""
-        consumer_endpoint: str = current_app.config.get('API_GW_CONSUMERS_API_URL')
-        gw_api_key: str = current_app.config.get('API_GW_KEY')
+        consumer_endpoint: str = cls._get_api_consumer_endpoint(env)
+        gw_api_key: str = cls._get_api_gw_key(env)
         try:
             RestService.get(
                 f'{consumer_endpoint}/mc/v1/consumers/{email}',
@@ -241,3 +247,9 @@ class ApiGateway:
         pay_accounts_endpoint = f"{current_app.config.get('PAY_API_URL')}/accounts/{org.id}"
         pay_account = RestService.get(endpoint=pay_accounts_endpoint, token=user.bearer_token).json()
         return pay_account
+
+    @classmethod
+    def _get_api_consumer_endpoint(cls, env):
+        current_app.logger.info('_get_api_consumer_endpoint %s', env)
+        return current_app.config.get('API_GW_CONSUMERS_API_URL') if env == 'prod' else current_app.config.get(
+            'API_GW_CONSUMERS_SANDBOX_API_URL')
