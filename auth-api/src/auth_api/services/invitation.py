@@ -398,7 +398,7 @@ class Invitation:
                 try:
                     # skip notifying admin if it auto approved
                     # for now , auto approval happens for GOVM.If more auto approval comes , just check if its GOVM
-                    if membership_model.status != Status.ACTIVE.value:
+                    if membership_model.status not in (Status.ACTIVE.value, Status.PENDING_STAFF_REVIEW.value):
                         Invitation.notify_admin(user, invitation_id, membership_model.id, origin)
                 except BusinessException as exception:
                     current_app.logger.error('<send_notification_to_admin failed', exception.message)
