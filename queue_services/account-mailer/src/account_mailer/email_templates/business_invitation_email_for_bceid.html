@@ -27,7 +27,7 @@
                         </h1>
                         <p style="margin-top: 25px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
                             <strong>{{ user_first_name }} {{ user_last_name }}</strong> has invited you to join the <strong>{{ account_name }}</strong> account at Business Registry.
-                            {% if role == 'ADMIN' %}
+                            {% if role.upper() == 'ACCOUNT ADMINISTRATOR' %}
                             <span>You will need to log in with a registered BCeID account, and verify your identity by a notarized affidavit. After submitting your information, staff will review your affidavit. If approved you will be able to join the account.</span>
                             {% else %}
                             <span>You will need to log in using your BCEID to join this account.</span>
