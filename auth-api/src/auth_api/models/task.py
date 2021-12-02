@@ -33,10 +33,10 @@ class Task(BaseModel):
     date_submitted = Column(DateTime)  # Instance when task is created
     relationship_type = Column(String(50), nullable=False)  # That is to be acted up on. For eg, an org
     relationship_id = Column(Integer, index=True, nullable=False)
-    relationship_status = Column(String(100), nullable=True)  # Status of the related object. For eg,
-    # org_Status of an org
+    relationship_status = Column(String(100), nullable=True)  # Status of the related object. e.g, PENDING_STAFF_REVIEW
     due_date = Column(DateTime)  # Optional field
-    type = Column(String(50), nullable=False)  # type of the task. For eg, PENDING_STAFF_REVIEW
+    type = Column(String(50), nullable=False)  # type of the task. For eg, GovN, BCeID Admin, New Account etc.
+    action = Column(String(50), nullable=True)  # Any sub type information for the task.
     status = Column(String(50), nullable=False)  # task is acted or to be acted. can be open or completed
     account_id = Column(Integer, nullable=True)  # account id related to task. Eg,
     # org id for pending product subscriptions

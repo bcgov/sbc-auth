@@ -35,7 +35,7 @@ def validate(**kwargs) -> ValidatorResponse:
                 (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             error = Error.USER_CANT_CREATE_EXTRA_PROVINCIAL_ORG
         if user.is_bceid_user() and access_type not in \
-                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVN.value):
             error = Error.USER_CANT_CREATE_REGULAR_ORG
         if error is not None:
             validator_response.add_error(error)
