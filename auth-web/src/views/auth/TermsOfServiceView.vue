@@ -132,7 +132,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
             await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
             return
           }
-          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}/${this.token}`)
+          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
           return
         }
         // special logic for handling redirection to create account page
