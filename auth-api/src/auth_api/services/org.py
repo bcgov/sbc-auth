@@ -40,7 +40,7 @@ from auth_api.services.validators.duplicate_org_name import validate as duplicat
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, AffidavitStatus, LoginSource, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod,
-    Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix, TaskSubType)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
@@ -109,6 +109,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if access_type == AccessType.GOVM.value:
             org.status_code = OrgStatus.PENDING_INVITE_ACCEPT.value
+        elif access_type == AccessType.GOVN.value:
+            org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
 
         # If mailing address is provided, save it
         if mailing_address:
@@ -131,37 +133,43 @@ class Org:  # pylint: disable=too-many-public-methods
         # raise BusinessException(Error.ACCOUNT_CREATION_FAILED_IN_PAY, None)
 
         # Send an email to staff to remind review the pending account
-        is_bceid_status_handling_needed = access_type in (AccessType.EXTRA_PROVINCIAL.value,
-                                                          AccessType.REGULAR_BCEID.value) and not \
-            AffidavitModel.find_approved_by_user_id(user_id=user_id)
+        is_staff_review_needed = access_type in (
+            AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVN.value
+        ) and not AffidavitModel.find_approved_by_user_id(user_id=user_id)
         user = UserModel.find_by_jwt_token()
-        if is_bceid_status_handling_needed:
-            Org._handle_bceid_status_and_notification(org, user)
+        if is_staff_review_needed:
+            Org._create_staff_review_task(org, user)
 
         org.commit()
-
-        if is_bceid_status_handling_needed:
-            Org.send_staff_review_account_reminder(relationship_id=org.id, user=user)
 
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
 
     @staticmethod
-    def _handle_bceid_status_and_notification(org, user):
+    def _create_staff_review_task(org: OrgModel, user: UserModel):
         org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
         # create a staff review task for this account
-        task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-        task_info = {'name': org.name,
-                     'relationshipId': org.id,
-                     'relatedTo': user.id,
-                     'dateSubmitted': datetime.today(),
-                     'relationshipType': TaskRelationshipType.ORG.value,
-                     'type': task_type,
-                     'status': TaskStatus.OPEN.value,
-                     'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                     }
+        task_type, action = None, TaskSubType.ACCOUNT_REVIEW.value
+        if org.access_type == AccessType.GOVN.value:
+            task_type = TaskTypePrefix.GOVN_REVIEW.value
+            if user.login_source == LoginSource.BCEID.value:
+                action = TaskSubType.AFFIDAVIT_REVIEW.value
+        else:
+            task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
+        task_info = {
+            'name': org.name,
+            'relationshipId': org.id,
+            'relatedTo': user.id,
+            'dateSubmitted': datetime.today(),
+            'relationshipType': TaskRelationshipType.ORG.value,
+            'type': task_type,
+            'action': action,
+            'status': TaskStatus.OPEN.value,
+            'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+        }
         TaskService.create_task(task_info=task_info, do_commit=False)
+        Org.send_staff_review_account_reminder(relationship_id=org.id, user=user)
 
     @staticmethod
     @user_context
