@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
@@ -109,12 +109,16 @@ export default class BceidInviteLanding extends Vue {
   @Prop({ default: '' }) orgName: string
 
   private registerForBceid () {
-    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
+    this.setStorage()
     window.location.href = ConfigHelper.getBceIdOsdLink()
   }
   private loginWithBceid () {
-    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
+    this.setStorage()
     this.$router.push('/signin/bceid/')
+  }
+
+  private setStorage () {
+    ConfigHelper.addToSession(SessionStorageKeys.InvitationToken, this.token)
   }
 
   private async mounted () {

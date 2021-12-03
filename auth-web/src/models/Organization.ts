@@ -123,7 +123,8 @@ export enum MembershipStatus {
   'Active' = 'ACTIVE',
   'Inactive' = 'INACTIVE',
   'Rejected' = 'REJECTED',
-  'Pending' = 'PENDING_APPROVAL'
+  'Pending' = 'PENDING_APPROVAL',
+  'PendingStaffReview'='PENDING_STAFF_REVIEW'
 }
 
 export enum MembershipType {

@@ -115,7 +115,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { IdpHint, Pages } from '@/util/constants'
+import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -158,7 +158,15 @@ export default class AffidavitDownload extends Vue {
   }
 
   private continueNext () {
-    this.$router.push(`/${Pages.CREATE_NON_BCSC_ACCOUNT}`)
+    const invToken = ConfigHelper.getFromSession(SessionStorageKeys.InvitationToken)
+    const affidavitNeeded = ConfigHelper.getFromSession(SessionStorageKeys.AffidavitNeeded)
+    // if affidavit flow we need to redirect user to siginin page
+    //  so it will go thorough invitstion flow necessary settings like setting session and removing invitation key
+    if (invToken && affidavitNeeded === 'true') {
+      this.$router.push(`/${Pages.SIGNIN}/${IdpHint.BCEID}`)
+    } else {
+      this.$router.push(`/${Pages.CREATE_NON_BCSC_ACCOUNT}`)
+    }
   }
 
   private goBack () {

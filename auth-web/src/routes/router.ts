@@ -33,6 +33,7 @@ import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
+import NonBcscAdminInviteSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAdminInviteSetupView.vue'
 import NonBcscInfoView from '@/views/auth/create-account/non-bcsc/NonBcscInfoView.vue'
 import PADTermsAndConditionsView from '@/views/auth/PADTermsAndConditionsView.vue'
 import PageNotFound from '@/views/auth/PageNotFound.vue'
@@ -390,6 +391,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/confirmtoken/:token/:loginSource?',
       name: 'confirmtoken',
       component: AcceptInviteView,
+      props: true,
+      meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
+    },
+    {
+      path: '/upload-affidavit/:token?',
+      name: 'uploadaffidavit',
+      component: NonBcscAdminInviteSetupView,
       props: true,
       meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
     },

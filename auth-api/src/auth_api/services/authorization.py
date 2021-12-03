@@ -211,6 +211,8 @@ def check_auth(**kwargs):
         if product_code_in_jwt is None:
             # product code must be present in jwt
             abort(403)
+        if product_code_in_jwt == 'ALL':  # Product code for super admin service account (sbc-auth-admin)
+            return
 
         if business_identifier:
             auth = Authorization.get_user_authorizations_for_entity(business_identifier)
