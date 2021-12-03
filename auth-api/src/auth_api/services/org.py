@@ -166,7 +166,7 @@ class Org:  # pylint: disable=too-many-public-methods
             'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
         }
         TaskService.create_task(task_info=task_info, do_commit=False)
-        Org.send_staff_review_account_reminder(relationship_id=org.id, user=user)
+        Org.send_staff_review_account_reminder(relationship_id=org.id)
 
     @staticmethod
     @user_context
@@ -814,7 +814,7 @@ class Org:  # pylint: disable=too-many-public-methods
         current_app.logger.debug('<send_staff_review_account_reminder')
         user: UserModel = UserModel.find_by_jwt_token()
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
-        # Get task id that is related with the task. Task Relationship Type can be ORG or PRODUCT.
+        # Get task id that is related with the task. Task Relationship Type can be ORG, PRODUCT etc.
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
                                                       relationship_id=relationship_id)
         context_path = f'review-account/{task.id}'
