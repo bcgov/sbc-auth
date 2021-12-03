@@ -26,7 +26,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import (
-    LoginSource, OrgStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    LoginSource, OrgStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestJwtClaims, TestOrgInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
@@ -63,12 +63,14 @@ def test_create_task_org(session, keycloak_mock):  # pylint:disable=unused-argum
         'relationshipType': TaskRelationshipType.ORG.value,
         'type': task_type_new_account,
         'status': [TaskStatus.OPEN.value],
-        'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+        'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+        'action': TaskAction.AFFIDAVIT_REVIEW.value
     }
     task = TaskService.create_task(test_task_info)
     assert task
     dictionary = task.as_dict()
     assert dictionary['name'] == test_org.name
+    assert dictionary['action'] == test_task_info['action']
 
 
 def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-argument

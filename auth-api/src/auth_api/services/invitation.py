@@ -35,7 +35,8 @@ from auth_api.services.user import User as UserService
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, LoginSource
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
-from auth_api.utils.enums import Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix
+from auth_api.utils.enums import (
+    Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF, USER
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -439,6 +440,7 @@ class Invitation:
                 'relatedTo': membership.user_id,
                 'dateSubmitted': datetime.today(),
                 'type': TaskTypePrefix.BCEID_ADMIN.value,
+                'action': TaskAction.AFFIDAVIT_REVIEW.value,
                 'status': TaskStatus.OPEN.value,
                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
             }

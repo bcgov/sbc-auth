@@ -29,13 +29,15 @@ from auth_api.models import db
 from auth_api.schemas import ProductCodeSchema
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
+    AccessType, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType,
+    TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
-from .authorization import check_auth
-from .task import Task as TaskService
+
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
 from ..utils.roles import CLIENT_ADMIN_ROLES, STAFF
+from .authorization import check_auth
+from .task import Task as TaskService
 
 
 class Product:
@@ -125,6 +127,7 @@ class Product:
                      'dateSubmitted': datetime.today(),
                      'relationshipType': TaskRelationshipType.PRODUCT.value,
                      'type': task_type,
+                     'action': TaskAction.PRODUCT_REVIEW.value,
                      'status': TaskStatus.OPEN.value,
                      'accountId': org.id,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
