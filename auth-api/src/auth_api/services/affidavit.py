@@ -112,7 +112,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
                              'dateSubmitted': task_model.date_submitted,
                              'relationshipType': TaskRelationshipType.ORG.value,
                              'type': task_type,
-                             'subType': task_model.sub_type,
+                             'action': task_model.action,
                              'status': TaskStatus.OPEN.value,
                              'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                              }

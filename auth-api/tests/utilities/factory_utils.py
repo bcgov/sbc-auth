@@ -87,15 +87,16 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
     return user
 
 
-def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1):
+def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1, keycloak_guid=None):
     """Produce a user model."""
     user_type = Role.ANONYMOUS_USER.name if user_info.get('access_type', None) == AccessType.ANONYMOUS.value else None
-    user = UserModel(username=user_info['username'],
+    user = UserModel(username=user_info.get('username', user_info.get('preferred_username')),
                      firstname=user_info['firstname'],
                      lastname=user_info['lastname'],
-                     keycloak_guid=user_info.get('keycloak_guid', None),
+                     keycloak_guid=user_info.get('keycloak_guid', keycloak_guid),
                      type=user_type,
-                     email='test@test.com'
+                     email='test@test.com',
+                     login_source=user_info.get('loginSource')
                      )
 
     user.save()

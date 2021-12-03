@@ -17,6 +17,8 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
 
+import pytest
+
 from auth_api import status as http_status
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.schemas import utils as schema_utils
@@ -24,7 +26,8 @@ from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import (
-    OrgStatus, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    AccessType, OrgStatus, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType,
+    TaskStatus, TaskTypePrefix)
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
@@ -255,3 +258,33 @@ def test_fetch_task(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.get('/api/v1/tasks/{}'.format(task_id), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('name') == task._model.name
+
+
+@pytest.mark.parametrize('user_token, access_type, expected_task_action', [
+    (TestJwtClaims.public_bceid_user, AccessType.EXTRA_PROVINCIAL.value, TaskAction.AFFIDAVIT_REVIEW.value),
+    (TestJwtClaims.public_bceid_user, AccessType.REGULAR_BCEID.value, TaskAction.AFFIDAVIT_REVIEW.value),
+    (TestJwtClaims.public_bceid_user, AccessType.GOVN.value, TaskAction.AFFIDAVIT_REVIEW.value),
+    (TestJwtClaims.public_user_role, AccessType.GOVN.value, TaskAction.ACCOUNT_REVIEW.value),
+])
+def test_tasks_on_account_creation(client, jwt, session, keycloak_mock,  # pylint:disable=unused-argument
+                                   monkeypatch, user_token, access_type, expected_task_action):
+    """Assert that tasks are created."""
+    # 1. Create User
+    # 2. Get document signed link
+    # 3. Create affidavit
+    # 4. Create Org
+    # 5. Assert correct task is created
+
+    monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: user_token)
+    user = factory_user_model_with_contact(user_token, keycloak_guid=user_token['sub'])
+
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+
+    org_info = TestOrgInfo.org_with_mailing_address()
+    org_info['accessType'] = access_type
+    OrgService.create_org(org_info, user_id=user.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
+    assert rv.json['tasks'][0]['action'] == expected_task_action
