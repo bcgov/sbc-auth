@@ -44,7 +44,8 @@
             "nro",
             "entity-selector",
             "bceid",
-            "fas-ui"
+            "fas-ui",
+            "ppr-ui"
         ]
     },
     {

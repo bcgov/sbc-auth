@@ -6,10 +6,12 @@
 </template>
 
 <script lang="ts">
-import { AccessType, IdpHint, LoginSource, Pages } from '@/util/constants'
+
+import { AccessType, IdpHint, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
@@ -60,8 +62,14 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
    */
   private async accept () {
     try {
+      const affidavitNeeded = !!this.$route.query.affidavit
+      // if affidavit needed we will append that also in URL so we can refirect user to new flow after TOS accept
+      const affidavitNeededURL = affidavitNeeded ? `?affidavit=true` : ''
       if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
-        await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}`)
+        await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}${affidavitNeededURL}`)
+        return
+      } else if (this.token && affidavitNeeded) {
+        await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
         return
       } else if (!this.userContact && this.isProfileNeeded()) {
         await this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)

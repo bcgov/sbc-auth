@@ -808,10 +808,11 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org)
 
     @staticmethod
-    def send_staff_review_account_reminder(relationship_id, user: UserModel = None,
+    def send_staff_review_account_reminder(relationship_id,
                                            task_relationship_type=TaskRelationshipType.ORG.value):
         """Send staff review account reminder notification."""
         current_app.logger.debug('<send_staff_review_account_reminder')
+        user: UserModel = UserModel.find_by_jwt_token()
         recipient = current_app.config.get('STAFF_ADMIN_EMAIL')
         # Get task id that is related with the task. Task Relationship Type can be ORG or PRODUCT.
         task = TaskModel.find_by_task_relationship_id(task_relationship_type=task_relationship_type,
@@ -819,8 +820,8 @@ class Org:  # pylint: disable=too-many-public-methods
         context_path = f'review-account/{task.id}'
         app_url = f"{g.get('origin_url', '')}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
         review_url = f'{app_url}/{context_path}'
-        first_name = getattr(user, 'firstname', '')
-        last_name = getattr(user, 'lastname', '')
+        first_name = user.firstname
+        last_name = user.lastname
 
         data = {
             'emailAddresses': recipient,

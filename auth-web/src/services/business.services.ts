@@ -1,9 +1,8 @@
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
-
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
-import { axios } from '@/util/http-util.ts'
+import { axios } from '@/util/http-util'
 
 export default class BusinessService {
   static async getBusiness (businessIdentifier: string): Promise<AxiosResponse<Business>> {
@@ -33,9 +32,11 @@ export default class BusinessService {
   static async createNumberedBusiness (filingBody: BusinessRequest): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, filingBody)
   }
+
   static async deleteBusinessFiling (businessRegNumber: string, filingId: string): Promise<AxiosResponse<any>> {
     return axios.delete(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings/${filingId}`)
   }
+
   static async getFilings (businessRegNumber: string): Promise<AxiosResponse<any>> {
     return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings`)
   }

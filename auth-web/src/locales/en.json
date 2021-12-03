@@ -175,5 +175,10 @@
   "removeIAConfirmText": "Deleting this incorporation application will remove the application from your Business Registry list. The business associated with this application will not be incorporated. If this incorporation application was associated with a Name Request, the Name Request can still be used to incorporate a business.",
   "myBusinessDashSubtitle": "Start BC-based businesses and keep business records up to date.",
   "onHoldOrRejectModalText": "To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose \"Reject Account\"",
-  "developerAccessSubtitle":"Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>."
+  "developerAccessSubtitle":"Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>.",
+  "pprLauncherText": "Register or search for legal claims on personal property.",
+  "pprLauncherTitle": "Staff Personal Property Registry",
+  "acceptInviteLandingMessageBCEID": "To accept the invitation to this account, log in to Business Registry with a registered BCeID account, and verify your identity by a notarized affidavit.",
+  "pendingAffidavitAdminReviewTitle":"Your submission to join {team} has been requested ",
+  "pendingAffidvitAdminReviewMessage":"Once your information has been reviewed and approved, you will receive an email allowing you to join the account. Please allow {days} business days for this process"
 }

@@ -141,8 +141,8 @@ router.beforeEach((to, from, next) => {
           console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
           return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
         }
-      } else if (currentAccountSettings && currentMembership?.membershipStatus === MembershipStatus.Pending) {
-        console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since users membership status is pending')
+      } else if (currentAccountSettings && [MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(currentMembership?.membershipStatus)) {
+        console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL/PENDING_STAFF_REVIEW since users membership status is pending')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}` })
       } else if (!currentOrganization || currentMembership?.membershipStatus !== MembershipStatus.Active) {
         console.log('[Navigation Guard] Redirecting user to Create Account since users nerither has account nor an active status')

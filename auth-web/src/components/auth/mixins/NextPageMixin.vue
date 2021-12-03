@@ -112,9 +112,14 @@ export default class NextPageMixin extends Vue {
         let bceidNextStep = '/'
         orgName = encodeURIComponent(btoa(this.currentAccountSettings?.label))
         let invToken = ConfigHelper.getFromSession(SessionStorageKeys.InvitationToken)
+        const affidavitNeeded = ConfigHelper.getFromSession(SessionStorageKeys.AffidavitNeeded)
+
         if (invToken) {
-          bceidNextStep = `${Pages.CONFIRM_TOKEN}/${invToken}`
+          // if affidavit needed we will append that also in URL
+          const affidavitNeededURL = affidavitNeeded === 'true' ? `?affidavit=true` : ''
+          bceidNextStep = `${Pages.CONFIRM_TOKEN}/${invToken}${affidavitNeededURL}`
           ConfigHelper.removeFromSession(SessionStorageKeys.InvitationToken)
+          ConfigHelper.removeFromSession(SessionStorageKeys.AffidavitNeeded)
         } else if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bceidNextStep = Pages.USER_PROFILE_TERMS
         } else if (!this.currentOrganization && !this.currentMembership) {
@@ -128,11 +133,13 @@ export default class NextPageMixin extends Vue {
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${orgName}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
-        } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+        } else if ([MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(this.currentMembership?.membershipStatus)) {
+          // if user is pending show pending page.
           bceidNextStep = `${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
           bceidNextStep = `${Pages.MAIN}/${this.currentOrganization.id}`
         }
+
         return `/${bceidNextStep}`
       default:
         return `/${Pages.HOME}`
