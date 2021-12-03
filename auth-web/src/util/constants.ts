@@ -15,7 +15,8 @@ export enum SessionStorageKeys {
     AuthWebUrl = 'AUTH_WEB_URL',
     StatusApiUrl = 'STATUS_API_URL',
     FasWebUrl = 'FAS_WEB_URL',
-    AffidavitNeeded = 'AFFIDAVIT_NEEDED'
+    AffidavitNeeded = 'AFFIDAVIT_NEEDED',
+    GOVN_USER='AUTH_GOVN_USER'
 }
 
 export enum Role {
@@ -190,7 +191,8 @@ export enum AccessType {
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL',
     ANONYMOUS = 'ANONYMOUS',
     REGULAR_BCEID = 'REGULAR_BCEID',
-    GOVM = 'GOVM'
+    GOVM = 'GOVM',
+    GOVN = 'GOVN'
 }
 
 export enum Permission {
