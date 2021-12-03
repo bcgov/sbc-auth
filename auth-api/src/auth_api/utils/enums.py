@@ -269,8 +269,8 @@ class TaskTypePrefix(Enum):
     GOVN_REVIEW = 'GovN'
 
 
-class TaskSubType(Enum):
-    """Task sub type."""
+class TaskAction(Enum):
+    """Task action."""
 
     AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW'
     ACCOUNT_REVIEW = 'ACCOUNT_REVIEW'
