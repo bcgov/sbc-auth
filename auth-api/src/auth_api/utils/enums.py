@@ -132,6 +132,7 @@ class AccessType(Enum):
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL'
     ANONYMOUS = 'ANONYMOUS'
     GOVM = 'GOVM'  # for govt ministry
+    GOVN = 'GOVN'  # for govt ministry
 
 
 class Status(Enum):
@@ -265,6 +266,15 @@ class TaskTypePrefix(Enum):
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
     GOVM_REVIEW = 'GovM'
     BCEID_ADMIN = 'BCeID Admin'
+    GOVN_REVIEW = 'GovN'
+
+
+class TaskAction(Enum):
+    """Task action."""
+
+    AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW'
+    ACCOUNT_REVIEW = 'ACCOUNT_REVIEW'
+    PRODUCT_REVIEW = 'PRODUCT_REVIEW'
 
 
 class ActivityAction(Enum):
