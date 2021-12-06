@@ -244,16 +244,14 @@ export default class ReviewAccountView extends Vue {
         if (this.task.action === TaskAction.ACCOUNT_REVIEW) {
           return [{ ...this.componentAccountInformation(1) },
             { ...this.componentAccountAdministrator(2) },
-            { ...this.componentPaymentInformation(3) },
-            { ...this.componentProductFee(4) }
+            { ...this.componentProductFee(3) }
           ]
         } else {
           return [{ ...this.compDownloadAffidavit(1) },
             { ...this.componentAccountInformation(2) },
             { ...this.componentAccountAdministrator(3) },
             { ...this.componentNotaryInformation(4) },
-            { ...this.componentPaymentInformation(5) },
-            { ...this.componentProductFee(6) }
+            { ...this.componentProductFee(5) }
           ]
         }
       default:
