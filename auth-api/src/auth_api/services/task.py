@@ -17,7 +17,7 @@ This module manages the tasks.
 """
 import urllib
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
@@ -58,12 +58,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         return self._model.id
 
     @ServiceTracing.disable_tracing
-    def as_dict(self):
+    def as_dict(self, exclude: List = None):
         """Return the Task as a python dict.
 
         None fields are not included in the dict.
         """
-        task_schema = TaskSchema()
+        exclude = exclude or []
+        task_schema = TaskSchema(exclude=exclude)
         obj = task_schema.dump(self._model, many=False)
         return obj
 
@@ -218,7 +219,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             return tasks
 
         for task in task_models:
-            task_dict = Task(task).as_dict()
+            task_dict = Task(task).as_dict(exclude=['user'])
             tasks['tasks'].append(task_dict)
 
         tasks['total'] = count

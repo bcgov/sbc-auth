@@ -13,9 +13,11 @@
 # limitations under the License.
 """Manager for tasks schema and export."""
 
-from auth_api.models import Task as TaskModel
+from marshmallow import fields
 
+from auth_api.models import Task as TaskModel
 from .base_schema import BaseSchema
+from .user import UserSchema
 
 
 class TaskSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -25,3 +27,5 @@ class TaskSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-pub
         """Maps all of the Task fields to a default schema."""
 
         model = TaskModel
+
+    user = fields.Nested(UserSchema, many=False)
