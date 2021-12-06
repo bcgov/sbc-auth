@@ -97,7 +97,7 @@
 </template>
 
 <script lang="ts">
-import { Account, PaymentTypes } from '@/util/constants'
+import { AccessType, Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Organization, PADInfo } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
@@ -203,7 +203,8 @@ export default class PaymentMethods extends Vue {
   }
 
   private get isPADOnly () {
-    return (this.currentOrgType === Account.UNLINKED_PREMIUM)
+    const isGovNAccount = this.currentOrganization?.accessType === AccessType.GOVN
+    return (this.currentOrgType === Account.UNLINKED_PREMIUM) || !!isGovNAccount
   }
 
   private get isPaymentEJV () {

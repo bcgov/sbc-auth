@@ -60,9 +60,20 @@
             </div>
           </v-card>
         </v-col>
+        <v-col sm="12" class="py-0">
+          <v-checkbox
+          color="primary"
+          class="py-0 mt-2 align-checkbox-label--top"
+          v-model="isGovN"
+        >
+          <template v-slot:label>
+            I am a government agency (other than BC provincial)
+          </template>
+        </v-checkbox>
+        </v-col>
       </v-row>
     </div>
-    <v-divider class="my-6"></v-divider>
+    <v-divider class="mb-6 mt-1"></v-divider>
     <div class="form__btns d-flex mt-8">
       <v-btn
         large
@@ -111,6 +122,7 @@ export default class ChooseAuthMethodView extends Vue {
   private readonly isAuthenticated!: boolean
   private readonly currentLoginSource!: string
   private authType = ''
+  private isGovN = false
 
   private selectBCSCAuth () {
     this.authType = LoginSource.BCSC
@@ -121,10 +133,12 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   private linkToNext () {
+    ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, this.isGovN)
     ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
   }
 
   private goNext () {
+    ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, this.isGovN)
     // TODO might need to set some session variables
     switch (this.authType) {
       case LoginSource.BCEID:
