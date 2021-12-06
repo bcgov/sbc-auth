@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, LDFlags, PaymentTypes } from '@/util/constants'
+import { AccessType, DisplayModeValues, LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -47,6 +47,7 @@ import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBa
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import { Address } from '@/models/address'
+import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -276,6 +277,8 @@ export default class NonBcscAccountSetupView extends Vue {
         await this.getUserProfile('@me')
         await this.syncOrganization(organization.id)
         await this.syncMembership(organization.id)
+        // remove GOVN accoutn type from session
+        ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
       } else {
         // re-upload final submission valeus here
         await this.updateUserFirstAndLastName()

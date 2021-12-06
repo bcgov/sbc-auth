@@ -923,7 +923,8 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async resetAccountWhileSwitchingPremium (): Promise<void> {
     this.context.commit('setGrantAccess', false)
-    this.context.commit('setCurrentOrganization', { name: '' })
+    // need to keep accesstype while resetting to know whenther the account is GOVM or not.
+    this.context.commit('setCurrentOrganization', { ...this.context.state['currentOrganization'], ...{ name: '' } })
     this.context.commit('setCurrentOrganizationAddress', undefined)
     this.context.commit('setCurrentOrganizationPaymentType', undefined)
     this.context.commit('setCurrentOrganizationPADInfo', undefined)

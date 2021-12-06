@@ -47,13 +47,14 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LDFlags, Pages, PaymentTypes } from '@/util/constants'
+import { LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -254,6 +255,8 @@ export default class AccountSetupView extends Vue {
       await this.getUserProfile('@me')
       await this.syncOrganization(organization.id)
       await this.syncMembership(organization.id)
+      // remove GOVN accoutn type from session
+      ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
       this.$store.commit('updateHeader')
       this.$router.push('/setup-account-success')
     } catch (err) {

@@ -198,6 +198,8 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
     }
 
     this.setAccessType(this.getOrgAccessType())
+    const accessType = this.getOrgAccessType()
+    this.setCurrentOrganization({ ...this.currentOrganization, ...{ accessType: accessType } })
     // remove current account from session storage .Or else permission of old account will be fetched
     ConfigHelper.removeFromSession('CURRENT_ACCOUNT')
   }
@@ -214,6 +216,11 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private getOrgAccessType () {
     let isBceidUser = this.currentUser?.loginSource === LoginSource.BCEID
     let isExtraProvice = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.ExtraProvincialUser || '{}'))
+    const isGovNAccount = !!JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.GOVN_USER || 'false'))
+
+    if (isGovNAccount) {
+      return AccessType.GOVN
+    }
     return isBceidUser ? (isExtraProvice ? AccessType.EXTRA_PROVINCIAL : AccessType.REGULAR_BCEID) : AccessType.REGULAR
   }
 
