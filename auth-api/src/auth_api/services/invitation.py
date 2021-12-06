@@ -440,6 +440,7 @@ class Invitation:
                 'dateSubmitted': datetime.today(),
                 'type': TaskTypePrefix.BCEID_ADMIN.value,
                 'status': TaskStatus.OPEN.value,
-                'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+                'account_id': org.id
             }
             Task.create_task(task_info=task_info, do_commit=False)
