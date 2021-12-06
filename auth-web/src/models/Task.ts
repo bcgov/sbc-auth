@@ -1,3 +1,5 @@
+import { User } from './user'
+
 export interface Tasks {
     tasks : Task[]
 }
@@ -14,10 +16,11 @@ export interface Task {
     relationshipType?: string;
     status?: string;
     type?: string;
-    user?: number;
+    user?: User;
     dueDate?: Date;
     accountId?:number;
     remarks?: string;
+    action?: string;
 }
 export interface TaskFilterParams {
     statuses?: string[];
@@ -32,4 +35,10 @@ export interface TaskList {
     limit: number
     page: number
     total: number
+}
+
+export interface SyncAccountPayload {
+    organizationIdentifier: number
+    isBCeIDAdminReview: boolean
+    relatedBCeIDUser: User
 }
