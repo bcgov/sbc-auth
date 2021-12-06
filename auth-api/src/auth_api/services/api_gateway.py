@@ -223,7 +223,7 @@ class ApiGateway:
             'bcolAccountNumber': org.bcol_account_id or '',
             'bcolUserId': org.bcol_user_id or '',
             'paymentInfo': {
-                'methodOfPayment': pay_account['paymentMethod'],
+                'methodOfPayment': pay_account.get('futurePaymentMethod', None) or pay_account['paymentMethod'],
                 'bankInstitutionNumber': '000',  # Dummy values
                 'bankTransitNumber': '00000',  # Dummy values
                 'bankAccountNumber': '0000000'  # Dummy values
