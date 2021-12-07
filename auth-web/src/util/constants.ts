@@ -285,6 +285,7 @@ export enum productStatus {
 export enum TaskRelationshipType {
     ORG = 'ORG',
     PRODUCT = 'PRODUCT',
+    USER = 'USER'
 }
 
 export enum TaskRelationshipStatus {
@@ -305,7 +306,15 @@ export enum TaskStatus {
 
 export enum TaskType {
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account',
-    GOVM_REVIEW = 'GovM'
+    GOVM_REVIEW = 'GovM',
+    GOVN_REVIEW = 'GovN',
+    BCEID_ADMIN_REVIEW = 'BCeID Admin'
+}
+
+export enum TaskAction {
+    AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW',
+    ACCOUNT_REVIEW = 'ACCOUNT_REVIEW',
+    PRODUCT_REVIEW = 'PRODUCT_REVIEW'
 }
 
 export enum FeeCodes {
