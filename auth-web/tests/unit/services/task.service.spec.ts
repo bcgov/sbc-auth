@@ -1,4 +1,3 @@
-
 import { Task } from '@/models/Task'
 import TaskService from '../../../src/services/task.services'
 import axios from 'axios'
@@ -19,8 +18,7 @@ const task: Task[] = [{
   'relationshipStatus': 'PENDING_STAFF_REVIEW',
   'relationshipType': 'PRODUCT',
   'status': 'OPEN',
-  'type': 'Wills Registry',
-  'user': 31
+  'type': 'Wills Registry'
 }]
 
 describe('Task service', () => {

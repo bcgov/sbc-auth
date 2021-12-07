@@ -1,7 +1,8 @@
-import { AccountStatus, TaskRelationshipType, TaskType } from '@/util/constants'
+import { AccountStatus, TaskAction, TaskRelationshipType, TaskType } from '@/util/constants'
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
+import { SyncAccountPayload, Task } from '@/models/Task'
 
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
@@ -11,7 +12,6 @@ import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import StaffService from '@/services/staff.services'
-import { Task } from '@/models/Task'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
@@ -137,26 +137,34 @@ export default class StaffModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async syncAccountUnderReview (organizationIdentifier: number): Promise<void> {
-    const accountResponse = await OrgService.getOrganization(organizationIdentifier)
+  public async syncAccountUnderReview (syncAccountPayload: SyncAccountPayload): Promise<void> {
+    const accountResponse = await OrgService.getOrganization(syncAccountPayload.organizationIdentifier)
     if (accountResponse?.data && accountResponse?.status === 200) {
       this.context.commit('setAccountUnderReview', accountResponse.data)
 
-      const addressResponse = await OrgService.getContactForOrg(organizationIdentifier)
+      const addressResponse = await OrgService.getContactForOrg(syncAccountPayload.organizationIdentifier)
       if (addressResponse) {
         this.context.commit('setAccountUnderReviewAddress', addressResponse)
       }
-
-      const accountMembersResponse = await OrgService.getOrgMembers(organizationIdentifier, 'ACTIVE')
-      if (accountMembersResponse?.data && accountMembersResponse?.status === 200) {
-        const admin = accountMembersResponse.data.members.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
-        if (admin) {
-          this.context.commit('setAccountUnderReviewAdmin', admin)
-          const adminContactResponse = await UserService.getUserProfile(admin.username)
-          if (adminContactResponse?.data && adminContactResponse?.status === 200) {
-            const contact = adminContactResponse?.data?.contacts?.length > 0 && adminContactResponse?.data?.contacts[0]
-            if (contact) {
-              this.context.commit('setAccountUnderReviewAdminContact', contact)
+      // Incase it is BCeIdAdmin request flow, then we need to get the requesting admin details rather than current account admin
+      if (syncAccountPayload.isBCeIDAdminReview) {
+        const user = syncAccountPayload.relatedBCeIDUser
+        this.context.commit('setAccountUnderReviewAdmin', user)
+        if (user.contacts && user.contacts.length > 0) {
+          this.context.commit('setAccountUnderReviewAdminContact', user.contacts[0])
+        }
+      } else {
+        const accountMembersResponse = await OrgService.getOrgMembers(syncAccountPayload.organizationIdentifier, 'ACTIVE')
+        if (accountMembersResponse?.data && accountMembersResponse?.status === 200) {
+          const admin = accountMembersResponse.data.members.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
+          if (admin) {
+            this.context.commit('setAccountUnderReviewAdmin', admin)
+            const adminContactResponse = await UserService.getUserProfile(admin.username)
+            if (adminContactResponse?.data && adminContactResponse?.status === 200) {
+              const contact = adminContactResponse?.data?.contacts?.length > 0 && adminContactResponse?.data?.contacts[0]
+              if (contact) {
+                this.context.commit('setAccountUnderReviewAdminContact', contact)
+              }
             }
           }
         }
@@ -169,17 +177,17 @@ export default class StaffModule extends VuexModule {
     const taskRelationshipType = task.relationshipType
     const taskRelationshipId = task.relationshipId
     const taskAccountId = task.accountId
-    const taskType = task.type
+    const taskAction = task.action
 
-    // if type is org need to set org details and affidavit details
-    if (taskRelationshipType === TaskRelationshipType.ORG && taskType === TaskType.NEW_ACCOUNT_STAFF_REVIEW) {
-      await this.context.dispatch('syncAccountUnderReview', taskRelationshipId)
-      await this.context.dispatch('syncAccountAffidavit', taskRelationshipId)
-    } else if (taskRelationshipType === TaskRelationshipType.PRODUCT) {
-      await this.context.dispatch('syncAccountUnderReview', taskAccountId)
-    } else {
-      // for GovM accounts
-      await this.context.dispatch('syncAccountUnderReview', task.relationshipId)
+    const accountId = taskRelationshipType === TaskRelationshipType.ORG ? taskRelationshipId : taskAccountId
+    const syncAccountPayload: SyncAccountPayload = {
+      organizationIdentifier: accountId,
+      isBCeIDAdminReview: task.type === TaskType.BCEID_ADMIN_REVIEW,
+      relatedBCeIDUser: task.user
+    }
+    await this.context.dispatch('syncAccountUnderReview', syncAccountPayload)
+    if (taskAction === TaskAction.AFFIDAVIT_REVIEW) {
+      await this.context.dispatch('syncAccountAffidavit', accountId)
     }
   }
 

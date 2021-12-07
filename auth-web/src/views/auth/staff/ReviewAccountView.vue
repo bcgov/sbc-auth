@@ -47,13 +47,13 @@
                     <span>Approve</span>
                   </v-btn>
                   <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
-                    <span v-if="isBCEIDAccountReview">Reject/On Hold</span>
+                    <span v-if="isAffidavitReview">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
                 </div>
               </div>
             </template>
-           </v-col>
+          </v-col>
 
           <!-- Account Status Column -->
           <v-col class="col-12 col-md-4 pl-0 pt-8 pr-8 d-flex">
@@ -88,7 +88,7 @@
 
 <script lang="ts">
 import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { DisplayModeValues, OnholdOrRejectCode, Pages, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+import { DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -171,7 +171,6 @@ export default class ReviewAccountView extends Vue {
   public task :Task
   public taskRelationshipType:string = ''
   private productFeeFormValid: boolean = false
-  private isBCEIDAccountReview:boolean = false
   private viewOnly = DisplayModeValues.VIEW_ONLY
 
   $refs: {
@@ -191,35 +190,81 @@ export default class ReviewAccountView extends Vue {
     return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
   }
 
+  // Tasks with Affidavit action can be put on hold
+  private get isAffidavitReview (): boolean {
+    return this.task.action === TaskAction.AFFIDAVIT_REVIEW
+  }
+
+  private get isGovNAccountReview (): boolean {
+    return this.task.type === TaskType.GOVN_REVIEW
+  }
+
   get title () {
     let title = 'Review Account'
     if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
       title = `Access Request (${this.task.type})`
+    } else if (this.taskRelationshipType === TaskRelationshipType.USER) {
+      // For now, Task with relationship type as user is for BCeID Admin request
+      title = 'Review BCeID Admin'
     }
     return title
   }
+
+  /*
+    5 types of Tasks:
+    1. New BCeId Account creation -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+    2. Product request access -> TaskType.PRODUCT and taskRelationshipType === TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
+    3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
+    4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
+    5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
+                      2. Bceid flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+  */
   get componentList () {
-    if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
-      return [
-        { ...this.componentAccountInformation(1) },
-        { ...this.componentAccountAdministrator(2) },
-        { ...this.componentAgreementInformation(3) }
-      ]
-    } else {
-      if (this.task.type === TaskType.NEW_ACCOUNT_STAFF_REVIEW) {
-        return [{ ...this.compDownloadAffidavit(1) },
-          { ...this.componentAccountInformation(2) },
-          { ...this.componentAccountAdministrator(3) },
-          { ...this.componentNotaryInformation(4) }
-        ]
-      } else {
-        // For GovM accounts
+    const taskType = this.task.type
+    switch (taskType) {
+      case TaskType.GOVM_REVIEW:
         return [{ ...this.componentAccountInformation(1) },
           { ...this.componentAccountAdministrator(2) },
           { ...this.componentPaymentInformation(3) },
           { ...this.componentProductFee(4) }
         ]
-      }
+      case TaskType.NEW_ACCOUNT_STAFF_REVIEW:
+        return [{ ...this.compDownloadAffidavit(1) },
+          { ...this.componentAccountInformation(2) },
+          { ...this.componentAccountAdministrator(3) },
+          { ...this.componentNotaryInformation(4) }
+        ]
+      case TaskType.BCEID_ADMIN_REVIEW:
+        return [{ ...this.compDownloadAffidavit(1) },
+          { ...this.componentAccountInformation(2) },
+          { ...this.componentAccountAdministrator(3) },
+          { ...this.componentNotaryInformation(4) }
+        ]
+      case TaskType.GOVN_REVIEW:
+        if (this.task.action === TaskAction.ACCOUNT_REVIEW) {
+          return [{ ...this.componentAccountInformation(1) },
+            { ...this.componentAccountAdministrator(2) },
+            { ...this.componentProductFee(3) }
+          ]
+        } else {
+          return [{ ...this.compDownloadAffidavit(1) },
+            { ...this.componentAccountInformation(2) },
+            { ...this.componentAccountAdministrator(3) },
+            { ...this.componentNotaryInformation(4) },
+            { ...this.componentProductFee(5) }
+          ]
+        }
+      default:
+        // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
+        // Also, we double check by task relationship type
+        if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
+          return [
+            { ...this.componentAccountInformation(1) },
+            { ...this.componentAccountAdministrator(2) },
+            { ...this.componentAgreementInformation(3) }
+          ]
+        }
+        break
     }
   }
 
@@ -230,7 +275,8 @@ export default class ReviewAccountView extends Vue {
       this.taskRelationshipType = this.task.relationshipType
       await this.syncTaskUnderReview(this.task)
 
-      if (this.task.type === TaskType.GOVM_REVIEW) {
+      // If the task type is GOVM or GOVN, then need to populate product fee codes
+      if (this.task.type === TaskType.GOVM_REVIEW || this.task.type === TaskType.GOVN_REVIEW) {
         const accountId = this.task.relationshipId
         await this.fetchCurrentOrganizationGLInfo(accountId)
         await this.fetchOrgProductFeeCodes()
@@ -242,8 +288,8 @@ export default class ReviewAccountView extends Vue {
           this.resetCurrentAccountFees()
         }
       }
-      this.isBCEIDAccountReview = this.task.type === TaskType.NEW_ACCOUNT_STAFF_REVIEW
-      if (this.isBCEIDAccountReview && (!this.onholdReasonCodes || this.onholdReasonCodes.length === 0)) {
+      // Tasks with Affidavit action can be put on hold. Therefore, populate on hold reasons
+      if (this.isAffidavitReview && (!this.onholdReasonCodes || this.onholdReasonCodes.length === 0)) {
         await this.getOnholdReasonCodes()
       }
     } catch (ex) {
@@ -273,8 +319,8 @@ export default class ReviewAccountView extends Vue {
       this.isRejectModal = true
       this.isOnHoldModal = false
     } else {
-      this.isRejectModal = this.isBCEIDAccountReview ? false : isRejectModal
-      this.isOnHoldModal = this.isBCEIDAccountReview ? isRejectModal : false
+      this.isRejectModal = this.isAffidavitReview ? false : isRejectModal
+      this.isOnHoldModal = this.isAffidavitReview ? isRejectModal : false
     }
 
     if (isConfirmationModal) {
