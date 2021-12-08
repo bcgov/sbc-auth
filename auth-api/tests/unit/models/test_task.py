@@ -178,7 +178,7 @@ def test_find_by_task_for_user(session):  # pylint:disable=unused-argument
                      relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
     task.save()
 
-    found_task = TaskModel.find_by_task_for_user(org_id=10, status=TaskStatus.OPEN.value)
+    found_task = TaskModel.find_by_user_and_status(org_id=10, status=TaskStatus.OPEN.value)
     assert found_task
     assert found_task.name == 'TEST 1'
     assert found_task.relationship_id == user.id

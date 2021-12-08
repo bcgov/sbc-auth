@@ -149,9 +149,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
                                          origin_url=origin_url)
             else:
                 user: UserModel = UserModel.find_by_id(user_id)
-                if user.status != Status.PENDING_STAFF_REVIEW.value:
-                    user.status = Status.PENDING_STAFF_REVIEW.value
-                    user.flush()
                 membership = MembershipModel.find_membership_by_userid(user_id)
                 # Send mail to admin about hold with reasons
                 Task._notify_admin_about_hold(user=user, task_model=task_model, is_new_bceid_admin_request=True,

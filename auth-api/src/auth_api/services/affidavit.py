@@ -108,14 +108,17 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
             # check if there is any holding tasks
             # Find if the corresponding task is NEW_ACCOUNT_STAFF_REVIEW type, clone and close it
             task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
+            if task_model is None:
+                # Else, find if there are any associated task of BCEID_ADMIN type, clone and close it
+                task_model: TaskModel = TaskModel.find_by_user_and_status(org.id, TaskStatus.HOLD.value)
+
             if task_model:
-                task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
                 task_info = {'name': org.name,
-                             'relationshipId': org.id,
+                             'relationshipId': task_model.relationship_id,
                              'relatedTo': user.identifier,
                              'dateSubmitted': task_model.date_submitted,
-                             'relationshipType': TaskRelationshipType.ORG.value,
-                             'type': task_type,
+                             'relationshipType': task_model.relationship_type,
+                             'type': task_model.type,
                              'action': task_model.action,
                              'status': TaskStatus.OPEN.value,
                              'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
@@ -124,36 +127,15 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
                 # Send notification mail to staff review task
                 from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
-                OrgService.send_staff_review_account_reminder(relationship_id=org.id)
-
-                remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
-                TaskService.close_task(task_model.id, remarks)
-            # Else, find if there are any associated task of BCEID_ADMIN type, clone and close it
-            else:
-                task_model: TaskModel = TaskModel.find_by_task_for_user(org.id, TaskStatus.HOLD.value)
-                if task_model:
-                    task_type = TaskTypePrefix.BCEID_ADMIN.value
-                    task_info = {'name': org.name,
-                                 'relationshipId': user.identifier,
-                                 'relatedTo': user.identifier,
-                                 'dateSubmitted': task_model.date_submitted,
-                                 'relationshipType': TaskRelationshipType.USER.value,
-                                 'type': task_type,
-                                 'action': task_model.action,
-                                 'status': TaskStatus.OPEN.value,
-                                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-                                 }
-                    new_task = TaskService.create_task(task_info=task_info, do_commit=False)
-
-                    # Send notification mail to staff review task
-                    from auth_api.services import \
-                        Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+                if task_model.relationship_type == TaskRelationshipType.USER.value:
                     OrgService.send_staff_review_account_reminder(
                         relationship_id=user.identifier,
                         task_relationship_type=TaskRelationshipType.USER.value)
+                else:
+                    OrgService.send_staff_review_account_reminder(relationship_id=org.id)
 
-                    remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
-                    TaskService.close_task(task_model.id, remarks)
+                remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
+                TaskService.close_task(task_model.id, remarks)
 
     @staticmethod
     def find_affidavit_by_org_id(org_id: int):

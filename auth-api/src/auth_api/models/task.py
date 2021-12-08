@@ -90,7 +90,7 @@ class Task(BaseModel):
                                                 relationship_type=TaskRelationshipType.ORG.value, status=status).first()
 
     @classmethod
-    def find_by_task_for_user(cls, org_id, status):
+    def find_by_user_and_status(cls, org_id, status):
         """Find a task instance that matches the provided id."""
         return db.session.query(Task).filter_by(account_id=org_id,
                                                 relationship_type=TaskRelationshipType.USER.value, status=status)\
