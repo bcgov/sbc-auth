@@ -232,7 +232,8 @@ export enum LDFlags {
     HideProductPackage = 'hide-product-packages',
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
     IaSupportedEntities = 'ia-supported-entities',
-    EnableFasDashboard = 'enable-fas-dashboard'
+    EnableFasDashboard = 'enable-fas-dashboard',
+    DisableGovNAccountCreation='disable-govn-account'
 }
 
 export enum DateFilterCodes {
