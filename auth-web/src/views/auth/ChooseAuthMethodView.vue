@@ -60,7 +60,7 @@
             </div>
           </v-card>
         </v-col>
-        <v-col sm="12" class="py-0">
+        <v-col sm="12" class="py-0" v-if="!disableGovnAccountCreation">
           <v-checkbox
           color="primary"
           class="py-0 mt-2 align-checkbox-label--top"
@@ -105,8 +105,9 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { mapGetters } from 'vuex'
 
 @Component({
@@ -123,6 +124,10 @@ export default class ChooseAuthMethodView extends Vue {
   private readonly currentLoginSource!: string
   private authType = ''
   private isGovN = false
+
+  private get disableGovnAccountCreation (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.DisableGovNAccountCreation) || false
+  }
 
   private selectBCSCAuth () {
     this.authType = LoginSource.BCSC
