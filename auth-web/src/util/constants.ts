@@ -233,7 +233,7 @@ export enum LDFlags {
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard',
-    DisableGovNAccountCreation='disable-govm-account'
+    DisableGovNAccountCreation='disable-govn-account'
 }
 
 export enum DateFilterCodes {
