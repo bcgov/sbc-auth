@@ -164,3 +164,22 @@ def test_finding_task_by_relationship_id(session):  # pylint:disable=unused-argu
     assert found_task.name == 'TEST 1'
     assert found_task.relationship_id == 10
     assert found_task.status == TaskStatus.OPEN.value
+
+
+def test_find_by_task_for_user(session):  # pylint:disable=unused-argument
+    """Assert that we can fetch all tasks."""
+    user = factory_user_model()
+    task = TaskModel(name='TEST 1', date_submitted=datetime.now(),
+                     relationship_type=TaskRelationshipType.USER.value,
+                     relationship_id=user.id, type=TaskTypePrefix.BCEID_ADMIN.value,
+                     status=TaskStatus.OPEN.value,
+                     related_to=user.id,
+                     account_id=10,
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value)
+    task.save()
+
+    found_task = TaskModel.find_by_task_for_user(org_id=10, status=TaskStatus.OPEN.value)
+    assert found_task
+    assert found_task.name == 'TEST 1'
+    assert found_task.relationship_id == user.id
+    assert found_task.status == TaskStatus.OPEN.value

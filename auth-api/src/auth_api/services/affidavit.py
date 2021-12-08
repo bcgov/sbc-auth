@@ -21,6 +21,8 @@ from typing import Dict
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
@@ -98,11 +100,13 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _modify_task(user):
+        """Clone on-hold task to a new active task; handle user-based and org-based tasks."""
         # find users org. ideally only one org
         org_list = MembershipModel.find_orgs_for_user(user.identifier)
         org: OrgModel = next(iter(org_list or []), None)
         if org:
             # check if there is any holding tasks
+            # Find if the corresponding task is NEW_ACCOUNT_STAFF_REVIEW type, clone and close it
             task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
             if task_model:
                 task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
@@ -124,6 +128,32 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
 
                 remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
                 TaskService.close_task(task_model.id, remarks)
+            # Else, find if there are any associated task of BCEID_ADMIN type, clone and close it
+            else:
+                task_model: TaskModel = TaskModel.find_by_task_for_user(org.id, TaskStatus.HOLD.value)
+                if task_model:
+                    task_type = TaskTypePrefix.BCEID_ADMIN.value
+                    task_info = {'name': org.name,
+                                 'relationshipId': user.identifier,
+                                 'relatedTo': user.identifier,
+                                 'dateSubmitted': task_model.date_submitted,
+                                 'relationshipType': TaskRelationshipType.USER.value,
+                                 'type': task_type,
+                                 'action': task_model.action,
+                                 'status': TaskStatus.OPEN.value,
+                                 'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                                 }
+                    new_task = TaskService.create_task(task_info=task_info, do_commit=False)
+
+                    # Send notification mail to staff review task
+                    from auth_api.services import \
+                        Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
+                    OrgService.send_staff_review_account_reminder(
+                        relationship_id=user.identifier,
+                        task_relationship_type=TaskRelationshipType.USER.value)
+
+                    remarks = [f'User Uploaded New affidavit .Created New task id: {new_task.identifier}']
+                    TaskService.close_task(task_model.id, remarks)
 
     @staticmethod
     def find_affidavit_by_org_id(org_id: int):
@@ -145,4 +175,19 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
+        return Affidavit(affidavit)
+
+    @staticmethod
+    def approve_or_reject_bceid_admin(admin_user_id: int, is_approved: bool, user: UserModel):
+        """Mark the BCeId Admin Affidavit as approved or rejected."""
+        current_app.logger.debug('<approve_or_reject_bceid_admin ')
+        affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(admin_user_id)
+        if affidavit is None:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        affidavit.decision_made_by = user.username
+        affidavit.decision_made_on = datetime.now()
+        affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
+
+        current_app.logger.debug('>approve_or_reject_bceid_admin ')
         return Affidavit(affidavit)
