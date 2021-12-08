@@ -173,8 +173,9 @@ export default class AccessRequestModal extends Vue {
         // eslint-disable-next-line no-irregular-whitespace
         ? `By rejecting the request, this account won't have access to ${this.taskName}`
         : 'Rejecting the request will not activate this account'
-
-      btnLabel = 'Reject'
+      icon = 'mdi-alert-circle-outline'
+      color = 'error'
+      btnLabel = isProductApproval ? 'Reject' : 'Yes, Reject Account'
     } else if (this.isOnHoldModal) { // if we need to show on hold modal
       title = 'Reject or Hold Account Creation Request'
 
