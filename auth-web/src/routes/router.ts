@@ -401,6 +401,14 @@ export function getRoutes (): RouteConfig[] {
       props: true,
       meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
     },
+    // For reupload affidavit of BCeID Admin flow - same component different route
+    {
+      path: '/re-upload-affidavit/:orgId?/:membershipId?',
+      name: 'reuploadaffidavit',
+      component: NonBcscAdminInviteSetupView,
+      props: true,
+      meta: { requiresAuth: true, disabledRoles: [Role.Staff] }
+    },
     {
       path: '/:orgName/validatetoken/:loginSource/:token',
       component: AcceptInviteLandingView,

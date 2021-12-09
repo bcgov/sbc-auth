@@ -394,7 +394,7 @@ class Org:  # pylint: disable=too-many-public-methods
                      'dateSubmitted': datetime.today(),
                      'relationshipType': TaskRelationshipType.ORG.value,
                      'type': task_type,
-                     'action': TaskAction.AFFIDAVIT_REVIEW.value,
+                     'action': TaskAction.ACCOUNT_REVIEW.value,
                      'status': TaskStatus.OPEN.value,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
                      }
