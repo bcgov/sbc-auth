@@ -34,7 +34,7 @@ from auth_api.schemas import AffidavitSchema
 from auth_api.services.minio import MinioService
 from auth_api.services.task import Task as TaskService
 from auth_api.utils.enums import (
-    AffidavitStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
+    AffidavitStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.util import camelback2snake
 
 from .user import User as UserService
