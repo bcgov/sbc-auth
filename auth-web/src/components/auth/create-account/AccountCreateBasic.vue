@@ -166,14 +166,16 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       // changed this for accomadating bceid account re-upload
       const checkNameAVailability = (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
       // no need to check name if govmAccount
-      if (checkNameAVailability && !this.govmAccount) {
-        const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
-        if (!available) {
-          this.errorMessage =
-                'An account with this name already exists. Try a different account name.'
-          return
-        }
-      }
+      // TODO revert it
+      // This is for hotfix for account name and branch unique
+      // if (checkNameAVailability && !this.govmAccount) {
+      //   const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
+      //   if (!available) {
+      //     this.errorMessage =
+      //           'An account with this name already exists. Try a different account name.'
+      //     return
+      //   }
+      // }
       const orgType = (this.isBasicAccount) ? Account.BASIC : Account.PREMIUM
 
       let org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType }

@@ -244,15 +244,18 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private async validateAccountNameUnique () {
-    const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
-    if (!available) {
-      this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
-      this.orgNameReadOnly = false
-      return false
-    } else {
-      this.orgNameReadOnly = true
-      return true
-    }
+    // TODO revert it
+    // This is for hotfix for account name and branch unique
+    return true
+    // const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
+    // if (!available) {
+    //   this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
+    //   this.orgNameReadOnly = false
+    //   return false
+    // } else {
+    //   this.orgNameReadOnly = true
+    //   return true
+    // }
   }
 
   private cancel () {
