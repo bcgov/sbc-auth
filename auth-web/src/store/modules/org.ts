@@ -494,7 +494,8 @@ export default class OrgModule extends VuexModule {
     // we dont need org name and branch name as we are updating the already created org(when staff sends invite)
     const createRequestBody: CreateRequestBody = {
       paymentInfo: {
-        revenueAccount
+        revenueAccount,
+        paymentMethod: PaymentTypes.EJV
       },
       productSubscriptions: productsSelected
     }
