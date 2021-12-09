@@ -145,8 +145,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         elif task_model.relationship_type == TaskRelationshipType.USER.value:
             user_id = task_model.relationship_id
             if not is_hold:
-                self._update_bceid_admin(is_approved=is_approved, user_id=user_id,
-                                         origin_url=origin_url)
+                self._update_bceid_admin(is_approved=is_approved, user_id=user_id)
             else:
                 user: UserModel = UserModel.find_by_id(user_id)
                 membership = MembershipModel.find_membership_by_userid(user_id)
@@ -203,13 +202,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_task_org ')
 
     @staticmethod
-    def _update_bceid_admin(is_approved: bool, user_id: int, origin_url: str = None):
+    def _update_bceid_admin(is_approved: bool, user_id: int):
         """Approve/Reject BCeId Admin User and Affidavit."""
         current_app.logger.debug('<update_bceid_admin_to_org ')
 
         # Update user
         user: UserModel = UserModel.find_by_id(user_id)
-        user.verified = True if is_approved else False
+        user.verified = is_approved
         user.status = Status.ACTIVE.value if is_approved else Status.REJECTED.value
 
         # Update membership
@@ -217,8 +216,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
         membership.status = Status.ACTIVE.value if is_approved else Status.REJECTED.value
 
         # Update affidavit
-        from auth_api.services import Affidavit as AffidavitService  # pylint:disable=cyclic-import,
-        # import-outside-toplevel
+        from auth_api.services \
+            import Affidavit as AffidavitService  # pylint:disable=cyclic-import, import-outside-toplevel
         AffidavitService.approve_or_reject_bceid_admin(admin_user_id=user_id, is_approved=is_approved, user=user)
 
         current_app.logger.debug('>update_bceid_admin_to_org ')
