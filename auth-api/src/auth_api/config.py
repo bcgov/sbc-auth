@@ -151,7 +151,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     BCEID_SIGNIN_ROUTE = os.getenv('BCEID_SIGNIN_ROUTE', 'signin/bceid')
     # url for the front end app
     BCEID_ACCOUNT_SETUP_ROUTE = os.getenv('BCEID_ACCOUNT_SETUP_ROUTE', 'setup-non-bcsc-account')
-    BCEID_ADMIN_SETUP_ROUTE = os.getenv('BCEID_ADMIN_SETUP_ROUTE', 'upload-affidavit')
+    BCEID_ADMIN_SETUP_ROUTE = os.getenv('BCEID_ADMIN_SETUP_ROUTE', 're-upload-affidavit')
 
     try:
         MAX_NUMBER_OF_ORGS = int(os.getenv('MAX_NUMBER_OF_ORGS'))
