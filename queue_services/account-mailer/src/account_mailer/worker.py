@@ -200,6 +200,7 @@ async def process_event(event_message: dict, flask_app):
         else:
             if any(x for x in MessageType if x.value == message_type):
                 title = TitleType[MessageType(message_type).name].value
+
                 subject = SubjectType[MessageType(message_type).name].value\
                     .format(user_first_name=email_msg.get('userFirstName'),
                             user_last_name=email_msg.get('userLastName'),

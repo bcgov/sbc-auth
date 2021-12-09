@@ -35,7 +35,6 @@ from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import AccessType, OrgStatus, Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from auth_api.utils.util import camelback2snake
 
-
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
@@ -134,7 +133,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 is_bceid = org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
                 # bceid holds need notifications
                 if is_bceid:
-                    Task._notify_admin_about_hold(org, task_model)
+                    Task._notify_admin_about_hold(task_model, org=org)
             # TODO Update user.verified flag
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
             # Update Product relationship
@@ -145,19 +144,36 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         elif task_model.relationship_type == TaskRelationshipType.USER.value:
             user_id = task_model.relationship_id
-            if is_approved:
-                membership = MembershipModel.find_membership_by_userid(user_id)
-                membership.status = Status.ACTIVE.value
+            if not is_hold:
+                self._update_bceid_admin(is_approved=is_approved, user_id=user_id)
+            else:
                 user: UserModel = UserModel.find_by_id(user_id)
-                user.verified = True
-            # TODO Update affidavit status
+                membership = MembershipModel.find_membership_by_userid(user_id)
+                # Send mail to admin about hold with reasons
+                Task._notify_admin_about_hold(user=user, task_model=task_model, is_new_bceid_admin_request=True,
+                                              membership_id=membership.id)
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
-    def _notify_admin_about_hold(org, task_model):
-        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-        create_account_signin_route = urllib.parse.quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
-                                                              f'{org.id}')
+    def _notify_admin_about_hold(task_model, org: OrgModel = None, is_new_bceid_admin_request: bool = False,
+                                 membership_id: int = None, user: UserModel = None):
+        if is_new_bceid_admin_request:
+            create_account_signin_route = urllib.parse.quote_plus(
+                f"{current_app.config.get('BCEID_ADMIN_SETUP_ROUTE')}/"
+                f'{task_model.account_id}/'
+                f'{membership_id}')
+            admin_email = user.contacts[0].contact.email
+            account_id = task_model.account_id
+            mailer_type = 'resubmitBceidAdmin'
+
+        else:
+            create_account_signin_route = urllib.parse. \
+                quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
+                           f'{org.id}')
+            admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+            account_id = org.id
+            mailer_type = 'resubmitBceidOrg'
+
         data = {
             'remarks': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
@@ -168,7 +184,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                           f'{create_account_signin_route}'
         }
         try:
-            publish_to_mailer('resubmitBceidOrg', org_id=org.id, data=data)
+            publish_to_mailer(mailer_type, org_id=account_id, data=data)
             current_app.logger.debug('<send_approval_notification_to_member')
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_notification_to_member failed')
@@ -184,6 +200,26 @@ class Task:  # pylint: disable=too-many-instance-attributes
                                      origin_url=origin_url)
 
         current_app.logger.debug('>update_task_org ')
+
+    @staticmethod
+    def _update_bceid_admin(is_approved: bool, user_id: int):
+        """Approve/Reject BCeId Admin User and Affidavit."""
+        from auth_api.services import Affidavit  # pylint:disable=cyclic-import, import-outside-toplevel
+        current_app.logger.debug('<update_bceid_admin_to_org ')
+
+        # Update user
+        user: UserModel = UserModel.find_by_id(user_id)
+        user.verified = is_approved
+        user.status = Status.ACTIVE.value if is_approved else Status.REJECTED.value
+
+        # Update membership
+        membership = MembershipModel.find_membership_by_userid(user_id)
+        membership.status = Status.ACTIVE.value if is_approved else Status.REJECTED.value
+
+        # Update affidavit
+        Affidavit.approve_or_reject_bceid_admin(admin_user_id=user_id, is_approved=is_approved, user=user)
+
+        current_app.logger.debug('>update_bceid_admin_to_org ')
 
     @staticmethod
     def _update_product_subscription(is_approved: bool, product_subscription_id: int, org_id: int):
