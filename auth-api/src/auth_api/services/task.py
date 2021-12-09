@@ -204,6 +204,8 @@ class Task:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _update_bceid_admin(is_approved: bool, user_id: int):
         """Approve/Reject BCeId Admin User and Affidavit."""
+        from auth_api.services import Affidavit as AffidavitService  # pylint:disable=cyclic-import,
+        # import-outside-toplevel
         current_app.logger.debug('<update_bceid_admin_to_org ')
 
         # Update user
@@ -216,8 +218,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
         membership.status = Status.ACTIVE.value if is_approved else Status.REJECTED.value
 
         # Update affidavit
-        from auth_api.services \
-            import Affidavit as AffidavitService  # pylint:disable=cyclic-import, import-outside-toplevel
         AffidavitService.approve_or_reject_bceid_admin(admin_user_id=user_id, is_approved=is_approved, user=user)
 
         current_app.logger.debug('>update_bceid_admin_to_org ')
