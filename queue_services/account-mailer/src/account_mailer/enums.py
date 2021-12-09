@@ -53,6 +53,7 @@ class MessageType(Enum):
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
+    RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
 
 
 class SubjectType(Enum):
@@ -97,6 +98,8 @@ class SubjectType(Enum):
                                          'Your Product Request {product_name} Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                       'Update your information.'
+    RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
+                                        'Update your information.'
 
 
 class TitleType(Enum):
@@ -120,6 +123,7 @@ class TitleType(Enum):
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'Your Account Creation Request is On hold '
+    RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
 
 
 class TemplateType(Enum):
@@ -156,6 +160,7 @@ class TemplateType(Enum):
     PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
     PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
     RESUBMIT_BCEID_ORG_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_org'
+    RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
 
 
 class Constants(Enum):
