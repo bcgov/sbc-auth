@@ -65,8 +65,9 @@ class Affidavit(VersionedModel):
     @classmethod
     def find_effective_by_user_guid(cls, user_guid: str):
         """Find pending affidavit by user id."""
+        status = [AffidavitStatus.PENDING.value, AffidavitStatus.APPROVED.value, AffidavitStatus.REJECTED.value]
         return db.session.query(Affidavit)\
             .join(User, User.id == Affidavit.user_id)\
-            .filter(Affidavit.status_code.in_([AffidavitStatus.PENDING.value, AffidavitStatus.APPROVED.value]))\
+            .filter(Affidavit.status_code.in_(status))\
             .filter(User.keycloak_guid == user_guid)\
             .one_or_none()
