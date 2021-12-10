@@ -147,6 +147,16 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         return affidavit_dict
 
     @staticmethod
+    def find_affidavit_by_user_guid(user_guid: str):
+        """Return affidavit for the user."""
+        current_app.logger.debug('<find_affidavit_by_user_guid ')
+        affidavit = AffidavitModel.find_effective_by_user_guid(user_guid)
+        affidavit_dict = Affidavit(affidavit).as_dict()
+        affidavit_dict['documentUrl'] = MinioService.create_signed_get_url(affidavit.document_id)
+        current_app.logger.debug('>find_affidavit_by_user_guid ')
+        return affidavit_dict
+
+    @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, user: UserModel):
         """Mark the affdiavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')

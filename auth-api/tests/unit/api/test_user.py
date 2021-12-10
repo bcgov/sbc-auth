@@ -34,8 +34,8 @@ from auth_api.utils.enums import AccessType, IdpHint, ProductCode, Status, UserS
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import (
-    KeycloakScenario, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestOrgTypeInfo, TestUserInfo)
+    KeycloakScenario, TestAffidavit, TestAnonymousMembership, TestContactInfo, TestEntityInfo, TestJwtClaims,
+    TestOrgInfo, TestOrgTypeInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
@@ -826,3 +826,23 @@ def test_user_post_during_login(client, jwt, session):  # pylint:disable=unused-
                      content_type='application/json')
     assert schema_utils.validate(rv.json, 'user_response')[0]
     assert login_time != rv.json.get('loginTime')
+
+
+def test_get_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert get affidavit."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
+    doc_key = document_signature.json.get('key')
+    client.post(f"/api/v1/users/{TestJwtClaims.public_user_role.get('sub')}/affidavits",
+                headers=headers,
+                data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
+                content_type='application/json')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+
+    rv = client.get(f"/api/v1/users/{TestJwtClaims.public_user_role.get('sub')}/affidavits",
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
