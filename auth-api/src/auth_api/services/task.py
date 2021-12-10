@@ -32,7 +32,8 @@ from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import AccessType, OrgStatus, Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
+from auth_api.utils.enums import AccessType, OrgStatus, Status, TaskRelationshipStatus, TaskRelationshipType, \
+    TaskStatus, TaskAction, TaskTypePrefix
 from auth_api.utils.util import camelback2snake
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -122,17 +123,30 @@ class Task:  # pylint: disable=too-many-instance-attributes
             # Update Org relationship
             org_id = task_model.relationship_id
             if not is_hold:
+                is_govn_affidavit_review = task_model.type == TaskTypePrefix.GOVN_REVIEW.value and \
+                                         task_model.action == TaskAction.AFFIDAVIT_REVIEW.value
                 self._update_org(is_approved=is_approved, org_id=org_id,
-                                 origin_url=origin_url)
+                                 origin_url=origin_url, is_govn_affidavit_review=is_govn_affidavit_review)
             else:
+                # Task with GOVN type and ACCOUNT_REVIEW action cannot be put on hold
+                if task_model.type == TaskTypePrefix.GOVN_REVIEW.value and \
+                        task_model.action == TaskAction.ACCOUNT_REVIEW.value:
+                    raise BusinessException(Error.INVALID_INPUT, None)
+
                 # no updates on org yet.put the task on hold and send mail to user
                 org: OrgModel = OrgModel.find_by_org_id(org_id)
                 if org.status_code != OrgStatus.PENDING_STAFF_REVIEW.value:
                     org.status_code = OrgStatus.PENDING_STAFF_REVIEW.value
                     org.flush()
+
+                # BCEID related tasks can be put on hold
                 is_bceid = org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
-                # bceid holds need notifications
-                if is_bceid:
+                # Task with GOVN type and ACCOUNT_REVIEW action can also be put on hold
+                is_govn_affidavit_review = (org.access_type == AccessType.GOVN.value and
+                                            task_model.action == TaskAction.AFFIDAVIT_REVIEW.value)
+
+                # send on-hold mail notification
+                if is_bceid or is_govn_affidavit_review:
                     Task._notify_admin_about_hold(task_model, org=org)
             # TODO Update user.verified flag
         elif task_model.relationship_type == TaskRelationshipType.PRODUCT.value:
@@ -191,13 +205,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def _update_org(is_approved: bool, org_id: int, origin_url: str = None):
+    def _update_org(is_approved: bool, org_id: int, origin_url: str = None, is_govn_affidavit_review: bool = False):
         """Approve/Reject Affidavit and Org."""
         from auth_api.services import Org as OrgService  # pylint:disable=cyclic-import, import-outside-toplevel
         current_app.logger.debug('<update_task_org ')
 
         OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                     origin_url=origin_url)
+                                     origin_url=origin_url, is_govn_affidavit_review=is_govn_affidavit_review)
 
         current_app.logger.debug('>update_task_org ')
 

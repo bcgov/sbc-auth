@@ -105,7 +105,7 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
         org: OrgModel = next(iter(org_list or []), None)
         if org:
             # check if there is any holding tasks
-            # Find if the corresponding task is NEW_ACCOUNT_STAFF_REVIEW type, clone and close it
+            # Find if the corresponding task is NEW_ACCOUNT_STAFF_REVIEW / GOVN type, clone and close it
             task_model: TaskModel = TaskModel.find_by_task_for_account(org.id, TaskStatus.HOLD.value)
             if task_model is None:
                 # Else, find if there are any associated task of BCEID_ADMIN type, clone and close it
