@@ -397,8 +397,8 @@ class MembershipResource(Resource):
         return response, status
 
 
-@cors_preflight('OPTIONS,POST')
-@API.route('/<string:user_guid>/affidavits', methods=['OPTIONS', 'POST'])
+@cors_preflight('OPTIONS,POST,GET')
+@API.route('/<string:user_guid>/affidavits', methods=['OPTIONS', 'POST', 'GET'])
 class UserAffidavit(Resource):
     """Resource for managing an individual user affidavit."""
 
@@ -419,6 +419,23 @@ class UserAffidavit(Resource):
 
         try:
             response, status = AffidavitService.create_affidavit(request_json).as_dict(), http_status.HTTP_200_OK
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    def get(user_guid):
+        """Return pending/active affidavit for the user."""
+        token = g.jwt_oidc_token_info
+
+        if Role.STAFF.value not in token['realm_access']['roles'] and token.get('sub', None) != user_guid:
+            abort(403)
+
+        try:
+            response, status = AffidavitService.find_affidavit_by_user_guid(user_guid), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
