@@ -178,6 +178,7 @@ export default class StaffModule extends VuexModule {
     const taskRelationshipId = task.relationshipId
     const taskAccountId = task.accountId
     const taskAction = task.action
+    const taskUserGuid = task?.user?.keycloakGuid
 
     const accountId = taskRelationshipType === TaskRelationshipType.ORG ? taskRelationshipId : taskAccountId
     const syncAccountPayload: SyncAccountPayload = {
@@ -187,13 +188,13 @@ export default class StaffModule extends VuexModule {
     }
     await this.context.dispatch('syncAccountUnderReview', syncAccountPayload)
     if (taskAction === TaskAction.AFFIDAVIT_REVIEW) {
-      await this.context.dispatch('syncAccountAffidavit', accountId)
+      await this.context.dispatch('syncAccountAffidavit', taskUserGuid)
     }
   }
 
   @Action({ rawError: true })
-  public async syncAccountAffidavit (organizationIdentifier: number): Promise<void> {
-    const affidavitResponse = await OrgService.getAffidavitInfo(organizationIdentifier)
+  public async syncAccountAffidavit (taskUserGuid: string): Promise<void> {
+    const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid)
     if (affidavitResponse?.data && affidavitResponse?.status === 200) {
       this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
     }
