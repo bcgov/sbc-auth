@@ -768,7 +768,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None,
-                          is_govn_affidavit_review: bool = False):
+                          task_action: str = None):
         """Mark the affidavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         # Get the org and check what's the current status
@@ -783,11 +783,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # Current User
         user: UserModel = UserModel.find_by_jwt_token()
 
-        is_affidavit_review = \
-            org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
-            org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value)
-
-        if is_affidavit_review or is_govn_affidavit_review:
+        if task_action == TaskAction.AFFIDAVIT_REVIEW.value:
             AffidavitService.approve_or_reject(org_id, is_approved, user)
 
         if is_approved:
