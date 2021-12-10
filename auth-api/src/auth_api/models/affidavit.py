@@ -23,6 +23,7 @@ from .base_model import VersionedModel
 from .db import db
 from .membership import Membership
 from .org import Org
+from .user import User
 
 
 class Affidavit(VersionedModel):
@@ -60,3 +61,13 @@ class Affidavit(VersionedModel):
     def find_approved_by_user_id(cls, user_id: int):
         """Find pending affidavit by user id."""
         return cls.query.filter_by(user_id=user_id, status_code=AffidavitStatus.APPROVED.value).one_or_none()
+
+    @classmethod
+    def find_effective_by_user_guid(cls, user_guid: str):
+        """Find pending affidavit by user id."""
+        status = [AffidavitStatus.PENDING.value, AffidavitStatus.APPROVED.value, AffidavitStatus.REJECTED.value]
+        return db.session.query(Affidavit)\
+            .join(User, User.id == Affidavit.user_id)\
+            .filter(Affidavit.status_code.in_(status))\
+            .filter(User.keycloak_guid == user_guid)\
+            .one_or_none()
