@@ -2,7 +2,7 @@ import { AddUsersToOrgBody, BulkUserResponseBody, Member, Organizations, RoleInf
 import { Contact, Contacts } from '@/models/contact'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { User, UserProfileRequestBody, UserSettings } from '@/models/user'
-
+import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { axios } from '@/util/http-util'
@@ -103,7 +103,7 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userId)}/affidavits`, inputrequest)
   }
 
-  static async getAffidavitInfo (userGuid: string): Promise<AxiosResponse<User>> {
+  static async getAffidavitInfo (userGuid: string): Promise<AxiosResponse<AffidavitInformation>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userGuid)}/affidavits`)
   }
 
