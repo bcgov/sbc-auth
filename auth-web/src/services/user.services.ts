@@ -103,6 +103,10 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userId)}/affidavits`, inputrequest)
   }
 
+  static async getAffidavitInfo (userGuid: string): Promise<AxiosResponse<User>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userGuid)}/affidavits`)
+  }
+
   static async resetOTPAuthenticator (username: string): Promise<AxiosResponse<any>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/users/${username}/otp`)
   }
