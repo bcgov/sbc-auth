@@ -774,12 +774,6 @@ class Org:  # pylint: disable=too-many-public-methods
         # Get the org and check what's the current status
         org: OrgModel = OrgModel.find_by_org_id(org_id)
 
-        if org.status_code != OrgStatus.PENDING_STAFF_REVIEW.value or \
-                org.access_type not in \
-                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVM.value,
-                 AccessType.GOVN.value):
-            raise BusinessException(Error.INVALID_INPUT, None)
-
         # Current User
         user: UserModel = UserModel.find_by_jwt_token()
 
