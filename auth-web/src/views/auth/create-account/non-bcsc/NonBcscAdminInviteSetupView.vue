@@ -26,7 +26,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -40,7 +41,7 @@ const UserModule = namespace('user')
     UserProfileForm
   }
 })
-export default class NonBcscAdminInviteSetupView extends Vue {
+export default class NonBcscAdminInviteSetupView extends Mixins(NextPageMixin) {
   @Prop({ default: undefined }) private readonly orgId: number; // org id used for bceid re-upload
   @Prop() token: string
   @UserModule.Action('createAffidavit') private createAffidavit!: () => User
@@ -56,7 +57,13 @@ export default class NonBcscAdminInviteSetupView extends Vue {
       //  user details will be saved from userprofile before emitting this event
       // redirect to confirmtoken will set invitation accepted
       await this.createAffidavit()
-      this.$router.push('/confirmtoken/' + this.token)
+      // if no token then it will re-upload
+      if (this.token) {
+        this.$router.push('/confirmtoken/' + this.token)
+      } else if (this.orgId) {
+        this.$store.commit('updateHeader')
+        this.$router.push(this.getNextPageUrl())
+      }
     }
   }
 
