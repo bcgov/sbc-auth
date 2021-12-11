@@ -15,7 +15,6 @@
 
 Test suite to ensure that the Org service routines are working as expected.
 """
-import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -42,7 +41,7 @@ from auth_api.utils.enums import AccessType, LoginSource, OrgStatus, OrgType, Pa
     TaskStatus, TaskRelationshipStatus, TaskAction
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
-    TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
+    TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)  # noqa: I005
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
@@ -885,7 +884,7 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):
         'status': TaskStatus.OPEN.value,
         'relationshipStatus': TaskRelationshipStatus.ACTIVE.value,
     }
-    task = TaskService.update_task(TaskService(task_model), task_info)
+    TaskService.update_task(TaskService(task_model), task_info)
     org_result: OrgModel = OrgModel.find_by_org_id(org_dict['id'])
     assert org_result.status_code == OrgStatus.ACTIVE.value
 
@@ -919,7 +918,7 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):
             'status': TaskStatus.OPEN.value,
             'relationshipStatus': TaskRelationshipStatus.REJECTED.value,
         }
-        task = TaskService.update_task(TaskService(task_model), task_info)
+        TaskService.update_task(TaskService(task_model), task_info)
         org_result: OrgModel = OrgModel.find_by_org_id(org_dict['id'])
         assert org_result.status_code == OrgStatus.REJECTED.value
 

@@ -39,7 +39,7 @@ from auth_api.services import User as UserService
 from auth_api.utils.enums import (
     AccessType, AffidavitStatus, OrgStatus, OrgType, PaymentMethod, ProductCode, ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
-from auth_api.utils.roles import ADMIN
+from auth_api.utils.roles import ADMIN  # noqa: I005
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload, TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims,
     TestOrgInfo, TestPaymentMethodInfo)
