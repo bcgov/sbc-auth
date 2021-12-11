@@ -120,7 +120,8 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
                              'type': task_model.type,
                              'action': task_model.action,
                              'status': TaskStatus.OPEN.value,
-                             'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                             'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+                             'account_id': task_model.account_id
                              }
                 new_task = TaskService.create_task(task_info=task_info, do_commit=False)
 
