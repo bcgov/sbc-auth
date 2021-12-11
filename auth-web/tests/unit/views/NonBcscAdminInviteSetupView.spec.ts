@@ -17,8 +17,26 @@ describe('NonBcscAdminInviteSetupView.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    const userModule = {
+      namespaced: true,
+      state: {
+        userProfile: {}
+      },
+      actions: {
+        createAffidavit: jest.fn()
+      }
+    }
+
+    const store = new Vuex.Store({
+      state: {},
+      strict: false,
+      modules: {
+        user: userModule
+      }
+    })
 
     wrapper = shallowMount(NonBcscAdminInviteSetupView, {
+      store,
       localVue,
       router,
       vuetify
