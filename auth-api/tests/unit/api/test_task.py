@@ -125,7 +125,7 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     # 4. Create Org
     # 5. Update the created task and the relationship
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: TestJwtClaims.public_bceid_user)
-    user_with_token = TestUserInfo.user_staff_admin
+    user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model_with_contact(user_with_token)
 
@@ -159,7 +159,6 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert rv.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == TaskStatus.HOLD.value
     assert dictionary['relationshipStatus'] == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
-    assert isinstance(['relationshipStatus'], list)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get('/api/v1/orgs/{}'.format(org_id),

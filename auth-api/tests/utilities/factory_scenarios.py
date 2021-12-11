@@ -822,6 +822,7 @@ class TestUserInfo(dict, Enum):
         'roles': '{edit, uma_authorization, tester}',
         'keycloak_guid': uuid.uuid4(),
         'access_type': 'BCEID',
+        'loginSource': LoginSource.BCEID.value
     }
 
     @staticmethod
