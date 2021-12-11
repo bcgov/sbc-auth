@@ -176,7 +176,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         data = {
             'remarks': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
-            'accountId': task_model.relationship_id,
+            'accountId': account_id,
             'emailAddresses': admin_email,
             'contextUrl': f"{current_app.config.get('WEB_APP_URL')}"
                           f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
