@@ -34,11 +34,12 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Org as OrgService
+from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
     AccessType, AffidavitStatus, OrgStatus, OrgType, PaymentMethod, ProductCode, ProductSubscriptionStatus, Status,
-    SuspensionReasonCode)
-from auth_api.utils.roles import ADMIN
+    SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
+from auth_api.utils.roles import ADMIN  # noqa: I005
 from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload, TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims,
     TestOrgInfo, TestPaymentMethodInfo)
@@ -1426,14 +1427,27 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
                                content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
+
+    update_task_payload = {
+        'status': TaskStatus.COMPLETED.value,
+        'relationshipStatus': TaskRelationshipStatus.ACTIVE.value
+    }
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
+                    data=json.dumps(update_task_payload),
+                    headers=headers, content_type='application/json')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    rv = client.get('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                    headers=headers, content_type='application/json')
+
+    assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
+
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
-
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
-                                      data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
-                                      headers=headers, content_type='application/json')
-
-    assert org_patch_response.json.get('orgStatus') == OrgStatus.ACTIVE.value
-
     staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
                                 headers=headers, content_type='application/json')
 
@@ -1482,13 +1496,27 @@ def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, se
                                content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
+    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    fetched_tasks = tasks['tasks']
+    fetched_task = fetched_tasks[0]
+
+    update_task_payload = {
+        'status': TaskStatus.COMPLETED.value,
+        'relationshipStatus': TaskRelationshipStatus.ACTIVE.value
+    }
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.put('/api/v1/tasks/{}'.format(fetched_task['id']),
+                    data=json.dumps(update_task_payload),
+                    headers=headers, content_type='application/json')
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_account_holder_user)
+    rv = client.get('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                    headers=headers, content_type='application/json')
+
+    assert rv.json.get('orgStatus') == OrgStatus.ACTIVE.value
+
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
-
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
-                                      data=json.dumps({'statusCode': AffidavitStatus.APPROVED.value}),
-                                      headers=headers, content_type='application/json')
-
-    assert org_patch_response.json.get('orgStatus') == OrgStatus.ACTIVE.value
 
     affidavit_staff_response = client.get('/api/v1/orgs/{}/admins/affidavits'.format(org_response.json.get('id')),
                                           headers=headers, content_type='application/json')
