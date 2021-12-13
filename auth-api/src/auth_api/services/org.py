@@ -767,7 +767,8 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org_model)
 
     @staticmethod
-    def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None):
+    def approve_or_reject(org_id: int, is_approved: bool, origin_url: str = None,
+                          task_action: str = None):
         """Mark the affidavit as approved or rejected."""
         current_app.logger.debug('<find_affidavit_by_org_id ')
         # Get the org and check what's the current status
@@ -776,14 +777,8 @@ class Org:  # pylint: disable=too-many-public-methods
         # Current User
         user: UserModel = UserModel.find_by_jwt_token()
 
-        # If status is PENDING_STAFF_REVIEW handle affidavit approve process, else raise error
-        if org.status_code == OrgStatus.PENDING_STAFF_REVIEW.value and \
-                org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+        if task_action == TaskAction.AFFIDAVIT_REVIEW.value:
             AffidavitService.approve_or_reject(org_id, is_approved, user)
-        elif org.status_code != OrgStatus.PENDING_STAFF_REVIEW.value or \
-                org.access_type not in \
-                (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value, AccessType.GOVM.value):
-            raise BusinessException(Error.INVALID_INPUT, None)
 
         if is_approved:
             org.status_code = OrgStatus.ACTIVE.value
@@ -801,8 +796,9 @@ class Org:  # pylint: disable=too-many-public-methods
         admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
         if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
             Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
-        elif org.access_type == AccessType.GOVM.value:
-            Org.send_approved_rejected_govm_notification(admin_email, org.name, org.id, org.status_code, origin_url)
+        elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
+            Org.send_approved_rejected_govm_govn_notification(admin_email, org.name, org.id, org.status_code,
+                                                              origin_url)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -862,10 +858,10 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_approved_rejected_govm_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus,
-                                                 origin_url):
+    def send_approved_rejected_govm_govn_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus,
+                                                      origin_url):
         """Send Approved govm notification to the user."""
-        current_app.logger.debug('<send_approved_rejected_govm_notification')
+        current_app.logger.debug('<send_approved_rejected_govm_govn_notification')
 
         if org_status == OrgStatus.ACTIVE.value:
             notification_type = 'govmApprovedNotification'
@@ -882,7 +878,7 @@ class Org:  # pylint: disable=too-many-public-methods
         }
         try:
             publish_to_mailer(notification_type, org_id=org_id, data=data)
-            current_app.logger.debug('send_approved_rejected_govm_notification>')
+            current_app.logger.debug('send_approved_rejected_govm_govn_notification>')
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_approved_rejected_govm_notification failed')
+            current_app.logger.error('<send_approved_rejected_govm_govn_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
