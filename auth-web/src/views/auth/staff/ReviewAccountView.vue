@@ -141,7 +141,6 @@ export default class ReviewAccountView extends Vue {
   @StaffModule.State('accountUnderReviewAffidavitInfo') public accountUnderReviewAffidavitInfo!: AffidavitInformation
 
   @StaffModule.Getter('accountNotaryName') public accountNotaryName!: string
-  @StaffModule.Getter('accountNotaryContact') public accountNotaryContact!: Contact
 
   @StaffModule.Action('syncTaskUnderReview') public syncTaskUnderReview!: (task:Task) => Promise<void>
   @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
@@ -270,6 +269,7 @@ export default class ReviewAccountView extends Vue {
 
   private async mounted () {
     // need to change call task api before
+
     try {
       this.task = await this.getTaskById(this.orgId)
       this.taskRelationshipType = this.task.relationshipType
@@ -365,6 +365,10 @@ export default class ReviewAccountView extends Vue {
     }
   }
 
+  public get accountNotaryContact (): Contact {
+    return this.accountUnderReviewAffidavitInfo?.contacts?.length > 0 && this.accountUnderReviewAffidavitInfo?.contacts[0]
+  }
+
   private goBack (): void {
     this.$router.push(Pages.STAFF_DASHBOARD)
   }
@@ -435,7 +439,7 @@ export default class ReviewAccountView extends Vue {
       {
         title: 'Notary Information',
         accountNotaryContact: this.accountNotaryContact,
-        accountNotaryName: this.accountNotaryName
+        accountNotaryName: this.accountUnderReviewAffidavitInfo?.issuer || '-'
       }
     )
   }
