@@ -439,7 +439,7 @@ export default class ReviewAccountView extends Vue {
       {
         title: 'Notary Information',
         accountNotaryContact: this.accountNotaryContact,
-        accountNotaryName: this.accountUnderReviewAffidavitInfo?.issuer || '-' // this.accountNotaryName
+        accountNotaryName: this.accountUnderReviewAffidavitInfo?.issuer || '-'
       }
     )
   }
