@@ -250,20 +250,6 @@ export default class CommonUtils {
     }
   }
 
-  static bcGovemailRules (isOptional: boolean = false) {
-    const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)*gov\.bc\.ca))$/i
-    if (isOptional) {
-      return [
-        v => !v || pattern.test(v) || 'Enter an IDIR email address'
-      ]
-    } else {
-      return [
-        v => !!v || 'Email address is required',
-        v => pattern.test(v) || 'Enter an IDIR email address'
-      ]
-    }
-  }
-
   // format number to two places - for eg 2 => 02, 10 => 10.
   static formatNumberToTwoPlaces (index: number): string {
     const stringIndexValue: string = index.toString()
