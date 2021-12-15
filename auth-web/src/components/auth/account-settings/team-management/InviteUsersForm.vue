@@ -10,7 +10,7 @@
               filled
               label="Email Address"
               v-model="invitations[index].emailAddress"
-              :rules="isAccountGovM ? bcGovemailRules : emailRules"
+              :rules="emailRules"
               :data-test="getIndexedTag('email-address', index)"
             ></v-text-field>
 
@@ -124,7 +124,6 @@ export default class InviteUsersForm extends TeamManagementMixin {
   }
 
   private invitations: InvitationInfo[] = []
-  private bcGovemailRules = CommonUtils.bcGovemailRules(true)
   private emailRules = CommonUtils.emailRules(true)
 
   private roles: RoleInfo[] = []
