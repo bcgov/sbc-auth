@@ -97,13 +97,14 @@
                 </v-list-item-icon>
                 <v-list-item-title>Team Members</v-list-item-title>
               </v-list-item>
+              <!-- now this menu dispalying for regular/GOVN account will add bceid also if needed later -->
               <v-list-item
                 dense
                 class="py-1 px-4"
                 aria-label="Team Member Authentication Methods"
                 role="listitem"
                 :to="accountAuthUrl"
-                v-if="isRegularAccount"
+                v-if="isRegularAccount || isGovnAccount"
                 v-can:VIEW_AUTH_OPTIONS.hide data-test="user-auth-nav-item">
                 <v-list-item-icon>
                   <v-icon color="link" left>mdi-shield-account-outline</v-icon>
