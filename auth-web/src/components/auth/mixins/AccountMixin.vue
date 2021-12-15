@@ -40,5 +40,9 @@ export default class AccountMixin extends Vue {
   protected get isGovmAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.GOVM
   }
+
+  protected get isGovnAccount (): boolean {
+    return this.currentOrganization?.accessType === AccessType.GOVN
+  }
 }
 </script>
