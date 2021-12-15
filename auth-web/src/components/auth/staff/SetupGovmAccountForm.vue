@@ -36,7 +36,7 @@
       <v-row>
         <v-col cols="12" class="pb-0">
           <h4 class="mb-2">Account Admin Contact</h4>
-          <p class="mb-6">Enter the IDIR email address of the ministry's employee. An email will be sent this user
+          <p class="mb-6">Enter the email address of the ministry's employee. An email will be sent this user
 to verify and activate this account. This user will be the admin of this account.</p>
         </v-col>
       </v-row>
@@ -46,7 +46,7 @@ to verify and activate this account. This user will be the admin of this account
             filled
             label="Email Address"
             v-model.trim="email"
-            :rules="bcGovemailRules"
+            :rules="emailRules"
             persistent-hint
             :disabled="saving"
             data-test="input-email-address"
@@ -60,7 +60,7 @@ to verify and activate this account. This user will be the admin of this account
             filled
             label="Confirm Email Address"
             v-model.trim="emailConfirm"
-            :rules="bcGovemailRules"
+            :rules="emailRules"
             persistent-hint
             :error-messages="emailMatchError()"
             :disabled="saving"
@@ -142,7 +142,7 @@ export default class SetupAccountForm extends Vue {
   public emailConfirm = ''
   public dialogTitle = ''
   public dialogText = ''
-  public bcGovemailRules = CommonUtils.bcGovemailRules()
+  public emailRules = CommonUtils.emailRules()
 
   $refs: {
     setupGovmAccountForm: HTMLFormElement,
