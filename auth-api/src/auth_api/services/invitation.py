@@ -134,10 +134,14 @@ class Invitation:
     def update_invitation(self, user, invitation_origin):
         """Update the specified invitation with new data."""
         # Ensure that the current user is ADMIN or COORDINATOR on each org being re-invited to
+        token_email_query_params: Dict = {}
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         for membership in self._model.membership:
             org_id = membership.org_id
             check_auth(org_id=org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+            if membership.membership_type_code == ADMIN \
+                    and self._model.login_source == LoginSource.BCEID.value:
+                token_email_query_params['affidavit'] = 'true'
 
         # TODO doesnt work when invited to multiple teams.. Re-work the logic when multiple teams introduced
         confirmation_token = Invitation.generate_confirmation_token(self._model.id, self._model.type)
@@ -145,7 +149,8 @@ class Invitation:
         updated_invitation = self._model.update_invitation_as_retried()
         org_name = OrgModel.find_by_org_id(self._model.membership[0].org_id).name
         Invitation.send_invitation(updated_invitation, org_name, self._model.membership[0].org_id, user.as_dict(),
-                                   f'{invitation_origin}/{context_path}', self._model.login_source)
+                                   f'{invitation_origin}/{context_path}', self._model.login_source,
+                                   query_params=token_email_query_params)
         return Invitation(updated_invitation)
 
     @staticmethod
