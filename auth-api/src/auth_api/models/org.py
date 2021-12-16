@@ -176,7 +176,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         ).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
         if org_id:
             query = query.filter(Org.id != org_id)
-        return query.first()
+        return query.all()
 
     @classmethod
     def get_count_of_org_created_by_user_id(cls, user_id: int):

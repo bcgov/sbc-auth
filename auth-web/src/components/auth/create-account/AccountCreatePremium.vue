@@ -98,7 +98,7 @@
 import { Account, LoginSource } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, OrgBusinessType, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
@@ -143,7 +143,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
 
   @OrgModule.Action('syncMembership') private readonly syncMembership!: (orgId: number) => Promise<Member>
   @OrgModule.Action('syncOrganization') private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+  @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (requestBody: CreateRequestBody) => Promise<boolean>
 
   @OrgModule.Mutation('setCurrentOrganization') private readonly setCurrentOrganization!: (organization: Organization) => void
   @OrgModule.Mutation('setCurrentOrganizationAddress') private readonly setCurrentOrganizationAddress!: (address: Address) => void
@@ -244,7 +244,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   }
 
   private async validateAccountNameUnique () {
-    const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
+    const available = await this.isOrgNameAvailable({ 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
     if (!available) {
       this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
       this.orgNameReadOnly = false
