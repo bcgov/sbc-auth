@@ -113,8 +113,8 @@ def test_find_similar_org_by_name(session):  # pylint:disable=unused-argument
     assert found_org
     assert found_org.name == org.name
 
-    found_org = OrgModel.find_similar_org_by_name('Test Or')[0]
-    assert found_org is None
+    found_org = OrgModel.find_similar_org_by_name('Test Or')
+    assert not found_org
 
 
 def test_find_similar_org_by_name_inactive(session):  # pylint:disable=unused-argument
@@ -125,8 +125,8 @@ def test_find_similar_org_by_name_inactive(session):  # pylint:disable=unused-ar
 
     org.delete()
 
-    found_org = OrgModel.find_similar_org_by_name(org.name)[0]
-    assert found_org is None
+    found_org = OrgModel.find_similar_org_by_name(org.name)
+    assert not found_org
 
 
 def test_update_org_from_dict(session):  # pylint:disable=unused-argument
