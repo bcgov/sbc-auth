@@ -430,12 +430,14 @@ class UserAffidavit(Resource):
     def get(user_guid):
         """Return pending/active affidavit for the user."""
         token = g.jwt_oidc_token_info
+        affidavit_status = request.args.get('status', None)
 
         if Role.STAFF.value not in token['realm_access']['roles'] and token.get('sub', None) != user_guid:
             abort(403)
 
         try:
-            response, status = AffidavitService.find_affidavit_by_user_guid(user_guid), http_status.HTTP_200_OK
+            response, status = AffidavitService.find_affidavit_by_user_guid(user_guid, status=affidavit_status), \
+                               http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status

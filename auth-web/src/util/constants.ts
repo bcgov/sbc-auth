@@ -339,3 +339,10 @@ export const DEACTIVATE_ACCOUNT_MESSAGE : Map<string, string> = new Map([
   ['TRANSACTIONS_IN_PROGRESS', 'deactivateActiveTransactionsMsg'],
   ['DEFAULT', 'deactivateGenericMsg']
 ])
+
+export enum AffidavitStatus {
+    PENDING = 'PENDING',
+    APPROVED = 'APPROVED',
+    REJECTED = 'REJECTED',
+    INACTIVE = 'INACTIVE'
+}

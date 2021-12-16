@@ -24,7 +24,7 @@ from faker import Faker
 
 from auth_api.config import get_named_config
 from auth_api.services.keycloak_user import KeycloakUser
-from auth_api.utils.enums import AccessType, IdpHint, LoginSource, OrgType, PaymentMethod, ProductCode
+from auth_api.utils.enums import AccessType, AffidavitStatus, IdpHint, LoginSource, OrgType, PaymentMethod, ProductCode
 
 fake = Faker()
 
@@ -932,4 +932,20 @@ class TestAffidavit:
                 'phone': '(555) 555-5555',
                 'phoneExtension': '123'
             }
+        }
+
+    @staticmethod
+    def get_test_affidavit_with_contact_rejected(doc_id: str = '1234567890987654323456789876543456787654345678.txt',
+                                                 issuer='ABC Notaries Inc.',
+                                                 email='foo@bar.com'):
+        """Return a dict for affidavit."""
+        return {
+            'issuer': issuer,
+            'documentId': doc_id,
+            'contact': {
+                'email': email,
+                'phone': '(555) 555-5555',
+                'phoneExtension': '123'
+            },
+            'status_code': AffidavitStatus.REJECTED.value
         }
