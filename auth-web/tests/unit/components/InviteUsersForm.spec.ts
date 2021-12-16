@@ -129,7 +129,7 @@ describe('InviteUsersForm.vue', () => {
 
     await Vue.nextTick()
 
-    expect(wrapper.vm.isFormValid()).toBeFalsy()
+    expect(wrapper.vm.isFormValid()).toBeTruthy()
 
     wrapper.find("[data-test='email-address-0']").setValue('test1@gov.bc.ca')
     wrapper.find("[data-test='email-address-1']").setValue('test2@gov.bc.ca')

@@ -174,6 +174,13 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
       class: 'bold-header'
     },
     {
+      text: 'API Key',
+      align: 'left',
+      sortable: false,
+      value: 'apiKey',
+      class: 'bold-header'
+    },
+    {
       text: 'Actions',
       align: 'right',
       sortable: false,
