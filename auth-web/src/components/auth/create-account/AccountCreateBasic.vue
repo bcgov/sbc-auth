@@ -60,7 +60,7 @@
 <script lang="ts">
 import { Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { Member, OrgBusinessType, Organization } from '@/models/Organization'
+import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
@@ -100,7 +100,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private isBasicAccount: boolean = true
   private readonly syncMembership!: (orgId: number) => Promise<Member>
   private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  private readonly isOrgNameAvailable!: (orgName: string) => Promise<boolean>
+  private readonly isOrgNameAvailable!: (requestBody: CreateRequestBody) => Promise<boolean>
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly currentOrganization!: Organization
 
@@ -167,7 +167,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       const checkNameAVailability = (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
       // no need to check name if govmAccount
       if (checkNameAVailability && !this.govmAccount) {
-        const available = await this.isOrgNameAvailable(this.orgBusinessTypeLocal.name)
+        const available = await this.isOrgNameAvailable({ 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
         if (!available) {
           this.errorMessage =
                 'An account with this name already exists. Try a different account name.'

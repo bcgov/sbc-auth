@@ -556,8 +556,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async isOrgNameAvailable (name: string) {
-    const response = await OrgService.isOrgNameAvailable(name)
+  public async isOrgNameAvailable (createRequestBody: CreateOrgRequestBody) {
+    const response = await OrgService.isOrgNameAvailable(createRequestBody.name, createRequestBody.branchName)
     if (response.status === 204) {
       return true
     } else {

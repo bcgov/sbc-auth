@@ -21,8 +21,14 @@ export default class OrgService {
     return response.data.contacts[0]
   }
 
-  public static async isOrgNameAvailable (orgName: string): Promise<AxiosResponse> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs?name=${orgName}&validateName=true`)
+  public static async isOrgNameAvailable (orgName: string, branchName: string): Promise<AxiosResponse> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs`, {
+      params: {
+        'validateName': true,
+        'name': orgName,
+        ...(branchName ? { branchName: branchName } : {})
+      }
+    })
   }
 
   public static async getOrgMembers (orgId: number, status: string): Promise<AxiosResponse<Members>> {
