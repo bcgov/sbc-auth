@@ -1,4 +1,4 @@
-import { AccountStatus, AffidavitStatus, AffiliationTypes, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
+import { AccountStatus, AffidavitStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
