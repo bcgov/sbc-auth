@@ -1,4 +1,4 @@
-import { AccountStatus, TaskAction, TaskRelationshipType, TaskType } from '@/util/constants'
+import { AccountStatus, AffidavitStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
@@ -178,7 +178,6 @@ export default class StaffModule extends VuexModule {
     const taskRelationshipId = task.relationshipId
     const taskAccountId = task.accountId
     const taskAction = task.action
-    const taskUserGuid = task?.user?.keycloakGuid
 
     const accountId = taskRelationshipType === TaskRelationshipType.ORG ? taskRelationshipId : taskAccountId
     const syncAccountPayload: SyncAccountPayload = {
@@ -188,13 +187,15 @@ export default class StaffModule extends VuexModule {
     }
     await this.context.dispatch('syncAccountUnderReview', syncAccountPayload)
     if (taskAction === TaskAction.AFFIDAVIT_REVIEW) {
-      await this.context.dispatch('syncAccountAffidavit', taskUserGuid)
+      await this.context.dispatch('syncAccountAffidavit', task)
     }
   }
 
   @Action({ rawError: true })
-  public async syncAccountAffidavit (taskUserGuid: string): Promise<void> {
-    const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid)
+  public async syncAccountAffidavit (task: Task): Promise<void> {
+    const taskUserGuid = task?.user?.keycloakGuid
+    const status = task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ? AffidavitStatus.PENDING : task.relationshipStatus
+    const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid, status)
     if (affidavitResponse?.data && affidavitResponse?.status === 200) {
       this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
     }
