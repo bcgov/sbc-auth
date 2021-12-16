@@ -23,6 +23,7 @@ import uuid
 
 from auth_api import status as http_status
 from auth_api.exceptions.errors import Error
+from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
@@ -30,7 +31,7 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.services.keycloak import KeycloakService
-from auth_api.utils.enums import AccessType, IdpHint, ProductCode, Status, UserStatus
+from auth_api.utils.enums import AccessType, AffidavitStatus, IdpHint, ProductCode, Status, UserStatus
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, Role
 from tests import skip_in_pod
 from tests.utilities.factory_scenarios import (
@@ -40,7 +41,6 @@ from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_contact_model, factory_entity_model,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_product_model,
     factory_user_model, patch_token_info)
-
 
 KEYCLOAK_SERVICE = KeycloakService()
 
@@ -844,5 +844,28 @@ def test_get_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=u
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
     rv = client.get(f"/api/v1/users/{TestJwtClaims.public_user_role.get('sub')}/affidavits",
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+def test_get_rejected_affidavit(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert get affidavit."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    document_signature = client.get('/api/v1/documents/test.jpeg/signatures', headers=headers,
+                                    content_type='application/json')
+    doc_key = document_signature.json.get('key')
+    rv = client.post(f"/api/v1/users/{TestJwtClaims.public_user_role.get('sub')}/affidavits",
+                     headers=headers,
+                     data=json.dumps(TestAffidavit.get_test_affidavit_with_contact(doc_id=doc_key)),
+                     content_type='application/json')
+
+    affidavit: AffidavitModel = AffidavitModel.find_pending_by_user_id(rv.json.get('user'))
+    affidavit.status_code = AffidavitStatus.REJECTED.value
+    affidavit.save()
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+
+    rv = client.get(f"/api/v1/users/{TestJwtClaims.public_user_role.get('sub')}/affidavits?status=REJECTED",
                     headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK

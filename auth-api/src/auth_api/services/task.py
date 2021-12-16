@@ -209,7 +209,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
         # Update user
         user: UserModel = UserModel.find_by_id(user_id)
         user.verified = is_approved
-        user.status = Status.ACTIVE.value if is_approved else Status.REJECTED.value
+        user.status = Status.ACTIVE.value if is_approved else Status.INACTIVE.value
 
         # Update membership
         membership = MembershipModel.find_membership_by_userid(user_id)
