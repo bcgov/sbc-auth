@@ -63,7 +63,7 @@ class Orgs(Resource):
             user = UserService.find_by_jwt_token()
             if user is None:
                 response, status = {'message': 'Not authorized to perform this action'}, \
-                    http_status.HTTP_401_UNAUTHORIZED
+                                   http_status.HTTP_401_UNAUTHORIZED
                 return response, status
             response, status = OrgService.create_org(request_json,
                                                      user.identifier).as_dict(), http_status.HTTP_201_CREATED
@@ -81,6 +81,7 @@ class Orgs(Resource):
         # Search based on request arguments
         business_identifier = request.args.get('affiliation', None)
         name = request.args.get('name', None)
+        branch_name = request.args.get('branchName', None)
         statuses = request.args.getlist('status', None)
         access_type = request.args.get('access_type', None)
         bcol_account_id = request.args.get('bcolAccountId', None)
@@ -91,7 +92,7 @@ class Orgs(Resource):
         try:
             token = g.jwt_oidc_token_info
             if validate_name.upper() == 'TRUE':
-                response, status = OrgService.find_by_org_name(name), http_status.HTTP_200_OK
+                response, status = OrgService.find_by_org_name(name, branch_name), http_status.HTTP_200_OK
             else:
                 response, status = OrgService.search_orgs(business_identifier=business_identifier,
                                                           access_type=access_type, name=name,

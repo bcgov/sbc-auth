@@ -501,12 +501,12 @@ class Org:  # pylint: disable=too-many-public-methods
         return Org(org_model)
 
     @staticmethod
-    def find_by_org_name(org_name):
+    def find_by_org_name(org_name, branch_name=None):
         """Find and return an existing organization with the provided name."""
         if org_name is None:
             return None
 
-        org_model = OrgModel.find_by_org_name(org_name)
+        org_model = OrgModel.find_similar_org_by_name(org_name, org_id=None, branch_name=branch_name)
         if not org_model:
             return None
 

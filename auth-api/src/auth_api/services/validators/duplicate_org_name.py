@@ -26,8 +26,8 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     branch_name = kwargs.get('branch_name')
     org_id = kwargs.get('org_id', None)
     validator_response = ValidatorResponse()
-    existing_similar_org = OrgModel.find_similar_org_by_name(name, org_id=org_id, branch_name=branch_name)
-    if existing_similar_org is not None:
+    existing_similar_orgs = OrgModel.find_similar_org_by_name(name, org_id=org_id, branch_name=branch_name)
+    if existing_similar_orgs:
         validator_response.add_error(Error.DATA_CONFLICT)
         if is_fatal:
             raise BusinessException(Error.DATA_CONFLICT, None)

@@ -37,18 +37,18 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import (AccessType, LoginSource, OrgStatus, OrgType, PaymentMethod, SuspensionReasonCode,
-                                  TaskStatus, TaskRelationshipStatus, TaskAction)
+from auth_api.utils.enums import (
+    AccessType, LoginSource, OrgStatus, OrgType, PaymentMethod, SuspensionReasonCode, TaskAction,
+    TaskRelationshipStatus, TaskStatus)
+from tests.utilities.factory_scenarios import (
+    KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
+    TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
+from tests.utilities.factory_utils import (
+    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
+    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
+    patch_pay_account_delete, patch_token_info)
 
-from tests.utilities.factory_scenarios import (KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo,
-                                               TestEntityInfo, TestJwtClaims, TestOrgInfo,
-                                               TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo,
-                                               TestUserInfo)
-from tests.utilities.factory_utils import (factory_contact_model, factory_entity_model, factory_entity_service,
-                                           factory_invitation, factory_membership_model,
-                                           factory_org_model, factory_org_service, factory_user_model,
-                                           factory_user_model_with_contact,
-                                           patch_pay_account_delete, patch_token_info)
+
 # noqa: I005
 
 
@@ -479,6 +479,25 @@ def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
 
     assert found_org
     assert found_org.get('orgs')[0].get('name') == org_name
+
+
+def test_find_org_by_name_branch_name(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved by its name annd branch nanme."""
+    org = factory_org_service(org_info=TestOrgInfo.org2)
+    dictionary = org.as_dict()
+    org_name = dictionary['name']
+    branch_name = dictionary['branch_name']
+
+    found_org = OrgService.find_by_org_name(org_name)
+
+    assert found_org
+    assert found_org.get('orgs')[0].get('name') == org_name
+
+    found_org = OrgService.find_by_org_name(org_name, branch_name=branch_name)
+
+    assert found_org
+    assert found_org.get('orgs')[0].get('name') == org_name
+    assert found_org.get('orgs')[0].get('branch_name') == branch_name
 
 
 def test_add_contact(session):  # pylint:disable=unused-argument
