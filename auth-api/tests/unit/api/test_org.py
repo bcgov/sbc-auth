@@ -137,6 +137,33 @@ def test_search_org_by_client(client, jwt, session, keycloak_mock):  # pylint:di
     assert orgs.get('orgs')[0].get('name') == TestOrgInfo.org1.get('name')
 
 
+def test_duplicate_name(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be searched using multiple syntax."""
+    # Create active org
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    name = TestOrgInfo.org1.get('name')
+    rv = client.get(f'/api/v1/orgs?validateName=true&name={name}',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    # not existing brnach name ; so 204
+    rv = client.get(f'/api/v1/orgs?validateName=true&name={name}&branchName=foo',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+    # empty brnach name; so 200
+    rv = client.get(f'/api/v1/orgs?validateName=true&name={name}&branchName=',
+                    headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
 def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be searched using multiple syntax."""
     # Create active org
