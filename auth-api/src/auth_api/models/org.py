@@ -172,8 +172,9 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         """Find an Org instance that matches the provided name."""
         query = cls.query.filter(and_(
             func.upper(Org.name) == name.upper(),
-            func.upper(Org.branch_name) == (branch_name.upper() if branch_name else ''))
+            (func.upper(func.coalesce(Org.branch_name, '')) == ((branch_name or '').upper())))
         ).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
+
         if org_id:
             query = query.filter(Org.id != org_id)
         return query.all()
