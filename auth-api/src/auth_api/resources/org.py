@@ -19,6 +19,7 @@ from flask_restx import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
+from auth_api.models import Org as OrgModel
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -28,8 +29,7 @@ from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
-from auth_api.utils.enums import AccessType, AffidavitStatus, NotificationType
-from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import AccessType, NotificationType, PatchActions
 from auth_api.utils.enums import Status
 from auth_api.utils.role_validator import validate_roles
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role
@@ -115,8 +115,8 @@ class Orgs(Resource):
         return response, status
 
 
-@cors_preflight('GET,PUT,OPTIONS,DELETE')
-@API.route('/<int:org_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+@cors_preflight('GET,PUT,OPTIONS,PATCH,DELETE')
+@API.route('/<int:org_id>', methods=['GET', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'])
 class Org(Resource):
     """Resource for managing a single org."""
 
@@ -174,6 +174,29 @@ class Org(Resource):
             response, status = '', http_status.HTTP_204_NO_CONTENT
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+    @staticmethod
+    @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def patch(org_id):
+        """Patch an account."""
+        request_json = request.get_json()
+        try:
+            org = OrgService(OrgModel.find_by_org_id(org_id))
+            if org:
+                # set default patch action to updating status action
+                action = request_json.get('action', PatchActions.UPDATE_STATUS.value)
+                response, status = org.patch_org(action,
+                                                 request_json), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'The requested organization could not be found.'}, \
+                                   http_status.HTTP_404_NOT_FOUND
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
         return response, status
 
 
@@ -424,7 +447,7 @@ class OrgMember(Resource):
             membership = MembershipService.find_membership_by_id(membership_id)
 
             is_own_membership = membership.as_dict()['user']['username'] == \
-                UserService.find_by_jwt_token().as_dict()['username']
+                                UserService.find_by_jwt_token().as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND
@@ -502,46 +525,6 @@ class OrgAdminAffidavits(Resource):
         try:
             response, status = AffidavitService.find_affidavit_by_org_id(org_id=org_id), \
                                http_status.HTTP_200_OK
-
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-
-        return response, status
-
-
-@cors_preflight('PATCH,OPTIONS')
-@API.route('/<int:org_id>/status', methods=['PATCH', 'OPTIONS'])
-class OrgStatus(Resource):
-    """Resource for changing the status of org."""
-
-    @staticmethod
-    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.STAFF_SUSPEND_ACCOUNTS.value])
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    def patch(org_id):
-        """Patch an account."""
-        request_json = request.get_json()
-        # For now allowed is to put the status code, which will be done by bcol_staff_admin.
-        # If this patch is going to be used by other other roles, then add proper security check
-
-        try:
-
-            status_code = request_json.get('statusCode', None)
-            suspension_reason_code = request_json.get('suspensionReasonCode', None)
-            if status_code in (OrgStatusEnum.SUSPENDED.value, OrgStatusEnum.ACTIVE.value):
-
-                if not _jwt.validate_roles([Role.STAFF_SUSPEND_ACCOUNTS.value]):
-                    return {'message': 'Not authorized to perform this action'}, \
-                           http_status.HTTP_401_UNAUTHORIZED
-
-                response, status = OrgService.change_org_status(org_id=org_id, status_code=status_code,
-                                                                suspension_reason_code=suspension_reason_code
-                                                                ).as_dict(), http_status.HTTP_200_OK
-            else:
-                is_approved: bool = request_json.get('statusCode', None) == AffidavitStatus.APPROVED.value
-                origin = request.environ.get('HTTP_ORIGIN', 'localhost')
-                response, status = OrgService.approve_or_reject(org_id=org_id, is_approved=is_approved,
-                                                                origin_url=origin).as_dict(), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

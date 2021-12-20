@@ -37,7 +37,8 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, OrgStatus, OrgType, PaymentMethod, ProductCode, ProductSubscriptionStatus, Status,
+    AccessType, AffidavitStatus, OrgStatus, OrgType, PatchActions, PaymentMethod, ProductCode,
+    ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
 from auth_api.utils.roles import ADMIN  # noqa: I005
 from tests.utilities.factory_scenarios import (
@@ -184,7 +185,7 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
@@ -1573,26 +1574,26 @@ def test_suspend_unsuspend(client, jwt, session, keycloak_mock):  # pylint:disab
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
                                                        'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
     assert org_patch_response.json.get('suspensionReasonCode') == SuspensionReasonCode.OWNER_CHANGE.name
 
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('orgStatus') == OrgStatus.ACTIVE.value
 
     # public user suspending/unsuspend shud give back error
 
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
                                       headers=public_headers, content_type='application/json')
     assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
 
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.ACTIVE.value}),
                                       headers=public_headers, content_type='application/json')
     assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
@@ -1612,7 +1613,7 @@ def test_org_suspended_reason(client, jwt, session, keycloak_mock):  # pylint:di
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
-    org_patch_response = client.patch('/api/v1/orgs/{}/status'.format(org_response.json.get('id')),
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
                                       data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
                                                        'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
                                       headers=headers, content_type='application/json')
@@ -1787,3 +1788,70 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
                        data=json.dumps(DeleteAffiliationPayload.delete_affiliation2),
                        content_type='application/json')
     assert da.status_code == http_status.HTTP_200_OK
+
+
+def test_org_patch_validate_request_json(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved via GET."""
+    public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=public_headers, content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
+                               headers=public_headers,
+                               content_type='application/json')
+    dictionary = json.loads(org_response.data)
+    org_id = dictionary['id']
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    # Validate public Bcol user cannot do patch
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
+                                                       'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
+                                      headers=public_headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+    # Validate patch - update status fails if it is missing one of json properties
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_400_BAD_REQUEST
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                                      data=json.dumps({'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_400_BAD_REQUEST
+
+    # Validate patch - update access type fails if it is missing one of json properties
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                                      data=json.dumps({'action': PatchActions.UPDATE_ACCESS_TYPE.value,
+                                                       'accessType': AccessType.GOVM.value}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_400_BAD_REQUEST
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                                      data=json.dumps({'action': PatchActions.UPDATE_ACCESS_TYPE.value}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.status_code == http_status.HTTP_400_BAD_REQUEST
+
+
+def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that an org can be retrieved via GET."""
+    public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
+    client.post('/api/v1/users', headers=public_headers, content_type='application/json')
+
+    org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
+                               headers=public_headers,
+                               content_type='application/json')
+    dictionary = json.loads(org_response.data)
+    assert org_response.status_code == http_status.HTTP_201_CREATED
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
+
+    org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
+                                      data=json.dumps({'action': PatchActions.UPDATE_ACCESS_TYPE.value,
+                                                       'accessType': AccessType.GOVN.value}),
+                                      headers=headers, content_type='application/json')
+    assert org_patch_response.json.get('accessType') == AccessType.GOVN.value
