@@ -902,10 +902,11 @@ class Org:  # pylint: disable=too-many-public-methods
             if status_code == OrgStatus.SUSPENDED.value and suspension_reason_code is None:
                 raise BusinessException(Error.INVALID_INPUT, None)
             return self.change_org_status(status_code, suspension_reason_code).as_dict()
-        elif patch_action == PatchActions.UPDATE_ACCESS_TYPE:
+        if patch_action == PatchActions.UPDATE_ACCESS_TYPE:
             access_type = request_json.get('accessType', None)
             # Currently, only accounts with the following access types can be updated
             if access_type is None or access_type not in [AccessType.REGULAR.value, AccessType.REGULAR_BCEID.value,
                                                           AccessType.EXTRA_PROVINCIAL.value, AccessType.GOVN.value]:
                 raise BusinessException(Error.INVALID_INPUT, None)
             return self.change_org_access_type(access_type).as_dict()
+        return None

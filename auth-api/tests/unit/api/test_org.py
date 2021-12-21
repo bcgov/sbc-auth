@@ -186,7 +186,8 @@ def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_moc
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
 
     org_patch_response = client.patch('/api/v1/orgs/{}'.format(org_response.json.get('id')),
-                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value}),
+                                      data=json.dumps({'statusCode': OrgStatus.SUSPENDED.value,
+                                                       'suspensionReasonCode': SuspensionReasonCode.OWNER_CHANGE.name}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('orgStatus') == OrgStatus.SUSPENDED.value
 
