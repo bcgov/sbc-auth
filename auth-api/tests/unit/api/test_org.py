@@ -1792,7 +1792,7 @@ def test_delete_affiliation_payload_no_mail(client, jwt, session, keycloak_mock)
 
 
 def test_org_patch_validate_request_json(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be retrieved via GET."""
+    """Validate patch org endpoints based on different input."""
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post('/api/v1/users', headers=public_headers, content_type='application/json')
 
@@ -1837,7 +1837,7 @@ def test_org_patch_validate_request_json(client, jwt, session, keycloak_mock):  
 
 
 def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
-    """Assert that an org can be retrieved via GET."""
+    """Assert patch Org endpoint for access type."""
     public_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_bceid_user)
     client.post('/api/v1/users', headers=public_headers, content_type='application/json')
 
