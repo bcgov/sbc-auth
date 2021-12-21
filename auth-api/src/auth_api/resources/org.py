@@ -31,8 +31,8 @@ from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, NotificationType, PatchActions
 from auth_api.utils.enums import Status
+from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role  # noqa: I005
 from auth_api.utils.role_validator import validate_roles
-from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_ADMIN_ROLES, STAFF, USER, Role
 from auth_api.utils.util import cors_preflight
 
 API = Namespace('orgs', description='Endpoints for organization management')
@@ -446,8 +446,8 @@ class OrgMember(Resource):
 
             membership = MembershipService.find_membership_by_id(membership_id)
 
-            is_own_membership = membership.as_dict()['user']['username'] == \
-                                UserService.find_by_jwt_token().as_dict()['username']
+            is_own_membership = \
+                membership.as_dict()['user']['username'] == UserService.find_by_jwt_token().as_dict()['username']
             if not membership:
                 response, status = {'message': 'The requested membership record could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND

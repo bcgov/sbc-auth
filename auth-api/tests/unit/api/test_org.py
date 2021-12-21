@@ -1799,8 +1799,6 @@ def test_org_patch_validate_request_json(client, jwt, session, keycloak_mock):  
     org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
                                headers=public_headers,
                                content_type='application/json')
-    dictionary = json.loads(org_response.data)
-    org_id = dictionary['id']
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
     # Validate public Bcol user cannot do patch
@@ -1846,7 +1844,6 @@ def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:d
     org_response = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_with_mailing_address()),
                                headers=public_headers,
                                content_type='application/json')
-    dictionary = json.loads(org_response.data)
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.bcol_admin_role)
