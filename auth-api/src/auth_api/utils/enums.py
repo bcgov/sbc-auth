@@ -132,7 +132,7 @@ class AccessType(Enum):
     EXTRA_PROVINCIAL = 'EXTRA_PROVINCIAL'
     ANONYMOUS = 'ANONYMOUS'
     GOVM = 'GOVM'  # for govt ministry
-    GOVN = 'GOVN'  # for govt ministry
+    GOVN = 'GOVN'  # for govt non-ministry
 
 
 class Status(Enum):
@@ -284,3 +284,15 @@ class ActivityAction(Enum):
     RESET_PASSCODE = 'Reset Passcode'
     GENERATED_PASSCODE = 'Generated Passcode'
     CREATE_AFFILIATION = 'Created Affiliation'
+
+
+class PatchActions(Enum):
+    """Patch Actions."""
+
+    UPDATE_STATUS = 'updateStatus'
+    UPDATE_ACCESS_TYPE = 'updateAccessType'
+
+    @classmethod
+    def from_value(cls, value):
+        """Return instance from value of the enum."""
+        return PatchActions(value) if value in cls._value2member_map_ else None  # pylint: disable=no-member

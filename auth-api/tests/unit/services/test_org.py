@@ -38,7 +38,7 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import (
-    AccessType, LoginSource, OrgStatus, OrgType, PaymentMethod, SuspensionReasonCode, TaskAction,
+    AccessType, LoginSource, OrgStatus, OrgType, PatchActions, PaymentMethod, SuspensionReasonCode, TaskAction,
     TaskRelationshipStatus, TaskStatus)
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
@@ -441,13 +441,13 @@ def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
 
     patch_token_info(token_info, monkeypatch)
-    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.SUSPENDED.value,
-                                               SuspensionReasonCode.OWNER_CHANGE.name)
+    updated_org = org.change_org_status(OrgStatus.SUSPENDED.value,
+                                        SuspensionReasonCode.OWNER_CHANGE.name)
     assert updated_org.as_dict()['status_code'] == OrgStatus.SUSPENDED.value
     assert updated_org.as_dict()['suspension_reason_code'] == SuspensionReasonCode.OWNER_CHANGE.name
 
-    updated_org = OrgService.change_org_status(org._model.id, OrgStatus.ACTIVE.value,
-                                               SuspensionReasonCode.DISPUTE.name)
+    updated_org = org.change_org_status(OrgStatus.ACTIVE.value,
+                                        SuspensionReasonCode.DISPUTE.name)
     assert updated_org.as_dict()['status_code'] == OrgStatus.ACTIVE.value
 
 
@@ -949,3 +949,67 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):
         org_dict = org.as_dict()
         assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
         mock_notify.assert_called()
+
+
+def test_change_org_access_type(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Org can be updated."""
+    org = factory_org_service()
+    user = factory_user_model_with_contact()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+
+    patch_token_info(token_info, monkeypatch)
+    updated_org = org.change_org_access_type(AccessType.GOVN.value)
+    assert updated_org.as_dict()['access_type'] == AccessType.GOVN.value
+
+
+def test_patch_org_status(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Org status can be updated."""
+    org = factory_org_service()
+    user = factory_user_model_with_contact()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    patch_token_info(token_info, monkeypatch)
+
+    # Validate and update org status
+    patch_info = {
+        'action': PatchActions.UPDATE_STATUS.value,
+        'statusCode': OrgStatus.SUSPENDED.value,
+    }
+    with pytest.raises(BusinessException) as exception:
+        org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
+    assert exception.value.code == Error.INVALID_INPUT.name
+
+    patch_info['suspensionReasonCode'] = SuspensionReasonCode.OWNER_CHANGE.name
+    updated_org = org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
+    assert updated_org['status_code'] == OrgStatus.SUSPENDED.value
+
+    patch_info = {
+        'action': PatchActions.UPDATE_STATUS.value,
+        'statusCode': OrgStatus.ACTIVE.value,
+    }
+    updated_org = org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
+    assert updated_org['status_code'] == OrgStatus.ACTIVE.value
+
+
+def test_patch_org_access_type(session, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Org access type can be updated."""
+    org = factory_org_service()
+    user = factory_user_model_with_contact()
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    patch_token_info(token_info, monkeypatch)
+
+    # Validate and update org status
+    patch_info = {
+        'action': PatchActions.UPDATE_ACCESS_TYPE.value
+    }
+    with pytest.raises(BusinessException) as exception:
+        org.patch_org(PatchActions.UPDATE_ACCESS_TYPE.value, patch_info)
+    assert exception.value.code == Error.INVALID_INPUT.name
+
+    patch_info['accessType'] = AccessType.GOVM.value
+    with pytest.raises(BusinessException) as exception:
+        org.patch_org(PatchActions.UPDATE_ACCESS_TYPE.value, patch_info)
+    assert exception.value.code == Error.INVALID_INPUT.name
+
+    patch_info['accessType'] = AccessType.GOVN.value
+    updated_org = org.patch_org(PatchActions.UPDATE_ACCESS_TYPE.value, patch_info)
+    assert updated_org['access_type'] == AccessType.GOVN.value

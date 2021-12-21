@@ -39,7 +39,7 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, LoginSource, OrgStatus, OrgType, PaymentAccountStatus, PaymentMethod,
+    AccessType, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus, PaymentMethod,
     Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix, TaskAction)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
@@ -740,8 +740,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         return False
 
-    @staticmethod
-    def change_org_status(org_id: int, status_code, suspension_reason_code):
+    def change_org_status(self, status_code, suspension_reason_code):
         """Update the status of the org.
 
         Used now for suspending/activate account.
@@ -753,10 +752,8 @@ class Org:  # pylint: disable=too-many-public-methods
         """
         current_app.logger.debug('<change_org_status ')
 
-        org_model: OrgModel = OrgModel.find_by_org_id(org_id)
-
         user: UserModel = UserModel.find_by_jwt_token()
-        current_app.logger.debug('<setting org status to  ')
+        org_model = self._model
         org_model.status_code = status_code
         org_model.decision_made_by = user.username  # not sure if a new field is needed for this.
         if status_code == OrgStatus.SUSPENDED.value:
@@ -882,3 +879,34 @@ class Org:  # pylint: disable=too-many-public-methods
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_rejected_govm_govn_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
+
+    def change_org_access_type(self, access_type):
+        """Update the access type of the org."""
+        current_app.logger.debug('<change_org_access_type ')
+        org_model = self._model
+        org_model.access_type = access_type
+        org_model.save()
+        current_app.logger.debug('change_org_access_type>')
+        return Org(org_model)
+
+    def patch_org(self, action: str = None, request_json: Dict[str, any] = None):
+        """Update Org."""
+        if (patch_action := PatchActions.from_value(action)) is None:
+            raise BusinessException(Error.PATCH_INVALID_ACTION, None)
+
+        if patch_action == PatchActions.UPDATE_STATUS:
+            status_code = request_json.get('statusCode', None)
+            suspension_reason_code = request_json.get('suspensionReasonCode', None)
+            if status_code is None:
+                raise BusinessException(Error.INVALID_INPUT, None)
+            if status_code == OrgStatus.SUSPENDED.value and suspension_reason_code is None:
+                raise BusinessException(Error.INVALID_INPUT, None)
+            return self.change_org_status(status_code, suspension_reason_code).as_dict()
+        if patch_action == PatchActions.UPDATE_ACCESS_TYPE:
+            access_type = request_json.get('accessType', None)
+            # Currently, only accounts with the following access types can be updated
+            if access_type is None or access_type not in [AccessType.REGULAR.value, AccessType.REGULAR_BCEID.value,
+                                                          AccessType.EXTRA_PROVINCIAL.value, AccessType.GOVN.value]:
+                raise BusinessException(Error.INVALID_INPUT, None)
+            return self.change_org_access_type(access_type).as_dict()
+        return None
