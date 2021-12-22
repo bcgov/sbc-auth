@@ -14,7 +14,7 @@
           </div>
         </div>
         <div v-else>
-          orgProduct:{{ orgProduct }}
+
           <ProductFeeSelector
             :canSelect="true"
             :orgProductFeeCodes="orgProductFeeCodes"

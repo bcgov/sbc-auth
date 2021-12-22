@@ -1077,8 +1077,10 @@ export default class OrgModule extends VuexModule {
   @Action({ rawError: true })
   public async updateAccountFees (accountFee): Promise<any> {
     const { accoundId, accountFeePayload } = accountFee
-    // const accountFeePayload = JSON.parse(JSON.stringify(this.context.state['currentAccountFees']))
-    await PaymentService.updateAccountFees(accoundId.toString(), { accountFees: accountFeePayload })
+    const response = await PaymentService.updateAccountFees(accoundId.toString(), { accountFees: accountFeePayload })
+    if (response && response.data && response.status === 200) {
+      return response.data
+    }
   }
 
   @Action({ commit: 'setCurrentAccountFees', rawError: true })

@@ -1,10 +1,6 @@
 <template>
   <section >
-
     <v-form ref="productFeeForm" id="productFeeForm">
-applyFilingFees:{{applyFilingFees}}
-selectedApplyFilingFees:{{selectedApplyFilingFees}}
-orgProductFeeCodes:{{orgProductFeeCodes}}
         <v-row>
             <v-col
             cols="6"
@@ -48,18 +44,14 @@ orgProductFeeCodes:{{orgProductFeeCodes}}
               </v-select>
             </v-col>
         </v-row>
-      <!-- </div> -->
+
     </v-form>
   </section>
 </template>
 
 <script lang="ts">
-import { AccountFee, AccountFeeDTO, OrgProductFeeCode } from '@/models/Organization'
+import { AccountFee, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
-import { productStatus } from '@/util/constants'
-
-const orgModule = namespace('org')
 
 @Component({})
 export default class ProductFee extends Vue {
