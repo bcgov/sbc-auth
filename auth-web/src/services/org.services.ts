@@ -91,18 +91,12 @@ export default class OrgService {
   static async patchOrg (patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
     switch (patchOrgPayload.action) {
       case PatchActions.UPDATE_STATUS:
-        if (patchOrgPayload.statusCode && patchOrgPayload.suspensionReasonCode) {
-          return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { statusCode: patchOrgPayload.statusCode,
-            suspensionReasonCode: patchOrgPayload.suspensionReasonCode,
-            action: patchOrgPayload.action })
-        }
-        break
+        return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { statusCode: patchOrgPayload.statusCode,
+          suspensionReasonCode: patchOrgPayload.suspensionReasonCode,
+          action: patchOrgPayload.action })
       case PatchActions.UPDATE_ACCESS_TYPE:
-        if (patchOrgPayload.accessType) {
-          return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { accessType: patchOrgPayload.accessType,
-            action: patchOrgPayload.action })
-        }
-        break
+        return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { accessType: patchOrgPayload.accessType,
+          action: patchOrgPayload.action })
       default:
         break
     }
