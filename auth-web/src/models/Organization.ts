@@ -277,3 +277,11 @@ export interface OrgBusinessType {
   businessType?: string,
   businessSize?: string
 }
+
+export interface PatchOrgPayload {
+  orgIdentifier: number;
+  action: string;
+  statusCode?: string;
+  suspensionReasonCode?: string;
+  accessType?: string;
+}

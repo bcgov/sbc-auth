@@ -346,3 +346,8 @@ export enum AffidavitStatus {
     REJECTED = 'REJECTED',
     INACTIVE = 'INACTIVE'
 }
+
+export enum PatchActions {
+    UPDATE_STATUS = 'updateStatus',
+    UPDATE_ACCESS_TYPE = 'updateAccessType'
+}

@@ -1,7 +1,7 @@
+import { AccountStatus, PatchActions } from '@/util/constants'
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, OrgProduct, OrgProductsRequestBody, Organization, UpdateMemberPayload } from '@/models/Organization'
+import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, OrgProduct, OrgProductsRequestBody, Organization, PatchOrgPayload, UpdateMemberPayload } from '@/models/Organization'
 
-import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
@@ -88,8 +88,24 @@ export default class OrgService {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
   }
 
-  static async suspendOrg (orgIdentifier: number, statusCode: AccountStatus, suspensionReasonCode: string): Promise<AxiosResponse> {
-    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: statusCode, suspensionReasonCode: suspensionReasonCode })
+  static async patchOrg (patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
+    switch (patchOrgPayload.action) {
+      case PatchActions.UPDATE_STATUS:
+        if (patchOrgPayload.statusCode && patchOrgPayload.suspensionReasonCode) {
+          return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { statusCode: patchOrgPayload.statusCode,
+            suspensionReasonCode: patchOrgPayload.suspensionReasonCode,
+            action: patchOrgPayload.action })
+        }
+        break
+      case PatchActions.UPDATE_ACCESS_TYPE:
+        if (patchOrgPayload.accessType) {
+          return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { accessType: patchOrgPayload.accessType,
+            action: patchOrgPayload.action })
+        }
+        break
+      default:
+        break
+    }
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {
