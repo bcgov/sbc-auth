@@ -1,6 +1,7 @@
 <template>
   <div>
     <template>
+
       <v-card
         outlined
         hover
@@ -66,8 +67,16 @@
                   :ref="productFooter.ref"
                   v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
                 />
+                <div v-if="showProductFee">
+                  <v-divider class="my-6"></v-divider>
+                  <ProductFee :orgProduct="orgProduct" :orgProductFeeCodes="orgProductFeeCodes" @save:saveProductFee="saveProductFee"/>
+                </div>
               </div>
+
             </v-expand-transition>
+          </div>
+          <div>
+
           </div>
         </div>
       </v-card>
@@ -76,26 +85,32 @@
 </template>
 
 <script lang="ts">
+import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, productStatus } from '@/util/constants'
-import { OrgProduct } from '@/models/Organization'
+import ProductFee from '@/components/auth/common/ProductFee.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
 const TOS_NEEDED_PRODUCT = ['VS']
 
 @Component({
   components: {
-    ProductTos
+    ProductTos,
+    ProductFee
   }
 })
 export default class Product extends Vue {
   @Prop({ default: undefined }) productDetails: OrgProduct
+  @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
+  @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
+
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string
   @Prop({ default: false }) isSelected: boolean
   @Prop({ default: false }) isexpandedView: boolean
   @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
   @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
+  @Prop({ default: false }) canManageProductFee: boolean
 
   private termsAccepted: boolean = false
   public productSelected:boolean = false
@@ -109,6 +124,9 @@ export default class Product extends Vue {
   onisSelectedChange (newValue:boolean) {
     // setting check box
     this.productSelected = newValue
+  }
+  get showProductFee () {
+    return this.canManageProductFee && this.orgProduct && this.orgProduct.product
   }
 
   get productLabel () {
@@ -227,6 +245,11 @@ export default class Product extends Vue {
       events: { 'tos-status-changed': this.tosChanged },
       ref: 'tosForm'
     }
+  }
+
+  @Emit('save:saveProductFee')
+  private saveProductFee (data) {
+    return data
   }
 }
 </script>

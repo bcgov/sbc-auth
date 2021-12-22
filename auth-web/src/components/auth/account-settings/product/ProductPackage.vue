@@ -30,6 +30,10 @@
             :isSelected="currentSelectedProducts.includes(product.code)"
             :isAccountSettingsView="true"
             :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
+            :orgProduct="orgProductDetails(product.code)"
+            :orgProductFeeCodes="orgProductFeeCodes"
+            @save:saveProductFee="saveProductFee"
+            :canManageProductFee="canManageAccounts"
           ></Product>
         </div>
         <div class="align-right-container">
@@ -81,10 +85,9 @@
 </template>
 
 <script lang="ts">
-
+import { Account, Role } from '@/util/constants'
+import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
 import { Component, Mixins, Vue } from 'vue-property-decorator'
-import { OrgProduct, OrgProductCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
-import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -111,6 +114,9 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
   @OrgModule.Action('addOrgProducts') public addOrgProducts!:(product:OrgProductsRequestBody) =>Promise<OrgProduct>
   @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
+  @OrgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
+  @OrgModule.Action('fetchOrgProductFeeCodes') public fetchOrgProductFeeCodes!:() =>Promise<OrgProductFeeCode>
+  @OrgModule.Action('updateAccountFees') public updateAccountFees!:(accountFee) =>Promise<any>
 
   public isBtnSaved = false
   public disableSaveBtn = false
@@ -121,6 +127,8 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public submitRequestValidationError = ''
   public expandedProductCode: string = ''
   public AccountEnum = Account
+  public orgProducts:any = ''
+  public orgProductFeeCodes:any = ''
 
   $refs: {
       confirmDialog: ModalDialog
@@ -139,6 +147,12 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     this.isLoading = true
     this.resetCurrentSelectedProducts()
     await this.loadProduct()
+    // if staff need to load product fee also
+    if (this.canManageAccounts) {
+      this.orgProducts = await this.syncCurrentAccountFees(this.currentOrganization.id)
+      this.orgProductFeeCodes = await this.fetchOrgProductFeeCodes()
+    }
+
     this.isLoading = false
   }
 
@@ -160,6 +174,18 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
       // eslint-disable-next-line no-console
       console.log('Error while loading products ', err)
     }
+  }
+
+  private get canManageAccounts () {
+    return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
+  }
+  private orgProductDetails (productCode) {
+    if (this.orgProducts.length > 0) {
+      const orgProd = this.orgProducts.filter((orgProduct) => orgProduct.product === productCode)
+
+      return (orgProd && orgProd[0]) || {}
+    }
+    return {}
   }
 
   private closeError () {
@@ -197,6 +223,17 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
 
       // eslint-disable-next-line no-console
       console.log('Error while trying to submit product request')
+    }
+  }
+
+  public async saveProductFee (productFee) {
+    const accountFee = { accoundId: this.currentOrganization.id, productFee }
+
+    try {
+      await this.updateAccountFees(accountFee)
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('Error while updating product fee ', err)
     }
   }
 }
