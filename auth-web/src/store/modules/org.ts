@@ -347,11 +347,10 @@ export default class OrgModule extends VuexModule {
       try {
         const patchOrgPayload: PatchOrgPayload = {
           action: PatchActions.UPDATE_STATUS,
-          orgIdentifier: orgId,
           statusCode: orgStatus,
           suspensionReasonCode: suspensionReasonCode
         }
-        const response = await OrgService.patchOrg(patchOrgPayload)
+        const response = await OrgService.patchOrg(orgId, patchOrgPayload)
         if (response.status === 200) {
           await this.context.dispatch('syncOrganization', orgId)
         }
@@ -1146,10 +1145,9 @@ export default class OrgModule extends VuexModule {
       try {
         const patchOrgPayload: PatchOrgPayload = {
           action: PatchActions.UPDATE_ACCESS_TYPE,
-          orgIdentifier: orgId,
           accessType: accessType
         }
-        const response = await OrgService.patchOrg(patchOrgPayload)
+        const response = await OrgService.patchOrg(orgId, patchOrgPayload)
         if (response && response.status === 200) {
           await this.context.dispatch('syncOrganization', orgId)
         }

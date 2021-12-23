@@ -97,9 +97,7 @@ export default class OrgService {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
   }
 
-  static async patchOrg (patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
-    const orgId = patchOrgPayload.orgIdentifier
-    delete patchOrgPayload.orgIdentifier
+  static async patchOrg (orgId: number, patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, { ...patchOrgPayload })
   }
 

@@ -279,7 +279,6 @@ export interface OrgBusinessType {
 }
 
 export interface PatchOrgPayload {
-  orgIdentifier: number;
   action: string;
   statusCode?: string;
   suspensionReasonCode?: string;
