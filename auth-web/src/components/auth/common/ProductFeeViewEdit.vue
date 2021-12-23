@@ -1,5 +1,6 @@
 <template>
   <v-card elevation="0">
+
     <div class="d-flex justify-space-between">
       <div class="d-flex" :class="{ 'w-100': !viewOnlyMode }">
         <div
@@ -11,11 +12,11 @@
         <div v-if="viewOnlyMode">
           <div>
             Statutory Fee:
-            <span class="font-weight-bold">{{ applyFilling }}</span>
+            <span class="font-weight-bold" data-test="apply-filing">{{ applyFilling }}</span>
           </div>
           <div>
             Service Fee:
-            <span class="font-weight-bold">{{ getProductFee }}</span>
+            <span class="font-weight-bold" data-test="prod-filing">{{ getProductFee }}</span>
           </div>
         </div>
         <div v-else class="d-flex w-100">
@@ -79,7 +80,7 @@ import ProductFeeSelector from '@/components/auth/common/ProductFeeSelector.vue'
     ProductFeeSelector
   }
 })
-export default class ProductFee extends Vue {
+export default class ProductFeeViewEdit extends Vue {
   @Prop({ default: undefined }) orgProduct: any // product available for orgs
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode[] // product
   @Prop({ default: false }) isProductActionLoading: boolean // loading

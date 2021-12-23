@@ -50,11 +50,11 @@ import { AccountFee, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 
 @Component({})
-export default class ProductFee extends Vue {
+export default class ProductFeeSelector extends Vue {
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
   @Prop({ default: false }) private canSelect: boolean
   @Prop({ default: '' }) private productCode: any
-  @Prop({ default: {} }) private selectedApplyFilingFees: any
+  @Prop({ default: undefined }) private selectedApplyFilingFees: any
 
   public applyFilingFees = 'false'
   public serviceFeeCode = ''

@@ -93,7 +93,7 @@
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, productStatus } from '@/util/constants'
-import ProductFee from '@/components/auth/common/ProductFee.vue'
+import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
 const TOS_NEEDED_PRODUCT = ['VS']
