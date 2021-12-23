@@ -98,17 +98,6 @@ export default class OrgService {
   }
 
   static async patchOrg (patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
-  /*  switch (patchOrgPayload.action) {
-      case PatchActions.UPDATE_STATUS:
-        return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { statusCode: patchOrgPayload.statusCode,
-          suspensionReasonCode: patchOrgPayload.suspensionReasonCode,
-          action: patchOrgPayload.action })
-      case PatchActions.UPDATE_ACCESS_TYPE:
-        return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { accessType: patchOrgPayload.accessType,
-          action: patchOrgPayload.action })
-      default:
-        break
-    } */
     const orgId = patchOrgPayload.orgIdentifier
     delete patchOrgPayload.orgIdentifier
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, { ...patchOrgPayload })
