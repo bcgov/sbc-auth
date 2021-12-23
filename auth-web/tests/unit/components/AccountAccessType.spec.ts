@@ -1,4 +1,4 @@
-import { AccessType, AccountStatus, PatchActions } from '@/util/constants'
+import { AccessType, AccountStatus } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'

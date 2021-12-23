@@ -116,7 +116,7 @@ export default class AccountAccessType extends Vue {
   }
   private selectedAccessType: string = undefined
   public AccessType = AccessType
-  public isLoading: boolean = false
+  public isLoading = false
 
   public get currentOrgPaymentTypePad (): boolean {
     return this.currentOrgPaymentType && this.currentOrgPaymentType === PaymentTypes.PAD
