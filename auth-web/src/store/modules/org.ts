@@ -3,8 +3,7 @@ import {
   Account,
   AccountStatus,
   FeeCodes,
-  LoginSource,
-  Pages,
+  PatchActions,
   PaymentTypes,
   Permission,
   Role,
@@ -31,6 +30,7 @@ import {
   Organization,
   PADInfo,
   PADInfoValidation,
+  PatchOrgPayload,
   UpdateMemberPayload
 } from '@/models/Organization'
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
@@ -345,7 +345,12 @@ export default class OrgModule extends VuexModule {
     const orgStatus = this.context.state['currentOrganization'].statusCode === AccountStatus.ACTIVE ? AccountStatus.SUSPENDED : AccountStatus.ACTIVE
     if (orgId && orgStatus) {
       try {
-        const response = await OrgService.suspendOrg(orgId, orgStatus, suspensionReasonCode)
+        const patchOrgPayload: PatchOrgPayload = {
+          action: PatchActions.UPDATE_STATUS,
+          statusCode: orgStatus,
+          suspensionReasonCode: suspensionReasonCode
+        }
+        const response = await OrgService.patchOrg(orgId, patchOrgPayload)
         if (response.status === 200) {
           await this.context.dispatch('syncOrganization', orgId)
         }
@@ -1131,5 +1136,25 @@ export default class OrgModule extends VuexModule {
   public async revokeOrgApiKeys (ApiDetails) {
     const response = await OrgService.revokeOrgApiKeys(ApiDetails)
     return response?.data || {}
+  }
+
+  @Action({ rawError: true })
+  public async updateOrganizationAccessType (accessType: string) {
+    const orgId = this.context.state['currentOrganization']?.id
+    if (orgId && accessType) {
+      try {
+        const patchOrgPayload: PatchOrgPayload = {
+          action: PatchActions.UPDATE_ACCESS_TYPE,
+          accessType: accessType
+        }
+        const response = await OrgService.patchOrg(orgId, patchOrgPayload)
+        if (response && response.status === 200) {
+          await this.context.dispatch('syncOrganization', orgId)
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('update Organization AccessType operation failed! - ', error)
+      }
+    }
   }
 }

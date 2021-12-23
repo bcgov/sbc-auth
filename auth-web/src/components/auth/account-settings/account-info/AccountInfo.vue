@@ -9,7 +9,7 @@
           {{ errorMessage }}
         </v-alert>
 
-        <template v-show="!anonAccount">
+        <div v-show="!anonAccount">
           <div class="nv-list-item mb-6">
             <div class="name font-weight-bold" id="accountNumber">
               Account Number
@@ -53,17 +53,27 @@
               </v-btn>
             </div>
           </div>
-          <div class="nv-list-item mb-6">
+          <div class="nv-list-item mb-0">
             <div class="name font-weight-bold" id="accountType">
               Account Type
             </div>
-            <div class="value" aria-labelledby="accountType">
-              <div class="value__title">
-                {{ isPremiumAccount ? 'Premium' : 'Basic' }}
+            <div class="value-column">
+              <div class="value" aria-labelledby="accountType">
+                <div class="value__title">
+                  {{ isPremiumAccount ? 'Premium' : 'Basic' }}
+                </div>
               </div>
             </div>
           </div>
-
+          <AccountAccessType
+            v-if="isPremiumAccount"
+            :organization="currentOrganization"
+            :viewOnlyMode="isAccessTypeViewOnly"
+            :currentOrgPaymentType="currentOrgPaymentType"
+            :canChangeAccessType="canChangeAccessType"
+            @update:viewOnlyMode="viewOnlyMode"
+            @update:updateAndSaveAccessTypeDetails="updateAndSaveAccessTypeDetails"
+          ></AccountAccessType>
           <div
             class="nv-list-item mb-6"
             v-if="currentOrganization.bcolAccountDetails"
@@ -79,7 +89,7 @@
             </div>
           </div>
           <v-divider class="my-6"></v-divider>
-        </template>
+        </div>
 
         <div class="nv-list-item mb-10" v-if="isAdminContactViewable">
           <div class="name" id="adminContact">Account Contact</div>
@@ -226,6 +236,7 @@ import {
   Organization
 } from '@/models/Organization'
 
+import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
@@ -248,13 +259,13 @@ const userModule = namespace('user')
 
 @Component({
   components: {
-
     OrgAdminContact,
     LinkedBCOLBanner,
     ModalDialog,
     AccountBusinessTypePicker,
     AccountDetails,
-    AccountMailingAddress
+    AccountMailingAddress,
+    AccountAccessType
   }
 })
 export default class AccountInfo extends Mixins(
@@ -263,13 +274,10 @@ export default class AccountInfo extends Mixins(
 ) {
   @CodesModule.State('suspensionReasonCodes')
   private suspensionReasonCodes!: Code[]
-
-  @OrgModule.State('currentOrganization')
-  public currentOrganization!: Organization
   @OrgModule.State('currentMembership') public currentMembership!: Organization
   @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
   @OrgModule.State('permissions') public permissions!: string[]
-
+  @OrgModule.State('currentOrgPaymentType') public currentOrgPaymentType!: string
   @userModule.State('currentUser') public currentUser!: KCUserProfile
 
   @OrgModule.Getter('isBusinessAccount') public isBusinessAccount!: boolean
@@ -281,6 +289,10 @@ export default class AccountInfo extends Mixins(
   ) => Promise<Organization>
 
   @OrgModule.Action('syncAddress') syncAddress!: () => Address
+  @OrgModule.Action('getOrgPayments') getOrgPayments!: () => any
+  @OrgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!: (
+    accessType: string
+  ) => Promise<Organization>
 
   @OrgModule.Action('syncOrganization') syncOrganization!: (
     currentAccount: number
@@ -305,6 +317,7 @@ export default class AccountInfo extends Mixins(
   private accountDetails: OrgBusinessType = {}
   public isAddressViewOnly = true
   public isAccountInfoViewOnly = true
+  public isAccessTypeViewOnly = true
 
   $refs: {
     editAccountForm: HTMLFormElement
@@ -355,6 +368,12 @@ export default class AccountInfo extends Mixins(
     this.updateDetails()
   }
 
+  // update account access type from child component
+  public async updateAndSaveAccessTypeDetails (accessType: string) {
+    await this.updateOrganizationAccessType(accessType)
+    this.viewOnlyMode({ component: 'accessType', mode: true })
+  }
+
   private get isSuspendButtonVisible (): boolean {
     return (
       (this.currentOrganization.statusCode === AccountStatus.ACTIVE ||
@@ -365,6 +384,10 @@ export default class AccountInfo extends Mixins(
 
   get editAccountUrl () {
     return Pages.EDIT_ACCOUNT_TYPE
+  }
+
+  get canChangeAccessType (): boolean {
+    return this.currentUser.roles.includes(Role.StaffManageAccounts)
   }
 
   private suspensionSelectRules = [
@@ -390,13 +413,20 @@ export default class AccountInfo extends Mixins(
     this.viewOnlyMode('address')
   }
   // use same funtion to toggle both account info and mailer view mode
-  public viewOnlyMode (details) {
+  public async viewOnlyMode (details) {
     const { component, mode } = details
     if (component === 'address') {
       this.isAddressViewOnly = mode
     }
     if (component === 'account') {
       this.isAccountInfoViewOnly = mode
+    }
+    if (component === 'accessType') {
+      // Get org payment methods if it is edit mode
+      if (!mode) {
+        await this.getOrgPayments()
+      }
+      this.isAccessTypeViewOnly = mode
     }
   }
 

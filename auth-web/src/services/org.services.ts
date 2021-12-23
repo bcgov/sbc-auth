@@ -1,13 +1,22 @@
 import { Affiliation, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { CreateRequestBody as CreateOrganizationRequestBody, Member, Members, OrgProduct, OrgProductsRequestBody, Organization, UpdateMemberPayload } from '@/models/Organization'
+import {
+  CreateRequestBody as CreateOrganizationRequestBody,
+  Member,
+  Members,
+  OrgProduct,
+  OrgProductsRequestBody,
+  Organization,
+  PatchOrgPayload,
+  UpdateMemberPayload
+} from '@/models/Organization'
 
-import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
 import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
+import { PatchActions } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class OrgService {
@@ -88,8 +97,8 @@ export default class OrgService {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: 'REJECTED' })
   }
 
-  static async suspendOrg (orgIdentifier: number, statusCode: AccountStatus, suspensionReasonCode: string): Promise<AxiosResponse> {
-    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/status`, { statusCode: statusCode, suspensionReasonCode: suspensionReasonCode })
+  static async patchOrg (orgId: number, patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, { ...patchOrgPayload })
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {
