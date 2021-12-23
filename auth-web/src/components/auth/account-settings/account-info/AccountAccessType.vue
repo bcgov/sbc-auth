@@ -43,7 +43,7 @@
                 v-model="selectedAccessType"
                 class="mt-0"
                 req
-                :rules="[accessTypeMustBeGovN]"
+                :rules="[selectedAccessTypeRules]"
               >
                 <v-radio
                 label="Regular Access"
@@ -61,7 +61,7 @@
               <v-card-actions class="px-0 pt-0">
                 <v-row>
                   <v-col cols="12" class="form__btns py-0 d-inline-flex">
-                    <div class="d-flex" v-if="!currentOrgPaymentTypePad">
+                    <div class="d-flex" v-if="!isPad">
                       <v-icon size="30" color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
                       <span class="error-text">{{ $t('accountAccessTypeUpdateWarning') }}</span>
                     </div>
@@ -118,38 +118,35 @@ export default class AccountAccessType extends Vue {
   public AccessType = AccessType
   public isLoading = false
 
-  public get currentOrgPaymentTypePad (): boolean {
+  public get isPad (): boolean {
     return this.currentOrgPaymentType && this.currentOrgPaymentType === PaymentTypes.PAD
-  }
-
-  public get isCurrentOrgGovN (): boolean {
-    return this.organization.accessType === AccessType.GOVN
   }
 
   // Watch property access type and update model
   @Watch('organization', { deep: true, immediate: true })
   onOrganizationChange () {
-    this.selectedAccessType = this.isCurrentOrgGovN ? AccessType.GOVN : AccessType.REGULAR
+    this.selectedAccessType = this.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
+  }
+
+  // Custom rules for selectedAccessType v-model in form
+  public selectedAccessTypeRules (): any {
+    return this.selectedAccessType === AccessType.GOVN ? true : 'Please select Government agency'
   }
 
   // Currently, there is only one way change from Regular access type accounts to GovN. Not the other way around
   public updateDetails () {
-    if (this.currentOrgPaymentTypePad && this.$refs.accountAccessTypeForm.validate()) {
+    if (this.isPad && this.$refs.accountAccessTypeForm.validate()) {
       this.$emit('update:updateAndSaveAccessTypeDetails', this.selectedAccessType)
     }
   }
 
   @Emit('update:viewOnlyMode')
   cancelEdit () {
-    this.selectedAccessType = this.isCurrentOrgGovN ? AccessType.GOVN : AccessType.REGULAR
+    this.selectedAccessType = this.organization.accessType === AccessType.GOVN ? AccessType.GOVN : AccessType.REGULAR
     return {
       component: 'accessType',
       mode: true
     }
-  }
-
-  public accessTypeMustBeGovN (): any {
-    return this.selectedAccessType === AccessType.GOVN ? true : 'Please select Government agency'
   }
 }
 </script>
