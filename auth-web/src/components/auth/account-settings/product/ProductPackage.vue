@@ -34,6 +34,8 @@
             :orgProductFeeCodes="orgProductFeeCodes"
             @save:saveProductFee="saveProductFee"
             :canManageProductFee="canManageAccounts"
+            :isProductActionLoading="isProductActionLoading"
+            :isProductActionCompleted="isProductActionCompleted"
           ></Product>
         </div>
         <div class="align-right-container">
@@ -121,6 +123,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public isBtnSaved = false
   public disableSaveBtn = false
   public isLoading: boolean = false
+  public isProductActionLoading: boolean = false
   public dialogTitle = ''
   public dialogText = ''
   public dialogIcon = ''
@@ -129,6 +132,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public AccountEnum = Account
   public orgProducts:any = ''
   public orgProductFeeCodes:any = ''
+  public isProductActionCompleted: boolean = false
 
   $refs: {
       confirmDialog: ModalDialog
@@ -226,14 +230,19 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     }
   }
 
-  public async saveProductFee (productFee) {
-    const accountFee = { accoundId: this.currentOrganization.id, productFee }
-
+  public async saveProductFee (accountFees) {
+    const accountFee = { accoundId: this.currentOrganization.id, accountFees }
+    this.isProductActionLoading = true
+    this.isProductActionCompleted = false
     try {
       await this.updateAccountFees(accountFee)
+      this.orgProducts = await this.syncCurrentAccountFees(this.currentOrganization.id)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('Error while updating product fee ', err)
+    } finally {
+      this.isProductActionLoading = false
+      this.isProductActionCompleted = true
     }
   }
 }

@@ -1,8 +1,13 @@
 <template>
   <v-card elevation="0">
     <div class="d-flex justify-space-between">
-      <div class="d-flex">
-        <div class="font-weight-bold mr-5">Product Fee:</div>
+      <div class="d-flex" :class="{ 'w-100': !viewOnlyMode }">
+        <div
+          class="font-weight-bold mr-5"
+          :class="{ 'prod-fee-label': !viewOnlyMode }"
+        >
+          Product Fee:
+        </div>
         <div v-if="viewOnlyMode">
           <div>
             Statutory Fee:
@@ -13,8 +18,7 @@
             <span class="font-weight-bold">{{ getProductFee }}</span>
           </div>
         </div>
-        <div v-else>
-
+        <div v-else class="d-flex w-100">
           <ProductFeeSelector
             :canSelect="true"
             :orgProductFeeCodes="orgProductFeeCodes"
@@ -43,7 +47,7 @@
         large
         class="save-btn px-9"
         color="primary"
-        :loading="false"
+        :loading="isProductActionLoading"
         aria-label="Save product fee"
         @click="saveProductFee()"
       >
@@ -65,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 
 import { OrgProductFeeCode } from '@/models/Organization'
 import ProductFeeSelector from '@/components/auth/common/ProductFeeSelector.vue'
@@ -78,16 +82,19 @@ import ProductFeeSelector from '@/components/auth/common/ProductFeeSelector.vue'
 export default class ProductFee extends Vue {
   @Prop({ default: undefined }) orgProduct: any // product available for orgs
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode[] // product
+  @Prop({ default: false }) isProductActionLoading: boolean // loading
+  @Prop({ default: false }) isProductActionCompleted: boolean // close after saving
 
   private viewOnlyMode = true
   private selectedFee: any = {}
 
-  public updateViewOnlyMode (mode = true) {
-    this.viewOnlyMode = mode
-    if (mode === false) {
-      this.selectedFee = {}
+  @Watch('isProductActionCompleted')
+  onProductActionCompleted (val, oldVal) {
+    if (val && val !== oldVal) {
+      this.updateViewOnlyMode(true)
     }
   }
+
   get applyFilling () {
     return this.orgProduct?.applyFilingFees === true ? 'Yes' : 'No'
   }
@@ -97,6 +104,13 @@ export default class ProductFee extends Vue {
     return fee && fee.amount ? `$ ${fee && fee?.amount.toFixed(2)}` : ''
   }
 
+  public updateViewOnlyMode (mode = true) {
+    this.viewOnlyMode = mode
+    if (mode === false) {
+      // reset on cancel
+      this.selectedFee = {}
+    }
+  }
   private productFee () {
     if (this.orgProductFeeCodes.length > 0) {
       const fees = this.orgProductFeeCodes.filter(
@@ -131,3 +145,11 @@ export default class ProductFee extends Vue {
   }
 }
 </script>
+<style lang="scss" scoped>
+.w-100 {
+  width: 100%;
+}
+.prod-fee-label {
+  width: 13%;
+}
+</style>

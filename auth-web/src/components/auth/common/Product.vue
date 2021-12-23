@@ -69,7 +69,12 @@
                 />
                 <div v-if="showProductFee">
                   <v-divider class="my-6"></v-divider>
-                  <ProductFee :orgProduct="orgProduct" :orgProductFeeCodes="orgProductFeeCodes" @save:saveProductFee="saveProductFee"/>
+                  <ProductFee :orgProduct="orgProduct"
+                  :orgProductFeeCodes="orgProductFeeCodes"
+                  @save:saveProductFee="saveProductFee"
+                  :isProductActionLoading="isProductActionLoading"
+                  :isProductActionCompleted="isProductActionCompleted"
+                  />
                 </div>
               </div>
 
@@ -103,6 +108,8 @@ export default class Product extends Vue {
   @Prop({ default: undefined }) productDetails: OrgProduct
   @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
+  @Prop({ default: false }) isProductActionLoading: boolean // loading
+  @Prop({ default: false }) isProductActionCompleted: boolean // loading
 
   @Prop({ default: '' }) userName: string
   @Prop({ default: '' }) orgName: string

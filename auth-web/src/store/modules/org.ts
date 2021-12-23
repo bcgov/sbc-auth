@@ -1076,8 +1076,8 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async updateAccountFees (accountFee): Promise<any> {
-    const { accoundId, accountFeePayload } = accountFee
-    const response = await PaymentService.updateAccountFees(accoundId.toString(), { accountFees: accountFeePayload })
+    const { accoundId, accountFees } = accountFee
+    const response = await PaymentService.updateAccountFees(accoundId.toString(), accountFees)
     if (response && response.data && response.status === 200) {
       return response.data
     }
