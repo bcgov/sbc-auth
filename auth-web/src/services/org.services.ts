@@ -98,7 +98,7 @@ export default class OrgService {
   }
 
   static async patchOrg (patchOrgPayload: PatchOrgPayload): Promise<AxiosResponse> {
-    switch (patchOrgPayload.action) {
+  /*  switch (patchOrgPayload.action) {
       case PatchActions.UPDATE_STATUS:
         return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${patchOrgPayload.orgIdentifier}`, { statusCode: patchOrgPayload.statusCode,
           suspensionReasonCode: patchOrgPayload.suspensionReasonCode,
@@ -108,8 +108,10 @@ export default class OrgService {
           action: patchOrgPayload.action })
       default:
         break
-    }
-    return null
+    } */
+    const orgId = patchOrgPayload.orgIdentifier
+    delete patchOrgPayload.orgIdentifier
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, { ...patchOrgPayload })
   }
 
   public static async getMemberLoginOption (orgId: number): Promise<string> {
