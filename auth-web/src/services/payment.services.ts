@@ -172,4 +172,9 @@ export default class PaymentService {
   static getAccountFees (accountId: string): AxiosPromise<any> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}`)
   }
+
+  static updateAccountFees (accountId: string, accountFeePayload: any): AxiosPromise<any> {
+    const { product } = accountFeePayload
+    return axios.put(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees/${product}`, accountFeePayload)
+  }
 }

@@ -1079,6 +1079,15 @@ export default class OrgModule extends VuexModule {
     await PaymentService.createAccountFees(accoundId.toString(), { accountFees: accountFeePayload })
   }
 
+  @Action({ rawError: true })
+  public async updateAccountFees (accountFee): Promise<any> {
+    const { accoundId, accountFees } = accountFee
+    const response = await PaymentService.updateAccountFees(accoundId.toString(), accountFees)
+    if (response && response.data && response.status === 200) {
+      return response.data
+    }
+  }
+
   @Action({ commit: 'setCurrentAccountFees', rawError: true })
   public async syncCurrentAccountFees (accoundId:number): Promise<AccountFee[]> {
     const response = await PaymentService.getAccountFees(accoundId.toString())
