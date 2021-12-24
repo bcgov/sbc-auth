@@ -55,7 +55,7 @@
 
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 import { productStatus } from '@/util/constants'
 
