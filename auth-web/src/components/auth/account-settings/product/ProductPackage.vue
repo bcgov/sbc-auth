@@ -184,7 +184,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
   }
   private orgProductDetails (productCode) {
-    if (this.orgProducts.length > 0) {
+    if (this.orgProducts && this.orgProducts.length > 0) {
       const orgProd = this.orgProducts.filter((orgProduct) => orgProduct.product === productCode)
 
       return (orgProd && orgProd[0]) || {}
