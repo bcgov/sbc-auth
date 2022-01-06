@@ -30,7 +30,7 @@
             :isSelected="currentSelectedProducts.includes(product.code)"
             :isAccountSettingsView="true"
             :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
-            :orgProduct="orgProductDetails(product.code)"
+            :orgProduct="orgProductDetails(product)"
             :orgProductFeeCodes="orgProductFeeCodes"
             @save:saveProductFee="saveProductFee"
             :canManageProductFee="canManageAccounts"
@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts">
-import { Account, Role } from '@/util/constants'
+import { AccessType, Account, Role, productStatus } from '@/util/constants'
 import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
 import { Component, Mixins, Vue } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -130,7 +130,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public submitRequestValidationError = ''
   public expandedProductCode: string = ''
   public AccountEnum = Account
-  public orgProducts:any = ''
+  public orgProductsFees:any = ''
   public orgProductFeeCodes:any = ''
   public isProductActionCompleted: boolean = false
 
@@ -153,7 +153,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     await this.loadProduct()
     // if staff need to load product fee also
     if (this.canManageAccounts) {
-      this.orgProducts = await this.syncCurrentAccountFees(this.currentOrganization.id)
+      this.orgProductsFees = await this.syncCurrentAccountFees(this.currentOrganization.id)
       this.orgProductFeeCodes = await this.fetchOrgProductFeeCodes()
     }
 
@@ -181,15 +181,33 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   }
 
   private get canManageAccounts () {
-    return this.currentUser?.roles?.includes(Role.StaffManageAccounts)
+    // check for role and account can have service fee (GOVM and GOVN account)
+    return this.currentUser?.roles?.includes(Role.StaffManageAccounts) && this.isServiceFeeTypeAccount()
   }
-  private orgProductDetails (productCode) {
-    if (this.orgProducts && this.orgProducts.length > 0) {
-      const orgProd = this.orgProducts.filter((orgProduct) => orgProduct.product === productCode)
+  private orgProductDetails (product) {
+    const { code: productCode, subscriptionStatus } = product
 
-      return (orgProd && orgProd[0]) || {}
+    let productData
+    if (this.orgProductsFees && this.orgProductsFees.length > 0) {
+      const orgProd = this.orgProductsFees.filter((orgProduct) => orgProduct.product === productCode)
+      productData = (orgProd && orgProd[0])
     }
-    return {}
+
+    if (!productData && subscriptionStatus !== productStatus.NOT_SUBSCRIBED) {
+      // set default value
+      productData = {
+        'product': productCode,
+        'applyFilingFees': true,
+        'serviceFeeCode': 'TRF01'
+      }
+    }
+
+    return productData || {}
+  }
+
+  private isServiceFeeTypeAccount () {
+    const accessType:any = this.currentOrganization.accessType
+    return ([AccessType.GOVM, AccessType.GOVN].includes(accessType)) || false
   }
 
   private closeError () {
@@ -236,7 +254,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     this.isProductActionCompleted = false
     try {
       await this.updateAccountFees(accountFee)
-      this.orgProducts = await this.syncCurrentAccountFees(this.currentOrganization.id)
+      this.orgProductsFees = await this.syncCurrentAccountFees(this.currentOrganization.id)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('Error while updating product fee ', err)
