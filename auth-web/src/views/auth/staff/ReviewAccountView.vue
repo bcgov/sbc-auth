@@ -351,7 +351,8 @@ export default class ReviewAccountView extends Vue {
         // both reject and hold will happen here passing second argument to determine which call need to make
           await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remarks: onholdReasons })
         }
-        const taskType: TaskType = TaskType[this.task.type]
+        const taskType: any = this.task.type
+
         if ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType)) {
           await this.createAccountFees(this.task.relationshipId)
         }
