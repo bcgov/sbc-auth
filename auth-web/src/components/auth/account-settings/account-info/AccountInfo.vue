@@ -66,7 +66,6 @@
             </div>
           </div>
           <AccountAccessType
-            v-if="isPremiumAccount"
             :organization="currentOrganization"
             :viewOnlyMode="isAccessTypeViewOnly"
             :currentOrgPaymentType="currentOrgPaymentType"

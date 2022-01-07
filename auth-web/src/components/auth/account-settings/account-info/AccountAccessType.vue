@@ -17,10 +17,10 @@
             <div v-if="viewOnlyMode" class="view-only">
               <div class="with-change-icon">
                 <div>
-                  <span data-test="txt-selected-access-type">{{ selectedAccessType === AccessType.GOVN ? 'Government agency (other than BC provincial)' : 'Regular Access'}}</span>
+                  <span data-test="txt-selected-access-type">{{ getAccessTypeText }}</span>
                 </div>
                 <div
-                  v-if="canChangeAccessType"
+                  v-if="isChangeButtonEnabled"
                 >
                   <span
                     class="primary--text cursor-pointer"
@@ -98,7 +98,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, PaymentTypes } from '@/util/constants'
+import { AccessType, Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
 
@@ -120,6 +120,23 @@ export default class AccountAccessType extends Vue {
 
   public get isPad (): boolean {
     return this.currentOrgPaymentType && this.currentOrgPaymentType === PaymentTypes.PAD
+  }
+
+  public get isChangeButtonEnabled (): boolean {
+    // Check access type and orgtype must be premium
+    const accessType: any = this.organization.accessType
+    const isAllowedAccessType = this.organization.orgType === Account.PREMIUM && [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
+    return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access pasased as property
+  }
+
+  public get getAccessTypeText (): string {
+    let accessTypeText = 'Regular Access'
+    if (this.organization.accessType === AccessType.GOVN) {
+      accessTypeText = 'Government agency (other than BC provincial)'
+    } else if (this.organization.accessType === AccessType.GOVM) {
+      accessTypeText = 'BC Government Ministry'
+    }
+    return accessTypeText
   }
 
   // Watch property access type and update model
