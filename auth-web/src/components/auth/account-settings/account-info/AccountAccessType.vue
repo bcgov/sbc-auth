@@ -20,7 +20,7 @@
                   <span data-test="txt-selected-access-type">{{ selectedAccessType === AccessType.GOVN ? 'Government agency (other than BC provincial)' : 'Regular Access'}}</span>
                 </div>
                 <div
-                  v-if="canChangeAccessType"
+                  v-if="canChangeAccessType && selectedAccessType !== AccessType.GOVN"
                 >
                   <span
                     class="primary--text cursor-pointer"
