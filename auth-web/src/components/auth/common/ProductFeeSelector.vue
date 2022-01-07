@@ -77,14 +77,14 @@ export default class ProductFeeSelector extends Vue {
   @Watch('selectedApplyFilingFees', { deep: true })
   updateFilingFees (val, oldVal) {
     if (
-      val?.existingApplyFilingFees.toString() !==
-      oldVal?.existingApplyFilingFees.toString()
+      val?.existingApplyFilingFees?.toString() !==
+      oldVal?.existingApplyFilingFees?.toString()
     ) {
-      this.applyFilingFees = val?.existingApplyFilingFees.toString() || ''
+      this.applyFilingFees = val?.existingApplyFilingFees?.toString() || ''
     }
     if (
-      val?.existingserviceFeeCode.toString() !==
-      oldVal?.existingserviceFeeCode.toString()
+      val?.existingserviceFeeCode?.toString() !==
+      oldVal?.existingserviceFeeCode?.toString()
     ) {
       this.serviceFeeCode = val?.existingserviceFeeCode || ''
     }
@@ -92,7 +92,7 @@ export default class ProductFeeSelector extends Vue {
 
   private mounted () {
     this.applyFilingFees =
-      this.selectedApplyFilingFees?.existingApplyFilingFees.toString() ||
+      this.selectedApplyFilingFees?.existingApplyFilingFees?.toString() ||
       this.applyFilingFees
     this.serviceFeeCode =
       this.selectedApplyFilingFees?.existingserviceFeeCode ||
