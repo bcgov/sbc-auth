@@ -182,7 +182,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
 
   private get canManageAccounts () {
     // check for role and account can have service fee (GOVM and GOVN account)
-    return this.currentUser?.roles?.includes(Role.StaffManageAccounts) && this.isServiceFeeTypeAccount()
+    return this.currentUser?.roles?.includes(Role.StaffManageAccounts) && this.isVariableFeeAccount()
   }
   private orgProductDetails (product) {
     const { code: productCode, subscriptionStatus } = product
@@ -205,7 +205,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     return productData || {}
   }
 
-  private isServiceFeeTypeAccount () {
+  private isVariableFeeAccount () {
     const accessType:any = this.currentOrganization.accessType
     return ([AccessType.GOVM, AccessType.GOVN].includes(accessType)) || false
   }
