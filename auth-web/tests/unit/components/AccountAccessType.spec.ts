@@ -1,4 +1,4 @@
-import { AccessType, AccountStatus } from '@/util/constants'
+import { AccessType, Account, AccountStatus } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'
@@ -22,7 +22,8 @@ describe('AccountAccessType.vue', () => {
     name: 'testOrg',
     statusCode: AccountStatus.ACTIVE,
     accessType: AccessType.REGULAR,
-    id: 1
+    id: 1,
+    orgType: Account.PREMIUM
   }
 
   beforeEach(() => {
@@ -46,7 +47,7 @@ describe('AccountAccessType.vue', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
 
-  it('validate view mode', () => {
+  it('validate view mode with regular org', () => {
     const $t = () => ''
     wrapper = mount(AccountAccessType, {
       localVue,
@@ -80,5 +81,47 @@ describe('AccountAccessType.vue', () => {
     })
 
     expect(wrapper.vm.currentOrgPaymentTypePad).toBeFalsy()
+  })
+
+  it('validate view mode with govn org', () => {
+    const $t = () => ''
+    const govnOrg = organization
+    govnOrg.accessType = AccessType.GOVN
+    wrapper = mount(AccountAccessType, {
+      localVue,
+      vuetify,
+      propsData: {
+        organization: govnOrg,
+        viewOnlyMode: true,
+        canChangeAccessType: true
+      },
+      mocks: { $t
+      }
+    })
+
+    expect(wrapper.find('[data-test="title"]').text()).toBe('Access Type')
+    expect(wrapper.find('[data-test="txt-selected-access-type"]').text()).toBe('Government agency (other than BC provincial)')
+    expect(wrapper.find('[data-test="btn-edit"]').exists()).toBeFalsy()
+  })
+
+  it('validate view mode with govm org', () => {
+    const $t = () => ''
+    const govmOrg = organization
+    govmOrg.accessType = AccessType.GOVM
+    wrapper = mount(AccountAccessType, {
+      localVue,
+      vuetify,
+      propsData: {
+        organization: govmOrg,
+        viewOnlyMode: true,
+        canChangeAccessType: true
+      },
+      mocks: { $t
+      }
+    })
+
+    expect(wrapper.find('[data-test="title"]').text()).toBe('Access Type')
+    expect(wrapper.find('[data-test="txt-selected-access-type"]').text()).toBe('BC Government Ministry')
+    expect(wrapper.find('[data-test="btn-edit"]').exists()).toBeFalsy()
   })
 })
