@@ -66,7 +66,6 @@
             </div>
           </div>
           <AccountAccessType
-            v-if="isPremiumAccount && isRegularAccount"
             :organization="currentOrganization"
             :viewOnlyMode="isAccessTypeViewOnly"
             :currentOrgPaymentType="currentOrgPaymentType"
@@ -407,11 +406,6 @@ export default class AccountInfo extends Mixins(
   }
   private get nameChangeNotAllowed () {
     return (this.anonAccount || this.isGovmAccount)
-  }
-
-  get isRegularAccount (): boolean {
-    const accessType: any = this.currentOrganization.accessType
-    return [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
   }
 
   resetAddress () {
