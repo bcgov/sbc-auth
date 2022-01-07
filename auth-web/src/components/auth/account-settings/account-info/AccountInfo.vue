@@ -222,7 +222,6 @@
 
 <script lang="ts">
 import {
-  AccessType,
   AccountStatus,
   Pages,
   Permission,

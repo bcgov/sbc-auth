@@ -123,16 +123,14 @@ export default class AccountAccessType extends Vue {
   }
 
   public get isChangeButtonEnabled (): boolean {
-    let isChangeButtonEnabled: boolean = this.organization.orgType === Account.PREMIUM // Only Premium accounts can be edited
-
-    // Check access type
+    // Check access type and orgtype must be premium
     const accessType: any = this.organization.accessType
-    isChangeButtonEnabled = isChangeButtonEnabled && [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
-    return isChangeButtonEnabled && this.canChangeAccessType // canChangeAccessType is the role based access pasased as property
+    const isAllowedAccessType = this.organization.orgType === Account.PREMIUM && [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
+    return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access pasased as property
   }
 
   public get getAccessTypeText (): string {
-    let accessTypeText: string = 'Regular Access'
+    let accessTypeText = 'Regular Access'
     if (this.organization.accessType === AccessType.GOVN) {
       accessTypeText = 'Government agency (other than BC provincial)'
     } else if (this.organization.accessType === AccessType.GOVM) {
