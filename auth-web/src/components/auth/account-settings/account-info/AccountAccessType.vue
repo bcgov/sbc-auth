@@ -58,13 +58,15 @@
                 data-test="radio-govn"
                 ></v-radio>
               </v-radio-group>
-              <v-card-actions class="px-0 pt-0">
-                <v-row>
-                  <v-col cols="12" class="form__btns py-0 d-inline-flex">
-                    <div class="d-flex" v-if="!isPad">
+               <div class="d-flex pb-3" v-if="!isPad">
                       <v-icon size="30" color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
                       <span class="error-text">{{ $t('accountAccessTypeUpdateWarning') }}</span>
                     </div>
+
+              <v-card-actions class="px-0 pt-0">
+                <v-row>
+                  <v-col cols="12" class="form__btns py-0 d-inline-flex">
+
                     <v-spacer></v-spacer>
                     <v-btn
                       large
