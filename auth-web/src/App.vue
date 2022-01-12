@@ -32,7 +32,7 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <BreadCrumb v-if="showNavigationBar" class="pl-8" :breadcrumbs="breadcrumbs" />
+      <BreadCrumb v-if="showNavigationBar" :breadcrumbs="breadcrumbs" />
       <pay-system-alert />
     </div>
     <div class="app-body">

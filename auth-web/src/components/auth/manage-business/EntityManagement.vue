@@ -25,7 +25,7 @@
         </div>
       </div>
 
-      <v-row no-gutters id="dashboard-actions" class="mb-n3 pl-4">
+      <v-row no-gutters id="dashboard-actions" class="mb-n3">
         <v-col cols="9">
           <!-- Add Existing Name Request or Business -->
           <v-menu
@@ -57,7 +57,7 @@
             </v-list>
           </v-menu>
         </v-col>
-        <v-col class="mr-4">
+        <v-col>
           <v-select
             dense filled multiple
             class="column-selector"
