@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Pages, Permission, Role, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
 import { HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
