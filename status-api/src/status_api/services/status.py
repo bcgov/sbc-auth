@@ -94,8 +94,8 @@ class Status:
     @staticmethod
     def get_available_schedules(service_schedule: list, check_date_local: arrow.Arrow):
         """Get available schedules from schedules."""
-        week_dates: list = list()
-        date_availables: list = list()
+        week_dates: list = []
+        date_availables: list = []
 
         check_date_only: arrow.Arrow = check_date_local.replace(hour=0, minute=0, second=0, microsecond=0)
         for day_week in range(-1, 7):
@@ -115,7 +115,7 @@ class Status:
     @staticmethod
     def get_outage_schedules(service_schedule: list):
         """Get outage schedules from schedules."""
-        date_outages: list = list()
+        date_outages: list = []
 
         if 'outage' in service_schedule[0]:
             for outage_time in service_schedule[0]['outage']:
