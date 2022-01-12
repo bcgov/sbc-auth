@@ -13,7 +13,7 @@
     "start": "vue-cli-service serve"
   },
   "dependencies": {
-    "@bcrs-shared-components/bread-crumb": "^1.0.1",
+    "@bcrs-shared-components/bread-crumb": "^1.0.2",
     "@bcrs-shared-components/corp-type-module": "1.0.4",
     "@bcrs-shared-components/interfaces": "1.0.28",
     "@mdi/font": "^4.5.95",

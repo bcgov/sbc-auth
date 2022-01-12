@@ -32,7 +32,6 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-<!--      <navigation-bar :configuration="navigationBarConfig" :hide="!showNavigationBar" />-->
       <BreadCrumb v-if="showNavigationBar" class="pl-8" :breadcrumbs="breadcrumbs" />
       <pay-system-alert />
     </div>
@@ -46,7 +45,7 @@
 <script lang="ts">
 import { AccessType, LoginSource, Pages, Permission, Role, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import { DashboardBreadcrumb, HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
+import { HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
@@ -59,8 +58,6 @@ import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { MembershipStatus } from '@/models/Organization'
-import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
-import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
@@ -74,8 +71,7 @@ import { getModule } from 'vuex-module-decorators'
     SbcHeader,
     SbcFooter,
     SbcLoader,
-    PaySystemAlert,
-    NavigationBar
+    PaySystemAlert
   },
   computed: {
     ...mapState('org', [
@@ -102,17 +98,6 @@ export default class App extends Mixins(NextPageMixin) {
   private toastTimeout = 6000
   private logoutUrl = ''
   private readonly needMissingBusinessDetailsRedirect!: boolean
-  private navigationBarConfig: NavigationBarConfig = {
-    titleItem: {
-      name: '',
-      url: '',
-      meta: {
-        requiresAuth: false,
-        requiresAccount: false
-      }
-    },
-    menuItems: []
-  }
 
   $refs: {
     header: SbcHeader
@@ -124,8 +109,11 @@ export default class App extends Mixins(NextPageMixin) {
 
   /** The route breadcrumbs list. */
   get breadcrumbs (): Array<BreadcrumbIF> {
-    const defaultCrumb = this.currentUser?.roles?.includes(Role.Staff) ? StaffDashboardBreadcrumb : HomeBreadCrumb
     let breadcrumbs = [...(this.$route?.meta?.breadcrumb || [])]
+
+    // Apply dynamic return crumb depending on user role
+    // This will be replaced when we have our UBER dashboard / high level marketing page
+    const defaultCrumb = this.currentUser?.roles?.includes(Role.Staff) ? StaffDashboardBreadcrumb : HomeBreadCrumb
     if (this.$route?.name === 'business') breadcrumbs.unshift(defaultCrumb)
 
     return breadcrumbs
@@ -210,7 +198,6 @@ export default class App extends Mixins(NextPageMixin) {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('App.vue.setup Error: ' + e)
-        this.navigationBarConfig.menuItems = []
         this.$store.dispatch('user/reset')
         this.$store.commit('loadComplete')
         this.$router.push('/home')
