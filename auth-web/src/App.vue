@@ -114,7 +114,9 @@ export default class App extends Mixins(NextPageMixin) {
     // Apply dynamic return crumb depending on user role
     // This will be replaced when we have our UBER dashboard / high level marketing page
     const defaultCrumb = this.currentUser?.roles?.includes(Role.Staff) ? StaffDashboardBreadcrumb : HomeBreadCrumb
-    if (this.$route?.name === 'business') { breadcrumbs.unshift(defaultCrumb) }
+    if (this.$route?.name === 'business') {
+      breadcrumbs.unshift(defaultCrumb)
+    }
 
     return breadcrumbs
   }
