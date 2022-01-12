@@ -1,3 +1,4 @@
+import { DashboardBreadcrumb, HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
@@ -120,35 +121,70 @@ export function getRoutes (): RouteConfig[] {
     { path: '/', name: 'root', redirect: 'home' },
     {
       path: '/home',
-      name: 'home',
       component: HomeView,
       children: [
         {
           path: '',
+          name: 'home',
           redirect: 'decide-business'
         },
         {
           path: 'decide-business',
+          name: 'decide-business',
           component: DecideBusinessView,
-          meta: { showNavBar: false }
+          meta: {
+            breadcrumb: [
+              {
+                text: HomeBreadCrumb.text,
+                to: { name: 'decide-business' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'request-name',
+          name: 'request-name',
           component: RequestNameView,
-          meta: { showNavBar: false }
+          meta: {
+            breadcrumb: [
+              {
+                text: HomeBreadCrumb.text,
+                to: { name: 'request-name' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'incorporate-or-register',
+          name: 'incorporate-or-register',
           component: IncorpOrRegisterView,
-          meta: { showNavBar: false }
+          meta: {
+            breadcrumb: [
+              {
+                text: HomeBreadCrumb.text,
+                to: { name: 'incorporate-or-register' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'maintain-business',
+          name: 'maintain-business',
           component: MaintainBusinessView,
-          meta: { showNavBar: false }
+          meta: {
+            breadcrumb: [
+              {
+                text: HomeBreadCrumb.text,
+                to: { name: 'maintain-business' }
+              }
+            ],
+            showNavBar: true
+          }
         }
-      ],
-      meta: { showNavBar: false }
+      ]
     },
     {
       path: '/business',
@@ -173,7 +209,8 @@ export function getRoutes (): RouteConfig[] {
             showNavBar: true,
             disabledRoles: [Role.AnonymousUser],
             requiresAuth: true,
-            requiresActiveAccount: true
+            requiresActiveAccount: true,
+            breadcrumb: [DashboardBreadcrumb]
           }
         }]
     },
@@ -446,7 +483,7 @@ export function getRoutes (): RouteConfig[] {
       path: '/businessprofile',
       name: 'businessprofile',
       component: BusinessProfileView,
-      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true, showNavBar: true }
+      meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
     },
     {
       path: '/makepayment/:paymentId/:redirectUrl',
@@ -486,39 +523,84 @@ export function getRoutes (): RouteConfig[] {
 
     {
       path: Pages.STAFF_DASHBOARD,
-      name: 'staff-dashboard',
       component: StaffDashboardView,
       props: true,
       meta: { requiresAuth: true, allowedRoles: [Role.Staff] },
       children: [
         {
           path: '',
+          name: 'staff-dashboard',
           redirect: 'active'
         },
         {
           path: 'active',
+          name: 'active',
           component: StaffActiveAccountsTable,
-          name: 'active'
+          meta: {
+            breadcrumb: [
+              {
+                text: StaffDashboardBreadcrumb.text,
+                to: { name: 'active' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'invitations',
+          name: 'invitations',
           component: StaffPendingAccountInvitationsTable,
-          name: 'invitations'
+          meta: {
+            breadcrumb: [
+              {
+                text: StaffDashboardBreadcrumb.text,
+                to: { name: 'invitations' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'review',
+          name: 'review',
           component: StaffPendingAccountsTable,
-          name: 'review'
+          meta: {
+            breadcrumb: [
+              {
+                text: StaffDashboardBreadcrumb.text,
+                to: { name: 'review' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'rejected',
+          name: 'rejected',
           component: StaffRejectedAccountsTable,
-          name: 'rejected'
+          meta: {
+            breadcrumb: [
+              {
+                text: StaffDashboardBreadcrumb.text,
+                to: { name: 'rejected' }
+              }
+            ],
+            showNavBar: true
+          }
         },
         {
           path: 'suspended',
+          name: 'suspended',
           component: StaffSuspendedAccountsTable,
-          name: 'suspended'
+          meta: {
+            breadcrumb: [
+              {
+                text: StaffDashboardBreadcrumb.text,
+                to: { name: 'suspended' }
+              }
+            ],
+            showNavBar: true
+          }
         }
       ]
     },

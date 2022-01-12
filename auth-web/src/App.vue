@@ -32,7 +32,8 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <navigation-bar :configuration="navigationBarConfig" :hide="!showNavigationBar" />
+<!--      <navigation-bar :configuration="navigationBarConfig" :hide="!showNavigationBar" />-->
+      <BreadCrumb v-if="showNavigationBar" class="pl-8" :breadcrumbs="breadcrumbs" />
       <pay-system-alert />
     </div>
     <div class="app-body">
@@ -43,10 +44,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Pages, Permission, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LoginSource, Pages, Permission, Role, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
+import { DashboardBreadcrumb, HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
+import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
+import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 import BusinessModule from './store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -66,6 +70,7 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    BreadCrumb,
     SbcHeader,
     SbcFooter,
     SbcLoader,
@@ -117,27 +122,13 @@ export default class App extends Mixins(NextPageMixin) {
     return this.$route.meta.showNavBar
   }
 
-  private setupNavigationBar (): void {
-    this.navigationBarConfig = {
-      titleItem: {
-        name: 'Business Registry',
-        url: `/home`,
-        meta: {
-          requiresAuth: false,
-          requiresAccount: false
-        }
-      },
-      menuItems: [
-        {
-          name: 'Manage Businesses',
-          url: `/account/${this.currentAccountSettings?.id || '0'}/business`,
-          meta: {
-            requiresAuth: true,
-            requiresAccount: true
-          }
-        }
-      ]
-    }
+  /** The route breadcrumbs list. */
+  get breadcrumbs (): Array<BreadcrumbIF> {
+    const defaultCrumb = this.currentUser?.roles?.includes(Role.Staff) ? StaffDashboardBreadcrumb : HomeBreadCrumb
+    let breadcrumbs = [...(this.$route?.meta?.breadcrumb || [])]
+    if (this.$route?.name === 'business') breadcrumbs.unshift(defaultCrumb)
+
+    return breadcrumbs
   }
 
   private startAccountSwitch () {
@@ -173,7 +164,6 @@ export default class App extends Mixins(NextPageMixin) {
     if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
       this.loadUserInfo()
       await this.syncUser()
-      this.setupNavigationBar()
       this.$store.commit('loadComplete')
     }
   }
@@ -217,7 +207,6 @@ export default class App extends Mixins(NextPageMixin) {
         }
         this.loadUserInfo()
         await this.syncUser()
-        this.setupNavigationBar()
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('App.vue.setup Error: ' + e)
