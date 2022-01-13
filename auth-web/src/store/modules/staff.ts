@@ -194,7 +194,20 @@ export default class StaffModule extends VuexModule {
   @Action({ rawError: true })
   public async syncAccountAffidavit (task: Task): Promise<void> {
     const taskUserGuid = task?.user?.keycloakGuid
-    const status = task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ? AffidavitStatus.PENDING : task.relationshipStatus
+    let status = task.relationshipStatus
+
+    switch (task.relationshipStatus) {
+      case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
+        status = AffidavitStatus.PENDING
+        break
+      case TaskRelationshipStatus.REJECTED:
+        status = AffidavitStatus.REJECTED
+        break
+      default:
+        status = AffidavitStatus.APPROVED
+        break
+    }
+
     const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid, status)
     if (affidavitResponse?.data && affidavitResponse?.status === 200) {
       this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
@@ -204,8 +217,9 @@ export default class StaffModule extends VuexModule {
   @Action({ rawError: true })
   public async approveAccountUnderReview (task:Task) {
     if (task) {
-      await TaskService.approvePendingTask(task)
-      await this.context.dispatch('syncTaskUnderReview', task)
+      const response = await TaskService.approvePendingTask(task)
+      const newTask = response.data || task
+      await this.context.dispatch('syncTaskUnderReview', newTask)
     }
   }
 

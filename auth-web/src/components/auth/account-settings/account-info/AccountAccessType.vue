@@ -17,10 +17,10 @@
             <div v-if="viewOnlyMode" class="view-only">
               <div class="with-change-icon">
                 <div>
-                  <span data-test="txt-selected-access-type">{{ selectedAccessType === AccessType.GOVN ? 'Government agency (other than BC provincial)' : 'Regular Access'}}</span>
+                  <span data-test="txt-selected-access-type">{{ getAccessTypeText }}</span>
                 </div>
                 <div
-                  v-if="canChangeAccessType"
+                  v-if="isChangeButtonEnabled"
                 >
                   <span
                     class="primary--text cursor-pointer"
@@ -58,13 +58,15 @@
                 data-test="radio-govn"
                 ></v-radio>
               </v-radio-group>
-              <v-card-actions class="px-0 pt-0">
-                <v-row>
-                  <v-col cols="12" class="form__btns py-0 d-inline-flex">
-                    <div class="d-flex" v-if="!isPad">
+               <div class="d-flex pb-3" v-if="!isPad">
                       <v-icon size="30" color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
                       <span class="error-text">{{ $t('accountAccessTypeUpdateWarning') }}</span>
                     </div>
+
+              <v-card-actions class="px-0 pt-0">
+                <v-row>
+                  <v-col cols="12" class="form__btns py-0 d-inline-flex">
+
                     <v-spacer></v-spacer>
                     <v-btn
                       large
@@ -98,7 +100,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, PaymentTypes } from '@/util/constants'
+import { AccessType, Account, PaymentTypes } from '@/util/constants'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
 
@@ -120,6 +122,23 @@ export default class AccountAccessType extends Vue {
 
   public get isPad (): boolean {
     return this.currentOrgPaymentType && this.currentOrgPaymentType === PaymentTypes.PAD
+  }
+
+  public get isChangeButtonEnabled (): boolean {
+    // Check access type and orgtype must be premium
+    const accessType: any = this.organization.accessType
+    const isAllowedAccessType = this.organization.orgType === Account.PREMIUM && [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
+    return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access pasased as property
+  }
+
+  public get getAccessTypeText (): string {
+    let accessTypeText = 'Regular Access'
+    if (this.organization.accessType === AccessType.GOVN) {
+      accessTypeText = 'Government agency (other than BC provincial)'
+    } else if (this.organization.accessType === AccessType.GOVM) {
+      accessTypeText = 'BC Government Ministry'
+    }
+    return accessTypeText
   }
 
   // Watch property access type and update model

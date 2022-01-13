@@ -32,7 +32,7 @@
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <navigation-bar :configuration="navigationBarConfig" :hide="!showNavigationBar" />
+      <BreadCrumb v-if="showNavigationBar" :breadcrumbs="breadcrumbs" />
       <pay-system-alert />
     </div>
     <div class="app-body">
@@ -43,10 +43,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Pages, Permission, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
+import { HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
+import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
+import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 import BusinessModule from './store/modules/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -55,8 +58,6 @@ import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { MembershipStatus } from '@/models/Organization'
-import NavigationBar from 'sbc-common-components/src/components/NavigationBar.vue'
-import { NavigationBarConfig } from 'sbc-common-components/src/models/NavigationBarConfig'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
@@ -66,11 +67,11 @@ import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
+    BreadCrumb,
     SbcHeader,
     SbcFooter,
     SbcLoader,
-    PaySystemAlert,
-    NavigationBar
+    PaySystemAlert
   },
   computed: {
     ...mapState('org', [
@@ -97,17 +98,6 @@ export default class App extends Mixins(NextPageMixin) {
   private toastTimeout = 6000
   private logoutUrl = ''
   private readonly needMissingBusinessDetailsRedirect!: boolean
-  private navigationBarConfig: NavigationBarConfig = {
-    titleItem: {
-      name: '',
-      url: '',
-      meta: {
-        requiresAuth: false,
-        requiresAccount: false
-      }
-    },
-    menuItems: []
-  }
 
   $refs: {
     header: SbcHeader
@@ -117,27 +107,18 @@ export default class App extends Mixins(NextPageMixin) {
     return this.$route.meta.showNavBar
   }
 
-  private setupNavigationBar (): void {
-    this.navigationBarConfig = {
-      titleItem: {
-        name: 'Business Registry',
-        url: `/home`,
-        meta: {
-          requiresAuth: false,
-          requiresAccount: false
-        }
-      },
-      menuItems: [
-        {
-          name: 'Manage Businesses',
-          url: `/account/${this.currentAccountSettings?.id || '0'}/business`,
-          meta: {
-            requiresAuth: true,
-            requiresAccount: true
-          }
-        }
-      ]
+  /** The route breadcrumbs list. */
+  get breadcrumbs (): Array<BreadcrumbIF> {
+    const breadcrumbs = [...(this.$route?.meta?.breadcrumb || [])]
+
+    // Apply dynamic return crumb depending on user role
+    // This will be replaced when we have our UBER dashboard / high level marketing page
+    const defaultCrumb = this.currentUser?.roles?.includes(Role.Staff) ? StaffDashboardBreadcrumb : HomeBreadCrumb
+    if (this.$route?.name === 'business') {
+      breadcrumbs.unshift(defaultCrumb)
     }
+
+    return breadcrumbs
   }
 
   private startAccountSwitch () {
@@ -173,7 +154,6 @@ export default class App extends Mixins(NextPageMixin) {
     if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
       this.loadUserInfo()
       await this.syncUser()
-      this.setupNavigationBar()
       this.$store.commit('loadComplete')
     }
   }
@@ -217,11 +197,9 @@ export default class App extends Mixins(NextPageMixin) {
         }
         this.loadUserInfo()
         await this.syncUser()
-        this.setupNavigationBar()
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('App.vue.setup Error: ' + e)
-        this.navigationBarConfig.menuItems = []
         this.$store.dispatch('user/reset')
         this.$store.commit('loadComplete')
         this.$router.push('/home')

@@ -28,6 +28,7 @@ from .apihelper import Api
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .status import API as STATUS_API
+from .whatsnew import API as WHATSNEW_API
 
 
 __all__ = ('API_BLUEPRINT', 'OPS_BLUEPRINT')
@@ -64,3 +65,4 @@ HANDLER = ExceptionHandler(API)
 
 API.add_namespace(META_API, path='/meta')
 API.add_namespace(STATUS_API, path='/status/<string:service_name>')
+API.add_namespace(WHATSNEW_API, path='/whatsnew')
