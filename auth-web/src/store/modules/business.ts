@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad, RegistrationRequest } from '@/models/business'
 import {
   CorpType,
   FilingTypes,
@@ -7,6 +7,7 @@ import {
   LegalTypes,
   NrConditionalStates,
   NrState,
+  NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
@@ -36,7 +37,7 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async syncBusinesses (): Promise<void> {
+  public async syncBusinesses (enableSpGpDba: boolean): Promise<void> {
     /** Returns NR's approved name. */
     const getApprovedName = (nr): string =>
       nr.names.find(name => [NrState.APPROVED, NrState.CONDITION].includes(name.state))?.name
@@ -51,9 +52,18 @@ export default class BusinessModule extends VuexModule {
       (nr.state === NrState.CONDITIONAL &&
         [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(nr.consentFlag))
 
-    /** Returns True if NR is approved for one stop registration. */
+    /** Returns True if NR is approved for registration. */
     const isApprovedForRegistration = (nr): boolean =>
       nr.actions.some(action => action.filingName === LearFilingTypes.REGISTRATION)
+
+    /** Returns target conditionally. */
+    const getTarget = (nr): NrTargetTypes => {
+      if ([LegalTypes.SP, LegalTypes.GP].includes(nr.requestTypeCd) && !enableSpGpDba) {
+        // Fallback to onestop if SpGpDba is not enabled
+        return NrTargetTypes.ONESTOP
+      }
+      return nr.target
+    }
 
     // initialize store
     this.setBusinesses([])
@@ -106,7 +116,8 @@ export default class BusinessModule extends VuexModule {
           applicantPhone: nr.applicants?.phoneNumber,
           enableIncorporation: isApprovedForIa(nr) || isConditionallyApproved(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
-          target: nr.target
+          target: getTarget(nr),
+          entityTypeCd: nr.entity_type_cd
         }
       }
     })
@@ -182,16 +193,15 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createNamedBusiness (filingBody: BusinessRequest) {
+  public async createNamedBusiness (filingBody: any, nrNumber: string) {
     // Create an affiliation between implicit org and requested business
-    const updateResponse = await BusinessService.createNamedBusiness(filingBody)
+    const updateResponse = await BusinessService.createDraftFiling(filingBody)
     if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
       return updateResponse
     } else {
       // delete the created affiliation if the update failed for avoiding orphan records
       // unable to do these from backend, since it causes a circular dependency
       const orgId = filingBody?.filing?.header?.accountId
-      const nrNumber = filingBody?.filing?.incorporationApplication?.nameRequest?.nrNumber
       await OrgService.removeAffiliation(orgId, nrNumber, undefined, false)
       return {
         errorMsg: 'Cannot add business due to some technical reasons'
@@ -229,7 +239,7 @@ export default class BusinessModule extends VuexModule {
       }
     }
 
-    await BusinessService.createNumberedBusiness(filingBody)
+    await BusinessService.createDraftFiling(filingBody)
       .then(response => {
         if (response && response.data && (response.status === 200 || response.status === 201)) {
           const tempRegNum = response.data.filing?.business?.identifier

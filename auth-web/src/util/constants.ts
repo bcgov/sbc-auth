@@ -123,7 +123,8 @@ export enum AffiliationTypes {
 }
 
 export enum FilingTypes {
-    INCORPORATION_APPLICATION = 'incorporationApplication'
+    INCORPORATION_APPLICATION = 'incorporationApplication',
+    REGISTRATION = 'registration'
 }
 
 export enum LearFilingTypes {
@@ -135,7 +136,9 @@ export enum LearFilingTypes {
 export enum LegalTypes {
     BCOMP = 'BEN',
     COOP = 'CP',
-    CORP = 'CR'
+    CORP = 'CR',
+    SP = 'SP',
+    GP = 'GP'
 }
 
 export enum CorpType {
@@ -233,7 +236,8 @@ export enum LDFlags {
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard',
-    DisableGovNAccountCreation='disable-govn-account'
+    DisableGovNAccountCreation='disable-govn-account',
+    EnableSpGpDba='enable-sp-gp-dba'
 }
 
 export enum DateFilterCodes {

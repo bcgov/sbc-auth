@@ -257,7 +257,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private addAffiliationDropdown: boolean = false
 
   private readonly isPremiumAccount!: boolean
-  private readonly syncBusinesses!: () => Promise<void>
+  private readonly syncBusinesses!: (enableSpGpDba: boolean) => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
   private readonly currentOrgAddress!: Address
@@ -316,9 +316,13 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
     this.isLoading = 1 // truthy
     this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
-    await this.syncBusinesses()
+    await this.syncBusinesses(this.enableSpGpDba)
     this.lastSyncBusinesses = Date.now()
     this.isLoading = 0 // falsy
+  }
+
+  private get enableSpGpDba (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableSpGpDba) || false
   }
 
   private get enableMandatoryAddress (): boolean {
@@ -334,7 +338,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addBusinessDialog.close()
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
-    await this.syncBusinesses()
+    await this.syncBusinesses(this.enableSpGpDba)
     this.$refs.successDialog.open()
   }
 
@@ -342,7 +346,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
-    await this.syncBusinesses()
+    await this.syncBusinesses(this.enableSpGpDba)
     this.$refs.successDialog.open()
   }
 
@@ -466,7 +470,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
       await this.removeBusiness(this.removeBusinessPayload)
       this.dialogText = this.$t(dialogTextKey).toString()
       this.dialogTitle = this.$t(dialogTitleKey).toString()
-      await this.syncBusinesses()
+      await this.syncBusinesses(this.enableSpGpDba)
       this.$refs.removedBusinessSuccessDialog.open()
     } catch (ex) {
       // eslint-disable-next-line no-console
