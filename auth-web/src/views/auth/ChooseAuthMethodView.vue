@@ -22,7 +22,7 @@
                 Residents of British Columbia can use their government-issued BC Services Card to verify their identity
               </div>
               <div class="mb-10">
-                <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card" target="_blank">Learn more about the BC Services card</a>
+                <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup" target="_blank">Learn more about the BC Services card</a>
               </div>
               <!-- State Button (Create Account) -->
               <div class="mb-4">
