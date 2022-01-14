@@ -101,3 +101,18 @@ def test_create_contents_with_attachment_url(session, loop):
 
     assert result_attachment[0].file_name == AttachmentFactory.RequestData.FILE_REQUEST_1['fileName']
     assert result_attachment[1].file_name == AttachmentFactory.RequestData.FILE_REQUEST_2['fileName']
+
+
+def test_update_content(session, loop):
+    """Assert the test can update content."""
+    notification = NotificationFactory.create_model(session, notification_info=NotificationFactory.Models.PENDING_1)
+
+    content = ContentFactory.create_model(session, notification.id, content_info=ContentFactory.Models.CONTENT_1)
+
+    content.body = ''
+    result = loop.run_until_complete(
+        ContentCRUD.update_content(session, content)
+    )
+
+    assert result.notification_id == NotificationFactory.Models.PENDING_1['id']
+    assert result.body == ''
