@@ -85,6 +85,19 @@ class ContentResponse(BaseModel):  # pylint: disable=too-few-public-methods
         orm_mode = True
 
 
+class ContentUpdate(ContentBase):  # pylint: disable=too-few-public-methods
+    """Content model for update."""
+
+    id: int
+    subject: str = ''
+    body: str = ''
+
+    class Config:  # pylint: disable=too-few-public-methods
+        """Config."""
+
+        orm_mode = True
+
+
 class Content(ContentBase):  # pylint: disable=too-few-public-methods
     """This is the Entity Root model for the Notification content."""
 

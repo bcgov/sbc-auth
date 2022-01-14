@@ -1,7 +1,11 @@
 import logging
+import re
+import json
 
 import uvicorn
 from starlette.responses import RedirectResponse
+from fastapi.responses import JSONResponse
+from fastapi import Request, Response
 
 from notify_api import NotifyAPI
 from notify_api.core.settings import get_api_settings
@@ -18,9 +22,20 @@ logger = logging.getLogger(__name__)  # the __name__ resolve to 'main' since we 
 app = NotifyAPI(bind=get_api_settings().NOTIFY_DATABASE_URL)
 
 
+
+
+
 @app.get('/')
 async def root():
     response = RedirectResponse(url='/docs')
+    return response
+
+
+@app.middleware('http')
+async def middleware(request: Request, call_next) -> Response:
+    response = await call_next(request)  # response has been StreamingResponse Type
+
+
     return response
 
 if __name__ == '__main__':

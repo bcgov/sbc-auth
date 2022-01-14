@@ -32,7 +32,7 @@ from notify_api.core.errors import (
     auth_exception_handler, db_exception_handler, http_422_error_handler, http_error_handler,
     validation_exception_handler)
 from notify_api.core.jwt import JWTWrapper
-from notify_api.core.middleware import session_middleware
+from notify_api.core.middleware import response_middleware, session_middleware
 from notify_api.core.settings import get_api_settings
 from notify_api.db.database import SESSION as db_session
 from notify_api.resources import ROUTER as api_router
@@ -145,3 +145,4 @@ class NotifyAPI(FastAPI):
         """Add any default middleware."""
         self.add_middleware(BaseHTTPMiddleware, dispatch=session_middleware)
         self.add_middleware(AuthenticationMiddleware, backend=JWT)
+        self.add_middleware(BaseHTTPMiddleware, dispatch=response_middleware)
