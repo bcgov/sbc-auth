@@ -102,6 +102,24 @@ def test_update_notification(session, loop):
     assert result.status_code == 'FAILURE'
 
 
+def test_update_notification_success(session, loop):
+    """Assert the test can update notification."""
+    notification = NotificationFactory.create_model(session)
+    ContentFactory.create_model(session, notification.id, content_info=ContentFactory.Models.CONTENT_1)
+
+    update_notification: NotificationUpdate = NotificationUpdate(id=notification.id,
+                                                                 sent_date=datetime.now(),
+                                                                 notify_status='DELIVERED')
+    result = loop.run_until_complete(
+        NotifyService.update_notification_status(session, update_notification)
+    )
+
+    assert result.id == NotificationFactory.Models.PENDING_1['id']
+    assert result.recipients == NotificationFactory.Models.PENDING_1['recipients']
+    assert result.status_code == 'DELIVERED'
+    assert result.content.body == ''
+
+
 def test_update_notification_no_exists(session, loop):
     """Assert the test can not update a non exists notification."""
     update_notification: NotificationUpdate = NotificationUpdate(id=999,
