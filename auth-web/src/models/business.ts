@@ -66,7 +66,8 @@ export interface NameRequest {
     enableIncorporation?: boolean,
     folioNumber?: string,
     target?: NrTargetTypes,
-    entityTypeCd?: string
+    entityTypeCd?: string,
+    natureOfBusiness?: string
 }
 
 // Names interface to match external data provided from lear.
@@ -105,11 +106,12 @@ export interface BusinessRequest {
 export interface RegistrationRequest {
     filing: {
         header: {
-            name: string,
+            name: string
             accountId: number
         },
         business: {
             legalType: string
+            natureOfBusiness: string
         },
         registration: {
             nameRequest: NameRequest

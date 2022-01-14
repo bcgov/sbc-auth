@@ -386,7 +386,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
           accountId: this.currentOrganization.id
         },
         business: {
-          legalType: business.nameRequest.legalType
+          legalType: business.nameRequest.legalType,
+          natureOfBusiness: business.nameRequest.natureOfBusiness
         },
         registration: {
           nameRequest: {
@@ -397,7 +398,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       }
     }
     if (business.nameRequest.legalType === LegalTypes.SP) {
-      filingBody.filing.registration.businessType = business.nameRequest.entityTypeCd
+      filingBody.filing.registration.businessType =
+                    (business.nameRequest.entityTypeCd === 'FR' ? 'SP' : business.nameRequest.entityTypeCd)
     }
     return this.createNamedBusiness(filingBody, business.businessIdentifier)
   }

@@ -117,7 +117,8 @@ export default class BusinessModule extends VuexModule {
           enableIncorporation: isApprovedForIa(nr) || isConditionallyApproved(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
-          entityTypeCd: nr.entity_type_cd
+          entityTypeCd: nr.entity_type_cd,
+          natureOfBusiness: nr.natureBusinessInfo
         }
       }
     })
