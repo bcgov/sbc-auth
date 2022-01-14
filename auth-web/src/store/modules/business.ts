@@ -58,7 +58,7 @@ export default class BusinessModule extends VuexModule {
 
     /** Returns target conditionally. */
     const getTarget = (nr): NrTargetTypes => {
-      if ([LegalTypes.SP, LegalTypes.GP].includes(nr.requestTypeCd) && !enableSpGpDba) {
+      if ([LegalTypes.SP, LegalTypes.GP].includes(nr.legalType) && !enableSpGpDba) {
         // Fallback to onestop if SpGpDba is not enabled
         return NrTargetTypes.ONESTOP
       }
