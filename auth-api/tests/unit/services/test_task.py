@@ -20,6 +20,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
@@ -127,8 +128,10 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
 
     task = TaskService.update_task(TaskService(task), task_info=task_info)
     dictionary = task.as_dict()
+    user = UserModel.find_by_id(user.id)
     assert dictionary['status'] == TaskStatus.COMPLETED.value
     assert dictionary['relationship_status'] == TaskRelationshipStatus.ACTIVE.value
+    assert user.verified
 
 
 def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
