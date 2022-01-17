@@ -132,7 +132,7 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     switch (authType) {
       case LoginSource.BCSC:
         // open up BCSC learn more dialog
-        window.open('https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card', '_blank')
+        window.open('https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup', '_blank')
         break
       case LoginSource.BCEID:
         // open up BCEID learn more dialog

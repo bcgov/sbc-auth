@@ -61,8 +61,8 @@ import { User } from '@/models/user'
   }
 })
 export default class BcscPanel extends Vue {
-  private readonly cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card'
-  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card/mobile-card'
+  private readonly cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
+  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
   private secureBulletPoints: Array<any> = [
     { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
     { text: 'Only your name and a unique identifier is stored on the mobile device.' }

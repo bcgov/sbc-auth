@@ -151,6 +151,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 # Send mail to admin about hold with reasons
                 Task._notify_admin_about_hold(user=user, task_model=task_model, is_new_bceid_admin_request=True,
                                               membership_id=membership.id)
+
+        # If action is affidavit review, mark the user as verified.
+        if is_approved and task_model.action == TaskAction.AFFIDAVIT_REVIEW.value and task_model.user:
+            task_model.user.verified = True
+            task_model.user.save()
+
         current_app.logger.debug('>update_task_relationship ')
 
     @staticmethod
@@ -208,7 +214,6 @@ class Task:  # pylint: disable=too-many-instance-attributes
 
         # Update user
         user: UserModel = UserModel.find_by_id(user_id)
-        user.verified = is_approved
         user.status = Status.ACTIVE.value if is_approved else Status.INACTIVE.value
 
         # Update membership

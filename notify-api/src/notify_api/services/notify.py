@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 
 from notify_api.core.settings import get_api_settings
 from notify_api.core.queue_publisher import publish
+from notify_api.db.crud import content as ContentCRUD
 from notify_api.db.crud import notification as NotificaitonCRUD
 from notify_api.db.models.notification import NotificationRequest, NotificationUpdate
 from notify_api.db.models.notification_status import NotificationStatusEnum
@@ -70,4 +71,9 @@ class NotifyService:  # pylint: disable=too-few-public-methods
             notification_exists.sent_date = notification.sent_date
             notification_exists.status_code = notification.notify_status
             updated_notification = await NotificaitonCRUD.update_notification(db_session, notification_exists)
+            if notification_exists.status_code == NotificationStatusEnum.DELIVERED:
+                content_exists = await ContentCRUD.find_content_by_notification_id(db_session, notification.id)
+                if content_exists:
+                    content_exists.body = ''
+                    await ContentCRUD.update_content(db_session, content_exists)
             return updated_notification

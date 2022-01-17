@@ -15,21 +15,21 @@
 from sqlalchemy.orm import Session
 
 from notify_api.db.crud import attachment as AttachmentCRUD
-from notify_api.db.models.content import ContentModel, ContentRequest
+from notify_api.db.models.content import ContentModel, ContentRequest, ContentUpdate
 
 
 async def find_content_by_id(db_session: Session, content_id: int):
     """Get notification content by id."""
-    db_notification = db_session.query(ContentModel)\
+    db_content = db_session.query(ContentModel)\
         .filter(ContentModel.id == content_id).first()
-    return db_notification
+    return db_content
 
 
 async def find_content_by_notification_id(db_session: Session, notification_id: int):
     """Get notification content by notification id."""
-    db_notification = db_session.query(ContentModel) \
+    db_content = db_session.query(ContentModel) \
         .filter(ContentModel.notification_id == notification_id).first()
-    return db_notification
+    return db_content
 
 
 async def create_content(db_session: Session, content: ContentRequest, notification_id: int):
@@ -48,4 +48,13 @@ async def create_content(db_session: Session, content: ContentRequest, notificat
                                                    attachment=attachment,
                                                    content_id=db_content.id)
 
+    return db_content
+
+
+async def update_content(db_session: Session, content: ContentUpdate):
+    """Update content."""
+    db_content = content
+    db_session.add(db_content)
+    db_session.commit()
+    db_session.refresh(db_content)
     return db_content
