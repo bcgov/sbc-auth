@@ -76,7 +76,7 @@
                     </template>
                     <v-list>
                       <v-list-item
-                        v-if="showUseNameRequest(item)"
+                        v-if="canUseNameRequest(item)"
                         class="actions-dropdown_item my-1"
                         data-test="use-name-request-button"
                         @click="useNameRequest(item)"
@@ -127,6 +127,7 @@ import {
   LDFlags,
   LegalTypes,
   NrDisplayStates,
+  NrEntityType,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
@@ -194,7 +195,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 
   /** Returns true if the affiliation is approved to start an IA or Registration */
-  private showUseNameRequest (business: Business): boolean {
+  private canUseNameRequest (business: Business): boolean {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
 
@@ -343,7 +344,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Create a business record in Lear */
   private async createBusinessRecord (business: Business): Promise<string> {
     let filingResponse = null
-    if ([LegalTypes.SP, LegalTypes.GP].includes(business.nameRequest.legalType as LegalTypes)) {
+    if ([LegalTypes.SP, LegalTypes.GP].includes(business.nameRequest?.legalType as LegalTypes)) {
       filingResponse = await this.createBusinessRegistration(business)
     } else {
       filingResponse = await this.createBusinessIA(business)
@@ -397,9 +398,13 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         }
       }
     }
+    // businessType is only required for legalType SP to differentiate Sole Proprietor / Sole Proprietor (DBA)
     if (business.nameRequest.legalType === LegalTypes.SP) {
-      filingBody.filing.registration.businessType =
-                    (business.nameRequest.entityTypeCd === 'FR' ? 'SP' : business.nameRequest.entityTypeCd)
+      if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
+        filingBody.filing.registration.businessType = 'SP'
+      } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
+        filingBody.filing.registration.businessType = 'DBA'
+      }
     }
     return this.createNamedBusiness(filingBody, business.businessIdentifier)
   }

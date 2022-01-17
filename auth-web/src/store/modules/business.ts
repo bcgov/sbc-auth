@@ -1,8 +1,9 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad, RegistrationRequest } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import {
   CorpType,
   FilingTypes,
+  LDFlags,
   LearFilingTypes,
   LegalTypes,
   NrConditionalStates,
@@ -15,6 +16,7 @@ import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
 
 @Module({
@@ -37,7 +39,9 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async syncBusinesses (enableSpGpDba: boolean): Promise<void> {
+  public async syncBusinesses (): Promise<void> {
+    const enableSpGpDba = LaunchDarklyService.getFlag(LDFlags.EnableSpGpDba) || false
+
     /** Returns NR's approved name. */
     const getApprovedName = (nr): string =>
       nr.names.find(name => [NrState.APPROVED, NrState.CONDITION].includes(name.state))?.name
