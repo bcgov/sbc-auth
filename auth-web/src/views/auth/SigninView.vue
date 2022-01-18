@@ -46,7 +46,11 @@ export default class Signin extends Mixins(NextPageMixin) {
     if (this.$store.getters['auth/isAuthenticated']) {
       this.$root.$emit('signin-complete', () => {
         if (this.redirectUrl) {
-          this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
+          if (this.redirectUrl.startsWith('/')) {
+            this.redirectTo(this.redirectUrl)
+          } else {
+            this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
+          }
         } else {
           this.redirectTo(this.getNextPageUrl())
         }

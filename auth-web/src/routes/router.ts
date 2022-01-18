@@ -14,6 +14,7 @@ import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
+import BookmarkLoginView from '@/views/auth/BookmarkLoginView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -625,6 +626,13 @@ export function getRoutes (): RouteConfig[] {
       path: '/unauthorized',
       name: 'unauthorized',
       component: UnauthorizedView,
+      props: true,
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/bookmark',
+      name: 'bookmark',
+      component: BookmarkLoginView,
       props: true,
       meta: { requiresAuth: false }
     },
