@@ -51,12 +51,9 @@ import Vue from 'vue'
   }
 })
 export default class BookmarkLoginView extends Vue {
-  mounted () {
-  }
-
   /** The route bookmarkPath. */
   get bookmarkPath (): string {
-    return `${this.$route.query.bookmarkPath}`
+    return this.$route.query?.bookmarkPath as string
   }
 }
 </script>
