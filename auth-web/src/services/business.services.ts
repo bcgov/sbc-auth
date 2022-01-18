@@ -25,7 +25,7 @@ export default class BusinessService {
     return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessIdentifier}`)
   }
 
-  static async createDraftFiling (filingBody: any): Promise<AxiosResponse<any>> {
+  static async createDraftFiling (filingBody: BusinessRequest): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, filingBody)
   }
 

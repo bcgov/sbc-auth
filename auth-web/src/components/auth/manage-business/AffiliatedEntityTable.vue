@@ -132,7 +132,7 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { Business, BusinessRequest, NameRequest, Names, RegistrationRequest } from '@/models/business'
+import { Business, BusinessRequest, NameRequest, Names } from '@/models/business'
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -157,7 +157,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   // Local Properties
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
-  private readonly createNamedBusiness!: (filingBody: any, nrNumber: string) => Promise<any>
+  private readonly createNamedBusiness!: (filingBody: BusinessRequest, nrNumber: string) => Promise<any>
   private headers: Array<any> = []
   private isLoading: boolean = false
 
@@ -380,7 +380,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 
   private async createBusinessRegistration (business: Business): Promise<any> {
-    const filingBody: RegistrationRequest = {
+    const filingBody: BusinessRequest = {
       filing: {
         header: {
           name: FilingTypes.REGISTRATION,

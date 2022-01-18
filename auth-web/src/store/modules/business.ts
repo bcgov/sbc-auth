@@ -198,7 +198,7 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createNamedBusiness (filingBody: any, nrNumber: string) {
+  public async createNamedBusiness (filingBody: BusinessRequest, nrNumber: string) {
     // Create an affiliation between implicit org and requested business
     const updateResponse = await BusinessService.createDraftFiling(filingBody)
     if (updateResponse?.status >= 200 && updateResponse?.status < 300) {

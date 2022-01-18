@@ -96,24 +96,12 @@ export interface BusinessRequest {
         },
         business: {
             legalType: string
+            natureOfBusiness?: string
         },
-        incorporationApplication: {
+        incorporationApplication?: {
             nameRequest: NameRequest
-        }
-    }
-}
-
-export interface RegistrationRequest {
-    filing: {
-        header: {
-            name: string
-            accountId: number
         },
-        business: {
-            legalType: string
-            natureOfBusiness: string
-        },
-        registration: {
+        registration?: {
             nameRequest: NameRequest
             businessType?: string
         }
