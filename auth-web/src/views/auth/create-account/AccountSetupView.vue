@@ -171,26 +171,6 @@ export default class AccountSetupView extends Vue {
       }
     ]
 
-  async created () {
-    try {
-      if (this.isAuthenticated && !this.skipConfirmation) {
-        this.isCurrentUserSettingLoading = true
-        const currentUserAccountSettings = await this.getUserAccountSettings()
-        const hasExistingAccount = currentUserAccountSettings.length > 0
-        if (hasExistingAccount) {
-          let redirectUrlToDuplicateAccountWarning = this.redirectToUrl
-            ? `${Pages.DUPLICATE_ACCOUNT_WARNING}?redirectToUrl=${encodeURIComponent(this.redirectToUrl)}` : `${Pages.DUPLICATE_ACCOUNT_WARNING}`
-          this.$router.push(redirectUrlToDuplicateAccountWarning)
-        }
-      }
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.log('error while setting up account view')
-    } finally {
-      this.isCurrentUserSettingLoading = false
-    }
-  }
-
   private beforeMount () {
     if (this.enablePaymentMethodSelectorStep) {
       const paymentMethodStep = {
