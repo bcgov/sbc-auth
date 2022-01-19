@@ -12,6 +12,7 @@ export interface User {
     loginSource?: string
     id?: number
     keycloakGuid?: string
+    verified?:boolean
 }
 
 export interface UserTerms {

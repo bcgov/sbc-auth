@@ -10,7 +10,7 @@ import AccountFreezeView from '@/views/auth/account-freeze/AccountFreezeView.vue
 import AccountInstructions from '@/components/auth/create-account/non-bcsc/AccountInstructions.vue'
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
-import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
+import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
@@ -289,7 +289,7 @@ export function getRoutes (): RouteConfig[] {
     {
       path: '/setup-account',
       name: 'setupaccount',
-      component: AccountSetupView,
+      component: AccountSetupLanding,
       props: (route) => ({ redirectToUrl: route.query.redirectToUrl, skipConfirmation: route.query.skipConfirmation }),
       meta: { requiresAuth: true, requiresProfile: true }
     },

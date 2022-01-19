@@ -56,7 +56,6 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
@@ -75,7 +74,8 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
   },
   computed: {
     ...mapState('user', [
-      'userContact'
+      'userContact',
+      'userProfile'
     ]),
     ...mapState('org', [
       'currentOrgPaymentType',
@@ -112,25 +112,27 @@ export default class NonBcscAccountSetupView extends Vue {
   private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
-  private readonly createAffidavit!: () => User
-  private readonly updateUserFirstAndLastName!: (user?: User) => Contact
+  private readonly createAffidavit!: () => Promise<User>
+  private readonly updateUserFirstAndLastName!: (user?: User) => Promise<Contact>
   private readonly createOrg!: () => Promise<Organization>
   private readonly validatePADInfo!: () => Promise<PADInfoValidation>
-  private readonly createUserContact!: (contact?: Contact) => Contact
-  private readonly updateUserContact!: (contact?: Contact) => Contact
-  private readonly getUserProfile!: (identifer: string) => User
+  private readonly createUserContact!: (contact?: Contact) => Promise<Contact>
+  private readonly updateUserContact!: (contact?: Contact) => Promise<Contact>
+  private readonly getUserProfile!: (identifer: string) => Promise<User>
   readonly syncOrganization!: (orgId: number) => Promise<Organization>
   readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly syncAddress!: () => Address
-  private readonly getOrgPayments!: () => OrgPaymentDetails
+  private readonly syncAddress!: () => Promise<Address>
+  private readonly getOrgPayments!: () => Promise<OrgPaymentDetails>
   private readonly setCurrentOrganizationType!: (orgType: string) => void
   private readonly setViewOnlyMode!: (mode: string) => void
   private readonly currentOrganization!: Organization
+  private readonly userProfile!: User
 
   private errorTitle = 'Account creation failed'
   private errorText = ''
   private isLoading: boolean = false
   private readOnly = false
+  private isAffidavitAlreadyApproved = false
 
   $refs: {
     errorDialog: ModalDialog,
@@ -183,7 +185,7 @@ export default class NonBcscAccountSetupView extends Vue {
       }
     ]
 
-  private beforeMount () {
+  private async beforeMount () {
     if (this.enablePaymentMethodSelectorStep) {
       const paymentMethodStep = {
         title: 'Payment Method',
@@ -195,10 +197,21 @@ export default class NonBcscAccountSetupView extends Vue {
       // use the new premium chooser account when flag is enabled
       this.accountStepperConfig[3].alternate.component = PremiumChooser
     }
+    // Loading user details if not exist and check user already verified with affidavit
+    if (!this.userProfile) {
+      await this.getUserProfile('@me')
+    }
+    this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile?.verified
+    // if user affidavit is already approve no need to show upload affidavit stepper
+    // so removing it from array
+    if (this.isAffidavitAlreadyApproved) {
+      this.accountStepperConfig.splice(2, 1)
+    }
   }
   private async mounted () {
     // on re-upload need show some pages are in view only mode
     this.readOnly = !!this.orgId
+    // this.isAffidavitAlreadyApproved = this.userProfile && this.userProfile.verified
     if (this.orgId) {
       // setting view only mode for all other pages which not need to edit
       this.setViewOnlyMode(DisplayModeValues.VIEW_ONLY)
@@ -270,7 +283,10 @@ export default class NonBcscAccountSetupView extends Vue {
     try {
       // normal account flow
       if (!this.readOnly) {
-        await this.createAffidavit()
+        // if user affidavit is already approve no need to make creade affidavit call
+        if (!this.isAffidavitAlreadyApproved) {
+          await this.createAffidavit()
+        }
         await this.updateUserFirstAndLastName()
         const organization = await this.createOrg()
         await this.saveOrUpdateContact()
