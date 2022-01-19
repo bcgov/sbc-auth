@@ -47,8 +47,8 @@ router.beforeEach((to, from, next) => {
         })
       }
       return next({
-        path: '/unauthorized',
-        query: { redirect: to.fullPath }
+        path: '/bookmark',
+        query: { bookmarkPath: to.fullPath }
       })
     }
     if (to.matched.some(record => record.meta.isPremiumOnly)) {
