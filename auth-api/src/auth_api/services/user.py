@@ -73,6 +73,11 @@ class User:  # pylint: disable=too-many-instance-attributes
         """Return the Keycloak GUID for the user."""
         return self._model.keycloak_guid
 
+    @property
+    def verified(self) -> str:
+        """Return the verified flag for the user."""
+        return self._model.verified
+
     @ServiceTracing.disable_tracing
     def as_dict(self):
         """Return the User as a python dict.
