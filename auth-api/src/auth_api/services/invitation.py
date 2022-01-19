@@ -396,7 +396,9 @@ class Invitation:
                 org_model: OrgModel = OrgModel.find_by_org_id(membership.org_id)
 
                 # GOVM users gets direct approval since they are IDIR users.
-                membership_model.status = Invitation._get_status_based_on_org(org_model, login_source, membership_model)
+                membership_model.status = Invitation._get_status_based_on_org(
+                    org_model, login_source, membership_model, user.verified
+                )
                 membership_model.save()
 
                 # Create staff review task.
@@ -427,10 +429,11 @@ class Invitation:
         return Invitation(invitation)
 
     @staticmethod
-    def _get_status_based_on_org(org_model: OrgModel, login_source: str, membership_model: MembershipModel) -> str:
+    def _get_status_based_on_org(org_model: OrgModel, login_source: str, membership_model: MembershipModel,
+                                 verified: bool) -> str:
         if org_model.access_type == AccessType.GOVM.value:
             return Status.ACTIVE.value
-        if login_source == LoginSource.BCEID.value and membership_model.membership_type.code == ADMIN:
+        if login_source == LoginSource.BCEID.value and membership_model.membership_type.code == ADMIN and not verified:
             return Status.PENDING_STAFF_REVIEW.value
         return Status.PENDING_APPROVAL.value
 
