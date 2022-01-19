@@ -76,7 +76,7 @@
                     </template>
                     <v-list>
                       <v-list-item
-                        v-if="isApprovedForIA(item)"
+                        v-if="canUseNameRequest(item)"
                         class="actions-dropdown_item my-1"
                         data-test="use-name-request-button"
                         @click="useNameRequest(item)"
@@ -125,7 +125,9 @@ import {
   CorpType,
   FilingTypes,
   LDFlags,
+  LegalTypes,
   NrDisplayStates,
+  NrEntityType,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
@@ -155,7 +157,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   // Local Properties
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
-  private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
+  private readonly createNamedBusiness!: (filingBody: BusinessRequest, nrNumber: string) => Promise<any>
   private headers: Array<any> = []
   private isLoading: boolean = false
 
@@ -192,13 +194,13 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return item.corpType.code === CorpType.NEW_BUSINESS && item.name === item.businessIdentifier
   }
 
-  /** Returns true if the affiliation is approved to start an IA */
-  private isApprovedForIA (business: Business): boolean {
+  /** Returns true if the affiliation is approved to start an IA or Registration */
+  private canUseNameRequest (business: Business): boolean {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
 
     return this.isNameRequest(business.corpType.code) && // Is this a Name Request
-      business.nameRequest?.enableIncorporation && // Is the Nr state approved or conditionally approved
+      business.nameRequest?.enableIncorporation && // Is the Nr state approved (conditionally) or registration
       supportedEntityFlags.includes(business.nameRequest?.legalType) // Feature flagged Nr types
   }
 
@@ -341,6 +343,22 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   /** Create a business record in Lear */
   private async createBusinessRecord (business: Business): Promise<string> {
+    let filingResponse = null
+    if ([LegalTypes.SP, LegalTypes.GP].includes(business.nameRequest?.legalType as LegalTypes)) {
+      filingResponse = await this.createBusinessRegistration(business)
+    } else {
+      filingResponse = await this.createBusinessIA(business)
+    }
+
+    if (filingResponse?.errorMsg) {
+      this.$emit('add-unknown-error')
+      return ''
+    } else {
+      return filingResponse.data.filing.business.identifier
+    }
+  }
+
+  private async createBusinessIA (business: Business): Promise<any> {
     const filingBody: BusinessRequest = {
       filing: {
         header: {
@@ -358,14 +376,37 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         }
       }
     }
-    const filingResponse = await this.createNamedBusiness(filingBody)
+    return this.createNamedBusiness(filingBody, business.businessIdentifier)
+  }
 
-    if (filingResponse?.errorMsg) {
-      this.$emit('add-unknown-error')
-      return ''
-    } else {
-      return filingResponse.data.filing.business.identifier
+  private async createBusinessRegistration (business: Business): Promise<any> {
+    const filingBody: BusinessRequest = {
+      filing: {
+        header: {
+          name: FilingTypes.REGISTRATION,
+          accountId: this.currentOrganization.id
+        },
+        business: {
+          legalType: business.nameRequest.legalType,
+          natureOfBusiness: business.nameRequest.natureOfBusiness
+        },
+        registration: {
+          nameRequest: {
+            legalType: business.nameRequest.legalType,
+            nrNumber: business.businessIdentifier
+          }
+        }
+      }
     }
+    // businessType is only required for legalType SP to differentiate Sole Proprietor / Sole Proprietor (DBA)
+    if (business.nameRequest.legalType === LegalTypes.SP) {
+      if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
+        filingBody.filing.registration.businessType = 'SP'
+      } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
+        filingBody.filing.registration.businessType = 'DBA'
+      }
+    }
+    return this.createNamedBusiness(filingBody, business.businessIdentifier)
   }
 
   /** Is true when the selected columns includes the column argument. */
