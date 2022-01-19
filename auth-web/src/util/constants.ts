@@ -123,7 +123,8 @@ export enum AffiliationTypes {
 }
 
 export enum FilingTypes {
-    INCORPORATION_APPLICATION = 'incorporationApplication'
+    INCORPORATION_APPLICATION = 'incorporationApplication',
+    REGISTRATION = 'registration'
 }
 
 export enum LearFilingTypes {
@@ -135,7 +136,9 @@ export enum LearFilingTypes {
 export enum LegalTypes {
     BCOMP = 'BEN',
     COOP = 'CP',
-    CORP = 'CR'
+    CORP = 'CR',
+    SP = 'SP',
+    GP = 'GP'
 }
 
 export enum CorpType {
@@ -179,6 +182,35 @@ export enum NrTargetTypes {
     LEAR = 'lear',
     COLIN = 'colin',
     ONESTOP = 'onestop'
+}
+
+export enum NrEntityType {
+    // BC Entity Types:
+    FR = 'FR',
+    DBA = 'DBA',
+    CR = 'CR',
+    UL = 'UL',
+    GP = 'GP',
+    LP = 'LP',
+    LL = 'LL',
+    CP = 'CP',
+    BC = 'BC',
+    CC = 'CC',
+    SO = 'SO',
+    PA = 'PA',
+    FI = 'FI',
+    PAR = 'PAR',
+
+    // XPRO Entity Types:
+    XCR = 'XCR',
+    XUL = 'XUL',
+    RLC = 'RLC',
+    XLP = 'XLP',
+    XLL = 'XLL',
+    XCP = 'XCP',
+    XSO = 'XSO',
+
+    INFO = 'INFO', // special value for sub-menu
 }
 
 export enum BusinessState {
@@ -233,7 +265,8 @@ export enum LDFlags {
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard',
-    DisableGovNAccountCreation='disable-govn-account'
+    DisableGovNAccountCreation='disable-govn-account',
+    EnableSpGpDba='enable-sp-gp-dba'
 }
 
 export enum DateFilterCodes {

@@ -94,15 +94,13 @@ import { StatusCodes } from 'http-status-codes'
   },
   methods: {
     ...mapActions('business', [
-      'addNameRequest',
-      'createNamedBusiness'
+      'addNameRequest'
     ])
   }
 })
 export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
-  private readonly createNamedBusiness!: (filingBody: BusinessRequest) => any
 
   private helpDialogBlurb = 'If you have lost your receipt and name results email and ' +
     'need assistance finding your Name Request (NR) Number, please contact use at:'
