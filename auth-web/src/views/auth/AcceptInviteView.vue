@@ -38,10 +38,6 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
   private readonly getUserProfile!: (identifier: string) => Promise<User>
   private readonly setCurrentOrganization!: (organization: Organization) => void
   private readonly setCurrentMembership!: (membership: Member) => void
-
-  protected readonly userContact!: Contact
-  protected readonly userProfile!: User
-
   @Prop() token: string
   private inviteError: boolean = false
   @Prop({ default: LoginSource.BCSC }) loginSource: string
@@ -76,7 +72,6 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         return
       } else {
         const invitation = await this.acceptInvitation(this.token)
-        // ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id, label: invitation.membership[0].org.name }))
         const invitingOrg = invitation?.membership[0]?.org
         this.setCurrentAccountSettings({
           id: invitingOrg.id,
@@ -97,6 +92,9 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
             user: null
           }
           this.setCurrentMembership(membership)
+          // Store the invitation org as acuurentaccount in session for handling multiple accounts in a single IDIR.
+          // Preserves the invitation org while page refresh.
+          ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id, label: invitation.membership[0].org.name }))
         } else {
           await this.syncMembership(invitation?.membership[0]?.org?.id)
         }
