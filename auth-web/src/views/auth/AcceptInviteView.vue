@@ -58,7 +58,8 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
    */
   private async accept () {
     try {
-      const affidavitNeeded = !!this.$route.query.affidavit
+      // affidavit need for admin users only if not verified before
+      const affidavitNeeded = !!this.$route.query.affidavit && !this.userProfile?.verified
       // if affidavit needed we will append that also in URL so we can refirect user to new flow after TOS accept
       const affidavitNeededURL = affidavitNeeded ? `?affidavit=true` : ''
       if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
