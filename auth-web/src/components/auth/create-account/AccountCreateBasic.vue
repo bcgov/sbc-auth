@@ -115,6 +115,8 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
 
   private baseAddressSchema: {} = addressSchema
   private isOrgBusinessTypeValid = false
+  // Org Id variable to store the current organization ID of the invitation IDIR account
+  private orgId: number = null
 
   $refs: {
     createAccountInfoForm: HTMLFormElement
@@ -125,6 +127,9 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private async mounted () {
+    if (this.govmAccount) {
+      this.orgId = this.currentOrganization.id
+    }
     if (this.enablePaymentMethodSelectorStep) {
       this.isBasicAccount = (this.currentOrganizationType === Account.BASIC)
     }
@@ -178,7 +183,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
 
       let org: Organization = { name: this.orgBusinessTypeLocal.name, orgType: orgType }
       if (this.govmAccount) {
-        org = { ...org, ...{ branchName: this.orgBusinessTypeLocal.branchName, id: this.currentOrganization.id } }
+        org = { ...org, ...{ branchName: this.orgBusinessTypeLocal.branchName, id: this.orgId } }
       }
       if (this.orgBusinessTypeLocal.isBusinessAccount) {
         org = { ...org,

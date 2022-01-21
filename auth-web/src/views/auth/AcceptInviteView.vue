@@ -92,9 +92,6 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
             user: null
           }
           this.setCurrentMembership(membership)
-          // Store the invitation org as acuurentaccount in session for handling multiple accounts in a single IDIR.
-          // Preserves the invitation org while page refresh.
-          ConfigHelper.addToSession(SessionStorageKeys.CurrentAccount, JSON.stringify({ id: invitation.membership[0].org.id, label: invitation.membership[0].org.name }))
         } else {
           await this.syncMembership(invitation?.membership[0]?.org?.id)
         }
