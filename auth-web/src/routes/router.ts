@@ -14,7 +14,6 @@ import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
-import BookmarkLoginView from '@/views/auth/BookmarkLoginView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -32,6 +31,7 @@ import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupVi
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
+import LoginView from '@/views/auth/LoginView.vue'
 import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import NonBcscAccountCreationSuccessView from '@/views/auth/create-account/non-bcsc/NonBcscAccountCreationSuccessView.vue'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
@@ -630,9 +630,9 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: false }
     },
     {
-      path: '/bookmark',
-      name: 'bookmark',
-      component: BookmarkLoginView,
+      path: '/login',
+      name: 'login',
+      component: LoginView,
       props: true,
       meta: { requiresAuth: false }
     },
