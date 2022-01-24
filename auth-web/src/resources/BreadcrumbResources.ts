@@ -3,15 +3,15 @@ import ConfigHelper from '@/util/config-helper'
 
 export const MarketingHomeBreadcrumb: BreadcrumbIF = {
   text: 'BC Registries and Online Services',
-  href: `${ConfigHelper.getValue('BCROS_HOME_URL')}`
+  href: `${ConfigHelper.getValue('REGISTRY_HOME_URL')}`
 }
 
-export const DashboardHomeBreadcrumb: BreadcrumbIF = {
+export const RegistryDashboardBreadcrumb: BreadcrumbIF = {
   text: 'BC Registries Dashboard',
-  href: `${ConfigHelper.getValue('BCROS_HOME_URL')}dashboard`
+  href: `${ConfigHelper.getValue('REGISTRY_HOME_URL')}dashboard`
 }
 
-export const RegistryTableBreadcrumb: BreadcrumbIF = {
+export const MyBusinessRegistryBreadcrumb: BreadcrumbIF = {
   text: 'My Business Registry',
   to: { name: 'business' },
   href: `${ConfigHelper.getValue('AUTH_WEB_URL')}/business`

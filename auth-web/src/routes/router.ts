@@ -1,7 +1,7 @@
 import {
-  DashboardHomeBreadcrumb,
   MarketingHomeBreadcrumb,
-  RegistryTableBreadcrumb,
+  MyBusinessRegistryBreadcrumb,
+  RegistryDashboardBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
@@ -221,8 +221,8 @@ export function getRoutes (): RouteConfig[] {
             requiresAuth: true,
             requiresActiveAccount: true,
             breadcrumb: [
-              DashboardHomeBreadcrumb,
-              RegistryTableBreadcrumb
+              RegistryDashboardBreadcrumb,
+              MyBusinessRegistryBreadcrumb
             ]
           }
         }]

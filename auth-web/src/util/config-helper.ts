@@ -37,7 +37,7 @@ export default class ConfigHelper {
   }
 
   static getBcrosDashboardURL () {
-    return `${ConfigHelper.getValue('BCROS_HOME_URL')}dashboard`
+    return `${ConfigHelper.getValue('REGISTRY_HOME_URL')}dashboard`
   }
 
   static getBcrosURL () {
