@@ -17,6 +17,7 @@ export default class ConfigHelper {
     sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.AuthWebUrl, ConfigHelper.getSelfURL())
     sessionStorage.setItem(SessionStorageKeys.FasWebUrl, ConfigHelper.getFasWebUrl())
+    sessionStorage.setItem(SessionStorageKeys.RegistryHomeUrl, ConfigHelper.getRegistryHomeURL())
   }
 
   /**
@@ -34,6 +35,10 @@ export default class ConfigHelper {
   static getBusinessURL () {
     // this needs trailing slash
     return `${window.location.origin}/business/`
+  }
+
+  static getRegistryHomeURL () {
+    return `${ConfigHelper.getValue('REGISTRY_HOME_URL')}`
   }
 
   static getBcrosDashboardURL () {
