@@ -1,4 +1,9 @@
-import { DashboardBreadcrumb, HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
+import {
+  DashboardHomeBreadcrumb,
+  MarketingHomeBreadcrumb,
+  RegistryTableBreadcrumb,
+  StaffDashboardBreadcrumb
+} from '@/resources/BreadcrumbResources'
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
 
 import AcceptInviteLandingView from '@/views/auth/AcceptInviteLandingView.vue'
@@ -135,8 +140,9 @@ export function getRoutes (): RouteConfig[] {
           component: DecideBusinessView,
           meta: {
             breadcrumb: [
+              MarketingHomeBreadcrumb,
               {
-                text: HomeBreadCrumb.text,
+                text: 'Business Registry Home',
                 to: { name: 'decide-business' }
               }
             ],
@@ -149,8 +155,9 @@ export function getRoutes (): RouteConfig[] {
           component: RequestNameView,
           meta: {
             breadcrumb: [
+              MarketingHomeBreadcrumb,
               {
-                text: HomeBreadCrumb.text,
+                text: 'Business Registry Home',
                 to: { name: 'request-name' }
               }
             ],
@@ -163,8 +170,9 @@ export function getRoutes (): RouteConfig[] {
           component: IncorpOrRegisterView,
           meta: {
             breadcrumb: [
+              MarketingHomeBreadcrumb,
               {
-                text: HomeBreadCrumb.text,
+                text: 'Business Registry Home',
                 to: { name: 'incorporate-or-register' }
               }
             ],
@@ -177,8 +185,9 @@ export function getRoutes (): RouteConfig[] {
           component: MaintainBusinessView,
           meta: {
             breadcrumb: [
+              MarketingHomeBreadcrumb,
               {
-                text: HomeBreadCrumb.text,
+                text: 'Business Registry Home',
                 to: { name: 'maintain-business' }
               }
             ],
@@ -211,7 +220,10 @@ export function getRoutes (): RouteConfig[] {
             disabledRoles: [Role.AnonymousUser],
             requiresAuth: true,
             requiresActiveAccount: true,
-            breadcrumb: [DashboardBreadcrumb]
+            breadcrumb: [
+              DashboardHomeBreadcrumb,
+              RegistryTableBreadcrumb
+            ]
           }
         }]
     },

@@ -1,5 +1,6 @@
 {
   "AUTH_WEB_URL": "https://dev.bcregistry.ca/business/auth/",
+  "BCROS_HOME_URL": "https://yfthig-dev.web.app/",
   "BUSINESS_CREATE_URL": "https://business-create-dev.apps.silver.devops.gov.bc.ca/businesses/",
   "DIRECTOR_SEARCH_URL": "https://dev.bcregistry.ca/directorsearch/",
   "NRO_URL": "https://dev.bcregistrynames.gov.bc.ca/nro/",

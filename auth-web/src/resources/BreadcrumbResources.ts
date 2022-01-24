@@ -1,19 +1,23 @@
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
+import ConfigHelper from '@/util/config-helper'
 
-export const HomeBreadCrumb: BreadcrumbIF = {
-  text: 'Business Registry Home',
-  to: { name: 'home' },
-  href: `${sessionStorage.getItem('AUTH_WEB_URL')}`
+export const MarketingHomeBreadcrumb: BreadcrumbIF = {
+  text: 'BC Registries and Online Services',
+  href: `${ConfigHelper.getValue('BCROS_HOME_URL')}`
 }
 
-export const DashboardBreadcrumb: BreadcrumbIF = {
+export const DashboardHomeBreadcrumb: BreadcrumbIF = {
+  text: 'BC Registries Dashboard',
+  href: `${ConfigHelper.getValue('BCROS_HOME_URL')}dashboard`
+}
+
+export const RegistryTableBreadcrumb: BreadcrumbIF = {
   text: 'My Business Registry',
   to: { name: 'business' },
-  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/business`
+  href: `${ConfigHelper.getValue('AUTH_WEB_URL')}/business`
 }
 
 export const StaffDashboardBreadcrumb: BreadcrumbIF = {
   text: 'Staff Dashboard',
-  to: { name: 'staff-dashboard' },
-  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/staff/dashboard/active`
+  href: `${ConfigHelper.getValue('AUTH_WEB_URL')}/staff/dashboard/active`
 }

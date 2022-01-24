@@ -42,7 +42,7 @@
           <v-icon small
             color="#1a5a96"
             class="mr-1">mdi-arrow-left</v-icon>
-          <span>Manage Businesses</span>
+          <span>Go to My Dashboard</span>
         </a>
       </div>
     </nav>
@@ -280,8 +280,9 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private readonly permissions!: string[]
 
   private handleBackButton (): void {
-    const backTo = this.isStaff ? Pages.STAFF_DASHBOARD : `/account/${this.orgId}/business`
-    this.$router.push(backTo)
+    this.isStaff
+      ? this.$router.push(Pages.STAFF_DASHBOARD)
+      : window.location.replace(ConfigHelper.getBcrosDashboardURL())
   }
 
   private get isStaff ():boolean {
