@@ -1,7 +1,7 @@
 import {
-  MarketingHomeBreadcrumb,
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
+  RegistryHomeBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
@@ -140,7 +140,7 @@ export function getRoutes (): RouteConfig[] {
           component: DecideBusinessView,
           meta: {
             breadcrumb: [
-              MarketingHomeBreadcrumb,
+              RegistryHomeBreadcrumb,
               {
                 text: 'Business Registry Home',
                 to: { name: 'decide-business' }
@@ -155,7 +155,7 @@ export function getRoutes (): RouteConfig[] {
           component: RequestNameView,
           meta: {
             breadcrumb: [
-              MarketingHomeBreadcrumb,
+              RegistryHomeBreadcrumb,
               {
                 text: 'Business Registry Home',
                 to: { name: 'request-name' }
@@ -170,7 +170,7 @@ export function getRoutes (): RouteConfig[] {
           component: IncorpOrRegisterView,
           meta: {
             breadcrumb: [
-              MarketingHomeBreadcrumb,
+              RegistryHomeBreadcrumb,
               {
                 text: 'Business Registry Home',
                 to: { name: 'incorporate-or-register' }
@@ -185,7 +185,7 @@ export function getRoutes (): RouteConfig[] {
           component: MaintainBusinessView,
           meta: {
             breadcrumb: [
-              MarketingHomeBreadcrumb,
+              RegistryHomeBreadcrumb,
               {
                 text: 'Business Registry Home',
                 to: { name: 'maintain-business' }

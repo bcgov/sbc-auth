@@ -1,7 +1,7 @@
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
 import ConfigHelper from '@/util/config-helper'
 
-export const MarketingHomeBreadcrumb: BreadcrumbIF = {
+export const RegistryHomeBreadcrumb: BreadcrumbIF = {
   text: 'BC Registries and Online Services',
   href: `${ConfigHelper.getValue('REGISTRY_HOME_URL')}`
 }
