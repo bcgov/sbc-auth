@@ -76,7 +76,8 @@ export enum Pages {
     STAFF_GOVM_SETUP_ACCOUNT = '/staff-govm-setup-account',
     SETUP_GOVM_ACCOUNT_SUCCESS='setup-govm-account-success',
     DUPLICATE_ACCOUNT_WARNING='/duplicate-account-warning',
-    AFFIDAVIT_COMPLETE='upload-affidavit'
+    AFFIDAVIT_COMPLETE = 'upload-affidavit',
+    LOGIN = 'login'
 }
 
 export enum Account {

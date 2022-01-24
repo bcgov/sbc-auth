@@ -47,8 +47,8 @@ router.beforeEach((to, from, next) => {
         })
       }
       return next({
-        path: '/bookmark',
-        query: { bookmarkPath: to.fullPath }
+        path: '/login',
+        query: { redirect: to.fullPath }
       })
     }
     if (to.matched.some(record => record.meta.isPremiumOnly)) {
@@ -89,30 +89,38 @@ router.beforeEach((to, from, next) => {
     const currentMembership: Member = (store.state as any)?.org?.currentMembership
     const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
     const permissions: string[] = (store.state as any)?.org?.permissions
-    if (to.matched.some(record => record.meta.requiresProfile) &&
-      !userProfile?.userTerms?.isTermsOfUseAccepted) {
-      switch (currentUser?.loginSource) {
-        case LoginSource.IDIR:
-          break
-        case LoginSource.BCSC:
-        case LoginSource.BCROS:
-        case LoginSource.BCEID:
-          // eslint-disable-next-line no-console
-          console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
-          // if there's redirectUri in query string, keep existing redirectUri, otherwise use current location
-          const urlParams = new URLSearchParams(window.location.search)
-          let uriRedirectTo = urlParams.get('redirectUri')
-          if (uriRedirectTo === '' || uriRedirectTo === null) {
-            uriRedirectTo = window.location.pathname.replace(process.env.VUE_APP_PATH, '')
-          }
-          return next({
-            path: `/${Pages.USER_PROFILE_TERMS}`,
-            query: { redirectUri: `${uriRedirectTo}` }
-          })
-        default:
-          return next({
-            path: '/'
-          })
+    if (to.path === `/${Pages.LOGIN}` && currentUser) {
+      // If the user came back from login page and is already logged in
+      // redirect to redirect path
+      return next({
+        path: `${to.query.redirect as string}` || '/'
+      })
+    } else {
+      if (to.matched.some(record => record.meta.requiresProfile) &&
+        !userProfile?.userTerms?.isTermsOfUseAccepted) {
+        switch (currentUser?.loginSource) {
+          case LoginSource.IDIR:
+            break
+          case LoginSource.BCSC:
+          case LoginSource.BCROS:
+          case LoginSource.BCEID:
+            // eslint-disable-next-line no-console
+            console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
+            // if there's redirectUri in query string, keep existing redirectUri, otherwise use current location
+            const urlParams = new URLSearchParams(window.location.search)
+            let uriRedirectTo = urlParams.get('redirectUri')
+            if (uriRedirectTo === '' || uriRedirectTo === null) {
+              uriRedirectTo = window.location.pathname.replace(process.env.VUE_APP_PATH, '')
+            }
+            return next({
+              path: `/${Pages.USER_PROFILE_TERMS}`,
+              query: { redirectUri: `${uriRedirectTo}` }
+            })
+          default:
+            return next({
+              path: '/'
+            })
+        }
       }
     }
 
