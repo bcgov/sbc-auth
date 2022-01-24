@@ -304,7 +304,8 @@ export default class NonBcscAccountSetupView extends Vue {
       }
 
       this.$store.commit('updateHeader')
-      this.$router.push('/setup-non-bcsc-account-success')
+      const nextRoute = !this.isAffidavitAlreadyApproved ? '/setup-non-bcsc-account-success' : '/setup-account-success'
+      this.$router.push(nextRoute)
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error(err)
