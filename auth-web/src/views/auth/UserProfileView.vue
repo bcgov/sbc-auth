@@ -62,7 +62,7 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
 
   private navigateBack (): void {
     if (this.currentOrganization) {
-      window.location.replace(ConfigHelper.getBcrosDashboardURL())
+      window.location.assign(ConfigHelper.getBcrosDashboardURL())
     } else {
       this.$router.push('/home')
     }

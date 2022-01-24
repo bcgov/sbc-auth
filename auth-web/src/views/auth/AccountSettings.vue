@@ -282,7 +282,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   private handleBackButton (): void {
     this.isStaff
       ? this.$router.push(Pages.STAFF_DASHBOARD)
-      : window.location.replace(ConfigHelper.getBcrosDashboardURL())
+      : window.location.assign(ConfigHelper.getBcrosDashboardURL())
   }
 
   private get isStaff ():boolean {
