@@ -6,6 +6,7 @@
         :key="$store.state.refreshKey"
         :in-auth="true"
         :show-product-selector="false"
+        :show-login-menu="showLoginMenu"
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
@@ -104,6 +105,11 @@ export default class App extends Mixins(NextPageMixin) {
 
   get showNavigationBar (): boolean {
     return this.$route.meta.showNavBar
+  }
+
+  get showLoginMenu (): boolean {
+    // Don't show the login menu if the user is on login page
+    return this.$route.path !== `/${Pages.LOGIN}`
   }
 
   /** The route breadcrumbs list. */
