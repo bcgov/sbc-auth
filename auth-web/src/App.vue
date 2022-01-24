@@ -108,10 +108,6 @@ export default class App extends Mixins(NextPageMixin) {
 
   /** The route breadcrumbs list. */
   get breadcrumbs (): Array<BreadcrumbIF> {
-    // eslint-disable-next-line no-console
-    console.log(ConfigHelper.getValue('BCROS_HOME_URL'))
-    // eslint-disable-next-line no-console
-    console.log(this.$route?.meta?.breadcrumb)
     return [...(this.$route?.meta?.breadcrumb || [])]
   }
 
