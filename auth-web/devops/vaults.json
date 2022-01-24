@@ -45,7 +45,8 @@
             "entity-selector",
             "bceid",
             "fas-ui",
-            "ppr-ui"
+            "ppr-ui",
+            "registry"
         ]
     },
     {

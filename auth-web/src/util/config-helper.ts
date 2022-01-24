@@ -36,6 +36,10 @@ export default class ConfigHelper {
     return `${window.location.origin}/business/`
   }
 
+  static getBcrosDashboardURL () {
+    return `${ConfigHelper.getValue('REGISTRY_HOME_URL')}dashboard`
+  }
+
   static getBcrosURL () {
     return `${ConfigHelper.getSelfURL()}/signin/bcros/`
   }

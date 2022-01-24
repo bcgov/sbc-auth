@@ -45,7 +45,6 @@
 <script lang="ts">
 import { AccessType, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import { HomeBreadCrumb, StaffDashboardBreadcrumb } from '@/resources/BreadcrumbResources'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
@@ -109,16 +108,7 @@ export default class App extends Mixins(NextPageMixin) {
 
   /** The route breadcrumbs list. */
   get breadcrumbs (): Array<BreadcrumbIF> {
-    const breadcrumbs = [...(this.$route?.meta?.breadcrumb || [])]
-
-    // Apply dynamic return crumb depending on user role
-    // This will be replaced when we have our UBER dashboard / high level marketing page
-    const defaultCrumb = this.currentUser?.roles?.includes(Role.Staff) ? StaffDashboardBreadcrumb : HomeBreadCrumb
-    if (this.$route?.name === 'business') {
-      breadcrumbs.unshift(defaultCrumb)
-    }
-
-    return breadcrumbs
+    return [...(this.$route?.meta?.breadcrumb || [])]
   }
 
   private startAccountSwitch () {

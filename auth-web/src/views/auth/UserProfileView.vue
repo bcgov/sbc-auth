@@ -39,14 +39,11 @@
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { Contact } from '@/models/contact'
+import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
@@ -65,7 +62,7 @@ export default class UserProfileView extends Mixins(NextPageMixin) {
 
   private navigateBack (): void {
     if (this.currentOrganization) {
-      this.$router.push(`/account/${this.currentOrganization.id}`)
+      window.location.assign(ConfigHelper.getBcrosDashboardURL())
     } else {
       this.$router.push('/home')
     }
