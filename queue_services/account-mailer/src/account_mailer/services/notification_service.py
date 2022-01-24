@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Invitation data."""
-import json
-
 from auth_api.services.rest_service import RestService
 from flask import current_app
 
