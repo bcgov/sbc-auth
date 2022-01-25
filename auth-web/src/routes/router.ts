@@ -35,6 +35,7 @@ import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAcco
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LeaveTeamLandingView from '@/views/auth/LeaveTeamLandingView.vue'
 import LoginView from '@/views/auth/LoginView.vue'
 import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
@@ -109,6 +110,11 @@ function mapPendingDetails (route: any) {
     teamName: orgName,
     pendingAffidavit: route.params.pendingAffidavit
   }
+}
+
+function isStaff () {
+  const kcUserProfile = KeyCloakService.getUserInfo()
+  return kcUserProfile.roles.includes(Role.Staff)
 }
 
 export function getRoutes (): RouteConfig[] {
@@ -221,7 +227,7 @@ export function getRoutes (): RouteConfig[] {
             requiresAuth: true,
             requiresActiveAccount: true,
             breadcrumb: [
-              RegistryDashboardBreadcrumb,
+              ...isStaff() ? [StaffDashboardBreadcrumb] : [RegistryDashboardBreadcrumb],
               MyBusinessRegistryBreadcrumb
             ]
           }
