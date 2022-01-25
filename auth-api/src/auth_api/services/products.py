@@ -35,7 +35,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
-from ..utils.roles import CLIENT_AUTH_ROLES, CLIENT_ADMIN_ROLES, STAFF
+from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .authorization import check_auth
 from .task import Task as TaskService
 
