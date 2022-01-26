@@ -495,7 +495,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     private navigateBack (): void {
       if (this.currentOrganization) {
-        this.$router.push(`/account/${this.currentOrganization.id}`)
+        window.location.assign(configHelper.getBcrosDashboardURL())
       } else {
         this.$router.push('/home')
       }
