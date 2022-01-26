@@ -112,9 +112,9 @@ function mapPendingDetails (route: any) {
   }
 }
 
-function isStaff () {
+function isStaff (): boolean {
   const kcUserProfile = KeyCloakService.getUserInfo()
-  return kcUserProfile?.roles?.includes(Role.Staff)
+  return kcUserProfile?.roles?.includes(Role.Staff) || false
 }
 
 export function getRoutes (): RouteConfig[] {
