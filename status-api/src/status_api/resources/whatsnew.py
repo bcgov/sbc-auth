@@ -35,5 +35,5 @@ class WhatsNew(Resource):
     def get():
         """Get the service schedule and return status and next schedule date/time."""
         print(current_app.config.get('WHATSNEW'))
-        response, status = current_app.config.get('WHATSNEW'), HTTPStatus.OK
-        return json.dumps(response), status
+        news_json = current_app.config.get('WHATSNEW')
+        return news_json, HTTPStatus.OK
