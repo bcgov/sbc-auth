@@ -203,8 +203,7 @@ export default class PaymentMethods extends Vue {
   }
 
   private get isPADOnly () {
-    const isGovNAccount = this.currentOrganization?.accessType === AccessType.GOVN
-    return (this.currentOrgType === Account.UNLINKED_PREMIUM) || !!isGovNAccount
+    return this.currentOrgType === Account.UNLINKED_PREMIUM
   }
 
   private get isPaymentEJV () {
