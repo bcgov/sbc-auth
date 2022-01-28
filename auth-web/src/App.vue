@@ -46,6 +46,7 @@
 <script lang="ts">
 import { AccessType, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
+import { MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
@@ -57,12 +58,12 @@ import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
-import { MembershipStatus } from '@/models/Organization'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -114,7 +115,18 @@ export default class App extends Mixins(NextPageMixin) {
 
   /** The route breadcrumbs list. */
   get breadcrumbs (): Array<BreadcrumbIF> {
-    return [...(this.$route?.meta?.breadcrumb || [])]
+    const currentAccountId = this.currentOrganization?.id || ''
+    const breadcrumb = this.$route?.meta?.breadcrumb || []
+    // updating breadcrumb url with account id if its external URL
+    const breadcrumbwithAccountId = breadcrumb.map(items => {
+      const newItem = { ...items }
+      if (newItem && newItem.href) {
+        newItem.href = appendAccountId(items.href, currentAccountId.toString())
+      }
+      return newItem
+    })
+
+    return [...(breadcrumbwithAccountId || [])]
   }
 
   private startAccountSwitch () {
