@@ -140,6 +140,7 @@ import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   computed: {
@@ -322,23 +323,23 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
     let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
 
-    window.location.href = decodeURIComponent(redirectURL)
+    window.location.href = appendAccountId(decodeURIComponent(redirectURL))
   }
 
   /** Navigation handler for name request application */
   private goToNameRequest (nameRequest: NameRequest): void {
     ConfigHelper.setNrCredentials(nameRequest)
-    window.location.href = `${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`
+    window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`)
   }
 
   /** Navigation handler for OneStop application */
   private goToOneStop (): void {
-    window.location.href = ConfigHelper.getOneStopUrl()
+    window.location.href = appendAccountId(ConfigHelper.getOneStopUrl())
   }
 
   /** Navigation handler for Corporate Online application */
   private goToCorpOnline (): void {
-    window.location.href = ConfigHelper.getCorporateOnlineUrl()
+    window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
   }
 
   /** Create a business record in Lear */

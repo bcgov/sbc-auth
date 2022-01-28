@@ -56,6 +56,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
@@ -75,18 +76,18 @@ export default class RequestNameView extends Vue {
   // open Name Request in current tab to retain current account and user
   goToNameRequestExisting (): void {
     if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
-      window.location.href = `${ConfigHelper.getNameRequestUrl()}existing`
+      window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}existing`)
     } else {
-      window.location.href = `${ConfigHelper.getNroUrl()}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`
+      window.location.href = appendAccountId(`${ConfigHelper.getNroUrl()}nro.htm?_flowId=anonymous-monitor-flow&_flowExecutionKey=e1s1`)
     }
   }
 
   // open Name Request in current tab to retain current account and user
   goToNameRequest (): void {
     if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
-      window.location.href = ConfigHelper.getNameRequestUrl()
+      window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
     } else {
-      window.location.href = ConfigHelper.getNroUrl()
+      window.location.href = appendAccountId(ConfigHelper.getNroUrl())
     }
   }
 }

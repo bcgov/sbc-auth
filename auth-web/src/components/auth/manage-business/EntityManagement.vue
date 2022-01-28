@@ -217,6 +217,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
@@ -327,7 +328,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   // open Name Request
   private goToNameRequest (): void {
-    window.location.href = ConfigHelper.getNameRequestUrl()
+    window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
   }
 
   async showAddSuccessModal () {
