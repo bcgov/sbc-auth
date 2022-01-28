@@ -197,6 +197,11 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
       this.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
       this.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
       this.selectedPaymentMethod = this.currentOrgPaymentType || ''
+
+      // Rare cases where GOVN account has payment switched from PAD to BCOL in the backend
+      if (this.currentOrganization.accessType === AccessType.GOVN && orgPayments.paymentMethod === PaymentTypes.BCOL) {
+        this.savedOrganizationType = this.currentOrganization.orgType
+      }
     } else {
       // if the account switing happening when the user is already in the transaction page,
       // redirect to account info if its a basic account
