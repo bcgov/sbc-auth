@@ -22,9 +22,12 @@
           large
           color="primary"
           class="font-weight-bold ml-auto"
+          :loading="isLoading"
           @click="exportCSV"
+          :disabled="isLoading"
           data-test="btn-export-csv"
-        >Export CSV</v-btn>
+        >Export CSV
+       </v-btn>
          </div>
       <TransactionsDataTable
         class="mt-4"
@@ -72,6 +75,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
 
   private updateTransactionTableCounter: number = 0
   private totalTransactionsCount: number = 0
+  private isLoading: boolean = false
   private searchFilter: SearchFilterParam[] = []
   private transactionFilterProp: TransactionFilter = {} as TransactionFilter
   private isTransactionFetchDone: boolean = false
@@ -155,9 +159,11 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   }
 
   private async exportCSV () {
+    this.isLoading = true
     const filterParams: TransactionFilter = this.transactionFilterProp
     const downloadData = await this.getTransactionReport(filterParams)
     CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+    this.isLoading = false
   }
 
   private get isTransactionsAllowed (): boolean {
