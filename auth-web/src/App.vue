@@ -77,8 +77,7 @@ import { getModule } from 'vuex-module-decorators'
   computed: {
     ...mapState('org', [
       'currentAccountSettings',
-      'permissions',
-      'currentOrganization'
+      'permissions'
     ]),
     ...mapState('user', ['currentUser']),
     ...mapGetters('auth', ['isAuthenticated']),
@@ -100,7 +99,6 @@ export default class App extends Mixins(NextPageMixin) {
   private toastTimeout = 6000
   private logoutUrl = ''
   private readonly needMissingBusinessDetailsRedirect!: boolean
-  private currentOrganization: Organization
 
   $refs: {
     header: SbcHeader
@@ -123,7 +121,7 @@ export default class App extends Mixins(NextPageMixin) {
     const breadcrumbwithAccountId = breadcrumb.map(items => {
       const newItem = { ...items }
       if (newItem && newItem.href) {
-        newItem.href = appendAccountId(items.href, currentAccountId)
+        newItem.href = appendAccountId(items.href, currentAccountId.toString())
       }
       return newItem
     })
