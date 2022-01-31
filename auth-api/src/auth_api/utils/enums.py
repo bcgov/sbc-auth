@@ -43,6 +43,7 @@ class CorpType(Enum):
     NR = 'NR'
     CP = 'CP'  # cooperative
     TMP = 'TMP'
+    RTMP = 'RTMP'
     BC = 'BC'  # bcomp
     CR = 'CR'  # corporation
     UL = 'UL'  # Unlimited Liability
