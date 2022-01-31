@@ -79,7 +79,8 @@ class Affiliation:
         nr_number_name_dict = {d['business_identifier']: d['name']
                                for d in data if d['corp_type']['code'] == CorpType.NR.value}
         # Create a list of all temporary business names
-        tmp_business_list = [d['name'] for d in data if d['corp_type']['code'] == CorpType.TMP.value]
+        temp_types = (CorpType.TMP.value, CorpType.RTMP.value)
+        tmp_business_list = [d['name'] for d in data if d['corp_type']['code'] in temp_types]
 
         # NR Numbers
         nr_numbers = nr_number_name_dict.keys()
@@ -91,7 +92,7 @@ class Affiliation:
                 if not entity['business_identifier'] in tmp_business_list:
                     filtered_affiliations.append(entity)
 
-            elif entity['corp_type']['code'] == CorpType.TMP.value:
+            elif entity['corp_type']['code'] in temp_types:
 
                 # If affiliation is not for a named company IA, and not a Numbered company
                 # (name and businessIdentifier same)
