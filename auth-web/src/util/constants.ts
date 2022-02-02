@@ -121,7 +121,8 @@ export enum TransactionStatus {
 export enum AffiliationTypes {
     NAME_REQUEST ='Name Request',
     INCORPORATION_APPLICATION = 'Incorporation Application',
-    CORPORATION = 'Corporation'
+    CORPORATION = 'Corporation',
+    REGISTRATION = 'Registration'
 }
 
 export enum FilingTypes {
@@ -146,6 +147,7 @@ export enum LegalTypes {
 export enum CorpType {
     COOP = 'CP',
     NEW_BUSINESS = 'TMP',
+    NEW_REGISTRATION = 'RTMP',
     BCOMP = 'BEN',
     NAME_REQUEST = 'NR',
     TEMP = 'TMP'
