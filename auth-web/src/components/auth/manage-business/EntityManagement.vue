@@ -414,6 +414,9 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_BUSINESS) {
       this.populateIAmodalValues()
       this.$refs.removalConfirmDialog.open()
+    } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_REGISTRATION) {
+      this.populateRegistrationModalValues()
+      this.$refs.removalConfirmDialog.open()
     } else {
       this.$refs.passcodeResetOptionsModal.open()
     }
@@ -437,8 +440,22 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.secondaryBtnHandler = this.cancelRemoval
   }
 
+  private populateRegistrationModalValues () {
+    this.dialogTitle = this.$t('removeRegistrationConfirmTitle').toString()
+    this.dialogText = this.$t('removeRegistrationConfirmText').toString()
+    this.primaryBtnText = 'Delete Registration'
+    this.secondaryBtnText = 'Keep Registration'
+    this.primaryBtnHandler = this.confirmRemovalRegistration
+    this.secondaryBtnHandler = this.cancelRemoval
+  }
+
   cancelRemoval () {
     this.$refs.removalConfirmDialog.close()
+  }
+
+  confirmRemovalRegistration () {
+    this.$refs.removalConfirmDialog.close()
+    this.remove('', false, 'removeRegistrationSuccessTitle', 'removeRegistrationSuccessText')
   }
 
   confirmRemovalIA () {
