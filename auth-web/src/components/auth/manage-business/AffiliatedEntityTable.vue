@@ -94,7 +94,7 @@
                       >
                         <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">
                           <v-icon small>mdi-delete-forever</v-icon>
-                          <span class="pl-1">Delete Incorporation Application</span>
+                          <span class="pl-1">Delete {{tempDescription(item.corpType.code)}}</span>
                         </v-list-item-subtitle>
                         <v-list-item-subtitle v-else>
                           <v-icon small>mdi-delete</v-icon>
@@ -187,7 +187,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   /** Returns true if the affiliation is a Temp Registration */
   private isTemporaryBusinessRegistration (corpType: string): boolean {
-    return corpType === CorpType.NEW_BUSINESS
+    return corpType === CorpType.NEW_BUSINESS || corpType === CorpType.NEW_REGISTRATION
   }
 
   /** Returns true if the affiliation is a Numbered Company */
@@ -240,9 +240,19 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       case (this.isNameRequest(item.corpType.code)):
         return AffiliationTypes.NAME_REQUEST
       case this.isTemporaryBusinessRegistration(item.corpType.code):
-        return AffiliationTypes.INCORPORATION_APPLICATION
+        return this.tempDescription(item.corpType.code as CorpType)
       default:
         return this.typeDescription(item.corpType.code as CorpTypeCd)
+    }
+  }
+
+  /** Returns the temp corp description for display */
+  private tempDescription (corpType: CorpType): string {
+    switch (corpType) {
+      case CorpType.NEW_BUSINESS:
+        return AffiliationTypes.INCORPORATION_APPLICATION
+      case CorpType.NEW_REGISTRATION:
+        return AffiliationTypes.REGISTRATION
     }
   }
 
