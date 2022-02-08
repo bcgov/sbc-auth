@@ -41,7 +41,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     claims['sub'] = str(kc_id)
     patch_token_info(claims, monkeypatch)
 
-    OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
+    OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user_model.id)
 
     # post token with updated claims
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -49,6 +49,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
     item_list = rv.json
     account = next(obj for obj in item_list if obj['type'] == 'ACCOUNT')
     assert account['accountType'] == 'BASIC'
+    assert account['additionalLabel'] == TestOrgInfo.org_branch_name.get('branchName')
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(item_list, 'user_settings_response')[0]
     assert account['productSettings'] == f'/account/{account["id"]}/restricted-product'

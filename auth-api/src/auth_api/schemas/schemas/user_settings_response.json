@@ -121,6 +121,15 @@
                       "pattern": "^(.*)$"
                   }
               },
+                  "additionalLabel": {
+                      "$id": "#/items/anyOf/0/properties/additionalLabel",
+                      "type": "string",
+                      "title": "Additional Label",
+                      "default": "",
+                      "examples": [
+                          "My Test Branch"
+                      ]
+                  },
               "additionalProperties": true
           }
       ]
