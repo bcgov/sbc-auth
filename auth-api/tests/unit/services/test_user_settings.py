@@ -42,3 +42,13 @@ def test_user_settings(session, auth_mock, keycloak_mock, monkeypatch):  # pylin
     assert len(usersettings) == 3
     assert org[0].label == TestOrgInfo.org1['name']
     assert org[0].id == org_id
+    assert org[0].additional_label == '', 'no additional label'
+
+    # add an org with branch name and assert additonal label
+    org = OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user.identifier)
+    org_with_branch_dictionary = org.as_dict()
+
+    usersettings = UserSettingsService.fetch_user_settings(user.identifier)
+    assert len(usersettings) == 4
+    org = [x for x in usersettings if x.type == 'ACCOUNT' and x.label == org_with_branch_dictionary.get('name')]
+    assert org[0].additional_label == org_with_branch_dictionary.get('branch_name'), 'additional label matches'
