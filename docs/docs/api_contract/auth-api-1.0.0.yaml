@@ -2611,6 +2611,7 @@ paths:
                       type: ACCOUNT
                       urlorigin: 'https://dev.bcregistry.ca/business/auth'
                       urlpath: /account/2662/settings
+                      additionalLabel: PREMIUM SAMPLE ACCOUNT BRANCH NAME
                     - accountStatus: ACTIVE
                       accountType: BASIC
                       id: 2664
@@ -2639,6 +2640,7 @@ paths:
                       type: ACCOUNT
                       urlorigin: 'https://dev.bcregistry.ca/business/auth'
                       urlpath: /account/2468/settings
+                      additionalLabel: PREMIUM SAMPLE ACCOUNT BRANCH NAME
                     - accountStatus: ACTIVE
                       accountType: BASIC
                       id: 2446
@@ -2647,6 +2649,7 @@ paths:
                       type: ACCOUNT
                       urlorigin: 'https://dev.bcregistry.ca/business/auth'
                       urlpath: /account/2446/settings
+                      additionalLabel: BASIC SAMPLE ACCOUNT BRANCH NAME
                     - accountStatus: ACTIVE
                       accountType: PREMIUM
                       id: 2466
@@ -3571,6 +3574,9 @@ components:
             type: string
             minLength: 1
           urlpath:
+            type: string
+            minLength: 1
+          additionalLabel:
             type: string
             minLength: 1
         required:
