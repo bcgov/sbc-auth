@@ -96,7 +96,6 @@ export interface BusinessRequest {
         },
         business: {
             legalType: string
-            natureOfBusiness?: string
         },
         incorporationApplication?: {
             nameRequest: NameRequest
@@ -104,6 +103,9 @@ export interface BusinessRequest {
         registration?: {
             nameRequest: NameRequest
             businessType?: string
+            business: {
+                natureOfBusiness?: string
+            }
         }
     }
 }
