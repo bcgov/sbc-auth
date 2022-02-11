@@ -94,7 +94,7 @@ export interface BusinessRequest {
             name: string,
             accountId: number
         },
-        business: {
+        business?: {
             legalType: string
         },
         incorporationApplication?: {

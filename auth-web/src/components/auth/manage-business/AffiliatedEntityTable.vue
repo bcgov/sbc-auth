@@ -397,9 +397,6 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
           name: FilingTypes.REGISTRATION,
           accountId: this.currentOrganization.id
         },
-        business: {
-          legalType: business.nameRequest.legalType
-        },
         registration: {
           nameRequest: {
             legalType: business.nameRequest.legalType,
