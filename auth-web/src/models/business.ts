@@ -94,6 +94,7 @@ export interface BusinessRequest {
             name: string,
             accountId: number
         },
+        // business is only used in incorporationApplication filing
         business?: {
             legalType: string
         },
