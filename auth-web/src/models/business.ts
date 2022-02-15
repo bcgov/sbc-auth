@@ -94,9 +94,9 @@ export interface BusinessRequest {
             name: string,
             accountId: number
         },
-        business: {
+        // business is only used in incorporationApplication filing
+        business?: {
             legalType: string
-            natureOfBusiness?: string
         },
         incorporationApplication?: {
             nameRequest: NameRequest
@@ -104,6 +104,9 @@ export interface BusinessRequest {
         registration?: {
             nameRequest: NameRequest
             businessType?: string
+            business: {
+                natureOfBusiness?: string
+            }
         }
     }
 }
