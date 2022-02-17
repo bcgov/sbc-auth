@@ -47,7 +47,7 @@
                     <span>Approve</span>
                   </v-btn>
                   <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
-                    <span v-if="isAffidavitReview">Reject/On Hold</span>
+                    <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
                 </div>
@@ -178,7 +178,11 @@ export default class ReviewAccountView extends Vue {
   }
 
   private get canEdit (): boolean {
-    return this.task.status === TaskStatus.OPEN
+    return this.task.status === TaskStatus.OPEN || this.isTaskOnHold
+  }
+
+  private get isTaskOnHold (): boolean {
+    return this.task.status === TaskStatus.HOLD
   }
 
   private get canSelect (): boolean {
@@ -315,7 +319,7 @@ export default class ReviewAccountView extends Vue {
     }
     this.isConfirmationModal = isConfirmationModal
 
-    if (rejectConfirmationModal) {
+    if (rejectConfirmationModal || (isRejectModal && this.isTaskOnHold)) {
       this.isRejectModal = true
       this.isOnHoldModal = false
     } else {
