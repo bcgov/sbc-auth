@@ -227,13 +227,14 @@ export default class StaffModule extends VuexModule {
   public async rejectorOnHoldAccountUnderReview ({ task, isRejecting, remarks }) {
     if (task) {
       const taskId = task.id
+      let newTask = null
       if (isRejecting) {
-        await TaskService.rejectPendingTask(taskId)
+        newTask = await TaskService.rejectPendingTask(taskId)
       } else {
-        await TaskService.onHoldPendingTask(taskId, remarks)
+        newTask = await TaskService.onHoldPendingTask(taskId, remarks)
       }
 
-      await this.context.dispatch('syncTaskUnderReview', task)
+      await this.context.dispatch('syncTaskUnderReview', newTask)
     }
   }
 
