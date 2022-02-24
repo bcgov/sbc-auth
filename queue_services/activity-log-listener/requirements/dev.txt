@@ -28,4 +28,5 @@ isort
 # docker
 lovely-pytest-docker
 pytest-asyncio
+soft_unicode
 
