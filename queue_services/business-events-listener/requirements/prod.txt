@@ -9,4 +9,3 @@ jaeger-client
 Werkzeug<2
 attrs
 python-dateutil
-soft_unicode

@@ -23,4 +23,3 @@ FreezeGun
 lovely-pytest-docker
 Faker
 itsdangerous==2.0.1
-soft_unicode

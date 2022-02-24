@@ -8,4 +8,3 @@ pycountry
 jaeger-client
 Werkzeug<2
 attrs
-soft_unicode
