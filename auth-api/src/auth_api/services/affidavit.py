@@ -161,18 +161,15 @@ class Affidavit:  # pylint: disable=too-many-instance-attributes
     def approve_or_reject(org_id: int, is_approved: bool, user: UserModel):
         """Mark the affidavit as approved or rejected."""
         current_app.logger.debug('<approve_or_reject ')
-        
         # In order to get the pending affidavit to be reviewed, we need to filter out the following cases
         # 1. Inactive affidavits - usually while the old affidavit is made inactive
         # while the task is put on hold and the user uploads a new one.
         # 2. When the user account request is rejected, then user creates a new account
         filtered_affidavit_statuses = [AffidavitStatus.INACTIVE.value, AffidavitStatus.REJECTED.value]
         affidavit: AffidavitModel = AffidavitModel.find_by_org_id(org_id, filtered_affidavit_statuses)
-
         affidavit.decision_made_by = user.username
         affidavit.decision_made_on = datetime.now()
         affidavit.status_code = AffidavitStatus.APPROVED.value if is_approved else AffidavitStatus.REJECTED.value
-
         current_app.logger.debug('>approve_or_reject')
         return Affidavit(affidavit)
 
