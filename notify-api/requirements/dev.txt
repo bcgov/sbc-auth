@@ -20,4 +20,3 @@ autopep8
 lovely-pytest-docker
 pytest-asyncio
 faker
-
