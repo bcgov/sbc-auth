@@ -20,4 +20,4 @@ gunicorn
 Werkzeug==0.16.1
 cryptography
 idna==2.10
-itsdangerous==2.0.1
+

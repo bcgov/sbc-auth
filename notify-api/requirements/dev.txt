@@ -20,4 +20,4 @@ autopep8
 lovely-pytest-docker
 pytest-asyncio
 faker
-itsdangerous==2.0.1
+
