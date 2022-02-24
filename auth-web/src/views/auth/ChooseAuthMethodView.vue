@@ -27,7 +27,7 @@
               <!-- State Button (Create Account) -->
               <div class="mb-4">
                 <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCSC'">
-                   {{ authType == 'BCSC' ? 'SELECTED' : 'SELECT' }}
+                  {{ authType == 'BCSC' ? 'SELECTED' : 'SELECT' }}
                 </v-btn>
               </div>
               <div class="notary-link">
@@ -65,11 +65,14 @@
           color="primary"
           class="py-0 mt-2 align-checkbox-label--top"
           v-model="isGovN"
+          @click="openGovnWarningModal"
+          hide-details
         >
           <template v-slot:label>
             I am a government agency (other than BC provincial)
           </template>
         </v-checkbox>
+        <span v-if="isGovN" class="text-color"> {{ govnAccountDescription }} </span>
         </v-col>
       </v-row>
     </div>
@@ -100,6 +103,37 @@
         </v-icon>
       </v-btn>
     </div>
+    <!-- Open GovN Account Modal -->
+    <ModalDialog
+      ref="govnConfirmModal"
+      :title="govnConfirmModalTitle"
+      :text="govnConfirmModalText"
+      dialog-class="notify-dialog"
+      max-width="680"
+      :isPersistent="true"
+      data-test="modal-govn-confirm"
+    >
+      <template v-slot:icon>
+        <v-icon large color="primary">mdi-help-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn
+          large
+          color="primary"
+          @click="confirmGovnCreateAccount()"
+          data-test="btn-govn-confirm"
+          class="mr-5 px-4"
+          >Confirm</v-btn
+        >
+        <v-btn
+          large
+          @click="closeConfirmModal()"
+          data-test="btn-close-dialog"
+          class="px-4"
+          >Cancel</v-btn
+        >
+      </template>
+    </ModalDialog>
   </v-container>
 </template>
 
@@ -108,9 +142,13 @@ import { Component, Vue } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { mapGetters } from 'vuex'
 
 @Component({
+  components: {
+    ModalDialog
+  },
   computed: {
     ...mapGetters('auth', [
       'isAuthenticated',
@@ -124,6 +162,14 @@ export default class ChooseAuthMethodView extends Vue {
   private readonly currentLoginSource!: string
   private authType = ''
   private isGovN = false
+
+  private govnConfirmModalTitle = 'Create Government Agency Account?'
+  private govnConfirmModalText = this.$t('govnConfirmText')
+  private govnAccountDescription = this.$t('govnAccountDescription')
+
+  $refs: {
+    govnConfirmModal: ModalDialog
+  }
 
   private get disableGovnAccountCreation (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.DisableGovNAccountCreation) || false
@@ -165,10 +211,26 @@ export default class ChooseAuthMethodView extends Vue {
         break
     }
   }
+
+  private openGovnWarningModal (): void {
+    this.$refs.govnConfirmModal.open()
+  }
+
+  private confirmGovnCreateAccount (): void {
+    this.$refs.govnConfirmModal.close()
+    this.isGovN = true
+  }
+
+  private closeConfirmModal (): void {
+    this.$refs.govnConfirmModal.close()
+    // Set isGovn flag back to false
+    this.isGovN = false
+  }
 }
 </script>
 
 <style lang="scss" scoped>
+@import '$assets/scss/theme.scss';
   .view-container {
     max-width: 60rem;
   }
@@ -238,5 +300,10 @@ export default class ChooseAuthMethodView extends Vue {
 
   .lb {
     display: block;
+  }
+
+  .text-color {
+    color: $TextColorGray !important;
+    font-size: 1.125rem !important;
   }
 </style>
