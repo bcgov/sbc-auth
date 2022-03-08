@@ -44,12 +44,14 @@ class Affidavit(VersionedModel):
     user = relationship('User', foreign_keys=[user_id], lazy='select')
 
     @classmethod
-    def find_by_org_id(cls, org_id: int):
+    def find_by_org_id(cls, org_id: int, filtered_affidavit_statuses=None):
         """Find an affidavit by org id."""
+        if filtered_affidavit_statuses is None:
+            filtered_affidavit_statuses = [AffidavitStatus.INACTIVE.value]
         return db.session.query(Affidavit) \
             .join(Membership, Membership.user_id == Affidavit.user_id) \
             .join(Org, Org.id == Membership.org_id) \
-            .filter(and_(Org.id == org_id, Affidavit.status_code != AffidavitStatus.INACTIVE.value)) \
+            .filter(and_(Org.id == org_id, Affidavit.status_code not in filtered_affidavit_statuses)) \
             .one_or_none()  # There should be only one record at most, else throw error
 
     @classmethod
