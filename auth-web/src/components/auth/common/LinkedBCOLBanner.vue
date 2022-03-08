@@ -1,10 +1,12 @@
 <template>
+  <div>
   <v-alert
     dark
     color="primary"
     class="ma-0 py-3 px-5"
+    v-if="!editMode"
   >
-    <div class="bcol-acc d-flex justify-space-between align-center">
+    <div class="bcol-acc d-flex justify-space-between align-center" >
       <div v-if="bcolAccountDetails">
         <div class="bcol-acc__name font-weight-bold">
           {{ bcolAccountName }}
@@ -29,22 +31,61 @@
           Remove
         </v-btn>
       </div>
+
+      <div>
+        <v-btn v-if="showEditBtn"
+          v-can:CHANGE_PAYMENT_METHOD.disable
+          color="primary"
+          plain
+          depressed
+          x-large
+          class="font-weight-bold"
+          @click="editAccount"
+          data-test="edit-bcol-button"
+        >
+          <v-icon class="ml-2">mdi-pencil</v-icon>
+          Edit
+        </v-btn>
+      </div>
     </div>
   </v-alert>
+  <div>
+    <BcolLogin v-if="editMode" hideLinkBtn="true" @emit-bcol-info="emitBcolInfo" ></BcolLogin>
+  </div>
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { BcolAccountDetails } from '@/models/bcol'
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 
-@Component({})
+@Component({
+  components: {
+    BcolLogin
+  }
+})
 export default class LinkedBCOLBanner extends Vue {
   @Prop({ default: false }) showUnlinkAccountBtn: boolean
+  @Prop({ default: false }) showEditBtn: boolean
   @Prop({ default: '' }) bcolAccountName: string
   @Prop({ default: () => ({} as BcolAccountDetails) }) bcolAccountDetails: BcolAccountDetails
+  private editMode: boolean = false
 
+  private async mounted () {
+    this.editMode = false
+  }
   @Emit()
   private unlinkAccount () {
+  }
+
+  @Emit('emit-bcol-info')
+  private emitBcolInfo (bcolProfile: BcolProfile) {
+    return bcolProfile
+  }
+
+  private editAccount () {
+    this.editMode = true
   }
 }
 </script>

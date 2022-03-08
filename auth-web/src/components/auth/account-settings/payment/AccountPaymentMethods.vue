@@ -17,11 +17,19 @@
       :isAcknowledgeNeeded="isAcknowledgeNeeded"
       @payment-method-selected="setSelectedPayment"
       @get-PAD-info="getPADInfo"
+      @emit-bcol-info="getBcolInfo"
       @is-pad-valid="isPADValid"
       isTouchedUpdate="true"
       :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
       :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
     ></PaymentMethods>
+    <v-slide-y-transition>
+      <div class="pb-2" v-show="errorMessage">
+        <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
+          {{errorMessage}}
+        </v-alert>
+      </div>
+    </v-slide-y-transition>
     <v-divider class="my-10"></v-divider>
     <div class="form__btns d-flex">
       <v-btn
@@ -72,11 +80,10 @@ import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organizat
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Address } from '@/models/address'
+import { BcolProfile } from '@/models/bcol'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
-import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 @Component({
   components: {
@@ -122,7 +129,9 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private padInfo: PADInfo = {} as PADInfo
   private isBtnSaved = false
   private disableSaveBtn = false
+  private errorMessage: string = ''
   private errorTitle = 'Payment Update Failed'
+  private bcolInfo: BcolProfile = {} as BcolProfile
   private errorText = ''
   private isLoading: boolean = false
   private padValid: boolean = false
@@ -135,6 +144,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     }
 
   private setSelectedPayment (payment) {
+    this.errorMessage = ''
     this.selectedPaymentMethod = payment.selectedPaymentMethod
     this.isBtnSaved = (this.isBtnSaved && !payment.isTouched) || false
     this.paymentMethodChanged = payment.isTouched || false
@@ -170,7 +180,14 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
     return (this.selectedPaymentMethod !== this.currentOrgPaymentType || this.isFuturePaymentMethodAvailable)
   }
 
+  @Emit('emit-bcol-info')
+  private getBcolInfo (bcolProfile: BcolProfile) {
+    this.bcolInfo = bcolProfile
+  }
+
   private async initialize () {
+    this.errorMessage = ''
+    this.bcolInfo = {}
     // check if address info is complete if not redirect user to address page
     const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
     if (isNotAnonUser) {
@@ -251,6 +268,14 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
           bankAccountNumber: this.padInfo.bankAccountNumber
         }
       }
+    } if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
+      isValid = true
+      createRequestBody = {
+        paymentInfo: {
+          paymentMethod: PaymentTypes.BCOL
+        },
+        bcOnlineCredential: this.bcolInfo
+      }
     } else {
       isValid = true
       createRequestBody = {
@@ -274,6 +299,16 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         this.isLoading = false
         this.isBtnSaved = false
         this.paymentMethodChanged = false
+        switch (error.response.status) {
+          case 409:
+            this.errorMessage = error.response.data.message
+            break
+          case 400:
+            this.errorMessage = error.response.data.message
+            break
+          default:
+            this.errorMessage = 'An error occurred while attempting to create your account.'
+        }
       }
     }
   }
