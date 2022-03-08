@@ -847,6 +847,23 @@ paths:
                     businessType: LAW
                     businessSize: 2-5
                     businessName: SAMPLE PREMIUM ACCOUNT
+                example2:
+                  value:
+                    accessType: REGULAR
+                    created: '2021-02-27T23:33:42.039641+00:00'
+                    createdBy: BCREG2 Chun Fourteen
+                    id: 854
+                    modified: '2021-02-27T23:33:42.039641+00:00'
+                    name: SAMPLE PREMIUM ACCOUNT
+                    branchName: SAMPLE BRANCH NAME
+                    orgType: PREMIUM
+                    orgStatus: ACTIVE
+                    businessType: LAW
+                    businessSize: 2-5
+                    businessName: SAMPLE PREMIUM ACCOUNT
+                    bcolAccountId: 12345
+                    bcolAccountName: NEW BC ONLINE TECH TEAM
+                    bcolUserId: BCOL12344
         '404':
           description: Not Found
           content:
@@ -3206,6 +3223,31 @@ components:
         name:
           type: string
           title: The Name Schema
+          default: ''
+          pattern: ^(.*)$
+        branchName:
+          type: string
+          title: The Branch Name Schema
+          default: ''
+          pattern: ^(.*)$
+        bcolAccountId:
+          type: string
+          title: The BCOL Account Id
+          default: ''
+          pattern: ^(.*)$
+        bcolAccountName:
+          type: string
+          title: The BCOL Account Name Schema
+          default: ''
+          pattern: ^(.*)$
+        bcolUserId:
+          type: string
+          title: The BCOL User Id
+          default: ''
+          pattern: ^(.*)$
+        accessType:
+          type: string
+          title: The Access Type Schema
           default: ''
           pattern: ^(.*)$
         orgType:
