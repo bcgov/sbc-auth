@@ -1,0 +1,78 @@
+{
+	"id": "60d4e6d4-958e-451f-bd2c-997ae38a8092",
+	"name": "Keycloak-DEV",
+	"values": [
+		{
+			"key": "keycloak-base-url",
+			"value": "https://dev.oidc.gov.bc.ca/",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "service-account-id",
+			"value": "sbc-auth-admin",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "service-account-secret",
+			"value": "",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "client-id",
+			"value": "",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "root-url",
+			"value": "",
+			"enabled": true
+		},
+		{
+			"key": "valid-redirect-urls",
+			"value": "",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "web-origins",
+			"value": "",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			},
+			"enabled": true
+		},
+		{
+			"key": "valid-redirect-urls-array",
+			"value": "[\"https://bcregistries-daxiom.web.app/*\",\"http://localhost:3000/*\"]",
+			"enabled": true
+		},
+		{
+			"key": "web-origins-array",
+			"value": "[\"*\"]",
+			"enabled": true
+		}
+	],
+	"_postman_variable_scope": "environment",
+	"_postman_exported_at": "2022-02-04T21:06:13.254Z",
+	"_postman_exported_using": "Postman/6.7.4"
+}
