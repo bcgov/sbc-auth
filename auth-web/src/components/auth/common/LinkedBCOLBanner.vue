@@ -49,7 +49,7 @@
       </div>
     </div>
   </v-alert>
-  <BcolLogin v-if="editMode" hideLinkBtn="true" @emit-bcol-info="emitBcolInfo" ></BcolLogin>
+  <BcolLogin v-if="editMode" :hideLinkBtn="true" @emit-bcol-info="emitBcolInfo" ></BcolLogin>
   </div>
 </template>
 

@@ -18,7 +18,7 @@
         </div>
       </v-slide-y-transition>
       <v-row>
-        <v-col :cols="hideLinkBtn?6:4" class="py-0 pr-0">
+        <v-col :cols="hideLinkBtn ? 6 : 4 " class="py-0 pr-0">
           <v-text-field
             dense
             filled
