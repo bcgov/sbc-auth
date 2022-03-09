@@ -7,13 +7,6 @@
   "additionalProperties": false,
   "required": [
   ],
-  "dependencies": {
-    "bcOnlineCredential": {
-      "required": [
-        "mailingAddress"
-      ]
-    }
-  },
   "properties": {
     "name": {
       "$id": "#/properties/name",
