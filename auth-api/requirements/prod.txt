@@ -19,7 +19,7 @@ sentry-sdk[flask]
 bcrypt
 jaeger-client
 Werkzeug<2
-minio
+minio==7.0.2
 pyhumps
 sqlalchemy-utils
 Flask-Caching
