@@ -1486,7 +1486,7 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
     assert staff_response.json.get('status') == AffidavitStatus.APPROVED.value
 
 
-@pytest.mark.skip(reason="Fix this later")
+@pytest.mark.skip(reason='Fix this later')
 def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, session,
                                                                  keycloak_mock):  # pylint:disable=unused-argument
     """Assert that staff admin can approve pending affidavits."""
