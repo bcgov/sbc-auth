@@ -47,6 +47,14 @@
         </v-expand-x-transition>
         <span class="save-btn__label">{{ (isBtnSaved) ? 'Saved' : 'Save' }}</span>
       </v-btn>
+      <v-btn
+        large
+        depressed
+        @click="cancel"
+        data-test="cancel-button"
+        class="cancel-button ml-2"
+      > Cancel
+      </v-btn>
     </div>
         <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -249,6 +257,10 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
       this.$refs.errorDialog.open()
       return false
     }
+  }
+
+  private cancel () {
+    this.initialize()
   }
 
   private async save () {

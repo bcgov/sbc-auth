@@ -18,7 +18,7 @@
         </div>
       </v-slide-y-transition>
       <v-row>
-        <v-col cols="4" class="py-0 pr-0">
+        <v-col :cols="hideLinkBtn?6:4" class="py-0 pr-0">
           <v-text-field
             dense
             filled
@@ -31,7 +31,7 @@
           >
           </v-text-field>
         </v-col>
-        <v-col cols="4" class="py-0 pr-0">
+        <v-col :cols="hideLinkBtn?6:4" class="py-0 pr-0">
           <v-text-field
             dense
             filled
@@ -68,7 +68,6 @@
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { PADInfo } from '@/models/Organization'
 @Component({
   name: 'BcolLogin',
   computed: {
