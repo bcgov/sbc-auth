@@ -63,6 +63,8 @@
                   <LinkedBCOLBanner
                     :bcolAccountName="currentOrganization.bcolAccountName"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
+                    :show-edit-btn="true"
+                    @emit-bcol-info="getBcolInfo"
                   ></LinkedBCOLBanner>
                 </div>
 
@@ -100,6 +102,7 @@
 import { AccessType, Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Organization, PADInfo } from '@/models/Organization'
+import { BcolProfile } from '@/models/bcol'
 import ConfigHelper from '@/util/config-helper'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
@@ -243,6 +246,11 @@ export default class PaymentMethods extends Vue {
   private getPADInfo (padInfo: PADInfo) {
     this.padInfo = padInfo
     return this.padInfo
+  }
+
+  @Emit('emit-bcol-info')
+  private getBcolInfo (bcolProfile: BcolProfile) {
+    return bcolProfile
   }
 
   @Emit('is-pad-valid')

@@ -18,7 +18,7 @@
         </div>
       </v-slide-y-transition>
       <v-row>
-        <v-col cols="4" class="py-0 pr-0">
+        <v-col :cols="hideLinkBtn ? 6 : 4 " class="py-0 pr-0">
           <v-text-field
             dense
             filled
@@ -27,10 +27,11 @@
             :rules="usernameRules"
             req
             data-test="input-user-id"
+            @change="emitBcolInfo"
           >
           </v-text-field>
         </v-col>
-        <v-col cols="4" class="py-0 pr-0">
+        <v-col :cols="hideLinkBtn?6:4" class="py-0 pr-0">
           <v-text-field
             dense
             filled
@@ -40,10 +41,11 @@
             req
             :rules="passwordRules"
             data-test="input-user-password"
+            @change="emitBcolInfo"
           >
           </v-text-field>
         </v-col>
-        <v-col cols="4" class="py-0">
+        <v-col cols="4" class="py-0" v-if="!hideLinkBtn">
           <v-btn
             large
             depressed
@@ -80,6 +82,7 @@ export default class BcolLogin extends Vue {
   private password: string = ''
   private errorMessage: string = ''
   private isLoading: boolean = false
+  @Prop({ default: false }) hideLinkBtn: boolean
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   private isFormValid (): boolean {
@@ -131,6 +134,14 @@ export default class BcolLogin extends Vue {
   resetForm () {
     this.username = this.password = this.errorMessage = ''
     this.$refs.form.resetValidation()
+  }
+  @Emit()
+  private async emitBcolInfo () {
+    const bcolInfo: BcolProfile = {
+      userId: this.username,
+      password: this.password
+    }
+    return bcolInfo
   }
 }
 </script>
