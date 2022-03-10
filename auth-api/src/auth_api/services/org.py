@@ -272,20 +272,20 @@ class Org:  # pylint: disable=too-many-public-methods
         return validator_obj.info.get('bcol_response', None)
 
     @staticmethod
-    def _map_response_to_org(bcol_response, org_info, skip_name_linking=False):
+    def _map_response_to_org(bcol_response, org_info, do_link_name=True):
         org_info.update({
             'bcol_account_id': bcol_response.get('accountNumber'),
             'bcol_user_id': bcol_response.get('userId'),
         })
 
-        if not skip_name_linking:
+        if do_link_name:
             org_info.update({
                 'bcol_account_name': bcol_response.get('orgName')
             })
 
         # New org who linked to BCOL account will use BCOL account name as default name
         # Existing account keep their account name to avoid payment info change.
-        if not org_info.get('name'):
+        if not org_info.get('name') and do_link_name:
             org_info.update({'name': bcol_response.get('orgName')})
 
     @staticmethod
@@ -325,7 +325,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
             bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
-            Org._map_response_to_org(bcol_response, org_info, skip_name_linking=True)
+            Org._map_response_to_org(bcol_response, org_info, skip_name_linking=False)
             ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get('profileFlags'))
             has_org_updates = True
 
