@@ -325,7 +325,7 @@ class Org:  # pylint: disable=too-many-public-methods
         # If it's a valid account disable the current one and add a new one
         if bcol_credential := org_info.pop('bcOnlineCredential', None):
             bcol_response = Org.get_bcol_details(bcol_credential, self._model.id).json()
-            Org._map_response_to_org(bcol_response, org_info, skip_name_linking=False)
+            Org._map_response_to_org(bcol_response, org_info, do_link_name=False)
             ProductService.create_subscription_from_bcol_profile(org_model.id, bcol_response.get('profileFlags'))
             has_org_updates = True
 
