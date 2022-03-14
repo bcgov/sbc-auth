@@ -344,7 +344,7 @@ def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unu
     business_identifier = 'NR 1234567'
 
     affiliation = AffiliationService.create_new_business_affiliation(org_id, business_identifier=business_identifier,
-                                                                     email='test@test.com', phone='1112223333')
+                                                                     email='TEST@test.com', phone='1112223333')
     assert affiliation
     assert affiliation.as_dict()['business']['business_identifier'] == business_identifier
 
