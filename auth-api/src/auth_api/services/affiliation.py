@@ -211,7 +211,6 @@ class Affiliation:
                 raise BusinessException(Error.NR_NOT_APPROVED, None)
 
             if (phone and phone != nr_phone) or (email and email.casefold() != nr_email.casefold()):
-                current_app.logger.debug(f'NR Applicants Email:{nr_email.casefold()}; verification:{email.casefold()}')
                 raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
             # Create an entity with the Name from NR if entity doesn't exist
