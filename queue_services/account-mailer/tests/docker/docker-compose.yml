@@ -51,7 +51,7 @@ services:
         https://raw.githubusercontent.com/bcgov/sbc-auth/development/docs/docs/api_contract/notify-api-1.0.0.yaml
 
     minio:
-      image: 'bitnami/minio:latest'
+      image: 'bitnami/minio:2022.2.5'
       ports:
         - '9000:9000'
       environment:
