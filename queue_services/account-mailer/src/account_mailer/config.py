@@ -143,6 +143,8 @@ class _Config():  # pylint: disable=too-few-public-methods
     # BC online admin email
     BCOL_ADMIN_EMAIL = os.getenv('BCOL_ADMIN_EMAIL', 'test@test.com')
 
+    LEGISLATIVE_TIMEZONE = os.getenv('LEGISLATIVE_TIMEZONE', 'America/Vancouver')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Creates the Development Config object."""
