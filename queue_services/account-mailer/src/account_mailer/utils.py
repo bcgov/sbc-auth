@@ -16,6 +16,10 @@
 When deployed in OKD, it adds the last commit hash onto the version info.
 """
 import os
+from datetime import datetime
+
+import pytz
+from flask import current_app
 
 from account_mailer.version import __version__
 
@@ -30,3 +34,16 @@ def get_run_version():
     if commit_hash:
         return f'{__version__}-{commit_hash}'
     return __version__
+
+
+def get_local_time(date_val: datetime):
+    """Return local time value."""
+    tz_name = current_app.config['LEGISLATIVE_TIMEZONE']
+    tz_local = pytz.timezone(tz_name)
+    date_val = date_val.astimezone(tz_local)
+    return date_val
+
+
+def get_local_formatted_date(date_val: datetime, dt_format: str = '%Y-%m-%d'):
+    """Return formatted local time."""
+    return get_local_time(date_val).strftime(dt_format)
