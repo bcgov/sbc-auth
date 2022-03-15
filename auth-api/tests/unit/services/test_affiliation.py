@@ -349,7 +349,8 @@ def test_create_new_business(session, auth_mock, nr_mock):  # pylint:disable=unu
     assert affiliation
     assert affiliation.as_dict()['business']['business_identifier'] == business_identifier
 
-    affiliation_uc = AffiliationService.create_new_business_affiliation(org_id, business_identifier=business_identifier_2,
+    affiliation_uc = AffiliationService.create_new_business_affiliation(org_id,
+                                                                        business_identifier=business_identifier_2,
                                                                         email='TEST@TEST.COM', phone='1112223334')
     assert affiliation_uc
     assert affiliation_uc.as_dict()['business']['business_identifier'] == business_identifier
