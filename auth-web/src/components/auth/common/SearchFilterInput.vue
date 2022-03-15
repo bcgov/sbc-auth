@@ -155,8 +155,8 @@ export default class SearchFilterInput extends Vue {
 
   private getDateFilterLabel (appliedFilterValue) {
     return (appliedFilterValue?.startDate === appliedFilterValue?.endDate)
-      ? CommonUtils.formatDisplayDate(new Date(appliedFilterValue?.startDate))
-      : `${CommonUtils.formatDisplayDate(new Date(appliedFilterValue?.startDate))} - ${CommonUtils.formatDisplayDate(new Date(appliedFilterValue?.endDate))}`
+      ? CommonUtils.formatDisplayDate(appliedFilterValue?.startDate)
+      : `${CommonUtils.formatDisplayDate(appliedFilterValue?.startDate)} - ${CommonUtils.formatDisplayDate(appliedFilterValue?.endDate)}`
   }
 }
 </script>
