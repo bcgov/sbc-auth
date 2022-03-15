@@ -37,9 +37,6 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
     filled_template = generate_template(current_app.config.get('TEMPLATE_PATH'), template_name)
     current_time = datetime.now()
     formatted_date = get_local_formatted_date(current_time, '%m-%d-%Y')
-    logger.debug('formatted_date: %s', formatted_date)
-    logger.debug('current_time: %s', current_time)
-    logger.debug('current_time formatted: %s', current_time.strftime('%m-%d-%Y'))
     # render template with vars from email msg
     jnja_template = Template(filled_template, autoescape=True)
     jinja_kwargs = {
