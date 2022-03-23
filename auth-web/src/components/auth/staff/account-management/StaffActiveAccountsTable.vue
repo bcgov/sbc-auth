@@ -101,7 +101,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'branchName'
     },
     {
-      text: 'Account Id',
+      text: 'Account Number',
       align: 'left',
       sortable: true,
       value: 'id'
