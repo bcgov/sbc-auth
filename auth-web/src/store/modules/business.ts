@@ -58,7 +58,8 @@ export default class BusinessModule extends VuexModule {
 
     /** Returns True if NR is approved for registration. */
     const isApprovedForRegistration = (nr): boolean =>
-      nr.actions.some(action => action.filingName === LearFilingTypes.REGISTRATION)
+      (nr.state === NrState.APPROVED &&
+        nr.actions.some(action => action.filingName === LearFilingTypes.REGISTRATION))
 
     /** Returns target conditionally. */
     const getTarget = (nr): NrTargetTypes => {
