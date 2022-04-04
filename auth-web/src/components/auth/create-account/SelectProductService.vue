@@ -2,7 +2,7 @@
   <v-form ref="form" lazy-validation data-test="form-profile">
 
     <div class="view-header flex-column mb-6">
-    <p class="mb-9" v-if="isStepperView">To access our digitial registries servcies, select multiple product and services you require.</p>
+    <p class="mb-9" v-if="isStepperView">To access our digitial registries services, select multiple product and services you require.</p>
 
     </div>
     <template v-if="isLoading">
