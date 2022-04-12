@@ -46,7 +46,8 @@
             "bceid",
             "fas-ui",
             "ppr-ui",
-            "registry"
+            "registry",
+            "api-document"
         ]
     },
     {
