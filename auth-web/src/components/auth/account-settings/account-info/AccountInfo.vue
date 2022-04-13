@@ -328,12 +328,14 @@ export default class AccountInfo extends Mixins(
   }
 
   private setAccountDetails () {
-    this.accountDetails.name = this.currentOrganization?.name || ''
-    this.accountDetails.branchName = this.currentOrganization?.branchName || ''
-    this.accountDetails.businessType =
-      this.currentOrganization.businessType || ''
-    this.accountDetails.businessSize =
-      this.currentOrganization?.businessSize || ''
+    // Create a new object, to trigger the watch in AccountDetails.
+    this.accountDetails = {
+      ...this.accountDetails,
+      name: this.currentOrganization?.name || '',
+      branchName: this.currentOrganization?.branchName || '',
+      businessType: this.currentOrganization.businessType || '',
+      businessSize: this.currentOrganization?.businessSize || ''
+    }
   }
   private async setup () {
     this.setAccountDetails()
