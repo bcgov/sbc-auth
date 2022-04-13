@@ -83,7 +83,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         response.headers['API'] = f'auth_api/{version}'
 
     def camelize_json(response):
-        if response.headers['Content-Type'] == 'application/json':
+        if response.headers['Content-Type'] == 'application/json' and \
+           'swagger.json' not in request.base_url:
             response.set_data(json.dumps(camelize(json.loads(response.get_data()))))
 
     register_shellcontext(app)
