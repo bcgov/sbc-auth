@@ -47,7 +47,7 @@ class Documents(Resource):
             if doc is None:
                 response, status = {'message': 'The requested document could not be found.'}, \
                        http_status.HTTP_404_NOT_FOUND
-            elif doc.as_dict().get('content_type', None) == ContentType.PDF.value:  # pdfs has to be served as attachment
+            elif doc.as_dict().get('content_type', None) == ContentType.PDF.value:  # pdf has to be served as attachment
                 return send_from_directory('static', filename=doc.as_dict()['content'], as_attachment=True)
             else:
                 response, status = doc.as_dict(), http_status.HTTP_200_OK
