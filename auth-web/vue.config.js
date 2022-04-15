@@ -10,7 +10,7 @@ module.exports = {
     }
   },
   publicPath: process.env.VUE_APP_PATH,
-  transpileDependencies: ['vuetify', 'vuex-persist'],
+  transpileDependencies: ['vuetify', 'vuex-persist', 'fas-ui', 'clickout-event', 'vue-plugin-helper-decorator'],
   devServer: {
     overlay: {
       warnings: true,
