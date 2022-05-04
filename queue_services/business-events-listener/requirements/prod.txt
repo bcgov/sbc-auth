@@ -9,3 +9,4 @@ jaeger-client
 Werkzeug<2
 attrs
 python-dateutil
+Jinja2==3.0.3
