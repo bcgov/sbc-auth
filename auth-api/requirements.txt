@@ -59,7 +59,4 @@ thrift==0.16.0
 tornado==6.1
 urllib3==1.26.9
 zipp==3.8.0
-<<<<<<< HEAD
 -e git+https://github.com/bcgov/sbc-common-components.git#egg=sbc-common-components&subdirectory=python
-=======
->>>>>>> 42955382 (Update Makefile, update requirements.txt.)
