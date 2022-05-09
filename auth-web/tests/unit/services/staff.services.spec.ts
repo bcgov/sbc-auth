@@ -17,7 +17,7 @@ jest.mock('axios', () => ({
 */
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-  'AUTH_API_URL': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
+  'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }
 
 var mockProducts : ProductsRequestBody = {

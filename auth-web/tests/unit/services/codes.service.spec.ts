@@ -4,7 +4,7 @@ import axios from 'axios'
 
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-  'AUTH_API_URL': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
+  'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }
 
 describe('Codes service', () => {
