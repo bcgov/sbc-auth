@@ -14,7 +14,9 @@ module.exports = {
     'sort-imports': 'error',
     'space-before-function-paren': 1,
     'no-use-before-define': 'off',
-    '@typescript-eslint/no-use-before-define': 'error'
+    '@typescript-eslint/no-use-before-define': ['error', { 'functions': false, 'classes': true, 'variables': true }],
+    'no-unused-expressions': 'off',
+    '@typescript-eslint/no-unused-expressions': ['error', { 'allowShortCircuit': true, 'allowTernary': true }]
   },
   parserOptions: {
     parser: '@typescript-eslint/parser',
