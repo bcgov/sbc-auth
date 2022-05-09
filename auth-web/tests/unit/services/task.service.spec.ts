@@ -4,7 +4,8 @@ import axios from 'axios'
 
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
-  'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
+  'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
+  'AUTH_API_VERSION': ''
 }
 const task: Task[] = [{
   'accountId': 2628,
