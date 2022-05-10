@@ -263,8 +263,8 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
-  private selectedColumns = ['Number', 'Type', 'Status', 'Last Modified', 'Modified By']
-  private columns = ['Number', 'Type', 'Status', 'Last Modified', 'Modified By']
+  private selectedColumns = ['Number', 'Type', 'Status']
+  private columns = ['Number', 'Type', 'Status']
 
   $refs: {
     successDialog: ModalDialog
