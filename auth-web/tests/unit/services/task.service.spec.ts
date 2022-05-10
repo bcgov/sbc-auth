@@ -27,23 +27,19 @@ describe('Task service', () => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
     jest.clearAllMocks()
-  })
-
-  it('call getTaskById() for task Details ', () => {
     jest.mock('axios')
 
     const resp = { data: task }
     axios.get = jest.fn().mockReturnValue(resp)
+    axios.put = jest.fn().mockReturnValue(resp)
+  })
 
+  it('call getTaskById() for task Details ', () => {
     TaskService.getTaskById(1).then((response) => {
       expect(response).toEqual(task)
     })
   })
   it('call fetchTasks() for all tasks  ', () => {
-    jest.mock('axios')
-
-    const resp = { data: task }
-    axios.get = jest.fn().mockReturnValue(resp)
     const taskFilter = {
       status: 'PENDING_STAFF_REVIEW',
       type: 'OPEN',
@@ -57,21 +53,12 @@ describe('Task service', () => {
   })
 
   it('call approvePendingTask() to approve request ', async () => {
-    jest.mock('axios')
-    const resp = { data: task }
-    axios.put = jest.fn().mockReturnValue(resp)
-
     TaskService.approvePendingTask(task).then((response) => {
       expect(response).toEqual(task)
     })
   })
 
   it('call rejectPendingTask() to reject request ', async () => {
-    jest.mock('axios')
-
-    const resp = { data: task }
-    axios.put = jest.fn().mockReturnValue(resp)
-
     TaskService.rejectPendingTask(task).then((response) => {
       expect(response).toEqual(task)
     })
