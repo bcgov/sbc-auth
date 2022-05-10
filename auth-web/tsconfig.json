@@ -13,7 +13,8 @@
     "experimentalDecorators": true,
     "types": [
       "webpack-env",
-      "jest"
+      "jest",
+      "vuetify"
     ],
     "paths": {
       "@/*": [

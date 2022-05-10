@@ -27,7 +27,7 @@ describe('AccountTypeSelector.vue', () => {
   const config = {
     'VUE_APP_ROOT_API': 'https://localhost:8080/api/v1/11',
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
-    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+    'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 

@@ -19,7 +19,7 @@ describe('GovmPaymentMethodSelector.vue', () => {
   let wrapperFactory: any
   const config = {
     'AUTH_API_URL': 'https://localhost:8080/api/v1/11',
-    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+    'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'API_DOCUMENTATION_URL': 'https://developer.bcregistry.daxiom.ca/'
   }
 
