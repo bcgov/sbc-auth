@@ -27,7 +27,6 @@ describe('Task service', () => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
     jest.clearAllMocks()
-    jest.mock('axios')
   })
 
   it('call getTaskById() for task Details ', () => {
