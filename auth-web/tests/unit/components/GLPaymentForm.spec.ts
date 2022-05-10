@@ -10,7 +10,7 @@ describe('GLPaymentForm.vue', () => {
   let wrapper: any
   const config = {
     'AUTH_API_URL': 'https://localhost:8080/api/v1/11',
-    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1'
+    'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)

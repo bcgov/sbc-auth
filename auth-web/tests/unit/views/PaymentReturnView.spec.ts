@@ -13,7 +13,7 @@ jest.mock('../../../src/services/payment.services')
 
 describe('PaymentReturnView.vue', () => {
   var ob = {
-    'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
+    'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',
     'VUE_APP_FLAVOR': 'post-mvp'

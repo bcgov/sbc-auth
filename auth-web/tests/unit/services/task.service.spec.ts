@@ -1,12 +1,11 @@
 import { Task } from '@/models/Task'
 import TaskService from '../../../src/services/task.services'
-import axios from 'axios'
 
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
-  'AUTH_API_URL': 'https://auth-api-dev.pathfinder.gov.bc.ca/api/v1'
+  'AUTH_API_URL': 'https://auth-api-dev.silver.devops.gov.bc.ca/api/v1'
 }
-const task: Task[] = [{
+const mockTask: Task[] = [{
   'accountId': 2628,
   'created': new Date('2021-04-19T16:21:28.989168+00:00'),
   'createdBy': 'BCREGTEST Jing SIXTEEN',
@@ -21,6 +20,25 @@ const task: Task[] = [{
   'type': 'Wills Registry'
 }]
 
+jest.mock('axios', () => {
+  return {
+    create: () => {
+      return {
+        get: () => {
+          return mockTask
+        },
+        put: () => {
+          return mockTask
+        },
+        interceptors: {
+          request: { eject: jest.fn(), use: jest.fn() },
+          response: { eject: jest.fn(), use: jest.fn() }
+        }
+      }
+    }
+  }
+})
+
 describe('Task service', () => {
   beforeEach(() => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
@@ -29,20 +47,11 @@ describe('Task service', () => {
   })
 
   it('call getTaskById() for task Details ', () => {
-    jest.mock('axios')
-
-    const resp = { data: task }
-    axios.get = jest.fn().mockReturnValue(resp)
-
     TaskService.getTaskById(1).then((response) => {
-      expect(response).toEqual(task)
+      expect(response).toEqual(mockTask)
     })
   })
   it('call fetchTasks() for all tasks  ', () => {
-    jest.mock('axios')
-
-    const resp = { data: task }
-    axios.get = jest.fn().mockReturnValue(resp)
     const taskFilter = {
       status: 'PENDING_STAFF_REVIEW',
       type: 'OPEN',
@@ -51,28 +60,19 @@ describe('Task service', () => {
     }
 
     TaskService.fetchTasks(taskFilter).then((response) => {
-      expect(response).toEqual(task)
+      expect(response).toEqual(mockTask)
     })
   })
 
   it('call approvePendingTask() to approve request ', async () => {
-    jest.mock('axios')
-    const resp = { data: task }
-    axios.put = jest.fn().mockReturnValue(resp)
-
-    TaskService.approvePendingTask(task).then((response) => {
-      expect(response).toEqual(task)
+    TaskService.approvePendingTask(mockTask).then((response) => {
+      expect(response).toEqual(mockTask)
     })
   })
 
   it('call rejectPendingTask() to reject request ', async () => {
-    jest.mock('axios')
-
-    const resp = { data: task }
-    axios.put = jest.fn().mockReturnValue(resp)
-
-    TaskService.rejectPendingTask(task).then((response) => {
-      expect(response).toEqual(task)
+    TaskService.rejectPendingTask(mockTask).then((response) => {
+      expect(response).toEqual(mockTask)
     })
   })
 })

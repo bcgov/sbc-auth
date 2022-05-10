@@ -66,7 +66,7 @@
             :items="columns"
             :menu-props="{ bottom: true, offsetY: true }"
           >
-            <template v-slot:selection="{ item }"></template>
+            <template v-slot:selection></template>
           </v-select>
         </v-col>
       </v-row>
