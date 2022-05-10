@@ -661,7 +661,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 // Custom Scroll bars
 #affiliated-entity-table {
   ::v-deep .v-menu__content {
-    margin-left: -6rem;
+    margin-left: -5rem;
     margin-right: 1rem;
     text-align: left;
     position: sticky;
