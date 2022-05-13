@@ -426,7 +426,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
-            raise BusinessException(Error.DATA_NOT_FOUND, None)      
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
         if org.status_code not in (OrgStatus.ACTIVE.value, OrgStatus.PENDING_INVITE_ACCEPT.value):
             raise BusinessException(Error.NOT_ACTIVE_ACCOUNT, None)
 
