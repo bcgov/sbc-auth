@@ -417,7 +417,7 @@ class Org:  # pylint: disable=too-many-public-methods
         1 - If there is any active PAD transactions going on, then cannot be deleted.
 
         """
-        current_app.logger.debug('<Delete Org {}', org_id)
+        current_app.logger.debug(f'<Delete Org {org_id}')
         # Affiliation uses OrgService, adding as local import
         # pylint:disable=import-outside-toplevel, cyclic-import
         from auth_api.services.affiliation import Affiliation as AffiliationService
