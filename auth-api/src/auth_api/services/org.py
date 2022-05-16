@@ -417,7 +417,7 @@ class Org:  # pylint: disable=too-many-public-methods
         1 - If there is any active PAD transactions going on, then cannot be deleted.
 
         """
-        current_app.logger.debug('<Delete Org {}', org_id)
+        current_app.logger.debug(f'<Delete Org {org_id}')
         # Affiliation uses OrgService, adding as local import
         # pylint:disable=import-outside-toplevel, cyclic-import
         from auth_api.services.affiliation import Affiliation as AffiliationService
@@ -427,7 +427,7 @@ class Org:  # pylint: disable=too-many-public-methods
         org: OrgModel = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        if org.status_code != OrgStatus.ACTIVE.value:
+        if org.status_code not in (OrgStatus.ACTIVE.value, OrgStatus.PENDING_INVITE_ACCEPT.value):
             raise BusinessException(Error.NOT_ACTIVE_ACCOUNT, None)
 
         # Deactivate pay account
