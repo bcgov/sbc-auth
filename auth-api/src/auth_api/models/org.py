@@ -149,11 +149,15 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
             .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
             .options(contains_eager('invitations').contains_eager('invitation')) \
-            .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value,
-                    Invitation.type == InvitationType.DIRECTOR_SEARCH.value,
-                    Org.status_code == OrgStatusEnum.ACTIVE.value) \
-            .filter(Org.access_type == AccessType.ANONYMOUS.value)
-
+            .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value) \
+            .filter(
+                ((Invitation.type == InvitationType.DIRECTOR_SEARCH.value) &
+                 (Org.status_code == OrgStatusEnum.ACTIVE.value) &
+                 (Org.access_type == AccessType.ANONYMOUS.value)) |
+                ((Invitation.type == InvitationType.GOVM.value) &
+                 (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value) &
+                 (Org.access_type == AccessType.GOVM.value))
+                 )
         if name:
             query = query.filter(Org.name.ilike(f'%{name}%'))
 

@@ -1854,3 +1854,36 @@ def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:d
                                                        'accessType': AccessType.GOVN.value}),
                                       headers=headers, content_type='application/json')
     assert org_patch_response.json.get('accessType') == AccessType.GOVN.value
+
+
+def test_search_org_govm(client, jwt, session, monkeypatch):  # pylint:disable=unused-argument
+    """Create org_govm, find it in the search."""
+    # Set up: create/login user, create org
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+
+    # Create govm organization.
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_govm),
+                     headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # Invite a user to the org
+    rv = client.post('/api/v1/invitations',
+                     data=json.dumps(factory_invitation(org_id, 'abc123@email.com', membership_type=ADMIN)),
+                     headers=headers, content_type='application/json')
+
+    # Fetch PENDING_ACTIVATION for govm.
+    rv = client.get('/api/v1/orgs?status=PENDING_ACTIVATION', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    dictionary = json.loads(rv.data)
+    assert dictionary['orgs']
+    assert len(dictionary['orgs']) == 1
+
+    # 1 - assert org can be deleted without any dependencies like members or business affiliations.
+    patch_pay_account_delete(monkeypatch)
+
+    # Delete PENDING_INVITE_ACCEPT org.
+    rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
