@@ -1856,7 +1856,7 @@ def test_org_patch_access_type(client, jwt, session, keycloak_mock):  # pylint:d
     assert org_patch_response.json.get('accessType') == AccessType.GOVN.value
 
 
-def test_search_org_govm(client, jwt, session, monkeypatch):
+def test_search_org_govm(client, jwt, session, monkeypatch):  # pylint:disable=unused-argument
     """Create org_govm, find it in the search."""
     # Set up: create/login user, create org
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
