@@ -50,7 +50,7 @@
             </td>
             <td>{{item.folioNumber}}</td>
             <td><span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span></td>
-            <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate, 'MMMM DD, YYYY')}}</span></td>
+            <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate, 'MMMM DD, YYYY hh:mm A')}}</span></td>
             <td>
               <div class="font-weight-bold text-right">
                 ${{item.totalAmount}}
@@ -138,7 +138,7 @@ export default class TransactionsDataTable extends Vue {
       width: '170'
     },
     {
-      text: 'Date',
+      text: 'Date (Pacific Time)',
       align: 'left',
       value: 'transactionDate',
       sortable: false,
