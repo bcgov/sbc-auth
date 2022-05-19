@@ -281,7 +281,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         }
       }
     } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
-      isValid = this.bcolInfo.userId && this.bcolInfo.password
+      isValid = !!(this.bcolInfo.userId && this.bcolInfo.password)
       if (!isValid) {
         this.errorMessage = 'Missing User ID and Password for BC Online.'
         this.isLoading = false
