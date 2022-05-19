@@ -280,7 +280,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
           bankAccountNumber: this.padInfo.bankAccountNumber
         }
       }
-    } if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
+    } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
       isValid = true
       createRequestBody = {
         paymentInfo: {
