@@ -12,6 +12,7 @@
         </p>
         <v-form ref="accountInformationForm" data-test="account-information-form">
           <v-radio-group
+            v-if="!govmAccount"
             row
             v-model="isBusinessAccount"
             ref="isBusinessAccount"
