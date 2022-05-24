@@ -105,10 +105,10 @@ async def process_business_events(message_type: str, event_message: Dict[str, an
     entity_identifier = event_message.get('identifier')
     entity = EntityModel.find_by_business_identifier(entity_identifier)
     if entity is None:
-        logger.warn('process_business_events - Couldn''t find Entity : '
-                    f'{entity_identifier} to update entity.status.')
+        logger.error('process_business_events - Couldn''t find Entity : '
+                     '%s to update entity.status.', entity_identifier)
     elif message_type == 'bc.registry.business.dissolution':
-        logger.info(f'Setting Entity :{entity_identifier} status to HISTORICAL')
+        logger.info('Setting Entity : %s status to HISTORICAL', entity_identifier)
         entity.status = EntityStatus.HISTORICAL
         entity.save()
     elif message_type == 'bc.registry.business.correction':
