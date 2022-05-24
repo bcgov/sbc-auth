@@ -269,6 +269,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         return NrDisplayStates[NrState[item.nameRequest.state]]
       case this.isTemporaryBusinessRegistration(item.corpType.code):
         return BusinessState.DRAFT
+      case !!item.status:
+        return item.status
       default:
         return BusinessState.ACTIVE
     }

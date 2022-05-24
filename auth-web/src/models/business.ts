@@ -1,4 +1,4 @@
-import { LearFilingTypes, NrTargetTypes } from '@/util/constants'
+import { BusinessState, LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { Contact } from './contact'
 
 export interface LoginPayload {
@@ -30,6 +30,7 @@ export interface Business {
     modifiedBy?: string
     nameRequest?: NameRequest
     nrNumber?: string
+    status?: BusinessState
 }
 
 export interface BusinessSearchResultDto {

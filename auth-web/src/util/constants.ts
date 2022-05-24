@@ -219,6 +219,7 @@ export enum NrEntityType {
 
 export enum BusinessState {
     ACTIVE = 'Active',
+    HISTORICAL = 'Historical',
     DRAFT = 'Draft'
 }
 
