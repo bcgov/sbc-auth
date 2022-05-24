@@ -21,11 +21,11 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
-from auth_api.utils.enums import AccessType
+from auth_api.utils.enums import AccessType, EntityStatus
 from entity_queue_common.service_utils import subscribe_to_queue
 from requests.models import Response
 
-from .utils import get_random_number, helper_add_event_to_queue
+from .utils import get_random_number, helper_add_business_dissolution_to_queue, helper_add_names_event_to_queue
 
 
 @pytest.mark.asyncio
@@ -39,7 +39,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
                                      monkeypatch, access_type, is_auto_affiliate_expected):
     """Assert that events can be retrieved and decoded from the Queue."""
     # Call back for the subscription
-    from business_events_listener.worker import cb_nr_subscription_handler
+    from business_events_listener.worker import cb_subscription_handler
 
     # 1. Create an Org
     # 2. Mock the rest service to return the invoices with the org created.
@@ -64,7 +64,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
                              events_subject,
                              events_queue,
                              events_durable_name,
-                             cb_nr_subscription_handler)
+                             cb_subscription_handler)
 
     # Mock the rest service response to return the org just created.
     def get_invoices_mock(nr_number, token):
@@ -87,7 +87,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
                         lambda *args, **kwargs: None)
 
     # add an event to queue
-    await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
+    await helper_add_names_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
 
     entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
     assert entity
@@ -100,7 +100,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
         assert affiliations[0].org_id == org_id
 
         # Publish message again and assert it doesn't create duplicate affiliation.
-        await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
+        await helper_add_names_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
         affiliations: [AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
         assert len(affiliations) == 1
 
@@ -123,9 +123,38 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
     monkeypatch.setattr('auth_api.services.rest_service.RestService.get', get_invoices_mock)
     # add an event to queue
     nr_number = f'NR {get_random_number()}'
-    await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
+    await helper_add_names_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
 
     # Query the entity and assert the entity is not affiliated.
     entity: EntityModel = EntityModel.find_by_business_identifier(nr_number)
     assert entity
     assert not entity.pass_code_claimed
+
+
+@pytest.mark.asyncio
+async def test_business_events_queue(app, session, stan_server, event_loop, client_id, events_stan, future,
+                                     monkeypatch, access_type, is_auto_affiliate_expected):
+    """Assert that business events can be retrieved and decoded from the Queue."""
+    # Call back for the subscription
+    from business_events_listener.worker import cb_subscription_handler
+
+    # 1. Create an entity
+    # 2. Publish a disolution event and assert the status has changed to historical.
+    entity = EntityModel(
+        name='Test',
+        business_identifier='CP9992256',
+    ).save()
+
+    # register the handler to test it
+    await subscribe_to_queue(events_stan,
+                             'test_subject',
+                             'test_queue',
+                             'test_durable',
+                             cb_subscription_handler)
+
+    # add an event to queue
+    await helper_add_business_dissolution_to_queue(events_stan, 'test_subject')
+
+    entity: EntityModel = EntityModel.find_by_business_identifier(entity.id)
+    assert entity
+    assert entity.state == EntityStatus.HISTORICAL

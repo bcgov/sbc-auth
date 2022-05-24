@@ -19,7 +19,7 @@ import asyncio
 import random
 from copy import deepcopy
 
-from business_events_listener.worker import APP_CONFIG, cb_nr_subscription_handler, qsm
+from business_events_listener.worker import APP_CONFIG, cb_subscription_handler, qsm
 
 
 if __name__ == '__main__':
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         """Run both nr and entity tasks."""
         nr_task = qsm.run(loop=event_loop,
                           config=APP_CONFIG,
-                          callback=cb_nr_subscription_handler)
+                          callback=cb_subscription_handler)
 
         subscriber_coroutines = [nr_task]
 

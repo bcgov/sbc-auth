@@ -44,7 +44,7 @@ from flask import Flask  # pylint: disable=wrong-import-order
 from business_events_listener import config
 
 
-async def cb_nr_subscription_handler(msg: nats.aio.client.Msg):
+async def cb_subscription_handler(msg: nats.aio.client.Msg):
     """Use Callback to process Queue Msg objects."""
     try:
         logger.info('Received raw message seq:%s, data=  %s', msg.sequence, msg.data.decode())
