@@ -24,7 +24,7 @@ async def helper_add_names_event_to_queue(stan_client: stan.aio.client.Client,
                                     nr_number: str,
                                     new_state: str,
                                     old_state: str):
-    """Add event to the Queue."""
+    """Add names event to the Queue."""
     payload = {
         'specversion': '1.0.1',
         'type': 'bc.registry.names.events',
@@ -52,9 +52,9 @@ def get_random_number():
 
 
 async def helper_add_business_dissolution_to_queue(stan_client: stan.aio.client.Client,
-                                       subject: str,
-                                       business_identifier: str,
-                                       filing_id: str):
+                                                   subject: str,
+                                                   business_identifier: str,
+                                                   filing_id: str):
     """Add dissolution event to Queue."""
     payload = {
         'specversion': '1.x-wip',

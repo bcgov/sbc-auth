@@ -153,7 +153,7 @@ async def test_business_events_queue(app, session, stan_server, event_loop, clie
                              cb_subscription_handler)
 
     # add an event to queue
-    await helper_add_business_dissolution_to_queue(events_stan, 'test_subject')
+    await helper_add_business_dissolution_to_queue(events_stan, 'test_subject', 'CP9992256', 9)
 
     entity: EntityModel = EntityModel.find_by_business_identifier(entity.id)
     assert entity
