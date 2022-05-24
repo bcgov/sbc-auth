@@ -21,7 +21,7 @@ from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
-from auth_api.utils.enums import AccessType, EntityStatus
+from auth_api.utils.enums import AccessType
 from entity_queue_common.service_utils import subscribe_to_queue
 from requests.models import Response
 
@@ -157,4 +157,4 @@ async def test_business_events_queue(app, session, stan_server, event_loop, clie
 
     entity: EntityModel = EntityModel.find_by_business_identifier(entity.id)
     assert entity
-    assert entity.state == EntityStatus.HISTORICAL
+    assert entity.state == 'HISTORICAL'

@@ -109,7 +109,7 @@ async def process_business_events(message_type: str, event_message: Dict[str, an
                      '%s to update entity.status.', entity_identifier)
     elif message_type == 'bc.registry.business.dissolution':
         logger.info('Setting Entity : %s status to HISTORICAL', entity_identifier)
-        entity.status = EntityStatus.HISTORICAL
+        entity.status = 'HISTORICAL'
         entity.save()
     elif message_type == 'bc.registry.business.correction':
         pass  # TODO unimplemented currently.
