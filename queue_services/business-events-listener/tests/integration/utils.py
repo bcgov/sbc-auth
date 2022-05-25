@@ -60,7 +60,7 @@ async def helper_add_business_dissolution_to_queue(stan_client: stan.aio.client.
         'specversion': '1.x-wip',
         'type': 'bc.registry.business.dissolution',
         'source': f'/business/{business_identifier}/filing/{filing_id}',
-        'id': id,
+        'id': 1234,
         'time': '',
         'datacontenttype': 'application/json',
         'identifier': business_identifier,
@@ -68,7 +68,7 @@ async def helper_add_business_dissolution_to_queue(stan_client: stan.aio.client.
             'filing': {
                 'header': {
                             'filingId': filing_id,
-                            'effectiveDate': datetime.utcnow().isoformat()
+                            'effectiveDate': str(datetime.now())
                             },
                 'business': {'identifier': business_identifier},
                 'legalFilings': ['dissolution']

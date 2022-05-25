@@ -142,6 +142,7 @@ async def test_business_events_queue(app, session, stan_server, event_loop, clie
     entity = EntityModel(
         name='Test',
         business_identifier='CP9992256',
+        corp_type_code='SP'
     ).save()
 
     # register the handler to test it
@@ -156,4 +157,4 @@ async def test_business_events_queue(app, session, stan_server, event_loop, clie
 
     entity: EntityModel = EntityModel.find_by_business_identifier('CP9992256')
     assert entity
-    assert entity.state == 'HISTORICAL'
+    assert entity.status == 'HISTORICAL'
