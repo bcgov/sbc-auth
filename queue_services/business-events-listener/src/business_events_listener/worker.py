@@ -76,7 +76,7 @@ async def process_business_events(message_type: str, event_message: Dict[str, an
 
     1. Check if entity exists and dissolution has occured.
        - Update the status to HISTORICAL.
-    2. **Unimplemented ** Check if entity exists and dissolution has reversed (via correction).
+    2. **Unimplemented** Check if entity exists and dissolution has reversed (via correction).
        - Update the status to ACTIVE.
 
     Args:

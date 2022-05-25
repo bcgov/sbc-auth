@@ -689,11 +689,3 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 }
 </style>
-
-function capitalizeFirstLetter(status: BusinessState): string {
-  throw new Error('Function not implemented.')
-}
-
-function formatTitle(status: BusinessState): string {
-  throw new Error('Function not implemented.')
-}
