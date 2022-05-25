@@ -27,7 +27,6 @@
             :rules="usernameRules"
             req
             data-test="input-user-id"
-            @change="emitBcolInfo"
           >
           </v-text-field>
         </v-col>
@@ -41,7 +40,6 @@
             req
             :rules="passwordRules"
             data-test="input-user-password"
-            @change="emitBcolInfo"
           >
           </v-text-field>
         </v-col>
@@ -66,7 +64,7 @@
 
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 @Component({
   name: 'BcolLogin',
@@ -83,7 +81,18 @@ export default class BcolLogin extends Vue {
   private errorMessage: string = ''
   private isLoading: boolean = false
   @Prop({ default: false }) hideLinkBtn: boolean
+  @Prop() defaultUserId: string
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
+
+  private async mounted () {
+    this.username = this.defaultUserId
+    this.password = ''
+  }
+
+  @Watch('password', { deep: true })
+  onPasswordChange () {
+    this.emitBcolInfo()
+  }
 
   private isFormValid (): boolean {
     return !!this.username && !!this.password
@@ -132,9 +141,10 @@ export default class BcolLogin extends Vue {
     }
   }
   resetForm () {
-    this.username = this.password = this.errorMessage = ''
+    this.password = this.errorMessage = ''
     this.$refs.form.resetValidation()
   }
+
   @Emit()
   private async emitBcolInfo () {
     const bcolInfo: BcolProfile = {
