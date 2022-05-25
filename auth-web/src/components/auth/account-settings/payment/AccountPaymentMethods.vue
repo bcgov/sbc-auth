@@ -163,11 +163,20 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
     if (this.isBtnSaved) {
       disableSaveBtn = false
-    } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) || (!this.paymentMethodChanged) || (this.selectedPaymentMethod === PaymentTypes.EJV)) {
+    } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) ||
+               (!this.paymentMethodChanged) ||
+               (this.selectedPaymentMethod === PaymentTypes.EJV) ||
+               this.disableSaveButtonForBCOL()) {
       disableSaveBtn = true
     }
 
     return disableSaveBtn
+  }
+
+  private disableSaveButtonForBCOL () {
+    return (this.selectedPaymentMethod === PaymentTypes.BCOL &&
+            this.selectedPaymentMethod === this.currentOrgPaymentType &&
+           (this.bcolInfo?.password === undefined || this.bcolInfo?.password === ''))
   }
 
   private getPADInfo (padInfo: PADInfo) {
