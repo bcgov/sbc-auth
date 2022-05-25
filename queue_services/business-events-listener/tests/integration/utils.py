@@ -20,10 +20,10 @@ import stan
 
 
 async def helper_add_names_event_to_queue(stan_client: stan.aio.client.Client,
-                                    subject: str,
-                                    nr_number: str,
-                                    new_state: str,
-                                    old_state: str):
+                                          subject: str,
+                                          nr_number: str,
+                                          new_state: str,
+                                          old_state: str):
     """Add names event to the Queue."""
     payload = {
         'specversion': '1.0.1',

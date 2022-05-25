@@ -132,8 +132,7 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
 
 
 @pytest.mark.asyncio
-async def test_business_events_queue(app, session, stan_server, event_loop, client_id, events_stan, future,
-                                     monkeypatch, access_type, is_auto_affiliate_expected):
+async def test_business_events_queue(app, session, stan_server, event_loop, client_id, events_stan, future):
     """Assert that business events can be retrieved and decoded from the Queue."""
     # Call back for the subscription
     from business_events_listener.worker import cb_subscription_handler
