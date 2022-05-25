@@ -137,6 +137,7 @@ import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -270,7 +271,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       case this.isTemporaryBusinessRegistration(item.corpType.code):
         return BusinessState.DRAFT
       case !!item.status:
-        return item.status
+        return CommonUtils.formatTitle(item.status)
       default:
         return BusinessState.ACTIVE
     }
@@ -688,3 +689,11 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 }
 </style>
+
+function capitalizeFirstLetter(status: BusinessState): string {
+  throw new Error('Function not implemented.')
+}
+
+function formatTitle(status: BusinessState): string {
+  throw new Error('Function not implemented.')
+}
