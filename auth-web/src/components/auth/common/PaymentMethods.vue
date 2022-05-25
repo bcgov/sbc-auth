@@ -64,6 +64,7 @@
                     :bcolAccountName="currentOrganization.bcolAccountName"
                     :bcolAccountDetails="currentOrganization.bcolAccountDetails"
                     :show-edit-btn="true"
+                    :force-edit-mode="forceEditModeBCOL"
                     @emit-bcol-info="getBcolInfo"
                   ></LinkedBCOLBanner>
                 </div>
@@ -175,6 +176,7 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: '' }) currentOrgType: string
   @Prop({ default: undefined }) currentOrganization: Organization
   @Prop({ default: '' }) currentSelectedPaymentMethod: string
+  @Prop({ default: undefined }) currentOrgPaymentType: string
   @Prop({ default: false }) isChangeView: boolean
   @Prop({ default: true }) isAcknowledgeNeeded: boolean
   @Prop({ default: false }) isTouchedUpdate: boolean
@@ -203,6 +205,12 @@ export default class PaymentMethods extends Vue {
       })
     }
     return paymentMethods
+  }
+
+  private get forceEditModeBCOL () {
+    return this.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
+           this.currentOrgPaymentType !== undefined &&
+           this.currentOrgPaymentType !== PaymentTypes.BCOL
   }
 
   private get isPADOnly () {

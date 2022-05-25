@@ -94,6 +94,11 @@ export default class BcolLogin extends Vue {
     this.emitBcolInfo()
   }
 
+  @Watch('username', { deep: true })
+  onUsernameChange () {
+    this.emitBcolInfo()
+  }
+
   private isFormValid (): boolean {
     return !!this.username && !!this.password
   }
