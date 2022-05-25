@@ -10,7 +10,7 @@ itsdangerous
 python-dotenv
 python-dateutil
 python-multipart
-PyJWT==1.7.1
+PyJWT==2.4.0
 psycopg2-binary
 sqlalchemy
 sqlalchemy-filters
