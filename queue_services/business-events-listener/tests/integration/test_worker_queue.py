@@ -155,6 +155,6 @@ async def test_business_events_queue(app, session, stan_server, event_loop, clie
     # add an event to queue
     await helper_add_business_dissolution_to_queue(events_stan, 'test_subject', 'CP9992256', 9)
 
-    entity: EntityModel = EntityModel.find_by_business_identifier(entity.id)
+    entity: EntityModel = EntityModel.find_by_business_identifier('CP9992256')
     assert entity
     assert entity.state == 'HISTORICAL'
