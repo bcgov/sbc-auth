@@ -223,6 +223,7 @@ class ProductCode(Enum):
     """Product code."""
 
     BUSINESS = 'BUSINESS'
+    BUSINESS_SEARCH = 'BUSINESS_SEARCH'
     VS = 'VS'
     BCA = 'BCA'
     PPR = 'PPR'
