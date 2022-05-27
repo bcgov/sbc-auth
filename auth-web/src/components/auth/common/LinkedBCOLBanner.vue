@@ -74,7 +74,6 @@ export default class LinkedBCOLBanner extends Vue {
   private async mounted () {
     this.editMode = this.forceEditMode || false
     this.emitBcolInfo({})
-    this.emitBcolInfo({})
   }
   @Emit()
   private unlinkAccount () {
