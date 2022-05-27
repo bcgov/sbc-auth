@@ -38,7 +38,7 @@
                 {{ typeDescription(item.nameRequest.legalType) }}
               </span>
             </td>
-            <td v-if="showCol(headers[3].text)">{{ status(item) }}</td>
+            <td v-if="showCol(headers[3].text)" class="status">{{ status(item) }}</td>
             <td v-if="showCol(headers[4].text)">{{ folio(item) }}</td>
             <td v-if="showCol(headers[5].text)">{{ lastModified(item) }}</td>
             <td v-if="showCol(headers[6].text)">{{ modifiedBy(item) }}</td>
@@ -271,7 +271,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       case this.isTemporaryBusinessRegistration(item.corpType.code):
         return BusinessState.DRAFT
       case !!item.status:
-        return CommonUtils.formatTitle(item.status)
+        return item.status
       default:
         return BusinessState.ACTIVE
     }

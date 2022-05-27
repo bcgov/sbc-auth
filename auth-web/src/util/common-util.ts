@@ -255,8 +255,4 @@ export default class CommonUtils {
     const stringIndexValue: string = index.toString()
     return stringIndexValue.padStart(2, '0')
   }
-
-  static formatTitle (str: string): string {
-    return str ? str[0]?.toUpperCase() + str.slice(1)?.toLowerCase() : str
-  }
 }
