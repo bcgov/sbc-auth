@@ -89,12 +89,12 @@ export default class BcolLogin extends Vue {
     this.password = ''
   }
 
-  @Watch('password', { deep: true })
+  @Watch('password')
   onPasswordChange () {
     this.emitBcolInfo()
   }
 
-  @Watch('username', { deep: true })
+  @Watch('username')
   onUsernameChange () {
     this.emitBcolInfo()
   }
