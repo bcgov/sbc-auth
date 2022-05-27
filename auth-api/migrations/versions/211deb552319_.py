@@ -1,7 +1,7 @@
 """Insert Business search product code
 
 Revision ID: 211deb552319
-Revises: cd89e8e61dec
+Revises: da0ce563c18a
 Create Date: 2022-05-27 11:43:03.530212
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '211deb552319'
-down_revision = 'cd89e8e61dec'
+down_revision = 'da0ce563c18a'
 branch_labels = None
 depends_on = None
 
