@@ -66,12 +66,13 @@ import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 export default class LinkedBCOLBanner extends Vue {
   @Prop({ default: false }) showUnlinkAccountBtn: boolean
   @Prop({ default: false }) showEditBtn: boolean
+  @Prop({ default: false }) forceEditMode: boolean
   @Prop({ default: '' }) bcolAccountName: string
   @Prop({ default: () => ({} as BcolAccountDetails) }) bcolAccountDetails: BcolAccountDetails
   private editMode: boolean = false // user can edit the bcol details
 
   private async mounted () {
-    this.editMode = false
+    this.editMode = this.forceEditMode || false
     this.emitBcolInfo({})
   }
   @Emit()
