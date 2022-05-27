@@ -19,8 +19,8 @@ asyncio-nats-streaming==0.4.0
 attrs==21.4.0
 bcrypt==3.2.2
 blinker==1.4
-cachelib==0.6.0
-certifi==2021.10.8
+cachelib==0.7.0
+certifi==2022.5.18.1
 cffi==1.15.0
 charset-normalizer==2.0.12
 click==7.1.2
@@ -30,7 +30,7 @@ flask-marshmallow==0.11.0
 flask-restx==0.5.1
 gunicorn==20.1.0
 idna==3.3
-importlib-metadata==4.11.3
+importlib-metadata==4.11.4
 importlib-resources==5.7.1
 itsdangerous==1.1.0
 jaeger-client==4.8.0
@@ -40,7 +40,7 @@ marshmallow==3.15.0
 minio==7.1.8
 opentracing==2.4.0
 packaging==21.3
-protobuf==3.20.1
+protobuf==3.19.4
 psycopg2-binary==2.9.3
 pyasn1==0.4.8
 pycparser==2.21
