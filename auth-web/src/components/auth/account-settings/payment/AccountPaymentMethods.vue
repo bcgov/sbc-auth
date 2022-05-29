@@ -12,6 +12,7 @@
       v-if="selectedPaymentMethod"
       :currentOrgType="savedOrganizationType"
       :currentOrganization="currentOrganization"
+      :currentOrgPaymentType="currentOrgPaymentType"
       :currentSelectedPaymentMethod="selectedPaymentMethod"
       :isChangeView="true"
       :isAcknowledgeNeeded="isAcknowledgeNeeded"
@@ -175,7 +176,6 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
   private disableSaveButtonForBCOL () {
     return (this.selectedPaymentMethod === PaymentTypes.BCOL &&
-            this.selectedPaymentMethod === this.currentOrgPaymentType &&
            (this.bcolInfo?.password === undefined || this.bcolInfo?.password === ''))
   }
 
