@@ -157,6 +157,11 @@ class Entity:
             if entity_info.get('passCode') is not None:
                 entity_info['passCode'] = passcode_hash(entity_info['passCode'])
 
+        # Small mapping from state -> status. EX in LEAR: Business.State.HISTORICAL
+        if 'state' in entity_info:
+            entity_info['status'] = entity_info['state']
+            del entity_info['state']
+
         entity.update_from_dict(**camelback2snake(entity_info))
         entity.commit()
 
