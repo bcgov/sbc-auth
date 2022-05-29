@@ -30,6 +30,7 @@ export interface Business {
     modifiedBy?: string
     nameRequest?: NameRequest
     nrNumber?: string
+    status?: string
 }
 
 export interface BusinessSearchResultDto {
