@@ -159,7 +159,7 @@ class Entity:
 
         # Small mapping from state -> status. EX in LEAR: Business.State.HISTORICAL
         if 'state' in entity_info:
-            entity_info['status'] = entity_info['state'].replace('State.', '')
+            entity_info['status'] = entity_info['state']
             del entity_info['state']
 
         entity.update_from_dict(**camelback2snake(entity_info))
