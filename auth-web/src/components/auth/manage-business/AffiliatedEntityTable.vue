@@ -686,5 +686,9 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     border-radius: 10px;
     background-color: lightgray;
   }
+
+  .status {
+    text-transform: capitalize;
+  }
 }
 </style>
