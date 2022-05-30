@@ -39,7 +39,7 @@ export default class PPRLauncher extends Vue {
   }
 
   private getImgUrl (img) {
-    let images = require.context('@/assets/img/')
+    const images = require.context('@/assets/img/')
     return images('./' + img)
   }
 
