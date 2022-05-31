@@ -7,10 +7,5 @@ module.exports = {
       }
     ]
   ],
-  'env': {
-    'test': {
-      'plugins': ['transform-require-context']
-    }
-  },
   'compact': true
 }
