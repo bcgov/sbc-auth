@@ -3,11 +3,11 @@
     <v-row align="center" no-gutters>
       <v-col cols="auto">
         <!-- to use a dynamic src use 'require(<path>)' -->
-        <img class="product-img" src="@/assets/img/PPR_dashboard_thumbnail_image.jpg" />
+        <img class="product-img" :src="getImgUrl(img)" />
       </v-col>
       <v-col class="product-info">
-        <h2>{{ $t('pprLauncherTitle') }}</h2>
-        <p class="pt-3 ma-0">{{ $t('pprLauncherText') }}</p>
+        <h2>{{ title }}</h2>
+        <p class="pt-3 ma-0">{{ text }}</p>
         <v-btn class="primary action-btn px-5">
           Open
           <v-icon>mdi-chevron-right</v-icon>
@@ -17,19 +17,52 @@
   </v-card>
 </template>
 <script lang="ts">
-import { Component } from 'vue-property-decorator'
+import { Component, Watch } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import Vue from 'vue'
+import { namespace } from 'vuex-class'
+const userModule = namespace('user')
 
 // FUTURE: import this from shared components once built
 // - this is converted statically from UserProduct.vue in bcgov/bcregistry repo
 @Component({})
 export default class PPRLauncher extends Vue {
-  private text = 'Register or search for legal claims on personal property.'
-  private title = 'Staff Personal Property Registry'
+  @userModule.State('currentUser') public currentUser!: KCUserProfile
+
+  private title = ''
+  private text = ''
+  private img = ''
 
   private get pprUrl (): string {
     return ConfigHelper.getPPRWebUrl()
+  }
+
+  private getImgUrl (img) {
+    const images = require.context('@/assets/img/')
+    return images('./' + img)
+  }
+
+  @Watch('currentUser', { deep: true, immediate: true })
+  assignAssetContent (): void {
+    const roles = this.currentUser?.roles
+    switch (true) {
+      case roles.includes('ppr_staff') && roles.includes('mhr_staff'):
+        this.img = 'AssetsRegistries_dashboard.jpg'
+        this.title = this.$t('assetLauncherTitle').toString()
+        this.text = this.$t('assetLauncherText').toString()
+        break
+      case roles.includes('mhr_staff'):
+        this.img = 'ManufacturedHomeRegistry_dashboard.jpg'
+        this.title = this.$t('mhrLauncherTitle').toString()
+        this.text = this.$t('mhrLauncherText').toString()
+        break
+      default:
+        this.img = 'PPR_dashboard_thumbnail_image.jpg'
+        this.title = this.$t('pprLauncherTitle').toString()
+        this.text = this.$t('pprLauncherText').toString()
+        break
+    }
   }
 }
 </script>
