@@ -229,6 +229,7 @@ class ProductCode(Enum):
     PPR = 'PPR'
     DIR_SEARCH = 'DIR_SEARCH'
     NAMES_REQUEST = 'NRO'
+    MHR = 'MHR'
 
 
 class TaskRelationshipType(Enum):
