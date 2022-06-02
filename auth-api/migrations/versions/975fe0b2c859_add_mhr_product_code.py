@@ -20,8 +20,8 @@ def upgrade():
     op.execute("INSERT INTO public.product_codes "
              "(code, description,\"default\", type_code, hidden, need_review, premium_only, url) "
              "VALUES "
-             "('MHR', 'Mobile Home Registry', true, 'INTERNAL', false, false, true, "
-             "'https://www.bcregistry.ca/business/search')")
+             "('MHR', 'Mobile Home Registry', false, 'INTERNAL', true, false, true, "
+             "'https://www.bcregistry.ca/ppr')")
     op.execute("commit")
 
 
