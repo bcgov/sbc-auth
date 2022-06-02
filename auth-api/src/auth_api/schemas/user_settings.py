@@ -28,7 +28,7 @@ class UserSettingsSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors,
                   'product_settings')
 
     @post_dump(pass_many=True)
-    def _remove_empty(self, data, many):  # pylint: disable=no-self-use
+    def _remove_empty(self, data, many):
         """Remove all empty values from the dumped dict."""
         if not many:
             return {

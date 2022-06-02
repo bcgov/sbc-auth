@@ -38,7 +38,7 @@ class OrgSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-publ
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True, data_key='mailing_address')
 
     @post_dump(pass_many=False)
-    def _include_dynamic_fields(self, data, many):  # pylint: disable=no-self-use
+    def _include_dynamic_fields(self, data, many):
         """Remove all empty values and versions from the dumped dict."""
         if not many:
             if data.get('is_business_account', False):

@@ -27,7 +27,7 @@ from humps.main import camelize, decamelize
 def cors_preflight(methods):
     """Render an option method on the class."""
 
-    def wrapper(f):
+    def wrapper(func):
         def options(self, *args, **kwargs):  # pylint: disable=unused-argument
             return {'Allow': 'GET'}, 200, \
                    {'Access-Control-Allow-Origin': '*',
@@ -35,8 +35,8 @@ def cors_preflight(methods):
                     'Access-Control-Allow-Headers': 'Authorization, Content-Type, registries-trace-id, '
                                                     'invitation_token'}
 
-        setattr(f, 'options', options)
-        return f
+        setattr(func, 'options', options)
+        return func
 
     return wrapper
 
