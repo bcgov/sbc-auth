@@ -25,7 +25,7 @@
                     <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
                       {{productDetails.description}}
                   <v-tooltip
-                    v-if="productDetails.code === 'BUSINESS_SEARCH'"
+                    v-if="productPremTooltipText(productDetails.code)"
                     class="pa-2"
                     content-class="tooltip"
                     color="grey darken-4"
@@ -38,10 +38,7 @@
                       </span>
                     </template>
                     <div class="py-3">
-                      <span>The BETA version of the Business Search will only be available for
-                        Premium accounts (accounts using pre-authorized debit or BC Online payment
-                        types). Basic account access to Business search will be available soon.
-                      </span>
+                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
                     </div>
                   </v-tooltip>
                   <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
@@ -60,7 +57,7 @@
                 <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
                   {{productDetails.description}}
                   <v-tooltip
-                    v-if="productDetails.code === 'BUSINESS_SEARCH'"
+                    v-if="productPremTooltipText(productDetails.code)"
                     class="pa-2"
                     content-class="tooltip"
                     color="grey darken-4"
@@ -73,10 +70,7 @@
                       </span>
                     </template>
                     <div class="py-3">
-                      <span>The BETA version of the Business Search will only be available for
-                        Premium accounts (accounts using pre-authorized debit or BC Online payment
-                        types). Basic account access to Business search will be available soon.
-                      </span>
+                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
                     </div>
                   </v-tooltip>
                   <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
@@ -140,7 +134,7 @@
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, LDFlags, productStatus } from '@/util/constants'
+import { DisplayModeValues, productStatus } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
@@ -309,10 +303,11 @@ export default class Product extends Vue {
   }
 
   public productBadge (code: string) {
-    if (code === 'BUSINESS_SEARCH') {
-      return LaunchDarklyService.getFlag(LDFlags.ProductBusSearchChip)
-    }
-    return ''
+    return LaunchDarklyService.getFlag(`product-${code}-status`)
+  }
+
+  public productPremTooltipText (code: string) {
+    return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
   }
 }
 </script>
