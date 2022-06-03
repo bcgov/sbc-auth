@@ -270,7 +270,8 @@ export enum LDFlags {
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard',
     DisableGovNAccountCreation='disable-govn-account',
-    EnableSpGpDba='enable-sp-gp-dba'
+    EnableSpGpDba='enable-sp-gp-dba',
+    ProductBusSearchChip='product-bus-search-chip'
 }
 
 export enum DateFilterCodes {
