@@ -22,7 +22,28 @@
               >
                 <template v-slot:label>
                   <div class="ml-2">
-                    <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
+                    <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
+                      {{productDetails.description}}
+                  <v-tooltip
+                    v-if="productPremTooltipText(productDetails.code)"
+                    class="pa-2"
+                    content-class="tooltip"
+                    color="grey darken-4"
+                    max-width="350px"
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
+                        (<span class="underline-dotted">requires Premium Account</span>)
+                      </span>
+                    </template>
+                    <div class="py-3">
+                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
+                    </div>
+                  </v-tooltip>
+                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
+                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
+                    </h3>
                     <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
                   </div>
               </template>
@@ -33,7 +54,28 @@
                 {{ productLabel.decisionMadeIcon }}
               </v-icon>
               <div class="ml-2 label-color">
-                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">{{productDetails.description}}</h3>
+                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
+                  {{productDetails.description}}
+                  <v-tooltip
+                    v-if="productPremTooltipText(productDetails.code)"
+                    class="pa-2"
+                    content-class="tooltip"
+                    color="grey darken-4"
+                    max-width="350px"
+                    top
+                  >
+                    <template v-slot:activator="{ on }">
+                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
+                        (<span class="underline-dotted">requires Premium Account</span>)
+                      </span>
+                    </template>
+                    <div class="py-3">
+                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
+                    </div>
+                  </v-tooltip>
+                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
+                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
+                </h3>
                 <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"  />
               </div>
             </div>
@@ -93,6 +135,7 @@
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, productStatus } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 
@@ -258,11 +301,19 @@ export default class Product extends Vue {
   private saveProductFee (data) {
     return data
   }
+
+  public productBadge (code: string) {
+    return LaunchDarklyService.getFlag(`product-${code}-status`)
+  }
+
+  public productPremTooltipText (code: string) {
+    return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-
+@import '@/assets/scss/theme.scss';
 .product-card {
   transition: all ease-out 0.2s;
 
@@ -285,5 +336,35 @@ export default class Product extends Vue {
 .label-color {
     color: rgba(0,0,0,.6) !important;
 }
+
+.product-title-info {
+  color: $gray7;
+  font-size: 1.125rem;
+  font-weight: normal;
+}
+
+.product-title-badge {
+  color: $BCgovBlue5;
+  font-size: 0.875rem;
+  letter-spacing: -0.25px;
+  position: absolute;
+}
+
+.underline-dotted {
+  border-bottom: dotted;
+}
+
+.v-tooltip__content:before {
+    content: ' ';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    margin-left: -10px;
+    width: 20px;
+    height: 20px;
+    border-width: 10px 10px 10px 10px;
+    border-style: solid;
+    border-color: var(--v-grey-darken4) transparent transparent transparent;
+  }
 
 </style>
