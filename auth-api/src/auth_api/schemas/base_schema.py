@@ -35,7 +35,7 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     )
 
     @post_dump(pass_many=True)
-    def _remove_empty(self, data, many):  # pylint: disable=no-self-use
+    def _remove_empty(self, data, many):
         """Remove all empty values and versions from the dumped dict."""
         if not many:
             for key in list(data):
