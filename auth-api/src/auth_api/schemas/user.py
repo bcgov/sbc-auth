@@ -37,7 +37,7 @@ class UserSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-pub
     user_terms = fields.Method('get_user_terms_object')
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
 
-    def get_user_terms_object(self, obj):  # pylint: disable=no-self-use
+    def get_user_terms_object(self, obj):
         """Map terms properties into nested object."""
         return {
             'isTermsOfUseAccepted': obj.is_terms_of_use_accepted,

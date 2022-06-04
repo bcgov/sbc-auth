@@ -33,8 +33,8 @@ def validate_roles(**role_args):
         not_allowed_roles [str,]: Comma separated list of any invalid roles
     """
 
-    def decorated(f):
-        @wraps(f)
+    def decorated(func):
+        @wraps(func)
         @_jwt.requires_auth
         def wrapper(*args, **kwargs):
             token_info: Dict = _get_token_info() or {}
@@ -48,7 +48,7 @@ def validate_roles(**role_args):
             if len(set(not_allowed_roles).intersection(user_roles)) > 0:
                 abort(http_status.HTTP_401_UNAUTHORIZED,
                       description='Not allowed role(s) present.Denied access to this endpoint')
-            return f(*args, **kwargs)
+            return func(*args, **kwargs)
 
         return wrapper
 
