@@ -48,7 +48,7 @@ export default class NextPageMixin extends Vue {
   }
 
   protected getNextPageUrl (): string {
-    const bcRegistryDashoadUrl = `${sessionStorage.getItem('REGISTRY_HOME_URL')}dashboard`
+    const dashboardUrl = `${sessionStorage.getItem('REGISTRY_HOME_URL')}dashboard`
     let orgName = ''
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
@@ -69,7 +69,7 @@ export default class NextPageMixin extends Vue {
           return `/${Pages.SETUP_GOVM_ACCOUNT_SUCCESS}`
         } else {
           // return `/${Pages.MAIN}/${this.currentOrganization.id}`
-          return bcRegistryDashoadUrl
+          return dashboardUrl
         }
       case LoginSource.BCROS:
         let bcrosNextStep = '/'
@@ -97,11 +97,11 @@ export default class NextPageMixin extends Vue {
         } else if (!this.currentOrganization && !this.currentMembership) {
           nextStep = `/${Pages.CREATE_ACCOUNT}`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          nextStep = bcRegistryDashoadUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          nextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
         } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
           nextStep = `/${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
-          nextStep = bcRegistryDashoadUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          nextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
         }
 
         return nextStep
@@ -134,17 +134,17 @@ export default class NextPageMixin extends Vue {
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
           bceidNextStep = `/${Pages.PENDING_APPROVAL}/${orgName}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          bceidNextStep = bcRegistryDashoadUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          bceidNextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
         } else if ([MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(this.currentMembership?.membershipStatus)) {
           // if user is pending show pending page.
           bceidNextStep = `/${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
-          bceidNextStep = bcRegistryDashoadUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          bceidNextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
         }
 
         return `${bceidNextStep}`
       default:
-        return bcRegistryDashoadUrl
+        return dashboardUrl
     }
   }
 
