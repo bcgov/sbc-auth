@@ -79,7 +79,7 @@ async def process_notification(notification_id: int, db_session):
                     spaces = re.compile(r'[\s]+', re.UNICODE)
                     filename = unicodedata.normalize('NFKD', attachment.file_name)
                     filename = filename.encode('ascii', 'ignore').decode('ascii')
-                    filename = spaces.sub(u' ', filename).strip()
+                    filename = spaces.sub(' ', filename).strip()
 
                     try:
                         filename and filename.encode('ascii')
