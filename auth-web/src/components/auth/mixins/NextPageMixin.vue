@@ -195,14 +195,11 @@ export default class NextPageMixin extends Vue {
       } else {
         this.$router.push(`/${Pages.ACCOUNT_FREEZE}`)
       }
-    } else {
+    } else if (this.$route.name?.search('account-freeze') > -1) {
       /** If user is in the account freeze page while switching the account, then need to redirect them to account info page if that account is active.
        * otherwise user will stuck on the account freeze page **/
-      if (this.$route.name?.search('account-freeze') > -1) {
-        this.$router.push(`${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}`)
-      }
-    }
-    if (needMissingBusinessDetailsRedirect) {
+      this.$router.push(`${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}`)
+    } else if (needMissingBusinessDetailsRedirect) {
       this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
