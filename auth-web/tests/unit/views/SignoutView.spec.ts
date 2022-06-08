@@ -11,6 +11,11 @@ Vue.use(VueRouter)
 
 describe('SignoutView.vue', () => {
   let wrapper: Wrapper<SignoutView>
+  const config = {
+    'REGISTRY_HOME_URL': 'https://localhost:8080/'
+  }
+
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
