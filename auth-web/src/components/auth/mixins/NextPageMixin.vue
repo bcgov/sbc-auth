@@ -48,7 +48,7 @@ export default class NextPageMixin extends Vue {
   }
 
   protected getNextPageUrl (): string {
-    const dashboardUrl = `${sessionStorage.getItem('REGISTRY_HOME_URL')}dashboard`
+    const dashboardUrl = `${ConfigHelper.getRegistryHomeURL()}dashboard`
     let orgName = ''
     switch (this.currentUser?.loginSource) {
       case LoginSource.IDIR:
