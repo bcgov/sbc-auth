@@ -142,19 +142,8 @@ export default class App extends Mixins(NextPageMixin) {
 
     this.$store.commit('updateHeader')
 
-    this.accountFreezeRedirect()
-
-    // Some edge cases where user needs to be redirected based on their account status and current location
-    if (this.needMissingBusinessDetailsRedirect) {
-      this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
-    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
-      // 1. If user was in a pending approval page and switched to an active account, take them to the home page
-      this.$router.push(`/home`)
-    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-      const label = encodeURIComponent(btoa(this.currentAccountSettings?.label))
-      // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
-      this.$router.push(`/${Pages.PENDING_APPROVAL}/${label}`)
-    }
+    // Account Freeze + edge cases - redirected based on account status and location
+    this.accountSwitchRedirect(this.needMissingBusinessDetailsRedirect)
   }
 
   private async created () {

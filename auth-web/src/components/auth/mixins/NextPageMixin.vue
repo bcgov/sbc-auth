@@ -186,7 +186,7 @@ export default class NextPageMixin extends Vue {
     }
   }
 
-  protected accountFreezeRedirect () {
+  protected accountSwitchRedirect (needMissingBusinessDetailsRedirect: boolean) {
     if (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
       // eslint-disable-next-line no-console
       console.log('Redirecting user to Account Freeze message since the account is temporarly suspended.')
@@ -201,6 +201,16 @@ export default class NextPageMixin extends Vue {
       if (this.$route.name?.search('account-freeze') > -1) {
         this.$router.push(`${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}`)
       }
+    }
+    if (needMissingBusinessDetailsRedirect) {
+      this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+      // 1. If user was in a pending approval page and switched to an active account, take them to the home page
+      this.$router.push(`/home`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      const label = encodeURIComponent(btoa(this.currentAccountSettings?.label))
+      // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
+      this.$router.push(`/${Pages.PENDING_APPROVAL}/${label}`)
     }
   }
 }
