@@ -31,7 +31,7 @@ describe('PPRLauncher.vue', () => {
     state: {
       currentUser: {
         fullName: 'user2',
-        roles: ['ppr_staff']
+        roles: ['ppr']
       }
     }
   }
@@ -87,7 +87,7 @@ describe('PPRLauncher.vue', () => {
   })
 
   it('renders img, title, text and button as MHR staff', async () => {
-    userModule.state.currentUser.roles = ['mhr_staff']
+    userModule.state.currentUser.roles = ['mhr']
     await Vue.nextTick()
     expect(wrapper.find('.product-container').exists()).toBe(true)
     expect(wrapper.find('.product-img').exists()).toBe(true)
@@ -100,7 +100,7 @@ describe('PPRLauncher.vue', () => {
   })
 
   it('renders img, title, text and button as Asset staff', async () => {
-    userModule.state.currentUser.roles = ['mhr_staff', 'ppr_staff']
+    userModule.state.currentUser.roles = ['mhr', 'ppr']
     await Vue.nextTick()
     expect(wrapper.find('.product-container').exists()).toBe(true)
     expect(wrapper.find('.product-img').exists()).toBe(true)
