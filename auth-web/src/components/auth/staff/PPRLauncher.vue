@@ -47,12 +47,12 @@ export default class PPRLauncher extends Vue {
   assignAssetContent (): void {
     const roles = this.currentUser?.roles
     switch (true) {
-      case roles.includes('ppr_staff') && roles.includes('mhr_staff'):
+      case roles.includes('ppr') && roles.includes('mhr'):
         this.img = 'AssetsRegistries_dashboard.jpg'
         this.title = this.$t('assetLauncherTitle').toString()
         this.text = this.$t('assetLauncherText').toString()
         break
-      case roles.includes('mhr_staff'):
+      case roles.includes('mhr'):
         this.img = 'ManufacturedHomeRegistry_dashboard.jpg'
         this.title = this.$t('mhrLauncherTitle').toString()
         this.text = this.$t('mhrLauncherText').toString()
