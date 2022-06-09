@@ -22,7 +22,7 @@ export default class SignoutView extends Vue {
     // redirect to dashboard on logout
     // TODO need to fix for one URL
     if (!this.redirectUrl) {
-      return ConfigHelper.getRegistryHomeURL()
+      return `${ConfigHelper.getRegistryHomeURL()}/login`
     }
     return this.redirectUrl
   }
