@@ -68,7 +68,6 @@ export default class NextPageMixin extends Vue {
           // redirect to pending page
           return `/${Pages.SETUP_GOVM_ACCOUNT_SUCCESS}`
         } else {
-          // return `/${Pages.MAIN}/${this.currentOrganization.id}`
           return dashboardUrl
         }
       case LoginSource.BCROS:
@@ -97,11 +96,11 @@ export default class NextPageMixin extends Vue {
         } else if (!this.currentOrganization && !this.currentMembership) {
           nextStep = `/${Pages.CREATE_ACCOUNT}`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          nextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          nextStep = dashboardUrl // redirect to dashboard
         } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
           nextStep = `/${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
-          nextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          nextStep = dashboardUrl // redirect to dashboard
         }
 
         return nextStep
@@ -134,12 +133,12 @@ export default class NextPageMixin extends Vue {
         } else if (this.currentOrganization && this.currentOrganization.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
           bceidNextStep = `/${Pages.PENDING_APPROVAL}/${orgName}/true`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          bceidNextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          bceidNextStep = dashboardUrl// redirect to dashboard
         } else if ([MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(this.currentMembership?.membershipStatus)) {
           // if user is pending show pending page.
           bceidNextStep = `/${Pages.PENDING_APPROVAL}/${orgName}`
         } else {
-          bceidNextStep = dashboardUrl// `${Pages.MAIN}/${this.currentOrganization.id}`
+          bceidNextStep = dashboardUrl // redirect to dashboard
         }
 
         return `${bceidNextStep}`
