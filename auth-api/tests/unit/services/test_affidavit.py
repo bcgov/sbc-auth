@@ -47,8 +47,12 @@ def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pyl
 
     assert affidavit.as_dict().get('status', None) == AffidavitStatus.PENDING.value
     new_affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(affidavit_info=new_affidavit_info)
-
+    affidavit2 = AffidavitService.create_affidavit(affidavit_info=new_affidavit_info)
+    new_affidavit_info_2 = TestAffidavit.get_test_affidavit_with_contact()
+    affidavit3 = AffidavitService.create_affidavit(affidavit_info=new_affidavit_info_2)
+    assert affidavit.as_dict().get('status', None) == AffidavitStatus.INACTIVE.value
+    assert affidavit2.as_dict().get('status', None) == AffidavitStatus.INACTIVE.value
+    assert affidavit3.as_dict().get('status', None) == AffidavitStatus.PENDING.value
 
 def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
@@ -101,7 +105,14 @@ def test_reject_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     patch_token_info(token_info, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
-    AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+    affidavit1 = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+
+    affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
+    affidavit = AffidavitService.create_affidavit(affidavit_info=affidavit_info)
+
+    assert affidavit1.as_dict().get('status', None) == AffidavitStatus.INACTIVE.value
+    assert affidavit.as_dict().get('status', None) == AffidavitStatus.PENDING.value
+
     org = OrgService.create_org(TestOrgInfo.org_with_mailing_address(), user_id=user.id)
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
