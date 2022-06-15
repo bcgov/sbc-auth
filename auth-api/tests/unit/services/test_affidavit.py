@@ -54,6 +54,7 @@ def test_create_affidavit_duplicate(session, keycloak_mock, monkeypatch):  # pyl
     assert affidavit2.as_dict().get('status', None) == AffidavitStatus.INACTIVE.value
     assert affidavit3.as_dict().get('status', None) == AffidavitStatus.PENDING.value
 
+
 def test_approve_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Affidavit can be approved."""
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
