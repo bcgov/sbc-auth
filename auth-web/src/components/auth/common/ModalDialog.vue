@@ -6,34 +6,39 @@
     :content-class="dialogClass"
     :max-width="maxWidth"
     v-model="isOpen"
-    @keydown.esc="cancel">
+    @keydown.esc="cancel"
+  >
     <v-card>
+      <!-- title -->
       <v-card-title data-test="dialog-header">
+        <!-- optional check icon -->
         <slot v-if="showIcon" name="icon">
           <v-icon large color="success">mdi-check</v-icon>
         </slot>
+
         <span>
           <slot name="title">{{ title }}</slot>
         </span>
-        <span v-if="showCloseIcon">
-           <v-btn
-            icon
-           @click="close()"
-           class="font-weight-bold"
-            >
-                <v-icon>mdi-close</v-icon>
-            </v-btn>
 
-        </span>
+        <!-- optional close button -->
+        <v-btn v-if="showCloseIcon" icon @click="close()">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
       </v-card-title>
+
+      <!-- text -->
       <v-card-text>
         <slot name="text">
           <div v-html="text"></div>
         </slot>
       </v-card-text>
-        <v-card-actions v-if="showActions">
+
+      <!-- actions -->
+      <v-card-actions v-if="showActions">
         <slot name="actions">
-          <v-btn large color="success" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+          <v-btn large color="success" @click="close()" data-test="dialog-ok-button">
+            <span>OK</span>
+          </v-btn>
         </slot>
       </v-card-actions>
     </v-card>
@@ -45,18 +50,18 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class ModalDialog extends Vue {
-  private isOpen = false
+  protected isOpen = false
 
-  @Prop({ default: '' }) private title: string
-  @Prop({ default: '' }) private text: string
-  @Prop({ default: true }) private showIcon: boolean
-  @Prop({ default: true }) private showActions: boolean
-  @Prop({ default: false }) private isPersistent: boolean
-  @Prop({ default: false }) private fullscreenOnMobile: boolean
-  @Prop({ default: false }) private isScrollable: boolean
-  @Prop({ default: '' }) private dialogClass: string
-  @Prop({ default: '' }) private maxWidth: string
-  @Prop({ default: false }) private showCloseIcon: boolean
+  @Prop({ default: '' }) readonly title: string
+  @Prop({ default: '' }) readonly text: string
+  @Prop({ default: true }) readonly showIcon: boolean
+  @Prop({ default: true }) readonly showActions: boolean
+  @Prop({ default: false }) readonly isPersistent: boolean
+  @Prop({ default: false }) readonly fullscreenOnMobile: boolean
+  @Prop({ default: false }) readonly isScrollable: boolean
+  @Prop({ default: '' }) readonly dialogClass: string
+  @Prop({ default: '' }) readonly maxWidth: string
+  @Prop({ default: false }) readonly showCloseIcon: boolean
 
   public open () {
     this.isOpen = true

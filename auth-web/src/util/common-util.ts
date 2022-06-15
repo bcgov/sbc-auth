@@ -1,18 +1,17 @@
-/**
- * Place to put all the custom utility methods
- */
-
 import { Address, BaseAddressModel } from '@/models/address'
-
 import { Permission } from '@/util/constants'
 import moment from 'moment'
 
+/**
+ * A class to put all the common utility methods.
+ */
 export default class CommonUtils {
   // checking url matches the regex
   static isUrl (value:string):boolean {
     const URL_MATCHER = new RegExp('^(?:\\w+:)?\\/\\/([^\\s\\.]+\\.\\S{2}|localhost[\\:?\\d]*)\\S*$')
     return URL_MATCHER.test(value)
   }
+
   // formatting incorporation number according to the length of numbers
   static formatIncorporationNumber (incorpNum:string, isNR: boolean = false, numLength?:number):string {
     if (!incorpNum) return null
@@ -35,21 +34,30 @@ export default class CommonUtils {
     }
     return incorpNum.toUpperCase()
   }
+
   static validateIncorporationNumber (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(A|B|BC|C|CP|EPR|FM|FOR|LIC|LL|LLC|LP|MF|QA|QB|QC|QD|QE|REG|S|S-|S\/|XL|XP|XS|XS-|XS\/|CS|CS-|CS\/)?\d+$/)
     return VALID_FORMAT.test(value?.toUpperCase())
   }
+
   static isCooperativeNumber (value: string):boolean {
     return value?.toUpperCase().startsWith('CP') || false
   }
+
+  static isFirmNumber (value: string):boolean {
+    return value?.toUpperCase().startsWith('FM') || false
+  }
+
   static validateNameRequestNumber (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(NR )?\d+$/)
     return VALID_FORMAT.test(value?.toUpperCase())
   }
+
   static validateEmailFormat (value: string):boolean {
     const VALID_FORMAT = new RegExp(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
     return VALID_FORMAT.test(value)
   }
+
   static validatePhoneNumber (value: string):boolean {
     return value?.length <= 12 || false
   }
@@ -135,6 +143,7 @@ export default class CommonUtils {
     const path = window.location.pathname
     return path.includes('/signin') || path.includes('/signin-redirect') || path.includes('/signin-redirect-full')
   }
+
   static isSigningOut ():boolean {
     const path = window.location.pathname
     return path.includes('/signout')
@@ -163,6 +172,7 @@ export default class CommonUtils {
       Permission.VIEW_USER_LOGINSOURCE
     ]
   }
+
   static getViewOnlyPermissions (): string[] {
     return [
       Permission.VIEW_ACCOUNT,
@@ -174,6 +184,7 @@ export default class CommonUtils {
       Permission.VIEW_REQUEST_PRODUCT_PACKAGE
     ]
   }
+
   // for converting address object of sbc-auth to as needed for BaseAddress component
   static convertAddressForComponent (address: Address) : BaseAddressModel {
     return {
@@ -186,6 +197,7 @@ export default class CommonUtils {
       streetAddressAdditional: address.streetAdditional
     }
   }
+
   // for converting address object of BaseAddress component to as needed for sbc-auth
   static convertAddressForAuth (iaddress: BaseAddressModel) : Address {
     return {
@@ -227,6 +239,7 @@ export default class CommonUtils {
       }
     }
   }
+
   // allowing only number and X character in v-mask directive
   static accountMask () {
     return {

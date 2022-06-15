@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
@@ -6,16 +6,15 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
-
 const vuetify = new Vuetify({})
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
+const localVue = createLocalVue()
+localVue.use(Vuex)
 
 describe('Add Business Form', () => {
-  const localVue = createLocalVue()
-  localVue.use(Vuex)
-  it('renders the component properly', () => {
+  let wrapper: Wrapper<any>
+
+  beforeAll(() => {
     const orgModule = {
       namespaced: true,
       state: {
@@ -24,6 +23,7 @@ describe('Add Business Form', () => {
         }
       }
     }
+
     const businessModule = {
       namespaced: true,
       state: {
@@ -43,28 +43,78 @@ describe('Add Business Form', () => {
         business: businessModule
       }
     })
-    const wrapper = shallowMount(AddBusinessForm, {
+
+    wrapper = shallowMount(AddBusinessForm, {
       store,
       vuetify,
       propsData: { dialog: true }
     })
+  })
+
+  afterAll(() => {
+    wrapper.destroy()
+  })
+
+  it('renders the component properly for a CP', () => {
+    wrapper.setData({ businessIdentifier: 'CP0000000' })
 
     // verify components
-    expect(wrapper.attributes('class')).toBe('add-business-form')
-    expect(wrapper.find('.add-business-form').isVisible()).toBe(true)
+    expect(wrapper.attributes('id')).toBe('add-business-form')
+    expect(wrapper.find('#add-business-form').isVisible()).toBe(true)
     expect(wrapper.find(HelpDialog).exists()).toBe(true)
 
     // verify input fields
-    expect(wrapper.find('[data-test="business-identifier"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="passcode"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="folio-number"]').exists()).toBe(true)
+    expect(wrapper.find('.business-identifier').attributes('label')).toBe('Incorporation Number or Registration Number')
+    expect(wrapper.find('.passcode').attributes('label')).toBe('Passcode')
+    expect(wrapper.find('.certify').exists()).toBe(false)
+    expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
 
     // verify buttons
-    expect(wrapper.find('[data-test="forgot-button"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="add-button"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="add-button"]').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('[data-test="cancel-button"]').exists()).toBe(true)
+    expect(wrapper.find('#forgot-button span').text()).toBe('I lost or forgot my passcode')
+    expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
+    expect(wrapper.find('#add-button').attributes('disabled')).toBe('true')
+    expect(wrapper.find('#add-button span').text()).toBe('Add')
+  })
 
-    wrapper.destroy()
+  it('renders the component properly for a BC', () => {
+    wrapper.setData({ businessIdentifier: 'BC0000000' })
+
+    // verify components
+    expect(wrapper.attributes('id')).toBe('add-business-form')
+    expect(wrapper.find('#add-business-form').isVisible()).toBe(true)
+    expect(wrapper.find(HelpDialog).exists()).toBe(true)
+
+    // verify input fields
+    expect(wrapper.find('.business-identifier').attributes('label')).toBe('Incorporation Number or Registration Number')
+    expect(wrapper.find('.passcode').attributes('label')).toBe('Password')
+    expect(wrapper.find('.certify').exists()).toBe(false)
+    expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
+
+    // verify buttons
+    expect(wrapper.find('#forgot-button span').text()).toBe('I lost or forgot my password')
+    expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
+    expect(wrapper.find('#add-button').attributes('disabled')).toBe('true')
+    expect(wrapper.find('#add-button span').text()).toBe('Add')
+  })
+
+  it('renders the component properly for a FM', () => {
+    wrapper.setData({ businessIdentifier: 'FM0000000' })
+
+    // verify components
+    expect(wrapper.attributes('id')).toBe('add-business-form')
+    expect(wrapper.find('#add-business-form').isVisible()).toBe(true)
+    expect(wrapper.find(HelpDialog).exists()).toBe(true) // not used for FM
+
+    // verify input fields
+    expect(wrapper.find('.business-identifier').attributes('label')).toBe('Incorporation Number or Registration Number')
+    expect(wrapper.find('.passcode').attributes('label')).toBe('Proprietor or Partner Name')
+    expect(wrapper.find('.certify').exists()).toBe(true)
+    expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
+
+    // verify buttons
+    expect(wrapper.find('#forgot-button').exists()).toBe(false) // not shown for FM
+    expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
+    expect(wrapper.find('#add-button').attributes('disabled')).toBe('true')
+    expect(wrapper.find('#add-button span').text()).toBe('Add')
   })
 })
