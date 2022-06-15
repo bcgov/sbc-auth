@@ -84,9 +84,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   private get pageSubTitle () {
-    return (this.currentOrganizationType === Account.UNLINKED_PREMIUM)
-      ? 'Set up your pre-authorized debit account to automatically make payments when they are due.'
-      : 'Select the payment method for this account.'
+    return 'Select the payment method for this account.'
   }
 
   private get isEnableCreateBtn () {
