@@ -3,7 +3,7 @@
      <template v-if="isPaymentEJV">
       <GLPaymentForm :canSelect="false"></GLPaymentForm>
     </template>
-    <template v-else-if="!isPADOnly && !isPaymentEJV">
+    <template v-else-if="!isPaymentEJV">
       <v-card
         outlined
         hover
@@ -213,10 +213,6 @@ export default class PaymentMethods extends Vue {
            this.currentOrgPaymentType !== PaymentTypes.BCOL
   }
 
-  private get isPADOnly () {
-    return this.currentOrgType === Account.UNLINKED_PREMIUM
-  }
-
   private get isPaymentEJV () {
     return this.currentSelectedPaymentMethod === PaymentTypes.EJV
   }
@@ -227,9 +223,7 @@ export default class PaymentMethods extends Vue {
   }
 
   private async mounted () {
-    if (!this.isPADOnly) {
-      this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod }, false)
-    }
+    this.paymentMethodSelected({ type: this.currentSelectedPaymentMethod }, false)
     if (this.isPaymentEJV) {
       await this.fetchCurrentOrganizationGLInfo(this.currentOrganization?.id)
     }
