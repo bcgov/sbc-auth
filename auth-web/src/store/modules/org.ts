@@ -104,7 +104,7 @@ export default class OrgModule extends VuexModule {
   }
 
   get needMissingBusinessDetailsRedirect (): boolean {
-    return typeof (this.currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization.accessType !== AccessType.GOVM && this.canEditBusinessInfo
+    return typeof (this.currentOrganization?.isBusinessAccount) === 'undefined' && this.currentOrganization?.accessType !== AccessType.GOVM && this.canEditBusinessInfo
   }
 
   private get canEditBusinessInfo (): boolean {
