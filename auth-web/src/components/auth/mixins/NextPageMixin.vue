@@ -2,7 +2,7 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import Component from 'vue-class-component'
@@ -18,7 +18,8 @@ import { getModule } from 'vuex-module-decorators'
 @Component({
   computed: {
     ...mapState('user', ['currentUser', 'userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions'])
+    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions']),
+    ...mapGetters('org', ['needMissingBusinessDetailsRedirect'])
   },
   methods: {
     ...mapActions('user', ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
@@ -42,6 +43,7 @@ export default class NextPageMixin extends Vue {
   protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
   protected readonly syncMembership!: (currentAccount: number) => Promise<Member>
   protected readonly resetCurrentOrganization!: () => Promise<void>
+  private readonly needMissingBusinessDetailsRedirect!: boolean
 
   protected getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
@@ -202,6 +204,19 @@ export default class NextPageMixin extends Vue {
       if (this.$route.name?.search('account-freeze') > -1) {
         this.$router.push(`${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}`)
       }
+    }
+  }
+
+  protected accountPendingRedirect () {
+    if (this.needMissingBusinessDetailsRedirect) {
+      this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
+      // 1. If user was in a pending approval page and switched to an active account, take them to the home page
+      this.$router.push(`/home`)
+    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      const label = encodeURIComponent(btoa(this.currentAccountSettings?.label))
+      // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
+      this.$router.push(`/${Pages.PENDING_APPROVAL}/${label}`)
     }
   }
 }

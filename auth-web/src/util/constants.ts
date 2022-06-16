@@ -17,7 +17,9 @@ export enum SessionStorageKeys {
     StatusApiUrl = 'STATUS_API_URL',
     FasWebUrl = 'FAS_WEB_URL',
     AffidavitNeeded = 'AFFIDAVIT_NEEDED',
-    GOVN_USER='AUTH_GOVN_USER'
+    GOVN_USER='AUTH_GOVN_USER',
+    NameRequestUrl = 'NAME_REQUEST_URL',
+    PprWebUrl = 'PPR_WEB_URL'
 }
 
 export enum Role {

@@ -80,8 +80,7 @@ import { getModule } from 'vuex-module-decorators'
       'permissions'
     ]),
     ...mapState('user', ['currentUser']),
-    ...mapGetters('auth', ['isAuthenticated']),
-    ...mapGetters('org', ['needMissingBusinessDetailsRedirect'])
+    ...mapGetters('auth', ['isAuthenticated'])
   },
   methods: {
     ...mapMutations('org', ['setCurrentOrganization']),
@@ -98,7 +97,6 @@ export default class App extends Mixins(NextPageMixin) {
   private toastType = 'primary'
   private toastTimeout = 6000
   private logoutUrl = ''
-  private readonly needMissingBusinessDetailsRedirect!: boolean
 
   $refs: {
     header: SbcHeader
@@ -143,18 +141,7 @@ export default class App extends Mixins(NextPageMixin) {
     this.$store.commit('updateHeader')
 
     this.accountFreezeRedirect()
-
-    // Some edge cases where user needs to be redirected based on their account status and current location
-    if (this.needMissingBusinessDetailsRedirect) {
-      this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
-    } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
-      // 1. If user was in a pending approval page and switched to an active account, take them to the home page
-      this.$router.push(`/home`)
-    } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
-      const label = encodeURIComponent(btoa(this.currentAccountSettings?.label))
-      // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
-      this.$router.push(`/${Pages.PENDING_APPROVAL}/${label}`)
-    }
+    this.accountPendingRedirect()
   }
 
   private async created () {
