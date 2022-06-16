@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This manages an Affidavit record in the Auth service."""
-from operator import and_
-
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -51,7 +49,8 @@ class Affidavit(VersionedModel):
         return db.session.query(Affidavit) \
             .join(Membership, Membership.user_id == Affidavit.user_id) \
             .join(Org, Org.id == Membership.org_id) \
-            .filter(and_(Org.id == org_id, Affidavit.status_code not in filtered_affidavit_statuses)) \
+            .filter(Org.id == org_id) \
+            .filter(Affidavit.status_code.notin_(filtered_affidavit_statuses)) \
             .one_or_none()  # There should be only one record at most, else throw error
 
     @classmethod
