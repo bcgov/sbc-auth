@@ -166,7 +166,7 @@ export default class ConfigHelper {
     return {
       [Account.BASIC]: [ PaymentTypes.CREDIT_CARD, PaymentTypes.ONLINE_BANKING ],
       [Account.PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ],
-      [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD ]
+      [Account.UNLINKED_PREMIUM]: [ PaymentTypes.PAD, PaymentTypes.BCOL ]
     }
   }
 
