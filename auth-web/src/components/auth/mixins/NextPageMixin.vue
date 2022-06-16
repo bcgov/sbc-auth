@@ -44,6 +44,8 @@ export default class NextPageMixin extends Vue {
   protected readonly syncMembership!: (currentAccount: number) => Promise<Member>
   protected readonly resetCurrentOrganization!: () => Promise<void>
   private readonly needMissingBusinessDetailsRedirect!: boolean
+  // its used to determine if any pending redirect like NFS or account pending page
+  protected anyPendingRedirect:boolean =false
 
   protected getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
@@ -191,6 +193,7 @@ export default class NextPageMixin extends Vue {
 
   protected accountFreezeRedirect () {
     if (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
+      this.anyPendingRedirect = true
       // eslint-disable-next-line no-console
       console.log('Redirecting user to Account Freeze message since the account is temporarly suspended.')
       if (this.permissions.some(code => code === Permission.MAKE_PAYMENT)) {
@@ -202,6 +205,7 @@ export default class NextPageMixin extends Vue {
       /** If user is in the account freeze page while switching the account, then need to redirect them to account info page if that account is active.
        * otherwise user will stuck on the account freeze page **/
       if (this.$route.name?.search('account-freeze') > -1) {
+        this.anyPendingRedirect = true
         this.$router.push(`${Pages.MAIN}/${this.currentOrganization.id}/${Pages.ACCOUNT_SETTINGS}`)
       }
     }
@@ -209,11 +213,13 @@ export default class NextPageMixin extends Vue {
 
   protected accountPendingRedirect () {
     if (this.needMissingBusinessDetailsRedirect) {
+      this.anyPendingRedirect = true
       this.$router.push(`/${Pages.UPDATE_ACCOUNT}`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Active && this.$route.path.indexOf(Pages.PENDING_APPROVAL) > 0) {
       // 1. If user was in a pending approval page and switched to an active account, take them to the home page
       this.$router.push(`/home`)
     } else if (this.currentMembership.membershipStatus === MembershipStatus.Pending) {
+      this.anyPendingRedirect = true
       const label = encodeURIComponent(btoa(this.currentAccountSettings?.label))
       // 2. If user has a pending account status, take them to pending approval page (no matter where they are)
       this.$router.push(`/${Pages.PENDING_APPROVAL}/${label}`)

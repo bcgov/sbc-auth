@@ -28,14 +28,17 @@ export default class AccountSwitching extends Mixins(NextPageMixin) {
     await this.syncUser()
     // check all the coindtions before redirect
     await this.completeAccountSwitch()
-    const redirect:any = this.$route?.query?.redirectToUrl
-    const accountId:any = this.$route?.query?.accountid
-    // if no redirect URL redirect back to dashboard
-    let redirectToUrl = redirect || this.dashboardUrl
-    // if we have account id in URL set that as account id inredirect URL else it will get from session
-    redirectToUrl = appendAccountId(redirectToUrl, accountId)
-
-    window.location.replace(redirectToUrl)
+    // if any pending redirect , prevent redirection to redirectToUrl
+    if (!this.anyPendingRedirect) {
+      const redirect:any = this.$route?.query?.redirectToUrl
+      const accountId:any = this.$route?.query?.accountid
+      // if no redirect URL redirect back to dashboard
+      let redirectToUrl = redirect || this.dashboardUrl
+      // if we have account id in URL set that as account id inredirect URL else it will get from session
+      redirectToUrl = appendAccountId(redirectToUrl, accountId)
+      // redirect to new URL, its outside sbc auth so using window
+      window.location.replace(redirectToUrl)
+    }
     this.showLoading = false
   }
 }
