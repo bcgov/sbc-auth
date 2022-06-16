@@ -45,7 +45,7 @@ export default class NextPageMixin extends Vue {
   protected readonly resetCurrentOrganization!: () => Promise<void>
   private readonly needMissingBusinessDetailsRedirect!: boolean
   // its used to determine if any pending redirect like NFS or account pending page
-  protected anyPendingRedirect:boolean =false
+  protected anyPendingRedirect:boolean = false
 
   protected getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
