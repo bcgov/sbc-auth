@@ -39,7 +39,7 @@
       <div class="form__btns mt-8">
         <v-btn
           large text
-          class="pl-2 pr-2 forgot-btn"
+          class="pl-2 pr-2 mr-auto"
           data-test="forgot-button"
           @click.stop="openHelp()"
         >
@@ -47,22 +47,21 @@
           <span>I lost or forgot my Name Request (NR) Number</span>
         </v-btn>
         <v-btn
-          data-test="add-button"
-          large color="primary"
-          :disabled="!isFormValid()"
-          @click="add()"
-          :loading="isLoading"
-        >
-          <span>Add</span>
-        </v-btn>
-        <v-btn
-          large depressed
-          color="default"
-          class="ml-2"
+          large outlined color="primary"
           data-test="cancel-button"
           @click="$emit('on-cancel')"
         >
           <span>Cancel</span>
+        </v-btn>
+        <v-btn
+          large color="primary"
+          data-test="add-button"
+          max-width="100"
+          :disabled="!isFormValid()"
+          :loading="isLoading"
+          @click="add()"
+        >
+          <span>Add</span>
         </v-btn>
       </div>
     </v-form>
@@ -76,9 +75,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { FilingTypes, LegalTypes } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
-import { BusinessRequest } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
@@ -194,16 +191,24 @@ export default class AddNameRequestForm extends Vue {
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
-.forgot-btn {
-  margin-right: auto;
-}
-
 .form__btns {
   display: flex;
   justify-content: flex-end;
 
   .v-btn + .v-btn {
     margin-left: 0.5rem;
+  }
+
+  .v-btn[data-test="cancel-button"],
+  .v-btn[data-test="add-button"] {
+    min-width: unset !important;
+    width: 100px;
+  }
+
+  .v-btn[disabled]:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+    color: white !important;
+    background-color: $app-blue !important;
+    opacity: 0.4;
   }
 }
 </style>

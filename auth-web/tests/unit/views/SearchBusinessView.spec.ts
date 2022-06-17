@@ -73,7 +73,7 @@ describe('StaffDashboardView.vue', () => {
       vuetify,
       mocks: { $t }
     })
-    cmp.setData({ businessNumber: 'CP0000000' })
+    cmp.setData({ businessIdentifier: 'CP0000000' })
 
     jest.resetModules()
     jest.clearAllMocks()
@@ -85,8 +85,8 @@ describe('StaffDashboardView.vue', () => {
     expect(cmp.find(PPRLauncher).exists()).toBe(true)
   })
 
-  it('incorporation number is empty', () => {
-    expect(cmp.vm.businessNumber).toBe('CP0000000')
+  it('incorporation number is not empty', () => {
+    expect(cmp.vm.businessIdentifier).toBe('CP0000000')
   })
 
   it('enter button click invokes isFormValid method', () => {
