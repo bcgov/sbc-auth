@@ -19,7 +19,8 @@ export enum SessionStorageKeys {
     AffidavitNeeded = 'AFFIDAVIT_NEEDED',
     GOVN_USER='AUTH_GOVN_USER',
     NameRequestUrl = 'NAME_REQUEST_URL',
-    PprWebUrl = 'PPR_WEB_URL'
+    PprWebUrl = 'PPR_WEB_URL',
+    SiteminderLogoutUrl = 'SITEMINDER_LOGOUT_URL'
 }
 
 export enum Role {
