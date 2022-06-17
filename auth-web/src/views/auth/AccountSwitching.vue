@@ -32,14 +32,25 @@ export default class AccountSwitching extends Mixins(NextPageMixin) {
     // if any pending redirect , prevent redirection to redirectToUrl
     if (!this.anyPendingRedirect) {
       // redirect URL is given from common component.
-      const redirect:any = this.$route?.query?.redirectToUrl
+      const redirectToUrl:any = this.$route?.query?.redirectToUrl
       const accountId:any = this.$route?.query?.accountid
+      // check for allowed redirect to determine whether need to redirect back to that page or dashboard
+      // list of Allowed URLs
+      const allowedRedirectURls = ConfigHelper.getAllowedUrlForRedirectToSamePage()
+      // default redirect to dashboard
+      let redirect = this.dashboardUrl
+
+      if (allowedRedirectURls.indexOf(CommonUtils.trimTrailingSlashURL(redirectToUrl)) > -1) {
+        redirect = redirectToUrl
+      }
+
       // if no redirect URL or not valid URL, redirect back to dashboard
-      let redirectToUrl = CommonUtils.isUrl(redirect) ? redirect : this.dashboardUrl
+      redirect = CommonUtils.isUrl(redirect) ? redirect : this.dashboardUrl
       // if we have account id in URL set that as account id inredirect URL else it will get from session
-      redirectToUrl = appendAccountId(redirectToUrl, accountId)
+      redirect = appendAccountId(redirect, accountId)
+
       // redirect to new URL, its outside sbc auth so using window
-      window.location.replace(redirectToUrl)
+      window.location.replace(redirect)
     }
     this.showLoading = false
   }
