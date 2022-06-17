@@ -16,6 +16,7 @@ import AccountInstructions from '@/components/auth/create-account/non-bcsc/Accou
 import AccountLoginOptionsChooser from '@/views/auth/AccountLoginOptionsChooser.vue'
 import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
+import AccountSwitching from '@/views/auth/AccountSwitching.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
@@ -297,6 +298,13 @@ export function getRoutes (): RouteConfig[] {
           component: developerAccess
         }
       ]
+    },
+    {
+      path: '/account-switching',
+      name: 'accountswitching',
+      component: AccountSwitching,
+      props: (route) => ({ redirectToUrl: route.query.redirectToUrl, accountid: route.query.accountid }),
+      meta: { requiresAuth: true }
     },
     {
       path: '/price-list',
