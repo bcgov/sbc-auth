@@ -4,6 +4,7 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
@@ -30,10 +31,11 @@ export default class AccountSwitching extends Mixins(NextPageMixin) {
     await this.completeAccountSwitch()
     // if any pending redirect , prevent redirection to redirectToUrl
     if (!this.anyPendingRedirect) {
+      // redirect URL is given from common component.
       const redirect:any = this.$route?.query?.redirectToUrl
       const accountId:any = this.$route?.query?.accountid
-      // if no redirect URL redirect back to dashboard
-      let redirectToUrl = redirect || this.dashboardUrl
+      // if no redirect URL or not valid URL, redirect back to dashboard
+      let redirectToUrl = CommonUtils.isUrl(redirect) ? redirect : this.dashboardUrl
       // if we have account id in URL set that as account id inredirect URL else it will get from session
       redirectToUrl = appendAccountId(redirectToUrl, accountId)
       // redirect to new URL, its outside sbc auth so using window
