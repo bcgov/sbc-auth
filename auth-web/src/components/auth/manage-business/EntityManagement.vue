@@ -83,25 +83,30 @@
         @confirm-passcode-reset-options="remove($event)"
       />
 
-      <!-- Add Business Dialog -->
+      <!-- Add an Existing Business Dialog -->
       <ModalDialog
         ref="addBusinessDialog"
         :is-persistent="true"
         :title="dialogTitle"
         :show-icon="false"
         :show-actions="false"
-        max-width="640"
+        max-width="675"
         data-test-tag="add-business"
       >
         <template v-slot:text>
           <p>
-            Add an existing business by entering the Incorporation Number <span class="wb">and associated
-            {{CommonUtils.isCooperativeNumber(businessIdentifier) ? 'Passcode' : 'Password'}}.</span>
+            Add an existing business to your list by providing the following required pieces of information:
           </p>
+          <ul class="add-business-unordered-list">
+            <li>For <strong>corporations</strong>, enter the incorporation number and the password.</li>
+            <li>For <strong>benefit companies</strong>, enter the incorporation number and the passcode.</li>
+            <li>For <strong>firms</strong>, enter the registration number and the name of the prorietor or a
+              partner, and the business number for firms doing business as.</li>
+          </ul>
           <AddBusinessForm
-            class="mt-9"
+            class="mt-6"
             @add-success="showAddSuccessModal()"
-            @add-failed-invalid-code="showInvalidCodeModal()"
+            @add-failed-invalid-code="showInvalidCodeModal($event)"
             @add-failed-no-entity="showEntityNotFoundModal()"
             @add-failed-passcode-claimed="showPasscodeClaimedModal()"
             @add-unknown-error="showUnknownErrorModal('business')"
@@ -127,10 +132,10 @@
             OR applicant email that were used when the name was requested.
           </p>
           <AddNameRequestForm
-            class="mt-9"
+            class="mt-6"
             @close-add-nr-modal="cancelAddNameRequest()"
             @add-success="showAddSuccessModalNR()"
-            @add-failed-show-msg="showNRErrorModal"
+            @add-failed-show-msg="showNRErrorModal()"
             @add-failed-no-entity="showNRNotFoundModal()"
             @add-unknown-error="showUnknownErrorModal('nr')"
             @on-cancel="cancelAddNameRequest()"
@@ -177,7 +182,7 @@
           <v-icon large color="error">mdi-alert-circle-outline</v-icon>
         </template>
         <template v-slot:actions>
-          <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+          <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">OK</v-btn>
         </template>
       </ModalDialog>
 
@@ -211,7 +216,6 @@ import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.v
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
-import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -238,8 +242,6 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   }
 })
 export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
-  readonly CommonUtils = CommonUtils
-
   @Prop({ default: '' }) readonly orgId: string
 
   private removeBusinessPayload = null
@@ -347,10 +349,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.successDialog.open()
   }
 
-  showInvalidCodeModal () {
+  showInvalidCodeModal (label: string) {
     this.$refs.addBusinessDialog.close()
-    this.dialogTitle = 'Invalid Passcode'
-    this.dialogText = 'Unable to add the business. The provided Passcode is invalid.'
+    this.dialogTitle = `Invalid ${label}`
+    this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
     this.$refs.errorDialog.open()
   }
 
@@ -368,10 +370,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     this.$refs.errorDialog.open()
   }
 
-  showNRErrorModal (msg) {
+  showNRErrorModal () {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Error Adding Name Request'
-    this.dialogText = msg
+    this.dialogText = ''
     this.$refs.errorDialog.open()
   }
 
@@ -554,6 +556,23 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     width: 200px;
   }
 
+  .add-business-unordered-list {
+    list-style: none;
+    padding-left: 1rem;
+
+    li {
+      margin-left: 1.5rem;
+
+      &::before {
+        content: "\2022";
+        display: inline-block;
+        width: 1.5em;
+        color: $gray9;
+        margin-left: -1.5em;
+      }
+    }
+  }
+
   // Vuetify Overrides
   ::v-deep {
     #dashboard-actions {
@@ -595,10 +614,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
     .theme--light.v-list-item:focus:before {
       opacity: 0 !important;
-    }
-
-    .theme--light.v-text-field--filled>.v-input__control>.v-input__slot {
-      background-color: white;
     }
 
     .v-list-item__action {

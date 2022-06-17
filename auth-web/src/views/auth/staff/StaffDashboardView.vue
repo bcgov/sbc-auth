@@ -13,10 +13,10 @@
           <div class="view-header flex-column mb-10">
             <h2 class="view-header__title">Search Entities</h2>
             <p class="mt-3 mb-0">
-              Enter the Entity's Incorporation Number below to access their
-              dashboard.
+              Enter the Entity's Incorporation Number below to access their dashboard.
             </p>
           </div>
+
           <v-expand-transition>
             <div v-show="errorMessage">
               <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
@@ -24,20 +24,17 @@
               </v-alert>
             </div>
           </v-expand-transition>
+
           <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
             <v-text-field
-              filled
-              label="Incorporation Number"
-              hint="example: CP0001234"
-              persistent-hint
-              dense
-              req
-              @blur="incorpNumFormat"
-              :rules="incorpNumRules"
-              v-model="businessNumber"
+              filled dense req persistent-hint
+              label="Incorporation Number or Registration Number"
+              hint="Example: BC1234567, CP1234567 or FM1234567"
+              @blur="formatBusinessIdentifier()"
+              :rules="businessIdentifierRules"
+              v-model="businessIdentifier"
               id="txtBusinessNumber"
-            >
-            </v-text-field>
+            />
             <v-btn
               color="primary"
               class="search-btn mt-0"
@@ -45,8 +42,9 @@
               depressed
               :disabled="!isFormValid()"
               :loading="searchActive"
-              >Search</v-btn
             >
+              <span>Search</span>
+            </v-btn>
           </v-form>
 
           <template>
@@ -68,9 +66,8 @@
     </v-card>
 
     <!-- GL Codes -->
-
     <v-card flat class="mb-4 pa-8" v-if="canViewGLCodes">
-      <GLCodesListView></GLCodesListView>
+      <GLCodesListView />
     </v-card>
 
     <!-- FAS UI  -->
@@ -128,44 +125,47 @@ const userModule = namespace('user')
   }
 })
 export default class StaffDashboardView extends Vue {
-  @OrgModule.Action('getOrganizationForAffiliate')
-  private getOrganizationForAffiliate!: () => Promise<Organization>
-
-  @userModule.State('currentUser') private currentUser!: KCUserProfile
-
-  @BusinessModule.Action('searchBusiness') private searchBusiness!: (
-    businessIdentifier: string
-  ) => Promise<any>
-  @BusinessModule.Action('resetCurrentBusiness')
-  private resetCurrentBusiness!: () => Promise<any>
-  @BusinessModule.State('currentBusiness') private currentBusiness!: Business
-  @BusinessModule.Action('loadBusiness') private loadBusiness!: () => Promise<
-    Business
-  >
-
-  private businessNumber = ''
-  private searchedBusinessNumber = ''
-  private searchActive = false
-  private errorMessage = ''
-  private canViewIncorporationSearchResult: boolean = false
-  private affiliatedOrg = {}
-
-  private incorpNumRules = [
-    v => !!v || 'Incorporation Number is required',
-    v =>
-      CommonUtils.validateIncorporationNumber(v) ||
-      'Incorporation Number is invalid'
-  ]
-
   $refs: {
     searchBusinessForm: HTMLFormElement
   }
 
-  private get canViewAccounts (): boolean {
+  @OrgModule.Action('getOrganizationForAffiliate')
+  private getOrganizationForAffiliate!: () => Promise<Organization>
+
+  @userModule.State('currentUser')
+  private currentUser!: KCUserProfile
+
+  @BusinessModule.Action('searchBusiness')
+  private searchBusiness!: (businessIdentifier: string) => Promise<any>
+
+  @BusinessModule.Action('resetCurrentBusiness')
+  private resetCurrentBusiness!: () => Promise<any>
+
+  @BusinessModule.State('currentBusiness')
+  private currentBusiness!: Business
+
+  @BusinessModule.Action('loadBusiness')
+  private loadBusiness!: () => Promise<Business>
+
+  // local variables
+  protected businessIdentifier = ''
+  protected searchedBusinessNumber = ''
+  protected searchActive = false
+  protected errorMessage = ''
+  protected canViewIncorporationSearchResult = false
+  protected affiliatedOrg = {}
+
+  readonly businessIdentifierRules = [
+    v => !!v || 'Incorporation Number or Registration Number is required',
+    v => CommonUtils.validateIncorporationNumber(v) ||
+      'Incorporation Number or Registration Number is not valid'
+  ]
+
+  get canViewAccounts (): boolean {
     return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
   }
 
-  private get canViewGLCodes (): boolean {
+  get canViewGLCodes (): boolean {
     return this.currentUser?.roles?.includes(Role.ManageGlCodes)
   }
 
@@ -173,25 +173,25 @@ export default class StaffDashboardView extends Vue {
     return this.currentUser?.roles?.includes(Role.FasSearch)
   }
 
-  private isFormValid(): boolean {
-    return !!this.businessNumber && this.$refs.searchBusinessForm.validate()
+  get isFasDashboardEnabled (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false
   }
 
-  private clearError() {
-    this.searchedBusinessNumber = ''
+  protected isFormValid(): boolean {
+    return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
   }
 
-  async search() {
+  protected async search() {
     if (this.isFormValid()) {
       this.searchActive = true
 
       try {
         // Search for business, action will set session storage
-        await this.searchBusiness(this.businessNumber)
+        await this.searchBusiness(this.businessIdentifier)
         this.errorMessage = ''
         await this.updateCurrentBusiness()
       } catch (exception) {
-        this.searchedBusinessNumber = this.businessNumber
+        this.searchedBusinessNumber = this.businessIdentifier
         this.resetCurrentBusiness()
         this.errorMessage = this.$t('noIncorporationNumberFound').toString()
         this.canViewIncorporationSearchResult = false
@@ -201,7 +201,7 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  async updateCurrentBusiness() {
+  private async updateCurrentBusiness() {
     try {
       // Search for business, action will set session storage
       await this.loadBusiness()
@@ -215,21 +215,13 @@ export default class StaffDashboardView extends Vue {
     }
   }
 
-  incorpNumFormat () {
-    this.businessNumber = CommonUtils.formatIncorporationNumber(
-      this.businessNumber
-    )
-  }
-
-  gotToGLCodes() {
-    this.$router.push('/glcodelist')
-  }
-
-  get isFasDashboardEnabled (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false
+  protected formatBusinessIdentifier () {
+    this.businessIdentifier =
+      CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 }
 </script>
+
 <style lang="scss" >
 // importing FAS styles need no scope
 @import '~fas-ui/src/assets/scss/search.scss';
@@ -237,6 +229,7 @@ export default class StaffDashboardView extends Vue {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+
 .v-input {
   display: inline-block;
   width: 20rem;

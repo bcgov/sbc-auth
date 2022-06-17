@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
@@ -6,16 +6,39 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
-
 const vuetify = new Vuetify({})
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
+const localVue = createLocalVue()
+localVue.use(Vuex)
+
+const tests = [
+  {
+    desc: 'renders the component properly for a CP',
+    businessIdentifier: 'CP0000000',
+    passcodeLabel: 'Passcode',
+    certifyExists: false,
+    forgotButtonText: 'I lost or forgot my passcode'
+  },
+  {
+    desc: 'renders the component properly for a BC',
+    businessIdentifier: 'BC0000000',
+    passcodeLabel: 'Password',
+    certifyExists: false,
+    forgotButtonText: 'I lost or forgot my password'
+  },
+  {
+    desc: 'renders the component properly for a FM',
+    businessIdentifier: 'FM0000000',
+    passcodeLabel: 'Proprietor or Partner Name',
+    certifyExists: true,
+    forgotButtonText: null
+  }
+]
 
 describe('Add Business Form', () => {
-  const localVue = createLocalVue()
-  localVue.use(Vuex)
-  it('renders the component properly', () => {
+  let wrapper: Wrapper<any>
+
+  beforeAll(() => {
     const orgModule = {
       namespaced: true,
       state: {
@@ -24,6 +47,7 @@ describe('Add Business Form', () => {
         }
       }
     }
+
     const businessModule = {
       namespaced: true,
       state: {
@@ -43,28 +67,41 @@ describe('Add Business Form', () => {
         business: businessModule
       }
     })
-    const wrapper = shallowMount(AddBusinessForm, {
+
+    wrapper = shallowMount(AddBusinessForm, {
       store,
       vuetify,
       propsData: { dialog: true }
     })
+  })
 
-    // verify components
-    expect(wrapper.attributes('class')).toBe('add-business-form')
-    expect(wrapper.find('.add-business-form').isVisible()).toBe(true)
-    expect(wrapper.find(HelpDialog).exists()).toBe(true)
-
-    // verify input fields
-    expect(wrapper.find('[data-test="business-identifier"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="passcode"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="folio-number"]').exists()).toBe(true)
-
-    // verify buttons
-    expect(wrapper.find('[data-test="forgot-button"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="add-button"]').exists()).toBe(true)
-    expect(wrapper.find('[data-test="add-button"]').attributes('disabled')).toBeDefined()
-    expect(wrapper.find('[data-test="cancel-button"]').exists()).toBe(true)
-
+  afterAll(() => {
     wrapper.destroy()
+  })
+
+  tests.forEach(test => {
+    it(test.desc, () => {
+      wrapper.setData({ businessIdentifier: test.businessIdentifier })
+
+      // verify components
+      expect(wrapper.attributes('id')).toBe('add-business-form')
+      expect(wrapper.find('#add-business-form').isVisible()).toBe(true)
+      expect(wrapper.find(HelpDialog).exists()).toBe(true)
+
+      // verify input fields
+      expect(wrapper.find('.business-identifier').attributes('label')).toBe('Incorporation Number or Registration Number')
+      expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
+      expect(wrapper.find('.certify').exists()).toBe(test.certifyExists)
+      expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
+
+      // verify buttons
+      expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
+      if (test.forgotButtonText) {
+        expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
+      }
+      expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
+      expect(wrapper.find('#add-button').attributes('disabled')).toBe('true')
+      expect(wrapper.find('#add-button span').text()).toBe('Add')
+    })
   })
 })
