@@ -1,6 +1,7 @@
 import { Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 
 import Axios from 'axios'
+import CommonUtils from './common-util'
 import { NameRequest } from '@/models/business'
 
 /**
@@ -178,5 +179,14 @@ export default class ConfigHelper {
   }
   static getAccountApprovalSlaInDays () {
     return ConfigHelper.getValue('APPROVE_ACCOUNT_SLA_DAYS') || '5'
+  }
+
+  // Allowed redirect back to same page URUI list
+  static getAllowedUrlForRedirectToSamePage (): any {
+    return [
+      CommonUtils.trimTrailingSlashURL(ConfigHelper.getRegistryHomeURL()),
+      CommonUtils.trimTrailingSlashURL(ConfigHelper.getNameRequestUrl()),
+      CommonUtils.trimTrailingSlashURL(ConfigHelper.getPPRWebUrl())
+    ]
   }
 }
