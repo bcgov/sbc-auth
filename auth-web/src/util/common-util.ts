@@ -268,4 +268,9 @@ export default class CommonUtils {
     const stringIndexValue: string = index.toString()
     return stringIndexValue.padStart(2, '0')
   }
+
+  // trim last slas from URL
+  static trimTrailingSlashURL (url) {
+    return (url) ? url.trim().replace(/\/+$/, '') : ''
+  }
 }
