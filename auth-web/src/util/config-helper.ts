@@ -21,6 +21,7 @@ export default class ConfigHelper {
     sessionStorage.setItem(SessionStorageKeys.RegistryHomeUrl, ConfigHelper.getRegistryHomeURL())
     sessionStorage.setItem(SessionStorageKeys.NameRequestUrl, ConfigHelper.getNameRequestUrl())
     sessionStorage.setItem(SessionStorageKeys.PprWebUrl, ConfigHelper.getPPRWebUrl())
+    sessionStorage.setItem(SessionStorageKeys.SiteminderLogoutUrl, ConfigHelper.getSiteminderLogoutUrl())
   }
 
   /**
@@ -132,6 +133,10 @@ export default class ConfigHelper {
 
   static getPPRWebUrl () {
     return ConfigHelper.getValue('PPR_WEB_URL')
+  }
+
+  static getSiteminderLogoutUrl () {
+    return ConfigHelper.getValue('SITEMINDER_LOGOUT_URL')
   }
 
   static apiDocumentationUrl () {
