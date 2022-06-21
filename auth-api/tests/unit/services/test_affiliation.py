@@ -25,7 +25,8 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import Affiliation as AffiliationService
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo
-from tests.utilities.factory_utils import factory_entity_service, factory_org_service, patch_token_info
+from tests.utilities.factory_utils import (
+    factory_entity_service, factory_org_service, patch_get_firms_parties, patch_token_info)
 
 
 def test_create_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -144,6 +145,41 @@ def test_create_affiliation_exists(session, auth_mock):  # pylint:disable=unused
     affiliation = AffiliationService.create_affiliation(org_id_2, business_identifier1, pass_code)
 
     assert affiliation
+
+
+def test_create_affiliation_firms(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created."""
+    patch_get_firms_parties(monkeypatch)
+    entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock3)
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['business_identifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    affiliation = AffiliationService.create_affiliation(org_id, business_identifier,
+                                                        TestEntityInfo.entity_lear_mock3['passCode'])
+    assert affiliation
+    assert affiliation.entity.identifier == entity_service.identifier
+    assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
+
+
+def test_create_affiliation_firms_party_not_valid(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created."""
+    patch_get_firms_parties(monkeypatch)
+    entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock3)
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['business_identifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    with pytest.raises(BusinessException) as exception:
+        AffiliationService.create_affiliation(org_id, business_identifier, 'test user')
+
+    assert exception.value.code == Error.INVALID_USER_CREDENTIALS.name
 
 
 def test_find_affiliated_entities_by_org_id(session, auth_mock):  # pylint:disable=unused-argument

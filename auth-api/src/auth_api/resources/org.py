@@ -341,7 +341,7 @@ class OrgAffiliations(Resource):
                     bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = AffiliationService.create_affiliation(
-                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'), bearer_token ).\
+                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'), bearer_token).\
                                        as_dict(), http_status.HTTP_201_CREATED
 
         except BusinessException as exception:
