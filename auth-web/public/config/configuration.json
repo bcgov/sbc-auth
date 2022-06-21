@@ -28,5 +28,6 @@
   "CORPORATE_ONLINE_URL": "https://dev.corponline.gov.bc.ca/",
   "FAS_WEB_URL": "https://fas-dev.apps.silver.devops.gov.bc.ca/",
   "API_DOCUMENTATION_URL": "https://developer.bcregistry.daxiom.ca/apis-summary/",
-  "PPR_WEB_URL": "https://ppr-ui-dev.apps.silver.devops.gov.bc.ca/ppr/"
+  "PPR_WEB_URL": "https://ppr-ui-dev.apps.silver.devops.gov.bc.ca/ppr/",
+  "SITEMINDER_LOGOUT_URL": "https://logontest7.gov.bc.ca/clp-cgi/logoff.cgi"
 }
