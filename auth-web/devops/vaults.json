@@ -47,7 +47,8 @@
             "fas-ui",
             "ppr-ui",
             "registry",
-            "api-document"
+            "api-document",
+            "siteminder"
         ]
     },
     {
