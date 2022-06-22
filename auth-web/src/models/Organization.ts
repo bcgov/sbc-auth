@@ -57,6 +57,9 @@ export interface Organization {
   isBusinessAccount?: boolean,
   businessType?: string,
   businessSize?: string
+  firstName?: string
+  lastName?: string
+  emailAddress?: string
 }
 
 export interface PADInfo {
@@ -193,6 +196,13 @@ export interface OrgFilterParams {
   name?: string
   pageNumber?: number
   pageLimit?: number
+  branchName?: string
+  id?: string,
+  decisionMadeBy?: string
+  orgType?: string
+  firstName?: string
+  lastName?: string
+  emailAddress?: string
 }
 
 export interface OrgPaymentDetails {

@@ -35,6 +35,27 @@ export default class StaffService {
     if (orgFilter.name) {
       params.append('name', orgFilter.name)
     }
+    if (orgFilter.branchName) {
+      params.append('branchName', orgFilter.branchName)
+    }
+    if (orgFilter.id) {
+      params.append('id', orgFilter.id)
+    }
+    if (orgFilter.decisionMadeBy) {
+      params.append('decisionMadeBy', orgFilter.decisionMadeBy)
+    }
+    if (orgFilter.orgType) {
+      params.append('orgType', orgFilter.orgType)
+    }
+    if (orgFilter.firstName) {
+      params.append('firstName', orgFilter.firstName)
+    }
+    if (orgFilter.lastName) {
+      params.append('lastName', orgFilter.lastName)
+    }
+    if (orgFilter.emailAddress) {
+      params.append('emailAddress', orgFilter.emailAddress)
+    }
     if (orgFilter.pageNumber) {
       params.append('page', orgFilter.pageNumber.toString())
     }
