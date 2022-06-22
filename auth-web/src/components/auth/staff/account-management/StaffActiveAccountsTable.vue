@@ -13,6 +13,7 @@
               :footer-props="{
                 itemsPerPageOptions: getPaginationOptions
               }"
+              :items-per-page="numberOfItems"
               hide-default-header
               fixed-header
               :loading="isTableLoading"
@@ -282,7 +283,11 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   mounted () {
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
     const orgSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
-    this.searchParams = JSON.parse(orgSearchFilter)
+    try {
+      this.searchParams = JSON.parse(orgSearchFilter)
+    } catch {
+      // Do nothing, we have defaults for searchParams.
+    }
     if (this.hasCachedPageInfo) {
       this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
@@ -290,8 +295,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   @Watch('searchParams', { deep: true })
   searchChanged (value: OrgFilterParams, oldValue: OrgFilterParams) {
-    // eslint-disable-next-line no-console
-    console.log(value)
     this.searchParamsExist = this.doSearchParametersExist(value)
     this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1 }
     this.setSearchFilterToStorage(JSON.stringify(value))
@@ -304,13 +307,13 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   // Needed context here instead of this.
-  private debouncedOrgSearch = debounce(async (context, page = 1, pageLimit = context.numberOfItems) => {
+  private debouncedOrgSearch = debounce(async (context: StaffActiveAccountsTable, page = 1, pageLimit = context.numberOfItems) => {
     try {
       context.isTableLoading = true
-      const completeSearchParams = {
-        ...context.searchParams,
+      const completeSearchParams: OrgFilterParams = {
+        ...context.searchParams as OrgFilterParams,
         ...context.getOrgAndAccessTypeFromAccountType(context.searchParams.orgType),
-        page: page,
+        pageNumber: page,
         pageLimit: pageLimit
       }
       const activeAccountsResp = await context.searchOrgs(completeSearchParams)
@@ -474,10 +477,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     border: 0px;
   }
 
-  ::v-deep .v-data-table__wrapper {
-    padding-bottom: 0.25rem;
-  }
-
   ::v-deep .v-data-table__wrapper::-webkit-scrollbar {
     width: .625rem;
     height: 0.50rem;
@@ -516,6 +515,11 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     z-index: 1;
     background: white;
     text-align: right !important;
+  }
+
+ ::v-deep table > tbody > tr > td {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
   }
 
   ::v-deep table > tbody > tr > td:last-child:not([colspan]) {
