@@ -200,6 +200,7 @@ export interface OrgFilterParams {
   id?: string,
   decisionMadeBy?: string
   orgType?: string
+  accessType?: string
   firstName?: string
   lastName?: string
   emailAddress?: string

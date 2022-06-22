@@ -47,6 +47,9 @@ export default class StaffService {
     if (orgFilter.orgType) {
       params.append('orgType', orgFilter.orgType)
     }
+    if (orgFilter.accessType) {
+      params.append('accessType', orgFilter.accessType)
+    }
     if (orgFilter.firstName) {
       params.append('firstName', orgFilter.firstName)
     }
