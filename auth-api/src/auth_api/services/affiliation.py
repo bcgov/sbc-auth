@@ -294,12 +294,13 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
         parties_json = lear_response.json()
         for party in parties_json['parties']:
-            if party.get('officer').get('partyType') == 'organization':
-                party_name = party.get('officer').get('organizationName')
+            officer = party.get('officer')
+            if officer.get('partyType') == 'organization':
+                party_name = officer.get('organizationName')
             else:
-                party_name = party.get('officer').get('lastName') + ', ' + party.get('officer').get('firstName')
-                if party.get('officer').get('middleName'):
-                    party_name = party_name + ' ' + party.get('officer').get('middleName')
+                party_name = officer.get('lastName') + ', ' + officer.get('firstName')
+                if officer.get('middleName'):
+                    party_name = party_name + ' ' + officer.get('middleName')
             if party_name_str.upper() == party_name.upper():
                 return True
         return False
