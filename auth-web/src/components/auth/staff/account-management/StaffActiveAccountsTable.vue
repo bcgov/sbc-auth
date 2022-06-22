@@ -99,7 +99,7 @@
               </template>
 
                <!-- Item Actions -->
-              <template v-slot:[`item.action`]="{ item, index }">
+              <template v-slot:[`item.action`]="{ item }">
                 <div class="actions text-right">
                   <span class="open-action">
                     <v-btn
@@ -115,7 +115,7 @@
                   <!-- More Actions Menu -->
                   <span class="more-actions">
                     <v-menu
-                      v-model="dropdown[index]"
+                      v-model="dropdown[item.id]"
                     >
                       <template v-slot:activator="{ on }">
                         <v-btn
@@ -123,7 +123,7 @@
                           class="more-actions-btn"
                           v-on="on"
                         >
-                          <v-icon>{{dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
+                          <v-icon>{{dropdown[item.id] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
                         </v-btn>
                       </template>
                       <v-list>
