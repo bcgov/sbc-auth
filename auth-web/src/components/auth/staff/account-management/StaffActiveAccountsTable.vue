@@ -313,8 +313,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       const completeSearchParams: OrgFilterParams = {
         ...context.searchParams as OrgFilterParams,
         ...context.getOrgAndAccessTypeFromAccountType(context.searchParams.orgType),
-        pageNumber: page,
-        pageLimit: pageLimit
+        page: page,
+        limit: pageLimit
       }
       const activeAccountsResp = await context.searchOrgs(completeSearchParams)
       context.activeOrgs = activeAccountsResp.orgs

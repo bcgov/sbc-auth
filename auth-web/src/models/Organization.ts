@@ -194,8 +194,8 @@ export interface OrgList {
 export interface OrgFilterParams {
   statuses: string[]
   name?: string
-  pageNumber?: number
-  pageLimit?: number
+  page?: number
+  limit?: number
   branchName?: string
   id?: string,
   decisionMadeBy?: string
