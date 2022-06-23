@@ -48,6 +48,8 @@ class Authorization:
         token_roles = user_from_context.roles
 
         current_app.logger.debug(f'token roles=:{token_roles}')
+        current_app.logger.debug(f'tokenInfo:{user_from_context.token_info}')
+        current_app.logger.debug(f'bearerToken:{user_from_context.bearer_token}')
 
         # todo the service account level access has not been defined
         if Role.STAFF.value in token_roles:
