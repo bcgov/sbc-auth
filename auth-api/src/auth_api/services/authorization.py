@@ -47,6 +47,8 @@ class Authorization:
         auth = None
         token_roles = user_from_context.roles
 
+        current_app.logger.debug(f'token roles=:{token_roles}')
+
         # todo the service account level access has not been defined
         if Role.STAFF.value in token_roles:
             if expanded:
@@ -54,7 +56,7 @@ class Authorization:
                 auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id)
                 auth_response = Authorization(auth).as_dict(expanded)
             auth_response['roles'] = token_roles
-
+            current_app.logger.debug(f'staff roles=:{token_roles}')
         else:
             keycloak_guid = user_from_context.sub
             account_id_claim = user_from_context.account_id_claim
@@ -62,23 +64,29 @@ class Authorization:
             check_product_based_auth = Authorization._is_product_based_auth(corp_type_code)
             if check_product_based_auth:
                 if account_id_claim:
+                    current_app.logger.debug(f'auth view product - account_id_claim, corp_type_code=:{account_id_claim} {corp_type_code}')
                     auth = AuthorizationView.find_account_authorization_by_org_id_and_product(account_id_claim,
                                                                                               corp_type_code)
                 else:
+                    current_app.logger.debug(f'auth view, product based, keycloak, account_id, corp_type_code:{keycloak_guid} {account_id} {corp_type_code}')
                     auth = AuthorizationView.find_account_authorization_by_org_id_and_product_for_user(
                         keycloak_guid, account_id, corp_type_code
                     )
             else:
                 if account_id_claim and account_id == int(account_id_claim):
+                    current_app.logger.debug(f'auth view account_id claim=:{account_id_claim}')
                     auth = AuthorizationView.find_authorization_for_admin_by_org_id(account_id_claim)
                 elif account_id and keycloak_guid:
+                    current_app.logger.debug(f'auth view, keycloak guid, account_id=:{keycloak_guid} , {account_id}')
                     auth = AuthorizationView.find_user_authorization_by_org_id(keycloak_guid, account_id)
             auth_response['roles'] = []
             if auth:
+                current_app.logger.debug(f'if auth true permissions, status_code, org_membership:{auth.status_code} , {auth.org_membership}')
                 permissions = PermissionsService.get_permissions_for_membership(auth.status_code,
                                                                                 auth.org_membership)
                 auth_response = Authorization(auth).as_dict(expanded)
                 auth_response['roles'] = permissions
+                current_app.logger.debug(f'if auth roles:{permissions}')
 
         return auth_response
 
