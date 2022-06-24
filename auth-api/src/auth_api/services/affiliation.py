@@ -275,7 +275,8 @@ class Affiliation:
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
         """Return NR details by calling legal-api."""
-        get_nr_url = current_app.config.get('LEGAL_API_URL') + f'/nameRequests/{nr_number}'
+        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
+        get_nr_url = f'{ legal_api_url }/nameRequests/{nr_number}'
         try:
             get_nr_response = RestService.get(get_nr_url, token=token)
         except (HTTPError, ServiceUnavailableException) as e:
@@ -286,7 +287,8 @@ class Affiliation:
 
     @staticmethod
     def _validate_firms_party(token, business_identifier, party_name_str: str):
-        parties_url = current_app.config.get('LEGAL_API_URL') + f'/businesses/{business_identifier}/parties'
+        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
+        parties_url = f'{ legal_api_url }/businesses/{business_identifier}/parties'
         try:
             lear_response = RestService.get(parties_url, token=token)
         except (HTTPError, ServiceUnavailableException) as e:

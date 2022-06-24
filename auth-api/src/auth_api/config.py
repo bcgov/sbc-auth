@@ -111,6 +111,8 @@ class _Config:  # pylint: disable=too-few-public-methods
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     BCOL_API_URL = os.getenv('BCOL_API_URL')
     PAY_API_SANDBOX_URL = os.getenv('PAY_API_SANDBOX_URL')
+    LEGAL_API_VERSION = os.getenv('LEGAL_API_VERSION')
+    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2')
 
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
