@@ -273,7 +273,8 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
 
     # Legal-API URL
-    LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7/api/v1'
+    LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7'
+    LEGAL_API_VERSION_2 = '/api/v1'
 
     NOTIFY_API_URL = 'http://localhost:8080/notify-api/api/v1'
     BCOL_API_URL = 'http://localhost:8080/bcol-api/api/v1'
