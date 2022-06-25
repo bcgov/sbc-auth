@@ -57,6 +57,7 @@ class OrgSearch:
     page: int
     limit: int
 
+
 class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for an Org record."""
 
@@ -135,7 +136,6 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     @classmethod
     def search_org(cls, search: OrgSearch):
         """Find all orgs with the given type."""
-
         # The two lines below are due to the design of the models.
         # (Circular references - If Membership / User models are imported)
         members = Org.members.property.mapper.class_
@@ -147,7 +147,6 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             .outerjoin(Affiliation) \
             .outerjoin(Entity) \
             .options(contains_eager('contacts').contains_eager('contact'))
-            #contains_eager('members').contains_eager('user')
 
         if search.access_type:
             query = query.filter(Org.access_type.in_(search.access_type))
@@ -171,10 +170,18 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             query = query.filter(user.lastname.ilike(f'%{search.last_name}%'))
         if search.name:
             query = query.filter(Org.name.ilike(f'%{search.name}%'))
-        if search.statuses:
-            query = query.filter(Org.status_code.in_(search.statuses))
+
+        query = cls._search_for_statuses(query, search.statuses)
+
+        pagination = query.order_by(Org.created.desc()).paginate(per_page=search.limit, page=search.page)
+        return pagination.items, pagination.total
+
+    @classmethod
+    def _search_for_statuses(cls, query, statuses):
+        if statuses:
+            query = query.filter(Org.status_code.in_(statuses))
             # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
-            if OrgStatusEnum.ACTIVE.value in search.statuses:
+            if OrgStatusEnum.ACTIVE.value in statuses:
                 pending_inv_subquery = db.session.query(Org.id) \
                     .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
                     .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
@@ -182,9 +189,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
                             Invitation.type == InvitationType.DIRECTOR_SEARCH.value) \
                     .filter(Org.access_type == AccessType.ANONYMOUS.value)
                 query = query.filter(Org.id.notin_(pending_inv_subquery))
-
-        pagination = query.order_by(Org.created.desc()).paginate(per_page=search.limit, page=search.page)
-        return pagination.items, pagination.total
+        return query
 
     @classmethod
     def search_pending_activation_orgs(cls, name):
