@@ -16,10 +16,10 @@
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
 from dataclasses import dataclass, field
+from typing import List
 from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func, cast
 from sqlalchemy.orm import contains_eager, relationship
-from typing import List
 
 from auth_api.models.affiliation import Affiliation
 from auth_api.models.entity import Entity
@@ -38,6 +38,7 @@ from .org_type import OrgType
 
 
 @dataclass
+# pylint: disable=too-many-instance-attributes
 class OrgSearch:
     """Used for searching organizations."""
 
@@ -132,13 +133,11 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return query.all()
 
     @classmethod
-    def search_org(cls, search: OrgSearch, affilliation_org_ids: List[int]):
+    def search_org(cls, search: OrgSearch):
         """Find all orgs with the given type."""
 
-        """ 
-        The two lines below are due to the design of the models.
-        (Circular references - if I refer to Membership / User models)
-        """
+        # The two lines below are due to the design of the models.
+        # (Circular references - If Membership / User models are imported)
         members = Org.members.property.mapper.class_
         user = members.user.property.mapper.class_
 
@@ -147,8 +146,8 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             .outerjoin(Contact) \
             .outerjoin(Affiliation) \
             .outerjoin(Entity) \
-            .options(contains_eager('contacts').contains_eager('contact'),
-                     contains_eager('members').contains_eager('user'))
+            .options(contains_eager('contacts').contains_eager('contact'))
+            #contains_eager('members').contains_eager('user')
 
         if search.access_type:
             query = query.filter(Org.access_type.in_(search.access_type))

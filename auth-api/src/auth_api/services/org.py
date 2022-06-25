@@ -24,7 +24,6 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
-from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
@@ -683,12 +682,7 @@ class Org:  # pylint: disable=too-many-public-methods
             org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True
         else:
-            # These aren't in the model, because they cause circular dependencies.
-            affilliation_org_ids: List[int] = []
-            if search.business_identifier:
-                affiliations = AffiliationModel.find_affiliations_by_business_identifier(search.business_identifier)
-                affilliation_org_ids = [affiliation.org_id for affiliation in affiliations]
-            org_models, orgs_result['total'] = OrgModel.search_org(search, affilliation_org_ids)
+            org_models, orgs_result['total'] = OrgModel.search_org(search)
 
         for org in org_models:
             orgs_result['orgs'].append({
