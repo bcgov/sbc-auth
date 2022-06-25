@@ -15,9 +15,14 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
+from dataclasses import dataclass, field
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func, cast
 from sqlalchemy.orm import contains_eager, relationship
+from typing import List
+
+from auth_api.models.affiliation import Affiliation
+from auth_api.models.entity import Entity
 
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
@@ -31,6 +36,25 @@ from .invitation import Invitation, InvitationMembership
 from .org_status import OrgStatus
 from .org_type import OrgType
 
+
+@dataclass
+class OrgSearch:
+    """Used for searching organizations."""
+
+    name: str
+    branch_name: str
+    business_identifier: str
+    statuses: List = field()
+    access_type: str
+    bcol_account_id: str
+    id: str
+    decision_made_by: str
+    org_type: str
+    email_address: str
+    first_name: str
+    last_name: str
+    page: int
+    limit: int
 
 class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """Model for an Org record."""
@@ -108,38 +132,59 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return query.all()
 
     @classmethod
-    def search_org(cls, access_type, name, statuses, bcol_account_id,  # pylint: disable=too-many-arguments
-                   page: int, limit: int):
+    def search_org(cls, search: OrgSearch, affilliation_org_ids: List[int]):
         """Find all orgs with the given type."""
+
+        """ 
+        The two lines below are due to the design of the models.
+        (Circular references - if I refer to Membership / User models)
+        """
+        members = Org.members.property.mapper.class_
+        user = members.user.property.mapper.class_
+
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
             .outerjoin(Contact) \
-            .options(contains_eager('contacts').contains_eager('contact'))
+            .outerjoin(Affiliation) \
+            .outerjoin(Entity) \
+            .options(contains_eager('contacts').contains_eager('contact'),
+                     contains_eager('members').contains_eager('user'))
 
-        if access_type:
-            query = query.filter(Org.access_type.in_(access_type))
-        if name:
-            query = query.filter(Org.name.ilike(f'%{name}%'))
-        if statuses:
-            query = query.filter(Org.status_code.in_(statuses))
+        if search.access_type:
+            query = query.filter(Org.access_type.in_(search.access_type))
+        if search.id:
+            query = query.filter(cast(Org.id, String).like(f'%{search.id}%'))
+        if search.org_type:
+            query = query.filter(Org.org_type == search.org_type)
+        if search.decision_made_by:
+            query = query.filter(Org.decision_made_by.ilike(f'%{search.decision_made_by}%'))
+        if search.bcol_account_id:
+            query = query.filter(Org.bcol_account_id == search.bcol_account_id)
+        if search.branch_name:
+            query = query.filter(Org.branch_name.ilike(f'%{search.branch_name}%'))
+        if search.email_address:
+            query = query.filter(Org.contacts.any(Contact.email.ilike(f'%{search.email_address}%')))
+        if search.business_identifier:
+            query = query.filter(Org.affiliated_entities.any(Entity.business_identifier == search.business_identifier))
+        if search.first_name:
+            query = query.filter(user.firstname.ilike(f'%{search.first_name}%'))
+        if search.last_name:
+            query = query.filter(user.lastname.ilike(f'%{search.last_name}%'))
+        if search.name:
+            query = query.filter(Org.name.ilike(f'%{search.name}%'))
+        if search.statuses:
+            query = query.filter(Org.status_code.in_(search.statuses))
             # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
-            if OrgStatusEnum.ACTIVE.value in statuses:
+            if OrgStatusEnum.ACTIVE.value in search.statuses:
                 pending_inv_subquery = db.session.query(Org.id) \
                     .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
                     .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
                     .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value,
                             Invitation.type == InvitationType.DIRECTOR_SEARCH.value) \
                     .filter(Org.access_type == AccessType.ANONYMOUS.value)
-
                 query = query.filter(Org.id.notin_(pending_inv_subquery))
 
-        if bcol_account_id:
-            query = query.filter(Org.bcol_account_id == bcol_account_id)
-
-        query = query.order_by(Org.created.desc())
-
-        # Add pagination
-        pagination = query.paginate(per_page=limit, page=page)
+        pagination = query.order_by(Org.created.desc()).paginate(per_page=search.limit, page=search.page)
         return pagination.items, pagination.total
 
     @classmethod
@@ -161,9 +206,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if name:
             query = query.filter(Org.name.ilike(f'%{name}%'))
 
-        query = query.order_by(Org.created.desc())
-
-        orgs = query.all()
+        orgs = query.order_by(Org.created.desc()).all()
         return orgs, len(orgs)
 
     @classmethod

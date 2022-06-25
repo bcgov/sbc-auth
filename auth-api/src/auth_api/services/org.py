@@ -32,6 +32,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
+from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
@@ -664,58 +665,41 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(**kwargs):  # pylint: disable=too-many-locals
+    def search_orgs(search: OrgSearch):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
-        orgs = {'orgs': []}
-        if kwargs.get('business_identifier', None):
-            affiliations = AffiliationModel.find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
-            for affiliation in affiliations:
-                orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
+        orgs_result = {
+            'orgs': [],
+            'page': search.page,
+            'limit': search.limit,
+            'total': 0
+        }
+        include_invitations: bool = False
+        search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
+
+        if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
+            # only staff admin can see director search accounts
+            if not is_staff_admin:
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+            org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
+            include_invitations = True
         else:
-            include_invitations: bool = False
+            # These aren't in the model, because they cause circular dependencies.
+            affilliation_org_ids: List[int] = []
+            if search.business_identifier:
+                affiliations = AffiliationModel.find_affiliations_by_business_identifier(search.business_identifier)
+                affilliation_org_ids = [affiliation.org_id for affiliation in affiliations]
+            org_models, orgs_result['total'] = OrgModel.search_org(search, affilliation_org_ids)
 
-            page: int = int(kwargs.get('page'))
-            limit: int = int(kwargs.get('limit'))
-            statuses: str = kwargs.get('statuses', None)
-            name: str = kwargs.get('name', None)
-            # https://github.com/bcgov/entity/issues/4786
-            access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None))
-            search_args = (access_type,
-                           name,
-                           statuses,
-                           kwargs.get('bcol_account_id', None),
-                           page, limit)
+        for org in org_models:
+            orgs_result['orgs'].append({
+                **Org(org).as_dict(),
+                'contacts': ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False)
+                if org.contacts else [],
+                'invitations': InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False)
+                if include_invitations and org.invitations else [],
+            })
 
-            if statuses and OrgStatus.PENDING_ACTIVATION.value in statuses:
-                # only staff admin can see director search accounts
-                # https://github.com/bcgov/entity/issues/4786
-                if not is_staff_admin:
-                    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-                org_models, total = OrgModel.search_pending_activation_orgs(name)
-                include_invitations = True
-            else:
-                org_models, total = OrgModel.search_org(*search_args)
-
-            for org in org_models:
-                org_dict = Org(org).as_dict()
-                org_dict['contacts'] = []
-                org_dict['invitations'] = []
-
-                if org.contacts:
-                    org_dict['contacts'].append(
-                        ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False))
-
-                if include_invitations and org.invitations:
-                    org_dict['invitations'].append(
-                        InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False))
-
-                orgs['orgs'].append(org_dict)
-
-            orgs['total'] = total
-            orgs['page'] = page
-            orgs['limit'] = limit
-
-        return orgs
+        return orgs_result
 
     @staticmethod
     @user_context

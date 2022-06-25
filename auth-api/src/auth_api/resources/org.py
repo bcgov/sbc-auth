@@ -20,6 +20,7 @@ from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.models import Org as OrgModel
+from auth_api.models.org import OrgSearch
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -78,29 +79,32 @@ class Orgs(Resource):
         [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Search orgs."""
-        # Search based on request arguments
-        business_identifier = request.args.get('affiliation', None)
-        name = request.args.get('name', None)
-        branch_name = request.args.get('branchName', None)
-        statuses = request.args.getlist('status', None)
-        access_type = request.args.get('access_type', None)
-        bcol_account_id = request.args.get('bcolAccountId', None)
-        page = request.args.get('page', 1)
-        limit = request.args.get('limit', 10)
+        org_search = OrgSearch(
+            request.args.get('name', None),
+            request.args.get('branchName', None),
+            request.args.get('affiliation', None),
+            request.args.getlist('statuses', None),
+            request.args.get('access_type', None),
+            request.args.get('bcolAccountId', None),
+            request.args.get('id', None),
+            request.args.get('decisionMadeBy', None),
+            request.args.get('orgType', None),
+            request.args.get('emailAddress', None),
+            request.args.get('firstName', None),
+            request.args.get('lastName', None),
+            int(request.args.get('page', 1)),
+            int(request.args.get('limit', 10))
+        )
         validate_name = request.args.get('validateName', 'False')
 
         try:
             token = g.jwt_oidc_token_info
             if validate_name.upper() == 'TRUE':
-                response, status = OrgService.find_by_org_name(name, branch_name), http_status.HTTP_200_OK
+                response, status = OrgService.find_by_org_name(org_name=org_search.name,
+                                                               branch_name=org_search.branch_name), \
+                                                                    http_status.HTTP_200_OK
             else:
-                response, status = OrgService.search_orgs(business_identifier=business_identifier,
-                                                          access_type=access_type, name=name,
-                                                          statuses=statuses, bcol_account_id=bcol_account_id, page=page,
-                                                          limit=limit), http_status.HTTP_200_OK
-
-            # If public user is searching , return 200 with empty results if orgs exist
-            # Else return 204
+                response, status = OrgService.search_orgs(org_search), http_status.HTTP_200_OK
 
             is_public_user = Role.PUBLIC_USER.value in token.get('realm_access').get('roles')
             if is_public_user:  # public user cant get the details in search.Gets only status of orgs
