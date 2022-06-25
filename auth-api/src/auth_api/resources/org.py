@@ -83,7 +83,7 @@ class Orgs(Resource):
             request.args.get('name', None),
             request.args.get('branchName', None),
             request.args.get('affiliation', None),
-            request.args.getlist('statuses', None),
+            request.args.getlist('status', None),
             request.args.get('access_type', None),
             request.args.get('bcolAccountId', None),
             request.args.get('id', None),
