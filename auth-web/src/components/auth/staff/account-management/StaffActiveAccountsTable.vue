@@ -20,6 +20,15 @@
               :mobile-breakpoint="0"
               @update:items-per-page="saveItemsPerPage"
             >
+              <!-- Loading -->
+              <template v-slot:loading>
+                <div
+                  class="loading-datatable"
+                  >
+                  Loading items...
+                </div>
+              </template>
+
               <!-- No data -->
               <template v-slot:no-data>
                 <div
@@ -219,7 +228,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private accountTypeMap = new Map<string, object>([
     [
       'Basic', {
-        accessType: AccessType.REGULAR,
         orgType: Account.BASIC
       }
     ],
@@ -231,7 +239,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     ],
     [
       'Premium', {
-        accessType: AccessType.REGULAR,
         orgType: Account.PREMIUM
       }
     ],
@@ -325,8 +332,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     } finally {
       context.isTableLoading = false
     }
-  }, 300, true
-  )
+  })
 
   private async viewInBusinessRegistryDashboard (org: Organization) {
     await this.syncBeforeNavigate(org)
@@ -370,15 +376,13 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   // Used to go from accessType: AccessType.REGULAR, orgType: Account.BASIC -> 'Basic'
   private getAccountTypeFromOrgAndAccessType (org:Organization):string {
-    let accountType = this.reverseAccountTypeMap.get(JSON.stringify({
+    return this.reverseAccountTypeMap.get(JSON.stringify({
       accessType: org.accessType,
       orgType: org.orgType
-    }))
-    if (accountType) {
-      return accountType
-    }
-    return this.reverseAccountTypeMap.get(JSON.stringify({
+    })) || this.reverseAccountTypeMap.get(JSON.stringify({
       accessType: org.accessType
+    })) || this.reverseAccountTypeMap.get(JSON.stringify({
+      orgType: org.orgType
     }))
   }
 
@@ -473,8 +477,13 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     min-width: 100%;
   }
 
-  .no-data {
+  .no-data, .loading-datatable {
     border: 0px;
+    position: sticky;
+    width: 1260px;
+    left: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
   }
 
   ::v-deep .v-data-table__wrapper::-webkit-scrollbar {
@@ -527,8 +536,5 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     padding-right: 3px !important;
   }
 
-  ::v-deep table > tbody > tr > td[colspan] {
-    padding-right: calc(100% - 1264px);
-  }
 }
 </style>
