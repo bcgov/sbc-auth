@@ -186,7 +186,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
   private readonly addOrgSettings!: (org: Organization) => Promise<UserSettings>
   private readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly searchOrgs!: (filterParams: OrgFilterParams) => OrgList
+  private readonly searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
   private readonly headerAccounts = [
     {
       text: 'Account Name',
