@@ -122,7 +122,7 @@ class Affiliation:
         return data
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None):
+    def create_affiliation(org_id, business_identifier, pass_code=None, bearer_token=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -135,23 +135,30 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
         current_app.logger.debug('<create_affiliation entity found')
         entity_id = entity.identifier
+        entity_type = entity.corp_type
 
         authorized = True
 
-        # Unauthorized if the entity has been claimed
-        # Leaving the code as it may come back. Removing as part of #8863
-        # if entity.as_dict()['pass_code_claimed']:
-        #     authorized = False
-        #     already_claimed = True
-        # If a passcode was provided...
-        if pass_code:
-            # ... and the entity has a passcode on it, check that they match
-            authorized = validate_passcode(pass_code, entity.pass_code)
-        # If a passcode was not provided...
-        else:
-            # ... check that the entity does not have a passcode protecting it
-            if entity.pass_code:
+        if entity_type in ['SP', 'GP']:
+            if not pass_code:
                 authorized = False
+            else:
+                authorized = Affiliation._validate_firms_party(bearer_token, business_identifier, pass_code)
+        else:
+            # Unauthorized if the entity has been claimed
+            # Leaving the code as it may come back. Removing as part of #8863
+            # if entity.as_dict()['pass_code_claimed']:
+            #     authorized = False
+            #     already_claimed = True
+            # If a passcode was provided...
+            if pass_code:
+                # ... and the entity has a passcode on it, check that they match
+                authorized = validate_passcode(pass_code, entity.pass_code)
+            # If a passcode was not provided...
+            else:
+                # ... check that the entity does not have a passcode protecting it
+                if entity.pass_code:
+                    authorized = False
 
         # show a different message when the passcode is already claimed
         # if already_claimed:
@@ -171,7 +178,8 @@ class Affiliation:
         affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
         affiliation.save()
 
-        entity.set_pass_code_claimed(True)
+        if entity_type not in ['SP', 'GP']:
+            entity.set_pass_code_claimed(True)
         publish_activity(f'{ActivityAction.CREATE_AFFILIATION.value}-{entity.name}', entity.name, entity_id, org_id)
         return Affiliation(affiliation)
 
@@ -267,7 +275,8 @@ class Affiliation:
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
         """Return NR details by calling legal-api."""
-        get_nr_url = current_app.config.get('LEGAL_API_URL') + f'/nameRequests/{nr_number}'
+        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
+        get_nr_url = f'{ legal_api_url }/nameRequests/{nr_number}'
         try:
             get_nr_response = RestService.get(get_nr_url, token=token)
         except (HTTPError, ServiceUnavailableException) as e:
@@ -275,3 +284,25 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
 
         return get_nr_response.json()
+
+    @staticmethod
+    def _validate_firms_party(token, business_identifier, party_name_str: str):
+        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
+        parties_url = f'{ legal_api_url }/businesses/{business_identifier}/parties'
+        try:
+            lear_response = RestService.get(parties_url, token=token)
+        except (HTTPError, ServiceUnavailableException) as e:
+            current_app.logger.info(e)
+            raise BusinessException(Error.DATA_NOT_FOUND, None) from e
+        parties_json = lear_response.json()
+        for party in parties_json['parties']:
+            officer = party.get('officer')
+            if officer.get('partyType') == 'organization':
+                party_name = officer.get('organizationName')
+            else:
+                party_name = officer.get('lastName') + ', ' + officer.get('firstName')
+                if officer.get('middleName'):
+                    party_name = party_name + ' ' + officer.get('middleName')
+            if party_name_str.upper() == party_name.upper():
+                return True
+        return False
