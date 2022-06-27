@@ -38,7 +38,7 @@ from .org_type import OrgType
 
 
 @dataclass
-class OrgSearch:
+class OrgSearch: # pylint: too-many-instance-attributes
     """Used for searching organizations."""
 
     name: str
