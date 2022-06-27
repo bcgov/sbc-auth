@@ -89,9 +89,6 @@ class Orgs(Resource):
             request.args.get('id', None),
             request.args.get('decisionMadeBy', None),
             request.args.get('orgType', None),
-            request.args.get('emailAddress', None),
-            request.args.get('firstName', None),
-            request.args.get('lastName', None),
             int(request.args.get('page', 1)),
             int(request.args.get('limit', 10))
         )

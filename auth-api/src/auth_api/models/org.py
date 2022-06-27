@@ -38,7 +38,6 @@ from .org_type import OrgType
 
 
 @dataclass
-# pylint: disable=too-many-instance-attributes
 class OrgSearch:
     """Used for searching organizations."""
 
@@ -51,9 +50,6 @@ class OrgSearch:
     id: str
     decision_made_by: str
     org_type: str
-    email_address: str
-    first_name: str
-    last_name: str
     page: int
     limit: int
 
@@ -136,11 +132,6 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     @classmethod
     def search_org(cls, search: OrgSearch):
         """Find all orgs with the given type."""
-        # The two lines below are due to the design of the models.
-        # (Circular references - If Membership / User models are imported)
-        members = Org.members.property.mapper.class_
-        user = members.user.property.mapper.class_
-
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
             .outerjoin(Contact) \
@@ -160,20 +151,15 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             query = query.filter(Org.bcol_account_id == search.bcol_account_id)
         if search.branch_name:
             query = query.filter(Org.branch_name.ilike(f'%{search.branch_name}%'))
-        if search.email_address:
-            query = query.filter(Org.contacts.any(Contact.email.ilike(f'%{search.email_address}%')))
         if search.business_identifier:
             query = query.filter(Org.affiliated_entities.any(Entity.business_identifier == search.business_identifier))
-        if search.first_name:
-            query = query.filter(user.firstname.ilike(f'%{search.first_name}%'))
-        if search.last_name:
-            query = query.filter(user.lastname.ilike(f'%{search.last_name}%'))
         if search.name:
             query = query.filter(Org.name.ilike(f'%{search.name}%'))
 
         query = cls._search_for_statuses(query, search.statuses)
 
-        pagination = query.order_by(Org.created.desc()).paginate(per_page=search.limit, page=search.page)
+        pagination = query.order_by(Org.created.desc()) \
+                          .paginate(per_page=search.limit, page=search.page)
         return pagination.items, pagination.total
 
     @classmethod

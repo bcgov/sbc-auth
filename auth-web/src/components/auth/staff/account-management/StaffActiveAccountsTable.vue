@@ -209,18 +209,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'orgType'
     },
     {
-      text: 'First Name',
-      value: 'firstName'
-    },
-    {
-      text: 'Last Name',
-      value: 'lastName'
-    },
-    {
-      text: 'Email Address',
-      value: 'emailAddress'
-    },
-    {
       text: 'Actions',
       value: 'action'
     }
@@ -269,7 +257,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   private formatDate = CommonUtils.formatDisplayDate
   private totalAccountsCount = 0
   private tableDataOptions: Partial<DataOptions> = {}
-  private orgFilter: OrgFilterParams
   private isTableLoading: boolean = false
   private searchParamsExist: boolean = false
   /* V-model for dropdown menus. */
@@ -281,9 +268,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     id: '',
     decisionMadeBy: '',
     orgType: '',
-    firstName: '',
-    lastName: '',
-    emailAddress: '',
     statuses: [AccountStatus.ACTIVE]
   }
 
@@ -403,10 +387,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
           searchParams.branchName.length > 0 ||
           searchParams.id.length > 0 ||
           searchParams.decisionMadeBy.length > 0 ||
-          searchParams.orgType.length > 0 ||
-          searchParams.firstName.length > 0 ||
-          searchParams.lastName.length > 0 ||
-          searchParams.emailAddress.length > 0
+          searchParams.orgType.length > 0
   }
 }
 </script>
