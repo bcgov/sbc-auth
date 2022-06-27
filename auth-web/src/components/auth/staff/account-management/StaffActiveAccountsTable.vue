@@ -139,7 +139,7 @@
                       <v-list>
                         <v-list-item @click="viewInBusinessRegistryDashboard(item)">
                           <v-list-item-subtitle>
-                            <svg version="1.2" preserveAspectRatio="none" class="ng-element" data-id="689afdf4791548c899b570d10d167d1f" style="overflow: visible; opacity: 1; mix-blend-mode: normal; width: 14px; height: 14px; transform: rotate(0deg)"><g transform="translate(0, 0) rotate(0)"><path style="stroke-width: 0; stroke-linecap: butt; stroke-linejoin: miter; fill: rgb(22, 105, 187);" d="M0,7.77778h6.22222v-7.77778h-6.22222zM0,14h6.22222v-4.66667h-6.22222zM7.77778,14h6.22222v-7.77778h-6.22222zM7.77778,0v4.66667h6.22222v-4.66667z"></path></g><defs><path id="path-16549715222721676" d="M0,7.77778h6.22222v-7.77778h-6.22222zM0,14h6.22222v-4.66667h-6.22222zM7.77778,14h6.22222v-7.77778h-6.22222zM7.77778,0v4.66667h6.22222v-4.66667z"></path></defs></svg>
+                            <v-img class="business-dashboard-icon" src="@/assets/img/StaffActive_business_dashboard_icon.svg"/>
                             <span class="pl-1">Business Registry Dashboard</span>
                           </v-list-item-subtitle>
                         </v-list-item>
@@ -335,9 +335,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       id: '',
       decisionMadeBy: '',
       orgType: '',
-      firstName: '',
-      lastName: '',
-      emailAddress: '',
       statuses: [AccountStatus.ACTIVE]
     }
   }
@@ -422,10 +419,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 }
 
+.business-dashboard-icon {
+  opacity: 1;
+  width: 14px;
+  height: 14px;
+  transform: rotate(0deg);
+  display: inline-flex;
+}
+
 .account-active-search {
   table > thead > tr > th {
-    width: 229px !important;
-    min-width: 229px !important;
+    width: 220px !important;
+    min-width: 220px !important;
   }
 
   .open-action-btn,
