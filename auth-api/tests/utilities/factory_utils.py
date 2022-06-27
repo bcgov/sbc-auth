@@ -337,3 +337,35 @@ def patch_pay_account_delete_error(monkeypatch):
             raise HTTPError('TEST ERROR')
 
     monkeypatch.setattr('auth_api.services.rest_service.RestService.delete', lambda *args, **kwargs: MockPayResponse())
+
+
+def patch_get_firms_parties(monkeypatch):
+    """Patch pay account delete success."""
+    class MockPartiesResponse:
+
+        @staticmethod
+        def json():
+            return {
+                'parties': [
+                    {
+                        'officer': {
+                            'email': 'test@email.com',
+                            'firstName': 'Connor',
+                            'lastName': 'Horton',
+                            'partyType': 'person'
+                        },
+                        'roles': [
+                            {
+                                'appointmentDate': '2022-03-01',
+                                'cessationDate': 'None',
+                                'roleType': 'Partner'
+                            }
+                        ]
+                    }
+                ]
+            }
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.get', lambda *args, **kwargs: MockPartiesResponse())

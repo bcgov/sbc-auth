@@ -681,6 +681,11 @@ class TestEntityInfo(dict, Enum):
                          'name': 'Foobar, Inc.',
                          'passCode': '222222222', 'corpTypeCode': 'CP'}
 
+    entity_lear_mock3 = {'businessIdentifier': 'FM1000001',
+                         'businessNumber': '791861078BC0002',
+                         'name': 'Foobar, Inc.',
+                         'passCode': 'Horton, Connor', 'corpTypeCode': 'SP'}
+
     entity_folio_number = {'businessIdentifier': 'CP1234568',
                            'folioNumber': '12345678'}
 
