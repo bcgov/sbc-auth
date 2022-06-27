@@ -34,7 +34,6 @@
         "application": [
             "postgres-auth",
             "auth-api",
-            "legal-api",
             "sentry",
             "jwt"
         ]
@@ -42,7 +41,8 @@
     {
         "vault": "API",
         "application": [
-            "api_gw"
+            "api_gw",
+            "legal-api"
         ]
     }
 ]
