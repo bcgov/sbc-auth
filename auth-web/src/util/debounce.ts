@@ -1,27 +1,9 @@
-// Returns a function, that, as long as it continues to be invoked, will not
-// be triggered. The function will be called after it stops being called for
-// N milliseconds. If `immediate` is passed, trigger the function on the
-// leading edge, instead of the trailing.
-
-function debounce (func, wait = 300, immediate = false) {
-  let timeout
-  // to avoid this type error define this with type any, arg for rest arguments
-  return function (this: any, ...args) {
-    const context = this
-    const later = function () {
-      timeout = null
-      if (!immediate) {
-        func.apply(context, args)
-      }
-    }
-    const callNow = immediate && !timeout
-
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-    if (callNow) {
-      func.apply(context, args)
-    }
-  }
+export function debounce<F extends (...params: any[]) => void>(fn: F, delay = 300) {
+  let timeoutID: number = null
+  return function (this: any, ...args: any[]) {
+    clearTimeout(timeoutID)
+    timeoutID = window.setTimeout(() => fn.apply(this, args), delay)
+  } as F
 }
 
 export default debounce
