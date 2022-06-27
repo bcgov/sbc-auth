@@ -213,7 +213,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'action'
     }
   ]
-  private accountTypeMap = new Map<string, object>([
+  private readonly accountTypeMap = new Map<string, object>([
     [
       'Basic', {
         orgType: Account.BASIC
@@ -252,15 +252,15 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       }
     ]
   ])
-  private reverseAccountTypeMap = new Map(Array.from(this.accountTypeMap, entry => [JSON.stringify(entry[1]), entry[0]]))
+  private readonly reverseAccountTypeMap = new Map(Array.from(this.accountTypeMap, entry => [JSON.stringify(entry[1]), entry[0]]))
   private readonly accountTypes = Array.from(this.accountTypeMap.keys())
   private formatDate = CommonUtils.formatDisplayDate
   private totalAccountsCount = 0
   private tableDataOptions: Partial<DataOptions> = {}
-  private isTableLoading: boolean = false
-  private searchParamsExist: boolean = false
+  private isTableLoading = false
+  private searchParamsExist = false
   /* V-model for dropdown menus. */
-  private dropdown: Array<boolean> = []
+  private readonly dropdown: Array<boolean> = []
   /* V-model for searching */
   private searchParams: OrgFilterParams = {
     name: '',
@@ -298,11 +298,11 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   // Needed context here instead of this.
-  private debouncedOrgSearch = debounce(async (context: StaffActiveAccountsTable, page = 1, pageLimit = context.numberOfItems) => {
+  private readonly debouncedOrgSearch = debounce(async (context: StaffActiveAccountsTable, page = 1, pageLimit = context.numberOfItems) => {
     try {
       context.isTableLoading = true
       const completeSearchParams: OrgFilterParams = {
-        ...context.searchParams as OrgFilterParams,
+        ...context.searchParams,
         ...context.getOrgAndAccessTypeFromAccountType(context.searchParams.orgType),
         page: page,
         limit: pageLimit
@@ -493,10 +493,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     background-color: inherit !important;
   }
 
-  ::v-deep table > tbody > tr > td {
-    border: 0px;
-  }
-
   table > thead > tr > th:last-child,
   ::v-deep table > tbody > tr > td:last-child:not([colspan]) {
     position: sticky !important;
@@ -508,6 +504,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
  ::v-deep table > tbody > tr > td {
+    border: 0px;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
   }
