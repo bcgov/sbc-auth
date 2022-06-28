@@ -49,7 +49,7 @@
         <v-btn
           large outlined color="primary"
           data-test="cancel-button"
-          @click="$emit('on-cancel')"
+          @click="resetForm(); $emit('on-cancel')"
         >
           <span>Cancel</span>
         </v-btn>
