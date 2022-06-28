@@ -687,12 +687,13 @@ class Org:  # pylint: disable=too-many-public-methods
         for org in org_models:
             orgs_result['orgs'].append({
                 **Org(org).as_dict(),
-                'contacts': ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False)
+                'contacts': [ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False)]
                 if org.contacts else [],
-                'invitations': InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False)
+                'invitations': [
+                    InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False)
+                ]
                 if include_invitations and org.invitations else [],
             })
-
         return orgs_result
 
     @staticmethod

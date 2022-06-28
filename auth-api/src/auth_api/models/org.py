@@ -22,7 +22,6 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, a
 from sqlalchemy.orm import contains_eager, relationship
 
 from auth_api.models.affiliation import Affiliation
-from auth_api.models.entity import Entity
 
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
@@ -135,8 +134,6 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
             .outerjoin(Contact) \
-            .outerjoin(Affiliation) \
-            .outerjoin(Entity) \
             .options(contains_eager('contacts').contains_eager('contact'))
 
         if search.access_type:
@@ -151,16 +148,23 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             query = query.filter(Org.bcol_account_id == search.bcol_account_id)
         if search.branch_name:
             query = query.filter(Org.branch_name.ilike(f'%{search.branch_name}%'))
-        if search.business_identifier:
-            query = query.filter(Org.affiliated_entities.any(Entity.business_identifier == search.business_identifier))
         if search.name:
             query = query.filter(Org.name.ilike(f'%{search.name}%'))
 
+        query = cls._search_by_business_identifier(query, search.business_identifier)
         query = cls._search_for_statuses(query, search.statuses)
 
         pagination = query.order_by(Org.created.desc()) \
                           .paginate(per_page=search.limit, page=search.page)
         return pagination.items, pagination.total
+
+    @classmethod
+    def _search_by_business_identifier(cls, query, business_identifier):
+        if business_identifier:
+            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier)
+            affilliation_org_ids = [affilliations.org_id in affilliations]
+            query = query.filter(Org.id.in_(affilliation_org_ids))
+        return query
 
     @classmethod
     def _search_for_statuses(cls, query, statuses):
