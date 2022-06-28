@@ -49,7 +49,7 @@
         <v-btn
           large outlined color="primary"
           data-test="cancel-button"
-          @click="resetForm(); $emit('on-cancel')"
+          @click="resetForm('on-cancel')"
         >
           <span>Cancel</span>
         </v-btn>
@@ -165,17 +165,20 @@ export default class AddNameRequestForm extends Vue {
           this.$emit('add-unknown-error')
         }
       } finally {
-        this.resetForm()
+        this.resetForm('')
       }
     }
   }
 
-  private resetForm (): void {
+  private resetForm (event: string): void {
     this.nrNumber = ''
     this.applicantEmail = ''
     this.applicantPhoneNumber = ''
     this.$refs.addNRForm.resetValidation()
     this.isLoading = false
+    if (event) {
+      this.$emit('on-cancel')
+    }
   }
 
   private formatNrNumber (): void {
