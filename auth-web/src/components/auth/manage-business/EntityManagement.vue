@@ -97,12 +97,25 @@
           <p>
             Add an existing business to your list by providing the following required pieces of information:
           </p>
-          <ul class="add-business-unordered-list">
-            <li>For <strong>corporations</strong>, enter the incorporation number and the password.</li>
-            <li>For <strong>benefit companies</strong>, enter the incorporation number and the passcode.</li>
-            <li>For <strong>firms</strong>, enter the registration number and the name of the prorietor or a
-              partner, and the business number for firms doing business as.</li>
-          </ul>
+          <v-tooltip
+            top
+            nudge-bottom="50"
+            nudge-right="125"
+            content-class="top-tooltip">
+            <template v-slot:activator="{ on, attrs }">
+              <ul class="add-business-unordered-list">
+                <li>For <strong>corporations</strong>, enter the incorporation number and the password.</li>
+                <li>For <strong>benefit companies</strong>, enter the incorporation number and the passcode.</li>
+                <li>For <strong>firms</strong>, enter the registration number and the <span v-bind="attrs" v-on="on" activator class="underline-dotted">name of the prorietor or a partner</span>, and the business number for firms doing business as.</li>
+              </ul>
+            </template>
+            <span class="add-business-example-name">
+              For individuals, it should be "Last Name,<br>
+              First Name MiddleName".<br>
+              E.g. Watson, John Hamish
+            </span>
+          </v-tooltip>
+
           <AddBusinessForm
             class="mt-6"
             @add-success="showAddSuccessModal()"
@@ -531,6 +544,42 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
       font-weight: 700;
     }
   }
+
+  .underline-dotted {
+    border-bottom: dotted;
+    border-bottom-width: 2px;
+  }
+
+.v-tooltip__content {
+  background-color: RGBA(73,80,87, 0.95) !important;
+  color: white !important;
+  border-radius: 4px;
+  font-size: 12px !important;
+  line-height: 18px !important;
+  padding: 15px !important;
+  letter-spacing: 0;
+  max-width: 270px !important;
+}
+
+.v-tooltip__content:after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 100% !important;
+  margin-top: -10px !important;
+  border-top: 10px solid transparent !important;
+  border-bottom: 10px solid transparent !important;
+  border-right: 8px solid RGBA(73, 80, 87, 0.95) !important;
+}
+
+  .top-tooltip:after {
+  top: 100% !important;
+  left: 45% !important;
+  margin-top: 0 !important;
+  border-right: 10px solid transparent !important;
+  border-left: 10px solid transparent !important;
+  border-top: 8px solid RGBA(73,80,87, 0.95) !important;
+}
 
   #add-existing-btn {
     box-shadow: none;

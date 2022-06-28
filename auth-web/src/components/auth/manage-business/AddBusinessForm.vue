@@ -81,7 +81,7 @@
         <v-btn
           large outlined color="primary"
           id="cancel-button"
-          @click="$emit('on-cancel')"
+          @click="resetForm(); $emit('on-cancel')"
         >
           <span>Cancel</span>
         </v-btn>
