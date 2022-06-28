@@ -81,7 +81,7 @@
         <v-btn
           large outlined color="primary"
           id="cancel-button"
-          @click="$emit('on-cancel')"
+          @click="resetForm('on-cancel')"
         >
           <span>Cancel</span>
         </v-btn>
@@ -262,17 +262,20 @@ export default class AddBusinessForm extends Vue {
           this.$emit('add-unknown-error')
         }
       } finally {
-        this.resetForm()
+        this.resetForm('')
       }
     }
   }
 
-  private resetForm () {
+  private resetForm (event: string): void {
     this.businessIdentifier = ''
     this.passcode = ''
     this.folioNumber = ''
     this.$refs.addBusinessForm.resetValidation()
     this.isLoading = false
+    if (event) {
+      this.$emit(event)
+    }
   }
 
   protected formatBusinessIdentifier (): void {
