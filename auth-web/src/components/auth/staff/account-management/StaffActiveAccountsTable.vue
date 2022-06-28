@@ -440,8 +440,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
 .account-active-search {
   table > thead > tr > th {
-    width: 220px !important;
-    min-width: 220px !important;
+    width: 210px !important;
+    min-width: 210px !important;
   }
 
   .open-action-btn,
