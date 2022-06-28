@@ -106,7 +106,11 @@
               <ul class="add-business-unordered-list">
                 <li>For <strong>corporations</strong>, enter the incorporation number and the password.</li>
                 <li>For <strong>benefit companies</strong>, enter the incorporation number and the passcode.</li>
-                <li>For <strong>firms</strong>, enter the registration number and the <span v-bind="attrs" v-on="on" activator class="underline-dotted">name of the prorietor or a partner</span>, and the business number for firms doing business as.</li>
+                <li>For <strong>firms</strong>, enter the registration number and the
+                  <span v-bind="attrs" v-on="on" activator class="underline-dotted">
+                    name of the proprietor or a partner,
+                  </span>
+                  and the business number for firms doing business as.</li>
               </ul>
             </template>
             <span class="add-business-example-name">
