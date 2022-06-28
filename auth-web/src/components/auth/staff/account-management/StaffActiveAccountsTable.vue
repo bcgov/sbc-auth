@@ -348,7 +348,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   // Used to go from accessType: AccessType.REGULAR, orgType: Account.BASIC -> 'Basic'
   private getAccountTypeFromOrgAndAccessType (org:Organization): any {
-    let orgMapping = Object.entries(this.accountTypeMap).find(([key, value]) =>
+    const orgMapping = Object.entries(this.accountTypeMap).find(([key, value]) =>
       value?.accessType.includes(org.accessType) && value.orgType === org.orgType) ||
       Object.entries(this.accountTypeMap).find(([key, value]) =>
       value?.accessType.includes(org.accessType)) ||
