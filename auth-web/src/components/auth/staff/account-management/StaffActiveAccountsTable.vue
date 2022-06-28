@@ -213,48 +213,35 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'action'
     }
   ]
-  private readonly accountTypeMap = new Map<string, OrgMap>([
-    [
-      'Basic', {
-        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-        orgType: Account.BASIC
-      }
-    ],
-    [
-      'Basic (out-of-province)', {
-        accessType: [AccessType.EXTRA_PROVINCIAL],
-        orgType: Account.BASIC
-      }
-    ],
-    [
-      'Premium', {
-        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-        orgType: Account.PREMIUM
-      }
-    ],
-    [
-      'Premium (out-of-province)', {
-        accessType: [AccessType.EXTRA_PROVINCIAL],
-        orgType: Account.PREMIUM
-      }
-    ],
-    [
-      'GovM', {
-        accessType: [AccessType.GOVM]
-      }
-    ],
-    [
-      'GovN', {
-        accessType: [AccessType.GOVN]
-      }
-    ],
-    [
-      'Director Search', {
-        accessType: [AccessType.ANONYMOUS]
-      }
-    ]
-  ])
-  private readonly accountTypes = Array.from(this.accountTypeMap.keys())
+  private readonly accountTypeMap: { [ name: string ]: OrgMap } =
+  {
+    'Basic': {
+      accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
+      orgType: Account.BASIC
+    },
+    'Basic (out-of-province)': {
+      accessType: [AccessType.EXTRA_PROVINCIAL],
+      orgType: Account.BASIC
+    },
+    'Premium': {
+      accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
+      orgType: Account.PREMIUM
+    },
+    'Premium (out-of-province)': {
+      accessType: [AccessType.EXTRA_PROVINCIAL],
+      orgType: Account.PREMIUM
+    },
+    'GovM': {
+      accessType: [AccessType.GOVM]
+    },
+    'GovN': {
+      accessType: [AccessType.GOVN]
+    },
+    'Director Search': {
+      accessType: [AccessType.ANONYMOUS]
+    }
+  }
+  private readonly accountTypes = Array.from(Object.keys(this.accountTypeMap))
   private formatDate = CommonUtils.formatDisplayDate
   private totalAccountsCount = 0
   private tableDataOptions: Partial<DataOptions> = {}
@@ -356,26 +343,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   // Used to go from 'Basic' -> accessType: AccessType.REGULAR, orgType: Account.BASIC
   private getOrgAndAccessTypeFromAccountType (accountType: string): object {
-    return this.accountTypeMap.get(accountType)
+    return this.accountTypeMap[accountType]
   }
 
   // Used to go from accessType: AccessType.REGULAR, orgType: Account.BASIC -> 'Basic'
   private getAccountTypeFromOrgAndAccessType (org:Organization): any {
-    for (const [key, value] of this.accountTypeMap.entries()) {
-      if (value?.accessType.includes(org.accessType) && value.orgType === org.orgType) {
-        return key
-      }
-    }
-    for (const [key, value] of this.accountTypeMap.entries()) {
-      if (value?.accessType.includes(org.accessType)) {
-        return key
-      }
-    }
-    for (const [key, value] of this.accountTypeMap.entries()) {
-      if (value?.orgType === org.orgType) {
-        return key
-      }
-    }
+    let orgMapping = Object.entries(this.accountTypeMap).find(([key, value]) =>
+      value?.accessType.includes(org.accessType) && value.orgType === org.orgType) ||
+      Object.entries(this.accountTypeMap).find(([key, value]) =>
+      value?.accessType.includes(org.accessType)) ||
+     Object.entries(this.accountTypeMap).find(([key, value]) =>
+      value?.orgType === org.orgType) || {}
+    return orgMapping[0]
   }
 
   private get noDataMessage () {
