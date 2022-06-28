@@ -18,11 +18,9 @@ Basic users will have an internal Org that is not created explicitly, but implic
 from dataclasses import dataclass, field
 from typing import List
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func, cast
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, func
 from sqlalchemy.orm import contains_eager, relationship
-
 from auth_api.models.affiliation import Affiliation
-
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
