@@ -197,7 +197,7 @@ export interface OrgFilterParams {
   id?: string,
   decisionMadeBy?: string
   orgType?: string
-  accessType?: string
+  accessType?: string[]
 }
 
 export interface OrgPaymentDetails {
@@ -288,4 +288,9 @@ export interface PatchOrgPayload {
   statusCode?: string;
   suspensionReasonCode?: string;
   accessType?: string;
+}
+
+export interface OrgMap {
+  accessType?: string[];
+  orgType?: string;
 }

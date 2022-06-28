@@ -32,7 +32,9 @@ export default class StaffService {
       if (!orgFilter[key]) {
         continue
       }
-      if (key === 'status') {
+      if (key === 'accessType') {
+        orgFilter.accessType.forEach(accessType => params.append('accessType', accessType))
+      } else if (key === 'statuses') {
         orgFilter.statuses.forEach(status => params.append('status', status))
       } else {
         params.append(key, orgFilter[key])

@@ -43,8 +43,8 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     name: str
     branch_name: str
     business_identifier: str
-    statuses: List = field()
-    access_type: str
+    statuses: List[str] = field()
+    access_type: List[str] = field()
     bcol_account_id: str
     id: str
     decision_made_by: str
@@ -141,7 +141,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if search.id:
             query = query.filter(cast(Org.id, String).like(f'%{search.id}%'))
         if search.org_type:
-            query = query.filter(Org.org_type == search.org_type)
+            query = query.filter(Org.org_type == OrgType.get_type_for_code(search.org_type))
         if search.decision_made_by:
             query = query.filter(Org.decision_made_by.ilike(f'%{search.decision_made_by}%'))
         if search.bcol_account_id:
@@ -156,13 +156,14 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
         pagination = query.order_by(Org.created.desc()) \
                           .paginate(per_page=search.limit, page=search.page)
+
         return pagination.items, pagination.total
 
     @classmethod
     def _search_by_business_identifier(cls, query, business_identifier):
         if business_identifier:
             affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier)
-            affilliation_org_ids = [affilliations.org_id in affilliations]
+            affilliation_org_ids = [affilliation.org_id for affilliation in affilliations]
             query = query.filter(Org.id.in_(affilliation_org_ids))
         return query
 

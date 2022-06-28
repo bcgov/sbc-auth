@@ -159,7 +159,7 @@
 <script lang="ts">
 import { AccessType, Account, AccountStatus, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import { Member, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -213,46 +213,47 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'action'
     }
   ]
-  private readonly accountTypeMap = new Map<string, object>([
+  private readonly accountTypeMap = new Map<string, OrgMap>([
     [
       'Basic', {
+        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
         orgType: Account.BASIC
       }
     ],
     [
       'Basic (out-of-province)', {
-        accessType: AccessType.EXTRA_PROVINCIAL,
+        accessType: [AccessType.EXTRA_PROVINCIAL],
         orgType: Account.BASIC
       }
     ],
     [
       'Premium', {
+        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
         orgType: Account.PREMIUM
       }
     ],
     [
       'Premium (out-of-province)', {
-        accessType: AccessType.EXTRA_PROVINCIAL,
+        accessType: [AccessType.EXTRA_PROVINCIAL],
         orgType: Account.PREMIUM
       }
     ],
     [
       'GovM', {
-        accessType: AccessType.GOVM
+        accessType: [AccessType.GOVM]
       }
     ],
     [
       'GovN', {
-        accessType: AccessType.GOVN
+        accessType: [AccessType.GOVN]
       }
     ],
     [
       'Director Search', {
-        accessType: AccessType.ANONYMOUS
+        accessType: [AccessType.ANONYMOUS]
       }
     ]
   ])
-  private readonly reverseAccountTypeMap = new Map(Array.from(this.accountTypeMap, entry => [JSON.stringify(entry[1]), entry[0]]))
   private readonly accountTypes = Array.from(this.accountTypeMap.keys())
   private formatDate = CommonUtils.formatDisplayDate
   private totalAccountsCount = 0
@@ -303,6 +304,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       context.isTableLoading = true
       const completeSearchParams: OrgFilterParams = {
         ...context.searchParams,
+        orgType: undefined,
+        accessType: undefined,
         ...context.getOrgAndAccessTypeFromAccountType(context.searchParams.orgType),
         page: page,
         limit: pageLimit
@@ -335,6 +338,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       id: '',
       decisionMadeBy: '',
       orgType: '',
+      accessType: [],
       statuses: [AccountStatus.ACTIVE]
     }
   }
@@ -356,15 +360,22 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   // Used to go from accessType: AccessType.REGULAR, orgType: Account.BASIC -> 'Basic'
-  private getAccountTypeFromOrgAndAccessType (org:Organization):string {
-    return this.reverseAccountTypeMap.get(JSON.stringify({
-      accessType: org.accessType,
-      orgType: org.orgType
-    })) || this.reverseAccountTypeMap.get(JSON.stringify({
-      accessType: org.accessType
-    })) || this.reverseAccountTypeMap.get(JSON.stringify({
-      orgType: org.orgType
-    }))
+  private getAccountTypeFromOrgAndAccessType (org:Organization): any {
+    for (const [key, value] of this.accountTypeMap.entries()) {
+      if (value?.accessType.includes(org.accessType) && value.orgType === org.orgType) {
+        return key
+      }
+    }
+    for (const [key, value] of this.accountTypeMap.entries()) {
+      if (value?.accessType.includes(org.accessType)) {
+        return key
+      }
+    }
+    for (const [key, value] of this.accountTypeMap.entries()) {
+      if (value?.orgType === org.orgType) {
+        return key
+      }
+    }
   }
 
   private get noDataMessage () {

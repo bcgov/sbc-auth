@@ -674,7 +674,6 @@ class Org:  # pylint: disable=too-many-public-methods
         }
         include_invitations: bool = False
         search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
-
         if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
             # only staff admin can see director search accounts
             if not is_staff_admin:
@@ -698,20 +697,19 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     @user_context
-    def refine_access_type(access_type_str, **kwargs):
+    def refine_access_type(access_types, **kwargs):
         """Find Access Type."""
         user_from_context: UserContext = kwargs['user_context']
         roles = user_from_context.roles
 
         is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
-        access_type = [] if not access_type_str else access_type_str.split(',')
         if not is_staff_admin:
-            if len(access_type) < 1:
+            if len(access_types) < 1:
                 # pass everything except DIRECTOR SEARCH
-                access_type = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
+                access_types = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
             else:
-                access_type.remove(AccessType.ANONYMOUS.value)
-        return access_type, is_staff_admin
+                access_types.remove(AccessType.ANONYMOUS.value)
+        return access_types, is_staff_admin
 
     @staticmethod
     def bcol_account_link_check(bcol_account_id, org_id=None):
