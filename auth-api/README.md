@@ -23,6 +23,7 @@ virtual environment to install the Python packages used by this project.
 
 You also need to set up the variables used for environment-specific settings:
 1. Copy the [dotenv template file](../docs/dotenv_template) to somewhere above the source code and rename to `.env`. You will need to fill in missing values.
+   .github\workflows\auth-api-ci.yml could provide some hints for unit tests.
 
 ## Running the Auth Database on localhost
 
@@ -33,6 +34,9 @@ To prepare your local database:
 
 Note:
 
+**[Windows Users]**
+If using WSL, may need to change the host from localhost -> <computer-name>.local
+EX. in config.py and .env. 
 
 **[Mac Users]**
 : You might get an error regarding the SSL certificate verification failed.

@@ -142,8 +142,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     try {
       this.orgFilter = {
         statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED],
-        pageNumber: page,
-        pageLimit: pageLimit
+        page: page,
+        limit: pageLimit
       // name: appliedFilterValue
       }
       const activeAccountsResp:any = await this.searchOrgs(this.orgFilter)
