@@ -23,7 +23,7 @@
               <!-- Loading -->
               <template v-slot:loading>
                 <div
-                  class="loading-datatable"
+                  class="py-8 loading-datatable"
                   >
                   Loading items...
                 </div>
@@ -474,7 +474,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   .no-data, .loading-datatable {
     border: 0px;
     position: sticky;
-    width: 1260px;
+    width: 1230px;
     left: 0;
     flex-grow: 0;
     flex-shrink: 0;
