@@ -1897,6 +1897,15 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
+
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    decision_made_by = 'barney'
+    org: Org = Org.find_by_org_id(org_id)
+    org.decision_made_by = decision_made_by
+    org.status_code = OrgStatus.ACTIVE.value
+    org.save()
+
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_regular),
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
@@ -1904,13 +1913,9 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
 
-    decision_made_by = 'barney'
-    org: Org = Org.find_by_org_id(1)
-    org.decision_made_by = decision_made_by
-    org.status_code = OrgStatus.ACTIVE.value
-    org.save()
-
-    org: Org = Org.find_by_org_id(3)
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+    org: Org = Org.find_by_org_id(org_id)
     org.status_code = OrgStatus.ACTIVE.value
     org.save()
 
