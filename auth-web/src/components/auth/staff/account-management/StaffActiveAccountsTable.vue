@@ -139,7 +139,7 @@
                       <v-list>
                         <v-list-item @click="viewInBusinessRegistryDashboard(item)">
                           <v-list-item-subtitle>
-                            <v-img class="business-dashboard-icon" src="@/assets/img/StaffActive_business_dashboard_icon.svg"/>
+                            <v-icon>mdi-view-dashboard</v-icon>
                             <span class="pl-2">Business Registry Dashboard</span>
                           </v-list-item-subtitle>
                         </v-list-item>
@@ -165,11 +165,12 @@
 <script lang="ts">
 import { AccessType, Account, AccountStatus, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
 import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
+import { Member, OrgAccountTypes, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
+import { EnumDictionary } from '@/models/util'
 import OrgModule from '@/store/modules/org'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
@@ -219,31 +220,31 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'action'
     }
   ]
-  private readonly accountTypeMap: { [name: string]: OrgMap } =
+  private readonly accountTypeMap: EnumDictionary<OrgAccountTypes, OrgMap> =
   {
-    'Basic': {
+    [OrgAccountTypes.BASIC]: {
       accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
       orgType: Account.BASIC
     },
-    'Basic (out-of-province)': {
+    [OrgAccountTypes.BASIC_OUT_OF_PROVINCE]: {
       accessType: [AccessType.EXTRA_PROVINCIAL],
       orgType: Account.BASIC
     },
-    'Premium': {
+    [OrgAccountTypes.PREMIUM]: {
       accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
       orgType: Account.PREMIUM
     },
-    'Premium (out-of-province)': {
+    [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
       accessType: [AccessType.EXTRA_PROVINCIAL],
       orgType: Account.PREMIUM
     },
-    'GovM': {
+    [OrgAccountTypes.GOVM]: {
       accessType: [AccessType.GOVM]
     },
-    'GovN': {
+    [OrgAccountTypes.GOVN]: {
       accessType: [AccessType.GOVN]
     },
-    'Director Search': {
+    [OrgAccountTypes.DIRECTOR_SEARCH]: {
       accessType: [AccessType.ANONYMOUS]
     }
   }
@@ -352,15 +353,26 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     return this.accountTypeMap[accountType]
   }
 
-  // Used to go from accessType: AccessType.REGULAR, orgType: Account.BASIC -> 'Basic'
+  // Used to go from OrgType -> OrgAccountTypes
   private getAccountTypeFromOrgAndAccessType (org:Organization): any {
-    const orgMapping = Object.entries(this.accountTypeMap).find(([key, value]) =>
-      value?.accessType.includes(org.accessType) && value.orgType === org.orgType) ||
-      Object.entries(this.accountTypeMap).find(([key, value]) =>
-      value?.accessType.includes(org.accessType)) ||
-     Object.entries(this.accountTypeMap).find(([key, value]) =>
-      value?.orgType === org.orgType) || {}
-    return orgMapping[0]
+    const entries = Object.entries(this.accountTypeMap)
+    const byAccessTypeAndOrgType = entries.find(([key, value]) =>
+                                                  value?.accessType.includes(org.accessType) &&
+                                                  value?.orgType === org.orgType)
+    if (byAccessTypeAndOrgType) {
+      return byAccessTypeAndOrgType[0]
+    }
+    const byAccessType = entries.find(([key, value]) =>
+                                      value?.accessType.includes(org.accessType))
+    if (byAccessType) {
+      return byAccessType[0]
+    }
+    const byOrgType = entries.find(([key, value]) =>
+                                    value?.orgType === org.orgType)
+    if (byOrgType) {
+      return byOrgType[0]
+    }
+    return ''
   }
 
   private get noDataMessage () {

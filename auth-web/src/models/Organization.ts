@@ -294,3 +294,13 @@ export interface OrgMap {
   accessType?: string[];
   orgType?: string;
 }
+
+export enum OrgAccountTypes {
+  BASIC = 'Basic',
+  BASIC_OUT_OF_PROVINCE = 'Basic (out-of-province)',
+  PREMIUM = 'Premium',
+  PREMIUM_OUT_OF_PROVINCE = 'Premium (out-of-province)',
+  GOVM = 'GovM',
+  GOVN = 'GovN',
+  DIRECTOR_SEARCH = 'Director Search'
+}
