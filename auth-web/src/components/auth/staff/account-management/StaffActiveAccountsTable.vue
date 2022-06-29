@@ -140,13 +140,13 @@
                         <v-list-item @click="viewInBusinessRegistryDashboard(item)">
                           <v-list-item-subtitle>
                             <v-img class="business-dashboard-icon" src="@/assets/img/StaffActive_business_dashboard_icon.svg"/>
-                            <span class="pl-1">Business Registry Dashboard</span>
+                            <span class="pl-2">Business Registry Dashboard</span>
                           </v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item @click="view(item)">
                            <v-list-item-subtitle>
-                            <v-icon small style="font-size: 18px">mdi-account</v-icon>
-                            <span class="pl-1">Manage Account</span>
+                            <v-icon style="font-size: 14px">mdi-account</v-icon>
+                            <span class="pl-2">Manage Account</span>
                           </v-list-item-subtitle>
                         </v-list-item>
                       </v-list>
