@@ -30,7 +30,7 @@ from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
-from auth_api.models.org import Org, OrgSearch
+from auth_api.models.org import Org
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
