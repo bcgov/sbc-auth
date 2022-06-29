@@ -45,7 +45,7 @@
                     <th
                       v-for="(header, i) in headerAccounts"
                       :scope="i"
-                      :key="'find-header-row-1-'+i"
+                      :key="getIndexedTag('find-header-row', i)"
                       class="font-weight-bold"
                     >
                       {{ header.text }}
@@ -57,7 +57,7 @@
                     <th
                       v-for="(header, i) in headerAccounts"
                       :scope="i"
-                      :key="'find-header-row-2-'+i"
+                      :key="getIndexedTag('find-header-row2', i)"
                     >
                       <v-text-field
                         v-if="!['orgType','action'].includes(header.value)"
@@ -188,13 +188,13 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
-  private orgStore = getModule(OrgModule, this.$store)
-  private activeOrgs: Organization[] = []
-  private readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  private readonly addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  private readonly syncMembership!: (orgId: number) => Promise<Member>
-  private readonly searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
-  private readonly headerAccounts = [
+  protected orgStore = getModule(OrgModule, this.$store)
+  protected activeOrgs: Organization[] = []
+  protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  protected readonly addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  protected readonly syncMembership!: (orgId: number) => Promise<Member>
+  protected readonly searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
+  protected readonly headerAccounts = [
     {
       text: 'Account Name',
       value: 'name'
@@ -220,7 +220,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'action'
     }
   ]
-  private readonly accountTypeMap: EnumDictionary<OrgAccountTypes, OrgMap> =
+  protected readonly accountTypeMap: EnumDictionary<OrgAccountTypes, OrgMap> =
   {
     [OrgAccountTypes.BASIC]: {
       accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
@@ -248,16 +248,16 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       accessType: [AccessType.ANONYMOUS]
     }
   }
-  private readonly accountTypes = Array.from(Object.keys(this.accountTypeMap))
-  private formatDate = CommonUtils.formatDisplayDate
-  private totalAccountsCount = 0
-  private tableDataOptions: Partial<DataOptions> = {}
-  private isTableLoading = false
-  private searchParamsExist = false
+  protected readonly accountTypes = Array.from(Object.keys(this.accountTypeMap))
+  protected formatDate = CommonUtils.formatDisplayDate
+  protected totalAccountsCount = 0
+  protected tableDataOptions: Partial<DataOptions> = {}
+  protected isTableLoading = false
+  protected searchParamsExist = false
   /* V-model for dropdown menus. */
-  private readonly dropdown: Array<boolean> = []
+  protected readonly dropdown: Array<boolean> = []
   /* V-model for searching */
-  private searchParams: OrgFilterParams = {
+  protected searchParams: OrgFilterParams = {
     name: '',
     branchName: '',
     id: '',
@@ -280,7 +280,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   @Watch('searchParams', { deep: true })
-  searchChanged (value: OrgFilterParams, oldValue: OrgFilterParams) {
+  searchChanged (value: OrgFilterParams) {
     this.searchParamsExist = this.doSearchParametersExist(value)
     this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1 }
     this.setSearchFilterToStorage(JSON.stringify(value))
@@ -288,12 +288,12 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async tableDataOptionsChange (val, oldVal) {
+  async tableDataOptionsChange (val) {
     this.debouncedOrgSearch(this, val?.page, val?.itemsPerPage)
   }
 
   // Needed context here instead of this.
-  private readonly debouncedOrgSearch = debounce(async (context: StaffActiveAccountsTable, page = 1, pageLimit = context.numberOfItems) => {
+  protected readonly debouncedOrgSearch = debounce(async (context: StaffActiveAccountsTable, page = 1, pageLimit = context.numberOfItems) => {
     try {
       context.isTableLoading = true
       const completeSearchParams: OrgFilterParams = {
@@ -315,17 +315,17 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     }
   })
 
-  private async viewInBusinessRegistryDashboard (org: Organization) {
+  protected async viewInBusinessRegistryDashboard (org: Organization) {
     await this.syncBeforeNavigate(org)
     this.$router.push(`/account/business/business?accountid=${org.id}`)
   }
 
-  private async view (org: Organization) {
+  protected async view (org: Organization) {
     await this.syncBeforeNavigate(org)
     this.$router.push(`/account/${org.id}/settings`)
   }
 
-  private clearSearchParams () {
+  protected clearSearchParams () {
     this.searchParams = {
       name: '',
       branchName: '',
@@ -337,24 +337,24 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     }
   }
 
-  private async syncBeforeNavigate (org: Organization) {
+  protected async syncBeforeNavigate (org: Organization) {
     this.cachePageInfo(this.tableDataOptions)
     await this.syncOrganization(org.id)
     await this.addOrgSettings(org)
     await this.syncMembership(org.id)
   }
 
-  private getIndexedTag (tag, index): string {
+  protected getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
   // Used to go from 'Basic' -> accessType: AccessType.REGULAR, orgType: Account.BASIC
-  private getOrgAndAccessTypeFromAccountType (accountType: string): object {
+  protected getOrgAndAccessTypeFromAccountType (accountType: string): object {
     return this.accountTypeMap[accountType]
   }
 
   // Used to go from OrgType -> OrgAccountTypes
-  private getAccountTypeFromOrgAndAccessType (org:Organization): any {
+  protected getAccountTypeFromOrgAndAccessType (org:Organization): any {
     const entries = Object.entries(this.accountTypeMap)
     const byAccessTypeAndOrgType = entries.find(([key, value]) =>
                                                   value?.accessType.includes(org.accessType) &&
@@ -375,7 +375,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     return ''
   }
 
-  private get noDataMessage () {
+  protected get noDataMessage () {
     return this.$t(
       this.searchParamsExist
         ? 'searchAccountNoResult'
@@ -383,11 +383,11 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     )
   }
 
-  private setSearchFilterToStorage (val:string):void {
+  protected setSearchFilterToStorage (val:string):void {
     ConfigHelper.addToSession(SessionStorageKeys.OrgSearchFilter, val)
   }
 
-  private doSearchParametersExist (searchParams: OrgFilterParams) {
+  protected doSearchParametersExist (searchParams: OrgFilterParams) {
     return searchParams.name.length > 0 ||
           searchParams.branchName.length > 0 ||
           searchParams.id.length > 0 ||
