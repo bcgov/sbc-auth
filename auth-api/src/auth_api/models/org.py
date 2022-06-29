@@ -167,9 +167,10 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
     @classmethod
     def _search_for_statuses(cls, query, statuses):
-        query = query.filter(Org.status_code.in_(statuses))
+        if len(statuses) > 0:
+            query = query.filter(Org.status_code.in_(statuses))
         # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
-        if OrgStatusEnum.ACTIVE.value in statuses:
+        if len(statuses) == 0 or OrgStatusEnum.ACTIVE.value in statuses:
             pending_inv_subquery = db.session.query(Org.id) \
                 .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
                 .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
