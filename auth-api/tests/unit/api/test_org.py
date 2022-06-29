@@ -1899,9 +1899,9 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     assert rv.status_code == http_status.HTTP_201_CREATED
 
     dictionary = json.loads(rv.data)
-    org_id = dictionary['id']
+    org_id_1 = dictionary['id']
     decision_made_by = 'barney'
-    org: Org = Org.find_by_org_id(org_id)
+    org: Org = Org.find_by_org_id(org_id_1)
     org.decision_made_by = decision_made_by
     org.status_code = OrgStatus.ACTIVE.value
     org.save()
@@ -1923,11 +1923,11 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
 
     # # Fetch by Id
-    rv = client.get('/api/v1/orgs?id=1&status=ACTIVE', headers=headers)
+    rv = client.get(f'/api/v1/orgs?id={org_id_1}&status=ACTIVE', headers=headers)
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
-    assert orgs.get('orgs')[0].get('id') == 1
+    assert orgs.get('orgs')[0].get('id') == org_id_1
 
     # Fetch by accessType
     rv = client.get(f'/api/v1/orgs?accessType={AccessType.GOVM.value}&status=ACTIVE', headers=headers)
