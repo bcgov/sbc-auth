@@ -143,6 +143,12 @@
                             <span class="pl-1">Business Registry Dashboard</span>
                           </v-list-item-subtitle>
                         </v-list-item>
+                        <v-list-item @click="view(item)">
+                           <v-list-item-subtitle>
+                            <v-icon small style="font-size: 18px">mdi-account</v-icon>
+                            <span class="pl-1">Manage Account</span>
+                          </v-list-item-subtitle>
+                        </v-list-item>
                       </v-list>
                     </v-menu>
                   </span>
@@ -213,7 +219,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'action'
     }
   ]
-  private readonly accountTypeMap: { [ name: string ]: OrgMap } =
+  private readonly accountTypeMap: { [name: string]: OrgMap } =
   {
     'Basic': {
       accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
