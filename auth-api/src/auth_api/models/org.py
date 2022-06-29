@@ -15,10 +15,12 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
+from dataclasses import dataclass, field
+from typing import List
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, func
 from sqlalchemy.orm import contains_eager, relationship
-
+from auth_api.models.affiliation import Affiliation
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
@@ -30,6 +32,23 @@ from .db import db
 from .invitation import Invitation, InvitationMembership
 from .org_status import OrgStatus
 from .org_type import OrgType
+
+
+@dataclass
+class OrgSearch:  # pylint: disable=too-many-instance-attributes
+    """Used for searching organizations."""
+
+    name: str
+    branch_name: str
+    business_identifier: str
+    statuses: List[str] = field()
+    access_type: List[str] = field()
+    bcol_account_id: str
+    id: str
+    decision_made_by: str
+    org_type: str
+    page: int
+    limit: int
 
 
 class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes
@@ -108,39 +127,64 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         return query.all()
 
     @classmethod
-    def search_org(cls, access_type, name, statuses, bcol_account_id,  # pylint: disable=too-many-arguments
-                   page: int, limit: int):
+    def search_org(cls, search: OrgSearch):
         """Find all orgs with the given type."""
         query = db.session.query(Org) \
             .outerjoin(ContactLink) \
             .outerjoin(Contact) \
             .options(contains_eager('contacts').contains_eager('contact'))
 
-        if access_type:
-            query = query.filter(Org.access_type.in_(access_type))
-        if name:
-            query = query.filter(Org.name.ilike(f'%{name}%'))
+        if search.access_type:
+            query = query.filter(Org.access_type.in_(search.access_type))
+        if search.id:
+            query = query.filter(cast(Org.id, String).like(f'%{search.id}%'))
+        if search.org_type:
+            query = query.filter(Org.org_type == OrgType.get_type_for_code(search.org_type))
+        if search.decision_made_by:
+            query = query.filter(Org.decision_made_by.ilike(f'%{search.decision_made_by}%'))
+        if search.bcol_account_id:
+            query = query.filter(Org.bcol_account_id == search.bcol_account_id)
+        if search.branch_name:
+            query = query.filter(Org.branch_name.ilike(f'%{search.branch_name}%'))
+        if search.name:
+            query = query.filter(Org.name.ilike(f'%{search.name}%'))
+
+        query = cls._search_by_business_identifier(query, search.business_identifier)
+        query = cls._search_for_statuses(query, search.statuses)
+
+        pagination = query.order_by(Org.created.desc()) \
+                          .paginate(per_page=search.limit, page=search.page)
+
+        return pagination.items, pagination.total
+
+    @classmethod
+    def _search_by_business_identifier(cls, query, business_identifier):
+        if business_identifier:
+            affilliations = Affiliation.find_affiliations_by_business_identifier(business_identifier)
+            affilliation_org_ids = [affilliation.org_id for affilliation in affilliations]
+            query = query.filter(Org.id.in_(affilliation_org_ids))
+        return query
+
+    @classmethod
+    def _search_for_statuses(cls, query, statuses):
         if statuses:
             query = query.filter(Org.status_code.in_(statuses))
-            # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
-            if OrgStatusEnum.ACTIVE.value in statuses:
-                pending_inv_subquery = db.session.query(Org.id) \
-                    .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
-                    .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
-                    .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value,
-                            Invitation.type == InvitationType.DIRECTOR_SEARCH.value) \
-                    .filter(Org.access_type == AccessType.ANONYMOUS.value)
-
-                query = query.filter(Org.id.notin_(pending_inv_subquery))
-
-        if bcol_account_id:
-            query = query.filter(Org.bcol_account_id == bcol_account_id)
-
-        query = query.order_by(Org.created.desc())
-
-        # Add pagination
-        pagination = query.paginate(per_page=limit, page=page)
-        return pagination.items, pagination.total
+        # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
+        if not statuses or OrgStatusEnum.ACTIVE.value in statuses:
+            pending_inv_subquery = db.session.query(Org.id) \
+                .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
+                .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
+                .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value) \
+                .filter(
+                     ((Invitation.type == InvitationType.DIRECTOR_SEARCH.value) &
+                      (Org.status_code == OrgStatusEnum.ACTIVE.value) &
+                      (Org.access_type == AccessType.ANONYMOUS.value)) |
+                     ((Invitation.type == InvitationType.GOVM.value) &
+                      (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value) &
+                      (Org.access_type == AccessType.GOVM.value))
+                      )
+            query = query.filter(Org.id.notin_(pending_inv_subquery))
+        return query
 
     @classmethod
     def search_pending_activation_orgs(cls, name):
@@ -161,9 +205,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         if name:
             query = query.filter(Org.name.ilike(f'%{name}%'))
 
-        query = query.order_by(Org.created.desc())
-
-        orgs = query.all()
+        orgs = query.order_by(Org.created.desc()).all()
         return orgs, len(orgs)
 
     @classmethod

@@ -24,7 +24,6 @@ from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
-from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
@@ -32,6 +31,7 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
+from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
@@ -664,75 +664,52 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(**kwargs):  # pylint: disable=too-many-locals
+    def search_orgs(search: OrgSearch):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
-        orgs = {'orgs': []}
-        if kwargs.get('business_identifier', None):
-            affiliations = AffiliationModel.find_affiliations_by_business_identifier(kwargs.get('business_identifier'))
-            for affiliation in affiliations:
-                orgs['orgs'].append(Org(OrgModel.find_by_org_id(affiliation.org_id)).as_dict())
+        orgs_result = {
+            'orgs': [],
+            'page': search.page,
+            'limit': search.limit,
+            'total': 0
+        }
+        include_invitations: bool = False
+        search.access_type, is_staff_admin = Org.refine_access_type(search.access_type)
+        if search.statuses and OrgStatus.PENDING_ACTIVATION.value in search.statuses:
+            # only staff admin can see director search accounts
+            if not is_staff_admin:
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+            org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
+            include_invitations = True
         else:
-            include_invitations: bool = False
+            org_models, orgs_result['total'] = OrgModel.search_org(search)
 
-            page: int = int(kwargs.get('page'))
-            limit: int = int(kwargs.get('limit'))
-            statuses: str = kwargs.get('statuses', None)
-            name: str = kwargs.get('name', None)
-            # https://github.com/bcgov/entity/issues/4786
-            access_type, is_staff_admin = Org.refine_access_type(kwargs.get('access_type', None))
-            search_args = (access_type,
-                           name,
-                           statuses,
-                           kwargs.get('bcol_account_id', None),
-                           page, limit)
-
-            if statuses and OrgStatus.PENDING_ACTIVATION.value in statuses:
-                # only staff admin can see director search accounts
-                # https://github.com/bcgov/entity/issues/4786
-                if not is_staff_admin:
-                    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-                org_models, total = OrgModel.search_pending_activation_orgs(name)
-                include_invitations = True
-            else:
-                org_models, total = OrgModel.search_org(*search_args)
-
-            for org in org_models:
-                org_dict = Org(org).as_dict()
-                org_dict['contacts'] = []
-                org_dict['invitations'] = []
-
-                if org.contacts:
-                    org_dict['contacts'].append(
-                        ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False))
-
-                if include_invitations and org.invitations:
-                    org_dict['invitations'].append(
-                        InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False))
-
-                orgs['orgs'].append(org_dict)
-
-            orgs['total'] = total
-            orgs['page'] = page
-            orgs['limit'] = limit
-
-        return orgs
+        for org in org_models:
+            orgs_result['orgs'].append({
+                **Org(org).as_dict(),
+                'contacts': [ContactSchema(exclude=('links',)).dump(org.contacts[0].contact, many=False)]
+                if org.contacts else [],
+                'invitations': [
+                    InvitationSchema(exclude=('membership',)).dump(org.invitations[0].invitation, many=False)
+                ]
+                if include_invitations and org.invitations else [],
+            })
+        return orgs_result
 
     @staticmethod
     @user_context
-    def refine_access_type(access_type_str, **kwargs):
+    def refine_access_type(access_types, **kwargs):
         """Find Access Type."""
         user_from_context: UserContext = kwargs['user_context']
         roles = user_from_context.roles
 
         is_staff_admin = Role.STAFF_CREATE_ACCOUNTS.value in roles or Role.STAFF_MANAGE_ACCOUNTS.value in roles
-        access_type = [] if not access_type_str else access_type_str.split(',')
         if not is_staff_admin:
-            if len(access_type) < 1:
+            if len(access_types) < 1:
                 # pass everything except DIRECTOR SEARCH
-                access_type = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
+                access_types = [item.value for item in AccessType if item != AccessType.ANONYMOUS]
             else:
-                access_type.remove(AccessType.ANONYMOUS.value)
-        return access_type, is_staff_admin
+                access_types.remove(AccessType.ANONYMOUS.value)
+        return access_types, is_staff_admin
 
     @staticmethod
     def bcol_account_link_check(bcol_account_id, org_id=None):

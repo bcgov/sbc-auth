@@ -28,20 +28,18 @@ export default class StaffService {
 
   static async searchOrgs (orgFilter?: OrgFilterParams): Promise<AxiosResponse<OrgList>> {
     let params = new URLSearchParams()
-    if (orgFilter.statuses) {
-      orgFilter.statuses.forEach(status =>
-        params.append('status', status))
+    for (const key in orgFilter) {
+      if (!orgFilter[key]) {
+        continue
+      }
+      if (key === 'accessType') {
+        orgFilter.accessType.forEach(accessType => params.append('accessType', accessType))
+      } else if (key === 'statuses') {
+        orgFilter.statuses.forEach(status => params.append('status', status))
+      } else {
+        params.append(key, orgFilter[key])
+      }
     }
-    if (orgFilter.name) {
-      params.append('name', orgFilter.name)
-    }
-    if (orgFilter.pageNumber) {
-      params.append('page', orgFilter.pageNumber.toString())
-    }
-    if (orgFilter.pageLimit) {
-      params.append('limit', orgFilter.pageLimit.toString())
-    }
-
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs`, { params })
   }
 }
