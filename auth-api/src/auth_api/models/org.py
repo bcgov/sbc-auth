@@ -167,17 +167,22 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
     @classmethod
     def _search_for_statuses(cls, query, statuses):
-        if statuses:
-            query = query.filter(Org.status_code.in_(statuses))
-            # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
-            if OrgStatusEnum.ACTIVE.value in statuses:
-                pending_inv_subquery = db.session.query(Org.id) \
-                    .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
-                    .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
-                    .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value,
-                            Invitation.type == InvitationType.DIRECTOR_SEARCH.value) \
-                    .filter(Org.access_type == AccessType.ANONYMOUS.value)
-                query = query.filter(Org.id.notin_(pending_inv_subquery))
+        query = query.filter(Org.status_code.in_(statuses))
+        # If status is active, need to exclude the dir search orgs who haven't accepted the invitation yet
+        if OrgStatusEnum.ACTIVE.value in statuses:
+            pending_inv_subquery = db.session.query(Org.id) \
+                .outerjoin(InvitationMembership, InvitationMembership.org_id == Org.id) \
+                .outerjoin(Invitation, Invitation.id == InvitationMembership.invitation_id) \
+                .filter(Invitation.invitation_status_code == InvitationStatus.PENDING.value) \
+                .filter(
+                     ((Invitation.type == InvitationType.DIRECTOR_SEARCH.value) &
+                      (Org.status_code == OrgStatusEnum.ACTIVE.value) &
+                      (Org.access_type == AccessType.ANONYMOUS.value)) |
+                     ((Invitation.type == InvitationType.GOVM.value) &
+                      (Org.status_code == OrgStatusEnum.PENDING_INVITE_ACCEPT.value) &
+                      (Org.access_type == AccessType.GOVM.value))
+                      )
+            query = query.filter(Org.id.notin_(pending_inv_subquery))
         return query
 
     @classmethod
