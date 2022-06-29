@@ -139,7 +139,7 @@
                       <v-list>
                         <v-list-item @click="viewInBusinessRegistryDashboard(item)">
                           <v-list-item-subtitle>
-                            <v-icon>mdi-view-dashboard</v-icon>
+                            <v-icon style="font-size: 14px">mdi-view-dashboard</v-icon>
                             <span class="pl-2">Business Registry Dashboard</span>
                           </v-list-item-subtitle>
                         </v-list-item>
@@ -163,10 +163,9 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SearchFilterCodes, SessionStorageKeys } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgAccountTypes, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -177,23 +176,24 @@ import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import debounce from '@/util/debounce'
 import { getModule } from 'vuex-module-decorators'
+import { namespace } from 'vuex-class'
+
+const StaffBinding = namespace('staff')
+const OrgBinding = namespace('org')
 
 @Component({
   components: {
     SearchFilterInput
-  },
-  methods: {
-    ...mapActions('org', ['syncOrganization', 'addOrgSettings', 'syncMembership']),
-    ...mapActions('staff', ['searchOrgs'])
   }
 })
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
+  @OrgBinding.Action('syncOrganization') protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  @OrgBinding.Action('addOrgSettings') protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  @OrgBinding.Action('syncMembership') protected syncMembership!: (orgId: number) => Promise<Member>
+  @StaffBinding.Action('searchOrgs') protected searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
+
   protected orgStore = getModule(OrgModule, this.$store)
   protected activeOrgs: Organization[] = []
-  protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  protected readonly addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  protected readonly syncMembership!: (orgId: number) => Promise<Member>
-  protected readonly searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
   protected readonly headerAccounts = [
     {
       text: 'Account Name',
