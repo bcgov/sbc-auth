@@ -30,6 +30,7 @@ from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
+from auth_api.models.org import Org, OrgSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
@@ -1887,3 +1888,54 @@ def test_search_org_govm(client, jwt, session, monkeypatch):  # pylint:disable=u
     # Delete PENDING_INVITE_ACCEPT org.
     rv = client.delete('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_204_NO_CONTENT
+
+
+def test_new_active_search(client, jwt, session, keycloak_mock):
+    """Check for id, accessType , orgType, decisionMadeBy."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_regular),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_govm),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    decision_made_by = 'barney'
+    org: Org = Org.find_by_org_id(1)
+    org.decision_made_by = decision_made_by
+    org.save()
+
+    # staff search
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_accounts_role)
+
+    # # Fetch by Id
+    rv = client.get('/api/v1/orgs?id=1', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('id') == 1
+
+    # Fetch by accessType
+    rv = client.get(f'/api/v1/orgs?accessType={AccessType.GOVM.value}', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('accessType') == AccessType.GOVM.value
+
+    # Fetch by orgType
+    rv = client.get(f'/api/v1/orgs?orgType={OrgType.PREMIUM.value}', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('orgType') == OrgType.PREMIUM.value
+
+    # Fetch by decisionMadeBy
+    rv = client.get(f'/api/v1/orgs?decisionMadeBy={decision_made_by}', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(rv.json, 'paged_response')[0]
+    orgs = json.loads(rv.data)
+    assert orgs.get('orgs')[0].get('decisionMadeBy') == decision_made_by

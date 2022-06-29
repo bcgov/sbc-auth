@@ -484,6 +484,7 @@ class TestOrgInfo(dict, Enum):
     org_anonymous = {'name': 'My Test Anon Org', 'accessType': 'ANONYMOUS'}
     org_govm = {'name': 'My Test Anon Org', 'branchName': 'Bar', 'accessType': AccessType.GOVM.value}
     org_anonymous_2 = {'name': 'Another test org', 'accessType': 'ANONYMOUS'}
+    org_premium = {'name': 'Another test org', 'typeCode': OrgType.PREMIUM.value}
     invalid = {'foo': 'bar'}
     invalid_name_space = {'name': ''}
     invalid_name_spaces = {'name': '    '}
