@@ -6,7 +6,9 @@ if (process.env.NODE_ENV === 'production') {
       // remove older cached content
       // ref: https://santhoshkumarravi.medium.com/vue-pwa-disable-5463e44b1f7f
       caches.keys().then(names => {
-        for (let name of names) caches.delete(name)
+        for (const name of names) {
+          caches.delete(name)
+        }
       })
     }
   })
