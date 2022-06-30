@@ -222,6 +222,8 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   ]
   protected readonly accountTypeMap: EnumDictionary<OrgAccountTypes, OrgMap> =
   {
+    [OrgAccountTypes.ALL]: {
+    },
     [OrgAccountTypes.BASIC]: {
       accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
       orgType: Account.BASIC
@@ -262,7 +264,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     branchName: '',
     id: '',
     decisionMadeBy: '',
-    orgType: '',
+    orgType: OrgAccountTypes.ALL,
     statuses: [AccountStatus.ACTIVE]
   }
 
@@ -298,6 +300,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       context.isTableLoading = true
       const completeSearchParams: OrgFilterParams = {
         ...context.searchParams,
+        // orgType and accessType get overwritten from getOrgAndAccessTypeFromAccountType
         orgType: undefined,
         accessType: undefined,
         ...context.getOrgAndAccessTypeFromAccountType(context.searchParams.orgType),
@@ -331,7 +334,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       branchName: '',
       id: '',
       decisionMadeBy: '',
-      orgType: '',
+      orgType: OrgAccountTypes.ALL,
       accessType: [],
       statuses: [AccountStatus.ACTIVE]
     }
@@ -357,13 +360,13 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   protected getAccountTypeFromOrgAndAccessType (org:Organization): any {
     const entries = Object.entries(this.accountTypeMap)
     const byAccessTypeAndOrgType = entries.find(([key, value]) =>
-                                                  value?.accessType.includes(org.accessType) &&
+                                                  value?.accessType?.includes(org.accessType) &&
                                                   value?.orgType === org.orgType)
     if (byAccessTypeAndOrgType) {
       return byAccessTypeAndOrgType[0]
     }
     const byAccessType = entries.find(([key, value]) =>
-                                      value?.accessType.includes(org.accessType))
+                                      value?.accessType?.includes(org.accessType))
     if (byAccessType) {
       return byAccessType[0]
     }
@@ -392,7 +395,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
           searchParams.branchName.length > 0 ||
           searchParams.id.length > 0 ||
           searchParams.decisionMadeBy.length > 0 ||
-          searchParams.orgType.length > 0
+          (searchParams.orgType.length > 0 && searchParams.orgType !== OrgAccountTypes.ALL)
   }
 }
 </script>
