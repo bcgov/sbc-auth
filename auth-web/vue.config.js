@@ -44,7 +44,7 @@ module.exports = {
       // swSrc is required in InjectManifest mode.
       swSrc: 'src/service-worker.js',
       // skip precaching json files such as configs
-      exclude: [/\.json$/]
+      exclude: [/\.json$/, /\.map$/, /^manifest.*\.js(?:on)?$/]
     }
   }
 }
