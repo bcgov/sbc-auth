@@ -24,14 +24,20 @@ if (process.env.NODE_ENV === 'production') {
     updated (updatedEvent) {
       // write code for popup here
       console.log('New content is available; refreshing page in 1 sec')
-      // showInteractiveToastReload('New content is available!', updatedEvent)
+      // remove older cached content
+      // ref: https://santhoshkumarravi.medium.com/vue-pwa-disable-5463e44b1f7f
+      caches.keys().then(names => {
+        for (const name of names) {
+          caches.delete(name)
+        }
+      })
 
       // Remove Launch Darkly files from session if new build content is downloaded
       // Once the app is reloaded after the timeout, the App.vue will initialize the LD againx
       // Otherwise, user will only get the LD flags if he/she signout-and-signin or restart-browser
       ConfigHelper.removeFromSession(SessionStorageKeys.LaunchDarklyFlags)
 
-      updatedEvent.waiting.postMessage({ action: 'skipWaiting' })
+      navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' })
       // timeout is for the service worker to get activated
       setTimeout(() => {
         window.location.reload(true)
