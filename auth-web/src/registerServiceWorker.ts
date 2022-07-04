@@ -24,7 +24,11 @@ if (process.env.NODE_ENV === 'production') {
     updated (updatedEvent) {
       // write code for popup here
       console.log('New content is available; refreshing page in 1 sec')
-      // showInteractiveToastReload('New content is available!', updatedEvent)
+      caches.keys().then(names => {
+        for (const name of names) {
+          caches.delete(name)
+        }
+      })
 
       // Remove Launch Darkly files from session if new build content is downloaded
       // Once the app is reloaded after the timeout, the App.vue will initialize the LD againx
