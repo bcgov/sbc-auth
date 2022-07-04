@@ -296,6 +296,7 @@ export interface OrgMap {
 }
 
 export enum OrgAccountTypes {
+  ALL = 'All',
   BASIC = 'Basic',
   BASIC_OUT_OF_PROVINCE = 'Basic (out-of-province)',
   PREMIUM = 'Premium',
