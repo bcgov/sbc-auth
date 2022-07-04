@@ -24,6 +24,8 @@ if (process.env.NODE_ENV === 'production') {
     updated (updatedEvent) {
       // write code for popup here
       console.log('New content is available; refreshing page in 1 sec')
+      // remove older cached content
+      // ref: https://santhoshkumarravi.medium.com/vue-pwa-disable-5463e44b1f7f
       caches.keys().then(names => {
         for (const name of names) {
           caches.delete(name)
