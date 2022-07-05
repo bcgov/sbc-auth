@@ -555,7 +555,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
 .v-tooltip__content {
-  background-color: RGBA(97, 97, 97, .9) !important;
+  background-color: RGBA(73, 80, 87, 0.95) !important;
   color: white !important;
   border-radius: 4px;
   font-size: 12px !important;
@@ -573,7 +573,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   margin-top: -10px !important;
   border-top: 10px solid transparent !important;
   border-bottom: 10px solid transparent !important;
-  border-right: 8px solid RGBA(97, 97, 97, .9) !important;
+  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
 }
 
   .top-tooltip:after {
@@ -582,7 +582,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   margin-top: 0 !important;
   border-right: 10px solid transparent !important;
   border-left: 10px solid transparent !important;
-  border-top: 8px solid RGBA(73,80,87, 0.95) !important;
+  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
 }
 
   #add-existing-btn {
