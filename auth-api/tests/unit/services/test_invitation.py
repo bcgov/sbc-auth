@@ -16,20 +16,23 @@
 Test suite to ensure that the Invitation service routines are working as expected.
 """
 from datetime import datetime, timedelta
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 from freezegun import freeze_time
+from auth_api.models.dataclass import Activity
 
 import auth_api.services.authorization as auth
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Invitation as InvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
+from auth_api.services import ActivityLogPublisher
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
+from auth_api.utils.enums import ActivityAction
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_invitation, factory_user_model, patch_token_info
 
@@ -55,7 +58,13 @@ def test_create_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
-        invitation = InvitationService.create_invitation(invitation_info, User(user), '')
+
+        with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+            invitation = InvitationService.create_invitation(invitation_info, User(user), '')
+            mock_alp.assert_called_with(Activity(action=ActivityAction.INVITE_TEAM_MEMBER.value,
+                                        org_id=ANY, name=invitation_info['recipientEmail'], id=ANY,
+                                        value='USER'))
+
         invitation_dictionary = invitation.as_dict()
         assert invitation_dictionary['recipient_email'] == invitation_info['recipientEmail']
         assert invitation_dictionary['id']
@@ -228,7 +237,11 @@ def test_accept_invitation_for_govm(session, auth_mock, keycloak_mock, monkeypat
                 user_invitee = factory_user_model(user_with_token_invitee)
                 new_invitation = InvitationService.create_invitation(invitation_info, User(user_invitee), '')
                 new_invitation_dict = new_invitation.as_dict()
-                InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
+                with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+                    InvitationService.accept_invitation(new_invitation_dict['id'], User(user_invitee), '')
+                    mock_alp.assert_called_with(Activity(action=ActivityAction.APPROVE_TEAM_MEMBER.value,
+                                                org_id=ANY, name=ANY, id=ANY,
+                                                value=ANY))
 
                 members = MembershipService.get_members_for_org(org_dictionary['id'], 'ACTIVE')
                 assert members

@@ -131,19 +131,19 @@ export default class StaffPendingAccountInvitationsTable extends Mixins(Paginati
     {
       text: 'Name',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'name'
     },
     {
       text: 'Contact Email',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'contactEmail'
     },
     {
       text: 'Created By',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'createdBy'
     },
     {

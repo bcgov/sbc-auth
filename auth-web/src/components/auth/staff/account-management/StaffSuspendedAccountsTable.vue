@@ -74,31 +74,31 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     {
       text: 'Name',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'name'
     },
     {
       text: 'Type',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'orgType'
     },
     {
       text: 'Suspended by',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'decisionMadeBy'
     },
     {
       text: 'Date Suspended',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'suspendedOn'
     },
     {
       text: 'Reason',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'statusCode'
     },
     {

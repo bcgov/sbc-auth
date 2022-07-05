@@ -16,12 +16,15 @@
 Test suite to ensure that the Membership service routines are working as expected.
 """
 
+from unittest.mock import ANY, patch
 from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
+from auth_api.models.dataclass import Activity
+from auth_api.services import ActivityLogPublisher
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
-from auth_api.utils.enums import ProductCode, Status
+from auth_api.utils.enums import ActivityAction, ProductCode, Status
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
 
@@ -115,21 +118,42 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
     membership = MembershipService.get_membership_for_org_and_user(org.as_dict().get('id'), user2.id)
     active_membership_status = MembershipStatusCodeModel.get_membership_status_by_code(Status.ACTIVE.name)
     updated_fields = {'membership_status': active_membership_status}
-    MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
-
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
+        mock_alp.assert_called_with(Activity(action=ActivityAction.APPROVE_TEAM_MEMBER.value,
+                                             org_id=ANY, name=ANY, id=ANY,
+                                             value=ANY))
     user_groups = keycloak_service.get_user_groups(user_id=kc_user2.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
 
+    # Deactivate Membership
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        MembershipService(membership).deactivate_membership(token_info=token_info())
+        mock_alp.assert_called_with(Activity(action=ActivityAction.REMOVE_TEAM_MEMBER.value,
+                                             org_id=ANY, name=ANY, id=ANY,
+                                             value=ANY))
+
+    # ACTIVE
+    active_membership_status = MembershipStatusCodeModel.get_membership_status_by_code(Status.ACTIVE.name)
+    updated_fields = {'membership_status': active_membership_status}
+    MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
+
     # Find the membership and update to INACTIVE
     active_membership_status = MembershipStatusCodeModel.get_membership_status_by_code(Status.INACTIVE.name)
     updated_fields = {'membership_status': active_membership_status}
-    MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        MembershipService(membership).update_membership(updated_fields=updated_fields, token_info=token_info())
+        mock_alp.assert_called_with(Activity(action=ActivityAction.REMOVE_TEAM_MEMBER.value,
+                                             org_id=ANY, name=ANY, id=ANY,
+                                             value=ANY))
 
     user_groups = keycloak_service.get_user_groups(user_id=kc_user2.id)
     groups = []
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS not in groups
+
+    MembershipService(membership).deactivate_membership()

@@ -39,17 +39,23 @@ def test_fetch_activity_log(client, jwt, session):  # pylint:disable=unused-argu
 
     factory_activity_log_model(
         actor=user.id,
-        action=ActivityAction.GENERATED_PASSCODE.value
+        action=ActivityAction.APPROVE_TEAM_MEMBER.value,
+        item_name='Superb',
+        item_value=''
     )
     factory_activity_log_model(
         actor=user.id,
         action=ActivityAction.CREATE_AFFILIATION.value,
-        org_id=org.id
+        org_id=org.id,
+        item_name='Great Business',
+        item_value=''
     )
     factory_activity_log_model(
         actor=user.id,
         action=ActivityAction.REMOVE_AFFILIATION.value,
-        org_id=org.id
+        org_id=org.id,
+        item_name='Must sleep',
+        item_value='Getting Late'
     )
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
@@ -93,13 +99,10 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
     assert len(activity_logs.get('activityLogs')) == 2
     assert schema_utils.validate(activity_logs, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
-    staff_actor = next(x for x in activity_logs.get('activityLogs') if
-                       x.get('action') == ActivityAction.REMOVE_AFFILIATION.value)
+    staff_actor = activity_logs.get('activityLogs')[1]
     assert staff_actor.get('actor') == staff_user.username
 
-    user_actor = next(x for x in activity_logs.get('activityLogs') if
-                      x.get('action') == ActivityAction.CREATE_AFFILIATION.value)
-
+    user_actor = activity_logs.get('activityLogs')[0]
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'
 
     claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
@@ -110,10 +113,8 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
                     headers=headers, content_type='application/json')
     activity_logs = rv.json
 
-    staff_actor = next(x for x in activity_logs.get('activityLogs') if
-                       x.get('action') == ActivityAction.REMOVE_AFFILIATION.value)
+    staff_actor = activity_logs.get('activityLogs')[1]
     assert staff_actor.get('actor') == 'BC Registry Staff'
 
-    user_actor = next(x for x in activity_logs.get('activityLogs') if
-                      x.get('action') == ActivityAction.CREATE_AFFILIATION.value)
+    user_actor = activity_logs.get('activityLogs')[0]
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'

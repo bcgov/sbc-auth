@@ -21,6 +21,7 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.config import get_named_config
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
@@ -29,9 +30,10 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import LoginSource, NotificationType, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
+from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .org import Org as OrgService
@@ -223,6 +225,14 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             if value is not None:
                 setattr(self._model, key, value)
         self._model.save()
+
+        if updated_fields.get('membership_status', None) \
+                and updated_fields['membership_status'].id in [Status.INACTIVE.value, Status.ACTIVE.value]:
+            action = ActivityAction.APPROVE_TEAM_MEMBER.value \
+                if updated_fields['membership_status'].id == Status.ACTIVE.value  \
+                else ActivityAction.REMOVE_TEAM_MEMBER.value
+            ActivityLogPublisher.publish_activity(Activity(self._model.org_id, action,
+                                                           name=self._model.user.username))
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
         is_staff_modifying = user_from_context.is_staff()
@@ -261,7 +271,8 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         self._model.save()
         # Remove from account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
-
+        ActivityLogPublisher.publish_activity(Activity(self._model.org_id, ActivityAction.REMOVE_TEAM_MEMBER.value,
+                                                       name=self._model.user.username))
         current_app.logger.debug('>deactivate_membership')
         return self
 

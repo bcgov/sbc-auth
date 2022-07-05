@@ -22,6 +22,7 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.config import get_named_config
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -33,7 +34,7 @@ from auth_api.schemas import InvitationSchema
 from auth_api.services.task import Task
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import GROUP_GOV_ACCOUNT_USERS
-from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType, LoginSource
+from auth_api.utils.enums import AccessType, ActivityAction, InvitationStatus, InvitationType, LoginSource
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import (
     Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
@@ -42,6 +43,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.util import escape_wam_friendly_url
+from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
@@ -76,6 +78,7 @@ class Invitation:
         # Ensure that the current user is ADMIN or COORDINATOR on each org being invited to
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         org_id = invitation_info['membership'][0]['orgId']
+        membership_type = invitation_info['membership'][0]['membershipType']
         token_email_query_params: Dict = {}
         # get the org and check the access_type
         org: OrgModel = OrgModel.find_by_org_id(org_id)
@@ -98,7 +101,7 @@ class Invitation:
             mandatory_login_source = getattr(account_login_options, 'login_source',
                                              default_login_option_based_on_accesstype)
 
-            if invitation_info['membership'][0]['membershipType'] == ADMIN \
+            if membership_type == ADMIN \
                     and mandatory_login_source == LoginSource.BCEID.value:
                 token_email_query_params['affidavit'] = 'true'
 
@@ -110,6 +113,9 @@ class Invitation:
         Invitation.send_invitation(invitation, org_name, org.id, user.as_dict(),
                                    f'{invitation_origin}/{context_path}', mandatory_login_source,
                                    org_status=org.status_code, query_params=token_email_query_params)
+        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.INVITE_TEAM_MEMBER.value,
+                                                       name=invitation_info['recipientEmail'], value=membership_type,
+                                                       id=invitation.id))
         # notify admin if staff adds team members
         if user_from_context.is_staff() and invitation_type == InvitationType.STANDARD.value:
             try:
@@ -401,6 +407,8 @@ class Invitation:
                 )
                 membership_model.save()
 
+                Invitation._publish_activity_if_active(membership_model, user_from_context.user_name)
+
                 # Create staff review task.
                 Invitation._create_affidavit_review_task(org_model, membership_model)
                 try:
@@ -436,6 +444,14 @@ class Invitation:
         if login_source == LoginSource.BCEID.value and membership_model.membership_type.code == ADMIN and not verified:
             return Status.PENDING_STAFF_REVIEW.value
         return Status.PENDING_APPROVAL.value
+
+    @staticmethod
+    def _publish_activity_if_active(membership: MembershipModel, username: str):
+        """Purpose: GOVM accounts - they instantly get accepted."""
+        if membership.status == Status.ACTIVE.value:
+            ActivityLogPublisher.publish_activity(Activity(membership.org_id,
+                                                           ActivityAction.APPROVE_TEAM_MEMBER.value,
+                                                           name=username))
 
     @staticmethod
     def _create_affidavit_review_task(org: OrgModel, membership: MembershipModel):

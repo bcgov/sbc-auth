@@ -24,6 +24,7 @@ from requests import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -33,15 +34,18 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import UserSchema
+
 from auth_api.services.authorization import check_auth
 from auth_api.services.keycloak_user import KeycloakUser
 from auth_api.utils import util
-from auth_api.utils.enums import AccessType, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus
+from auth_api.utils.enums import (
+    AccessType, ActivityAction, DocumentType, IdpHint, LoginSource, OrgStatus, Status, UserStatus)
 from auth_api.utils.roles import ADMIN, CLIENT_ADMIN_ROLES, COORDINATOR, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
 
 from ..utils.account_mailer import publish_to_mailer
+from .activity_log_publisher import ActivityLogPublisher
 from .contact import Contact as ContactService
 from .documents import Documents as DocumentService
 from .keycloak import KeycloakService
@@ -197,6 +201,8 @@ class User:  # pylint: disable=too-many-instance-attributes
                                            membership_type_status=Status.ACTIVE.value)
 
         membership_model.flush()
+        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.APPROVE_TEAM_MEMBER.value,
+                                                       name=db_username, value=membership['membershipType']))
         return user_model
 
     @staticmethod
@@ -229,6 +235,8 @@ class User:  # pylint: disable=too-many-instance-attributes
         try:
             publish_to_mailer('otpAuthenticatorResetNotification', org_id=org_id, data=data)
             current_app.logger.debug('<send_otp_authenticator_reset_notification')
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.RESET_2FA.value,
+                                                           name=recipient_email))
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_otp_authenticator_reset_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e

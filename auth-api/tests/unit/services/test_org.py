@@ -15,16 +15,18 @@
 
 Test suite to ensure that the Org service routines are working as expected.
 """
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
 
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
+from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
@@ -38,8 +40,8 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import (
-    AccessType, LoginSource, OrgStatus, OrgType, PatchActions, PaymentMethod, SuspensionReasonCode, TaskAction,
-    TaskRelationshipStatus, TaskStatus)
+    AccessType, ActivityAction, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus, PaymentMethod,
+    SuspensionReasonCode, TaskAction, TaskRelationshipStatus, TaskStatus)
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
@@ -69,6 +71,19 @@ def test_create_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
     assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org1['name']
+
+
+def test_create_org_products(session, keycloak_mock, monkeypatch):
+    """Assert that an Org with products can be created."""
+    user = factory_user_model()
+    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        org = OrgService.create_org(TestOrgInfo.org_with_products, user_id=user.id)
+        mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                             org_id=ANY, value=ANY, id=ANY, name='BUSINESS'))
+        assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org_with_products['name']
 
 
 def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
@@ -115,6 +130,24 @@ def test_pay_request_is_correct_with_branch_name(session,
 
         }
         assert expected_data == actual_data
+
+
+def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, monkeypatch):
+    """Assert that while org payment update touches activity log."""
+    user_with_token = TestUserInfo.user_test
+    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user = factory_user_model(user_info=user_with_token)
+    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.BCOL)
+    patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
+    # Have to patch this because the pay spec is wrong and returns 201, not 202 or 200.
+    with patch.object(OrgService, '_create_payment_for_org', return_value=PaymentAccountStatus.CREATED):
+        with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+            org = OrgService.update_org(org, new_payment_method)
+            mock_alp.assert_called_with(Activity(action=ActivityAction.PAYMENT_INFO_CHANGE.value,
+                                                 org_id=ANY, name=ANY, id=ANY,
+                                                 value=PaymentMethod.BCOL.value))
 
 
 def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
@@ -232,8 +265,12 @@ def test_put_basic_org_assert_pay_request_is_govm(session,
 
         }
         patch_token_info(public_token_info, monkeypatch)
-        org = OrgService.update_org(org, org_body)
-        assert org
+        with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+            org = OrgService.update_org(org, org_body)
+            mock_alp.assert_called_with(Activity(action=ActivityAction.ACCOUNT_ADDRESS_CHANGE.value,
+                                        org_id=ANY, name=ANY, id=ANY,
+                                        value=TestOrgInfo.get_mailing_address()))
+            assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org_govm['name']
         mock_post.assert_called()
@@ -413,7 +450,11 @@ def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argumen
     org = factory_org_service()
 
     with patch.object(RestService, 'put') as mock_put:
-        org = org.update_org({'name': 'My Test'})
+        with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+            org = org.update_org({'name': 'My Test'})
+            mock_alp.assert_called_with(Activity(action=ActivityAction.ACCOUNT_NAME_CHANGE.value,
+                                                 org_id=ANY, value=ANY, id=ANY,
+                                                 name='My Test'))
         assert org
         dictionary = org.as_dict()
         mock_put.assert_called()
@@ -962,7 +1003,7 @@ def test_change_org_access_type(session, monkeypatch):  # pylint:disable=unused-
     assert updated_org.as_dict()['access_type'] == AccessType.GOVN.value
 
 
-def test_patch_org_status(session, monkeypatch):  # pylint:disable=unused-argument
+def test_patch_org_status(session, monkeypatch, auth_mock):  # pylint:disable=unused-argument
     """Assert that an Org status can be updated."""
     org = factory_org_service()
     user = factory_user_model_with_contact()
@@ -979,8 +1020,12 @@ def test_patch_org_status(session, monkeypatch):  # pylint:disable=unused-argume
     assert exception.value.code == Error.INVALID_INPUT.name
 
     patch_info['suspensionReasonCode'] = SuspensionReasonCode.OWNER_CHANGE.name
-    updated_org = org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
-    assert updated_org['status_code'] == OrgStatus.SUSPENDED.value
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        updated_org = org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
+        mock_alp.assert_called_with(Activity(action=ActivityAction.ACCOUNT_SUSPENSION.value,
+                                             org_id=ANY, name=ANY, id=ANY,
+                                             value=SuspensionReasonCode.OWNER_CHANGE.name))
+        assert updated_org['status_code'] == OrgStatus.SUSPENDED.value
 
     patch_info = {
         'action': PatchActions.UPDATE_STATUS.value,
@@ -988,6 +1033,11 @@ def test_patch_org_status(session, monkeypatch):  # pylint:disable=unused-argume
     }
     updated_org = org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
     assert updated_org['status_code'] == OrgStatus.ACTIVE.value
+
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        OrgService.update_login_option(org._model.id, 'BCROS')
+        mock_alp.assert_called_with(Activity(action=ActivityAction.AUTHENTICATION_METHOD_CHANGE.value,
+                                             org_id=ANY, name=ANY, id=ANY, value='BCROS'))
 
 
 def test_patch_org_access_type(session, monkeypatch):  # pylint:disable=unused-argument

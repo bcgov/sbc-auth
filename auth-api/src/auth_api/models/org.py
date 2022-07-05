@@ -15,12 +15,11 @@
 
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
-from dataclasses import dataclass, field
-from typing import List
 from flask import current_app
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, func
 from sqlalchemy.orm import contains_eager, relationship
 from auth_api.models.affiliation import Affiliation
+from auth_api.models.dataclass import OrgSearch
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
@@ -32,23 +31,6 @@ from .db import db
 from .invitation import Invitation, InvitationMembership
 from .org_status import OrgStatus
 from .org_type import OrgType
-
-
-@dataclass
-class OrgSearch:  # pylint: disable=too-many-instance-attributes
-    """Used for searching organizations."""
-
-    name: str
-    branch_name: str
-    business_identifier: str
-    statuses: List[str] = field()
-    access_type: List[str] = field()
-    bcol_account_id: str
-    id: str
-    decision_made_by: str
-    org_type: str
-    page: int
-    limit: int
 
 
 class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-instance-attributes

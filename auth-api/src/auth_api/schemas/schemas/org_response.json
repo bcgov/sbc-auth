@@ -50,7 +50,7 @@
     "bcolAccountId": {
       "$id": "#/properties/bcolAccountId",
       "type": "string",
-      "title": "BC Oline Account ID",
+      "title": "BC Online Account ID",
       "default": "",
       "examples": [
         "106700"
@@ -59,7 +59,7 @@
     "bcolAccountName": {
       "$id": "#/properties/bcolAccountName",
       "type": "string",
-      "title": "BC Oline Account Name",
+      "title": "BC Online Account Name",
       "default": "",
       "examples": [
         "BC ONLINE TECHNICAL TEAM DEVL"
@@ -68,7 +68,7 @@
     "bcolUserId": {
       "$id": "#/properties/bcolUserId",
       "type": "string",
-      "title": "BC Oline User ID",
+      "title": "BC Online User ID",
       "default": "",
       "examples": [
         "PB99999"

@@ -281,6 +281,7 @@ def factory_task_models(count: int, user_id: int):
 
 
 def factory_activity_log_model(actor: str, action: str, item_type: str = 'Account', item_name='Foo Bar', item_id=10,
+                               item_value: str = 'Val',
                                org_id=10,
                                remote_addr=''):
     """Create a Log Model."""
@@ -290,6 +291,7 @@ def factory_activity_log_model(actor: str, action: str, item_type: str = 'Accoun
         item_name=item_name,
         item_id=item_id,
         item_type=item_type,
+        item_value=item_value,
         remote_addr=remote_addr,
         org_id=org_id
     )
