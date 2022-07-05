@@ -37,7 +37,6 @@ if (process.env.NODE_ENV === 'production') {
       // Otherwise, user will only get the LD flags if he/she signout-and-signin or restart-browser
       ConfigHelper.removeFromSession(SessionStorageKeys.LaunchDarklyFlags)
 
-      navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' })
       // timeout is for the service worker to get activated
       setTimeout(() => {
         window.location.reload(true)
