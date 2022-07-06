@@ -30,7 +30,5 @@ def get_member_emails(org_id, roles):
 
 def get_login_url():
     """Get application login url."""
-    origin = current_app.config.get('WEB_APP_URL')
-    context_path = current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')
-    login_url = f'{origin}/{context_path}'
+    login_url = current_app.config.get('WEB_APP_URL')
     return login_url
