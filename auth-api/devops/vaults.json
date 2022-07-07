@@ -29,13 +29,18 @@
             "account-mailer"
         ]
     },
-    {
+	{
         "vault": "relationship",
         "application": [
             "postgres-auth",
             "auth-api",
-            "sentry",
             "jwt"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+             "relationship-api"
         ]
     },
     {

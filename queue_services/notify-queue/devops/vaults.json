@@ -24,5 +24,11 @@
             "notify-api",
             "notify-queue"
         ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+             "relationship-api"
+        ]
     }
 ]

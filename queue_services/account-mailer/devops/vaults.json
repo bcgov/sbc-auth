@@ -32,8 +32,13 @@
         "application": [
             "postgres-auth",
             "account-mailer",
-            "sentry",
             "jwt"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+             "relationship-api"
         ]
     }
 ]

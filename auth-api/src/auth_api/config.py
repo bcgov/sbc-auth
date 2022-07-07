@@ -141,6 +141,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     STAFF_ADMIN_EMAIL = os.getenv('STAFF_ADMIN_EMAIL')
 
     # Sentry Config
+    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
     SENTRY_DSN = os.getenv('SENTRY_DSN', None)
 
     # front end serves this image in this name.can be moved to openshift config as well..
