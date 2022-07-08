@@ -46,6 +46,7 @@ from account_mailer.email_processors import refund_requested  # pylint: disable=
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
+from account_mailer.utils import get_local_formatted_date  # pylint: disable=wrong-import-order
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -128,6 +129,7 @@ async def process_event(event_message: dict, flask_app):
             args = {
                 'nsf_fee': email_msg.get('nsfFee'),
                 'invoice_total': email_msg.get('invoice_total'),
+                'invoice_process_date': get_local_formatted_date(email_msg.get('invoice_process_date'), '%m-%d-%Y')
             }
             logo_url = email_msg.get('logo_url')
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
