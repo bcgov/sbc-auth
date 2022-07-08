@@ -39,7 +39,6 @@
       <v-expand-transition>
         <Certify
           v-if="isBusinessIdentifierValid && isFirm"
-          :legalName="passcode"
           :clause="certifyClause"
           entity="registered entity"
           @update:isCertified="isCertified = $event"
@@ -225,6 +224,7 @@ export default class AddBusinessForm extends Vue {
   }
 
   protected async add (): Promise<void> {
+    this.$refs.addBusinessForm.validate()
     if (this.isFormValid) {
       this.isLoading = true
       try {

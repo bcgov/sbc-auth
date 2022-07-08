@@ -109,8 +109,8 @@
                 <li>For <strong>sole proprietorships and general partnerships</strong>,
                   enter the registration number and either
                   <span v-bind="attrs" v-on="on" activator class="underline-dotted">
-                    the name of the proprietor or a partner,
-                  </span>
+                    the name of the proprietor or a
+                    partner</span>.
                 </li>
               </ul>
             </template>

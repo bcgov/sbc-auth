@@ -9,7 +9,7 @@
     >
       <template slot="label">
         <span>
-          <strong>{{ legalName || '[Legal Name]' }}</strong>
+          <strong>{{ currentUserName }}</strong>
           certifies that they have relevant knowledge of the {{ entity }} and is authorized
           to act on behalf of this business.
         </span>
@@ -22,13 +22,15 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { User } from '@/models/user'
+import { mapState } from 'vuex'
 
-@Component({})
+@Component({
+  computed: {
+    ...mapState('user', ['userProfile'])
+  }
+})
 export default class Certify extends Vue {
-  /** Entity name. */
-  @Prop({ required: true })
-  readonly legalName: string
-
   /** Entity name. */
   @Prop({ default: 'business' })
   readonly entity: string
@@ -39,6 +41,11 @@ export default class Certify extends Vue {
 
   // local variable
   protected isCertified = false
+  protected readonly userProfile!: User
+
+  get currentUserName (): string {
+    return this.userProfile.lastname + ', ' + this.userProfile.firstname
+  }
 
   /** Emits an event to update the Is Certified prop. */
   @Emit('update:isCertified')
