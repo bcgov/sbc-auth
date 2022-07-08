@@ -13,7 +13,7 @@
   "AFFIDAVIT_FILE_SIZE": "73KB",
   "PAYMENT_PAYEE_NAME": "BC Registries and Online Services",
   "SENTRY_DSN": "",
-  "SENTRY_ENABLE": "False",
+  "SENTRY_ENABLE": "false",
   "VON_API_URL": "https://orgbook.gov.bc.ca",
   "VON_API_VERSION": "/api/v3",
   "AUTH_API_URL": "https://auth-api-dev.apps.silver.devops.gov.bc.ca",

@@ -38,7 +38,7 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
   (<any>window).addressCompleteKey = ConfigHelper.getValue('ADDRESS_COMPLETE_KEY')
 
-  if (ConfigHelper.getValue('SENTRY_ENABLE') === 'True') {
+  if (ConfigHelper.getValue('SENTRY_ENABLE').lower() === 'true') {
     // initialize Sentry
     console.info('Initializing Sentry...') // eslint-disable-line no-console
     Sentry.init({

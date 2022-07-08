@@ -44,7 +44,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app.config.from_object(config.CONFIGURATION[run_mode])
 
     # Configure Sentry
-    if app.config.get('SENTRY_ENABLE') == 'True':
+    if app.config.get('SENTRY_ENABLE').lower()  == 'true':
         if app.config.get('SENTRY_DSN', None):
             sentry_sdk.init(  # pylint: disable=abstract-class-instantiated
                 dsn=app.config.get('SENTRY_DSN'),
