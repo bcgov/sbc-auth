@@ -88,7 +88,6 @@
         <v-btn
           large color="primary"
           id="add-button"
-          :disabled="!isFormValid"
           :loading="isLoading"
           @click="add()"
         >

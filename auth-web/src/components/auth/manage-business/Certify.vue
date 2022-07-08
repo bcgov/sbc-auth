@@ -11,7 +11,7 @@
         <span>
           <strong>{{ legalName || '[Legal Name]' }}</strong>
           certifies that they have relevant knowledge of the {{ entity }} and is authorized
-          to make this filing.
+          to act on behalf of this business.
         </span>
       </template>
     </v-checkbox>
