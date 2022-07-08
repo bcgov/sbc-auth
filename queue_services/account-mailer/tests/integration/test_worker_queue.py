@@ -248,7 +248,7 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
             'accountId': id,
             'nsfFee': '30',
             'invoice_total': '100',
-            'invoice_process_date': get_local_formatted_date(datetime.now(), '%m-%d-%Y')
+            'invoice_process_date': f'{datetime.now()}'
         }
         await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
                                         msg_type=MessageType.PAD_INVOICE_CREATED.value, mail_details=mail_details)
@@ -258,7 +258,7 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
-        assert f'hours on {mail_details["invoice_process_date"]}' \
+        assert f'hours on {get_local_formatted_date(datetime.now(), "%m-%d-%Y")}' \
             in mock_send.call_args.args[0].get('content').get('body')
 
 
