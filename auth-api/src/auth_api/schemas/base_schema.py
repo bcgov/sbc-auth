@@ -13,7 +13,7 @@
 # limitations under the License.
 """Super class to handle all operations related to base schema."""
 
-from marshmallow import fields, post_dump, pre_dump
+from marshmallow import fields, post_dump
 
 from auth_api.models import ma
 from auth_api.models.base_model import VersionedModel
@@ -59,4 +59,3 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
                     item.pop(key)
 
         return data
-
