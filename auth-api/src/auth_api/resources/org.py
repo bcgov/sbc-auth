@@ -408,7 +408,8 @@ class OrgMembers(Resource):
 
             members = MembershipService.get_members_for_org(org_id, status=status, membership_roles=roles)
             if members:
-                response, status = {'members': MembershipSchema(exclude=['org', 'user.contacts.user']).dump(members, many=True)}, \
+                response, status = {'members': MembershipSchema(exclude=['org', 'user.contacts.user'])
+                                    .dump(members, many=True)}, \
                                    http_status.HTTP_200_OK
             else:
                 response, status = {}, \
