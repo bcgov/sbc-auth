@@ -119,10 +119,11 @@ class Affiliation:
         # Accomplished in service instead of model (easier to avoid circular reference issues).
         subquery = db.session.query(AffiliationModel.entity_id, AffiliationModel.created) \
             .join(Entity).filter(AffiliationModel.org_id == org_id) \
-            .order_by(AffiliationModel.created.desc()) \
             .subquery()
 
-        entities = db.session.query(Entity).join(subquery, subquery.c.entity_id == Entity.id).all()
+        entities = db.session.query(Entity).join(subquery, subquery.c.entity_id == Entity.id) \
+            .order_by(subquery.c.created.desc()) \
+            .all()
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
