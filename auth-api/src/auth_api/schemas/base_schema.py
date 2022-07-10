@@ -24,7 +24,7 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
     def __init__(self, *args, **kwargs):
         """Excludes versions."""
-        if issubclass(self.opts.model, VersionedModel):
+        if issubclass(self.opts.model, VersionedModel) and 'versions' in self.opts.fields:
             self.opts.exclude += ('versions',)
         super().__init__(*args, **kwargs)
 
