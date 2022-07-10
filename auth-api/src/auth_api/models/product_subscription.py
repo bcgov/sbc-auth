@@ -29,7 +29,7 @@ class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-met
     __tablename__ = 'product_subscriptions'
 
     id = Column(Integer, primary_key=True)
-    org_id = Column(ForeignKey('orgs.id'), nullable=False)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False, index=True)
     product_code = Column(ForeignKey('product_codes.code'), nullable=False)
 
     product = relationship('ProductCode', foreign_keys=[product_code], lazy='select')

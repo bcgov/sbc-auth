@@ -38,13 +38,13 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
     __tablename__ = 'memberships'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(ForeignKey('users.id'), nullable=False)
-    org_id = Column(ForeignKey('orgs.id'), nullable=False)
+    user_id = Column(ForeignKey('users.id'), nullable=False, index=True)
+    org_id = Column(ForeignKey('orgs.id'), nullable=False, index=True)
     membership_type_code = Column(
         ForeignKey('membership_types.code'), nullable=False
     )
     status = Column(
-        ForeignKey('membership_status_codes.id')
+        ForeignKey('membership_status_codes.id'), index=True
     )
     membership_type = relationship('MembershipType', foreign_keys=[membership_type_code], lazy='select')
     membership_status = relationship('MembershipStatusCode', foreign_keys=[status], lazy='select')
