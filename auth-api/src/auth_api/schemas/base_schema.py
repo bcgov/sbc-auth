@@ -33,7 +33,7 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     modified_by = fields.Function(
         lambda obj: f'{obj.modified_by.firstname} {obj.modified_by.lastname}' if obj.modified_by else None
     )
-    exclude = 'versions'
+    exclude = ('versions')
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):
