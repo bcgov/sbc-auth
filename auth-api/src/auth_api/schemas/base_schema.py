@@ -35,7 +35,6 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     )
     exclude = 'versions'
 
-    # This doesn't work so great for schemas, version query could have executed before arriving here.
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):
         """Remove all empty values and versions from the dumped dict."""
