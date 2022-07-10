@@ -1,4 +1,4 @@
-"""Update indexes for affiliations, contact_links, memberships, product_subscriptsions.
+"""Update indexes for affiliations, contact_links, memberships, product_subscriptions.
 
 Revision ID: 2229cbcaaa93
 Revises: 975fe0b2c859
