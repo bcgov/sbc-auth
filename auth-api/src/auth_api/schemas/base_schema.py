@@ -33,22 +33,20 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     modified_by = fields.Function(
         lambda obj: f'{obj.modified_by.firstname} {obj.modified_by.lastname}' if obj.modified_by else None
     )
+    exclude = 'versions'
 
+    # This doesn't work so great for schemas, version query could have executed before arriving here.
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):
         """Remove all empty values and versions from the dumped dict."""
         if not many:
-            for key in list(data):
-                if key == 'versions':
-                    data.pop(key)
-
             return {
                 key: value for key, value in data.items()
                 if value is not None
             }
         for item in data:
             for key in list(item):
-                if (item[key] is None) or (key == 'versions'):
+                if (item[key] is None):
                     item.pop(key)
 
         return data
