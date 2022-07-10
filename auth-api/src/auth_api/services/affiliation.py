@@ -116,7 +116,7 @@ class Affiliation:
     @staticmethod
     def find_affiliations_by_org_id(org_id):
         """Return business affiliations for the org."""
-        # Done in service instead of model (easier to avoid circular reference issues).
+        # Accomplished in service instead of model (easier to avoid circular reference issues).
         subquery = db.session.query(AffiliationModel.entity_id, AffiliationModel.created) \
             .join(Entity).filter(AffiliationModel.org_id == org_id) \
             .order_by(AffiliationModel.created.desc()) \
