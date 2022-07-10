@@ -13,13 +13,20 @@
 # limitations under the License.
 """Super class to handle all operations related to base schema."""
 
-from marshmallow import fields, post_dump
+from marshmallow import fields, post_dump, pre_dump
 
 from auth_api.models import ma
+from auth_api.models.base_model import VersionedModel
 
 
 class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     """Base Schema."""
+
+    def __init__(self, *args, **kwargs):
+        """Excludes versions."""
+        if issubclass(self.opts.model, VersionedModel):
+            self.opts.exclude += ('versions',)
+        super().__init__(*args, **kwargs)
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class to declare any class attributes."""
@@ -33,19 +40,23 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     modified_by = fields.Function(
         lambda obj: f'{obj.modified_by.firstname} {obj.modified_by.lastname}' if obj.modified_by else None
     )
-    exclude = ('versions')
 
     @post_dump(pass_many=True)
     def _remove_empty(self, data, many):
         """Remove all empty values and versions from the dumped dict."""
         if not many:
+            for key in list(data):
+                if key == 'versions':
+                    data.pop(key)
+
             return {
                 key: value for key, value in data.items()
                 if value is not None
             }
         for item in data:
             for key in list(item):
-                if (item[key] is None):
+                if (key == 'versions') or (item[key] is None):
                     item.pop(key)
 
         return data
+
