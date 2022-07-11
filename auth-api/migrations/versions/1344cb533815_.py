@@ -1,7 +1,7 @@
 """Add in value for activity log. 
 
 Revision ID: 1344cb533815
-Revises: 975fe0b2c859
+Revises: 2229cbcaaa93
 Create Date: 2022-07-05 06:08:52.217258
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '1344cb533815'
-down_revision = '975fe0b2c859'
+down_revision = '2229cbcaaa93'
 branch_labels = None
 depends_on = None
 
