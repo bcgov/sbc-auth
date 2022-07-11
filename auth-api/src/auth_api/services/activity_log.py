@@ -93,7 +93,6 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def _build_string(activity: ActivityLogModel, actor) -> str:
-        action = activity.get('action')
         return {
             ActivityAction.INVITE_TEAM_MEMBER.value: ActivityLog._inviting_team_member(activity, actor),
             ActivityAction.APPROVE_TEAM_MEMBER.value: ActivityLog._approving_new_team_member(activity, actor),
@@ -109,7 +108,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             ActivityAction.ADD_PRODUCT_AND_SERVICE.value: ActivityLog._adding_products_and_services(activity, actor),
             ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value:
             ActivityLog._removing_products_and_services(activity, actor)
-        }.get(action, action)
+        }.get(activity.action, activity.action)
 
     @staticmethod
     def _inviting_team_member(activity: ActivityLogModel, actor: str) -> str:
