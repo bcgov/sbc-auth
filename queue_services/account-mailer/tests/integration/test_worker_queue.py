@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Test Suite to ensure the worker routines are working as expected."""
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
@@ -20,6 +21,7 @@ from entity_queue_common.service_utils import subscribe_to_queue
 from account_mailer.enums import MessageType, SubjectType
 from account_mailer.services import notification_service
 from account_mailer.services.minio_service import MinioService
+from account_mailer.utils import get_local_formatted_date
 
 from . import factory_membership_model, factory_org_model, factory_user_model_with_contact
 from .utils import helper_add_event_to_queue, helper_add_ref_req_to_queue
@@ -241,11 +243,12 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
                                  events_durable_name,
                                  cb_subscription_handler)
 
-        # add an event to queue
+        # add an event to queue, these are provided by cfs_create_invoice_task.
         mail_details = {
             'accountId': id,
             'nsfFee': '30',
-            'invoice_total': '100'
+            'invoice_total': '100',
+            'invoice_process_date': f'{datetime.now()}'
         }
         await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
                                         msg_type=MessageType.PAD_INVOICE_CREATED.value, mail_details=mail_details)
@@ -255,6 +258,8 @@ async def test_account_pad_invoice_mailer_queue(app, session, stan_server, event
         assert mock_send.call_args.args[0].get('content').get('subject') == SubjectType.PAD_INVOICE_CREATED.value
         assert mock_send.call_args.args[0].get('attachments') is None
         assert mock_send.call_args.args[0].get('content').get('body') is not None
+        assert f'hours on {get_local_formatted_date(datetime.now(), "%m-%d-%Y")}' \
+            in mock_send.call_args.args[0].get('content').get('body')
 
 
 @pytest.mark.asyncio
