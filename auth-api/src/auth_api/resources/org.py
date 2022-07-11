@@ -409,7 +409,8 @@ class OrgMembers(Resource):
 
             members = MembershipService.get_members_for_org(org_id, status=status, membership_roles=roles)
             if members:
-                response, status = {'members': MembershipSchema(exclude=['org']).dump(members, many=True)}, \
+                response, status = {'members': MembershipSchema(exclude=['org'])
+                                    .dump(members, many=True)}, \
                                    http_status.HTTP_200_OK
             else:
                 response, status = {}, \
@@ -505,7 +506,8 @@ class OrgInvitations(Resource):
             invitations = InvitationService.get_invitations_for_org(org_id=org_id,
                                                                     status=invitation_status)
 
-            response, status = {'invitations': InvitationSchema().dump(invitations, many=True)}, http_status.HTTP_200_OK
+            response, status = {'invitations': InvitationSchema(exclude=['membership.org'])
+                                .dump(invitations, many=True)}, http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 

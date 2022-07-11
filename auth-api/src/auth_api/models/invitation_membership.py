@@ -28,7 +28,7 @@ class InvitationMembership(BaseModel):  # pylint: disable=too-few-public-methods
     __tablename__ = 'invitation_memberships'
 
     id = Column(Integer, primary_key=True)
-    invitation_id = Column(ForeignKey('invitations.id'), nullable=False)
+    invitation_id = Column(ForeignKey('invitations.id'), nullable=False, index=True)
     org_id = Column(ForeignKey('orgs.id'), nullable=False)
     membership_type_code = Column(ForeignKey('membership_types.code'), nullable=False)
 

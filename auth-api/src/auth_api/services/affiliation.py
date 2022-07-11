@@ -19,7 +19,9 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
+from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
+from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
@@ -114,12 +116,15 @@ class Affiliation:
     @staticmethod
     def find_affiliations_by_org_id(org_id):
         """Return business affiliations for the org."""
-        data = []
-        affiliation_models = AffiliationModel.find_affiliations_by_org_id(org_id)
-        for affiliation_model in affiliation_models:
-            affiliation = EntityService(affiliation_model.entity).as_dict()
-            data.append(affiliation)
-        return data
+        # Accomplished in service instead of model (easier to avoid circular reference issues).
+        subquery = db.session.query(AffiliationModel.entity_id, AffiliationModel.created) \
+            .join(Entity).filter(AffiliationModel.org_id == org_id) \
+            .subquery()
+
+        entities = db.session.query(Entity).join(subquery, subquery.c.entity_id == Entity.id) \
+            .order_by(subquery.c.created.desc()) \
+            .all()
+        return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None, bearer_token=None):
