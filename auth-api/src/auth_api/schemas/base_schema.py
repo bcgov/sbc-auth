@@ -16,10 +16,17 @@
 from marshmallow import fields, post_dump
 
 from auth_api.models import ma
+from auth_api.models.base_model import VersionedModel
 
 
 class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
     """Base Schema."""
+
+    def __init__(self, *args, **kwargs):
+        """Excludes versions. Otherwise database will query <name>_versions table."""
+        if issubclass(self.opts.model, VersionedModel) and 'versions' in self.opts.fields:
+            self.opts.exclude += ('versions',)
+        super().__init__(*args, **kwargs)
 
     class Meta:  # pylint: disable=too-few-public-methods
         """Meta class to declare any class attributes."""
@@ -48,7 +55,7 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
             }
         for item in data:
             for key in list(item):
-                if (item[key] is None) or (key == 'versions'):
+                if (key == 'versions') or (item[key] is None):
                     item.pop(key)
 
         return data

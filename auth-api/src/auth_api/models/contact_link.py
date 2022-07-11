@@ -30,10 +30,10 @@ class ContactLink(VersionedModel):  # pylint: disable=too-few-public-methods
     __tablename__ = 'contact_links'
 
     id = Column(Integer, primary_key=True)
-    contact_id = Column(Integer, ForeignKey('contacts.id'))
-    entity_id = Column(Integer, ForeignKey('entities.id'))
-    user_id = Column(Integer, ForeignKey('users.id'))
-    org_id = Column(Integer, ForeignKey('orgs.id'))
+    contact_id = Column(Integer, ForeignKey('contacts.id'), index=True)
+    entity_id = Column(Integer, ForeignKey('entities.id'), index=True)
+    user_id = Column(Integer, ForeignKey('users.id'), index=True)
+    org_id = Column(Integer, ForeignKey('orgs.id'), index=True)
     affidavit_id = Column(Integer, ForeignKey('affidavits.id'))
 
     contact = relationship('Contact', foreign_keys=[contact_id])

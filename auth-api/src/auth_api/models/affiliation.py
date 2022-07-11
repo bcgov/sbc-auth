@@ -31,7 +31,7 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     __tablename__ = 'affiliations'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    entity_id = Column(ForeignKey('entities.id'), nullable=False)
+    entity_id = Column(ForeignKey('entities.id'), nullable=False, index=True)
     org_id = Column(ForeignKey('orgs.id'), nullable=False)
 
     entity = relationship('Entity', foreign_keys=[entity_id], lazy='select')
