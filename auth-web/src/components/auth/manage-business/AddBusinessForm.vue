@@ -21,7 +21,6 @@
       <!-- Passcode -->
       <v-expand-transition>
         <v-text-field
-          type="password"
           v-if="isBusinessIdentifierValid"
           filled
           :label="passcodeLabel"
