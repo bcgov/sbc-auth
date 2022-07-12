@@ -18,6 +18,7 @@ import AccountLoginOptionsInfo from '@/views/auth/AccountLoginOptionsInfo.vue'
 import AccountSetupLanding from '@/views/auth/create-account/AccountSetupLanding.vue'
 import AccountSwitching from '@/views/auth/AccountSwitching.vue'
 import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockSuccessView.vue'
+import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
@@ -547,7 +548,17 @@ export function getRoutes (): RouteConfig[] {
       props: mapReturnPayVars,
       meta: { requiresAuth: false }
     },
-
+    {
+      path: Pages.ADMIN,
+      name: 'admin',
+      redirect: Pages.ADMIN_DASHBOARD
+    },
+    {
+      path: Pages.ADMIN_DASHBOARD,
+      component: AdminDashboardView,
+      props: true,
+      meta: { requiresAuth: true, allowedRoles: [Role.AdminEdit] }
+    },
     {
       path: Pages.STAFF_DASHBOARD,
       component: StaffDashboardView,

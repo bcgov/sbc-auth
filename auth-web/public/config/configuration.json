@@ -24,6 +24,7 @@
   "PAY_API_VERSION": "/api/v1",
   "LEGAL_API_URL": "https://legal-api-dev.apps.silver.devops.gov.bc.ca",
   "LEGAL_API_VERSION": "/api/v1",
+  "LEGAL_API_VERSION_2": "/api/v2",
   "ONE_STOP_URL": "https://dev.onestop.gov.bc.ca/",
   "CORPORATE_ONLINE_URL": "https://dev.corponline.gov.bc.ca/",
   "FAS_WEB_URL": "https://fas-dev.apps.silver.devops.gov.bc.ca/",
