@@ -9,9 +9,9 @@
     >
       <template slot="label">
         <span>
-          <strong>{{ legalName || '[Legal Name]' }}</strong>
+          <strong>{{ currentUserName }}</strong>
           certifies that they have relevant knowledge of the {{ entity }} and is authorized
-          to make this filing.
+          to act on behalf of this business.
         </span>
       </template>
     </v-checkbox>
@@ -22,12 +22,14 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { namespace } from 'vuex-class'
+
+const UserModule = namespace('user')
 
 @Component({})
 export default class Certify extends Vue {
-  /** Entity name. */
-  @Prop({ required: true })
-  readonly legalName: string
+  @UserModule.State('currentUser') readonly currentUser!: KCUserProfile
 
   /** Entity name. */
   @Prop({ default: 'business' })
@@ -39,6 +41,10 @@ export default class Certify extends Vue {
 
   // local variable
   protected isCertified = false
+
+  get currentUserName (): string {
+    return `${this.currentUser.lastName}, ${this.currentUser.firstName}`
+  }
 
   /** Emits an event to update the Is Certified prop. */
   @Emit('update:isCertified')
