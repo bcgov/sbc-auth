@@ -15,17 +15,12 @@
 
 Test suite to ensure that the Entity service routines are working as expected.
 """
-from unittest.mock import ANY, patch
-
 import pytest
 
-from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
-from auth_api.services import ActivityLogPublisher
 from auth_api.services.entity import Entity as EntityService
-from auth_api.utils.enums import ActivityAction
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_org_service, patch_token_info)
