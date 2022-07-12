@@ -1,7 +1,9 @@
-import { Wrapper, mount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import Certify from '@/components/auth/manage-business/Certify.vue'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
+import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -9,11 +11,35 @@ const vuetify = new Vuetify({})
 describe('Add Business Form', () => {
   let wrapper: Wrapper<any>
 
+  const userModule: any = {
+    namespaced: true,
+    state: {
+      currentUser: {
+        firstName: 'Nadia',
+        lastName: 'Woodie'
+      }
+    },
+    actions: UserModule.actions,
+    mutations: UserModule.mutations,
+    getters: UserModule.getters
+  }
+
   beforeAll(() => {
+    const localVue = createLocalVue()
+    localVue.use(Vuex)
+
+    const store = new Vuex.Store({
+      strict: false,
+      modules: {
+        user: userModule
+      }
+    })
+
     wrapper = mount(Certify, {
+      store,
+      localVue,
       vuetify,
       propsData: {
-        legalName: 'Legal Name',
         entity: 'entity',
         clause: 'Lorem ipsum dolor sit amet.'
       }
@@ -30,9 +56,10 @@ describe('Add Business Form', () => {
     expect(wrapper.find('#certify').isVisible()).toBe(true)
 
     // verify checkbox
-    expect(wrapper.find('.certify-checkbox label').text()).toContain('Legal Name')
-    expect(wrapper.find('.certify-checkbox label').text()).toContain('certifies that')
-    expect(wrapper.find('.certify-checkbox label').text()).toContain('of the entity')
+    const fmCertifyLabel = wrapper.find('.certify-checkbox label').text()
+    expect(fmCertifyLabel).toContain('Woodie, Nadia')
+    expect(fmCertifyLabel).toContain('certifies that')
+    expect(fmCertifyLabel).toContain('of the entity')
     expect(wrapper.find('.certify-clause').text()).toBe('Lorem ipsum dolor sit amet.')
   })
 })

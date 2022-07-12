@@ -95,12 +95,15 @@ describe('Add Business Form', () => {
       expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
 
       // verify buttons
-      expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
+      if (!test.certifyExists) {
+        expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
+      }
       if (test.forgotButtonText) {
         expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
       }
       expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
-      expect(wrapper.find('#add-button').attributes('disabled')).toBe('true')
+
+      // always enable add button
       expect(wrapper.find('#add-button span').text()).toBe('Add')
     })
   })
