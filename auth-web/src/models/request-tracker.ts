@@ -4,8 +4,8 @@ export interface RequestTracker {
   isProcessed: boolean
   serviceName: string
   isAdmin: boolean
-  request?: string // available when requesting by requestTrackerId
-  response?: string // available when requesting by requestTrackerId
+  request?: string // Plain XML. Available when requesting by requestTrackerId
+  response?: string // Plain XML. Available when requesting by requestTrackerId
 }
 
 export interface BNRequest {
