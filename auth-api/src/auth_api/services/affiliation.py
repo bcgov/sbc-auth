@@ -17,6 +17,7 @@ from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
@@ -28,7 +29,7 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
-from .activity_log_publisher import publish_activity
+from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
 
@@ -185,7 +186,8 @@ class Affiliation:
 
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
-        publish_activity(f'{ActivityAction.CREATE_AFFILIATION.value}-{entity.name}', entity.name, entity_id, org_id)
+        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                              name=entity.name, id=entity.business_identifier))
         return Affiliation(affiliation)
 
     @staticmethod
@@ -244,6 +246,8 @@ class Affiliation:
             # Create an affiliation with org
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
             affiliation_model.save()
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                           name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -274,8 +278,8 @@ class Affiliation:
             entity.reset_passcode(entity.business_identifier, email_addresses)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
-        publish_activity(f'{ActivityAction.REMOVE_AFFILIATION.value}-{entity.name}', entity.name,
-                         business_identifier, org_id)
+        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
+                                                       name=entity.name, id=entity.business_identifier))
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):

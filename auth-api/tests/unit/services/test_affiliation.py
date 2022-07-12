@@ -15,15 +15,18 @@
 
 Test suite to ensure that the Affiliation service routines are working as expected.
 """
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 import pytest
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models.dataclass import Activity
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
+from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.utils.enums import ActivityAction
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo
 from tests.utilities.factory_utils import (
     factory_entity_service, factory_org_service, patch_get_firms_parties, patch_token_info)
@@ -244,12 +247,18 @@ def test_delete_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=
     org_dictionary = org_service.as_dict()
     org_id = org_dictionary['id']
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
-    affiliation = AffiliationService.create_affiliation(org_id,
-                                                        business_identifier,
-                                                        TestEntityInfo.entity_lear_mock['passCode'])
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        affiliation = AffiliationService.create_affiliation(org_id,
+                                                            business_identifier,
+                                                            TestEntityInfo.entity_lear_mock['passCode'])
+        mock_alp.assert_called_with(Activity(action=ActivityAction.CREATE_AFFILIATION.value,
+                                             org_id=ANY, name=ANY, id=ANY))
 
-    AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
-                                          email_addresses=None)
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        AffiliationService.delete_affiliation(org_id=org_id, business_identifier=business_identifier,
+                                              email_addresses=None)
+        mock_alp.assert_called_with(Activity(action=ActivityAction.REMOVE_AFFILIATION.value,
+                                             org_id=ANY, name=ANY, id=ANY))
 
     found_affiliation = AffiliationModel.query.filter_by(id=affiliation.identifier).first()
     assert found_affiliation is None

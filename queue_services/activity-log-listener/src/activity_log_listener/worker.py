@@ -54,11 +54,12 @@ async def process_event(event_message, flask_app):
         data = event_message.get('data')
         logger.debug('message_type received %s', data)
 
-        activity_model: ActivityLogModel = ActivityLogModel(actor_id=data.get('actor'),
+        activity_model: ActivityLogModel = ActivityLogModel(actor_id=data.get('actorId'),
                                                             action=data.get('action'),
                                                             item_type=data.get('itemType'),
                                                             item_name=data.get('itemName'),
                                                             item_id=data.get('itemId'),
+                                                            item_value=data.get('itemValue'),
                                                             remote_addr=data.get('remoteAddr'),
                                                             created=data.get('createdAt'),
                                                             org_id=data.get('orgId')
@@ -75,5 +76,5 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
         logger.debug('Event Message Received: %s', event_message)
         await process_event(event_message, FLASK_APP)
     except Exception:  # noqa: B902 # pylint: disable=broad-except
-        # Catch Exception so that any error is still caught and the message is removed from the queue
+        # Catch Exception so any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
