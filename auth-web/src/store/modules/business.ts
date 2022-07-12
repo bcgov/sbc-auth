@@ -13,6 +13,7 @@ import {
 } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { BNRequest } from '@/models/request-tracker'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -217,13 +218,18 @@ export default class BusinessModule extends VuexModule {
 
   // Following searchBusiness will search data from legal-api.
   @Action({ rawError: true })
-  public async searchBusiness (businessNumber: string): Promise<any> {
-    return BusinessService.searchBusiness(businessNumber)
-      .then(response => {
-        if (response.status === 200) {
-          ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
-        }
-      })
+  public async searchBusiness (businessIdentifier: string): Promise<any> {
+    const response = await BusinessService.searchBusiness(businessIdentifier)
+    if (response && response.data && response.status === 200) {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
+      return response.data.business
+    }
+    return null
+  }
+
+  @Action({ rawError: true })
+  public async createBNRequest (request: BNRequest): Promise<any> {
+    return BusinessService.createBNRequest(request)
   }
 
   @Action({ rawError: true })
