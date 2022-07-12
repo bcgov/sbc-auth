@@ -20,7 +20,6 @@ from typing import Tuple
 from flask import current_app
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
-from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import Contact as ContactModel
@@ -28,12 +27,10 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import ActivityAction
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
-from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 
 
@@ -269,5 +266,3 @@ class Entity:
             self.delete_contact()
 
         self._model.delete()
-        ActivityLogPublisher.publish_activity(Activity(None, ActivityAction.REMOVE_AFFILIATION.value,
-                                                       name=self._model.name, id=self._model.business_identifier))

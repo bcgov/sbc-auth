@@ -347,10 +347,7 @@ def test_delete_entity(app, session):  # pylint:disable=unused-argument
     contact_link.org = org._model  # pylint:disable=protected-access
     contact_link.commit()
 
-    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
-        entity.delete()
-        mock_alp.assert_called_with(Activity(action=ActivityAction.REMOVE_AFFILIATION.value,
-                                             org_id=ANY, name=ANY, id=ANY, value=ANY))
+    entity.delete()
 
     entity = EntityService.find_by_entity_id(entity.identifier)
 
