@@ -1,9 +1,9 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import Certify from '@/components/auth/manage-business/Certify.vue'
+import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import UserModule from '@/store/modules/user'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
