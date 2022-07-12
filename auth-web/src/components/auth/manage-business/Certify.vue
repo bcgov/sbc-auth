@@ -22,15 +22,15 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { User } from '@/models/user'
-import { mapState } from 'vuex'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { namespace } from 'vuex-class'
 
-@Component({
-  computed: {
-    ...mapState('user', ['userProfile'])
-  }
-})
+const UserModule = namespace('user')
+
+@Component({})
 export default class Certify extends Vue {
+  @UserModule.State('currentUser') private currentUser!: KCUserProfile
+
   /** Entity name. */
   @Prop({ default: 'business' })
   readonly entity: string
@@ -41,10 +41,9 @@ export default class Certify extends Vue {
 
   // local variable
   protected isCertified = false
-  protected readonly userProfile!: User
 
   get currentUserName (): string {
-    return this.userProfile.lastname + ', ' + this.userProfile.firstname
+    return this.currentUser.lastName + ', ' + this.currentUser.firstName
   }
 
   /** Emits an event to update the Is Certified prop. */
