@@ -128,7 +128,6 @@ import { BNRequest } from '@/models/request-tracker'
 import CommonUtils from '@/util/common-util'
 import { Component } from 'vue-property-decorator'
 import Vue from 'vue'
-import { mapActions } from 'vuex'
 import { mask } from 'vue-the-mask'
 import { namespace } from 'vuex-class'
 
