@@ -13,7 +13,7 @@
 # limitations under the License.
 """This module holds data classes."""
 
-from typing import List
+from typing import List, Optional
 from attr import dataclass, field
 
 
@@ -24,10 +24,10 @@ class Activity:
     org_id: int
     action: str
     name: str
-    value: str = None
-    id: int = None
-    type: str = None
-    actor_id: id = None
+    value: Optional[str] = None
+    id: Optional[int] = None
+    type: Optional[str] = None
+    actor_id: Optional[int] = None
 
 
 @dataclass
