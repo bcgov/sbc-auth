@@ -16,7 +16,6 @@
 from marshmallow import fields, post_dump
 
 from auth_api.models import ma
-from auth_api.models.base_model import VersionedModel
 
 
 class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
@@ -24,7 +23,7 @@ class BaseSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors
 
     def __init__(self, *args, **kwargs):
         """Excludes versions. Otherwise database will query <name>_versions table."""
-        if issubclass(self.opts.model, VersionedModel) and 'versions' in self.opts.fields:
+        if hasattr(self.opts.model, 'versions') and (len(self.opts.fields) == 0):
             self.opts.exclude += ('versions',)
         super().__init__(*args, **kwargs)
 

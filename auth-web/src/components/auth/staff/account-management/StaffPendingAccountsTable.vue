@@ -68,26 +68,26 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     {
       text: 'Date Submittted',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'dateSubmitted',
       width: '150'
     },
     {
       text: 'Name',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'name'
     },
     {
       text: 'Type',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'type'
     },
     {
       text: 'Status',
       align: 'left',
-      sortable: true,
+      sortable: false,
       value: 'status'
     },
     {

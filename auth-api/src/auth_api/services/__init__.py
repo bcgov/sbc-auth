@@ -13,6 +13,7 @@
 # limitations under the License.
 """Exposes all of the Services used in the API."""
 from .activity_log import ActivityLog
+from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit
 from .affiliation import Affiliation
 from .api_gateway import ApiGateway

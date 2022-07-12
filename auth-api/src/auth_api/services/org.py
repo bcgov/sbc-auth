@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 from datetime import datetime
+import json
 from typing import Dict, List, Tuple
 
 from flask import current_app, g
@@ -21,6 +22,7 @@ from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -39,13 +41,14 @@ from auth_api.services.validators.bcol_credentials import validate as bcol_crede
 from auth_api.services.validators.duplicate_org_name import validate as duplicate_org_name_validate
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus, PaymentMethod,
-    Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix, TaskAction)
+    AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
+    PaymentMethod, Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix, TaskAction)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.user_context import UserContext, user_context
+from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit as AffidavitService
 from .authorization import check_auth
 from .contact import Contact as ContactService
@@ -185,7 +188,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @user_context
     def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
                                  payment_method: str, mailing_address=None,
-                                 is_new_org: bool = True, **kwargs) -> PaymentAccountStatus:
+                                 is_new_org: bool = True, **kwargs):
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
@@ -223,12 +226,17 @@ class Org:  # pylint: disable=too-many-public-methods
             response = RestService.put(endpoint=f'{pay_url}/accounts/{org_model.id}',
                                        data=pay_request, token=token, raise_for_status=True)
 
-        if response == http_status.HTTP_200_OK:
+        if response.status_code == http_status.HTTP_200_OK:
             payment_account_status = PaymentAccountStatus.CREATED
-        elif response == http_status.HTTP_202_ACCEPTED:
+        elif response.status_code == http_status.HTTP_202_ACCEPTED:
             payment_account_status = PaymentAccountStatus.PENDING
         else:
             payment_account_status = PaymentAccountStatus.FAILED
+
+        if payment_account_status != PaymentAccountStatus.FAILED:
+            ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.PAYMENT_INFO_CHANGE.value,
+                                                           name=org_model.name,
+                                                           value=payment_method))
 
         return payment_account_status
 
@@ -298,7 +306,7 @@ class Org:  # pylint: disable=too-many-public-methods
         contact_link.org = org
         contact_link.add_to_session()
 
-    def update_org(self, org_info):  # pylint: disable=too-many-locals
+    def update_org(self, org_info):  # pylint: disable=too-many-locals, too-many-statements
         """Update the passed organization with the new info."""
         current_app.logger.debug('<update_org ')
 
@@ -314,9 +322,10 @@ class Org:  # pylint: disable=too-many-public-methods
         # validate if name or branch name is getting updatedtest_org.py
         branch_name = org_info.get('branchName', None)
         org_name = org_info.get('name', None)
+        current_org_name = org_name or org_model.name
         name_updated = branch_name or org_name
         if name_updated:
-            arg_dict = {'name': org_name or org_model.name,
+            arg_dict = {'name': current_org_name,
                         'branch_name': branch_name,
                         'org_id': org_model.id}
             duplicate_org_name_validate(is_fatal=True, **arg_dict)
@@ -333,8 +342,7 @@ class Org:  # pylint: disable=too-many-public-methods
 
         mailing_address = org_info.pop('mailingAddress', None)
         payment_info = org_info.pop('paymentInfo', {})
-        if is_govm_account_creation and (mailing_address is None or payment_info.get('revenueAccount') is None):
-            raise BusinessException(Error.GOVM_ACCOUNT_DATA_MISSING, None)
+        Org._is_govm_missing_account_data(is_govm_account_creation, mailing_address, payment_info.get('revenueAccount'))
 
         if is_govm_account_creation:
             has_org_updates = True
@@ -370,11 +378,31 @@ class Org:  # pylint: disable=too-many-public-methods
 
         if name_updated or payment_info:
             Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
+        Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
+        Org._publish_activity_on_name_change(org_model.id, org_name)
+
         current_app.logger.debug('>update_org ')
         return self
 
     @staticmethod
-    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True):
+    def _is_govm_missing_account_data(is_govm_account_creation, mailing_address, revenue_account):
+        if is_govm_account_creation and (mailing_address is None or revenue_account is None):
+            raise BusinessException(Error.GOVM_ACCOUNT_DATA_MISSING, None)
+
+    @staticmethod
+    def _publish_activity_on_mailing_address_change(org_id: int, org_name: str, mailing_address: str):
+        if mailing_address:
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ACCOUNT_ADDRESS_CHANGE.value,
+                                                           name=org_name, value=json.dumps(mailing_address)))
+
+    @staticmethod
+    def _publish_activity_on_name_change(org_id: int, org_name: str):
+        if org_name:
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ACCOUNT_NAME_CHANGE.value,
+                                                           name=org_name, value=org_name))
+
+    @staticmethod
+    def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True) -> PaymentAccountStatus:
         """Create Or update payment info for org."""
         selected_payment_method = payment_info.get('paymentMethod', None)
         payment_method = None
@@ -566,6 +594,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
         login_option = AccountLoginOptionsModel(login_source=login_source, org_id=org_id)
         login_option.save()
+        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.AUTHENTICATION_METHOD_CHANGE.value,
+                                                       name=org.name, value=login_source,
+                                                       id=login_option.id))
         return login_option
 
     @staticmethod
@@ -741,6 +772,9 @@ class Org:  # pylint: disable=too-many-public-methods
             org_model.suspended_on = datetime.today()
             org_model.suspension_reason_code = suspension_reason_code
         org_model.save()
+        if status_code == OrgStatus.SUSPENDED.value:
+            ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.ACCOUNT_SUSPENSION.value,
+                                                           name=org_model.name, value=suspension_reason_code))
         current_app.logger.debug('change_org_status>')
         return Org(org_model)
 

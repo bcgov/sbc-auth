@@ -16,9 +16,10 @@ BC Registries Business events listener
 ## Project Status
 As of 2018-02-22 in **ALPHA**
 
-## Documnentation
+## Documentation
 
-GitHub Pages (https://guides.github.com/features/pages/) are a neat way to document you application/project.
+The business-events-listener is used to create entities within sbc-auth and affiliate them to orgs (accounts).
+It's a bridge between namerequest -> sbc-auth via queue, based on events.
 
 ## Security
 

@@ -18,6 +18,7 @@ from typing import Any, Dict, List
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
@@ -29,13 +30,14 @@ from auth_api.models import db
 from auth_api.schemas import ProductCodeSchema
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType,
-    TaskStatus)
+    AccessType, ActivityAction, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
+    TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
 from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
 
@@ -97,6 +99,10 @@ class Product:
                                                                 product_code=product_code,
                                                                 status_code=subscription_status
                                                                 ).flush()
+                if subscription_status == ProductSubscriptionStatus.ACTIVE.value:
+                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                                                   name=product_subscription.product_code))
+
                 # If there is a linked product, add subscription to that too.
                 # This is to handle cases where Names and Business Registry is combined together.
                 if product_model.linked_product_code:
@@ -104,6 +110,8 @@ class Product:
                                              product_code=product_model.linked_product_code,
                                              status_code=subscription_status
                                              ).flush()
+                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                                                   name=product_subscription.product_code))
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
@@ -215,6 +223,9 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         Product.send_approved_product_subscription_notification(admin_email, product_model.description,
                                                                 product_subscription.status_code)
+        if is_approved:
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                                           name=product_subscription.product_code))
         current_app.logger.debug('>update_task_product ')
 
     @staticmethod

@@ -16,11 +16,13 @@
 This module manages the Membership Information between an org and a user.
 """
 
+import json
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.config import get_named_config
+from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
@@ -29,9 +31,10 @@ from auth_api.models import MembershipStatusCode as MembershipStatusCodeModel
 from auth_api.models import MembershipType as MembershipTypeModel
 from auth_api.models import Org as OrgModel
 from auth_api.schemas import MembershipSchema
-from auth_api.utils.enums import LoginSource, NotificationType, Status
+from auth_api.utils.enums import ActivityAction, LoginSource, NotificationType, Status
 from auth_api.utils.roles import ADMIN, ALL_ALLOWED_ROLES, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
+from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .org import Org as OrgService
@@ -204,10 +207,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if self._model.membership_type.code == COORDINATOR and updated_fields.get('membership_type', None) == ADMIN:
             check_auth(org_id=self._model.org_id, one_of_roles=(ADMIN, STAFF))
 
+        updated_membership_status = updated_fields.get('membership_status')
         admin_getting_removed: bool = False
         # Admin can be removed by other admin or staff. #4909
-        if updated_fields.get('membership_status', None) \
-                and updated_fields['membership_status'].id == Status.INACTIVE.value \
+        if updated_membership_status \
+                and updated_membership_status.id == Status.INACTIVE.value \
                 and self._model.membership_type.code == ADMIN:
             admin_getting_removed = True
             if OrgService(self._model.org).get_owner_count() == 1:
@@ -223,16 +227,26 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
             if value is not None:
                 setattr(self._model, key, value)
         self._model.save()
+
+        membership_type = updated_fields.get('membership_type') or self._model.membership_type.code
+        if updated_membership_status \
+                and updated_membership_status.id in [Status.INACTIVE.value, Status.ACTIVE.value]:
+            action = ActivityAction.APPROVE_TEAM_MEMBER.value \
+                if updated_membership_status.id == Status.ACTIVE.value  \
+                else ActivityAction.REMOVE_TEAM_MEMBER.value
+            name = {'first_name': self._model.user.firstname, 'last_name': self._model.user.lastname}
+            ActivityLogPublisher.publish_activity(Activity(self._model.org_id, action,
+                                                           name=json.dumps(name), id=self._model.user.id,
+                                                           value=membership_type))
         # Add to account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
-        is_staff_modifying = user_from_context.is_staff()
         is_bcros_user = self._model.user.login_source == LoginSource.BCROS.value
         # send mail if staff modifies , not applicable for bcros , only if anything is getting updated
-        if is_staff_modifying and not is_bcros_user and len(updated_fields) != 0:
+        if user_from_context.is_staff() and not is_bcros_user and len(updated_fields) != 0:
             publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
 
         # send mail to the person itself who is getting removed by staff ;if he is admin
-        if is_staff_modifying and not is_bcros_user and admin_getting_removed:
+        if user_from_context.is_staff() and not is_bcros_user and admin_getting_removed:
             recipient_email = ContactLinkModel.find_by_user_id(self._model.user.id).contact.email
             data = {
                 'accountId': self._model.org.id,
@@ -261,7 +275,11 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         self._model.save()
         # Remove from account_holders group in keycloak
         Membership._add_or_remove_group(self._model)
-
+        name = {'first_name': self._model.user.firstname, 'last_name': self._model.user.lastname}
+        ActivityLogPublisher.publish_activity(Activity(self._model.org_id,
+                                                       ActivityAction.REMOVE_TEAM_MEMBER.value,
+                                                       name=json.dumps(name),
+                                                       id=self._model.user.id))
         current_app.logger.debug('>deactivate_membership')
         return self
 

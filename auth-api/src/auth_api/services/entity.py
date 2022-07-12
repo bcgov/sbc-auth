@@ -27,12 +27,10 @@ from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.schemas import EntitySchema
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import ActivityAction
 from auth_api.utils.passcode import passcode_hash
 from auth_api.utils.roles import ALL_ALLOWED_ROLES
 from auth_api.utils.user_context import UserContext, user_context
 from auth_api.utils.util import camelback2snake
-from .activity_log_publisher import publish_activity
 from .authorization import check_auth
 
 
@@ -182,7 +180,6 @@ class Entity:
         entity.pass_code = passcode_hash(new_pass_code)
         entity.pass_code_claimed = False
         entity.save()
-        business_name = entity.name
         if email_addresses:
             mailer_payload = dict(
                 emailAddresses=email_addresses,
@@ -196,8 +193,6 @@ class Entity:
             )
 
         entity = Entity(entity)
-        publish_activity(f'{ActivityAction.GENERATED_PASSCODE.value}-{business_name}', business_name,
-                         business_identifier)
         return entity
 
     def add_contact(self, contact_info: dict):
@@ -271,5 +266,3 @@ class Entity:
             self.delete_contact()
 
         self._model.delete()
-        publish_activity(f'{ActivityAction.REMOVE_AFFILIATION.value}-{self._model.name}', self._model.name,
-                         self._model.business_identifier)

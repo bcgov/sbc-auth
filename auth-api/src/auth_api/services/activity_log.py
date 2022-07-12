@@ -16,6 +16,7 @@
 This module manages the activity logs.
 """
 
+import json
 from flask import current_app
 from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -23,6 +24,7 @@ from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.schemas import ActivityLogSchema
 from auth_api.services.authorization import check_auth
+from auth_api.utils.enums import ActivityAction
 from auth_api.utils.roles import ADMIN, STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -75,22 +77,118 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         is_staff_access = user_from_context.is_staff()
         for result in results:
             activity_log: ActivityLogModel = result[0]
-
             log_dict = ActivityLogSchema(exclude=('actor_id',)).dump(activity_log)
 
             if user := result[1]:
                 actor = ActivityLog._mask_user_name(is_staff_access, user)
                 log_dict['actor'] = actor
+            log_dict['action'] = ActivityLog._build_string(activity_log)
             logs['activity_logs'].append(log_dict)
 
         logs['total'] = count
         logs['page'] = page
         logs['limit'] = limit
 
-        current_app.logger.debug('>fetch_activiy logs')
+        current_app.logger.debug('>fetch_activity logs')
         return logs
 
     @staticmethod
+    def _build_string(activity: ActivityLogModel) -> str:
+        mapping = {
+            ActivityAction.INVITE_TEAM_MEMBER.value: ActivityLog._inviting_team_member,
+            ActivityAction.APPROVE_TEAM_MEMBER.value: ActivityLog._approving_new_team_member,
+            ActivityAction.REMOVE_TEAM_MEMBER.value: ActivityLog._removing_team_member,
+            ActivityAction.RESET_2FA.value: ActivityLog._twofactor_reset,
+            ActivityAction.PAYMENT_INFO_CHANGE.value: ActivityLog._payment_info_change,
+            ActivityAction.CREATE_AFFILIATION.value: ActivityLog._adding_a_business_affilliation,
+            ActivityAction.REMOVE_AFFILIATION.value: ActivityLog._removing_a_business_affilliation,
+            ActivityAction.ACCOUNT_NAME_CHANGE.value: ActivityLog._account_name_changes,
+            ActivityAction.ACCOUNT_ADDRESS_CHANGE.value: ActivityLog._account_address_changes,
+            ActivityAction.AUTHENTICATION_METHOD_CHANGE.value: ActivityLog._authentication_method_changes,
+            ActivityAction.ACCOUNT_SUSPENSION.value: ActivityLog._account_suspension,
+            ActivityAction.ADD_PRODUCT_AND_SERVICE.value: ActivityLog._adding_products_and_services
+        }.get(activity.action)
+        return mapping(activity) if (mapping) else activity.action
+
+    @staticmethod
+    def _inviting_team_member(activity: ActivityLogModel) -> str:
+        """Invited User Y as a [role name]."""
+        return f'Invited {activity.item_name} as a {activity.item_value}'
+
+    @staticmethod
+    def _approving_new_team_member(activity: ActivityLogModel) -> str:
+        """User X approved User Y joining the team as [role name]."""
+        try:
+            name = json.loads(activity.item_name)
+        except ValueError:
+            name = {}
+        return f'Approved {name.get("first_name", activity.item_name)} {name.get("last_name")} \
+            joining the team as {activity.item_value}'
+
+    @staticmethod
+    def _removing_team_member(activity: ActivityLogModel) -> str:
+        """User X removed User Y."""
+        return f'Removed {activity.item_name}'
+
+    @staticmethod
+    def _twofactor_reset(activity: ActivityLogModel) -> str:
+        """User X 2FA for User Y."""
+        return f'Reset 2FA for {activity.item_name}'
+
+    @staticmethod
+    def _payment_info_change(activity: ActivityLogModel) -> str:
+        """User X updated the account payment information to [payment method]."""
+        return f'Updated the account payment information to {activity.item_value}'
+
+    @staticmethod
+    def _adding_a_business_affilliation(activity: ActivityLogModel) -> str:
+        """User X has affiliated [Business Name] to the account."""
+        return f'Has affiliated {activity.item_name} to the account'
+
+    @staticmethod
+    def _removing_a_business_affilliation(activity: ActivityLogModel) -> str:
+        """User X has unaffiliated [Business Name] from the account."""
+        return f'Has unaffiliated {activity.item_name} from the account'
+
+    @staticmethod
+    def _account_name_changes(activity: ActivityLogModel) -> str:
+        """User X changed the account name to [new account name]."""
+        return f'Changed the account name to {activity.item_value}'
+
+    @staticmethod
+    def _account_address_changes(activity: ActivityLogModel) -> str:
+        """User X changed the mailing address to [new mailing address]."""
+        try:
+            address = json.loads(activity.item_value)
+        except ValueError:
+            address = {}
+        account_address_formatted = (
+            f"""{address.get('street')}; {address.get('streetAdditional')}; {address.get('city')}
+            {address.get('region')} {address.get('postalCode')}; {address.get('country')}"""
+        )
+        return f'Changed the mailing address to {account_address_formatted}'
+
+    @ staticmethod
+    def _authentication_method_changes(activity: ActivityLogModel) -> str:
+        """User X changed the account authentication method to [auth type]."""
+        return f'Changed the account authentication method to {activity.item_value}'
+
+    @ staticmethod
+    def _account_suspension(activity: ActivityLogModel) -> str:
+        """Account was suspended due to [Suspension reason]."""
+        return f'The account was suspended due to {activity.item_value}'
+
+    @ staticmethod
+    def _adding_products_and_services(activity: ActivityLogModel) -> str:
+        """User X added [product name] to the account Products and Services."""
+        return f'Added {activity.item_name} from account Products and Services'
+
+    @ staticmethod
+    def _removing_products_and_services(activity: ActivityLogModel) -> str:
+        """User X removed [product name] from the account Products and Services."""
+        return f'Removed {activity.item_name} from account Products and Services'
+
+    @ staticmethod
     def _mask_user_name(is_staff_access, user):
         is_actor_a_staff = user.type == Role.STAFF.name
         if not is_staff_access and is_actor_a_staff:

@@ -20,6 +20,7 @@ from sentry_sdk import capture_message
 from sqlalchemy_continuum.plugins.flask import fetch_remote_addr
 
 from auth_api.config import get_named_config
+from auth_api.models.dataclass import Activity
 from auth_api.models import User as UserModel
 from auth_api.services.queue_publisher import publish_response
 
@@ -27,39 +28,41 @@ from auth_api.services.queue_publisher import publish_response
 CONFIG = get_named_config()
 
 
-def publish_activity(action: str, item_name: str,
-                     item_id: str, org_id: int = None, user_id=None):  # pylint:disable=unused-argument
-    """Publish the activity asynchronously, using the given details."""
-    try:
-        # find user_id if haven't passed in
-        if not user_id and g and 'jwt_oidc_token_info' in g:
-            user: UserModel = UserModel.find_by_jwt_token()
-            user_id = user.id
+class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too-few-public-methods
+    """Class for Activity Log Publishing."""
 
-        data = {
-            'action': action,
-            'itemType': 'ACCOUNT',
-            'itemName': item_name,
-            'itemId': item_id,
-            'orgId': org_id,
-            'actor': user_id,
-            'remoteAddr': fetch_remote_addr(),
-            'createdAt': f'{datetime.now()}'
+    @staticmethod
+    def publish_activity(activity: Activity):  # pylint:disable=unused-argument
+        """Publish the activity asynchronously, using the given details."""
+        try:
+            # find user_id if haven't passed in
+            if not activity.actor_id and g and 'jwt_oidc_token_info' in g:
+                user: UserModel = UserModel.find_by_jwt_token()
+                activity.actor_id = user.id if user else None
+            data = {
+                'actorId': activity.actor_id,
+                'action': activity.action,
+                'itemType': 'ACCOUNT',
+                'itemName': activity.name,
+                'itemId': activity.id,
+                'itemValue': activity.value,
+                'orgId': activity.org_id,
+                'remoteAddr': fetch_remote_addr(),
+                'createdAt': f'{datetime.now()}'
+            }
+            source = 'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
 
-        }
-        source = 'https://api.auth.bcregistry.gov.bc.ca/v1/accounts'
-
-        payload = {
-            'specversion': '1.x-wip',
-            'type': 'bc.registry.auth.activity',
-            'source': source,
-            'id': str(uuid.uuid1()),
-            'time': f'{datetime.now()}',
-            'datacontenttype': 'application/json',
-            'data': data
-        }
-        publish_response(payload=payload, client_name=CONFIG.NATS_ACTIVITY_CLIENT_NAME,
-                         subject=CONFIG.NATS_ACTIVITY_SUBJECT)
-    except Exception as err:  # noqa: B902 # pylint: disable=broad-except
-        capture_message('Activity Queue Publish Event Error:' + str(err), level='error')
-        current_app.logger.error('Activity Queue Publish Event Error:', exc_info=True)
+            payload = {
+                'specversion': '1.x-wip',
+                'type': 'bc.registry.auth.activity',
+                'source': source,
+                'id': str(uuid.uuid1()),
+                'time': f'{datetime.now()}',
+                'datacontenttype': 'application/json',
+                'data': data
+            }
+            publish_response(payload=payload, client_name=CONFIG.NATS_ACTIVITY_CLIENT_NAME,
+                             subject=CONFIG.NATS_ACTIVITY_SUBJECT)
+        except Exception as err:  # noqa: B902 # pylint: disable=broad-except
+            capture_message('Activity Queue Publish Event Error:' + str(err), level='error')
+            current_app.logger.error('Activity Queue Publish Event Error:', exc_info=True)
