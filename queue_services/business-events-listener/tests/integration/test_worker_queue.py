@@ -19,11 +19,11 @@ from typing import List
 import pytest
 from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
-from auth_api.models import db
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
+from auth_api.models import db
 from auth_api.utils.enums import AccessType
 from entity_queue_common.service_utils import subscribe_to_queue
 from requests.models import Response
