@@ -25,30 +25,6 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data1
 
-  ####################### Notify Database Definition #######################
-  notifydb:
-    image: postgres:11
-    restart: always
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "54334:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data4
-
-  ####################### Notify Unit Test Database Definition #######################
-  notifydb-test:
-    image: postgres:11
-    restart: always
-    environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "54335:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data5
-
   #################### Jaeger Tracing Service Definition ####################
   jaeger:
     image: jaegertracing/all-in-one

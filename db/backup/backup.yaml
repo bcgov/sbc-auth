@@ -18,7 +18,6 @@ objects:
     data:
       backup-file: |-
         postgres=postgresql-${TAG}:5432/auth-db
-        postgres=postgresql-notify-${TAG}:5432/notify
         postgres=postgresql-keycloak-${TAG}:5432/keycloak
 
         0 1 * * * default ./backup.sh -s
@@ -133,16 +132,6 @@ objects:
                     secretKeyRef:
                       key: database-password
                       name: postgresql-${TAG}-secret
-                - name: POSTGRESQL_NOTIFY_${TAG_UPPER}_USER
-                  valueFrom:
-                    secretKeyRef:
-                      key: database-user
-                      name: postgresql-notify-${TAG}-secret
-                - name: POSTGRESQL_NOTIFY_${TAG_UPPER}_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      key: database-password
-                      name: postgresql-notify-${TAG}-secret
                 - name: POSTGRESQL_KEYCLOAK_${TAG_UPPER}_USER
                   valueFrom:
                     secretKeyRef:
