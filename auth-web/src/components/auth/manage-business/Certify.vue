@@ -43,7 +43,7 @@ export default class Certify extends Vue {
   protected isCertified = false
 
   get currentUserName (): string {
-    return this.currentUser.lastName + ', ' + this.currentUser.firstName
+    return `${this.currentUser.lastName}, ${this.currentUser.firstName}`
   }
 
   /** Emits an event to update the Is Certified prop. */
