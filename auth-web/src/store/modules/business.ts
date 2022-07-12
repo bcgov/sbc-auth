@@ -224,6 +224,7 @@ export default class BusinessModule extends VuexModule {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       return response.data.business
     }
+    return null
   }
 
   @Action({ rawError: true })
