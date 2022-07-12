@@ -17,7 +17,7 @@
             </p>
 
             <v-expand-transition>
-              <div v-show="errorMessage">
+              <div v-if="errorMessage">
                 <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
                   >{{ errorMessage }} <strong>{{ searchedBusinessIdentifier }}</strong>
                 </v-alert>
@@ -73,7 +73,7 @@
             </v-row>
 
             <v-expand-transition>
-              <div v-show="submitBNRequestErrorMessage">
+              <div v-if="submitBNRequestErrorMessage">
                 <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
                   >{{ submitBNRequestErrorMessage }}
                 </v-alert>
@@ -124,19 +124,17 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable */
-import { Component } from 'vue-property-decorator'
-import CommonUtils from '@/util/common-util'
-import Vue from 'vue'
-import { mask } from 'vue-the-mask'
-import { mapActions } from 'vuex'
 import { BNRequest } from '@/models/request-tracker'
+import CommonUtils from '@/util/common-util'
+import { Component } from 'vue-property-decorator'
+import Vue from 'vue'
+import { mapActions } from 'vuex'
+import { mask } from 'vue-the-mask'
+import { namespace } from 'vuex-class'
 
+const BusinessModule = namespace('business')
 
 @Component({
-  methods: {
-    ...mapActions('business', ['createBNRequest', 'searchBusiness'])
-  },
   directives: { mask }
 })
 export default class AdminDashboardView extends Vue {
@@ -145,7 +143,10 @@ export default class AdminDashboardView extends Vue {
     submitBNRequestForm: HTMLFormElement
   }
 
+  @BusinessModule.Action('searchBusiness')
   private readonly searchBusiness!: (businessIdentifier: string) => Promise<any>
+
+  @BusinessModule.Action('createBNRequest')
   private readonly createBNRequest!: (request: BNRequest) => Promise<any>
 
   // local variables
@@ -171,11 +172,11 @@ export default class AdminDashboardView extends Vue {
     return (!v || pattern.test(v)) || 'Invalid business number'
   }]
 
-  protected isFormValid(): boolean {
+  protected isFormValid (): boolean {
     return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
   }
 
-  protected async search() {
+  protected async search () {
     if (this.isFormValid()) {
       this.searchActive = true
 
@@ -198,16 +199,16 @@ export default class AdminDashboardView extends Vue {
       CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 
-  protected canRequestNewBN(): boolean {
-    return this.businessDetails && 
+  protected canRequestNewBN (): boolean {
+    return this.businessDetails &&
     (!this.businessDetails.taxId || this.businessDetails.taxId.length < 15)
   }
-  
-  protected isBNRequestFormValid(): boolean {
+
+  protected isBNRequestFormValid (): boolean {
     return this.requestCRA && this.$refs.submitBNRequestForm?.validate()
   }
 
-  protected async submitBNRequest() {
+  protected async submitBNRequest () {
     if (this.isBNRequestFormValid()) {
       this.submitActive = true
       try {

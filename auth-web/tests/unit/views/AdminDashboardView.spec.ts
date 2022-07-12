@@ -7,7 +7,7 @@ Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 describe('Search Business Form: Initial', () => {
-  let wrapper: Wrapper<any> = mount(AdminDashboardView, {
+  const wrapper: Wrapper<any> = mount(AdminDashboardView, {
     vuetify,
     propsData: {}
   })
@@ -20,7 +20,7 @@ describe('Search Business Form: Initial', () => {
 })
 
 describe('Search Business Form: Result', () => {
-  let wrapper: Wrapper<any> = shallowMount(AdminDashboardView, {
+  const wrapper: Wrapper<any> = shallowMount(AdminDashboardView, {
     vuetify,
     propsData: {}
   })

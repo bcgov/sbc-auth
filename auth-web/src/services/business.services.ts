@@ -1,6 +1,6 @@
-import { BNRequest, RequestTracker } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
 import { AxiosResponse } from 'axios'
+import { BNRequest } from '@/models/request-tracker'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { axios } from '@/util/http-util'
@@ -62,25 +62,15 @@ export default class BusinessService {
     return axios.post(url)
   }
 
-  static async fetchBNRequests (businessId: string): Promise<RequestTracker[]> {
+  static async fetchBNRequests (businessId: string): Promise<AxiosResponse<any>> {
+    // Will be used in the next ticket for Administrative BN
     const url = `requestTracker/bn/${businessId}`
     return axios.get(url)
-      .then(response => {
-        return response?.data?.requestTrackers
-      })
   }
 
-  static async fetchRequestTracker (requestId: string): Promise<RequestTracker> {
+  static async fetchRequestTracker (requestId: string): Promise<AxiosResponse<any>> {
+    // Will be used in the next ticket for Administrative BN
     const url = `requestTracker/${requestId}`
     return axios.get(url)
-      .then(response => {
-        const requestTracker = response?.data
-        if (!requestTracker) {
-        // eslint-disable-next-line no-console
-          console.log('fetchRequestTracker() error - invalid response =', response)
-          throw new Error('Invalid API response')
-        }
-        return requestTracker
-      })
   }
 }

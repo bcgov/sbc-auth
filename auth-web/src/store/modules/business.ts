@@ -218,14 +218,12 @@ export default class BusinessModule extends VuexModule {
 
   // Following searchBusiness will search data from legal-api.
   @Action({ rawError: true })
-  public async searchBusiness (businessNumber: string): Promise<any> {
-    return BusinessService.searchBusiness(businessNumber)
-      .then(response => {
-        if (response.status === 200) {
-          ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessNumber)
-          return response.data.business
-        }
-      })
+  public async searchBusiness (businessIdentifier: string): Promise<any> {
+    const response = await BusinessService.searchBusiness(businessIdentifier)
+    if (response && response.data && response.status === 200) {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
+      return response.data.business
+    }
   }
 
   @Action({ rawError: true })
