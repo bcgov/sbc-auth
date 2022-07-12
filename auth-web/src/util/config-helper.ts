@@ -109,6 +109,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('LEGAL_API_URL') + ConfigHelper.getValue('LEGAL_API_VERSION')
   }
 
+  static getLegalAPIV2Url () {
+    return ConfigHelper.getValue('LEGAL_API_URL') + ConfigHelper.getValue('LEGAL_API_VERSION_2')
+  }
+
   static getVonAPIUrl () {
     return ConfigHelper.getValue('VON_API_URL') + ConfigHelper.getValue('VON_API_VERSION')
   }

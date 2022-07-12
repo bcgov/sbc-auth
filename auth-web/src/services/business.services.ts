@@ -1,3 +1,4 @@
+import { BNRequest, RequestTracker } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
@@ -51,5 +52,35 @@ export default class BusinessService {
 
   static async getNrData (nrNumber: string): Promise<AxiosResponse<any>> {
     return axios.get(`${ConfigHelper.getLegalAPIUrl()}/nameRequests/${nrNumber}`)
+  }
+
+  static async createBNRequest (request: BNRequest): Promise<AxiosResponse<any>> {
+    let url = `${ConfigHelper.getLegalAPIV2Url()}/admin/bn/${request.businessIdentifier}`
+    if (request.businessNumber) {
+      url = `${url}/${request.businessNumber}`
+    }
+    return axios.post(url)
+  }
+
+  static async fetchBNRequests (businessId: string): Promise<RequestTracker[]> {
+    const url = `requestTracker/bn/${businessId}`
+    return axios.get(url)
+      .then(response => {
+        return response?.data?.requestTrackers
+      })
+  }
+
+  static async fetchRequestTracker (requestId: string): Promise<RequestTracker> {
+    const url = `requestTracker/${requestId}`
+    return axios.get(url)
+      .then(response => {
+        const requestTracker = response?.data
+        if (!requestTracker) {
+        // eslint-disable-next-line no-console
+          console.log('fetchRequestTracker() error - invalid response =', response)
+          throw new Error('Invalid API response')
+        }
+        return requestTracker
+      })
   }
 }

@@ -24,6 +24,7 @@ export enum SessionStorageKeys {
 }
 
 export enum Role {
+    AdminEdit = 'admin_edit',
     Staff = 'staff',
     Public = 'public_user',
     Edit = 'edit',
@@ -68,6 +69,8 @@ export enum Pages {
     STAFF_DASHBOARD_OLD= '/searchbusiness',
     STAFF_SETUP_ACCOUNT = 'staff-setup-account',
     CONFIRM_TOKEN = 'confirmtoken',
+    ADMIN = '/admin',
+    ADMIN_DASHBOARD = '/admin/dashboard',
     STAFF = '/staff',
     STAFF_DASHBOARD = '/staff/dashboard',
     STAFF_DASHBOARD_ACTIVE = '/staff/dashboard/active',
