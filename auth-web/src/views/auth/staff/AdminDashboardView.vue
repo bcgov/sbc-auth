@@ -182,9 +182,9 @@ export default class AdminDashboardView extends Vue {
       this.searchActive = true
 
       try {
+        this.errorMessage = ''
         // Search for business, action will set session storage
         this.businessDetails = await this.searchBusiness(this.businessIdentifier)
-        this.errorMessage = ''
       } catch (exception) {
         this.businessDetails = null
         this.searchedBusinessIdentifier = this.businessIdentifier
@@ -213,12 +213,12 @@ export default class AdminDashboardView extends Vue {
     if (this.isBNRequestFormValid()) {
       this.submitActive = true
       try {
+        this.submitBNRequestErrorMessage = ''
         await this.createBNRequest({
           businessIdentifier: this.businessIdentifier,
           businessNumber: this.businessNumber
         })
         this.$refs.submitBNRequestForm?.reset()
-        this.submitBNRequestErrorMessage = ''
       } catch (exception) {
         this.submitBNRequestErrorMessage = exception
       } finally {
