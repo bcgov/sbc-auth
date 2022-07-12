@@ -3,25 +3,26 @@ import Certify from '@/components/auth/manage-business/Certify.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import UserModule from '@/store/modules/user'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 describe('Add Business Form', () => {
-  let wrapper: Wrapper<Certify>
+  let wrapper: Wrapper<any>
   let userModule: any
 
   userModule = {
     namespaced: true,
     state: {
-      userProfile: {
-        firstname: 'Nadia',
-        lastname: 'Woodie'
+      currentUser: {
+        firstName: 'Nadia',
+        lastName: 'Woodie'
       }
     },
-    actions: {
-      getUserProfile: jest.fn()
-    }
+    actions: UserModule.actions,
+    mutations: UserModule.mutations,
+    getters: UserModule.getters
   }
 
   beforeAll(() => {
@@ -40,7 +41,6 @@ describe('Add Business Form', () => {
       localVue,
       vuetify,
       propsData: {
-        legalName: 'Legal Name',
         entity: 'entity',
         clause: 'Lorem ipsum dolor sit amet.'
       }
