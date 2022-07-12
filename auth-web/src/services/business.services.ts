@@ -62,14 +62,14 @@ export default class BusinessService {
     return axios.post(url)
   }
 
+  // Will be used in the next ticket for Administrative BN
   static async fetchBNRequests (businessId: string): Promise<AxiosResponse<any>> {
-    // Will be used in the next ticket for Administrative BN
     const url = `requestTracker/bn/${businessId}`
     return axios.get(url)
   }
 
+  // Will be used in the next ticket for Administrative BN
   static async fetchRequestTracker (requestId: string): Promise<AxiosResponse<any>> {
-    // Will be used in the next ticket for Administrative BN
     const url = `requestTracker/${requestId}`
     return axios.get(url)
   }

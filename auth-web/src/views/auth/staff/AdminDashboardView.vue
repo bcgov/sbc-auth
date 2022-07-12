@@ -25,7 +25,7 @@
 
             <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
               <v-text-field
-                filled dense req persistent-hint
+                filled dense persistent-hint
                 label="Incorporation Number or Registration Number"
                 hint="Example: BC1234567, CP1234567 or FM1234567"
                 @blur="formatBusinessIdentifier()"
@@ -96,7 +96,7 @@
               </v-checkbox>
               <!-- Business Number -->
               <v-text-field
-                dense req
+                dense
                 filled
                 persistent-hint
                 class="business-number"
