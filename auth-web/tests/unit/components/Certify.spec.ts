@@ -10,9 +10,8 @@ const vuetify = new Vuetify({})
 
 describe('Add Business Form', () => {
   let wrapper: Wrapper<any>
-  let userModule: any
 
-  userModule = {
+  const userModule: any = {
     namespaced: true,
     state: {
       currentUser: {
@@ -57,9 +56,10 @@ describe('Add Business Form', () => {
     expect(wrapper.find('#certify').isVisible()).toBe(true)
 
     // verify checkbox
-    expect(wrapper.find('.certify-checkbox label').text()).toContain('Woodie, Nadia')
-    expect(wrapper.find('.certify-checkbox label').text()).toContain('certifies that')
-    expect(wrapper.find('.certify-checkbox label').text()).toContain('of the entity')
+    const fmCertifyLabel = wrapper.find('.certify-checkbox label').text()
+    expect(fmCertifyLabel).toContain('Woodie, Nadia')
+    expect(fmCertifyLabel).toContain('certifies that')
+    expect(fmCertifyLabel).toContain('of the entity')
     expect(wrapper.find('.certify-clause').text()).toBe('Lorem ipsum dolor sit amet.')
   })
 })
