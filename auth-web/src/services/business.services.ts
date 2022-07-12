@@ -1,5 +1,6 @@
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
 import { AxiosResponse } from 'axios'
+import { BNRequest } from '@/models/request-tracker'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { axios } from '@/util/http-util'
@@ -51,5 +52,25 @@ export default class BusinessService {
 
   static async getNrData (nrNumber: string): Promise<AxiosResponse<any>> {
     return axios.get(`${ConfigHelper.getLegalAPIUrl()}/nameRequests/${nrNumber}`)
+  }
+
+  static async createBNRequest (request: BNRequest): Promise<AxiosResponse<any>> {
+    let url = `${ConfigHelper.getLegalAPIV2Url()}/admin/bn/${request.businessIdentifier}`
+    if (request.businessNumber) {
+      url = `${url}/${request.businessNumber}`
+    }
+    return axios.post(url)
+  }
+
+  // Will be used in the next ticket for Administrative BN
+  static async fetchBNRequests (businessId: string): Promise<AxiosResponse<any>> {
+    const url = `requestTracker/bn/${businessId}`
+    return axios.get(url)
+  }
+
+  // Will be used in the next ticket for Administrative BN
+  static async fetchRequestTracker (requestId: string): Promise<AxiosResponse<any>> {
+    const url = `requestTracker/${requestId}`
+    return axios.get(url)
   }
 }
