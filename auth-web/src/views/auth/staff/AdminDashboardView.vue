@@ -1,5 +1,5 @@
 <template>
-  <v-container class="view-container">
+  <v-container id="admin-dashboard-container" class="view-container">
     <div class="view-header flex-column">
       <h1 class="view-header__title">Admin Dashboard</h1>
     </div>
@@ -16,13 +16,12 @@
               Enter the Entity's Incorporation Number or Registration Number below to access their dashboard.
             </p>
 
-            <v-expand-transition>
-              <div v-if="errorMessage">
-                <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
-                  >{{ errorMessage }} <strong>{{ searchedBusinessIdentifier }}</strong>
-                </v-alert>
-              </div>
-            </v-expand-transition>
+            <v-alert
+              type="error" icon="mdi-alert-circle" class="mb-0"
+              v-if="errorMessage"
+            >
+              {{ errorMessage }} <strong>{{ searchedBusinessIdentifier }}</strong>
+            </v-alert>
 
             <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
               <v-text-field
@@ -48,34 +47,37 @@
           </div>
           <template v-else>
             <v-row class="business-details" no-gutters>
-              <v-col cols="12" sm="3" class="pr-4">
+              <v-col cols="12" sm="4" class="pr-4">
                 <strong>Business Name</strong>
               </v-col>
-              <v-col cols="12" sm="9">
+              <v-col cols="12" sm="8">
                 {{ businessDetails.legalName }}
               </v-col>
             </v-row>
             <v-row no-gutters>
-              <v-col cols="12" sm="3" class="pr-4">
-                <strong>Registration Number</strong>
+              <v-col cols="12" sm="4" class="pr-4">
+                <strong>Incorporation Number or Registration Number</strong>
               </v-col>
-              <v-col cols="12" sm="9">
+              <v-col cols="12" sm="8">
                 {{ businessDetails.identifier }}
               </v-col>
             </v-row>
             <v-row no-gutters>
-              <v-col cols="12" sm="3" class="pr-4">
+              <v-col cols="12" sm="4" class="pr-4">
                 <strong>Business Number (BN9/BN15)</strong>
               </v-col>
-              <v-col cols="12" sm="9">
+              <v-col cols="12" sm="8">
                 {{ businessDetails.taxId || '(Not Available)' }}
               </v-col>
             </v-row>
 
             <v-expand-transition>
-              <div v-if="submitBNRequestErrorMessage">
-                <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
-                  >{{ submitBNRequestErrorMessage }}
+              <div >
+                <v-alert
+                  type="error" icon="mdi-alert-circle" class="mb-0"
+                  v-if="submitBNRequestErrorMessage"
+                >
+                  {{ submitBNRequestErrorMessage }}
                 </v-alert>
               </div>
             </v-expand-transition>
