@@ -254,6 +254,7 @@ import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import { User, UserProfileData } from '@/models/user'
 import { mapActions, mapMutations, mapState } from 'vuex'
+import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
@@ -482,7 +483,11 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private redirectToNext () {
-      this.$router.push(this.getNextPageUrl())
+      if (CommonUtils.isUrl(this.getNextPageUrl())) {
+        window.location.assign(this.getNextPageUrl())
+      } else {
+        this.$router.push(this.getNextPageUrl())
+      }
     }
 
     private cancel () {
