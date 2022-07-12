@@ -29,7 +29,7 @@ const UserModule = namespace('user')
 
 @Component({})
 export default class Certify extends Vue {
-  @UserModule.State('currentUser') private currentUser!: KCUserProfile
+  @UserModule.State('currentUser') readonly currentUser!: KCUserProfile
 
   /** Entity name. */
   @Prop({ default: 'business' })
