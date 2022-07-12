@@ -38,7 +38,7 @@ class ActivityLogPublisher:  # pylint: disable=too-many-instance-attributes, too
             # find user_id if haven't passed in
             if not activity.actor_id and g and 'jwt_oidc_token_info' in g:
                 user: UserModel = UserModel.find_by_jwt_token()
-                activity.actor_id = user.id
+                activity.actor_id = user.id if user else None
             data = {
                 'actorId': activity.actor_id,
                 'action': activity.action,

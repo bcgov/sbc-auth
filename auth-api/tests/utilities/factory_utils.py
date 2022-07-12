@@ -313,6 +313,42 @@ def get_tos_latest_version():
     return '5'
 
 
+def patch_pay_account_post(monkeypatch):
+    """Patch pay account post success (200 or 201)."""
+    class MockPayResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        @staticmethod
+        def json():
+            return {}
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.post', lambda *args,
+                        **kwargs: MockPayResponse(None, 200))
+
+
+def patch_pay_account_put(monkeypatch):
+    """Patch pay account post success (200 or 201)."""
+    class MockPayResponse:
+        def __init__(self, json_data, status_code):
+            self.json_data = json_data
+            self.status_code = status_code
+
+        @staticmethod
+        def json():
+            return {}
+
+        def raise_for_status(self):
+            pass
+
+    monkeypatch.setattr('auth_api.services.rest_service.RestService.put', lambda *args,
+                        **kwargs: MockPayResponse(None, 200))
+
+
 def patch_pay_account_delete(monkeypatch):
     """Patch pay account delete success."""
     class MockPayResponse:

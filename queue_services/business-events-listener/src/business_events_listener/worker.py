@@ -30,6 +30,8 @@ import os
 from typing import Dict
 
 import nats
+from auth_api.enums import ActivityAction
+from auth_api.models import Activity as ActivityModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
@@ -132,6 +134,9 @@ async def process_name_events(event_message: Dict[str, any]):
                 logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
                 affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
                 affiliation.flush()
+                activity: ActivityModel = ActivityModel(org_id=org.id, action=ActivityAction.CREATE_AFFILIATION.value,
+                                                        name=nr_entity.name, id=nr_entity.business_identifier)
+                activity.flush()
 
     nr_entity.save()
     logger.debug('<<<<<<<process_name_events<<<<<<<<<<')

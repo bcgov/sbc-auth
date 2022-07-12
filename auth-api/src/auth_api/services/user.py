@@ -16,6 +16,7 @@
 This module manages the User Information.
 """
 
+import json
 from typing import Dict, List
 
 from flask import current_app
@@ -201,8 +202,11 @@ class User:  # pylint: disable=too-many-instance-attributes
                                            membership_type_status=Status.ACTIVE.value)
 
         membership_model.flush()
+        name = {'first_name': user_model.firstname, 'last_name': user_model.lastname}
         ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.APPROVE_TEAM_MEMBER.value,
-                                                       name=db_username, value=membership['membershipType']))
+                                                       name=json.dumps(name),
+                                                       value=membership['membershipType'],
+                                                       id=user_model.id))
         return user_model
 
     @staticmethod

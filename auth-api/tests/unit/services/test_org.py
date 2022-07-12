@@ -40,15 +40,15 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus, PaymentMethod,
-    SuspensionReasonCode, TaskAction, TaskRelationshipStatus, TaskStatus)
+    AccessType, ActivityAction, LoginSource, OrgStatus, OrgType, PatchActions, PaymentMethod, SuspensionReasonCode,
+    TaskAction, TaskRelationshipStatus, TaskStatus)
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
-    patch_pay_account_delete, patch_token_info)
+    patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put, patch_token_info)
 
 
 # noqa: I005
@@ -138,16 +138,20 @@ def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, mo
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
-    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
-    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.BCOL)
-    patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
     # Have to patch this because the pay spec is wrong and returns 201, not 202 or 200.
-    with patch.object(OrgService, '_create_payment_for_org', return_value=PaymentAccountStatus.CREATED):
-        with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
-            org = OrgService.update_org(org, new_payment_method)
-            mock_alp.assert_called_with(Activity(action=ActivityAction.PAYMENT_INFO_CHANGE.value,
-                                                 org_id=ANY, name=ANY, id=ANY,
-                                                 value=PaymentMethod.BCOL.value))
+    patch_pay_account_post(monkeypatch)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
+
+    patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
+
+    # Have to patch this because the pay spec is wrong and returns 201, not 202 or 200.
+    patch_pay_account_put(monkeypatch)
+    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
+        org = OrgService.update_org(org, new_payment_method)
+        mock_alp.assert_called_with(Activity(action=ActivityAction.PAYMENT_INFO_CHANGE.value,
+                                             org_id=ANY, name=ANY, id=ANY,
+                                             value=PaymentMethod.ONLINE_BANKING.value))
 
 
 def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
@@ -269,7 +273,7 @@ def test_put_basic_org_assert_pay_request_is_govm(session,
             org = OrgService.update_org(org, org_body)
             mock_alp.assert_called_with(Activity(action=ActivityAction.ACCOUNT_ADDRESS_CHANGE.value,
                                         org_id=ANY, name=ANY, id=ANY,
-                                        value=TestOrgInfo.get_mailing_address()))
+                                        value=ANY))
             assert org
         dictionary = org.as_dict()
         assert dictionary['name'] == TestOrgInfo.org_govm['name']
@@ -453,8 +457,8 @@ def test_update_org_name(session, monkeypatch):  # pylint:disable=unused-argumen
         with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
             org = org.update_org({'name': 'My Test'})
             mock_alp.assert_called_with(Activity(action=ActivityAction.ACCOUNT_NAME_CHANGE.value,
-                                                 org_id=ANY, value=ANY, id=ANY,
-                                                 name='My Test'))
+                                                 org_id=ANY, value='My Test', id=ANY,
+                                                 name=ANY))
         assert org
         dictionary = org.as_dict()
         mock_put.assert_called()

@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service for managing Organization data."""
 from datetime import datetime
+import json
 from typing import Dict, List, Tuple
 
 from flask import current_app, g
@@ -187,7 +188,7 @@ class Org:  # pylint: disable=too-many-public-methods
     @user_context
     def _create_payment_settings(org_model: OrgModel, payment_info: dict,  # pylint: disable=too-many-arguments
                                  payment_method: str, mailing_address=None,
-                                 is_new_org: bool = True, **kwargs) -> PaymentAccountStatus:
+                                 is_new_org: bool = True, **kwargs):
         """Add payment settings for the org."""
         pay_url = current_app.config.get('PAY_API_URL')
         org_name_for_pay = f'{org_model.name}-{org_model.branch_name}' if org_model.branch_name else org_model.name
@@ -225,12 +226,17 @@ class Org:  # pylint: disable=too-many-public-methods
             response = RestService.put(endpoint=f'{pay_url}/accounts/{org_model.id}',
                                        data=pay_request, token=token, raise_for_status=True)
 
-        if response == http_status.HTTP_200_OK:
+        if response.status_code == http_status.HTTP_200_OK:
             payment_account_status = PaymentAccountStatus.CREATED
-        elif response == http_status.HTTP_202_ACCEPTED:
+        elif response.status_code == http_status.HTTP_202_ACCEPTED:
             payment_account_status = PaymentAccountStatus.PENDING
         else:
             payment_account_status = PaymentAccountStatus.FAILED
+
+        if payment_account_status != PaymentAccountStatus.FAILED:
+            ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.PAYMENT_INFO_CHANGE.value,
+                                                           name=org_model.name,
+                                                           value=payment_method))
 
         return payment_account_status
 
@@ -371,8 +377,7 @@ class Org:  # pylint: disable=too-many-public-methods
                 Org.send_staff_review_account_reminder(relationship_id=self._model.id)
 
         if name_updated or payment_info:
-            payment_result = Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
-            Org._publish_activity_on_payment_change(org_model.id, current_org_name, payment_result, payment_info)
+            Org._create_payment_for_org(mailing_address, self._model, payment_info, False)
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
 
@@ -388,21 +393,13 @@ class Org:  # pylint: disable=too-many-public-methods
     def _publish_activity_on_mailing_address_change(org_id: int, org_name: str, mailing_address: str):
         if mailing_address:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ACCOUNT_ADDRESS_CHANGE.value,
-                                                           name=org_name, value=mailing_address))
+                                                           name=org_name, value=json.dumps(mailing_address)))
 
     @staticmethod
     def _publish_activity_on_name_change(org_id: int, org_name: str):
         if org_name:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ACCOUNT_NAME_CHANGE.value,
-                                                           name=org_name))
-
-    @staticmethod
-    def _publish_activity_on_payment_change(org_id: int, org_name: str, status: PaymentAccountStatus, payment_info):
-        if (payment_method := payment_info.get('paymentMethod', None)) and status.value in \
-                [PaymentAccountStatus.PENDING.value, PaymentAccountStatus.CREATED.value]:
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.PAYMENT_INFO_CHANGE.value,
-                                                           name=org_name,
-                                                           value=payment_method))
+                                                           name=org_name, value=org_name))
 
     @staticmethod
     def _create_payment_for_org(mailing_address, org, payment_info, is_new_org: bool = True) -> PaymentAccountStatus:
@@ -416,7 +413,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if is_new_org or selected_payment_method:
             validator_obj = payment_type_validate(is_fatal=True, **arg_dict)
             payment_method = validator_obj.info.get('payment_type')
-        return Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
+        Org._create_payment_settings(org, payment_info, payment_method, mailing_address, is_new_org)
 
     @staticmethod
     def _create_gov_account_task(org_model: OrgModel):

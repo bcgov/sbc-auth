@@ -29,7 +29,7 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
     item_type = Column(String(250), index=True)  # Which activity type: Account, Business, Names, Payment etc.
     item_name = Column(String(250), index=True)  # Who or what this affects - Display
     item_id = Column(String(250), index=False)  # id of the entity (if possible, may duplicate org_id)
-    item_value = Column(String(250), nullable=True)  # Value being set (Payment Method / Role Name etc)
+    item_value = Column(String(900), nullable=True)  # Value being set (Payment Method / Role Name etc)
     remote_addr = Column(String(250), index=False)
     org_id = Column(Integer, nullable=True, index=True)
 

@@ -110,6 +110,8 @@ class Product:
                                              product_code=product_model.linked_product_code,
                                              status_code=subscription_status
                                              ).flush()
+                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                                                   name=product_subscription.product_code))
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
@@ -221,9 +223,9 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         Product.send_approved_product_subscription_notification(admin_email, product_model.description,
                                                                 product_subscription.status_code)
-        action = ActivityAction.ADD_PRODUCT_AND_SERVICE.value \
-            if is_approved else ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value
-        ActivityLogPublisher.publish_activity(Activity(org_id, action, name=product_subscription.product_code))
+        if is_approved:
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                                           name=product_subscription.product_code))
         current_app.logger.debug('>update_task_product ')
 
     @staticmethod

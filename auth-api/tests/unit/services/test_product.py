@@ -55,11 +55,6 @@ def test_update_product_subscription(session, keycloak_mock, monkeypatch):
             self.contact = contact
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
         with patch.object(ContactLinkModel, 'find_by_user_id', return_value=MockPerson(contact=MockContact())):
-            ProductService.update_product_subscription(product_subscription.id, False, org._model.id)
-            mock_alp.assert_called_with(Activity(action=ActivityAction.REMOVE_PRODUCT_AND_SERVICE.value,
-                                                 org_id=ANY, value=ANY, id=ANY, name='PPR'))
-    with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
-        with patch.object(ContactLinkModel, 'find_by_user_id', return_value=MockPerson(contact=MockContact())):
             ProductService.update_product_subscription(product_subscription.id, True, org._model.id)
             mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                         org_id=ANY, value=ANY, id=ANY, name='PPR'))

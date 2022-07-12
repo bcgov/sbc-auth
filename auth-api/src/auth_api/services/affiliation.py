@@ -246,6 +246,8 @@ class Affiliation:
             # Create an affiliation with org
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
             affiliation_model.save()
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                           name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -277,7 +279,7 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
         ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
-                                                       entity.name, id=entity.business_identifier))
+                                                       name=entity.name, id=entity.business_identifier))
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):

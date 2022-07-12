@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service for managing Invitation data."""
 from datetime import datetime
+import json
 from typing import Dict
 from urllib.parse import urlencode
 
@@ -407,7 +408,7 @@ class Invitation:
                 )
                 membership_model.save()
 
-                Invitation._publish_activity_if_active(membership_model, user_from_context.user_name)
+                Invitation._publish_activity_if_active(membership_model, user_from_context)
 
                 # Create staff review task.
                 Invitation._create_affidavit_review_task(org_model, membership_model)
@@ -446,12 +447,14 @@ class Invitation:
         return Status.PENDING_APPROVAL.value
 
     @staticmethod
-    def _publish_activity_if_active(membership: MembershipModel, username: str):
+    def _publish_activity_if_active(membership: MembershipModel, user: UserContext):
         """Purpose: GOVM accounts - they instantly get accepted."""
         if membership.status == Status.ACTIVE.value:
+            name = {'first_name': user.first_name, 'last_name': user.last_name}
             ActivityLogPublisher.publish_activity(Activity(membership.org_id,
                                                            ActivityAction.APPROVE_TEAM_MEMBER.value,
-                                                           name=username))
+                                                           name=json.dumps(name)
+                                                           ))
 
     @staticmethod
     def _create_affidavit_review_task(org: OrgModel, membership: MembershipModel):
