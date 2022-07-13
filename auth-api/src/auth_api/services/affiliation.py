@@ -249,7 +249,7 @@ class Affiliation:
             affiliation_model.save()
             if entity.corp_type != 'TMP':
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                            name=entity.name, id=entity.business_identifier))
+                                                               name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -283,7 +283,7 @@ class Affiliation:
 
         if entity.corp_type != 'TMP':
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
-                                                        name=entity.name, id=entity.business_identifier))
+                                                           name=entity.name, id=entity.business_identifier))
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
