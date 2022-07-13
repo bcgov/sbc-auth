@@ -9,8 +9,13 @@
     {
         "vault": "relationship",
         "application": [
-            "postgres-auth",
-            "sentry"
+            "postgres-auth"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+             "relationship-api"
         ]
     }
 ]

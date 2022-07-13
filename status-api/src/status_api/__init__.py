@@ -38,11 +38,12 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app.config.from_object(CONFIGURATION[run_mode])
 
     # Configure Sentry
-    if app.config.get('SENTRY_DSN', None):
-        sentry_sdk.init(
-            dsn=app.config.get('SENTRY_DSN'),
-            integrations=[FlaskIntegration()]
-        )
+    if app.config.get('SENTRY_ENABLE').lower() == 'true':
+        if app.config.get('SENTRY_DSN', None):
+            sentry_sdk.init(
+                dsn=app.config.get('SENTRY_DSN'),
+                integrations=[FlaskIntegration()]
+            )
 
     from status_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
 

@@ -38,7 +38,7 @@ MAIL_PASSWORD = CONFIG('MAIL_PASSWORD', cast=str, default='')
 MAIL_FROM_ID = CONFIG('MAIL_FROM_ID', cast=str, default='abcabc@abcdabcd.com')
 
 # Sentry Config
-SENTRY_ENABLE = CONFIG('SENTRY_ENABLE', cast=str, default=None)
+SENTRY_ENABLE = CONFIG('SENTRY_ENABLE', cast=str, default=False)
 SENTRY_DSN = CONFIG('SENTRY_DSN', cast=str, default=None)
 
 NATS_CLIENT_NAME = CONFIG('NATS_CLIENT_NAME', cast=str, default='notifiations.worker')
