@@ -186,8 +186,9 @@ class Affiliation:
 
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
-        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                              name=entity.name, id=entity.business_identifier))
+        if entity_type != 'TMP':
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                           name=entity.name, id=entity.business_identifier))
         return Affiliation(affiliation)
 
     @staticmethod
@@ -246,8 +247,9 @@ class Affiliation:
             # Create an affiliation with org
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
             affiliation_model.save()
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                           name=entity.name, id=entity.business_identifier))
+            if entity.corp_type != 'TMP':
+                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                            name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -278,8 +280,10 @@ class Affiliation:
             entity.reset_passcode(entity.business_identifier, email_addresses)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
-        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
-                                                       name=entity.name, id=entity.business_identifier))
+
+        if entity.corp_type != 'TMP':
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
+                                                        name=entity.name, id=entity.business_identifier))
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
