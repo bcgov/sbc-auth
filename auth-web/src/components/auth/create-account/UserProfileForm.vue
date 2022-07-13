@@ -263,6 +263,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import UserService from '@/services/user.services'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import configHelper from '@/util/config-helper'
 import { mask } from 'vue-the-mask'
 
@@ -484,7 +485,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
 
     private redirectToNext () {
       if (CommonUtils.isUrl(this.getNextPageUrl())) {
-        window.location.assign(this.getNextPageUrl())
+        window.location.assign(appendAccountId(this.getNextPageUrl()))
       } else {
         this.$router.push(this.getNextPageUrl())
       }
