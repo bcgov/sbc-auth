@@ -101,7 +101,7 @@ class Product:
                                                                 ).flush()
                 if subscription_status == ProductSubscriptionStatus.ACTIVE.value:
                     ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
-                                                                   name=product_subscription.product_code))
+                                                                   name=product_model.description))
 
                 # If there is a linked product, add subscription to that too.
                 # This is to handle cases where Names and Business Registry is combined together.
@@ -110,8 +110,10 @@ class Product:
                                              product_code=product_model.linked_product_code,
                                              status_code=subscription_status
                                              ).flush()
-                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
-                                                                   name=product_subscription.product_code))
+                    if subscription_status == ProductSubscriptionStatus.ACTIVE.value:
+                        ActivityLogPublisher.publish_activity(Activity(org_id,
+                                                                       ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                                                       name=product_model.description))
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
@@ -225,7 +227,7 @@ class Product:
                                                                 product_subscription.status_code)
         if is_approved:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
-                                                           name=product_subscription.product_code))
+                                                           name=product_model.description))
         current_app.logger.debug('>update_task_product ')
 
     @staticmethod

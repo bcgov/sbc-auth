@@ -99,10 +99,10 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
     assert len(activity_logs.get('activityLogs')) == 2
     assert schema_utils.validate(activity_logs, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
-    staff_actor = activity_logs.get('activityLogs')[1]
+    staff_actor = activity_logs.get('activityLogs')[0]
     assert staff_actor.get('actor') == staff_user.username
 
-    user_actor = activity_logs.get('activityLogs')[0]
+    user_actor = activity_logs.get('activityLogs')[1]
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'
 
     claims = copy.deepcopy(TestJwtClaims.public_account_holder_user.value)
@@ -113,8 +113,8 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
                     headers=headers, content_type='application/json')
     activity_logs = rv.json
 
-    staff_actor = activity_logs.get('activityLogs')[1]
+    staff_actor = activity_logs.get('activityLogs')[0]
     assert staff_actor.get('actor') == 'BC Registry Staff'
 
-    user_actor = activity_logs.get('activityLogs')[0]
+    user_actor = activity_logs.get('activityLogs')[1]
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'

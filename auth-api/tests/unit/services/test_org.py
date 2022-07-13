@@ -80,7 +80,7 @@ def test_create_org_products(session, keycloak_mock, monkeypatch):
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
         org = OrgService.create_org(TestOrgInfo.org_with_products, user_id=user.id)
         mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
-                                             org_id=ANY, value=ANY, id=ANY, name='BUSINESS'))
+                                             org_id=ANY, value=ANY, id=ANY, name='Business Registry & Name Request'))
         assert org
     dictionary = org.as_dict()
     assert dictionary['name'] == TestOrgInfo.org_with_products['name']
@@ -1028,7 +1028,7 @@ def test_patch_org_status(session, monkeypatch, auth_mock):  # pylint:disable=un
         updated_org = org.patch_org(PatchActions.UPDATE_STATUS.value, patch_info)
         mock_alp.assert_called_with(Activity(action=ActivityAction.ACCOUNT_SUSPENSION.value,
                                              org_id=ANY, name=ANY, id=ANY,
-                                             value=SuspensionReasonCode.OWNER_CHANGE.name))
+                                             value=SuspensionReasonCode.OWNER_CHANGE.value))
         assert updated_org['status_code'] == OrgStatus.SUSPENDED.value
 
     patch_info = {

@@ -42,7 +42,8 @@ from auth_api.services.validators.duplicate_org_name import validate as duplicat
 from auth_api.services.validators.payment_type import validate as payment_type_validate
 from auth_api.utils.enums import (
     AccessType, ActivityAction, AffidavitStatus, LoginSource, OrgStatus, OrgType, PatchActions, PaymentAccountStatus,
-    PaymentMethod, Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix, TaskAction)
+    PaymentMethod, Status, SuspensionReasonCode, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
+    TaskTypePrefix, TaskAction)
 from auth_api.utils.roles import ADMIN, EXCLUDED_FIELDS, STAFF, VALID_STATUSES, Role  # noqa: I005
 from auth_api.utils.util import camelback2snake
 
@@ -233,11 +234,12 @@ class Org:  # pylint: disable=too-many-public-methods
         else:
             payment_account_status = PaymentAccountStatus.FAILED
 
-        if payment_account_status != PaymentAccountStatus.FAILED:
+        if payment_account_status != PaymentAccountStatus.FAILED and payment_method:
+            payment_method_description = PaymentMethod(payment_method).name if payment_method in [
+                item.value for item in PaymentMethod] else ''
             ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.PAYMENT_INFO_CHANGE.value,
                                                            name=org_model.name,
-                                                           value=payment_method))
-
+                                                           value=payment_method_description))
         return payment_account_status
 
     @staticmethod
@@ -773,8 +775,12 @@ class Org:  # pylint: disable=too-many-public-methods
             org_model.suspension_reason_code = suspension_reason_code
         org_model.save()
         if status_code == OrgStatus.SUSPENDED.value:
+            suspension_reason_description = SuspensionReasonCode[suspension_reason_code].value \
+                if suspension_reason_code in [
+                item.name for item in SuspensionReasonCode] else ''
             ActivityLogPublisher.publish_activity(Activity(org_model.id, ActivityAction.ACCOUNT_SUSPENSION.value,
-                                                           name=org_model.name, value=suspension_reason_code))
+                                                           name=org_model.name,
+                                                           value=suspension_reason_description))
         current_app.logger.debug('change_org_status>')
         return Org(org_model)
 
