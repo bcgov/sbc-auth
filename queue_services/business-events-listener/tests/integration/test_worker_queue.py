@@ -17,13 +17,11 @@ import json
 from typing import List
 
 import pytest
-from auth_api.models import ActivityLog as ActivityLogModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
-from auth_api.models import db
 from auth_api.utils.enums import AccessType
 from entity_queue_common.service_utils import subscribe_to_queue
 from requests.models import Response
@@ -98,22 +96,14 @@ async def test_events_listener_queue(app, session, stan_server, event_loop, clie
     if is_auto_affiliate_expected:
         assert entity.pass_code_claimed
         affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
-        activity_logs: List[ActivityLogModel] = db.session.query(ActivityLogModel) \
-                                                          .filter(ActivityLogModel.org_id == org_id) \
-                                                          .all()
         assert len(affiliations) == 1
-        assert len(activity_logs) == 1
         assert affiliations[0].entity_id == entity.id
         assert affiliations[0].org_id == org_id
 
         # Publish message again and assert it doesn't create duplicate affiliation.
         await helper_add_event_to_queue(events_stan, events_subject, nr_number, nr_state, 'TEST')
         affiliations: List[AffiliationModel] = AffiliationModel.find_affiliations_by_org_id(org_id)
-        activity_logs: List[ActivityLogModel] = db.session.query(ActivityLogModel) \
-                                                          .filter(ActivityLogModel.org_id == org_id) \
-                                                          .all()
         assert len(affiliations) == 1
-        assert len(activity_logs) == 1
 
     # Publish message for an NR which was done using a service account or staff with no user account.
     def get_invoices_mock(nr_number, token):
