@@ -30,12 +30,13 @@ import os
 from typing import Dict
 
 import nats
+from auth_api.models import ActivityLog as ActivityModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import AccessType, CorpType
+from auth_api.utils.enums import AccessType, ActivityAction, CorpType
 from dateutil import parser
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
@@ -132,6 +133,12 @@ async def process_name_events(event_message: Dict[str, any]):
                 logger.info('Creating affiliation between Entity : %s and Org : %s', nr_entity, org)
                 affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
                 affiliation.flush()
+                activity: ActivityModel = ActivityModel(org_id=org.id, action=ActivityAction.CREATE_AFFILIATION.value,
+                                                        item_name=nr_entity.business_identifier, 
+                                                        item_id=nr_entity.business_identifier,
+                                                        item_type=None, item_value=None, actor_id=None
+                                                        )
+                activity.flush()
 
     nr_entity.save()
     logger.debug('<<<<<<<process_name_events<<<<<<<<<<')
