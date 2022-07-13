@@ -258,7 +258,7 @@ class Affiliation:
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, email_addresses: str = None,
-                           reset_passcode: bool = False):
+                           reset_passcode: bool = False, log_delete_draft: bool = False):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
@@ -281,7 +281,11 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
-        if entity.corp_type != CorpType.RTMP.value:
+        # When registering a business it will affiliate a NR -> unaffiliate a NR draft -> affiliate a business.
+        # Users can also intentionally delete a draft. We want to log this action.
+        should_publish = (log_delete_draft or not (entity.status == NRStatus.DRAFT.value and
+                                                   entity.status == CorpType.NR.value))
+        if entity.corp_type != CorpType.RTMP.value and should_publish:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
                                                            name=entity.name, id=entity.business_identifier))
 
