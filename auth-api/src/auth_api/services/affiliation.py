@@ -284,7 +284,7 @@ class Affiliation:
         # When registering a business it will affiliate a NR -> unaffiliate a NR draft -> affiliate a business.
         # Users can also intentionally delete a draft. We want to log this action.
         should_publish = (log_delete_draft or not (entity.status == NRStatus.DRAFT.value and
-                                                   entity.status == CorpType.NR.value))
+                                                   entity.corp_type == CorpType.NR.value))
         if entity.corp_type != CorpType.RTMP.value and should_publish:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
                                                            name=entity.name, id=entity.business_identifier))
