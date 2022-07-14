@@ -1,4 +1,0 @@
-aiosmtplib
-email-validator
-idna==2.10
-dnspython==2.1.0

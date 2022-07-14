@@ -15,8 +15,6 @@ coverage:
         target: 80%
         flags:
           - authapi
-          - notifyapi
-          - notifyqueue
           - statusapi
           - eventlistenerqueue
           - accountmailer
@@ -45,14 +43,6 @@ flags:
   authapi:
     paths:
       - auth-api/src/auth_api
-    carryforward: true
-  notifyapi:
-    paths:
-      - notify-api/src/notify_api
-    carryforward: true
-  notifyqueue:
-    paths:
-      - queue_services/notify-queue/src/notify_service
     carryforward: true
   statusapi:
     paths:

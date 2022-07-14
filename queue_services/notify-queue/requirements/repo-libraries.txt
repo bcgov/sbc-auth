@@ -1,2 +1,0 @@
-git+https://github.com/bcgov/sbc-auth.git@main#egg=notify_api&subdirectory=notify-api
-git+https://github.com/bcgov/lear.git#egg=entity_queue_common&subdirectory=queue_services/common
