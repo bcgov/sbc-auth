@@ -281,8 +281,6 @@ class Affiliation:
         affiliation.delete()
         entity.set_pass_code_claimed(False)
 
-        current_app.logger.info(f'entity.status:{entity.status} corp_type:{entity.corp_type}')
-        current_app.logger.info(f'log_delete_draft:{log_delete_draft}')
         # When registering a business it will affiliate a NR -> unaffiliate a NR draft -> affiliate a business.
         # Users can also intentionally delete a draft. We want to log this action.
         should_publish = (log_delete_draft or not (entity.status == NRStatus.DRAFT.value and
