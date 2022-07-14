@@ -1,6 +1,0 @@
-aiosmtplib==1.1.6
-dnspython==2.1.0
-email-validator==1.1.3
-idna==2.10
-git+https://github.com/bcgov/sbc-auth.git@main#egg=notify_api&subdirectory=notify-api
-git+https://github.com/bcgov/lear.git#egg=entity_queue_common&subdirectory=queue_services/common

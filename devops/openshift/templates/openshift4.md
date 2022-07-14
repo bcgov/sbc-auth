@@ -37,8 +37,6 @@ Dev/Test/Prod Namespace:
 	oc delete all,svc,route,dc,secret,networksecuritypolicy,persistentvolumeclaim -n 6e0e49-dev -l app=postgresql
 	oc process -f openshift/templates/auth-db.yaml -o yaml | oc apply -f - -n 6e0e49-dev
 
-	oc delete all,svc,route,dc,secret,networksecuritypolicy,persistentvolumeclaim -n 6e0e49-dev -l app=postgresql-notify
-	oc process -f openshift/templates/notify-db.yaml -o yaml | oc apply -f - -n 6e0e49-dev
     ```
 
 2. 	RBAC and Network Security Policies:
@@ -68,9 +66,6 @@ Dev/Test/Prod Namespace:
         #### Create all the roles that exits in OCP3 db
         ```
         CREATE ROLE auth;
-        CREATE ROLE notify;
-        CREATE ROLE notifytester;
-        CREATE ROLE notifyuser;
         CREATE ROLE postgres;
         CREATE ROLE tester;
         ```

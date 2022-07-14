@@ -15,10 +15,6 @@ For more information on the web component refer to:
 
 [auth-web\Readme](auth-web/README.md)
 
-For more information on the Notify API component refer to:
-
-[notify-api\Readme](notify-api/README.md)
-
 For more information on the Status API component refer to:
 
 [status-api\Readme](status-api/README.md)
