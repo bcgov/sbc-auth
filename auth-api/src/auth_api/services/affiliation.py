@@ -320,8 +320,8 @@ class Affiliation:
                 party_name = officer.get('organizationName')
             else:
                 party_name = officer.get('lastName') + ', ' + officer.get('firstName')
-                if officer.get('middleName'):
-                    party_name = party_name + ' ' + officer.get('middleName')
+                if officer.get('middleInitial'):
+                    party_name = party_name + ' ' + officer.get('middleInitial')
             if party_name_str.upper() == party_name.upper():
                 return True
         return False
