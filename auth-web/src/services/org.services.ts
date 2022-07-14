@@ -82,7 +82,8 @@ export default class OrgService {
   }
 
   static async removeAffiliation (orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, resetPasscode?: boolean): Promise<AxiosResponse<void>> {
-    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`, { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode } })
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`,
+      { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
   }
   // TODO can be remove this since we moved from org to user affidavit
   static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {

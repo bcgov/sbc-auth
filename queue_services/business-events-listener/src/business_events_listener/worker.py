@@ -134,7 +134,8 @@ async def process_name_events(event_message: Dict[str, any]):
                 affiliation: AffiliationModel = AffiliationModel(entity=nr_entity, org=org)
                 affiliation.flush()
                 activity: ActivityModel = ActivityModel(org_id=org.id, action=ActivityAction.CREATE_AFFILIATION.value,
-                                                        item_name=nr_entity.name, item_id=nr_entity.business_identifier,
+                                                        item_name=nr_entity.business_identifier,
+                                                        item_id=nr_entity.business_identifier,
                                                         item_type=None, item_value=None, actor_id=None
                                                         )
                 activity.flush()

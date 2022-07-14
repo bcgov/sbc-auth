@@ -116,29 +116,42 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         return f'Invited {activity.item_name} as a {activity.item_value}'
 
     @staticmethod
+    def _get_names(name):
+        first_name = f'{name.get("first_name")}' if name.get('first_name') else ''
+        last_name = f'{name.get("last_name")}' if name.get('last_name') else ''
+        return first_name, last_name
+
+    @staticmethod
     def _approving_new_team_member(activity: ActivityLogModel) -> str:
         """User X approved User Y joining the team as [role name]."""
         try:
             name = json.loads(activity.item_name)
         except ValueError:
             name = {}
-        return f'Approved {name.get("first_name", activity.item_name)} {name.get("last_name")} \
+        first_name, last_name = ActivityLog._get_names(name)
+        return f'Approved {first_name} {last_name} \
             joining the team as {activity.item_value}'
 
     @staticmethod
     def _removing_team_member(activity: ActivityLogModel) -> str:
         """User X removed User Y."""
-        return f'Removed {activity.item_name}'
+        try:
+            name = json.loads(activity.item_name)
+        except ValueError:
+            name = {}
+        first_name, last_name = ActivityLog._get_names(name)
+        return f'Removed {first_name} {last_name}'
 
     @staticmethod
     def _twofactor_reset(activity: ActivityLogModel) -> str:
-        """User X 2FA for User Y."""
-        return f'Reset 2FA for {activity.item_name}'
+        """User X Authenticator for User Y."""
+        return f'Reset Authenticator for {activity.item_name}'
 
     @staticmethod
     def _payment_info_change(activity: ActivityLogModel) -> str:
         """User X updated the account payment information to [payment method]."""
-        return f'Updated the account payment information to {activity.item_value}'
+        payment_information = activity.item_value.replace('_', ' ')
+        return f'Updated the account payment information to {payment_information}'
 
     @staticmethod
     def _adding_a_business_affilliation(activity: ActivityLogModel) -> str:
@@ -162,10 +175,14 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
             address = json.loads(activity.item_value)
         except ValueError:
             address = {}
-        account_address_formatted = (
-            f"""{address.get('street')}; {address.get('streetAdditional')}; {address.get('city')}
-            {address.get('region')} {address.get('postalCode')}; {address.get('country')}"""
-        )
+        account_address_formatted = ''
+        street = f'{address.get("street")}; ' if address.get('street') else ''
+        street_additional = f'{address.get("streetAdditional")}; ' if address.get('streetAdditional') else ''
+        city = f'{address.get("city")}; ' if address.get('city') else ''
+        region = f'{address.get("region")}; ' if address.get('region') else ''
+        postal_code = f'{address.get("postalCode")}; ' if address.get('postal_code') else ''
+        country = f'{address.get("country")}; ' if address.get('country') else ''
+        account_address_formatted = f'{street}{street_additional}{city}{region}{postal_code}{country}'
         return f'Changed the mailing address to {account_address_formatted}'
 
     @ staticmethod
@@ -176,7 +193,8 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     @ staticmethod
     def _account_suspension(activity: ActivityLogModel) -> str:
         """Account was suspended due to [Suspension reason]."""
-        return f'The account was suspended due to {activity.item_value}'
+        suspension_reason = activity.item_value.replace('_', ' ')
+        return f'The account was suspended due to {suspension_reason}'
 
     @ staticmethod
     def _adding_products_and_services(activity: ActivityLogModel) -> str:
@@ -192,8 +210,9 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
     def _mask_user_name(is_staff_access, user):
         is_actor_a_staff = user.type == Role.STAFF.name
         if not is_staff_access and is_actor_a_staff:
-            # if staff ,change it to BC Regisitry Staff
             actor = 'BC Registry Staff'
         else:
             actor = user.username if is_actor_a_staff else f'{user.firstname} {user.lastname}'
+            if not user.firstname and not user.lastname:
+                actor = 'Service Account'
         return actor
