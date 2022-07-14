@@ -286,8 +286,9 @@ class Affiliation:
         should_publish = (log_delete_draft or not (entity.status == NRStatus.DRAFT.value and
                                                    entity.corp_type == CorpType.NR.value))
         if entity.corp_type != CorpType.RTMP.value and should_publish:
+            name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
-                                                           name=entity.name, id=entity.business_identifier))
+                                                           name=name, id=entity.business_identifier))
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
