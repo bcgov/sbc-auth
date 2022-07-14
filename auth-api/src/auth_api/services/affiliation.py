@@ -187,8 +187,9 @@ class Affiliation:
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
         if entity_type != CorpType.RTMP.value:
+            name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                           name=entity.name, id=entity.business_identifier))
+                                                           name=name, id=entity.business_identifier))
         return Affiliation(affiliation)
 
     @staticmethod
