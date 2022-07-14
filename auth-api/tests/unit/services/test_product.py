@@ -57,4 +57,4 @@ def test_update_product_subscription(session, keycloak_mock, monkeypatch):
         with patch.object(ContactLinkModel, 'find_by_user_id', return_value=MockPerson(contact=MockContact())):
             ProductService.update_product_subscription(product_subscription.id, True, org._model.id)
             mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
-                                        org_id=ANY, value=ANY, id=ANY, name='PPR'))
+                                        org_id=ANY, value=ANY, id=ANY, name='Personal Property Registry'))

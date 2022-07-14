@@ -186,8 +186,10 @@ class Affiliation:
 
         if entity_type not in ['SP', 'GP']:
             entity.set_pass_code_claimed(True)
-        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                              name=entity.name, id=entity.business_identifier))
+        if entity_type != CorpType.RTMP.value:
+            name = entity.name if len(entity.name) > 0 else entity.business_identifier
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                           name=name, id=entity.business_identifier))
         return Affiliation(affiliation)
 
     @staticmethod
@@ -246,8 +248,9 @@ class Affiliation:
             # Create an affiliation with org
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
             affiliation_model.save()
-            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                           name=entity.name, id=entity.business_identifier))
+            if entity.corp_type != CorpType.RTMP.value:
+                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                               name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -256,7 +259,7 @@ class Affiliation:
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, email_addresses: str = None,
-                           reset_passcode: bool = False):
+                           reset_passcode: bool = False, log_delete_draft: bool = False):
         """Delete the affiliation for the provided org id and business id."""
         current_app.logger.info(f'<delete_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
@@ -278,8 +281,15 @@ class Affiliation:
             entity.reset_passcode(entity.business_identifier, email_addresses)
         affiliation.delete()
         entity.set_pass_code_claimed(False)
-        ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
-                                                       name=entity.name, id=entity.business_identifier))
+
+        # When registering a business it will affiliate a NR -> unaffiliate a NR draft -> affiliate a business.
+        # Users can also intentionally delete a draft. We want to log this action.
+        should_publish = (log_delete_draft or not (entity.status == NRStatus.DRAFT.value and
+                                                   entity.corp_type == CorpType.NR.value))
+        if entity.corp_type != CorpType.RTMP.value and should_publish:
+            name = entity.name if len(entity.name) > 0 else entity.business_identifier
+            ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
+                                                           name=name, id=entity.business_identifier))
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):

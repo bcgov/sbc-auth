@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model for all activity stream related changes."""
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, desc
 
 from .base_model import BaseModel
 from .db import db
@@ -42,7 +42,8 @@ class ActivityLog(BaseModel):  # pylint: disable=too-few-public-methods,too-many
         from . import User  # pylint:disable=cyclic-import, import-outside-toplevel
         query = db.session.query(ActivityLog, User). \
             outerjoin(User, User.id == ActivityLog.actor_id). \
-            filter(ActivityLog.org_id == org_id)
+            filter(ActivityLog.org_id == org_id). \
+            order_by(desc(ActivityLog.created))
 
         if item_name:
             query = query.filter(ActivityLog.item_name == item_name)

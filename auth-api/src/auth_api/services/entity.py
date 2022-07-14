@@ -70,6 +70,11 @@ class Entity:
         """Return the corp_type_code for this entity."""
         return self._model.corp_type_code
 
+    @property
+    def status(self):
+        """Return the status for this entity."""
+        return self._model.status
+
     def set_pass_code_claimed(self, pass_code_claimed):
         """Set the pass_code_claimed status."""
         self._model.pass_code_claimed = pass_code_claimed
