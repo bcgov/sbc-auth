@@ -53,6 +53,7 @@ class _Config(object):  # pylint: disable=too-few-public-methods
     """Base class configuration that should set reasonable defaults for all the other configurations. """
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE', 'False')
     SENTRY_DSN = os.getenv('SENTRY_DSN')
 
     SERVICE_SCHEDULE = os.getenv('SERVICE_SCHEDULE')
@@ -71,6 +72,7 @@ class DevConfig(_Config):  # pylint: disable=too-few-public-methods
 
 class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     """In support of testing only used by the py.test suite."""
+    SENTRY_ENABLE = False
     SENTRY_DSN = None
 
     schedule_json = [
