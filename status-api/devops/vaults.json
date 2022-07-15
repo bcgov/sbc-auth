@@ -2,8 +2,13 @@
     {
         "vault": "relationship",
         "application": [
-            "status-api",
-            "sentry"
+            "status-api"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+             "relationship-api"
         ]
     }
 ]

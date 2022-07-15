@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Resource for Service status endpoints."""
-import json
 from http import HTTPStatus
 
 from flask import current_app
