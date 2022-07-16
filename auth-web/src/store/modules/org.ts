@@ -949,8 +949,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async getInvoice (paymentId: string) {
-    const response = await PaymentService.getInvoice(paymentId)
+  public async getInvoice (invoicePayload) {
+    const response = await PaymentService.getInvoice(invoicePayload.invoiceId, invoicePayload.accountId)
     return response?.data || {}
   }
 
