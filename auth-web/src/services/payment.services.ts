@@ -26,7 +26,7 @@ export default class PaymentService {
   }
 
   static getInvoice (invoiceId: string, accountId: number): AxiosPromise<Invoice> {
-    let headers = accountId ? { 'Account-Id': accountId } : {}
+    const headers = accountId ? { 'Account-Id': accountId } : {}
     return axios.get(`${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}`, { headers: headers })
   }
 
