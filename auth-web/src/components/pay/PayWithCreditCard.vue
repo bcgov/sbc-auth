@@ -4,8 +4,8 @@
       <h2 class="mb-2">Balance Due: <span class="ml-2">${{totalBalanceDue.toFixed(2)}}</span></h2>
       <template>
         <p class="mb-1" v-if="showPayWithOnlyCC">
-          <strong>Credit card will be the only payment option for this transaction</strong>.<br />
-          Online banking payment option is not available.
+          <strong>Credit card is the only payment option for this transaction</strong>.<br />
+          Online Banking is not available for this transaction.
         </p>
         <p class="mb-1" v-if="partialCredit">
           You can't <strong>use your account credit</strong> with credit card payment.<br />
