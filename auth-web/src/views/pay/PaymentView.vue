@@ -85,7 +85,7 @@ export default class PaymentView extends Vue {
   @Prop({ default: '' }) paymentId: string
   @Prop({ default: '' }) redirectUrl: string
   private readonly createTransaction!: (transactionData) => any
-  private readonly updateInvoicePaymentMethodAsCreditCard!: (paymentId: string) => any
+  private readonly updateInvoicePaymentMethodAsCreditCard!: (invoicePayload) => any
   private readonly downloadOBInvoice!: (paymentId: string) => any
   private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
   private readonly getInvoice!: (invoicePayload) => Invoice
@@ -162,7 +162,8 @@ export default class PaymentView extends Vue {
     // patch the transaction
     // redirect for payment
     try {
-      await this.updateInvoicePaymentMethodAsCreditCard(this.paymentId)
+      const accountSettings = this.getAccountFromSession()
+      await this.updateInvoicePaymentMethodAsCreditCard({ paymentId: this.paymentId, accountId: accountSettings?.id })
       await this.doCreateTransaction()
     } catch (error) {
       this.doHandleError(error)
