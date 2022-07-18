@@ -30,12 +30,15 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/payment-requests/${invoiceId}`, { headers: headers })
   }
 
-  static updateInvoicePaymentMethodAsCreditCard (paymentId: string): AxiosPromise<any> {
+  static updateInvoicePaymentMethodAsCreditCard (paymentId: string, accountId: number): AxiosPromise<any> {
+    const headers = accountId ? { 'Account-Id': accountId } : {}
     const url = `${ConfigHelper.getPayAPIURL()}/payment-requests/${paymentId}`
     return axios.patch(url, {
       paymentInfo: {
         methodOfPayment: PaymentTypes.CREDIT_CARD
       }
+    }, {
+      headers: headers
     }
     )
   }
