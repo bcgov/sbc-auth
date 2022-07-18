@@ -88,7 +88,7 @@ export default class PaymentView extends Vue {
   private readonly updateInvoicePaymentMethodAsCreditCard!: (paymentId: string) => any
   private readonly downloadOBInvoice!: (paymentId: string) => any
   private readonly getOrgPayments!: (orgId: number) => OrgPaymentDetails
-  private readonly getInvoice!: (paymentId: string) => Invoice
+  private readonly getInvoice!: (invoicePayload) => Invoice
   private showLoading: boolean = true
   private showdownloadLoading: boolean = false
   private showOnlineBanking: boolean = false
@@ -111,7 +111,7 @@ export default class PaymentView extends Vue {
       if (this.isUserSignedIn && !!accountSettings) {
         // get the invoice and check for OB
         try {
-          const invoice: Invoice = await this.getInvoice(this.paymentId)
+          const invoice: Invoice = await this.getInvoice({ invoiceId: this.paymentId, accountId: accountSettings?.id })
           if (invoice?.paymentMethod === PaymentTypes.ONLINE_BANKING) {
             // get account data to show in the UI
             const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(accountSettings?.id)
