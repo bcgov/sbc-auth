@@ -1,6 +1,8 @@
+import { RequestTrackerType } from '@/util/constants'
+
 export interface RequestTracker {
   id: number
-  requestType: string
+  requestType: RequestTrackerType
   isProcessed: boolean
   serviceName: string
   isAdmin: boolean
@@ -11,4 +13,10 @@ export interface RequestTracker {
 export interface BNRequest {
   businessIdentifier: string
   businessNumber?: string
+}
+
+export interface ResubmitBNRequest {
+  businessIdentifier: string
+  requestType: RequestTrackerType
+  request: string
 }
