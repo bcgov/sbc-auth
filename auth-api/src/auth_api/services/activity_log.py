@@ -212,7 +212,7 @@ class ActivityLog:  # pylint: disable=too-many-instance-attributes
         if not is_staff_access and is_actor_a_staff:
             actor = 'BC Registry Staff'
         else:
-            actor = user.username if is_actor_a_staff else f'{user.firstname} {user.lastname}'
+            actor = f'{user.firstname} {user.lastname}'
             if not user.firstname and not user.lastname:
                 actor = 'Service Account'
         return actor
