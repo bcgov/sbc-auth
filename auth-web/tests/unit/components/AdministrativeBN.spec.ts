@@ -1,5 +1,5 @@
 import { Wrapper, mount, shallowMount } from '@vue/test-utils'
-import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
+import AdministrativeBN from '@/components/auth/staff/admin/AdministrativeBN.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 
@@ -7,7 +7,7 @@ Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 describe('Search Business Form: Initial', () => {
-  const wrapper: Wrapper<any> = mount(AdminDashboardView, {
+  const wrapper: Wrapper<any> = mount(AdministrativeBN, {
     vuetify,
     propsData: {}
   })
@@ -20,7 +20,7 @@ describe('Search Business Form: Initial', () => {
 })
 
 describe('Search Business Form: Result', () => {
-  const wrapper: Wrapper<any> = shallowMount(AdminDashboardView, {
+  const wrapper: Wrapper<any> = shallowMount(AdministrativeBN, {
     vuetify,
     propsData: {}
   })

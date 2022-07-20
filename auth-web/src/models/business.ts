@@ -117,3 +117,9 @@ export interface PasscodeResetLoad {
     passcodeResetEmail: string,
     resetPasscode: boolean
 }
+
+export interface LearBusiness {
+    identifier: string,
+    legalName: string,
+    taxId?: string
+}
