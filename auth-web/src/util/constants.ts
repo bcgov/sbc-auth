@@ -278,7 +278,11 @@ export enum LDFlags {
     DisableGovNAccountCreation='disable-govn-account',
     EnableSpGpDba='enable-sp-gp-dba',
     ProductBusSearchStatus='product-BUSINESS_SEARCH-status',
-    ProductBusSearchPremTooltip='product-BUSINESS_SEARCH-prem-tooltip'
+    ProductBusSearchPremTooltip='product-BUSINESS_SEARCH-prem-tooltip',
+    ProductCSOStatus='product-CSO-status',
+    ProductWillsStatus='product-VS-status',
+    ProductSiteRegistryStatus='product-ESRA-status',
+    ProductBCAStatus='product-BCA-status'
 }
 
 export enum DateFilterCodes {
