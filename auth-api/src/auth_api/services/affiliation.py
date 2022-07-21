@@ -292,8 +292,9 @@ class Affiliation:
         # 4. unaffilliate a business (with NR in identifier)
         # 5. affilliate a business (with FM or BC in identifier)
         # Users can also intentionally delete a draft. We want to log this action.
-        publish = log_delete_draft or not ((entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and
-                                            entity.corp_type == CorpType.NR.value) or 'NR ' in entity.business_identifier)
+        name_request = (entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and
+                        entity.corp_type == CorpType.NR.value) or 'NR ' in entity.business_identifier
+        publish = log_delete_draft or not name_request
         if publish:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
