@@ -8,7 +8,7 @@
           attach="#bn-request-manager"
         />
 
-      <div d-flex class="table-header">
+      <div class="table-header d-flex">
         <label>BN Request History</label>
       </div>
       <v-data-table

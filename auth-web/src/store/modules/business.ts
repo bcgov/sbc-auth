@@ -220,7 +220,7 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async searchBusiness (businessIdentifier: string): Promise<LearBusiness> {
     const response = await BusinessService.searchBusiness(businessIdentifier).catch(() => null)
-    if (response && response?.status === 200 && response?.data?.business?.legalName) {
+    if (response?.status === 200 && response?.data?.business?.legalName) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       return response.data.business
     } else {
@@ -236,7 +236,7 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async getBNRequests (businessIdentifier: string): Promise<RequestTracker[]> {
     const response = await BusinessService.getBNRequests(businessIdentifier).catch(() => null)
-    if (response && response?.status === 200) {
+    if (response?.status === 200) {
       return response.data.requestTrackers
     }
     return []
@@ -245,13 +245,13 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<any> {
     const response = await BusinessService.resubmitBNRequest(resubmitRequest).catch(() => null)
-    return response && (response?.status === 200 || response?.status === 201)
+    return response?.status === 200
   }
 
   @Action({ rawError: true })
   public async getRequestTracker (requestTrackerId: number): Promise<RequestTracker> {
     const response = await BusinessService.getRequestTracker(requestTrackerId).catch(() => null)
-    if (response && (response?.status === 200)) {
+    if (response?.status === 200) {
       return response.data
     }
     return null
