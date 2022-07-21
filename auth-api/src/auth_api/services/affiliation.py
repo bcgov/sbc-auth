@@ -307,7 +307,7 @@ class Affiliation:
 
         return get_nr_response.json()
 
-    @ staticmethod
+    @staticmethod
     def _validate_firms_party(token, business_identifier, party_name_str: str):
         legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
         parties_url = f'{ legal_api_url }/businesses/{business_identifier}/parties'
