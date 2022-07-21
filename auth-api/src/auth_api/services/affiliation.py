@@ -285,10 +285,15 @@ class Affiliation:
         if entity.corp_type in [CorpType.RTMP.value, CorpType.TMP.value]:
             return
 
-        # When registering a business it will affiliate a NR -> unaffiliate a NR draft -> affiliate a business.
+        # When registering a business (also RTMP and TMP in between):
+        # 1. affiliate a NR
+        # 2. unaffiliate a NR draft
+        # 3. affiliate a business (with NR in identifier)
+        # 4. unaffilliate a business (with NR in identifier)
+        # 5. affilliate a business (with FM or BC in identifier)
         # Users can also intentionally delete a draft. We want to log this action.
-        publish = log_delete_draft or not (entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and
-                                            entity.corp_type == CorpType.NR.value)
+        publish = log_delete_draft or not ((entity.status in [NRStatus.DRAFT.value, NRStatus.CONSUMED.value] and
+                                            entity.corp_type == CorpType.NR.value) or 'NR ' in entity.business_identifier)
         if publish:
             name = entity.name if len(entity.name) > 0 else entity.business_identifier
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.REMOVE_AFFILIATION.value,
