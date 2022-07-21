@@ -5,7 +5,7 @@
     :attach="attach"
     content-class="resubmit-request-dialog"
   >
-    <v-card flat id="resubmit-request-container">
+    <v-card flat>
       <v-card-title id="dialog-title">Modify Request</v-card-title>
       <v-card-text>
         <v-textarea
@@ -29,7 +29,7 @@
             id="dialog-resubmit-button"
             :disabled="submitActive"
             :loading="submitActive"
-            @click.native="save()"
+            @click.native="resubmit()"
           >Resubmit</v-btn>
           <v-btn
             large depressed
@@ -63,12 +63,10 @@ export default class ResubmitRequest extends Vue {
   @Prop({ default: false })
   readonly submitActive: boolean
 
-  private save (): void {
-    this.resubmit(this.xmlData)
-  }
-
   @Emit('resubmit')
-  private resubmit (modifiedXml: string): void { }
+  private resubmit (): string {
+    return this.xmlData
+  }
 
   @Emit('close')
   private emitClose (): void { }

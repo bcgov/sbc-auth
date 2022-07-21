@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pa-8" flat style="height: 100%;">
+  <v-card id="administrative-bn" class="pa-8" flat style="height: 100%;">
     <div class="view-header flex-column">
       <v-row no-gutters>
           <v-col col="6">

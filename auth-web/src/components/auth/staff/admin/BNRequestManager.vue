@@ -8,7 +8,7 @@
           attach="#bn-request-manager"
         />
 
-      <div class="table-header">
+      <div d-flex class="table-header">
         <label>BN Request History</label>
       </div>
       <v-data-table
@@ -78,7 +78,7 @@ export default class BNRequestManager extends Vue {
 
   @Prop({ default: undefined }) businessIdentifier: string
 
-  protected headers = [
+  protected readonly headers = [
     { text: 'Request Type', align: 'start', value: 'requestType', sortable: false, show: true },
     { text: 'Processed', value: 'isProcessed', sortable: false, show: true },
     { text: 'Admin Request', value: 'isAdmin', sortable: false, show: true },
@@ -113,7 +113,7 @@ export default class BNRequestManager extends Vue {
     if (queued) {
       this.resubmitRequestDialog = false
       this.requestDetails = null
-      this.businessIdentifierChange()
+      await this.businessIdentifierChange()
     }
   }
 }
@@ -123,7 +123,6 @@ export default class BNRequestManager extends Vue {
 @import '@/assets/scss/theme.scss';
 
 .table-header {
-  display: flex;
   background-color: $app-lt-blue;
   padding: .875rem;
 }
@@ -135,6 +134,7 @@ export default class BNRequestManager extends Vue {
   padding-right: 5;
 }
 
+// table header overlaps with appHeader. setting z-index from 2 -> 1
 ::v-deep {
   .v-data-table--fixed-header thead th {
     z-index: 1;
