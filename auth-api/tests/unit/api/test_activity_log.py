@@ -100,7 +100,7 @@ def test_fetch_activity_log_masking(client, jwt, session):  # pylint:disable=unu
     assert schema_utils.validate(activity_logs, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
     staff_actor = activity_logs.get('activityLogs')[0]
-    assert staff_actor.get('actor') == staff_user.username
+    assert staff_actor.get('actor') == f'{user.firstname} {user.lastname}'
 
     user_actor = activity_logs.get('activityLogs')[1]
     assert user_actor.get('actor') == f'{user.firstname} {user.lastname}'
