@@ -143,7 +143,7 @@
   "mhrCodeSubtitle": "Select this if you need to search for manufactured homes in BC or complete a combined Manufactured Home and Personal Property Registry search.",
   "vsCodeSubtitle": "<p>Select this if you need to register the location of a will by filing a wills notice or search for a wills notice as part of an estate probate.</p>",
   "bcaCodeSubtitle": "Select this if you require access to BC Assessment's real property information database.",
-  "esraCodeSubtitle": "Select this if you need to search the Site Registry to identify properties with environmental records submitted under Part 4 of B.C.'s <i>Environmental Management Act.</i>",
+  "esraCodeSubtitle": "Select this if you need to search the Site Registry to identify properties with environmental records submitted under Part 4 of B.C.'s Environmental Management Act.",
   "rptCodeDescription": "<p><ul><li>Search a property's tax amounts over the last 10 years</li><li>Search a property's tax-paid status</li><li>Search a property's legal description</li></ul></p>",
   "csoCodeDescription": "Whether you're filing small claims forms for Provincial Court, making an application or filing any other court documents, Court Services Online offers a convenient, quick option to help you file in any BC court registry. You can also browse CSO's daily court listings across the province and search court file information.",
   "businessCodeDescription": "<ul><li>Request a name for your business </li><li>File annual reports </li><li>View and change your current directors or address</li><li>See the history of your business' fillings</li></ul> <a href='https://www.bcregistry.ca/business/auth/home/decide-business' target='sbc-auth-business'>Learn More <span class='mdi mdi-open-in-new'></span></a>",
