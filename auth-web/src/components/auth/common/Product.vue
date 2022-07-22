@@ -348,6 +348,7 @@ export default class Product extends Vue {
   font-size: 0.875rem;
   letter-spacing: -0.25px;
   position: absolute;
+  white-space: nowrap;
 }
 
 .underline-dotted {

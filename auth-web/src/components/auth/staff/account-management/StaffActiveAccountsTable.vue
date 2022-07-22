@@ -91,10 +91,13 @@
                       <v-btn v-else-if="searchParamsExist && header.value === 'action'"
                         outlined
                         color="primary"
-                        class="action-btn"
+                        class="action-btn clear-filter-button"
                         @click="clearSearchParams()"
                       >
-                        Clear Filters
+                        <span class="clear-filter cursor-pointer">
+                          Clear Filters
+                          <v-icon small color="primary">mdi-close</v-icon>
+                        </span>
                       </v-btn>
                     </th>
                   </tr>
@@ -125,6 +128,8 @@
                   <!-- More Actions Menu -->
                   <span class="more-actions">
                     <v-menu
+                      offset-y
+                      nudge-left=212
                       v-model="dropdown[item.id]"
                     >
                       <template v-slot:activator="{ on }">
@@ -212,7 +217,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'decisionMadeBy'
     },
     {
-      text: 'Account Type',
       value: 'orgType'
     },
     {
@@ -464,6 +468,24 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     max-width: 30px !important;
     min-width: 30px !important;
     margin-left: 0.05rem;
+  }
+
+  // Inline for Clear Filters
+  .clear-filter-button {
+    padding: 7px !important;
+  }
+
+  .clear-filter {
+    line-height: 1.5;
+  }
+
+  // As requested by Tracey.
+  ::v-deep input, ::v-deep .v-select__selection {
+    color:#212529 !important;
+  }
+
+  ::v-deep ::placeholder{
+    color:#495057 !important;
   }
 
   .v-data-table th {
