@@ -1,13 +1,13 @@
 <template>
-  <v-card id="administrative-bn" class="pa-8" flat style="height: 100%;">
+  <v-card id="administrative-bn" class="pa-8" flat>
     <div class="view-header flex-column">
       <v-row no-gutters>
           <v-col col="6">
             <h2 class="view-header__title">Administrative BN</h2>
           </v-col>
           <v-col col="6" class="pr-0" align="right">
-            <a v-if="businessDetails" @click="resetSearch()">Search another Business</a>
-            <a v-if="businessDetails" class="ml-10" href="">Reload</a>
+            <v-btn link color="primary" v-if="businessDetails" @click="resetSearch()">Search another Business</v-btn>
+            <v-btn link class="ml-2" v-if="businessDetails" @click="reload()">Reload</v-btn>
           </v-col>
         </v-row>
     </div>
@@ -24,7 +24,7 @@
         {{ errorMessage }} <strong>{{ searchedBusinessIdentifier }}</strong>
       </v-alert>
 
-      <v-form ref="searchBusinessForm" v-on:submit.prevent="businessSearch">
+      <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
         <v-text-field
           filled dense persistent-hint
           label="Incorporation Number or Registration Number"
@@ -198,12 +198,6 @@ export default class AdministrativeBN extends Vue {
     return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
   }
 
-  protected async businessSearch () {
-    if (this.isFormValid()) {
-      await this.search()
-    }
-  }
-
   protected async search () {
     this.searchActive = true
 
@@ -225,6 +219,10 @@ export default class AdministrativeBN extends Vue {
     this.searchedBusinessIdentifier = null
     this.businessIdentifier = null
     ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
+  }
+
+  protected reload () {
+    window.location.reload()
   }
 
   protected formatBusinessIdentifier () {
