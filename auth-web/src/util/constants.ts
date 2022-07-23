@@ -400,3 +400,12 @@ export enum PatchActions {
     UPDATE_STATUS = 'updateStatus',
     UPDATE_ACCESS_TYPE = 'updateAccessType'
 }
+
+export enum RequestTrackerType {
+    InformCRA = 'INFORM_CRA',
+    ChangeDeliveryAddress = 'CHANGE_DELIVERY_ADDRESS',
+    ChangeMailingAddress = 'CHANGE_MAILING_ADDRESS',
+    ChangeName = 'CHANGE_NAME',
+    ChangeStatus = 'CHANGE_STATUS',
+    ChangeParty = 'CHANGE_PARTY',
+}

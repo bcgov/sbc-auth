@@ -1,6 +1,6 @@
+import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
 import { AxiosResponse } from 'axios'
-import { BNRequest } from '@/models/request-tracker'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { axios } from '@/util/http-util'
@@ -62,15 +62,18 @@ export default class BusinessService {
     return axios.post(url)
   }
 
-  // Will be used in the next ticket for Administrative BN
-  static async fetchBNRequests (businessId: string): Promise<AxiosResponse<any>> {
-    const url = `requestTracker/bn/${businessId}`
+  static async getBNRequests (businessIdentifier: string): Promise<AxiosResponse<any>> {
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/requestTracker/bn/${businessIdentifier}`
     return axios.get(url)
   }
 
-  // Will be used in the next ticket for Administrative BN
-  static async fetchRequestTracker (requestId: string): Promise<AxiosResponse<any>> {
-    const url = `requestTracker/${requestId}`
+  static async resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<AxiosResponse<any>> {
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/requestTracker/bn/${resubmitRequest.businessIdentifier}`
+    return axios.post(url, resubmitRequest)
+  }
+
+  static async getRequestTracker (requestTrackerId: number): Promise<AxiosResponse<any>> {
+    const url = `${ConfigHelper.getLegalAPIV2Url()}/requestTracker/${requestTrackerId}`
     return axios.get(url)
   }
 }
