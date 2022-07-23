@@ -1,5 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { Business, BusinessRequest, FolioNumberload, LoginPayload, PasscodeResetLoad } from '@/models/business'
+import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
+import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import {
   CorpType,
   FilingTypes,
@@ -13,7 +14,6 @@ import {
 } from '@/util/constants'
 import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { BNRequest } from '@/models/request-tracker'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -218,18 +218,43 @@ export default class BusinessModule extends VuexModule {
 
   // Following searchBusiness will search data from legal-api.
   @Action({ rawError: true })
-  public async searchBusiness (businessIdentifier: string): Promise<any> {
-    const response = await BusinessService.searchBusiness(businessIdentifier)
-    if (response && response.data && response.status === 200) {
+  public async searchBusiness (businessIdentifier: string): Promise<LearBusiness> {
+    const response = await BusinessService.searchBusiness(businessIdentifier).catch(() => null)
+    if (response?.status === 200 && response?.data?.business?.legalName) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       return response.data.business
+    } else {
+      throw Error('search failed')
     }
-    return null
   }
 
   @Action({ rawError: true })
   public async createBNRequest (request: BNRequest): Promise<any> {
     return BusinessService.createBNRequest(request)
+  }
+
+  @Action({ rawError: true })
+  public async getBNRequests (businessIdentifier: string): Promise<RequestTracker[]> {
+    const response = await BusinessService.getBNRequests(businessIdentifier).catch(() => null)
+    if (response?.status === 200) {
+      return response.data.requestTrackers
+    }
+    return []
+  }
+
+  @Action({ rawError: true })
+  public async resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<any> {
+    const response = await BusinessService.resubmitBNRequest(resubmitRequest).catch(() => null)
+    return response?.status === 200
+  }
+
+  @Action({ rawError: true })
+  public async getRequestTracker (requestTrackerId: number): Promise<RequestTracker> {
+    const response = await BusinessService.getRequestTracker(requestTrackerId).catch(() => null)
+    if (response?.status === 200) {
+      return response.data
+    }
+    return null
   }
 
   @Action({ rawError: true })
