@@ -16,12 +16,14 @@
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sqlalchemy.orm import subqueryload
 
 from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
+from auth_api.models.contact_link import ContactLink
 from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
@@ -122,7 +124,9 @@ class Affiliation:
             .join(Entity).filter(AffiliationModel.org_id == org_id) \
             .subquery()
 
-        entities = db.session.query(Entity).join(subquery, subquery.c.entity_id == Entity.id) \
+        entities = db.session.query(Entity) \
+            .options(subqueryload(Entity.contacts).subqueryload(ContactLink.contact)) \
+            .join(subquery, subquery.c.entity_id == Entity.id) \
             .order_by(subquery.c.created.desc()) \
             .all()
         return [EntityService(entity).as_dict() for entity in entities]
