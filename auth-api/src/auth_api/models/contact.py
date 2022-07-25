@@ -40,6 +40,6 @@ class Contact(VersionedModel):  # pylint: disable=too-few-public-methods
     phone_extension = Column('phone_extension', String(10))
     email = Column('email', String(100))
     # MVP contact has been migrated over to the contact linking table (revised data model)
-    entity_id = Column(Integer, ForeignKey('entities.id'))
+    entity_id = Column(Integer, ForeignKey('entities.id'), index=True)
 
     links = relationship('ContactLink', cascade='all, delete-orphan')
