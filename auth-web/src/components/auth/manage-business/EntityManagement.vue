@@ -104,14 +104,11 @@
             content-class="top-tooltip">
             <template v-slot:activator="{ on, attrs }">
               <ul class="add-business-unordered-list">
-                <li>For <strong>corporations</strong>, enter the incorporation number and the password.</li>
-                <li>For <strong>benefit companies</strong>, enter the incorporation number and the passcode.</li>
-                <li>For <strong>sole proprietorships and general partnerships</strong>,
-                  enter the registration number and either
-                  <span v-bind="attrs" v-on="on" activator class="underline-dotted">
-                    the name of the proprietor or a
-                    partner</span>.
-                </li>
+                <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
+                <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
+                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
+                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
+                  of the proprietor or a partner</span>.</li>
               </ul>
             </template>
             <span class="add-business-example-name">
