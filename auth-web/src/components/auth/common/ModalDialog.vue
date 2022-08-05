@@ -6,7 +6,7 @@
     :content-class="dialogClass"
     :max-width="maxWidth"
     v-model="isOpen"
-    @keydown.esc="cancel"
+    @keydown.esc="close()"
   >
     <v-card>
       <!-- title -->
