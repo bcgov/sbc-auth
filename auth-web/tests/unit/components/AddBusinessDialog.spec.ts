@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
+import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -68,7 +68,7 @@ describe('Add Business Form', () => {
       }
     })
 
-    wrapper = shallowMount(AddBusinessForm, {
+    wrapper = shallowMount(AddBusinessDialog, {
       store,
       vuetify,
       propsData: { dialog: true }
@@ -84,8 +84,8 @@ describe('Add Business Form', () => {
       wrapper.setData({ businessIdentifier: test.businessIdentifier })
 
       // verify components
-      expect(wrapper.attributes('id')).toBe('add-business-form')
-      expect(wrapper.find('#add-business-form').isVisible()).toBe(true)
+      expect(wrapper.attributes('id')).toBe('add-business-dialog')
+      expect(wrapper.find('#add-business-dialog').isVisible()).toBe(true)
       expect(wrapper.find(HelpDialog).exists()).toBe(true)
 
       // verify input fields
