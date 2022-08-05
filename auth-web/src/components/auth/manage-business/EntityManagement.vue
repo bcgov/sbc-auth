@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="entity-management">
     <v-fade-transition>
       <div class="loading-container grayed-out" v-show="!!isLoading">
         <v-progress-circular size="50" width="5" color="primary" :indeterminate="!!isLoading"/>
@@ -84,52 +84,16 @@
       />
 
       <!-- Add an Existing Business Dialog -->
-      <ModalDialog
-        ref="addBusinessDialog"
-        :is-persistent="true"
-        :title="dialogTitle"
-        :show-icon="false"
-        :show-actions="false"
-        max-width="675"
-        data-test-tag="add-business"
-      >
-        <template v-slot:text>
-          <p>
-            Add an existing business to your list by providing the following required pieces of information:
-          </p>
-          <v-tooltip
-            top
-            nudge-bottom="50"
-            nudge-right="125"
-            content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
-              <ul class="add-business-unordered-list">
-                <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
-                <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
-                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
-                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
-                  of the proprietor or a partner</span>.</li>
-              </ul>
-            </template>
-            <span class="add-business-example-name">
-              For individuals, it should be "Last Name,<br>
-              First Name MiddleName".<br>
-              E.g. Watson, John Hamish
-            </span>
-          </v-tooltip>
-
-          <AddBusinessForm
-            class="mt-6"
-            @add-success="showAddSuccessModal()"
-            @add-failed-invalid-code="showInvalidCodeModal($event)"
-            @add-failed-no-entity="showEntityNotFoundModal()"
-            @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-            @add-unknown-error="showUnknownErrorModal('business')"
-            @on-cancel="cancelAddBusiness()"
-            @on-business-identifier="businessIdentifier = $event"
-          />
-        </template>
-      </ModalDialog>
+      <AddBusinessDialog
+        :dialog="addBusinessDialog"
+        @add-success="showAddSuccessModal()"
+        @add-failed-invalid-code="showInvalidCodeModal($event)"
+        @add-failed-no-entity="showEntityNotFoundModal()"
+        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+        @add-unknown-error="showUnknownErrorModal('business')"
+        @on-cancel="cancelAddBusiness()"
+        @on-business-identifier="businessIdentifier = $event"
+      />
 
       <!-- Add Name Request Dialog -->
       <ModalDialog
@@ -227,7 +191,7 @@ import { CorpType, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import AddBusinessForm from '@/components/auth/manage-business/AddBusinessForm.vue'
+import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
@@ -240,7 +204,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
-    AddBusinessForm,
+    AddBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
     ModalDialog,
@@ -270,6 +234,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
+  protected addBusinessDialog = false
 
   /** V-model for dropdown menu. */
   private addAffiliationDropdown: boolean = false
@@ -286,7 +251,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
-    addBusinessDialog: ModalDialog
     addNRDialog: ModalDialog
     passcodeResetOptionsModal: PasscodeResetOptionsModal,
     removedBusinessSuccessDialog: ModalDialog,
@@ -349,7 +313,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   async showAddSuccessModal () {
-    this.$refs.addBusinessDialog.close()
+    this.addBusinessDialog = false
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
     await this.syncBusinesses()
@@ -365,14 +329,14 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   showInvalidCodeModal (label: string) {
-    this.$refs.addBusinessDialog.close()
+    this.addBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
     this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
     this.$refs.errorDialog.open()
   }
 
   showEntityNotFoundModal () {
-    this.$refs.addBusinessDialog.close()
+    this.addBusinessDialog = false
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
     this.$refs.errorDialog.open()
@@ -394,7 +358,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   showPasscodeClaimedModal () {
     const contactNumber = this.$t('techSupportTollFree').toString()
-    this.$refs.addBusinessDialog.close()
+    this.addBusinessDialog = false
     this.dialogTitle = 'Passcode Already Claimed'
     this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
     this.$refs.errorDialog.open()
@@ -402,7 +366,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   showUnknownErrorModal (type: string) {
     if (type === 'business') {
-      this.$refs.addBusinessDialog.close()
+      this.addBusinessDialog = false
       this.dialogTitle = 'Error Adding Existing Business'
       this.dialogText = 'An error occurred adding your business. Please try again.'
     } else if (type === 'nr') {
@@ -414,8 +378,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   showAddBusinessModal () {
-    this.dialogTitle = 'Add an Existing Business'
-    this.$refs.addBusinessDialog.open()
+    this.addBusinessDialog = true
   }
 
   showAddNRModal () {
@@ -486,7 +449,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   cancelAddBusiness () {
-    this.$refs.addBusinessDialog.close()
+    this.addBusinessDialog = false
   }
 
   cancelAddNameRequest () {
@@ -520,162 +483,109 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 </script>
 
 <style lang="scss" scoped>
-  @import '$assets/scss/theme.scss';
+@import '$assets/scss/theme.scss';
 
-  .loading-container.grayed-out {
-    // these are the same styles as dialog overlay:
-    opacity: 0.46;
-    background-color: rgb(33, 33, 33); // grey darken-4
-    border-color: rgb(33, 33, 33); // grey darken-4
-  }
-
-  .view-header {
-    justify-content: space-between;
-
-    h1 {
-      margin-bottom: -10px;
-    }
-
-    .subtitle {
-      font-size: 1rem;
-      color: $gray7;
-      font-weight: normal;
-    }
-
-    .v-btn {
-      font-weight: 700;
-    }
-  }
-
-  .underline-dotted {
-    border-bottom: dotted;
-    border-bottom-width: 2px;
-  }
-
-.v-tooltip__content {
-  background-color: RGBA(73, 80, 87, 0.95) !important;
-  color: white !important;
-  border-radius: 4px;
-  font-size: 12px !important;
-  line-height: 18px !important;
-  padding: 15px !important;
-  letter-spacing: 0;
-  max-width: 270px !important;
+.loading-container.grayed-out {
+  // these are the same styles as dialog overlay:
+  opacity: 0.46;
+  background-color: rgb(33, 33, 33); // grey darken-4
+  border-color: rgb(33, 33, 33); // grey darken-4
 }
 
-.v-tooltip__content:after {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  right: 100% !important;
-  margin-top: -10px !important;
-  border-top: 10px solid transparent !important;
-  border-bottom: 10px solid transparent !important;
-  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
-}
+.view-header {
+  justify-content: space-between;
 
-  .top-tooltip:after {
-  top: 100% !important;
-  left: 45% !important;
-  margin-top: 0 !important;
-  border-right: 10px solid transparent !important;
-  border-left: 10px solid transparent !important;
-  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
-}
-
-  #add-existing-btn {
-    box-shadow: none;
-    background-color: $app-blue !important;
+  h1 {
+    margin-bottom: -10px;
   }
 
-  .add-existing-title {
-    font-size: .875rem;
-  }
-
-  .add-existing-item {
-    height: 40px !important;
-    font-size: .875rem;
+  .subtitle {
+    font-size: 1rem;
     color: $gray7;
+    font-weight: normal;
+  }
 
+  .v-btn {
+    font-weight: 700;
+  }
+}
+
+#add-existing-btn {
+  box-shadow: none;
+  background-color: $app-blue !important;
+}
+
+.add-existing-title {
+  font-size: .875rem;
+}
+
+.add-existing-item {
+  height: 40px !important;
+  font-size: .875rem;
+  color: $gray7;
+
+  &:hover {
+    background-color: $app-background-blue;
+  }
+}
+
+.column-selector {
+  float: right;
+  width: 200px;
+}
+
+// Vuetify Overrides
+::v-deep {
+  #dashboard-actions {
+    .v-input .v-label {
+      transform: translateY(-10px) scale(1);
+      top: 30px;
+      color: $gray7;
+      font-size: .875rem;
+    }
+  }
+
+  .v-data-table td {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    height: auto;
+    vertical-align: top;
+  }
+
+  .v-list-item__title {
+    display: block;
+    font-weight: 700;
+  }
+
+  .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled):hover {
+    color: $app-blue !important;
+  }
+
+  .v-list .v-list-item--active, .v-list .v-list-item--active {
     &:hover {
       background-color: $app-background-blue;
     }
   }
 
-  .column-selector {
-    float: right;
-    width: 200px;
+  .v-list-item {
+    min-height: 0 !important;
+    height: 32px;
   }
 
-  .add-business-unordered-list {
-    list-style: none;
-    padding-left: 1rem;
-
-    li {
-      margin-left: 1.5rem;
-
-      &::before {
-        content: "\2022";
-        display: inline-block;
-        width: 1.5em;
-        color: $gray9;
-        margin-left: -1.5em;
-      }
-    }
+  .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
+  .theme--light.v-list-item:focus:before {
+    opacity: 0 !important;
   }
 
-  // Vuetify Overrides
-  ::v-deep {
-    #dashboard-actions {
-      .v-input .v-label {
-        transform: translateY(-10px) scale(1);
-        top: 30px;
-        color: $gray7;
-        font-size: .875rem;
-      }
-    }
+  .v-list-item__action {
+    margin-right: 20px !important;
+  }
 
-    .v-data-table td {
-      padding-top: 1rem;
-      padding-bottom: 1rem;
-      height: auto;
-      vertical-align: top;
-    }
-
-    .v-list-item__title {
-      display: block;
-      font-weight: 700;
-    }
-
-    .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled):hover {
+  .v-list-item .v-list-item__subtitle, .v-list-item .v-list-item__title {
+    color: $gray7;
+    &:hover {
       color: $app-blue !important;
     }
-
-    .v-list .v-list-item--active, .v-list .v-list-item--active {
-      &:hover {
-        background-color: $app-background-blue;
-      }
-    }
-
-    .v-list-item {
-      min-height: 0 !important;
-      height: 32px;
-    }
-
-    .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
-    .theme--light.v-list-item:focus:before {
-      opacity: 0 !important;
-    }
-
-    .v-list-item__action {
-      margin-right: 20px !important;
-    }
-
-    .v-list-item .v-list-item__subtitle, .v-list-item .v-list-item__title {
-      color: $gray7;
-      &:hover {
-        color: $app-blue !important;
-      }
-     }
   }
+}
 </style>
