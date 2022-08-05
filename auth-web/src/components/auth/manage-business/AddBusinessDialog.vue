@@ -23,7 +23,7 @@
           <p>
             Add an existing business to your list by providing the following required pieces of information:
           </p>
-          <v-tooltip top nudge-bottom="95" content-class="top-tooltip">
+          <v-tooltip top nudge-bottom="80" content-class="top-tooltip">
             <template v-slot:activator="{ on, attrs }">
               <ul class="add-business-unordered-list">
                 <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
