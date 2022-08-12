@@ -25,7 +25,7 @@
         </v-list>
         <!-- Panel Btns -->
         <!-- Authenticated -->
-        <template v-if="userProfile">
+        <!-- <template v-if="userProfile">
           <div class="incorporate-btns d-flex flex-column">
             <v-btn large dark color="bcgovblue" class="incorporate-btn font-weight-bold mb-7"
               @click="emitManageBusinesses()">
@@ -36,14 +36,15 @@
               Incorporate a Numbered Benefit Company
             </v-btn>
           </div>
-        </template>
+        </template> -->
         <!-- Not Authenticated -->
-        <template v-else>
-          <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-2" to="/choose-authentication-method">
-            Create a BC Registries Account
+        <template>
+          <v-btn large color="bcgovblue" class="cta-btn font-weight-bold mr-2 white--text"
+            @click="emitRedirectManage()">
+            Go to My Business Registry
           </v-btn>
         </template>
-        <learn-more-button
+        <learn-more-button :isWide="true"
         :redirect-url="learnMoreUrl"/>
       </v-col>
       <!-- Image Column -->
@@ -58,6 +59,7 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import { Pages } from '@/util/constants'
@@ -70,7 +72,8 @@ import { User } from '@/models/user'
   }
 })
 export default class IncorpOrRegisterView extends Vue {
-  private readonly learnMoreUrl = 'https://smallbusinessbc.ca/article/how-to-choose-the-right-business-structure-for-your-small-business/'
+  private readonly dashboardUrl = `${ConfigHelper.getRegistryHomeURL()}dashboard`
+  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
   private readonly bulletPoints: Array<any> = [
     { text: 'For Named Companies, add your existing Name Request number to your account and open it.' },
     { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
@@ -80,6 +83,14 @@ export default class IncorpOrRegisterView extends Vue {
 
   @Prop()
   private userProfile: User
+
+  private emitRedirectManage () {
+    if (this.userProfile) {
+      this.emitManageBusinesses()
+    } else {
+      window.location.href = this.dashboardUrl
+    }
+  }
 
   @Emit('login')
   private emitLogin () {}

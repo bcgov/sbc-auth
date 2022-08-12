@@ -1,9 +1,10 @@
 <template>
   <v-btn
     large
-    color="#003366"
-    class="btn-name-request white--text"
-    :class="{'btn-name-request-wide': isWide}"
+    outlined
+    color="bcgovblue"
+    class="btn-name-request"
+    :class="{'btn-name-request-wide': isWide, 'btn-name-request-inverse': isInverse}"
     @click="goToNameRequest()"
   >
     <span class="btn-text">Request a Name</span>
@@ -20,6 +21,8 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 @Component({})
 export default class NameRequestButton extends Vue {
   @Prop() isWide: boolean
+
+  @Prop({ default: false }) isInverse: boolean
 
   // open Name Request in current tab to retain current account and user
   goToNameRequest (): void {
@@ -39,11 +42,17 @@ export default class NameRequestButton extends Vue {
     font-weight: bold;
     min-height: 2.75rem;
     width: 10rem;
-    background-color: $BCgovBlue5;
+    color: $BCgovBlue5;
+    border: 2px solid $BCgovBlue5;
+    max-width: 160px;
   }
 
   .btn-name-request-wide {
-    width: 100%;
     margin-bottom: 0.8125rem;
+  }
+
+  .v-btn.btn-name-request-inverse {
+    color: white !important;
+    background-color: $BCgovBlue5;
   }
 </style>
