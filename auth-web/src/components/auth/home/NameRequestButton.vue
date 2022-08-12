@@ -3,7 +3,7 @@
     large
     outlined
     color="bcgovblue"
-    class="btn-name-request"
+    class="btn-name-request white--text"
     :class="{'btn-name-request-wide': isWide, 'btn-name-request-inverse': isInverse}"
     @click="goToNameRequest()"
   >
@@ -44,7 +44,6 @@ export default class NameRequestButton extends Vue {
     width: 10rem;
     color: $BCgovBlue5;
     border: 2px solid $BCgovBlue5;
-    max-width: 160px;
   }
 
   .btn-name-request-wide {

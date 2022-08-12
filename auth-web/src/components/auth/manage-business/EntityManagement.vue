@@ -61,25 +61,11 @@
               <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
             </v-list>
           </v-menu>
-        </v-col>
-        <v-col cols="auto">
-          <v-tooltip top max-width="361px" content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                id="incorporate-numbered-btn"
-                class="mt-2 mr-4"
-                color="primary"
-                outlined dark large
-                v-bind="attrs"
-                v-on="on"
-                @click="startNumberedCompany()"
-              >
-                <v-icon>mdi-plus</v-icon>
-                <span><strong>Incorporate a Numbered Benefit Company</strong></span>
-              </v-btn>
-            </template>
-            <span>Start an incorporation application for a numbered benefit company in B.C.</span>
-          </v-tooltip>
+          <v-btn large text color="primary" class="mt-2 font-weight-bold incorporate-btn"
+            @click="goToManageBusinesses()">
+            <v-icon>mdi-plus</v-icon>
+            <span>Incorporate a Numbered Benefit Company</span>
+          </v-btn>
         </v-col>
         <v-col>
           <v-select
@@ -235,7 +221,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     PasscodeResetOptionsModal
   },
   computed: {
-    ...mapState('org', ['currentOrgAddress']),
+    ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
     ...mapState('user', ['userProfile', 'currentUser']),
     ...mapGetters('org', ['isPremiumAccount'])
   },
@@ -509,6 +495,12 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   close () {
     this.$refs.errorDialog.close()
   }
+
+  private goToManageBusinesses (isNumberedCompanyRequest: boolean = true): void {
+    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
+    manageBusinessUrl.query = { isNumberedCompanyRequest }
+    this.$router.push(manageBusinessUrl)
+  }
 }
 </script>
 
@@ -647,6 +639,11 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     &:hover {
       color: $app-blue !important;
     }
+  }
+
+  .incorporate-btn {
+    align-self: flex-start;
+    border: 2px solid $app-blue;
   }
 }
 </style>

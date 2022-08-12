@@ -24,28 +24,20 @@
           </v-list-item>
         </v-list>
         <!-- Panel Btns -->
-        <!-- Authenticated -->
-        <!-- <template v-if="userProfile">
-          <div class="incorporate-btns d-flex flex-column">
-            <v-btn large dark color="bcgovblue" class="incorporate-btn font-weight-bold mb-7"
-              @click="emitManageBusinesses()">
-              Incorporate a Named Benefit Company
-            </v-btn>
-            <v-btn large dark color="bcgovblue" class="incorporate-btn font-weight-bold mb-7"
-              @click="emitManageBusinesses(true)">
-              Incorporate a Numbered Benefit Company
-            </v-btn>
-          </div>
-        </template> -->
-        <!-- Not Authenticated -->
         <template>
-          <v-btn large color="bcgovblue" class="cta-btn font-weight-bold mr-2 white--text"
+          <v-btn large color="bcgovblue" class="cta-btn font-weight-bold mr-2 white--text registry-btn"
             @click="emitRedirectManage()">
             Go to My Business Registry
           </v-btn>
         </template>
-        <learn-more-button :isWide="true"
-        :redirect-url="learnMoreUrl"/>
+        <LearnMoreButton isWide=true :redirect-url="learnMoreUrl"/>
+        <div class="d-flex mt-8">
+          <span class="body-1">New to BC Registries?</span>
+          <router-link class="ml-2 body-1 font-weight-bold"
+            to="/choose-authentication-method"
+          >Create a BC Registries Account
+          </router-link>
+        </div>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
@@ -62,8 +54,8 @@ import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
-import { Pages } from '@/util/constants'
 import { User } from '@/models/user'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
@@ -72,8 +64,7 @@ import { User } from '@/models/user'
   }
 })
 export default class IncorpOrRegisterView extends Vue {
-  private readonly dashboardUrl = `${ConfigHelper.getRegistryHomeURL()}dashboard`
-  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
+  protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
   private readonly bulletPoints: Array<any> = [
     { text: 'For Named Companies, add your existing Name Request number to your account and open it.' },
     { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
@@ -88,7 +79,7 @@ export default class IncorpOrRegisterView extends Vue {
     if (this.userProfile) {
       this.emitManageBusinesses()
     } else {
-      window.location.href = this.dashboardUrl
+      window.location.assign(appendAccountId(`${ConfigHelper.getRegistryHomeURL()}dashboard`))
     }
   }
 
@@ -144,6 +135,11 @@ export default class IncorpOrRegisterView extends Vue {
       .incorporate-btn {
         align-self: flex-start;
       }
+    }
+
+    .registry-btn:hover {
+      color: white !important;
+      opacity: .8;
     }
   }
 </style>

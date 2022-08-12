@@ -91,21 +91,13 @@ describe('HomeView.vue', () => {
   it('renders the correct buttons when authenticated', () => {
     const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn-auth')
     const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
-    const namedCompBtn = bannerBtns[0]
-    const numberedCompBtn = bannerBtns[1]
-    const manageBusinessBtn = bannerBtns[2]
+    const manageBusinessBtn = bannerBtns[0]
 
     expect(nameRequestBtn).toBeDefined()
     expect(nameRequestBtn.textContent).toContain('Request a Name')
 
-    expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
-
-    expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
-
     expect(manageBusinessBtn).toBeDefined()
-    expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')
+    expect(manageBusinessBtn.textContent).toContain('Manage my Business')
   })
 
   it('renders the correct buttons when not authenticated', async () => {

@@ -23,14 +23,15 @@
         </v-list-item>
         <!-- Panel Btns -->
         <div class="request-name-info-btns mt-5">
-          <name-request-button class="mr-2" :isInverse="true"/>
-          <learn-more-button :redirect-url="learnMoreUrl"/>
+          <NameRequestButton class="mr-2" :isInverse="true"/>
+          <LearnMoreButton :redirect-url="learnMoreUrl"/>
         </div>
-        <p class="mt-5">Have an existing Name Request?
-            <a class="status-link" @click="goToNameRequestExisting()">
-              Check your Name Request Status
-            </a>
-          </p>
+        <p class="mt-5">
+          Have an existing Name Request?
+          <a class="status-link" @click="goToNameRequestExisting()">
+            Check your Name Request Status
+          </a>
+        </p>
       </v-col>
       <!-- Image Column -->
       <v-col cols="12" md="6">
