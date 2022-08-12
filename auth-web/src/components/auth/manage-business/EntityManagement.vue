@@ -56,7 +56,7 @@
                     for you. A few options are: a sole proprietorship
                     partnership, or corporation. Each structure has
                     different legal and financial implications.
-                    <a :href="getSelectorWizardUrl">
+                    <a v-bind:href="getSelectorWizardUrl">
                       Use the Business Structures Wizard to help you decide.
                     </a>
                     <v-icon small color="primary" class="mt-n1">mdi-open-in-new</v-icon>
@@ -71,7 +71,7 @@
                 <ul>
                   <li class="py-2">If you would like to start a named
                     business, the first step is is to
-                    <a :href="getAccountIdNameRequestUrl">submit a Name Request</a>.
+                    <a v-bind:href="getAccountIdNameRequestUrl">submit a Name Request</a>.
                     Select "Request a Business Name" and create a unique name
                     for your business and submit this name for examination by
                     the Business Registry.
