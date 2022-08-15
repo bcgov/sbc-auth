@@ -1,4 +1,4 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import DashboardHelp from '@/components/auth/manage-business/DashboardHelp.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
