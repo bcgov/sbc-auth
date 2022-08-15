@@ -64,8 +64,12 @@ async def process_event(event_message, flask_app):
                                                             created=data.get('createdAt'),
                                                             org_id=data.get('orgId')
                                                             )
-        activity_model.save()
-        logger.debug('activity log saved')
+        try:
+            activity_model.save()
+            logger.debug('activity log saved')
+        except Exception as e:  # NOQA # pylint: disable=broad-except
+            logger.error('DB Error: %s', e)
+            activity_model.rollback()
 
 
 async def cb_subscription_handler(msg: nats.aio.client.Msg):
