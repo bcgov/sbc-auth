@@ -149,6 +149,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('API_DOCUMENTATION_URL')
   }
 
+  static getRegistrySearchUrl () {
+    return ConfigHelper.getValue('REGISTRY_SEARCH_URL')
+  }
+
   static getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]
