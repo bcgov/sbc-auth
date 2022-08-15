@@ -1,6 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
+import DashboardHelp from '@/components/auth/manage-business/DashboardHelp.vue'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
@@ -35,7 +36,7 @@ function getPayLoad (type:string) {
 
 describe('Entity Management Component', () => {
   let wrapper: any
-  let mockedNrMethod:any
+  let mockedNrMethod: any
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -123,10 +124,6 @@ describe('Entity Management Component', () => {
     expect(wrapper.find(PasscodeResetOptionsModal).exists()).toBe(true)
     expect(wrapper.find(AddBusinessDialog).exists()).toBe(true)
     expect(wrapper.find(ModalDialog).exists()).toBe(true)
-  })
-
-  it('EntityManagement contains all the correct buttons', () => {
-    expect(wrapper.find('#add-name-request-btn').exists()).toBe(true)
-    expect(wrapper.find('#btn-buissness-help').exists()).toBe(true)
+    expect(wrapper.find(DashboardHelp).exists()).toBe(true)
   })
 })
