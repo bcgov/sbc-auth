@@ -48,7 +48,8 @@
             "ppr-ui",
             "registry",
             "api-document",
-            "siteminder"
+            "siteminder",
+            "registry-search-ui"
         ]
     },
     {
