@@ -9,7 +9,7 @@
 
     <v-row class="ma-0 mb-4" no-gutters>
       <v-col class="pr-2" cols="6">
-        <v-card class="pa-8" flat style="height: 100%;">
+        <v-card class="pa-8 srch-card" flat style="height: 100%;">
           <div class="view-header flex-column mb-10">
             <h2 class="view-header__title">Search Entities</h2>
             <p class="mt-3 mb-0">
@@ -53,6 +53,9 @@
               :affiliatedOrg="affiliatedOrg"
             ></IncorporationSearchResultView>
           </template>
+          <a class="srch-card__reg-srch-link" :href="registrySearchUrl" target="_blank">
+            Go to Business Search
+          </a>
         </v-card>
       </v-col>
       <v-col class="pl-2" cols="6">
@@ -99,6 +102,7 @@
 import { Component } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
@@ -219,6 +223,10 @@ export default class StaffDashboardView extends Vue {
     this.businessIdentifier =
       CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
+
+  get registrySearchUrl (): string {
+    return ConfigHelper.getRegistrySearchUrl()
+  }
 }
 </script>
 
@@ -248,6 +256,15 @@ export default class StaffDashboardView extends Vue {
     font-weight: bold;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+  }
+  .srch-card {
+    position: relative;
+  
+    &__reg-srch-link {
+      position: absolute;
+      right: 32px;
+      top: 20px;
+    }
   }
   .v-expansion-panel-content__wrap {
   padding: 0px !important;
