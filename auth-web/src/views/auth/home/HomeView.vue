@@ -3,7 +3,7 @@
     <article>
       <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
         <v-container>
-          <h1>Start a Benefit Company and Keep <br>Cooperatives Records up to date</h1>
+          <h1>Start a B.C. based Business and <br>keep Business Records up to date</h1>
           <p class="mt-7 mb-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
             and organizations in British Columbia.</p>
           <div class="hero-banner__cta-btns mb-2">
