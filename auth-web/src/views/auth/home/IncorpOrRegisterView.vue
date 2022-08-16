@@ -3,25 +3,55 @@
     <v-row>
       <!-- Info Column -->
       <v-col cols="12" md="6">
-        <h2>Incorporate or Register</h2>
+        <h2>Register or Incorporate</h2>
         <v-list class="py-0 mt-4 mb-6" color="transparent">
           <v-list-item class="list-item">
             <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
-                If you have an approved Name Request (NR number), or you want a <numbered-company-tooltip />,
-                you can start your Incorporation Application.
+                Once your Name Request is approved, visit <span class="font-weight-bold">My Business Registry</span>
+                page and use the Name Request Number to:
               </v-list-item-subtitle>
+              <v-list-item class="list-item" v-for="(item, index) in subBulletPoints" :key="index">
+                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+                <v-list-item-content>
+                  <v-list-item-subtitle class="list-item-text">
+                    {{item.text}}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
             </v-list-item-content>
           </v-list-item>
-          <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-            <v-list-item-content>
-              <v-list-item-subtitle class="list-item-text">
-                {{item.text}}
-              </v-list-item-subtitle>
-            </v-list-item-content>
-          </v-list-item>
+        <!-- </v-list> -->
+          <div class="pb-2">To register or incorporate, you will be asked for the following information:</div>
+          <template>
+            <v-expansion-panels flat tile accordion>
+              <v-expansion-panel v-for="(item, index) in registerPoints" :key="index" class="incorp-expansion-panels">
+                <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                  <template v-slot:actions>
+                    <v-icon color="primary">
+                      $expand
+                    </v-icon>
+                  </template>
+                  {{ item.text }}
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <v-list-item class="list-item">
+                    <v-list-item-content>
+                      <v-list-item class="list-item" v-for="(subItem, subIndex) in item.items" :key="subIndex">
+                        <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+                        <v-list-item-content>
+                          <v-list-item-subtitle class="list-item-text py-3">
+                            {{subItem.text}}
+                          </v-list-item-subtitle>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </template>
         </v-list>
         <!-- Panel Btns -->
         <template>
@@ -70,6 +100,30 @@ export default class IncorpOrRegisterView extends Vue {
     { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
     { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' },
     { text: 'Retain a copy of all Incorporation documents for your business\'s records.' }
+  ]
+  private readonly subBulletPoints: Array<any> = [
+    { text: 'Register a firm such as sole proprietorship, DBA, general partnership, and societies' },
+    { text: 'Incorporate a benefit company or a cooperative association' }
+  ]
+  private readonly registerPoints: Array<any> = [
+    { text: 'Sole Proprietorship, DBA, and General Partnership',
+      items: [
+        { text: 'The name(s) and address(es) of the proprietor or partner(s).' }
+      ]
+    },
+    { text: 'Benefit Companies',
+      items: [
+        { text: 'Business name translations if applicable.' },
+        { text: 'Registered and records office addresses and contact information.' },
+        { text: 'Addresses, directors and share structure, and articles.' }
+      ]
+    },
+    { text: 'Cooperative Associations',
+      items: [
+        { text: 'Office addresses, director name and addresses, rules of the association, and memorandum.' },
+        { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' }
+      ]
+    }
   ]
 
   @Prop()
@@ -135,6 +189,18 @@ export default class IncorpOrRegisterView extends Vue {
       .incorporate-btn {
         align-self: flex-start;
       }
+    }
+
+    .incorp-expansion-panels {
+      background-color: inherit;
+    }
+
+    .incorp-expansion-header {
+      color: $BCgoveBueText1;
+    }
+
+    .v-expansion-panel-content .v-list-item__content {
+      padding: 0;
     }
 
     .registry-btn:hover {
