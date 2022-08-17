@@ -61,11 +61,23 @@
               <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
             </v-list>
           </v-menu>
-          <v-btn large text color="primary" class="mt-2 font-weight-bold incorporate-btn"
-            @click="goToManageBusinesses()">
-            <v-icon>mdi-plus</v-icon>
-            <span>Incorporate a Numbered Benefit Company</span>
-          </v-btn>
+          <v-tooltip top max-width="361px" content-class="top-tooltip">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                id="incorporate-numbered-btn"
+                class="mt-2 mr-4"
+                color="primary"
+                outlined dark large
+                v-bind="attrs"
+                v-on="on"
+                @click="goToManageBusinesses()"
+              >
+                <v-icon>mdi-plus</v-icon>
+                <span><strong>Incorporate a Numbered Benefit Company</strong></span>
+              </v-btn>
+            </template>
+            <span>Start an incorporation application for a numbered benefit company in B.C.</span>
+          </v-tooltip>
         </v-col>
         <v-col>
           <v-select
@@ -639,11 +651,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     &:hover {
       color: $app-blue !important;
     }
-  }
-
-  .incorporate-btn {
-    align-self: flex-start;
-    border: 2px solid $app-blue;
   }
 }
 </style>
