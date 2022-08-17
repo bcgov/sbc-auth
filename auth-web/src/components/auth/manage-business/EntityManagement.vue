@@ -61,8 +61,6 @@
               <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
             </v-list>
           </v-menu>
-        </v-col>
-        <v-col cols="auto">
           <v-tooltip top max-width="361px" content-class="top-tooltip">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
@@ -72,7 +70,7 @@
                 outlined dark large
                 v-bind="attrs"
                 v-on="on"
-                @click="startNumberedCompany()"
+                @click="goToManageBusinesses()"
               >
                 <v-icon>mdi-plus</v-icon>
                 <span><strong>Incorporate a Numbered Benefit Company</strong></span>
@@ -235,7 +233,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     PasscodeResetOptionsModal
   },
   computed: {
-    ...mapState('org', ['currentOrgAddress']),
+    ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
     ...mapState('user', ['userProfile', 'currentUser']),
     ...mapGetters('org', ['isPremiumAccount'])
   },
@@ -508,6 +506,12 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   close () {
     this.$refs.errorDialog.close()
+  }
+
+  private goToManageBusinesses (isNumberedCompanyRequest: boolean = true): void {
+    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
+    manageBusinessUrl.query = { isNumberedCompanyRequest }
+    this.$router.push(manageBusinessUrl)
   }
 }
 </script>
