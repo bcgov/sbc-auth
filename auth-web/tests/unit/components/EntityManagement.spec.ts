@@ -33,7 +33,7 @@ function getPayLoad (type:string) {
 
 describe('Entity Management Component', () => {
   let wrapper: any
-  let mockedNrMethod:any
+  let mockedNrMethod: any
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -113,5 +113,20 @@ describe('Entity Management Component', () => {
     wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
     expect(mockedNrMethod).toHaveBeenCalledTimes(0)
     expect(mockedPasscodeResetMethod).toHaveBeenCalled()
+  })
+
+  it('all buttons, tooltips and v-menu selections exist', async () => {
+    // All buttons exist
+    expect(wrapper.find('#add-existing-btn').exists()).toBe(true)
+    expect(wrapper.find('#add-name-request-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-btn').exists()).toBe(true)
+
+    // Existing Business or NameRequest menu selections
+    wrapper.find('#add-existing-btn').trigger('click')
+    await Vue.nextTick()
+    expect(wrapper.findAll('.add-existing-item').length).toBe(2)
+
+    // tooltips exist
+    expect(wrapper.findAll('.top-tooltip').length).toBe(2)
   })
 })
