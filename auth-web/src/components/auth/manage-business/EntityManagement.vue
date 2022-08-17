@@ -6,7 +6,7 @@
       </div>
     </v-fade-transition>
 
-    <v-container class="view-container">
+    <v-container justify class="view-container">
       <div class="view-header align-center">
         <h1 class="view-header__title">My Business Registry<br>
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
@@ -26,7 +26,7 @@
       </div>
 
       <v-row no-gutters id="dashboard-actions" class="mb-n3">
-        <v-flex shrink class="mr-4">
+        <v-col cols="auto">
           <!-- Add Existing Name Request or Business -->
           <v-menu
             v-model="addAffiliationDropdown"
@@ -36,7 +36,7 @@
                 <template v-slot:activator="{ on: onTooltip }">
                   <v-btn
                     id="add-existing-btn"
-                    class="mt-2"
+                    class="mt-2 mr-4"
                     color="primary"
                     dark large
                     v-on="{ ...onMenu, ...onTooltip }"
@@ -61,13 +61,13 @@
               <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
             </v-list>
           </v-menu>
-        </v-flex>
-        <v-flex shrink>
+        </v-col>
+        <v-col cols="auto">
           <v-tooltip top max-width="361px" content-class="top-tooltip">
             <template v-slot:activator="{ on, attrs }">
               <v-btn
                 id="incorporate-numbered-btn"
-                class="mt-2"
+                class="mt-2 mr-4"
                 color="primary"
                 outlined dark large
                 v-bind="attrs"
@@ -80,8 +80,8 @@
             </template>
             <span>Start an incorporation application for a numbered benefit company in B.C.</span>
           </v-tooltip>
-        </v-flex>
-        <v-flex>
+        </v-col>
+        <v-col>
           <v-select
             dense filled multiple
             class="column-selector"
@@ -92,7 +92,7 @@
           >
             <template v-slot:selection></template>
           </v-select>
-        </v-flex>
+        </v-col>
       </v-row>
 
       <AffiliatedEntityTable
@@ -337,7 +337,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   }
 
   // create a numbered company
-  async startNumberedCompany () {
+  protected async startNumberedCompany () {
     await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
   }
