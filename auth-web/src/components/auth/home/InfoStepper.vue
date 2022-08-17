@@ -52,7 +52,7 @@ export default class InfoStepper extends Vue {
     {
       id: 'step-3-btn',
       step: 3,
-      text: 'Incorporate or Register',
+      text: 'Register or Incorporate',
       to: '/home/incorporate-or-register'
     },
     {

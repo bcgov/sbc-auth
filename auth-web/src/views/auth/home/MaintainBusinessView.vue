@@ -24,17 +24,18 @@
         </v-list>
         <!-- Panel Btns -->
         <div class="incorporate-btns">
-          <v-btn v-if="userProfile" large color="bcgovgold" class="cta-btn font-weight-bold mr-3" @click="emitManageBusinesses()">
-            Manage an Existing Business
+          <v-btn large color="bcgovblue" class="cta-btn font-weight-bold mr-2 white--text business-btn"
+            @click="emitRedirectManage()">
+            Manage my Business
           </v-btn>
-          <template v-else>
-            <v-btn large color="bcgovgold" class="cta-btn font-weight-bold mr-3" to="/choose-authentication-method">
-              Create a BC Registries account
-            </v-btn>
-          </template>
-          <learn-more-button
-           :redirect-url="learnMoreUrl"
-          />
+          <LearnMoreButton isWide=true :redirect-url="learnMoreUrl"/>
+          <div class="d-flex mt-8">
+            <span class="body-1">New to BC Registries?</span>
+            <router-link class="ml-2 body-1 font-weight-bold"
+              to="/choose-authentication-method"
+            >Create a BC Registries Account
+            </router-link>
+          </div>
           <p v-if="!userProfile" class="mt-5">
             Don't have your Cooperative Passcode?
             <v-menu top offset-y v-model="contactUsPopover" :close-on-content-click="false" attach="#maintain-info-container">
@@ -108,8 +109,10 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import ConfigHelper from '@/util/config-helper'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { User } from '@/models/user'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
@@ -119,7 +122,7 @@ import { User } from '@/models/user'
 export default class MaintainBusinessView extends Vue {
   private contactUsPopover = false
   private readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card'
-  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/assets/gov/employment-business-and-economic-development/business-management/permits-licences-and-registration/registries-guides/info_36_com_-_maintaining_your_bc_company.pdf'
+  protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   private readonly bulletPoints: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
@@ -134,6 +137,14 @@ export default class MaintainBusinessView extends Vue {
 
   @Prop()
   private userProfile: User
+
+  private emitRedirectManage () {
+    if (this.userProfile) {
+      this.emitManageBusinesses()
+    } else {
+      window.location.assign(appendAccountId(`${ConfigHelper.getRegistryHomeURL()}dashboard`))
+    }
+  }
 
   @Emit('login')
   private emitLogin () {}
@@ -206,6 +217,11 @@ export default class MaintainBusinessView extends Vue {
       .v-list-item__subtitle {
         font-size: .75rem;
       }
+    }
+
+    .business-btn:hover {
+      color: white !important;
+      opacity: .8;
     }
   }
 </style>

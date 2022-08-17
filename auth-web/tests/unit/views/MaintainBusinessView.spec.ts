@@ -12,9 +12,12 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
+const config = { 'REGISTRY_HOME_URL': 'hello' }
+
 describe('MaintainBusinessView.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -62,22 +65,22 @@ describe('MaintainBusinessView.vue', () => {
     const learnMoreBtn = authenticatedBtns[1]
 
     expect(manageBusinessBtn).toBeDefined()
-    expect(manageBusinessBtn.textContent).toContain('Manage an Existing Business')
+    expect(manageBusinessBtn.textContent).toContain('Manage my Business')
 
     expect(learnMoreBtn).toBeDefined()
     expect(learnMoreBtn.textContent).toContain('Learn More')
   })
 
-  it('renders the login button when NOT authenticated', () => {
+  it('renders the manage business button when NOT authenticated', () => {
     // Render Un-Authenticated
     const wrapper = wrapperFactory({ userProfile: null })
 
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const loginBtn = authenticatedBtns[0]
+    const manageBusinessBtn = authenticatedBtns[0]
     const learnMoreBtn = authenticatedBtns[1]
 
-    expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries account')
+    expect(manageBusinessBtn).toBeDefined()
+    expect(manageBusinessBtn.textContent).toContain('Manage my Business')
 
     expect(learnMoreBtn).toBeDefined()
     expect(learnMoreBtn.textContent).toContain('Learn More')

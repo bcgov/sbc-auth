@@ -13,9 +13,12 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
+const config = { 'REGISTRY_HOME_URL': 'hello' }
+
 describe('IncorpOrRegisterView.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -57,34 +60,34 @@ describe('IncorpOrRegisterView.vue', () => {
 
   it('renders the correct buttons when authenticated', () => {
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const namedCompBtn = authenticatedBtns[0]
-    const numberedCompBtn = authenticatedBtns[1]
+    const registryBtn = authenticatedBtns[0]
+    const learnMoreBtn = authenticatedBtns[1]
 
-    expect(namedCompBtn).toBeDefined()
-    expect(namedCompBtn.textContent).toContain('Incorporate a Named Benefit Company')
+    expect(registryBtn).toBeDefined()
+    expect(registryBtn.textContent).toContain('Go to My Business Registry')
 
-    expect(numberedCompBtn).toBeDefined()
-    expect(numberedCompBtn.textContent).toContain('Incorporate a Numbered Benefit Company')
+    expect(learnMoreBtn).toBeDefined()
+    expect(learnMoreBtn.textContent).toContain('Learn More')
   })
 
-  it('renders the login button when NOT authenticated', () => {
+  it('renders the registry button when NOT authenticated', () => {
     // Render Un-Authenticated
     const wrapper = wrapperFactory({ userProfile: null })
 
-    const loginBtn = wrapper.vm.$el.querySelector('.v-btn')
+    const registryBtn = wrapper.vm.$el.querySelector('.v-btn')
 
-    expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
+    expect(registryBtn).toBeDefined()
+    expect(registryBtn.textContent).toContain('Go to My Business Registry')
   })
 
-  it('renders the create account link when NOT authenticated', () => {
+  it('renders the registry buttn when authenticated', () => {
     // Render Un-Authenticated
-    const wrapper = wrapperFactory({ userProfile: null })
+    const wrapper = wrapperFactory({ userProfile: {} })
 
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
+    const registryBtn = wrapper.vm.$el.querySelector('.cta-btn')
 
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
+    expect(registryBtn).toBeDefined()
+    expect(registryBtn.textContent).toContain('Go to My Business Registry')
   })
 
   it('renders the correct text and number of bullet points', () => {

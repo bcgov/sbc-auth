@@ -9,19 +9,11 @@
           <div class="hero-banner__cta-btns mb-2">
             <!-- Authenticated -->
             <div v-if="userProfile" class="cta-btns-authenticated">
-              <name-request-button :isWide="true" />
-              <v-btn large dark color="bcgovblue" class="cta-btn-auth font-weight-bold"
+              <v-btn large color="bcgovblue" class="cta-btn-auth font-weight-bold white--text mr-4"
                      @click="goToManageBusinesses()">
-                Incorporate a Named Benefit Company
+                Manage my Business
               </v-btn>
-              <v-btn large dark color="bcgovblue" class="cta-btn-auth font-weight-bold"
-                     @click="goToManageBusinesses(true)">
-                Incorporate a Numbered Benefit Company
-              </v-btn>
-              <v-btn large color="bcgovgold" class="cta-btn-auth font-weight-bold"
-                     @click="goToManageBusinesses()">
-                Manage an Existing Business
-              </v-btn>
+              <NameRequestButton isWide=true />
             </div>
 
             <!-- Non-authenticated -->
@@ -36,8 +28,8 @@
                   <template v-slot:activator="{ on }">
                     <v-btn
                       large
-                      color="bcgovgold"
-                      class="hero-banner-login-btn mr-4 font-weight-bold"
+                      color="bcgovblue"
+                      class="hero-banner-login-btn mr-4 font-weight-bold white--text"
                       aria-label="log in"
                       id="loginBtn"
                       v-on="on">
@@ -49,7 +41,7 @@
                 </v-menu>
                 <name-request-button />
               </div>
-              <div d-flex class="mt-8">
+              <div class="d-flex mt-8">
                 <span class="body-1">New to BC Registries?</span>
                 <router-link class="ml-2 body-1 font-weight-bold"
                   to="/choose-authentication-method"
@@ -360,8 +352,7 @@ export default class HomeView extends Vue {
 
     .cta-btns-authenticated, .cta-btns-authenticated > div {
       display: flex;
-      max-width: 350px;
-      flex-wrap: wrap;
+      max-width: 200px;
       margin-bottom: 13px;
 
       .v-btn {
