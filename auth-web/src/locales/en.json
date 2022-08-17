@@ -197,7 +197,7 @@
   "removeRegistrationSuccessText": "You have successfully deleted a registration",
   "removeRegistrationConfirmTitle": "Delete Registration?",
   "removeRegistrationConfirmText": "Deleting this registration will remove the application from your Business Registry list. The business associated with this application will not be registered. If this registration was associated with a Name Request, the Name Request can still be used to register a business.",
-  "myBusinessDashSubtitle": "Start BC-based businesses and keep business records up to date.",
+  "myBusinessDashSubtitle": "Start B.C. based businesses and keep business records up to date.",
   "onHoldOrRejectModalText": "To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose \"Reject Account\"",
   "developerAccessSubtitle":"Enabling developer access would allow you to integrate the BC Registries API services to your system.<br />Learn more in the  <a href=\"{url}\">API documentation</a>.",
   "assetLauncherText": "Register or search for manufactured homes and register or search for legal claims on personal property.",

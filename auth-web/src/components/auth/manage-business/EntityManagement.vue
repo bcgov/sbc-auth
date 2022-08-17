@@ -26,24 +26,29 @@
       </div>
 
       <v-row no-gutters id="dashboard-actions" class="mb-n3">
-        <v-col cols="9">
+        <v-flex shrink class="mr-4">
           <!-- Add Existing Name Request or Business -->
           <v-menu
             v-model="addAffiliationDropdown"
           >
-            <template v-slot:activator="{ on }">
-              <v-btn
-                id="add-existing-btn"
-                class="mt-2"
-                color="primary"
-                dark
-                large
-                v-on="on"
-              >
-                <v-icon>mdi-plus</v-icon>
-                <span><strong>Add an Existing Business or Name Request</strong></span>
-                <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-              </v-btn>
+            <template v-slot:activator="{ on: onMenu }">
+              <v-tooltip top content-class="top-tooltip">
+                <template v-slot:activator="{ on: onTooltip }">
+                  <v-btn
+                    id="add-existing-btn"
+                    class="mt-2"
+                    color="primary"
+                    dark large
+                    v-on="{ ...onMenu, ...onTooltip }"
+                    @click="addAffiliationDropdown = !addAffiliationDropdown"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                    <span><strong>Add an Existing Business or Name Request</strong></span>
+                    <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                  </v-btn>
+                </template>
+                <span>To view and manage existing businesses and Name Requests, you can manually add them to your table.</span>
+              </v-tooltip>
             </template>
             <v-list>
               <v-list-item>
@@ -56,8 +61,27 @@
               <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
             </v-list>
           </v-menu>
-        </v-col>
-        <v-col>
+        </v-flex>
+        <v-flex shrink>
+          <v-tooltip top max-width="361px" content-class="top-tooltip">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                id="incorporate-numbered-btn"
+                class="mt-2"
+                color="primary"
+                outlined dark large
+                v-bind="attrs"
+                v-on="on"
+                @click="startNumberedCompany()"
+              >
+                <v-icon>mdi-plus</v-icon>
+                <span><strong>Incorporate a Numbered Benefit Company</strong></span>
+              </v-btn>
+            </template>
+            <span>Start an incorporation application for a numbered benefit company in B.C.</span>
+          </v-tooltip>
+        </v-flex>
+        <v-flex>
           <v-select
             dense filled multiple
             class="column-selector"
@@ -68,7 +92,7 @@
           >
             <template v-slot:selection></template>
           </v-select>
-        </v-col>
+        </v-flex>
       </v-row>
 
       <AffiliatedEntityTable
@@ -312,6 +336,12 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
     window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
   }
 
+  // create a numbered company
+  async startNumberedCompany () {
+    await this.createNumberedBusiness(this.currentAccountSettings.id)
+    await this.syncBusinesses()
+  }
+
   async showAddSuccessModal () {
     this.addBusinessDialog = false
     this.dialogTitle = 'Business Added'
@@ -490,6 +520,37 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   opacity: 0.46;
   background-color: rgb(33, 33, 33); // grey darken-4
   border-color: rgb(33, 33, 33); // grey darken-4
+}
+
+.v-tooltip__content {
+  background-color: RGBA(73, 80, 87, 0.95) !important;
+  color: white !important;
+  border-radius: 4px;
+  font-size: 12px !important;
+  line-height: 18px !important;
+  padding: 15px !important;
+  letter-spacing: 0;
+  max-width: 360px !important;
+}
+
+.v-tooltip__content:after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 100% !important;
+  margin-top: -10px !important;
+  border-top: 10px solid transparent !important;
+  border-bottom: 10px solid transparent !important;
+  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
+}
+
+.top-tooltip:after {
+  top: 100% !important;
+  left: 45% !important;
+  margin-top: 0 !important;
+  border-right: 10px solid transparent !important;
+  border-left: 10px solid transparent !important;
+  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
 }
 
 .view-header {
