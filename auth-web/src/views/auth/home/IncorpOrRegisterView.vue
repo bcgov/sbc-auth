@@ -22,7 +22,6 @@
               </v-list-item>
             </v-list-item-content>
           </v-list-item>
-        <!-- </v-list> -->
           <div class="pb-3">To register or incorporate, you will be asked for the following information:</div>
           <template>
             <v-expansion-panels flat tile accordion>
