@@ -10,6 +10,16 @@
             <v-list-item-subtitle class="list-item-text">
               {{item.text}}
             </v-list-item-subtitle>
+            <div v-if="index=== 1">
+              <v-list-item class="list-item" v-for="(subItem, subIndex) in subBulletPoints" :key="subIndex">
+                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+                <v-list-item-content>
+                  <v-list-item-subtitle class="list-item-text">
+                    {{ subItem.text }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </div>
           </v-list-item-content>
         </v-list-item>
         <v-list-item class="list-item">
@@ -67,9 +77,12 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 export default class RequestNameView extends Vue {
   private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
   private bulletPoints: Array<any> = [
-    { text: 'Create a unique name that ensures the public is not confused or misled by similar corporate names.' },
-    { text: 'Submit this name for examination by the Business Registry.' },
-    { text: 'If your name is approved, you can use it to incorporate or register your business.' }
+    { text: 'You can choose to have a name or use the incorporation number as the name of the business.' },
+    { text: 'If you choose to have a name for your business, create a unique name that ensures the public is not confused or mislead by similar corporate names.' }
+  ]
+  private subBulletPoints: Array<any> = [
+    { text: 'Submit your name choices for examination by the Business Registry.' },
+    { text: 'If your name is approved, you can use it to register or incorporate your business.' }
   ]
 
   // open Name Request in current tab to retain current account and user
@@ -103,6 +116,10 @@ export default class RequestNameView extends Vue {
       align-items: flex-start;
       margin: .5rem 0;
       padding-left: 0;
+    }
+
+    .list-item .list-item:last-child {
+      margin-bottom: 0;
     }
 
     .list-item-bullet {
