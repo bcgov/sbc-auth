@@ -70,7 +70,7 @@
                 outlined dark large
                 v-bind="attrs"
                 v-on="on"
-                @click="goToManageBusinesses()"
+                @click="startNumberedCompany()"
               >
                 <v-icon>mdi-plus</v-icon>
                 <span><strong>Incorporate a Numbered Benefit Company</strong></span>
@@ -336,7 +336,7 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   // create a numbered company
   protected async startNumberedCompany () {
-    await this.createNumberedBusiness(this.currentAccountSettings.id)
+    await this.createNumberedBusiness(this.currentOrganization.id)
     await this.syncBusinesses()
   }
 
@@ -506,12 +506,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   close () {
     this.$refs.errorDialog.close()
-  }
-
-  private goToManageBusinesses (isNumberedCompanyRequest: boolean = true): void {
-    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
-    manageBusinessUrl.query = { isNumberedCompanyRequest }
-    this.$router.push(manageBusinessUrl)
   }
 }
 </script>
