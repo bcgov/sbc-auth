@@ -12,7 +12,7 @@
                 Once your Name Request is approved, visit <span class="font-weight-bold">My Business Registry</span>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
-              <v-list-item class="list-item" v-for="(item, index) in subBulletPoints" :key="index">
+              <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
                 <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
                 <v-list-item-content>
                   <v-list-item-subtitle class="list-item-text">
@@ -23,10 +23,10 @@
             </v-list-item-content>
           </v-list-item>
         <!-- </v-list> -->
-          <div class="pb-2">To register or incorporate, you will be asked for the following information:</div>
+          <div class="pb-3">To register or incorporate, you will be asked for the following information:</div>
           <template>
             <v-expansion-panels flat tile accordion>
-              <v-expansion-panel v-for="(item, index) in registerPoints" :key="index" class="incorp-expansion-panels">
+              <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
                 <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
                   <template v-slot:actions>
                     <v-icon color="primary">
@@ -36,7 +36,6 @@
                   {{ item.text }}
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                  <v-list-item class="list-item">
                     <v-list-item-content>
                       <v-list-item class="list-item" v-for="(subItem, subIndex) in item.items" :key="subIndex">
                         <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
@@ -47,7 +46,6 @@
                         </v-list-item-content>
                       </v-list-item>
                     </v-list-item-content>
-                  </v-list-item>
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
@@ -96,16 +94,11 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 export default class IncorpOrRegisterView extends Vue {
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
   private readonly bulletPoints: Array<any> = [
-    { text: 'For Named Companies, add your existing Name Request number to your account and open it.' },
-    { text: 'Establish your company\'s articles and prepare an Incorporation Agreement. Either create your own, or use template provided in the Incorporation Application.' },
-    { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' },
-    { text: 'Retain a copy of all Incorporation documents for your business\'s records.' }
-  ]
-  private readonly subBulletPoints: Array<any> = [
     { text: 'Register a firm such as sole proprietorship, DBA, general partnership, and societies' },
     { text: 'Incorporate a benefit company or a cooperative association' }
   ]
-  private readonly registerPoints: Array<any> = [
+
+  private readonly expansionPanels: Array<any> = [
     { text: 'Sole Proprietorship, DBA, and General Partnership',
       items: [
         { text: 'The name(s) and address(es) of the proprietor or partner(s).' }
