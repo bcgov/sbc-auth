@@ -565,8 +565,4 @@ export default class HomeView extends Vue {
     background-color: transparent;
   }
 
-  .hero-banner-login-btn {
-    color: #003366 !important;
-  }
-
 </style>
