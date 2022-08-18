@@ -81,7 +81,7 @@ export default class RequestNameView extends Vue {
     { text: 'If you choose to have a name for your business, create a unique name that ensures the public is not confused or mislead by similar corporate names.' }
   ]
   private subBulletPoints: Array<any> = [
-    { text: 'Submit your name choices for examniation by the Business Registry.' },
+    { text: 'Submit your name choices for examination by the Business Registry.' },
     { text: 'If your name is approved, you can use it to register or incorporate your business.' }
   ]
 
