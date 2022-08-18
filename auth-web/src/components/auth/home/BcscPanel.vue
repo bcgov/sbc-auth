@@ -41,7 +41,8 @@
     <!-- Panel Btns -->
     <div class="mt-10">
       <template v-if="!userProfile">
-        <v-btn large color="bcgovblue" class="cta-btn font-weight-bold white--text mr-2 px-7" to="/choose-authentication-method">
+        <v-btn large color="bcgovblue" class="cta-btn font-weight-bold white--text mr-2 px-7"
+          to="/choose-authentication-method">
           Create a BC Registries Account
         </v-btn>
       </template>
@@ -128,6 +129,7 @@ export default class BcscPanel extends Vue {
 
     .v-btn:hover {
       opacity: .8;
+      color: white !important;
     }
 
     .link {

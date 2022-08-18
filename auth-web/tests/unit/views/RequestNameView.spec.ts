@@ -66,18 +66,17 @@ describe('RequestNameView.vue', () => {
   it('renders the correct text and number of bullet points', () => {
     wrapper.vm.bulletPoints = [
       { text: 'Bullet Mock 1' },
-      { text: 'Bullet Mock 2' },
-      { text: 'Bullet Mock 3' }
+      { text: 'Bullet Mock 2' }
     ]
 
     const bulletList = wrapper.vm.$el.querySelectorAll('.list-item')
 
     expect(bulletList[0].textContent).toContain('Bullet Mock 1')
     expect(bulletList[1].textContent).toContain('Bullet Mock 2')
-    expect(bulletList[2].textContent).toContain('Bullet Mock 3')
-    expect(bulletList[3].textContent).toContain('You can choose to incorporate')
+    expect(bulletList[2].textContent).toContain('Submit your name choices for examniation')
+    expect(bulletList[3].textContent).toContain('If your name is approved')
 
     // List item count will be +1 due to our fixed tooltip bullet point
-    expect(bulletList.length).toStrictEqual(4)
+    expect(bulletList.length).toStrictEqual(5)
   })
 })

@@ -29,7 +29,7 @@
                     <v-btn
                       large
                       color="bcgovblue"
-                      class="hero-banner-login-btn mr-4 font-weight-bold white--text"
+                      class="mr-4 font-weight-bold white--text"
                       aria-label="log in"
                       id="loginBtn"
                       v-on="on">
