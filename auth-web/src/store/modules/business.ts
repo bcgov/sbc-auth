@@ -50,7 +50,7 @@ export default class BusinessModule extends VuexModule {
     /** Returns True if NR is approved for incorporation. */
     const isApprovedForIa = (nr): boolean =>
       (nr.state === NrState.APPROVED &&
-        nr.actions.some(action => action.filingName === LearFilingTypes.INCORPORATION))
+        nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION))
 
     /** Returns True if NR is conditionally approved. */
     const isConditionallyApproved = (nr): boolean =>
@@ -60,7 +60,7 @@ export default class BusinessModule extends VuexModule {
     /** Returns True if NR is approved for registration. */
     const isApprovedForRegistration = (nr): boolean =>
       (nr.state === NrState.APPROVED &&
-        nr.actions.some(action => action.filingName === LearFilingTypes.REGISTRATION))
+        nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION))
 
     /** Returns target conditionally. */
     const getTarget = (nr): NrTargetTypes => {
