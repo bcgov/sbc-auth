@@ -9,7 +9,8 @@
             <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
-                Once your Name Request is approved, visit <span class="font-weight-bold">My Business Registry</span>
+                Once your Name Request is approved, visit
+                <span class="font-weight-bold" @click="emitRedirectManage()">My Business Registry</span>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
               <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
@@ -93,8 +94,8 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 export default class IncorpOrRegisterView extends Vue {
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
   private readonly bulletPoints: Array<any> = [
-    { text: 'Register a firm such as sole proprietorship, DBA, general partnership, and societies' },
-    { text: 'Incorporate a benefit company or a cooperative association' }
+    { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
+    { text: 'Incorporate a benefit company or a cooperative association.' }
   ]
 
   private readonly expansionPanels: Array<any> = [
@@ -103,17 +104,17 @@ export default class IncorpOrRegisterView extends Vue {
         { text: 'The name(s) and address(es) of the proprietor or partner(s).' }
       ]
     },
-    { text: 'Benefit Companies',
+    { text: 'Benefit Company',
       items: [
         { text: 'Business name translations if applicable.' },
         { text: 'Registered and records office addresses and contact information.' },
-        { text: 'Addresses, directors and share structure, and articles.' }
+        { text: 'Addresses, directors, share structure and articles.' }
       ]
     },
-    { text: 'Cooperative Associations',
+    { text: 'Cooperative Association',
       items: [
-        { text: 'Office addresses, director name and addresses, rules of the association, and memorandum.' },
-        { text: 'Complete the Incorporation Application by providing information about your company: addresses, directors and share structure.' }
+        { text: 'Office addresses, director name(s) and addresses.' },
+        { text: 'Share structure, rules of the association and memorandum.' }
       ]
     }
   ]
