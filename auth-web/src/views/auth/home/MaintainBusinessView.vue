@@ -128,9 +128,9 @@ export default class MaintainBusinessView extends Vue {
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
       subText: [
-        { text: 'See which Annual Reports are due and file each year.' },
-        { text: 'View and change your current directors and addresses by filing Director and Address Changes.' },
-        { text: 'See the history of your business\' filings and download copies of all documents including your Certificate of Incorporation and more.' }
+        { text: 'See which Annual Reports are due and file each year for your corporation.' },
+        { text: 'View and change your current directors and owners, and their addresses.' },
+        { text: 'See the history of your business\' filings and download copies of all documents including your Statement of Registries, Certificate of Incorporation and more.' }
       ]
     }
   ]
