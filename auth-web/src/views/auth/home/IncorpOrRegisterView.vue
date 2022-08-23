@@ -10,7 +10,7 @@
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
                 Once your Name Request is approved, visit
-                <span class="font-weight-bold" @click="emitRedirectManage()">My Business Registry</span>
+                <a class="body-1 font-weight-bold" @click="emitRedirectManage()">My Business Registry</a>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
               <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
@@ -38,7 +38,6 @@
                 <v-expansion-panel-content>
                     <v-list-item-content>
                       <v-list-item class="list-item" v-for="(subItem, subIndex) in item.items" :key="subIndex">
-                        <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
                         <v-list-item-content>
                           <v-list-item-subtitle class="list-item-text py-3">
                             {{subItem.text}}
@@ -106,15 +105,12 @@ export default class IncorpOrRegisterView extends Vue {
     },
     { text: 'Benefit Company',
       items: [
-        { text: 'Business name translations if applicable.' },
-        { text: 'Registered and records office addresses and contact information.' },
-        { text: 'Addresses, directors, share structure and articles.' }
+        { text: 'Office addresses, director names and addresses, share structure and articles.' }
       ]
     },
     { text: 'Cooperative Association',
       items: [
-        { text: 'Office addresses, director name(s) and addresses.' },
-        { text: 'Share structure, rules of the association and memorandum.' }
+        { text: 'Office addresses, director names and addresses, rules of the association and memorandum.' }
       ]
     }
   ]
