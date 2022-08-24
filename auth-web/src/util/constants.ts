@@ -282,7 +282,8 @@ export enum LDFlags {
     ProductCSOStatus='product-CSO-status',
     ProductWillsStatus='product-VS-status',
     ProductSiteRegistryStatus='product-ESRA-status',
-    ProductBCAStatus='product-BCA-status'
+    ProductBCAStatus='product-BCA-status',
+    BusSearchLink='bus-search-staff-link'
 }
 
 export enum DateFilterCodes {
