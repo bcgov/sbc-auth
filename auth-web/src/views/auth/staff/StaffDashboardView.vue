@@ -53,7 +53,7 @@
               :affiliatedOrg="affiliatedOrg"
             ></IncorporationSearchResultView>
           </template>
-          <a class="srch-card__reg-srch-link" :href="registrySearchUrl" target="_blank">
+          <a v-if="showBusSearchlink" class="srch-card__reg-srch-link" :href="registrySearchUrl" target="_blank">
             Go to Business Search
           </a>
         </v-card>
@@ -179,6 +179,10 @@ export default class StaffDashboardView extends Vue {
 
   get isFasDashboardEnabled (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false
+  }
+
+  get showBusSearchlink (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.BusSearchLink) || false
   }
 
   protected isFormValid(): boolean {
