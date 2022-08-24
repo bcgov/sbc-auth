@@ -40,7 +40,7 @@
             Don't have your Cooperative Passcode?
             <v-menu top offset-y v-model="contactUsPopover" :close-on-content-click="false" attach="#maintain-info-container">
               <template v-slot:activator="{ on, attrs }">
-                <span v-bind="attrs" v-on="on" class="popover-activator">Contact Us</span>
+                <span v-bind="attrs" v-on="on">Contact Us</span>
               </template>
               <v-card class="contact-popover">
                 <v-list class="pa-5" max-width="30rem">
@@ -128,9 +128,9 @@ export default class MaintainBusinessView extends Vue {
     { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
       subText: [
-        { text: 'See which Annual Reports are due and file each year for your corporation.' },
-        { text: 'View and change your current directors and owners, and their addresses.' },
-        { text: 'See the history of your business\' filings and download copies of all documents including your Statement of Registries, Certificate of Incorporation and more.' }
+        { text: 'See which Annual Reports are due for your corporation and file each year.' },
+        { text: 'View and change your current directors or owners and addresses.' },
+        { text: 'See the history of your business\' filings and download copies of all documents including your Statement of Registration, Certificate of Incorporation and more.' }
       ]
     }
   ]
@@ -203,10 +203,6 @@ export default class MaintainBusinessView extends Vue {
       .v-btn:hover {
         opacity: .8;
       }
-    }
-
-    .popover-activator {
-      text-decoration: underline dashed;
     }
 
     .contact-popover {
