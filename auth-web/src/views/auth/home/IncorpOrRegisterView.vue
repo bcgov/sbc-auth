@@ -10,7 +10,8 @@
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
                 Once your Name Request is approved, visit
-                <a class="body-1 font-weight-bold" @click="emitRedirectManage()">My Business Registry</a>
+                <a class="body-1 font-weight-bold my-registry-text" @click="emitRedirectManage()">
+                  My Business Registry</a>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
               <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
@@ -195,6 +196,10 @@ export default class IncorpOrRegisterView extends Vue {
     .registry-btn:hover {
       color: white !important;
       opacity: .8;
+    }
+
+    .my-registry-text {
+      text-decoration: underline;
     }
   }
 </style>
