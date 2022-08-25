@@ -37,11 +37,7 @@
             </router-link>
           </div>
           <p v-if="!userProfile" class="mt-5">
-            Don't have your Cooperative Passcode?
             <v-menu top offset-y v-model="contactUsPopover" :close-on-content-click="false" attach="#maintain-info-container">
-              <template v-slot:activator="{ on, attrs }">
-                <span v-bind="attrs" v-on="on">Contact Us</span>
-              </template>
               <v-card class="contact-popover">
                 <v-list class="pa-5" max-width="30rem">
                   <v-list-item class="pb-3">
