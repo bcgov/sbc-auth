@@ -288,7 +288,8 @@ class KeycloakService:
 
         response = requests.post(token_url,
                                  data=f'client_id={admin_client_id}&grant_type=client_credentials'
-                                      f'&client_secret={admin_secret}', headers=headers, timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
+                                      f'&client_secret={admin_secret}', headers=headers,
+                                      timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
         return response.json().get('access_token')
 
     @staticmethod
