@@ -19,7 +19,7 @@ import json
 from os import listdir, path
 from typing import Tuple
 
-from jsonschema import Draft7Validator, RefResolver, SchemaError, draft7_format_checker
+from jsonschema import Draft7Validator, RefResolver, SchemaError
 
 
 BASE_URI = 'https://bcrs.gov.bc.ca/.well_known/schemas'
@@ -91,14 +91,14 @@ def validate(json_data: json,
         resolver = RefResolver(f'file://{schema_file_path}.json', schema, schema_store)
 
         if Draft7Validator(schema,
-                           format_checker=draft7_format_checker,
+                           format_checker=Draft7Validator.FORMAT_CHECKER,
                            resolver=resolver
                            ) \
                 .is_valid(json_data):
             return True, None
 
         errors = Draft7Validator(schema,
-                                 format_checker=draft7_format_checker,
+                                 format_checker=Draft7Validator.FORMAT_CHECKER,
                                  resolver=resolver
                                  ) \
             .iter_errors(json_data)
