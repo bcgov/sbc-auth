@@ -64,7 +64,7 @@ class RestService:
         try:
             invoke_rest_method = getattr(requests, rest_method)
             response = invoke_rest_method(endpoint, data=data, headers=headers,
-                                          timeout=current_app.config.get('CONNECT_TIMEOUT', 10))
+                                          timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
             if raise_for_status:
                 response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
@@ -153,7 +153,7 @@ class RestService:
             session.mount(endpoint, RETRY_ADAPTER)
         response = None
         try:
-            response = session.get(endpoint, headers=headers, timeout=current_app.config.get('CONNECT_TIMEOUT'))
+            response = session.get(endpoint, headers=headers, timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
             response.raise_for_status()
         except (ReqConnectionError, ConnectTimeout) as exc:
             current_app.logger.error('---Error on GET---')
@@ -180,7 +180,8 @@ class RestService:
         # https://sso-dev.pathfinder.gov.bc.ca/auth/realms/fcf0kpqr/protocol/openid-connect/token
         token_url = issuer_url + '/protocol/openid-connect/token'
         auth_response = requests.post(token_url, auth=(kc_service_id, kc_secret), headers={
-            'Content-Type': ContentType.FORM_URL_ENCODED.value}, data='grant_type=client_credentials')
+            'Content-Type': ContentType.FORM_URL_ENCODED.value}, data='grant_type=client_credentials',
+                timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
         auth_response.raise_for_status()
         return auth_response.json().get('access_token')
 
