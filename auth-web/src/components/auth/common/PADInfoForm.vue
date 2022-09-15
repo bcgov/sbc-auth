@@ -1,316 +1,205 @@
-<template>
-  <div v-can:CHANGE_PAD_INFO.disable.card>
-    <template v-if="isAcknowledgeNeeded">
-      <p class="mb-6">
-        The Canadian Payment Association requires a confirmation period
-        of (3) days prior to your first pre-authorized debit deduction.
-        The administrator of this account will receive a written confirmation
-        of your pre-authorized debit agreement prior to the first deduction.
-      </p>
-      <p class="mb-10 font-weight-bold">
-        {{padInfoSubtitle}}
-      </p>
-    </template>
-    <v-form ref="preAuthDebitForm">
-      <section>
-        <header class="mb-4 d-flex align-content-center">
-          <div data-test="pad-info-form-title" class="mr-1 font-weight-bold">Banking Information</div>
-          <v-btn
-            small
-            icon
-            color="primary"
-            class="help-btn"
-            aria-label="How to locate your banking information"
-            @click.stop="bankInfoDialog = true"
-          >
-            <v-icon>mdi-help-circle-outline</v-icon>
-          </v-btn>
-          <v-dialog
-            v-model="bankInfoDialog"
-            max-width="800"
-          >
-            <v-card>
-              <v-card-title>
-                <h2 class="title font-weight-bold">How to locate your account information</h2>
-                <v-btn
-                  icon
-                  @click="bankInfoDialog = false"
-                >
-                  <v-icon>mdi-close</v-icon>
-                </v-btn>
-              </v-card-title>
-              <v-card-text>
-                <v-img src="../../../assets/img/cheque-sample.jpg" lazy-src></v-img>
-                <ol class="my-4">
-                  <li>Cheque number - not required</li>
-                  <li>Transit (branch) number - 5 digits</li>
-                  <li>Bank (institution) number - 3 digits</li>
-                  <li>Bank account number - as shown on your cheque</li>
-                </ol>
-              </v-card-text>
-            </v-card>
-          </v-dialog>
-        </header>
-        <v-row>
-          <v-col cols="6" class="py-0">
-            <v-text-field
-              label="Transit Number"
-              filled
-              hint="5 digits"
-              persistent-hint
-              :rules="transitNumberRules"
-              v-model="transitNumber"
-              @change="emitPreAuthDebitInfo"
-              v-mask="'#####'"
-              data-test="input-transitNumber"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="6" class="py-0">
-            <v-text-field
-              label="Institution Number"
-              filled
-              hint="3 digits"
-              persistent-hint
-              :rules="institutionNumberRules"
-              v-model="institutionNumber"
-              @change="emitPreAuthDebitInfo"
-              v-mask="'###'"
-              data-test="input-institutionNumber"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" class="py-0">
-            <v-text-field
-              label="Account Number"
-              filled
-              hint="7 to 12 digits"
-              persistent-hint
-              :rules="accountNumberRules"
-              v-model="accountNumber"
-              @change="emitPreAuthDebitInfo"
-              data-test="input-accountNumber"
-              v-mask="accountMask">
-            ></v-text-field>
-          </v-col>
-        </v-row>
-        <v-row v-if="isAcknowledgeNeeded">
-          <v-col class="pt-2 pl-6 pb-0">
-            <v-checkbox
-              hide-details
-              class="align-checkbox-label--top"
-              v-model="isAcknowledged"
-              @change="emitPreAuthDebitInfo"
-              data-test="check-isAcknowledged"
-            >
-              <template v-slot:label>
-                {{acknowledgementLabel}}
-              </template>
-            </v-checkbox>
-          </v-col>
-        </v-row>
-        <v-row v-if="isTOSNeeded">
-          <v-col class="pt-6 pl-6">
-            <div class="terms-container">
-              <TermsOfUseDialog
-                :isAlreadyAccepted="isTermsOfServiceAccepted"
-                @terms-acceptance-status="isTermsAccepted"
-                :tosType="'termsofuse_pad'"
-                :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
-                :tosCheckBoxLabelAppend="'of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services'"
-              ></TermsOfUseDialog>
-            </div>
-          </v-col>
-        </v-row>
-      </section>
-    </v-form>
-  </div>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
-import CommonUtils from '@/util/common-util'
-import { PADInfo } from '@/models/Organization'
-import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
-import { mask } from 'vue-the-mask'
-
-@Component({
+import {
+  defineComponent,
+  computed,
+  toRefs,
+  ref,
+  onMounted,
+  PropType,
+} from "@vue/composition-api";
+import { Component, Emit, Mixins, Prop, Vue } from "vue-property-decorator";
+import { mapMutations, mapState } from "vuex";
+import { Account } from "@/util/constants";
+import CommonUtils from "@/util/common-util";
+import { PADInfo } from "@/models/Organization";
+import TermsOfUseDialog from "@/components/auth/common/TermsOfUseDialog.vue";
+import { mask } from "vue-the-mask";
+export default defineComponent({
   directives: {
-    mask
+    mask,
   },
   components: {
-    TermsOfUseDialog
+    TermsOfUseDialog,
   },
-  computed: {
-    ...mapState('org', [
-      'currentOrgPADInfo',
-      'currentOrganizationType'
-    ])
+  props: {
+    padInformation: {
+      default: () => ({} as PADInfo),
+      type: Object as PropType<any>,
+    },
+    isChangeView: { default: false, type: Boolean },
+    isAcknowledgeNeeded: { default: true, type: Boolean },
+    isTOSNeeded: { default: true, type: Boolean },
+    isInitialTOSAccepted: { default: false, type: Boolean },
+    isInitialAcknowledged: { default: false, type: Boolean },
+    clearOnEdit: { default: false, type: Boolean },
   },
-  methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationPADInfo'
-    ])
-  }
-})
-export default class PADInfoForm extends Vue {
-  @Prop({ default: () => ({} as PADInfo) }) padInformation: any
-  @Prop({ default: false }) isChangeView: boolean
-  @Prop({ default: true }) isAcknowledgeNeeded: boolean
-  @Prop({ default: true }) isTOSNeeded: boolean
-  @Prop({ default: false }) isInitialTOSAccepted: boolean
-  @Prop({ default: false }) isInitialAcknowledged: boolean
-  @Prop({ default: false }) clearOnEdit: boolean
-  private readonly currentOrgPADInfo!: PADInfo
-  private readonly currentOrganizationType!: string
-  private readonly setCurrentOrganizationPADInfo!: (padInfo: PADInfo) => void
-  private transitNumber: string = ''
-  private institutionNumber: string = ''
-  private accountNumber: string = ''
-  private isTOSAccepted: boolean = false
-  private isAcknowledged: boolean = false
-  private isTouched: boolean = false
-  private isStartedEditing: boolean = false
-  private bankInfoDialog: boolean = false
-
-  $refs: {
-    preAuthDebitForm: HTMLFormElement,
-  }
-
-  private transitNumberRules = [
-    v => !!v || 'Transit Number is required',
-    v => (v.length >= 4) || 'Transit Number should be minimum of 4 digits'
-  ]
-
-  private institutionNumberRules = [
-    v => !!v || 'Institution Number is required',
-    v => (v.length === 3) || 'Institution Number should be 3 digits'
-  ]
-
-  private accountNumberRules = [
-    v => !!v || 'Account Number is required',
-    v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
-  ]
-
-  private accountMask = CommonUtils.accountMask()
-
-  public constructor () {
-    super()
-    this.isAcknowledged = this.isInitialAcknowledged
-  }
-
-  private mounted () {
-    const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
-    this.transitNumber = padInfo?.bankTransitNumber || ''
-    this.institutionNumber = padInfo?.bankInstitutionNumber || ''
-    this.accountNumber = padInfo?.bankAccountNumber || ''
-    this.isTOSAccepted = this.isInitialTOSAccepted || (padInfo?.isTOSAccepted || false)
-    this.setCurrentOrganizationPADInfo(padInfo)
-    this.$nextTick(() => {
-      if (this.isTOSAccepted) {
-        this.isPreAuthDebitFormValid()
+  setup(props, ctx) {
+    const currentOrgPADInfo = computed(
+      () => ctx.root.$store.state.org.currentOrgPADInfo
+    );
+    const currentOrganizationType = computed(
+      () => ctx.root.$store.state.org.currentOrganizationType
+    );
+    const {
+      padInformation,
+      isChangeView,
+      isAcknowledgeNeeded,
+      isTOSNeeded,
+      isInitialTOSAccepted,
+      isInitialAcknowledged,
+      clearOnEdit,
+    } = toRefs(props);
+    const currentOrgPADInfo = ref<PADInfo>(undefined);
+    const currentOrganizationType = ref<string>(undefined);
+    const setCurrentOrganizationPADInfo =
+      ref<(padInfo: PADInfo) => void>(undefined);
+    const transitNumber = ref<string>("");
+    const institutionNumber = ref<string>("");
+    const accountNumber = ref<string>("");
+    const isTOSAccepted = ref<boolean>(false);
+    const isAcknowledged = ref<boolean>(false);
+    const isTouched = ref<boolean>(false);
+    const isStartedEditing = ref<boolean>(false);
+    const bankInfoDialog = ref<boolean>(false);
+    const $refs = ref<{
+      preAuthDebitForm: HTMLFormElement;
+    }>(undefined);
+    const transitNumberRules = ref([
+      (v) => !!v || "Transit Number is required",
+      (v) => v.length >= 4 || "Transit Number should be minimum of 4 digits",
+    ]);
+    const institutionNumberRules = ref([
+      (v) => !!v || "Institution Number is required",
+      (v) => v.length === 3 || "Institution Number should be 3 digits",
+    ]);
+    const accountNumberRules = ref([
+      (v) => !!v || "Account Number is required",
+      (v) =>
+        (v.length >= 7 && v.length <= 12) ||
+        "Account Number should be between 7 to 12 digits",
+    ]);
+    const accountMask = ref(CommonUtils.accountMask());
+    const isTermsOfServiceAccepted = computed(() => {
+      if (isInitialTOSAccepted.value && !isStartedEditing.value) {
+        return true;
       }
-    })
-  }
-
-  private get isTermsOfServiceAccepted () {
-    if (this.isInitialTOSAccepted && !this.isStartedEditing) { // if TOS already accepted
-      return true
-    }
-    return (Object.keys(this.padInformation).length) ? this.padInformation.isTOSAccepted : this.currentOrgPADInfo?.isTOSAccepted
-  }
-
-  private get padInfoSubtitle () {
-    return (this.showPremiumPADInfo)
-      ? 'Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
-      : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
-  }
-
-  private get acknowledgementLabel () {
-    // for Premium accounts, the label should mention that it will charge from BCOL till PAD is done.
-    return (this.showPremiumPADInfo)
-      ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
-      : 'I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.'
-  }
-
-  private get showPremiumPADInfo () {
-    return (this.isChangeView || (this.currentOrganizationType === Account.PREMIUM))
-  }
-
-  @Emit()
-  private async emitPreAuthDebitInfo () {
-    if (!this.isStartedEditing) { // clear check needed only if user not started editing
-      await this.formClear() // await till decide
-    }
-
-    const padInfo: PADInfo = {
-      bankTransitNumber: this.transitNumber,
-      bankInstitutionNumber: this.institutionNumber,
-      bankAccountNumber: this.accountNumber,
-      isTOSAccepted: this.isTOSAccepted,
-      isAcknowledged: this.isAcknowledged
-    }
-    this.isPreAuthDebitFormValid()
-    this.setCurrentOrganizationPADInfo(padInfo)
-    this.isTouched = true
-    this.isPadInfoTouched()
-    return padInfo
-  }
-
-  formClear () {
-    // Clearing form when user touch any field first time
-    if (this.clearOnEdit && !this.isStartedEditing) {
-      // setting edited value if edited first time
-      const padInfo: PADInfo = (Object.keys(this.padInformation).length) ? this.padInformation : this.currentOrgPADInfo
-      this.transitNumber = padInfo?.bankTransitNumber !== this.transitNumber ? this.transitNumber : ''
-      this.institutionNumber = padInfo?.bankInstitutionNumber !== this.institutionNumber ? this.institutionNumber : ''
-      this.accountNumber = /X/.test(this.accountNumber) ? '' : this.accountNumber // test account number contain X, then clear all else leave as it is
-      // this.isAcknowledged = false
-      this.isTOSAccepted = false
-      this.isStartedEditing = true
-    }
-  }
-
-  @Emit()
-  private isPreAuthDebitFormValid () {
-    const acknowledge = (this.isAcknowledgeNeeded) ? this.isAcknowledged : true
-    const tosAccepted = (this.isTOSNeeded) ? this.isTOSAccepted : true
-    return (this.$refs.preAuthDebitForm?.validate() && tosAccepted && acknowledge) || false
-  }
-
-  @Emit()
-  private isPadInfoTouched () {
-    return this.isTouched
-  }
-
-  private isTermsAccepted (isAccepted) {
-    this.isTOSAccepted = isAccepted
-    this.isTouched = true
-    this.emitPreAuthDebitInfo()
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-  .align-checkbox-label--top {
-    ::v-deep {
-      .v-input__slot {
-        align-items: flex-start;
+      return Object.keys(padInformation.value).length
+        ? padInformation.value.isTOSAccepted
+        : currentOrgPADInfo.value?.isTOSAccepted;
+    });
+    const padInfoSubtitle = computed(() => {
+      return showPremiumPADInfo.value
+        ? "Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended."
+        : "This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.";
+    });
+    const acknowledgementLabel = computed(() => {
+      return showPremiumPADInfo.value
+        ? "I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended."
+        : "I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.";
+    });
+    const showPremiumPADInfo = computed(() => {
+      return (
+        isChangeView.value || currentOrganizationType.value === Account.PREMIUM
+      );
+    });
+    const emitPreAuthDebitInfo = async () => {
+      if (!isStartedEditing.value) {
+        await formClear();
       }
-    }
-  }
-
-  .v-input--checkbox {
-    color: var(--v-grey-darken4) !important;
-  }
-
-  ::v-deep {
-    .v-input--checkbox .v-label {
-      color: var(--v-grey-darken4) !important;
-    }
-  }
-
-  .help-btn {
-    margin-top: -2px;
-  }
-</style>
+      const padInfo: PADInfo = {
+        bankTransitNumber: transitNumber.value,
+        bankInstitutionNumber: institutionNumber.value,
+        bankAccountNumber: accountNumber.value,
+        isTOSAccepted: isTOSAccepted.value,
+        isAcknowledged: isAcknowledged.value,
+      };
+      isPreAuthDebitFormValid();
+      setCurrentOrganizationPADInfo.value(padInfo);
+      isTouched.value = true;
+      isPadInfoTouched();
+      return padInfo;
+    };
+    const formClear = () => {
+      if (clearOnEdit.value && !isStartedEditing.value) {
+        const padInfo: PADInfo = Object.keys(padInformation.value).length
+          ? padInformation.value
+          : currentOrgPADInfo.value;
+        transitNumber.value =
+          padInfo?.bankTransitNumber !== transitNumber.value
+            ? transitNumber.value
+            : "";
+        institutionNumber.value =
+          padInfo?.bankInstitutionNumber !== institutionNumber.value
+            ? institutionNumber.value
+            : "";
+        accountNumber.value = /X/.test(accountNumber.value)
+          ? ""
+          : accountNumber.value;
+        isTOSAccepted.value = false;
+        isStartedEditing.value = true;
+      }
+    };
+    const isPreAuthDebitFormValid = () => {
+      const acknowledge = isAcknowledgeNeeded.value
+        ? isAcknowledged.value
+        : true;
+      const tosAccepted = isTOSNeeded.value ? isTOSAccepted.value : true;
+      return (
+        (ctx.refs.preAuthDebitForm?.validate() && tosAccepted && acknowledge) ||
+        false
+      );
+    };
+    const isPadInfoTouched = () => {
+      return isTouched.value;
+    };
+    const isTermsAccepted = (isAccepted) => {
+      isTOSAccepted.value = isAccepted;
+      isTouched.value = true;
+      emitPreAuthDebitInfo();
+    };
+    onMounted(() => {
+      const padInfo: PADInfo = Object.keys(padInformation.value).length
+        ? padInformation.value
+        : currentOrgPADInfo.value;
+      transitNumber.value = padInfo?.bankTransitNumber || "";
+      institutionNumber.value = padInfo?.bankInstitutionNumber || "";
+      accountNumber.value = padInfo?.bankAccountNumber || "";
+      isTOSAccepted.value =
+        isInitialTOSAccepted.value || padInfo?.isTOSAccepted || false;
+      setCurrentOrganizationPADInfo.value(padInfo);
+      ctx.root.$nextTick(() => {
+        if (isTOSAccepted.value) {
+          isPreAuthDebitFormValid();
+        }
+      });
+    });
+    return {
+      currentOrgPADInfo,
+      currentOrganizationType,
+      currentOrgPADInfo,
+      currentOrganizationType,
+      setCurrentOrganizationPADInfo,
+      transitNumber,
+      institutionNumber,
+      accountNumber,
+      isTOSAccepted,
+      isAcknowledged,
+      isTouched,
+      isStartedEditing,
+      bankInfoDialog,
+      $refs,
+      transitNumberRules,
+      institutionNumberRules,
+      accountNumberRules,
+      accountMask,
+      isTermsOfServiceAccepted,
+      padInfoSubtitle,
+      acknowledgementLabel,
+      showPremiumPADInfo,
+      emitPreAuthDebitInfo,
+      formClear,
+      isPreAuthDebitFormValid,
+      isPadInfoTouched,
+      isTermsAccepted,
+    };
+  },
+});

@@ -1,108 +1,79 @@
-<template>
-  <v-btn
-    large
-    depressed
-    color="default"
-    data-test="confirm-cancel-button"
-    :disabled="disabled"
-    @click="openModalDialog"
-  >
-    Cancel
-    <!-- Confirm Dialog Popup -->
-    <ModalDialog
-      ref="confirmCancelDialog"
-      :title="mainText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:text>
-        <p class="pb-1">{{subText}}</p>
-      </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="confirmDialogResponse(true)" data-test="accept-button">
-          {{confirmBtnText}}
-        </v-btn>
-        <v-btn large color="default" @click="confirmDialogResponse(false)" data-test="reject-button">
-          {{rejectBtnText}}
-        </v-btn>
-      </template>
-    </ModalDialog>
-  </v-btn>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Prop } from 'vue-property-decorator'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import Vue from 'vue'
-import { mapActions } from 'vuex'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-
-@Component({
+import { defineComponent, toRefs, ref } from "@vue/composition-api";
+import { Component, Emit, Prop } from "vue-property-decorator";
+import ModalDialog from "@/components/auth/common/ModalDialog.vue";
+import Vue from "vue";
+import { mapActions } from "vuex";
+import { namespace } from "vuex-class";
+const OrgModule = namespace("org");
+export default defineComponent({
   components: {
-    ModalDialog
-  }
-})
-export default class ConfirmCancelButton extends Vue {
-  @Prop({ default: false }) isEmit: boolean
-  @Prop({ default: true }) showConfirmPopup: boolean
-  @Prop({ default: false }) disabled: boolean
-  @Prop({ default: 'Cancel Account Creation' }) mainText: string
-  @Prop({ default: 'Are you sure you want to cancel your account creation set-up?' }) subText: string
-  @Prop({ default: 'Yes' }) confirmBtnText: string
-  @Prop({ default: 'No' }) rejectBtnText: string
-  // targetRoute can be passed in when different page has to be shown after cancelling
-  @Prop({ default: '/' }) targetRoute: string
-  // for not to clear current org values [for account change , while clicking on cancel , current org has to stay]
-  @Prop({ default: true }) clearCurrentOrg: boolean
-
-  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings') private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
-  @OrgModule.Action('resetAccountSetupProgress') private resetAccountSetupProgress!: () => Promise<void>
-
-  $refs: {
-      confirmCancelDialog: ModalDialog
-  }
-
-  private async confirmDialogResponse (response) {
-    if (response) {
-      this.clickConfirm()
-    }
-    this.$refs.confirmCancelDialog.close()
-  }
-
-  private async clickConfirm () {
-    try {
-      if (this.clearCurrentOrg) {
-        await this.resetAccountSetupProgress()
-        await this.setCurrentOrganizationFromUserAccountSettings()
-        // Update header
-        await this.$store.commit('updateHeader')
+    ModalDialog,
+  },
+  props: {
+    isEmit: { default: false, type: Boolean },
+    showConfirmPopup: { default: true, type: Boolean },
+    disabled: { default: false, type: Boolean },
+    mainText: { default: "Cancel Account Creation", type: String },
+    subText: {
+      default: "Are you sure you want to cancel your account creation set-up?",
+      type: String,
+    },
+    confirmBtnText: { default: "Yes", type: String },
+    rejectBtnText: { default: "No", type: String },
+    targetRoute: { default: "/", type: String },
+    clearCurrentOrg: { default: true, type: Boolean },
+  },
+  setup(props, ctx) {
+    const {
+      isEmit,
+      showConfirmPopup,
+      disabled,
+      mainText,
+      subText,
+      confirmBtnText,
+      rejectBtnText,
+      targetRoute,
+      clearCurrentOrg,
+    } = toRefs(props);
+    const $refs = ref<{
+      confirmCancelDialog: ModalDialog;
+    }>(undefined);
+    const confirmDialogResponse = async (response) => {
+      if (response) {
+        clickConfirm();
       }
-      if (this.isEmit) {
-        this.emitClickConfirm()
+      ctx.refs.confirmCancelDialog.close();
+    };
+    const clickConfirm = async () => {
+      try {
+        if (clearCurrentOrg.value) {
+          await resetAccountSetupProgress();
+          await setCurrentOrganizationFromUserAccountSettings();
+          await ctx.root.$store.commit("updateHeader");
+        }
+        if (isEmit.value) {
+          emitClickConfirm();
+        } else {
+          ctx.root.$router.push(targetRoute.value);
+        }
+      } catch (err) {
+        console.log("Error while cancelling account creation flow", err);
+      }
+    };
+    const emitClickConfirm = () => {};
+    const openModalDialog = () => {
+      if (showConfirmPopup.value) {
+        ctx.refs.confirmCancelDialog.open();
       } else {
-        this.$router.push(this.targetRoute)
+        clickConfirm();
       }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log('Error while cancelling account creation flow', err)
-    }
-  }
-
-  @Emit('click-confirm')
-  emitClickConfirm () {
-  }
-
-  private openModalDialog () {
-    if (this.showConfirmPopup) {
-      this.$refs.confirmCancelDialog.open()
-    } else {
-      this.clickConfirm()
-    }
-  }
-}
-</script>
+    };
+    return {
+      $refs,
+      confirmDialogResponse,
+      clickConfirm,
+      emitClickConfirm,
+      openModalDialog,
+    };
+  },
+});

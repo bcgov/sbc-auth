@@ -1,193 +1,122 @@
-<template>
-  <v-form ref="form" lazy-validation  data-test="form-bcol-login">
-    <fieldset>
-      <legend class="mb-3">
-        BC Online Prime Contact Details
-        <v-tooltip bottom color="grey darken-4">
-          <template v-slot:activator="{ on }">
-            <v-icon color="grey darken-4" v-on="on" tabindex="0">mdi-help-circle-outline</v-icon>
-          </template>
-          <div class="bcol-tooltip__msg py-2">BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</div>
-        </v-tooltip>
-      </legend>
-      <v-slide-y-transition>
-        <div class="pb-2" v-show="errorMessage">
-          <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
-            {{errorMessage}}
-          </v-alert>
-        </div>
-      </v-slide-y-transition>
-      <v-row>
-        <v-col :cols="hideLinkBtn ? 6 : 4 " class="py-0 pr-0">
-          <v-text-field
-            dense
-            filled
-            label="User ID"
-            v-model.trim="username"
-            :rules="usernameRules"
-            req
-            data-test="input-user-id"
-          >
-          </v-text-field>
-        </v-col>
-        <v-col :cols="hideLinkBtn?6:4" class="py-0 pr-0">
-          <v-text-field
-            dense
-            filled
-            label="Password"
-            type="password"
-            v-model.trim="password"
-            req
-            :rules="passwordRules"
-            data-test="input-user-password"
-          >
-          </v-text-field>
-        </v-col>
-        <v-col cols="4" class="py-0" v-if="!hideLinkBtn">
-          <v-btn
-            large
-            depressed
-            color="primary"
-            class="link-account-btn"
-            @click="linkAccounts()"
-            data-test="dialog-save-button"
-            :loading="isLoading"
-            :disabled='!isFormValid() || isLoading'
-          >
-            Link Account
-          </v-btn>
-        </v-col>
-      </v-row>
-    </fieldset>
-  </v-form>
-</template>
-
-<script lang="ts">
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-@Component({
-  name: 'BcolLogin',
-  computed: {
-    ...mapState('org', ['currentOrganization'])
+import {
+  defineComponent,
+  computed,
+  toRefs,
+  ref,
+  watch,
+  onMounted,
+} from "@vue/composition-api";
+import { BcolAccountDetails, BcolProfile } from "@/models/bcol";
+import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
+import { mapActions, mapState } from "vuex";
+export default defineComponent({
+  name: "BcolLogin",
+  props: {
+    hideLinkBtn: { default: false, type: Boolean },
+    defaultUserId: { type: String },
   },
-  methods: {
-    ...mapActions('org', ['syncMembership', 'syncOrganization', 'validateBcolAccount'])
-  }
-})
-export default class BcolLogin extends Vue {
-  private username: string = ''
-  private password: string = ''
-  private errorMessage: string = ''
-  private isLoading: boolean = false
-  @Prop({ default: false }) hideLinkBtn: boolean
-  @Prop() defaultUserId: string
-  private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
-
-  private async mounted () {
-    this.username = this.defaultUserId
-    this.password = ''
-  }
-
-  @Watch('password')
-  onPasswordChange () {
-    this.emitBcolInfo()
-  }
-
-  @Watch('username')
-  onUsernameChange () {
-    this.emitBcolInfo()
-  }
-
-  private isFormValid (): boolean {
-    return !!this.username && !!this.password
-  }
-  private usernameRules = [
-    v => !!v.trim() || 'Username is required'
-  ]
-
-  private passwordRules = [
-    value => !!value || 'Password is required'
-  ]
-
-  $refs: {
-    form: HTMLFormElement
-  }
-
-  private async linkAccounts () {
-    this.isLoading = true
-    this.errorMessage = ''
-    // Validate form, and then create an team with this user a member
-    if (this.isFormValid()) {
-      const bcolProfile: BcolProfile = {
-        userId: this.username,
-        password: this.password
-      }
-      try {
-        const bcolAccountDetails = await this.validateBcolAccount(bcolProfile)
-        this.isLoading = false
-        if (bcolAccountDetails) { // TODO whats the success status
-          this.$emit('account-link-successful', { bcolProfile, bcolAccountDetails })
-          this.resetForm()
-        }
-      } catch (err) {
-        this.isLoading = false
-        switch (err.response.status) {
-          case 409:
-            this.errorMessage = err.response.data.message
-            break
-          case 400:
-            this.errorMessage = err.response.data.message
-            break
-          default:
-            this.errorMessage = 'An error occurred while attempting to create your account.'
+  setup(props, ctx) {
+    const currentOrganization = computed(
+      () => ctx.root.$store.state.org.currentOrganization
+    );
+    const syncMembership = () => ctx.root.$store.dispatch("org/syncMembership");
+    const syncOrganization = () =>
+      ctx.root.$store.dispatch("org/syncOrganization");
+    const validateBcolAccount = () =>
+      ctx.root.$store.dispatch("org/validateBcolAccount");
+    const { hideLinkBtn, defaultUserId } = toRefs(props);
+    const username = ref<string>("");
+    const password = ref<string>("");
+    const errorMessage = ref<string>("");
+    const isLoading = ref<boolean>(false);
+    const validateBcolAccount =
+      ref<(bcolProfile: BcolProfile) => Promise<BcolAccountDetails>>(undefined);
+    const usernameRules = ref([(v) => !!v.trim() || "Username is required"]);
+    const passwordRules = ref([(value) => !!value || "Password is required"]);
+    const $refs = ref<{
+      form: HTMLFormElement;
+    }>(undefined);
+    const onPasswordChange = () => {
+      emitBcolInfo();
+    };
+    const onUsernameChange = () => {
+      emitBcolInfo();
+    };
+    const isFormValid = (): boolean => {
+      return !!username.value && !!password.value;
+    };
+    const linkAccounts = async () => {
+      isLoading.value = true;
+      errorMessage.value = "";
+      if (isFormValid()) {
+        const bcolProfile: BcolProfile = {
+          userId: username.value,
+          password: password.value,
+        };
+        try {
+          const bcolAccountDetails = await validateBcolAccount.value(
+            bcolProfile
+          );
+          isLoading.value = false;
+          if (bcolAccountDetails) {
+            ctx.emit("account-link-successful", {
+              bcolProfile,
+              bcolAccountDetails,
+            });
+            resetForm();
+          }
+        } catch (err) {
+          isLoading.value = false;
+          switch (err.response.status) {
+            case 409:
+              errorMessage.value = err.response.data.message;
+              break;
+            case 400:
+              errorMessage.value = err.response.data.message;
+              break;
+            default:
+              errorMessage.value =
+                "An error occurred while attempting to create your account.";
+          }
         }
       }
-    }
-  }
-  resetForm () {
-    this.password = this.errorMessage = ''
-    this.$refs.form.resetValidation()
-  }
-
-  @Emit()
-  private async emitBcolInfo () {
-    const bcolInfo: BcolProfile = {
-      userId: this.username,
-      password: this.password
-    }
-    return bcolInfo
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-  .bcol-tooltip__msg {
-    max-width: 20rem;
-    line-height: 1.5;
-    font-size: 0.9375rem;
-  }
-
-  .v-icon {
-    margin-top: -2px;
-    font-size: 1.25rem !important;
-  }
-
-  .v-btn.link-account-btn {
-    font-size: 0.875rem !important;
-    font-weight: 700;
-  }
-
-  .v-tooltip__content:before {
-    content: ' ';
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    margin-left: -10px;
-    width: 20px;
-    height: 20px;
-    border-width: 10px 10px 10px 10px;
-    border-style: solid;
-    border-color: transparent transparent var(--v-grey-darken4) transparent;
-  }
-</style>
+    };
+    const resetForm = () => {
+      password.value = errorMessage.value = "";
+      ctx.refs.form.resetValidation();
+    };
+    const emitBcolInfo = async () => {
+      const bcolInfo: BcolProfile = {
+        userId: username.value,
+        password: password.value,
+      };
+      return bcolInfo;
+    };
+    watch(password, onPasswordChange);
+    watch(username, onUsernameChange);
+    onMounted(async () => {
+      username.value = defaultUserId.value;
+      password.value = "";
+    });
+    return {
+      currentOrganization,
+      syncMembership,
+      syncOrganization,
+      validateBcolAccount,
+      username,
+      password,
+      errorMessage,
+      isLoading,
+      validateBcolAccount,
+      usernameRules,
+      passwordRules,
+      $refs,
+      onPasswordChange,
+      onUsernameChange,
+      isFormValid,
+      linkAccounts,
+      resetForm,
+      emitBcolInfo,
+    };
+  },
+});

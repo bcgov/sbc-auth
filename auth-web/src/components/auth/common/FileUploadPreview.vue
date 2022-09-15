@@ -1,108 +1,74 @@
-<template>
-  <v-row>
-    <v-col class="py-0" sm="12" md="12">
-      <v-form ref="fileUploadInput" lazy-validation>
-        <v-file-input
-          label="Upload File"
-          filled
-          dense
-          v-model="fileUpload"
-          accept="image/*, .pdf"
-          class="file-upload-preview"
-          :rules="fileUploadRules"
-          show-size
-          @change="fileChange"
-          color="primary"
-        >
-        </v-file-input>
-      </v-form>
-    </v-col>
-  </v-row>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Prop } from 'vue-property-decorator'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import Vue from 'vue'
-import { mapActions } from 'vuex'
-
-@Component({
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  onMounted,
+  PropType,
+} from "@vue/composition-api";
+import { Component, Emit, Prop } from "vue-property-decorator";
+import ModalDialog from "@/components/auth/common/ModalDialog.vue";
+import Vue from "vue";
+import { mapActions } from "vuex";
+export default defineComponent({
   components: {
-    ModalDialog
+    ModalDialog,
   },
-  methods: {
-    ...mapActions('org', [
-      'resetAccountSetupProgress'
-    ])
-  }
-})
-export default class FileUploadPreview extends Vue {
-  @Prop() inputFile: File
-  @Prop({ default: true }) isRequired: boolean
-  @Prop({ default: 0 }) maxSize: number // in KB
-  private fileUpload = null
-
-  $refs: {
-    fileUploadInput: HTMLFormElement,
-  }
-
-  private fileUploadRules = [
-    (v) => {
-      if (this.isRequired) {
-        return !!v || 'Affidavit file is required'
+  props: {
+    inputFile: { type: Object as PropType<File> },
+    isRequired: { default: true, type: Boolean },
+    maxSize: { default: 0, type: Number },
+  },
+  setup(props, ctx) {
+    const resetAccountSetupProgress = () =>
+      ctx.root.$store.dispatch("org/resetAccountSetupProgress");
+    const { inputFile, isRequired, maxSize } = toRefs(props);
+    const fileUpload = ref(null);
+    const $refs = ref<{
+      fileUploadInput: HTMLFormElement;
+    }>(undefined);
+    const fileUploadRules = ref([
+      (v) => {
+        if (isRequired.value) {
+          return !!v || "Affidavit file is required";
+        }
+        return true;
+      },
+      (file) => {
+        if (maxSize.value) {
+          return (
+            file?.size <= maxSize.value * 1000 ||
+            "File size exceed max allowed size"
+          );
+        }
+        return true;
+      },
+    ]);
+    const fileChange = (file) => {
+      emitFileSelected(file);
+    };
+    const emitFileSelected = (file) => {
+      isFileValid();
+      return file;
+    };
+    const isFileValid = () => {
+      return ctx.refs.fileUploadInput.validate();
+    };
+    onMounted(() => {
+      if (inputFile.value) {
+        fileUpload.value = inputFile.value;
+        ctx.root.$nextTick(() => {
+          isFileValid();
+        });
       }
-      return true
-    },
-    (file) => {
-      if (this.maxSize) {
-        return (file?.size <= (this.maxSize * 1000)) || 'File size exceed max allowed size'
-      }
-      return true
-    }
-  ]
-
-  mounted () {
-    if (this.inputFile) {
-      this.fileUpload = this.inputFile
-      this.$nextTick(() => {
-        this.isFileValid()
-      })
-    }
-  }
-
-  private fileChange (file) {
-    this.emitFileSelected(file)
-  }
-
-  @Emit('file-selected')
-  emitFileSelected (file) {
-    this.isFileValid()
-    return file
-  }
-
-  @Emit('is-file-valid')
-  isFileValid () {
-    return this.$refs.fileUploadInput.validate()
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
-::v-deep {
-  .file-upload-preview {
-    .v-input__append-outer {
-      margin-top: 10px !important
-    }
-    .v-input__slot{
-      background-color: $BCgovInputBG !important;
-    }
-    .v-file-input__text{
-     color: var(--v-primary-base) !important;
-
-    }
-  }
-}
-
-</style>
+    });
+    return {
+      resetAccountSetupProgress,
+      fileUpload,
+      $refs,
+      fileUploadRules,
+      fileChange,
+      emitFileSelected,
+      isFileValid,
+    };
+  },
+});

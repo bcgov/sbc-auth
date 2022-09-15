@@ -1,650 +1,372 @@
-<template>
-  <div id="entity-management">
-    <v-fade-transition>
-      <div class="loading-container grayed-out" v-show="!!isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="!!isLoading"/>
-      </div>
-    </v-fade-transition>
-
-    <v-container justify class="view-container">
-      <div class="view-header align-center">
-        <h1 class="view-header__title">My Business Registry<br>
-          <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
-        </h1>
-        <div class="view-header__actions">
-          <v-btn
-            id="add-name-request-btn"
-            class="font-weight-regular"
-            color="primary"
-            outlined dark large
-            @click="goToNameRequest()"
-          >
-            <span>Request a BC Business Name</span>
-            <v-icon small class="ml-2">mdi-open-in-new</v-icon>
-          </v-btn>
-        </div>
-      </div>
-
-      <v-row no-gutters id="dashboard-actions" class="mb-n3">
-        <v-col cols="auto">
-          <!-- Add Existing Name Request or Business -->
-          <v-menu
-            v-model="addAffiliationDropdown"
-          >
-            <template v-slot:activator="{ on: onMenu }">
-              <v-tooltip top content-class="top-tooltip">
-                <template v-slot:activator="{ on: onTooltip }">
-                  <v-btn
-                    id="add-existing-btn"
-                    class="mt-2 mr-4"
-                    color="primary"
-                    dark large
-                    v-on="{ ...onMenu, ...onTooltip }"
-                    @click="addAffiliationDropdown = !addAffiliationDropdown"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                    <span><strong>Add an Existing Business or Name Request</strong></span>
-                    <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                  </v-btn>
-                </template>
-                <span>To view and manage existing businesses and Name Requests, you can manually add them to your table.</span>
-              </v-tooltip>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title class="d-inline-flex">
-                  <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
-            </v-list>
-          </v-menu>
-          <v-tooltip top max-width="361px" content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                id="incorporate-numbered-btn"
-                class="mt-2 mr-4"
-                color="primary"
-                outlined dark large
-                v-bind="attrs"
-                v-on="on"
-                @click="startNumberedCompany()"
-              >
-                <v-icon>mdi-plus</v-icon>
-                <span><strong>Incorporate a Numbered Benefit Company</strong></span>
-              </v-btn>
-            </template>
-            <span>Start an incorporation application for a numbered benefit company in B.C.</span>
-          </v-tooltip>
-        </v-col>
-        <v-col>
-          <v-select
-            dense filled multiple
-            class="column-selector"
-            label="Columns to Show"
-            v-model="selectedColumns"
-            :items="columns"
-            :menu-props="{ bottom: true, offsetY: true }"
-          >
-            <template v-slot:selection></template>
-          </v-select>
-        </v-col>
-      </v-row>
-
-      <AffiliatedEntityTable
-        :selectedColumns="selectedColumns"
-        :loading="isLoading"
-        @remove-business="showConfirmationOptionsModal($event)"
-      />
-
-      <PasscodeResetOptionsModal
-        ref="passcodeResetOptionsModal"
-        data-test="dialog-passcode-reset-options"
-        @confirm-passcode-reset-options="remove($event)"
-      />
-
-      <!-- Add an Existing Business Dialog -->
-      <AddBusinessDialog
-        :dialog="addBusinessDialog"
-        @add-success="showAddSuccessModal()"
-        @add-failed-invalid-code="showInvalidCodeModal($event)"
-        @add-failed-no-entity="showEntityNotFoundModal()"
-        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="cancelAddBusiness()"
-        @on-business-identifier="businessIdentifier = $event"
-      />
-
-      <!-- Add Name Request Dialog -->
-      <ModalDialog
-        ref="addNRDialog"
-        :is-persistent="true"
-        :title="dialogTitle"
-        :show-icon="false"
-        :show-actions="false"
-        max-width="640"
-        data-test-tag="add-name-request"
-      >
-        <template v-slot:text>
-          <p>
-            Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone number
-            OR applicant email that were used when the name was requested.
-          </p>
-          <AddNameRequestForm
-            class="mt-6"
-            @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success="showAddSuccessModalNR()"
-            @add-failed-show-msg="showNRErrorModal()"
-            @add-failed-no-entity="showNRNotFoundModal()"
-            @add-unknown-error="showUnknownErrorModal('nr')"
-            @on-cancel="cancelAddNameRequest()"
-          />
-        </template>
-      </ModalDialog>
-
-      <!-- Success Dialog -->
-      <ModalDialog
-        ref="successDialog"
-        :title="dialogTitle"
-        :text="dialogText"
-        dialog-class="notify-dialog"
-        max-width="640"
-      />
-
-      <!-- NR/IA removal confirm Dialog/A generic one -->
-      <ModalDialog
-        ref="removalConfirmDialog"
-        :title="dialogTitle"
-        :text="dialogText"
-        dialog-class="notify-dialog"
-        max-width="640"
-        data-test="remove-confirm-dialog"
-      >
-        <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="primaryBtnHandler()" data-test="dialog-ok-button">{{primaryBtnText}}</v-btn>
-          <v-btn large @click="secondaryBtnHandler()" data-test="dialog-ok-button">{{ secondaryBtnText }}</v-btn>
-        </template>
-      </ModalDialog>
-
-      <!-- Error Dialog -->
-      <ModalDialog
-        ref="errorDialog"
-        :title="dialogTitle"
-        :text="dialogText"
-        dialog-class="notify-dialog"
-        max-width="640"
-      >
-        <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">OK</v-btn>
-        </template>
-      </ModalDialog>
-
-      <!-- Dialog for confirming business removal -->
-      <ModalDialog
-        ref="removedBusinessSuccessDialog"
-        :title="dialogTitle"
-        :text="dialogText"
-        dialog-class="notify-dialog"
-        max-width="640"
-        :isPersistent="true"
-      >
-        <template v-slot:icon>
-          <v-icon large color="primary">mdi-check</v-icon>
-        </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
-        </template>
-      </ModalDialog>
-    </v-container>
-  </div>
-</template>
-
-<script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpType, LDFlags, LoginSource, Pages } from '@/util/constants'
-import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
-import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
-import { Address } from '@/models/address'
-import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
-import ConfigHelper from '@/util/config-helper'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
-import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-
-@Component({
+import {
+  defineComponent,
+  computed,
+  toRefs,
+  ref,
+  onMounted,
+} from "@vue/composition-api";
+import { Component, Mixins, Prop } from "vue-property-decorator";
+import { CorpType, LDFlags, LoginSource, Pages } from "@/util/constants";
+import { MembershipStatus, RemoveBusinessPayload } from "@/models/Organization";
+import { mapActions, mapGetters, mapState } from "vuex";
+import AccountChangeMixin from "@/components/auth/mixins/AccountChangeMixin.vue";
+import AddBusinessDialog from "@/components/auth/manage-business/AddBusinessDialog.vue";
+import AddNameRequestForm from "@/components/auth/manage-business/AddNameRequestForm.vue";
+import { Address } from "@/models/address";
+import AffiliatedEntityTable from "@/components/auth/manage-business/AffiliatedEntityTable.vue";
+import ConfigHelper from "@/util/config-helper";
+import LaunchDarklyService from "sbc-common-components/src/services/launchdarkly.services";
+import ModalDialog from "@/components/auth/common/ModalDialog.vue";
+import NextPageMixin from "@/components/auth/mixins/NextPageMixin.vue";
+import PasscodeResetOptionsModal from "@/components/auth/manage-business/PasscodeResetOptionsModal.vue";
+import { appendAccountId } from "sbc-common-components/src/util/common-util";
+export default defineComponent({
   components: {
     AddBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
     ModalDialog,
-    PasscodeResetOptionsModal
+    PasscodeResetOptionsModal,
   },
-  computed: {
-    ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
-    ...mapState('user', ['userProfile', 'currentUser']),
-    ...mapGetters('org', ['isPremiumAccount'])
-  },
-  methods: {
-    ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions('org', ['syncAddress'])
-  }
-})
-export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
-  @Prop({ default: '' }) readonly orgId: string
-
-  private removeBusinessPayload = null
-  private dialogTitle = ''
-  private dialogText = ''
-  private isLoading = -1 // truthy
-  private resetPasscodeEmail: string = null
-  businessIdentifier: string = null
-  private primaryBtnText = ''
-  private secondaryBtnText = ''
-  private primaryBtnHandler: () => void = undefined
-  private secondaryBtnHandler: () => void = undefined
-  private lastSyncBusinesses = 0
-  protected addBusinessDialog = false
-
-  /** V-model for dropdown menu. */
-  private addAffiliationDropdown: boolean = false
-
-  private readonly isPremiumAccount!: boolean
-  private readonly syncBusinesses!: () => Promise<void>
-  private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
-  private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
-  private readonly currentOrgAddress!: Address
-  private readonly syncAddress!: () => Address
-  private selectedColumns = ['Number', 'Type', 'Status']
-  private columns = ['Number', 'Type', 'Status']
-
-  $refs: {
-    successDialog: ModalDialog
-    errorDialog: ModalDialog
-    addNRDialog: ModalDialog
-    passcodeResetOptionsModal: PasscodeResetOptionsModal,
-    removedBusinessSuccessDialog: ModalDialog,
-    removalConfirmDialog: ModalDialog
-  }
-
-  private async mounted () {
-    if (this.currentMembership === undefined) {
-      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
-      return
-    }
-    // If pending approval on current account, redirect away
-    if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
-      this.$router.push(this.getNextPageUrl())
-      return
-    }
-    // check if address info is complete
-    const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
-    if (isNotAnonUser && this.enableMandatoryAddress) {
-      // do it only if address is not already fetched.Or else try to fetch from DB
-      if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
-        // sync and try again
-        await this.syncAddress()
-        if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
-          await this.$router.push(`/${Pages.MAIN}/${this.orgId}/settings/account-info`)
-          return
+  props: { orgId: { default: "", type: String } },
+  setup(props, ctx) {
+    const currentOrgAddress = computed(
+      () => ctx.root.$store.state.org.currentOrgAddress
+    );
+    const currentAccountSettings = computed(
+      () => ctx.root.$store.state.org.currentAccountSettings
+    );
+    const userProfile = computed(() => ctx.root.$store.state.user.userProfile);
+    const currentUser = computed(() => ctx.root.$store.state.user.currentUser);
+    const isPremiumAccount = computed(
+      () => ctx.root.$store.getters["org/isPremiumAccount"]
+    );
+    const syncBusinesses = () =>
+      ctx.root.$store.dispatch("business/syncBusinesses");
+    const removeBusiness = () =>
+      ctx.root.$store.dispatch("business/removeBusiness");
+    const createNumberedBusiness = () =>
+      ctx.root.$store.dispatch("business/createNumberedBusiness");
+    const syncAddress = () => ctx.root.$store.dispatch("org/syncAddress");
+    const { orgId } = toRefs(props);
+    const removeBusinessPayload = ref(null);
+    const dialogTitle = ref("");
+    const dialogText = ref("");
+    const isLoading = ref(-1);
+    const resetPasscodeEmail = ref<string>(null);
+    const businessIdentifier = ref<string>(null);
+    const primaryBtnText = ref("");
+    const secondaryBtnText = ref("");
+    const primaryBtnHandler = ref<() => void>(undefined);
+    const secondaryBtnHandler = ref<() => void>(undefined);
+    const lastSyncBusinesses = ref(0);
+    const addBusinessDialog = ref(false);
+    const addAffiliationDropdown = ref<boolean>(false);
+    const isPremiumAccount = ref<boolean>(undefined);
+    const syncBusinesses = ref<() => Promise<void>>(undefined);
+    const removeBusiness =
+      ref<(removeBusinessPayload: RemoveBusinessPayload) => Promise<void>>(
+        undefined
+      );
+    const createNumberedBusiness =
+      ref<(accountId: Number) => Promise<void>>(undefined);
+    const currentOrgAddress = ref<Address>(undefined);
+    const syncAddress = ref<() => Address>(undefined);
+    const selectedColumns = ref(["Number", "Type", "Status"]);
+    const columns = ref(["Number", "Type", "Status"]);
+    const $refs = ref<{
+      successDialog: ModalDialog;
+      errorDialog: ModalDialog;
+      addNRDialog: ModalDialog;
+      passcodeResetOptionsModal: PasscodeResetOptionsModal;
+      removedBusinessSuccessDialog: ModalDialog;
+      removalConfirmDialog: ModalDialog;
+    }>(undefined);
+    const enableMandatoryAddress = computed((): boolean => {
+      return (
+        LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+      );
+    });
+    const setup = async () => {
+      if (isLoading.value === 1) {
+        return;
+      }
+      if (Date.now() - lastSyncBusinesses.value < 2000) {
+        return;
+      }
+      isLoading.value = 1;
+      ctx.root.$route.query.isNumberedCompanyRequest &&
+        (await createNumberedBusiness.value(currentAccountSettings.value.id));
+      await syncBusinesses.value();
+      lastSyncBusinesses.value = Date.now();
+      isLoading.value = 0;
+    };
+    const goToNameRequest = (): void => {
+      window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl());
+    };
+    const startNumberedCompany = async () => {
+      await createNumberedBusiness.value(currentOrganization.id);
+      await syncBusinesses.value();
+    };
+    const showAddSuccessModal = async () => {
+      addBusinessDialog.value = false;
+      dialogTitle.value = "Business Added";
+      dialogText.value = "You have successfully added a business";
+      await syncBusinesses.value();
+      ctx.refs.successDialog.open();
+    };
+    const showAddSuccessModalNR = async () => {
+      ctx.refs.addNRDialog.close();
+      dialogTitle.value = "Name Request Added";
+      dialogText.value = "You have successfully added a name request";
+      await syncBusinesses.value();
+      ctx.refs.successDialog.open();
+    };
+    const showInvalidCodeModal = (label: string) => {
+      addBusinessDialog.value = false;
+      dialogTitle.value = `Invalid ${label}`;
+      dialogText.value = `Unable to add the business. The provided ${label} is invalid.`;
+      ctx.refs.errorDialog.open();
+    };
+    const showEntityNotFoundModal = () => {
+      addBusinessDialog.value = false;
+      dialogTitle.value = "Business Not Found";
+      dialogText.value = "The specified business was not found.";
+      ctx.refs.errorDialog.open();
+    };
+    const showNRNotFoundModal = () => {
+      ctx.refs.addNRDialog.close();
+      dialogTitle.value = "Name Request Not Found";
+      dialogText.value = "The specified name request was not found.";
+      ctx.refs.errorDialog.open();
+    };
+    const showNRErrorModal = () => {
+      ctx.refs.addNRDialog.close();
+      dialogTitle.value = "Error Adding Name Request";
+      dialogText.value = "";
+      ctx.refs.errorDialog.open();
+    };
+    const showPasscodeClaimedModal = () => {
+      const contactNumber = ctx.root.$t("techSupportTollFree").toString();
+      addBusinessDialog.value = false;
+      dialogTitle.value = "Passcode Already Claimed";
+      dialogText.value = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`;
+      ctx.refs.errorDialog.open();
+    };
+    const showUnknownErrorModal = (type: string) => {
+      if (type === "business") {
+        addBusinessDialog.value = false;
+        dialogTitle.value = "Error Adding Existing Business";
+        dialogText.value =
+          "An error occurred adding your business. Please try again.";
+      } else if (type === "nr") {
+        ctx.refs.addNRDialog.close();
+        dialogTitle.value = "Error Adding Existing Name Request";
+        dialogText.value =
+          "An error occurred adding your name request. Please try again.";
+      }
+      ctx.refs.errorDialog.open();
+    };
+    const showAddBusinessModal = () => {
+      addBusinessDialog.value = true;
+    };
+    const showAddNRModal = () => {
+      dialogTitle.value = "Add an Existing Name Request";
+      ctx.refs.addNRDialog.open();
+    };
+    const showConfirmationOptionsModal = (
+      removeBusinessPayload: RemoveBusinessPayload
+    ) => {
+      removeBusinessPayload.value = removeBusinessPayload;
+      if (
+        removeBusinessPayload.business.corpType.code === CorpType.NAME_REQUEST
+      ) {
+        populateNRmodalValues();
+        ctx.refs.removalConfirmDialog.open();
+      } else if (
+        removeBusinessPayload.business.corpType.code === CorpType.NEW_BUSINESS
+      ) {
+        populateIAmodalValues();
+        ctx.refs.removalConfirmDialog.open();
+      } else if (
+        removeBusinessPayload.business.corpType.code ===
+        CorpType.NEW_REGISTRATION
+      ) {
+        populateRegistrationModalValues();
+        ctx.refs.removalConfirmDialog.open();
+      } else {
+        ctx.refs.passcodeResetOptionsModal.open();
+      }
+    };
+    const populateNRmodalValues = () => {
+      dialogTitle.value = ctx.root.$t("removeNRConfirmTitle").toString();
+      dialogText.value = ctx.root.$t("removeNRConfirmText").toString();
+      primaryBtnText.value = "Remove Name Request";
+      secondaryBtnText.value = "Keep Name Request";
+      primaryBtnHandler.value = confirmRemovalNr;
+      secondaryBtnHandler.value = cancelRemoval;
+    };
+    const populateIAmodalValues = () => {
+      dialogTitle.value = ctx.root.$t("removeIAConfirmTitle").toString();
+      dialogText.value = ctx.root.$t("removeIAConfirmText").toString();
+      primaryBtnText.value = "Delete Incorporation Application";
+      secondaryBtnText.value = "Keep Incorporation Application";
+      primaryBtnHandler.value = confirmRemovalIA;
+      secondaryBtnHandler.value = cancelRemoval;
+    };
+    const populateRegistrationModalValues = () => {
+      dialogTitle.value = ctx.root
+        .$t("removeRegistrationConfirmTitle")
+        .toString();
+      dialogText.value = ctx.root
+        .$t("removeRegistrationConfirmText")
+        .toString();
+      primaryBtnText.value = "Delete Registration";
+      secondaryBtnText.value = "Keep Registration";
+      primaryBtnHandler.value = confirmRemovalRegistration;
+      secondaryBtnHandler.value = cancelRemoval;
+    };
+    const cancelRemoval = () => {
+      ctx.refs.removalConfirmDialog.close();
+    };
+    const confirmRemovalRegistration = () => {
+      ctx.refs.removalConfirmDialog.close();
+      remove(
+        "",
+        false,
+        "removeRegistrationSuccessTitle",
+        "removeRegistrationSuccessText"
+      );
+    };
+    const confirmRemovalIA = () => {
+      ctx.refs.removalConfirmDialog.close();
+      remove("", false, "removeIASuccessTitle", "removeIASuccessText");
+    };
+    const confirmRemovalNr = () => {
+      ctx.refs.removalConfirmDialog.close();
+      remove("", false, "removeNRSuccessTitle", "removeNRSuccessText");
+    };
+    const cancelAddBusiness = () => {
+      addBusinessDialog.value = false;
+    };
+    const cancelAddNameRequest = () => {
+      ctx.refs.addNRDialog.close();
+    };
+    const remove = async (
+      resetPasscodeEmail: string,
+      resetPasscode = true,
+      dialogTitleKey = "removeBusiness",
+      dialogTextKey = "removedBusinessSuccessText"
+    ) => {
+      try {
+        removeBusinessPayload.value.passcodeResetEmail = resetPasscodeEmail;
+        removeBusinessPayload.value.resetPasscode = resetPasscode;
+        ctx.refs.passcodeResetOptionsModal.close();
+        await removeBusiness.value(removeBusinessPayload.value);
+        dialogText.value = ctx.root.$t(dialogTextKey).toString();
+        dialogTitle.value = ctx.root.$t(dialogTitleKey).toString();
+        await syncBusinesses.value();
+        ctx.refs.removedBusinessSuccessDialog.open();
+      } catch (ex) {
+        console.log("Error during remove organization affiliations event !");
+      }
+    };
+    const removedBusinessSuccessClose = () => {
+      ctx.refs.removedBusinessSuccessDialog.close();
+    };
+    const close = () => {
+      ctx.refs.errorDialog.close();
+    };
+    onMounted(async () => {
+      if (currentMembership === undefined) {
+        ctx.root.$router.push(`/${Pages.CREATE_ACCOUNT}`);
+        return;
+      }
+      if (currentMembership?.membershipStatus !== MembershipStatus.Active) {
+        ctx.root.$router.push(getNextPageUrl());
+        return;
+      }
+      const isNotAnonUser =
+        currentUser.value?.loginSource !== LoginSource.BCROS;
+      if (isNotAnonUser && enableMandatoryAddress.value) {
+        if (
+          !currentOrgAddress.value ||
+          Object.keys(currentOrgAddress.value).length === 0
+        ) {
+          await syncAddress.value();
+          if (
+            !currentOrgAddress.value ||
+            Object.keys(currentOrgAddress.value).length === 0
+          ) {
+            await ctx.root.$router.push(
+              `/${Pages.MAIN}/${orgId.value}/settings/account-info`
+            );
+            return;
+          }
         }
       }
-    }
-
-    this.setAccountChangedHandler(this.setup)
-    this.setup()
-  }
-
-  private async setup () {
-    // ensure syncBusinesses isn't already running
-    if (this.isLoading === 1) {
-      return
-    }
-
-    // ensure syncBusinesses hasn't just been run
-    if (Date.now() - this.lastSyncBusinesses < 2000) {
-      return
-    }
-
-    this.isLoading = 1 // truthy
-    this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
-    await this.syncBusinesses()
-    this.lastSyncBusinesses = Date.now()
-    this.isLoading = 0 // falsy
-  }
-
-  private get enableMandatoryAddress (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
-  }
-
-  // open Name Request
-  private goToNameRequest (): void {
-    window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
-  }
-
-  // create a numbered company
-  protected async startNumberedCompany () {
-    await this.createNumberedBusiness(this.currentOrganization.id)
-    await this.syncBusinesses()
-  }
-
-  async showAddSuccessModal () {
-    this.addBusinessDialog = false
-    this.dialogTitle = 'Business Added'
-    this.dialogText = 'You have successfully added a business'
-    await this.syncBusinesses()
-    this.$refs.successDialog.open()
-  }
-
-  async showAddSuccessModalNR () {
-    this.$refs.addNRDialog.close()
-    this.dialogTitle = 'Name Request Added'
-    this.dialogText = 'You have successfully added a name request'
-    await this.syncBusinesses()
-    this.$refs.successDialog.open()
-  }
-
-  showInvalidCodeModal (label: string) {
-    this.addBusinessDialog = false
-    this.dialogTitle = `Invalid ${label}`
-    this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
-    this.$refs.errorDialog.open()
-  }
-
-  showEntityNotFoundModal () {
-    this.addBusinessDialog = false
-    this.dialogTitle = 'Business Not Found'
-    this.dialogText = 'The specified business was not found.'
-    this.$refs.errorDialog.open()
-  }
-
-  showNRNotFoundModal () {
-    this.$refs.addNRDialog.close()
-    this.dialogTitle = 'Name Request Not Found'
-    this.dialogText = 'The specified name request was not found.'
-    this.$refs.errorDialog.open()
-  }
-
-  showNRErrorModal () {
-    this.$refs.addNRDialog.close()
-    this.dialogTitle = 'Error Adding Name Request'
-    this.dialogText = ''
-    this.$refs.errorDialog.open()
-  }
-
-  showPasscodeClaimedModal () {
-    const contactNumber = this.$t('techSupportTollFree').toString()
-    this.addBusinessDialog = false
-    this.dialogTitle = 'Passcode Already Claimed'
-    this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
-    this.$refs.errorDialog.open()
-  }
-
-  showUnknownErrorModal (type: string) {
-    if (type === 'business') {
-      this.addBusinessDialog = false
-      this.dialogTitle = 'Error Adding Existing Business'
-      this.dialogText = 'An error occurred adding your business. Please try again.'
-    } else if (type === 'nr') {
-      this.$refs.addNRDialog.close()
-      this.dialogTitle = 'Error Adding Existing Name Request'
-      this.dialogText = 'An error occurred adding your name request. Please try again.'
-    }
-    this.$refs.errorDialog.open()
-  }
-
-  showAddBusinessModal () {
-    this.addBusinessDialog = true
-  }
-
-  showAddNRModal () {
-    this.dialogTitle = 'Add an Existing Name Request'
-    this.$refs.addNRDialog.open()
-  }
-
-  showConfirmationOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
-    this.removeBusinessPayload = removeBusinessPayload
-    if (removeBusinessPayload.business.corpType.code === CorpType.NAME_REQUEST) {
-      this.populateNRmodalValues()
-      this.$refs.removalConfirmDialog.open()
-    } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_BUSINESS) {
-      this.populateIAmodalValues()
-      this.$refs.removalConfirmDialog.open()
-    } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_REGISTRATION) {
-      this.populateRegistrationModalValues()
-      this.$refs.removalConfirmDialog.open()
-    } else {
-      this.$refs.passcodeResetOptionsModal.open()
-    }
-  }
-
-  private populateNRmodalValues () {
-    this.dialogTitle = this.$t('removeNRConfirmTitle').toString()
-    this.dialogText = this.$t('removeNRConfirmText').toString()
-    this.primaryBtnText = 'Remove Name Request'
-    this.secondaryBtnText = 'Keep Name Request'
-    this.primaryBtnHandler = this.confirmRemovalNr
-    this.secondaryBtnHandler = this.cancelRemoval
-  }
-
-  private populateIAmodalValues () {
-    this.dialogTitle = this.$t('removeIAConfirmTitle').toString()
-    this.dialogText = this.$t('removeIAConfirmText').toString()
-    this.primaryBtnText = 'Delete Incorporation Application'
-    this.secondaryBtnText = 'Keep Incorporation Application'
-    this.primaryBtnHandler = this.confirmRemovalIA
-    this.secondaryBtnHandler = this.cancelRemoval
-  }
-
-  private populateRegistrationModalValues () {
-    this.dialogTitle = this.$t('removeRegistrationConfirmTitle').toString()
-    this.dialogText = this.$t('removeRegistrationConfirmText').toString()
-    this.primaryBtnText = 'Delete Registration'
-    this.secondaryBtnText = 'Keep Registration'
-    this.primaryBtnHandler = this.confirmRemovalRegistration
-    this.secondaryBtnHandler = this.cancelRemoval
-  }
-
-  cancelRemoval () {
-    this.$refs.removalConfirmDialog.close()
-  }
-
-  confirmRemovalRegistration () {
-    this.$refs.removalConfirmDialog.close()
-    this.remove('', false, 'removeRegistrationSuccessTitle', 'removeRegistrationSuccessText')
-  }
-
-  confirmRemovalIA () {
-    this.$refs.removalConfirmDialog.close()
-    this.remove('', false, 'removeIASuccessTitle', 'removeIASuccessText')
-  }
-
-  confirmRemovalNr () {
-    this.$refs.removalConfirmDialog.close()
-    this.remove('', false, 'removeNRSuccessTitle', 'removeNRSuccessText')
-  }
-
-  cancelAddBusiness () {
-    this.addBusinessDialog = false
-  }
-
-  cancelAddNameRequest () {
-    this.$refs.addNRDialog.close()
-  }
-
-  async remove (resetPasscodeEmail: string, resetPasscode = true, dialogTitleKey = 'removeBusiness', dialogTextKey = 'removedBusinessSuccessText') {
-    try {
-      this.removeBusinessPayload.passcodeResetEmail = resetPasscodeEmail
-      this.removeBusinessPayload.resetPasscode = resetPasscode
-      this.$refs.passcodeResetOptionsModal.close()
-      await this.removeBusiness(this.removeBusinessPayload)
-      this.dialogText = this.$t(dialogTextKey).toString()
-      this.dialogTitle = this.$t(dialogTitleKey).toString()
-      await this.syncBusinesses()
-      this.$refs.removedBusinessSuccessDialog.open()
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.log('Error during remove organization affiliations event !')
-    }
-  }
-
-  removedBusinessSuccessClose () {
-    this.$refs.removedBusinessSuccessDialog.close()
-  }
-
-  close () {
-    this.$refs.errorDialog.close()
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
-.loading-container.grayed-out {
-  // these are the same styles as dialog overlay:
-  opacity: 0.46;
-  background-color: rgb(33, 33, 33); // grey darken-4
-  border-color: rgb(33, 33, 33); // grey darken-4
-}
-
-.v-tooltip__content {
-  background-color: RGBA(73, 80, 87, 0.95) !important;
-  color: white !important;
-  border-radius: 4px;
-  font-size: 12px !important;
-  line-height: 18px !important;
-  padding: 15px !important;
-  letter-spacing: 0;
-  max-width: 360px !important;
-}
-
-.v-tooltip__content:after {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  right: 100% !important;
-  margin-top: -10px !important;
-  border-top: 10px solid transparent !important;
-  border-bottom: 10px solid transparent !important;
-  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
-}
-
-.top-tooltip:after {
-  top: 100% !important;
-  left: 45% !important;
-  margin-top: 0 !important;
-  border-right: 10px solid transparent !important;
-  border-left: 10px solid transparent !important;
-  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
-}
-
-.view-header {
-  justify-content: space-between;
-
-  h1 {
-    margin-bottom: -10px;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-    color: $gray7;
-    font-weight: normal;
-  }
-
-  .v-btn {
-    font-weight: 700;
-  }
-}
-
-#add-existing-btn {
-  box-shadow: none;
-  background-color: $app-blue !important;
-}
-
-.add-existing-title {
-  font-size: .875rem;
-}
-
-.add-existing-item {
-  height: 40px !important;
-  font-size: .875rem;
-  color: $gray7;
-
-  &:hover {
-    background-color: $app-background-blue;
-  }
-}
-
-.column-selector {
-  float: right;
-  width: 200px;
-}
-
-// Vuetify Overrides
-::v-deep {
-  #dashboard-actions {
-    .v-input .v-label {
-      transform: translateY(-10px) scale(1);
-      top: 30px;
-      color: $gray7;
-      font-size: .875rem;
-    }
-  }
-
-  .v-data-table td {
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    height: auto;
-    vertical-align: top;
-  }
-
-  .v-list-item__title {
-    display: block;
-    font-weight: 700;
-  }
-
-  .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled):hover {
-    color: $app-blue !important;
-  }
-
-  .v-list .v-list-item--active, .v-list .v-list-item--active {
-    &:hover {
-      background-color: $app-background-blue;
-    }
-  }
-
-  .v-list-item {
-    min-height: 0 !important;
-    height: 32px;
-  }
-
-  .theme--light.v-list-item--active:before, .theme--light.v-list-item--active:hover:before,
-  .theme--light.v-list-item:focus:before {
-    opacity: 0 !important;
-  }
-
-  .v-list-item__action {
-    margin-right: 20px !important;
-  }
-
-  .v-list-item .v-list-item__subtitle, .v-list-item .v-list-item__title {
-    color: $gray7;
-    &:hover {
-      color: $app-blue !important;
-    }
-  }
-}
-</style>
+      setAccountChangedHandler(setup);
+      setup();
+    });
+    return {
+      currentOrgAddress,
+      currentAccountSettings,
+      userProfile,
+      currentUser,
+      isPremiumAccount,
+      syncBusinesses,
+      removeBusiness,
+      createNumberedBusiness,
+      syncAddress,
+      removeBusinessPayload,
+      dialogTitle,
+      dialogText,
+      isLoading,
+      resetPasscodeEmail,
+      businessIdentifier,
+      primaryBtnText,
+      secondaryBtnText,
+      primaryBtnHandler,
+      secondaryBtnHandler,
+      lastSyncBusinesses,
+      addBusinessDialog,
+      addAffiliationDropdown,
+      isPremiumAccount,
+      syncBusinesses,
+      removeBusiness,
+      createNumberedBusiness,
+      currentOrgAddress,
+      syncAddress,
+      selectedColumns,
+      columns,
+      $refs,
+      enableMandatoryAddress,
+      setup,
+      goToNameRequest,
+      startNumberedCompany,
+      showAddSuccessModal,
+      showAddSuccessModalNR,
+      showInvalidCodeModal,
+      showEntityNotFoundModal,
+      showNRNotFoundModal,
+      showNRErrorModal,
+      showPasscodeClaimedModal,
+      showUnknownErrorModal,
+      showAddBusinessModal,
+      showAddNRModal,
+      showConfirmationOptionsModal,
+      populateNRmodalValues,
+      populateIAmodalValues,
+      populateRegistrationModalValues,
+      cancelRemoval,
+      confirmRemovalRegistration,
+      confirmRemovalIA,
+      confirmRemovalNr,
+      cancelAddBusiness,
+      cancelAddNameRequest,
+      remove,
+      removedBusinessSuccessClose,
+      close,
+    };
+  },
+});

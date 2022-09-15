@@ -1,98 +1,67 @@
-<template>
-  <v-form ref="notaryContactForm" lazy-validation>
-    <fieldset v-if="notaryContact">
-      <legend class="mb-4">Notary Contact</legend>
-      <v-row>
-        <v-col cols="12" class="py-0">
-          <v-text-field
-            filled
-            label="Email Address"
-            :rules="rules.email"
-            :disabled="disabled"
-            hint="Optional"
-            persistent-hint
-            v-model.trim="notaryContact.email"
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="4" class="py-0">
-          <v-text-field
-            filled
-            label="Phone"
-            :disabled="disabled"
-            hint="Optional"
-            persistent-hint
-            v-model.trim="notaryContact.phone"
-          >
-          </v-text-field>
-        </v-col>
-        <v-col cols="3" class="py-0">
-          <v-text-field
-            filled
-            label="Extension"
-            :disabled="disabled"
-            hint="Optional"
-            persistent-hint
-            v-model.trim="notaryContact.extension"
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
-    </fieldset>
-  </v-form>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import CommonUtils from '@/util/common-util'
-import { NotaryContact } from '@/models/notary'
-
-@Component
-export default class NotaryContactForm extends Vue {
-  @Prop() inputNotaryContact: NotaryContact
-  @Prop({ default: false }) disabled: boolean
-  private notaryContact: NotaryContact = {}
-
-  $refs: {
-    notaryContactForm: HTMLFormElement,
-  }
-
-  private readonly rules = {
-    email: [val => {
-      if (val) {
-        return !!CommonUtils.validateEmailFormat(val) || 'Email is invalid'
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  watch,
+  onMounted,
+  PropType,
+} from "@vue/composition-api";
+import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
+import CommonUtils from "@/util/common-util";
+import { NotaryContact } from "@/models/notary";
+export default defineComponent({
+  props: {
+    inputNotaryContact: { type: Object as PropType<NotaryContact> },
+    disabled: { default: false, type: Boolean },
+  },
+  setup(props, ctx) {
+    const { inputNotaryContact, disabled } = toRefs(props);
+    const notaryContact = ref<NotaryContact>({});
+    const $refs = ref<{
+      notaryContactForm: HTMLFormElement;
+    }>(undefined);
+    const rules = ref({
+      email: [
+        (val) => {
+          if (val) {
+            return !!CommonUtils.validateEmailFormat(val) || "Email is invalid";
+          }
+          return true;
+        },
+      ],
+    });
+    const updateContact = async (val, oldVal) => {
+      emitNotaryContact();
+    };
+    const emitNotaryContact = () => {
+      isFormValid();
+      return notaryContact.value;
+    };
+    const isFormValid = () => {
+      return ctx.refs.notaryContactForm.validate();
+    };
+    watch(notaryContact, updateContact, { deep: true });
+    onMounted(() => {
+      if (inputNotaryContact.value) {
+        Object.keys(inputNotaryContact.value).forEach((key) => {
+          ctx.root.$set(
+            notaryContact.value,
+            key,
+            inputNotaryContact.value?.[key]
+          );
+        });
       }
-      return true
-    }]
-  }
-
-  mounted () {
-    if (this.inputNotaryContact) {
-      Object.keys(this.inputNotaryContact).forEach(key => {
-        this.$set(this.notaryContact, key, this.inputNotaryContact?.[key])
-      })
-    }
-    this.$nextTick(() => {
-      this.isFormValid()
-    })
-  }
-
-  @Watch('notaryContact', { deep: true })
-  async updateContact (val, oldVal) {
-    this.emitNotaryContact()
-  }
-
-  @Emit('notarycontact-update')
-  emitNotaryContact () {
-    this.isFormValid()
-    return this.notaryContact
-  }
-
-  @Emit('is-form-valid')
-  isFormValid () {
-    return this.$refs.notaryContactForm.validate()
-  }
-}
-</script>
+      ctx.root.$nextTick(() => {
+        isFormValid();
+      });
+    });
+    return {
+      notaryContact,
+      $refs,
+      rules,
+      updateContact,
+      emitNotaryContact,
+      isFormValid,
+    };
+  },
+});

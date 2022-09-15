@@ -1,371 +1,200 @@
-<template>
-  <div>
-    <template>
-
-      <v-card
-        outlined
-        hover
-        class="product-card py-8 px-5 mb-4 elevation-1"
-        :class="[ {'processing-card' : isSelected}]"
-        :data-test="`div-product-${productDetails.code}`"
-      >
-        <div>
-          <header class="d-flex align-center">
-            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct" data-test="div-decision-not-made-product">
-              <v-checkbox
-                class="product-check-box ma-0 pa-0"
-                hide-details
-                v-model="productSelected"
-                :data-test="`check-product-${productDetails.code}`"
-                @change="selecThisProduct"
-                :key="Math.random()"
-              >
-                <template v-slot:label>
-                  <div class="ml-2">
-                    <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
-                      {{productDetails.description}}
-                  <v-tooltip
-                    v-if="productPremTooltipText(productDetails.code)"
-                    class="pa-2"
-                    content-class="tooltip"
-                    color="grey darken-4"
-                    max-width="350px"
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
-                        (<span class="underline-dotted">requires Premium Account</span>)
-                      </span>
-                    </template>
-                    <div class="py-3">
-                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                    </div>
-                  </v-tooltip>
-                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
-                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
-                    </h3>
-                    <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
-                  </div>
-              </template>
-              </v-checkbox>
-            </div>
-            <div class="d-flex align-center pr-8" data-test="div-decision-made-product" v-else>
-              <v-icon :color="productLabel.decisionMadeColorCode" class="mr-2">
-                {{ productLabel.decisionMadeIcon }}
-              </v-icon>
-              <div class="ml-2 label-color">
-                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
-                  {{productDetails.description}}
-                  <v-tooltip
-                    v-if="productPremTooltipText(productDetails.code)"
-                    class="pa-2"
-                    content-class="tooltip"
-                    color="grey darken-4"
-                    max-width="350px"
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
-                        (<span class="underline-dotted">requires Premium Account</span>)
-                      </span>
-                    </template>
-                    <div class="py-3">
-                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                    </div>
-                  </v-tooltip>
-                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
-                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
-                </h3>
-                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"  />
-              </div>
-            </div>
-            <v-btn
-              large
-              depressed
-              color="primary"
-              width="120"
-              class="font-weight-bold ml-auto"
-              :aria-label="`Select  ${productDetails.description}`"
-              :data-test="`btn-productDetails-${productDetails.code}`"
-              text
-              @click="expand()"
-            >
-
-              <span v-if="isexpandedView" :data-test="`span-readless-${productDetails.code}`">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
-              <span :data-test="`span-readmore-${productDetails.code}`" v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
-            </v-btn>
-          </header>
-
-          <div class="product-card-contents ml-9">
-            <v-expand-transition>
-              <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
-                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
-                <component
-                  v-if="isTOSNeeded"
-                  :key="productFooter.id"
-                  :is="productFooter.component"
-                  v-bind="productFooter.props"
-                  v-on="productFooter.events"
-                  :ref="productFooter.ref"
-                  v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
-                />
-                <div v-if="showProductFee">
-                  <v-divider class="my-6"></v-divider>
-                  <ProductFee :orgProduct="orgProduct"
-                  :orgProductFeeCodes="orgProductFeeCodes"
-                  @save:saveProductFee="saveProductFee"
-                  :isProductActionLoading="isProductActionLoading"
-                  :isProductActionCompleted="isProductActionCompleted"
-                  />
-                </div>
-              </div>
-
-            </v-expand-transition>
-          </div>
-          <div>
-
-          </div>
-        </div>
-      </v-card>
-    </template>
-  </div>
-</template>
-
-<script lang="ts">
-import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, productStatus } from '@/util/constants'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
-import ProductTos from '@/components/auth/common/ProductTOS.vue'
-
-const TOS_NEEDED_PRODUCT = ['VS']
-
-@Component({
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  computed,
+  watch,
+  onMounted,
+  PropType,
+} from "@vue/composition-api";
+import {
+  AccountFee,
+  OrgProduct,
+  OrgProductFeeCode,
+} from "@/models/Organization";
+import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
+import { DisplayModeValues, productStatus } from "@/util/constants";
+import LaunchDarklyService from "sbc-common-components/src/services/launchdarkly.services";
+import ProductFee from "@/components/auth/common/ProductFeeViewEdit.vue";
+import ProductTos from "@/components/auth/common/ProductTOS.vue";
+const TOS_NEEDED_PRODUCT = ["VS"];
+export default defineComponent({
   components: {
     ProductTos,
-    ProductFee
-  }
-})
-export default class Product extends Vue {
-  @Prop({ default: undefined }) productDetails: OrgProduct
-  @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
-  @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
-  @Prop({ default: false }) isProductActionLoading: boolean // loading
-  @Prop({ default: false }) isProductActionCompleted: boolean // loading
-
-  @Prop({ default: '' }) userName: string
-  @Prop({ default: '' }) orgName: string
-  @Prop({ default: false }) isSelected: boolean
-  @Prop({ default: false }) isexpandedView: boolean
-  @Prop({ default: false }) isAccountSettingsView: boolean // to confirm if the rendering is from AccountSettings view
-  @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
-  @Prop({ default: false }) canManageProductFee: boolean
-
-  private termsAccepted: boolean = false
-  public productSelected:boolean = false
-  private viewOnly = DisplayModeValues.VIEW_ONLY
-
-  $refs: {
-    tosForm: HTMLFormElement
-  }
-
-  @Watch('isSelected')
-  onisSelectedChange (newValue:boolean) {
-    // setting check box
-    this.productSelected = newValue
-  }
-  get showProductFee () {
-    return this.canManageProductFee && this.orgProduct && this.orgProduct.product
-  }
-
-  get productLabel () {
-    // this is mapping product code with lang file.
-    // lang file have subtitle and description with product code prefix.
-    // eg: pprCodeSubtitle, pprCodeDescription
-    // Also, returns check box icon and color if the product has been reviewed.
-    const { code } = this.productDetails
-    let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
-    let details = `${code && code.toLowerCase()}CodeDescription` || ''
-    let decisionMadeIcon = null
-    let decisionMadeColorCode = null
-
-    if (this.isAccountSettingsView) {
-      const status = this.productDetails.subscriptionStatus
-      switch (status) {
-        case productStatus.ACTIVE: {
-          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
-          decisionMadeIcon = 'mdi-check-circle'
-          decisionMadeColorCode = 'success'
-          break
+    ProductFee,
+  },
+  props: {
+    productDetails: {
+      default: undefined,
+      type: Object as PropType<OrgProduct>,
+    },
+    orgProduct: { default: undefined, type: Object as PropType<AccountFee> },
+    orgProductFeeCodes: {
+      default: undefined,
+      type: Object as PropType<OrgProductFeeCode>,
+    },
+    isProductActionLoading: { default: false, type: Boolean },
+    isProductActionCompleted: { default: false, type: Boolean },
+    userName: { default: "", type: String },
+    orgName: { default: "", type: String },
+    isSelected: { default: false, type: Boolean },
+    isexpandedView: { default: false, type: Boolean },
+    isAccountSettingsView: { default: false, type: Boolean },
+    isBasicAccount: { default: false, type: Boolean },
+    canManageProductFee: { default: false, type: Boolean },
+  },
+  setup(props, ctx) {
+    const {
+      productDetails,
+      orgProduct,
+      orgProductFeeCodes,
+      isProductActionLoading,
+      isProductActionCompleted,
+      userName,
+      orgName,
+      isSelected,
+      isexpandedView,
+      isAccountSettingsView,
+      isBasicAccount,
+      canManageProductFee,
+    } = toRefs(props);
+    const termsAccepted = ref<boolean>(false);
+    const productSelected = ref<boolean>(false);
+    const viewOnly = ref(DisplayModeValues.VIEW_ONLY);
+    const $refs = ref<{
+      tosForm: HTMLFormElement;
+    }>(undefined);
+    const showProductFee = computed(() => {
+      return (
+        canManageProductFee.value &&
+        orgProduct.value &&
+        orgProduct.value.product
+      );
+    });
+    const productLabel = computed(() => {
+      const { code } = productDetails.value;
+      let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || "";
+      let details = `${code && code.toLowerCase()}CodeDescription` || "";
+      let decisionMadeIcon = null;
+      let decisionMadeColorCode = null;
+      if (isAccountSettingsView.value) {
+        const status = productDetails.value.subscriptionStatus;
+        switch (status) {
+          case productStatus.ACTIVE: {
+            subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || "";
+            decisionMadeIcon = "mdi-check-circle";
+            decisionMadeColorCode = "success";
+            break;
+          }
+          case productStatus.REJECTED: {
+            subTitle =
+              `${code && code.toLowerCase()}CodeRejectedSubtitle` || "";
+            decisionMadeIcon = "mdi-close-circle";
+            decisionMadeColorCode = "error";
+            break;
+          }
+          case productStatus.PENDING_STAFF_REVIEW: {
+            subTitle = "productPendingSubtitle";
+            decisionMadeIcon = "mdi-clock-outline";
+            break;
+          }
+          default: {
+            break;
+          }
         }
-        case productStatus.REJECTED: {
-          subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle` || ''
-          decisionMadeIcon = 'mdi-close-circle'
-          decisionMadeColorCode = 'error'
-          break
-        }
-        case productStatus.PENDING_STAFF_REVIEW: {
-          subTitle = 'productPendingSubtitle'
-          decisionMadeIcon = 'mdi-clock-outline'
-          break
-        }
-        default: {
-          break
+        if (isBasicAccountAndPremiumProduct.value) {
+          subTitle =
+            `${code && code.toLowerCase()}CodeUnselectableSubtitle` || "";
+          decisionMadeIcon = "mdi-minus-box";
         }
       }
-      if (this.isBasicAccountAndPremiumProduct) {
-        subTitle = `${code && code.toLowerCase()}CodeUnselectableSubtitle` || ''
-        decisionMadeIcon = 'mdi-minus-box'
+      return { subTitle, details, decisionMadeIcon, decisionMadeColorCode };
+    });
+    const isTOSNeeded = computed(() => {
+      return TOS_NEEDED_PRODUCT.includes(productDetails.value.code);
+    });
+    const isBasicAccountAndPremiumProduct = computed(() => {
+      return isBasicAccount.value && productDetails.value.premiumOnly;
+    });
+    const hasDecisionNotBeenMade = computed(() => {
+      if (!isAccountSettingsView.value) {
+        return true;
       }
-    }
-    return { subTitle, details, decisionMadeIcon, decisionMadeColorCode }
-  }
-
-  get isTOSNeeded () {
-    // check tos needed for product
-    return TOS_NEEDED_PRODUCT.includes(this.productDetails.code)
-  }
-
-  get isBasicAccountAndPremiumProduct () {
-    return this.isBasicAccount && this.productDetails.premiumOnly
-  }
-
-  get hasDecisionNotBeenMade () {
-    // returns true if create account flow
-    if (!this.isAccountSettingsView) {
-      return true
-    }
-    // returns true if product subscription status is unsubscribed and in account settings view
-    if (([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
-      return true
-    }
-    this.termsAccepted = true
-    return false
-  }
-
-  public mounted () {
-    this.productSelected = this.isSelected
-  }
-
-  @Emit('toggle-product-details')
-  public expand () {
-    // emit selected product code to controll expand all product
-    return this.isexpandedView ? '' : this.productDetails.code
-  }
-
-  public tosChanged (termsAccepted:boolean) {
-    this.termsAccepted = termsAccepted
-    // force select when tos accept
-    this.selecThisProduct(undefined, true)// no need to collaps on TOS accept
-  }
-  // // this function will only used when we have to show TOS (in product and service dashboard)
-
-  // since event is first argument, we are using second to set emitFromTos
-  @Emit('set-selected-product')
-  // eslint-disable-next-line
-  public selecThisProduct (event, emitFromTos:boolean = false) {
-
-    let forceRemove = false
-    // expand if tos needed
-    // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
-    // need to collaps on uncheck. Since both are using same function emitFromTos will be true when click happend from TOS check box. then no need to collaps
-    if (this.isTOSNeeded && !this.termsAccepted) {
-      if (!emitFromTos) { // expand and collaps on click if click is not coming from TOS
-        this.expand()
+      if (
+        ([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(
+          productDetails.value.subscriptionStatus
+        )
+      ) {
+        return true;
       }
-      this.productSelected = false
-      // wait till user approve TOS or remove product selection from array if tos not accepted
-      forceRemove = true
-    }
-    return { ...this.productDetails, forceRemove }
-  }
-
-  // if TOS needed will inject component
-  // in future can use different components for different product
-  get productFooter () {
+      termsAccepted.value = true;
+      return false;
+    });
+    const productFooter = computed(() => {
+      return {
+        id: "tos",
+        component: ProductTos,
+        props: {
+          userName: userName.value,
+          orgName: orgName.value,
+          isTOSAlreadyAccepted: termsAccepted.value,
+        },
+        events: { "tos-status-changed": tosChanged },
+        ref: "tosForm",
+      };
+    });
+    const onisSelectedChange = (newValue: boolean) => {
+      productSelected.value = newValue;
+    };
+    const expand = () => {
+      return isexpandedView.value ? "" : productDetails.value.code;
+    };
+    const tosChanged = (termsAccepted: boolean) => {
+      termsAccepted.value = termsAccepted;
+      selecThisProduct(undefined, true);
+    };
+    const selecThisProduct = (event, emitFromTos: boolean = false) => {
+      let forceRemove = false;
+      if (isTOSNeeded.value && !termsAccepted.value) {
+        if (!emitFromTos) {
+          expand();
+        }
+        productSelected.value = false;
+        forceRemove = true;
+      }
+      return { ...productDetails.value, forceRemove };
+    };
+    const saveProductFee = (data) => {
+      return data;
+    };
+    const productBadge = (code: string) => {
+      return LaunchDarklyService.getFlag(`product-${code}-status`);
+    };
+    const productPremTooltipText = (code: string) => {
+      return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`);
+    };
+    watch(isSelected, onisSelectedChange);
+    onMounted(() => {
+      productSelected.value = isSelected.value;
+    });
     return {
-      id: 'tos',
-      component: ProductTos,
-      props: {
-        userName: this.userName,
-        orgName: this.orgName,
-        isTOSAlreadyAccepted: this.termsAccepted
-      },
-      events: { 'tos-status-changed': this.tosChanged },
-      ref: 'tosForm'
-    }
-  }
-
-  @Emit('save:saveProductFee')
-  private saveProductFee (data) {
-    return data
-  }
-
-  public productBadge (code: string) {
-    return LaunchDarklyService.getFlag(`product-${code}-status`)
-  }
-
-  public productPremTooltipText (code: string) {
-    return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-@import '@/assets/scss/theme.scss';
-.product-card {
-  transition: all ease-out 0.2s;
-
-  &:hover {
-    border-color: var(--v-primary-base) !important;
-  }
-
-  &.selected {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
-  }
-  &.processing-card{
-    border-color: var(--v-primary-base) !important;
-  }
-}
-
-.theme--light.v-card.v-card--outlined.selected {
-  border-color: var(--v-primary-base);
-}
-
-.label-color {
-    color: rgba(0,0,0,.6) !important;
-}
-
-.product-title-info {
-  color: $gray7;
-  font-size: 1.125rem;
-  font-weight: normal;
-}
-
-.product-title-badge {
-  color: $BCgovBlue5;
-  font-size: 0.875rem;
-  letter-spacing: -0.25px;
-  position: absolute;
-  white-space: nowrap;
-}
-
-.underline-dotted {
-  border-bottom: dotted;
-}
-
-.v-tooltip__content:before {
-    content: ' ';
-    position: absolute;
-    bottom: -20px;
-    left: 50%;
-    margin-left: -10px;
-    width: 20px;
-    height: 20px;
-    border-width: 10px 10px 10px 10px;
-    border-style: solid;
-    border-color: var(--v-grey-darken4) transparent transparent transparent;
-  }
-
-</style>
+      termsAccepted,
+      productSelected,
+      viewOnly,
+      $refs,
+      showProductFee,
+      productLabel,
+      isTOSNeeded,
+      isBasicAccountAndPremiumProduct,
+      hasDecisionNotBeenMade,
+      productFooter,
+      onisSelectedChange,
+      expand,
+      tosChanged,
+      selecThisProduct,
+      saveProductFee,
+      productBadge,
+      productPremTooltipText,
+    };
+  },
+});

@@ -1,267 +1,160 @@
-<template>
-  <v-container class="transaction-container">
-    <header class="view-header align-center mb-7">
-      <h2 class="view-header__title">Transactions</h2>
-
-    </header>
-     <section v-if="credit !==0">
-       <v-divider class="mb-8"></v-divider>
-          <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{credit.toFixed(2)}}</h2>
-          <p class="credit-details mt-1">You have a credit of ${{credit.toFixed(2)}} on this account.</p>
-       <v-divider class="mb-8 mt-8"></v-divider>
-      </section>
-    <section>
-      <div class="d-flex">
-      <SearchFilterInput
-        :filterParams="searchFilter"
-        :filteredRecordsCount="totalTransactionsCount"
-        @filter-texts="setAppliedFilterValue"
-        :isDataFetchCompleted="isTransactionFetchDone"
-      ></SearchFilterInput>
-       <v-btn
-          large
-          color="primary"
-          class="font-weight-bold ml-auto"
-          :loading="isLoading"
-          @click="exportCSV"
-          :disabled="isLoading"
-          data-test="btn-export-csv"
-        >Export CSV
-       </v-btn>
-         </div>
-      <TransactionsDataTable
-        class="mt-4"
-        :transactionFilters="transactionFilterProp"
-        :key="updateTransactionTableCounter"
-        @total-transaction-count="setTotalTransactionCount"
-      ></TransactionsDataTable>
-
-    </section>
-  </v-container>
-</template>
-
-<script lang="ts">
-import { Account, Pages, SearchFilterCodes } from '@/util/constants'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
-import { TransactionFilter, TransactionFilterParams, TransactionTableList } from '@/models/transaction'
-import { mapActions, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import CommonUtils from '@/util/common-util'
-import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import { SearchFilterParam } from '@/models/searchfilter'
-import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
-import moment from 'moment'
-
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-
-@Component({
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  computed,
+  onMounted,
+} from "@vue/composition-api";
+import { Account, Pages, SearchFilterCodes } from "@/util/constants";
+import { Component, Mixins, Prop, Vue, Watch } from "vue-property-decorator";
+import {
+  Member,
+  MembershipType,
+  OrgPaymentDetails,
+  Organization,
+} from "@/models/Organization";
+import {
+  TransactionFilter,
+  TransactionFilterParams,
+  TransactionTableList,
+} from "@/models/transaction";
+import { mapActions, mapState } from "vuex";
+import AccountChangeMixin from "@/components/auth/mixins/AccountChangeMixin.vue";
+import CommonUtils from "@/util/common-util";
+import SearchFilterInput from "@/components/auth/common/SearchFilterInput.vue";
+import { SearchFilterParam } from "@/models/searchfilter";
+import TransactionsDataTable from "@/components/auth/account-settings/transaction/TransactionsDataTable.vue";
+import moment from "moment";
+import { namespace } from "vuex-class";
+const OrgModule = namespace("org");
+export default defineComponent({
   components: {
     TransactionsDataTable,
-    SearchFilterInput
-  }
-})
-export default class Transactions extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: string;
-
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.State('currentMembership') private currentMembership!: Member
-  @OrgModule.State('currentOrgPaymentDetails') private currentOrgPaymentDetails!: OrgPaymentDetails
-
-  @OrgModule.Action('getTransactionReport') private getTransactionReport!: (filterParams: TransactionFilter) => TransactionTableList
-  @OrgModule.Action('getOrgPayments') private getOrgPayments!: (orgId: number) => OrgPaymentDetails
-
-  private updateTransactionTableCounter: number = 0
-  private totalTransactionsCount: number = 0
-  private isLoading: boolean = false
-  private searchFilter: SearchFilterParam[] = []
-  private transactionFilterProp: TransactionFilter = {} as TransactionFilter
-  private isTransactionFetchDone: boolean = false
-  public credit:any = 0
-
-  private async mounted () {
-    this.setAccountChangedHandler(this.initFilter)
-    this.initFilter()
-  }
-
-  private async getPaymentDetails () {
-    const { accountId, credit } = this.currentOrgPaymentDetails
-    if (!accountId || Number(accountId) !== this.currentOrganization?.id) {
-      const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(this.currentOrganization?.id)
-      this.credit = paymentDetails.credit && paymentDetails.credit !== null ? paymentDetails.credit : 0
-    } else {
-      this.credit = credit && credit !== null ? credit : 0
-    }
-  }
-
-  private initializeFilters () {
-    this.searchFilter = [
-      {
-        id: SearchFilterCodes.DATERANGE,
-        placeholder: 'Date Range',
-        labelKey: 'Date',
-        appliedFilterValue: '',
-        filterInput: ''
-      },
-      {
-        id: SearchFilterCodes.USERNAME,
-        placeholder: 'Initiated by',
-        labelKey: 'Initiated by',
-        appliedFilterValue: '',
-        filterInput: ''
-      },
-      {
-        id: SearchFilterCodes.FOLIONUMBER,
-        placeholder: 'Folio Number',
-        labelKey: 'Folio Number',
-        appliedFilterValue: '',
-        filterInput: ''
+    SearchFilterInput,
+  },
+  props: { orgId: { default: "", type: String } },
+  setup(props, ctx) {
+    const { orgId } = toRefs(props);
+    const updateTransactionTableCounter = ref<number>(0);
+    const totalTransactionsCount = ref<number>(0);
+    const isLoading = ref<boolean>(false);
+    const searchFilter = ref<SearchFilterParam[]>([]);
+    const transactionFilterProp = ref<TransactionFilter>(
+      {} as TransactionFilter
+    );
+    const isTransactionFetchDone = ref<boolean>(false);
+    const credit = ref<any>(0);
+    const isTransactionsAllowed = computed((): boolean => {
+      return (
+        currentOrganization?.orgType === Account.PREMIUM &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(
+          currentMembership.membershipTypeCode
+        )
+      );
+    });
+    const getPaymentDetails = async () => {
+      const { accountId, credit } = currentOrgPaymentDetails;
+      if (!accountId || Number(accountId) !== currentOrganization?.id) {
+        const paymentDetails: OrgPaymentDetails = await getOrgPayments(
+          currentOrganization?.id
+        );
+        credit.value =
+          paymentDetails.credit && paymentDetails.credit !== null
+            ? paymentDetails.credit
+            : 0;
+      } else {
+        credit.value = credit && credit !== null ? credit : 0;
       }
-    ]
-    this.isTransactionFetchDone = false
-  }
-
-  private setAppliedFilterValue (filters: SearchFilterParam[]) {
-    filters.forEach(filter => {
-      switch (filter.id) {
-        case SearchFilterCodes.DATERANGE:
-          this.transactionFilterProp.dateFilter = filter.appliedFilterValue || {}
-          break
-        case SearchFilterCodes.FOLIONUMBER:
-          this.transactionFilterProp.folioNumber = filter.appliedFilterValue
-          break
-        case SearchFilterCodes.USERNAME:
-          this.transactionFilterProp.createdBy = filter.appliedFilterValue
-          break
+    };
+    const initializeFilters = () => {
+      searchFilter.value = [
+        {
+          id: SearchFilterCodes.DATERANGE,
+          placeholder: "Date Range",
+          labelKey: "Date",
+          appliedFilterValue: "",
+          filterInput: "",
+        },
+        {
+          id: SearchFilterCodes.USERNAME,
+          placeholder: "Initiated by",
+          labelKey: "Initiated by",
+          appliedFilterValue: "",
+          filterInput: "",
+        },
+        {
+          id: SearchFilterCodes.FOLIONUMBER,
+          placeholder: "Folio Number",
+          labelKey: "Folio Number",
+          appliedFilterValue: "",
+          filterInput: "",
+        },
+      ];
+      isTransactionFetchDone.value = false;
+    };
+    const setAppliedFilterValue = (filters: SearchFilterParam[]) => {
+      filters.forEach((filter) => {
+        switch (filter.id) {
+          case SearchFilterCodes.DATERANGE:
+            transactionFilterProp.value.dateFilter =
+              filter.appliedFilterValue || {};
+            break;
+          case SearchFilterCodes.FOLIONUMBER:
+            transactionFilterProp.value.folioNumber = filter.appliedFilterValue;
+            break;
+          case SearchFilterCodes.USERNAME:
+            transactionFilterProp.value.createdBy = filter.appliedFilterValue;
+            break;
+        }
+      });
+      isTransactionFetchDone.value = false;
+      updateTransactionTableCounter.value++;
+    };
+    const initFilter = () => {
+      if (isTransactionsAllowed.value) {
+        initializeFilters();
+        getPaymentDetails();
+        updateTransactionTableCounter.value++;
+      } else {
+        ctx.root.$router.push(
+          `/${Pages.MAIN}/${currentOrganization.id}/settings/account-info`
+        );
       }
-    })
-    this.isTransactionFetchDone = false
-    this.updateTransactionTableCounter++
-  }
-
-  private initFilter () {
-    if (this.isTransactionsAllowed) {
-      this.initializeFilters()
-      this.getPaymentDetails()
-      this.updateTransactionTableCounter++
-    } else {
-      // if the account switing happening when the user is already in the transaction page,
-      // redirect to account info if its a basic account
-      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
-    }
-  }
-
-  private setTotalTransactionCount (value) {
-    this.totalTransactionsCount = value
-    this.isTransactionFetchDone = true
-  }
-
-  private async exportCSV () {
-    this.isLoading = true
-    const filterParams: TransactionFilter = this.transactionFilterProp
-    const downloadData = await this.getTransactionReport(filterParams)
-    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
-    this.isLoading = false
-  }
-
-  private get isTransactionsAllowed (): boolean {
-    return (this.currentOrganization?.orgType === Account.PREMIUM) &&
-      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
-  .view-header {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-  }
-
-  .transaction-container {
-    overflow: hidden;
-  }
-
-  .folio-number-field {
-    border-top-right-radius: 0px;
-    border-bottom-right-radius: 0px;
-    max-width: 180px;
-  }
-
-  .folio-number-apply-btn {
-    border-top-left-radius: 0px;
-    border-bottom-left-radius: 0px;
-  }
-
-  .date-filter-container {
-    .date-range-list {
-      border-right: 1px solid #999;
-      padding-right: 0;
-    }
-  }
-
-  .date-range-options {
-    width: 15rem;
-    border-radius: 0 !important;
-    border-right: 1px solid var(--v-grey-lighten1);
-  }
-
-  .date-range-label {
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--v-grey-lighten1);
-  }
-
-  .v-picker.v-card {
-    box-shadow: none !important;
-  }
-
-  .filter-results {
-    opacity: 0;
-    overflow: hidden;
-    max-height: 0;
-    transition: all ease-out 0.25s;
-  }
-
-  .filter-results.active {
-    opacity: 1;
-    max-height: 4rem;
-  }
-
-  .filter-results-label {
-    font-weight: 700;
-  }
-
-  .v-chip {
-    height: 36px;
-  }
-
-  ::v-deep {
-    .v-text-field--outlined.v-input--dense .v-label {
-      top: 14px !important;
-    }
-
-    .date-picker-disable {
-      .v-date-picker-table {
-        pointer-events: none;
-      }
-    }
-
-    .date-range-label strong {
-      margin-right: 0.25rem;
-    }
-
-    .v-progress-linear {
-      margin-top: -2px !important
-    }
-  }
-  .cad-credit{
-    font-size: 14px;
-    color: $gray6;
-  }
-  .credit-details{
-     color: $gray7;
-  }
-</style>
+    };
+    const setTotalTransactionCount = (value) => {
+      totalTransactionsCount.value = value;
+      isTransactionFetchDone.value = true;
+    };
+    const exportCSV = async () => {
+      isLoading.value = true;
+      const filterParams: TransactionFilter = transactionFilterProp.value;
+      const downloadData = await getTransactionReport(filterParams);
+      CommonUtils.fileDownload(
+        downloadData,
+        `bcregistry-transactions-${moment().format("MM-DD-YYYY")}.csv`,
+        "text/csv"
+      );
+      isLoading.value = false;
+    };
+    onMounted(async () => {
+      setAccountChangedHandler(initFilter);
+      initFilter();
+    });
+    return {
+      updateTransactionTableCounter,
+      totalTransactionsCount,
+      isLoading,
+      searchFilter,
+      transactionFilterProp,
+      isTransactionFetchDone,
+      credit,
+      isTransactionsAllowed,
+      getPaymentDetails,
+      initializeFilters,
+      setAppliedFilterValue,
+      initFilter,
+      setTotalTransactionCount,
+      exportCSV,
+    };
+  },
+});

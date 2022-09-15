@@ -1,362 +1,325 @@
-<template>
-  <v-container class="view-container">
-    <div class="view-header flex-column mb-6">
-      <h2 class="view-header__title" data-test="account-settings-title">
-        Payment Methods
-      </h2>
-      <p class="mt-3 payment-page-sub">
-        Manage your payment method for this account.
-      </p>
-    </div>
-    <PaymentMethods
-      v-if="selectedPaymentMethod"
-      :currentOrgType="savedOrganizationType"
-      :currentOrganization="currentOrganization"
-      :currentOrgPaymentType="currentOrgPaymentType"
-      :currentSelectedPaymentMethod="selectedPaymentMethod"
-      :isChangeView="true"
-      :isAcknowledgeNeeded="isAcknowledgeNeeded"
-      @payment-method-selected="setSelectedPayment"
-      @get-PAD-info="getPADInfo"
-      @emit-bcol-info="getBcolInfo"
-      @is-pad-valid="isPADValid"
-      isTouchedUpdate="true"
-      :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
-      :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
-    ></PaymentMethods>
-    <v-slide-y-transition>
-      <div class="pb-2" v-show="errorMessage">
-        <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
-          {{errorMessage}}
-        </v-alert>
-      </div>
-    </v-slide-y-transition>
-    <v-divider class="my-10"></v-divider>
-    <div class="form__btns d-flex">
-      <v-btn
-        large
-        class="save-btn"
-        v-bind:class="{ 'disabled': isBtnSaved }"
-        :color="isBtnSaved ? 'success' : 'primary'"
-        :disabled="isDisableSaveBtn"
-        v-can:CHANGE_PAYMENT_METHOD.disable
-        @click="save"
-        :loading="isLoading"
-      >
-        <v-expand-x-transition>
-          <v-icon v-show="isBtnSaved">mdi-check</v-icon>
-        </v-expand-x-transition>
-        <span class="save-btn__label">{{ (isBtnSaved) ? 'Saved' : 'Save' }}</span>
-      </v-btn>
-      <v-btn
-        large
-        depressed
-        @click="cancel"
-        data-test="cancel-button"
-        class="cancel-button ml-2"
-      > Cancel
-      </v-btn>
-    </div>
-        <!-- Alert Dialog (Error) -->
-    <ModalDialog
-      ref="errorDialog"
-      :title="errorTitle"
-      :text="errorText"
-      dialog-class="notify-dialog"
-      max-width="640"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn
-          large
-          color="primary"
-          class="font-weight-bold"
-          @click="closeError"
-        >
-          OK
-        </v-btn>
-      </template>
-    </ModalDialog>
-  </v-container>
-</template>
-
-<script lang="ts">
-import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import { Address } from '@/models/address'
-import { BcolProfile } from '@/models/bcol'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
-
-@Component({
+import {
+  defineComponent,
+  computed,
+  ref,
+  onMounted,
+} from "@vue/composition-api";
+import {
+  AccessType,
+  Account,
+  LoginSource,
+  Pages,
+  PaymentTypes,
+  Permission,
+} from "@/util/constants";
+import { Component, Emit, Mixins, Prop, Vue } from "vue-property-decorator";
+import {
+  CreateRequestBody,
+  Member,
+  MembershipType,
+  OrgPaymentDetails,
+  Organization,
+  PADInfo,
+  PADInfoValidation,
+} from "@/models/Organization";
+import { mapActions, mapMutations, mapState } from "vuex";
+import AccountChangeMixin from "@/components/auth/mixins/AccountChangeMixin.vue";
+import { Address } from "@/models/address";
+import { BcolProfile } from "@/models/bcol";
+import { KCUserProfile } from "sbc-common-components/src/models/KCUserProfile";
+import ModalDialog from "@/components/auth/common/ModalDialog.vue";
+import PaymentMethods from "@/components/auth/common/PaymentMethods.vue";
+export default defineComponent({
   components: {
     PaymentMethods,
-    ModalDialog
+    ModalDialog,
   },
-  computed: {
-    ...mapState('org', [
-      'currentOrganization',
-      'currentOrgPaymentType',
-      'currentMembership',
-      'permissions',
-      'currentOrgAddress'
-    ]),
-    ...mapState('user', ['currentUser'])
+  props: {},
+  setup(_props, ctx) {
+    const currentOrganization = computed(
+      () => ctx.root.$store.state.org.currentOrganization
+    );
+    const currentOrgPaymentType = computed(
+      () => ctx.root.$store.state.org.currentOrgPaymentType
+    );
+    const currentMembership = computed(
+      () => ctx.root.$store.state.org.currentMembership
+    );
+    const permissions = computed(() => ctx.root.$store.state.org.permissions);
+    const currentOrgAddress = computed(
+      () => ctx.root.$store.state.org.currentOrgAddress
+    );
+    const currentUser = computed(() => ctx.root.$store.state.user.currentUser);
+    const validatePADInfo = () =>
+      ctx.root.$store.dispatch("org/validatePADInfo");
+    const getOrgPayments = () => ctx.root.$store.dispatch("org/getOrgPayments");
+    const updateOrg = () => ctx.root.$store.dispatch("org/updateOrg");
+    const syncAddress = () => ctx.root.$store.dispatch("org/syncAddress");
+    const setCurrentOrganizationPaymentType =
+      ref<(paymentType: string) => void>(undefined);
+    const getOrgPayments = ref<() => any>(undefined);
+    const updateOrg =
+      ref<(requestBody: CreateRequestBody) => Promise<Organization>>(undefined);
+    const currentMembership = ref<Member>(undefined);
+    const currentOrganization = ref<Organization>(undefined);
+    const currentOrgPaymentType = ref<string>(undefined);
+    const validatePADInfo = ref<() => Promise<PADInfoValidation>>(undefined);
+    const permissions = ref<string[]>(undefined);
+    const currentUser = ref<KCUserProfile>(undefined);
+    const currentOrgAddress = ref<Address>(undefined);
+    const syncAddress = ref<() => Address>(undefined);
+    const savedOrganizationType = ref<string>("");
+    const selectedPaymentMethod = ref<string>("");
+    const padInfo = ref<PADInfo>({} as PADInfo);
+    const isBtnSaved = ref(false);
+    const disableSaveBtn = ref(false);
+    const errorMessage = ref<string>("");
+    const errorTitle = ref("Payment Update Failed");
+    const bcolInfo = ref<BcolProfile>({} as BcolProfile);
+    const errorText = ref("");
+    const isLoading = ref<boolean>(false);
+    const padValid = ref<boolean>(false);
+    const paymentMethodChanged = ref<boolean>(false);
+    const isFuturePaymentMethodAvailable = ref<boolean>(false);
+    const isTOSandAcknowledgeCompleted = ref<boolean>(false);
+    const $refs = ref<{
+      errorDialog: ModalDialog;
+    }>(undefined);
+    const isDisableSaveBtn = computed(() => {
+      let disableSaveBtn = false;
+      if (isBtnSaved.value) {
+        disableSaveBtn = false;
+      } else if (
+        (selectedPaymentMethod.value === PaymentTypes.PAD && !padValid.value) ||
+        !paymentMethodChanged.value ||
+        selectedPaymentMethod.value === PaymentTypes.EJV ||
+        disableSaveButtonForBCOL()
+      ) {
+        disableSaveBtn = true;
+      }
+      return disableSaveBtn;
+    });
+    const isAcknowledgeNeeded = computed(() => {
+      return (
+        selectedPaymentMethod.value !== currentOrgPaymentType.value ||
+        isFuturePaymentMethodAvailable.value
+      );
+    });
+    const isPaymentViewAllowed = computed((): boolean => {
+      return [Permission.VIEW_PAYMENT_METHODS, Permission.MAKE_PAYMENT].some(
+        (per) => permissions.value.includes(per)
+      );
+    });
+    const setSelectedPayment = (payment) => {
+      errorMessage.value = "";
+      selectedPaymentMethod.value = payment.selectedPaymentMethod;
+      isBtnSaved.value = (isBtnSaved.value && !payment.isTouched) || false;
+      paymentMethodChanged.value = payment.isTouched || false;
+    };
+    const disableSaveButtonForBCOL = () => {
+      return (
+        selectedPaymentMethod.value === PaymentTypes.BCOL &&
+        (bcolInfo.value?.password === undefined ||
+          bcolInfo.value?.password === "")
+      );
+    };
+    const getPADInfo = (padInfo: PADInfo) => {
+      padInfo.value = padInfo;
+    };
+    const isPADValid = (isValid) => {
+      padValid.value = isValid;
+    };
+    const getBcolInfo = (bcolProfile: BcolProfile) => {
+      bcolInfo.value = bcolProfile;
+    };
+    const initialize = async () => {
+      errorMessage.value = "";
+      bcolInfo.value = {};
+      const isNotAnonUser =
+        currentUser.value?.loginSource !== LoginSource.BCROS;
+      if (isNotAnonUser) {
+        if (
+          !currentOrgAddress.value ||
+          Object.keys(currentOrgAddress.value).length === 0
+        ) {
+          await syncAddress.value();
+          if (
+            !currentOrgAddress.value ||
+            Object.keys(currentOrgAddress.value).length === 0
+          ) {
+            await ctx.root.$router.push(
+              `/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`
+            );
+            return;
+          }
+        }
+      }
+      if (isPaymentViewAllowed.value) {
+        savedOrganizationType.value =
+          currentOrganization.value?.orgType === Account.PREMIUM &&
+          !currentOrganization.value?.bcolAccountId &&
+          currentOrganization.value?.accessType !== AccessType.GOVM
+            ? Account.UNLINKED_PREMIUM
+            : currentOrganization.value.orgType;
+        selectedPaymentMethod.value = "";
+        const orgPayments: OrgPaymentDetails = await getOrgPayments.value();
+        isFuturePaymentMethodAvailable.value =
+          !!orgPayments.futurePaymentMethod || false;
+        isTOSandAcknowledgeCompleted.value =
+          orgPayments.padTosAcceptedBy !== null || false;
+        selectedPaymentMethod.value = currentOrgPaymentType.value || "";
+        if (
+          currentOrganization.value.accessType === AccessType.GOVN &&
+          orgPayments.paymentMethod === PaymentTypes.BCOL
+        ) {
+          savedOrganizationType.value = currentOrganization.value.orgType;
+        }
+      } else {
+        ctx.root.$router.push(
+          `/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`
+        );
+      }
+    };
+    const verifyPAD = async () => {
+      const verifyPad: PADInfoValidation = await validatePADInfo.value();
+      if (!verifyPad || verifyPad?.isValid) {
+        return true;
+      } else {
+        isLoading.value = false;
+        errorText.value = "Bank information validation failed";
+        if (verifyPad?.message?.length) {
+          let msgList = "";
+          verifyPad.message.forEach((msg) => {
+            msgList += `<li>${msg}</li>`;
+          });
+          errorText.value = `<ul style="list-style-type: none;">${msgList}</ul>`;
+        }
+        ctx.refs.errorDialog.open();
+        return false;
+      }
+    };
+    const cancel = () => {
+      initialize();
+    };
+    const save = async () => {
+      isBtnSaved.value = false;
+      isLoading.value = true;
+      let isValid = false;
+      let createRequestBody: CreateRequestBody;
+      if (selectedPaymentMethod.value === PaymentTypes.PAD) {
+        isValid = await verifyPAD();
+        createRequestBody = {
+          paymentInfo: {
+            paymentMethod: PaymentTypes.PAD,
+            bankTransitNumber: padInfo.value.bankTransitNumber,
+            bankInstitutionNumber: padInfo.value.bankInstitutionNumber,
+            bankAccountNumber: padInfo.value.bankAccountNumber,
+          },
+        };
+      } else if (selectedPaymentMethod.value === PaymentTypes.BCOL) {
+        isValid = !!(bcolInfo.value.userId && bcolInfo.value.password);
+        if (!isValid) {
+          errorMessage.value = "Missing User ID and Password for BC Online.";
+          isLoading.value = false;
+        }
+        createRequestBody = {
+          paymentInfo: {
+            paymentMethod: PaymentTypes.BCOL,
+          },
+          bcOnlineCredential: bcolInfo.value,
+        };
+      } else {
+        isValid = true;
+        createRequestBody = {
+          paymentInfo: {
+            paymentMethod: selectedPaymentMethod.value,
+          },
+        };
+      }
+      if (isValid) {
+        try {
+          await updateOrg.value(createRequestBody);
+          isBtnSaved.value = true;
+          isLoading.value = false;
+          paymentMethodChanged.value = false;
+          initialize();
+          setCurrentOrganizationPaymentType.value(selectedPaymentMethod.value);
+        } catch (error) {
+          console.error(error);
+          isLoading.value = false;
+          isBtnSaved.value = false;
+          paymentMethodChanged.value = false;
+          switch (error.response.status) {
+            case 409:
+              errorMessage.value = error.response.data.message;
+              break;
+            case 400:
+              errorMessage.value = error.response.data.message;
+              break;
+            default:
+              errorMessage.value =
+                "An error occurred while attempting to create your account.";
+          }
+        }
+      }
+    };
+    const closeError = () => {
+      ctx.refs.errorDialog.close();
+    };
+    onMounted(async () => {
+      setAccountChangedHandler(await initialize);
+      await initialize();
+    });
+    return {
+      currentOrganization,
+      currentOrgPaymentType,
+      currentMembership,
+      permissions,
+      currentOrgAddress,
+      currentUser,
+      validatePADInfo,
+      getOrgPayments,
+      updateOrg,
+      syncAddress,
+      setCurrentOrganizationPaymentType,
+      getOrgPayments,
+      updateOrg,
+      currentMembership,
+      currentOrganization,
+      currentOrgPaymentType,
+      validatePADInfo,
+      permissions,
+      currentUser,
+      currentOrgAddress,
+      syncAddress,
+      savedOrganizationType,
+      selectedPaymentMethod,
+      padInfo,
+      isBtnSaved,
+      disableSaveBtn,
+      errorMessage,
+      errorTitle,
+      bcolInfo,
+      errorText,
+      isLoading,
+      padValid,
+      paymentMethodChanged,
+      isFuturePaymentMethodAvailable,
+      isTOSandAcknowledgeCompleted,
+      $refs,
+      isDisableSaveBtn,
+      isAcknowledgeNeeded,
+      isPaymentViewAllowed,
+      setSelectedPayment,
+      disableSaveButtonForBCOL,
+      getPADInfo,
+      isPADValid,
+      getBcolInfo,
+      initialize,
+      verifyPAD,
+      cancel,
+      save,
+      closeError,
+    };
   },
-  methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationPaymentType'
-    ]),
-    ...mapActions('org', [
-      'validatePADInfo',
-      'getOrgPayments',
-      'updateOrg',
-      'syncAddress'
-    ])
-  }
-})
-export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
-  private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
-  private readonly getOrgPayments!: () => any
-  private readonly updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-  private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
-  private readonly currentOrgPaymentType!: string
-  private readonly validatePADInfo!: () => Promise<PADInfoValidation>
-  private readonly permissions!: string[]
-  private readonly currentUser!: KCUserProfile
-  private readonly currentOrgAddress!: Address
-  private readonly syncAddress!: () => Address
-  private savedOrganizationType: string = ''
-  private selectedPaymentMethod: string = ''
-  private padInfo: PADInfo = {} as PADInfo
-  private isBtnSaved = false
-  private disableSaveBtn = false
-  private errorMessage: string = ''
-  private errorTitle = 'Payment Update Failed'
-  private bcolInfo: BcolProfile = {} as BcolProfile
-  private errorText = ''
-  private isLoading: boolean = false
-  private padValid: boolean = false
-  private paymentMethodChanged:boolean = false
-  private isFuturePaymentMethodAvailable: boolean = false // set true if in between 3 days cooling period
-  private isTOSandAcknowledgeCompleted:boolean = false // sert true if TOS already accepted
-
-  $refs: {
-      errorDialog: ModalDialog
-    }
-
-  private setSelectedPayment (payment) {
-    this.errorMessage = ''
-    this.selectedPaymentMethod = payment.selectedPaymentMethod
-    this.isBtnSaved = (this.isBtnSaved && !payment.isTouched) || false
-    this.paymentMethodChanged = payment.isTouched || false
-  }
-
-  private get isDisableSaveBtn () {
-    let disableSaveBtn = false
-
-    if (this.isBtnSaved) {
-      disableSaveBtn = false
-    } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) ||
-               (!this.paymentMethodChanged) ||
-               (this.selectedPaymentMethod === PaymentTypes.EJV) ||
-               this.disableSaveButtonForBCOL()) {
-      disableSaveBtn = true
-    }
-
-    return disableSaveBtn
-  }
-
-  private disableSaveButtonForBCOL () {
-    return (this.selectedPaymentMethod === PaymentTypes.BCOL &&
-           (this.bcolInfo?.password === undefined || this.bcolInfo?.password === ''))
-  }
-
-  private getPADInfo (padInfo: PADInfo) {
-    this.padInfo = padInfo
-  }
-
-  private isPADValid (isValid) {
-    this.padValid = isValid
-  }
-
-  private async mounted () {
-    this.setAccountChangedHandler(await this.initialize)
-    await this.initialize()
-  }
-
-  private get isAcknowledgeNeeded () {
-    // isAcknowledgeNeeded should show if isFuturePaymentMethodAvailable (3 days cooling period)
-    return (this.selectedPaymentMethod !== this.currentOrgPaymentType || this.isFuturePaymentMethodAvailable)
-  }
-
-  @Emit('emit-bcol-info')
-  private getBcolInfo (bcolProfile: BcolProfile) {
-    this.bcolInfo = bcolProfile
-  }
-
-  private async initialize () {
-    this.errorMessage = ''
-    this.bcolInfo = {}
-    // check if address info is complete if not redirect user to address page
-    const isNotAnonUser = this.currentUser?.loginSource !== LoginSource.BCROS
-    if (isNotAnonUser) {
-      // do it only if address is not already fetched.Or else try to fetch from DB
-      if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
-        // sync and try again
-        await this.syncAddress()
-        if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
-          await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
-          return
-        }
-      }
-    }
-
-    if (this.isPaymentViewAllowed) {
-      this.savedOrganizationType =
-      ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId && this.currentOrganization?.accessType !== AccessType.GOVM)
-        ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
-      this.selectedPaymentMethod = ''
-      const orgPayments: OrgPaymentDetails = await this.getOrgPayments()
-      // TODO : revisit  if need
-      // if need to add more logic -> move to store
-      // now setting flag for futurePaymentMethod and TOS to show content and TOS checkbox
-      this.isFuturePaymentMethodAvailable = !!orgPayments.futurePaymentMethod || false
-      this.isTOSandAcknowledgeCompleted = orgPayments.padTosAcceptedBy !== null || false
-      this.selectedPaymentMethod = this.currentOrgPaymentType || ''
-
-      // Rare cases where GOVN account has payment switched from PAD to BCOL in the backend
-      if (this.currentOrganization.accessType === AccessType.GOVN && orgPayments.paymentMethod === PaymentTypes.BCOL) {
-        this.savedOrganizationType = this.currentOrganization.orgType
-      }
-    } else {
-      // if the account switing happening when the user is already in the transaction page,
-      // redirect to account info if its a basic account
-      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
-    }
-  }
-
-  private get isPaymentViewAllowed (): boolean {
-    // checking permission instead of roles to give access for staf
-    return [Permission.VIEW_PAYMENT_METHODS, Permission.MAKE_PAYMENT].some(per => this.permissions.includes(per))
-  }
-
-  private async verifyPAD () {
-    const verifyPad: PADInfoValidation = await this.validatePADInfo()
-    if (!verifyPad || verifyPad?.isValid) {
-      // proceed to update payment even if the response is empty or valid account info
-      return true
-    } else {
-      this.isLoading = false
-      this.errorText = 'Bank information validation failed'
-      if (verifyPad?.message?.length) {
-        let msgList = ''
-        verifyPad.message.forEach((msg) => {
-          msgList += `<li>${msg}</li>`
-        })
-        this.errorText = `<ul style="list-style-type: none;">${msgList}</ul>`
-      }
-      this.$refs.errorDialog.open()
-      return false
-    }
-  }
-
-  private cancel () {
-    this.initialize()
-  }
-
-  private async save () {
-    this.isBtnSaved = false
-    this.isLoading = true
-    let isValid = false
-
-    let createRequestBody: CreateRequestBody
-
-    if (this.selectedPaymentMethod === PaymentTypes.PAD) {
-      isValid = await this.verifyPAD()
-      createRequestBody = {
-        paymentInfo: {
-          paymentMethod: PaymentTypes.PAD,
-          bankTransitNumber: this.padInfo.bankTransitNumber,
-          bankInstitutionNumber: this.padInfo.bankInstitutionNumber,
-          bankAccountNumber: this.padInfo.bankAccountNumber
-        }
-      }
-    } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
-      isValid = !!(this.bcolInfo.userId && this.bcolInfo.password)
-      if (!isValid) {
-        this.errorMessage = 'Missing User ID and Password for BC Online.'
-        this.isLoading = false
-      }
-      createRequestBody = {
-        paymentInfo: {
-          paymentMethod: PaymentTypes.BCOL
-        },
-        bcOnlineCredential: this.bcolInfo
-      }
-    } else {
-      isValid = true
-      createRequestBody = {
-        paymentInfo: {
-          paymentMethod: this.selectedPaymentMethod
-        }
-      }
-    }
-
-    if (isValid) {
-      try {
-        await this.updateOrg(createRequestBody)
-        this.isBtnSaved = true
-        this.isLoading = false
-        this.paymentMethodChanged = false
-        this.initialize()
-        this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error(error)
-        this.isLoading = false
-        this.isBtnSaved = false
-        this.paymentMethodChanged = false
-        switch (error.response.status) {
-          case 409:
-            this.errorMessage = error.response.data.message
-            break
-          case 400:
-            this.errorMessage = error.response.data.message
-            break
-          default:
-            this.errorMessage = 'An error occurred while attempting to create your account.'
-        }
-      }
-    }
-  }
-  private closeError () {
-    this.$refs.errorDialog.close()
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-.form__btns {
-  display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
-  margin-top: 2rem;
-
-  .v-btn {
-    width: 6rem;
-  }
-}
-
-.save-btn.disabled {
-  pointer-events: none;
-}
-</style>
+});

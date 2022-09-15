@@ -1,95 +1,79 @@
-<template>
-  <v-form ref="notaryInformationForm">
-    <fieldset v-if="notaryInfo">
-      <legend class="mb-4">Notary Information</legend>
-      <v-row>
-        <v-col cols="12" class="py-0">
-          <v-text-field
-            filled
-            label="Name of Notary"
-            :rules="rules.notaryName"
-            :disabled="disabled"
-            v-model.trim="notaryInfo.notaryName"
-          >
-          </v-text-field>
-        </v-col>
-      </v-row>
-      <base-address-form
-        ref="notaryAddress"
-        :editing="true"
-        :schema="notaryAddressSchema"
-        :address="notaryAddress"
-        @update:address="updateNotaryAddress"
-        @valid="notaryAddressValidity"
-      />
-    </fieldset>
-  </v-form>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Address } from '@/models/address'
-import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
-import { NotaryInformation } from '@/models/notary'
-import { addressSchema } from '@/schemas'
-
-@Component({
+import {
+  defineComponent,
+  toRefs,
+  ref,
+  watch,
+  onBeforeMount,
+  PropType,
+} from "@vue/composition-api";
+import { Component, Emit, Prop, Vue, Watch } from "vue-property-decorator";
+import { Address } from "@/models/address";
+import BaseAddressForm from "@/components/auth/common/BaseAddressForm.vue";
+import { NotaryInformation } from "@/models/notary";
+import { addressSchema } from "@/schemas";
+export default defineComponent({
   components: {
-    BaseAddressForm
-  }
-})
-export default class NotaryInformationForm extends Vue {
-  @Prop() inputNotaryInfo: NotaryInformation
-  @Prop({ default: false }) disabled: boolean
-  private notaryInfo: NotaryInformation = {}
-  private isNotaryAddressValid: boolean = false
-
-  private notaryAddress: Address = {} as Address
-  private notaryAddressSchema: {} = addressSchema
-
-  $refs: {
-    notaryInformationForm: HTMLFormElement,
-  }
-
-  private readonly rules = {
-    notaryName: [v => !!v || 'Name of Notary is required']
-  }
-
-  private updateNotaryAddress (val: Address) {
-    this.notaryInfo.address = { ...val }
-    return this.emitNotaryInformation()
-  }
-
-  private notaryAddressValidity (isValid: boolean) {
-    this.isNotaryAddressValid = isValid
-    this.emitNotaryInformation()
-  }
-
-  beforeMount () {
-    if (this.inputNotaryInfo) {
-      Object.keys(this.inputNotaryInfo)
-        .filter(key => key !== 'address')
-        .forEach(key => {
-          this.$set(this.notaryInfo, key, this.inputNotaryInfo?.[key])
-        })
-      this.notaryAddress = { ...this.inputNotaryInfo?.address }
-    }
-  }
-
-  @Watch('notaryInfo', { deep: true })
-  async updateNotary (val, oldVal) {
-    this.emitNotaryInformation()
-  }
-
-  @Emit('notaryinfo-update')
-  emitNotaryInformation () {
-    this.isFormValid()
-    return this.notaryInfo
-  }
-
-  @Emit('is-form-valid')
-  isFormValid () {
-    return this.$refs.notaryInformationForm?.validate() && this.isNotaryAddressValid
-  }
-}
-</script>
+    BaseAddressForm,
+  },
+  props: {
+    inputNotaryInfo: { type: Object as PropType<NotaryInformation> },
+    disabled: { default: false, type: Boolean },
+  },
+  setup(props, ctx) {
+    const { inputNotaryInfo, disabled } = toRefs(props);
+    const notaryInfo = ref<NotaryInformation>({});
+    const isNotaryAddressValid = ref<boolean>(false);
+    const notaryAddress = ref<Address>({} as Address);
+    const notaryAddressSchema = ref<{}>(addressSchema);
+    const $refs = ref<{
+      notaryInformationForm: HTMLFormElement;
+    }>(undefined);
+    const rules = ref({
+      notaryName: [(v) => !!v || "Name of Notary is required"],
+    });
+    const updateNotaryAddress = (val: Address) => {
+      notaryInfo.value.address = { ...val };
+      return emitNotaryInformation();
+    };
+    const notaryAddressValidity = (isValid: boolean) => {
+      isNotaryAddressValid.value = isValid;
+      emitNotaryInformation();
+    };
+    const updateNotary = async (val, oldVal) => {
+      emitNotaryInformation();
+    };
+    const emitNotaryInformation = () => {
+      isFormValid();
+      return notaryInfo.value;
+    };
+    const isFormValid = () => {
+      return (
+        ctx.refs.notaryInformationForm?.validate() && isNotaryAddressValid.value
+      );
+    };
+    watch(notaryInfo, updateNotary, { deep: true });
+    onBeforeMount(() => {
+      if (inputNotaryInfo.value) {
+        Object.keys(inputNotaryInfo.value)
+          .filter((key) => key !== "address")
+          .forEach((key) => {
+            ctx.root.$set(notaryInfo.value, key, inputNotaryInfo.value?.[key]);
+          });
+        notaryAddress.value = { ...inputNotaryInfo.value?.address };
+      }
+    });
+    return {
+      notaryInfo,
+      isNotaryAddressValid,
+      notaryAddress,
+      notaryAddressSchema,
+      $refs,
+      rules,
+      updateNotaryAddress,
+      notaryAddressValidity,
+      updateNotary,
+      emitNotaryInformation,
+      isFormValid,
+    };
+  },
+});

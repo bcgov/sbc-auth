@@ -1,113 +1,62 @@
-<template>
-  <div>
-    <v-fade-transition>
-      <div class="loading-container" v-if="!termsContent">
-        <v-progress-circular
-          size="50"
-          width="5"
-          color="primary"
-          :indeterminate="termsContent"
-        />
-      </div>
-    </v-fade-transition>
-    <div v-html="termsContent" class="terms-container"></div>
-  </div>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
-import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { User } from '@/models/user'
-import documentService from '@/services/document.services.ts'
-
-@Component({
-  computed: {
-    ...mapState('user', [
-      'termsOfUse',
-      'userProfile',
-      'userHasToAcceptTOS'
-    ])
+import {
+  defineComponent,
+  computed,
+  toRefs,
+  ref,
+  onMounted,
+} from "@vue/composition-api";
+import { Component, Emit, Prop, Vue } from "vue-property-decorator";
+import { mapActions, mapMutations, mapState } from "vuex";
+import CommonUtils from "@/util/common-util";
+import { TermsOfUseDocument } from "@/models/TermsOfUseDocument";
+import { User } from "@/models/user";
+import documentService from "@/services/document.services.ts";
+export default defineComponent({
+  props: { tosType: { default: "termsofuse", type: String } },
+  setup(props, ctx) {
+    const termsOfUse = computed(() => ctx.root.$store.state.user.termsOfUse);
+    const userProfile = computed(() => ctx.root.$store.state.user.userProfile);
+    const userHasToAcceptTOS = computed(
+      () => ctx.root.$store.state.user.userHasToAcceptTOS
+    );
+    const getTermsOfUse = () => ctx.root.$store.dispatch("user/getTermsOfUse");
+    const { tosType } = toRefs(props);
+    const getTermsOfUse =
+      ref<(docType?: string) => TermsOfUseDocument>(undefined);
+    const termsContent = ref("");
+    const userProfile = ref<User>(undefined);
+    const userHasToAcceptTOS = ref<boolean>(undefined);
+    const hasAcceptedLatestTos = (latestVersionId: string) => {
+      const userTOS = userProfile.value?.userTerms?.termsOfUseAcceptedVersion;
+      if (!userTOS) {
+        return true;
+      }
+      const currentlyAcceptedTermsVersion =
+        CommonUtils.extractAndConvertStringToNumber(userTOS);
+      const latestVersionNumber =
+        CommonUtils.extractAndConvertStringToNumber(latestVersionId);
+      return currentlyAcceptedTermsVersion > latestVersionNumber;
+    };
+    onMounted(async () => {
+      const termsOfService = await getTermsOfUse.value(tosType.value);
+      termsContent.value = termsOfService.content;
+      const hasLatestTermsAccepted = hasAcceptedLatestTos(
+        termsOfService.versionId
+      );
+      if (!hasLatestTermsAccepted) {
+        ctx.emit("tos-version-updated");
+      }
+    });
+    return {
+      termsOfUse,
+      userProfile,
+      userHasToAcceptTOS,
+      getTermsOfUse,
+      getTermsOfUse,
+      termsContent,
+      userProfile,
+      userHasToAcceptTOS,
+      hasAcceptedLatestTos,
+    };
   },
-  methods: {
-    ...mapActions('user', [
-      'getTermsOfUse'
-    ])
-  }
-})
-export default class TermsOfUse extends Vue {
-  private readonly getTermsOfUse!: (docType?: string) => TermsOfUseDocument
-  private termsContent = ''
-  protected readonly userProfile!: User
-  protected readonly userHasToAcceptTOS!: boolean
-
-  @Prop({ default: 'termsofuse' }) tosType: string
-
-  async mounted () {
-    const termsOfService = await this.getTermsOfUse(this.tosType)
-    this.termsContent = termsOfService.content
-    const hasLatestTermsAccepted = this.hasAcceptedLatestTos(termsOfService.versionId)
-    if (!hasLatestTermsAccepted) {
-      this.$emit('tos-version-updated')
-    }
-  }
-
-  private hasAcceptedLatestTos (latestVersionId: string) {
-    /*
-    version id comes with a string prefix like d1 , d2... strip that , convert to number for comparison
-    Or else 'd1' will be,l 'd2' . But 'd2' wont be less than ' d10 '!!!  '
-    */
-
-    const userTOS = this.userProfile?.userTerms?.termsOfUseAcceptedVersion
-
-    if (!userTOS) {
-      return true
-    }
-    const currentlyAcceptedTermsVersion = CommonUtils.extractAndConvertStringToNumber(userTOS)
-    const latestVersionNumber = CommonUtils.extractAndConvertStringToNumber(latestVersionId)
-    return (currentlyAcceptedTermsVersion > latestVersionNumber)
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-  .terms-container {
-    ::v-deep {
-      section {
-        + section {
-          margin-top: 2rem;
-        }
-
-        header {
-          margin-bottom: 1.5rem;
-          text-transform: uppercase;
-          font-size: 1.125rem;
-          font-weight: 700;
-        }
-      }
-
-      ul {
-        list-style-type: none;
-        padding-left: 50px !important;
-      }
-
-      ul.alpha-listing {
-        list-style-type: lower-alpha !important;
-      }
-
-      li {
-        + li {
-          margin-top: 1rem;
-        }
-
-        span {
-          display: inline-block;
-          width: 50px;
-          margin-left: -50px;
-          font-size: 0.9375rem;
-        }
-      }
-    }
-  }
-</style>
+});

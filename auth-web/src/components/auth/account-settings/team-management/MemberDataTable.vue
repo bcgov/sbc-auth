@@ -1,605 +1,388 @@
-<template>
-  <div>
-  <v-data-table
-    v-if="roleInfos"
-    :headers="headerMembers"
-    :items="indexedOrgMembers"
-    :items-per-page="5"
-    :hide-default-footer="indexedOrgMembers.length <= 5"
-    :custom-sort="customSortActive"
-    class="member-data-table"
-    :no-data-text="$t('noActiveUsersLabel')"
-  >
-    <template v-slot:loading>
-      Loading...
-    </template>
-
-    <!-- Name Column Template -->
-    <template v-slot:[`item.name`]="{ item }">
-      <div
-        class="user-name font-weight-bold"
-        :data-test="getIndexedTag('user-name', item.index)"
-        >
-          {{ item.user.firstname }} {{ item.user.lastname }}
-      </div>
-      <div
-        :data-test="getIndexedTag('business-id', item.index)"
-        class="contact-email"
-        v-if="item.user.contacts && item.user.contacts.length > 0"
-        >
-          {{ item.user.contacts[0].email }}
-      </div>
-    </template>
-
-    <!-- Authentication Column Template .Show it only for BCSC/BCEID -->
-    <template
-      v-slot:[`item.authentication`]="{ item }"
-      :data-test="getIndexedTag('last-active', item.index)"
-      v-if="isRegularAccount()"
-    >
-      <div v-if="item.user.loginSource ===loginSourceEnum.BCEID "> {{item.user.username}} </div>
-      <div v-if="item.user.loginSource ===loginSourceEnum.BCSC "> BCServicesCard </div>
-      <div v-else></div>
-    </template>
-
-    <!-- Role Column Template -->
-    <template v-slot:[`item.role`]="{ item }">
-      <v-menu
-        transition="slide-y-transition">
-        <template v-slot:activator="{ on }">
-          <v-btn
-            text
-            class="ml-n4 pr-2"
-            aria-label="Select User Role"
-            v-on="on"
-            :disabled="!canChangeRole(item)"
-            :data-test="getIndexedTag('role-selector', item.index)"
-          >
-            {{ item.roleDisplayName }}
-            <v-icon depressed>mdi-menu-down</v-icon>
-          </v-btn>
-        </template>
-        <v-list dense class="role-list" role="user role list">
-          <v-item-group>
-            <v-list-item
-              class="py-1"
-              v-for="(role, index) in roleInfos"
-              :key="index"
-              @click="
-                item.membershipTypeCode.toUpperCase() !==
-                role.name.toUpperCase()
-                  ? confirmChangeRole(item, role.name)
-                  : ''
-              "
-              :disabled="!isRoleEnabled(role, item)"
-              v-bind:class="{
-                'primary--text v-item--active v-list-item--active':
-                  item.membershipTypeCode.toUpperCase() ===
-                  role.name.toUpperCase()
-              }"
-            >
-              <v-list-item-icon>
-                <v-icon v-text="role.icon" />
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title
-                  class="user-role-name"
-                  v-text="role.displayName"
-                >
-                </v-list-item-title>
-                <v-list-item-subtitle
-                  class="user-role-desc"
-                  v-text="role.label"
-                >
-                </v-list-item-subtitle>
-                <v-divider></v-divider>
-              </v-list-item-content>
-            </v-list-item>
-          </v-item-group>
-        </v-list>
-      </v-menu>
-    </template>
-
-    <!-- Date Column Template -->
-    <template
-      v-slot:[`item.lastActive`]="{ item }"
-      :data-test="getIndexedTag('last-active', item.index)"
-    >
-      {{ formatDate(item.user.modified, 'MMMM DD, YYYY') }}
-    </template>
-
-    <!-- Actions Column Template -->
-    <template v-slot:[`item.action`]="{ item }">
-
-      <!-- Reset Authenticator -->
-      <v-btn
-        icon
-        class="mr-1"
-        aria-label="Reset Authenticator"
-        title="Reset Authenticator"
-        v-can:RESET_OTP.hide
-        v-show="canResetAuthenticator(item)"
-        @click="showResetAuthenticatorDialog(item)">
-        <v-icon>mdi-lock-reset</v-icon>
-      </v-btn>
-
-      <!-- Reset Password -->
-      <v-btn
-        icon
-        class="mr-1"
-        aria-label="Reset User Password"
-        title="Reset User Password"
-        v-can:RESET_PASSWORD.hide
-        v-show="anonAccount"
-        :data-test="getIndexedTag('reset-password-button', item.index)"
-        @click="resetPassword(item)"
-      >
-        <v-icon>mdi-lock-reset</v-icon>
-      </v-btn>
-
-      <!-- Remove User -->
-      <v-btn
-        icon
-        aria-label="Remove Team Member"
-        title="Remove Team Member"
-        v-show="canRemove(item)"
-        :data-test="getIndexedTag('remove-user-button', item.index)"
-        @click="confirmRemoveMember(item)"
-      >
-        <v-icon>mdi-trash-can-outline</v-icon>
-      </v-btn>
-
-      <!-- Leave Account -->
-      <v-btn
-        icon
-        aria-label="Leave Account"
-        title="Leave Account"
-        v-show="canLeave(item)"
-        :data-test="getIndexedTag('leave-team-button', item.index)"
-        @click="confirmLeaveTeam(item)"
-      >
-        <v-icon>mdi-trash-can-outline</v-icon>
-      </v-btn>
-
-    </template>
-  </v-data-table>
-
-  <v-snackbar
-    bottom
-    color="primary"
-    class="mb-6"
-    v-model="showResetSnackBar"
-    :timeout="SNACKBAR_TIMEOUT"
-  >
-    Authenticator reset for {{selectedUsername()}}
-    <v-btn
-      icon
-      dark
-      aria-label="Close Notification"
-      title="Close Notification"
-      @click="showResetSnackBar = false"
-    >
-      <v-icon>mdi-close</v-icon>
-    </v-btn>
-  </v-snackbar>
-
-  <ModalDialog
-    ref="resetAuthenticatorDialog"
-    icon="mdi-check"
-    title="Reset Authenticator"
-    text="Resetting this team members authenticator will require them to log in and enter a new one-time password in their authenticator app."
-    dialog-class="notify-dialog"
-    max-width="600"
-  >
-    <template v-slot:icon>
-      <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-    </template>
-    <template v-slot:actions>
-      <v-btn
-        large
-        color="error"
-        class="font-weight-bold"
-        @click="resetAuthenticator()"
-      >
-        Reset
-      </v-btn>
-      <v-btn
-        large
-        depressed
-        @click="closeResetAuthDialog()"
-      >
-        Cancel
-      </v-btn>
-    </template>
-  </ModalDialog>
-
-  </div>
-</template>
-
-<script lang="ts">
-import { AccessType, LoginSource, Permission } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import { Business } from '@/models/business'
-import CommonUtils from '@/util/common-util'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-
+import {
+  defineComponent,
+  computed,
+  toRefs,
+  ref,
+  onMounted,
+} from "@vue/composition-api";
+import { AccessType, LoginSource, Permission } from "@/util/constants";
+import { Component, Emit, Prop, Vue } from "vue-property-decorator";
+import {
+  Member,
+  MembershipStatus,
+  MembershipType,
+  Organization,
+  RoleInfo,
+} from "@/models/Organization";
+import { mapActions, mapState } from "vuex";
+import { Business } from "@/models/business";
+import CommonUtils from "@/util/common-util";
+import ModalDialog from "@/components/auth/common/ModalDialog.vue";
 export interface ChangeRolePayload {
-  member: Member
-  targetRole: string
+  member: Member;
+  targetRole: string;
 }
-
-@Component({
+export default defineComponent({
   components: {
-    ModalDialog
+    ModalDialog,
   },
-  computed: {
-    ...mapState('business', ['businesses']),
-    ...mapState('org', [
-      'activeOrgMembers',
-      'currentMembership',
-      'currentOrganization',
-      'permissions'
-    ]),
-    ...mapState('user', [
-      'roleInfos'
-    ])
-  },
-  methods: {
-    ...mapActions('user', [
-      'getRoleInfo',
-      'resetOTPAuthenticator'
-    ])
-  }
-})
-export default class MemberDataTable extends Vue {
-  @Prop({ default: '' }) private userNamefilterText: string
-  private readonly businesses!: Business[]
-  private activeOrgMembers!: Member[]
-  private readonly currentMembership!: Member
-  private readonly currentOrganization!: Organization
-  private readonly getRoleInfo!: () => Promise<RoleInfo[]>
-  private readonly resetOTPAuthenticator!: (username: string) => any
-  private readonly roleInfos!: RoleInfo[]
-  private readonly SNACKBAR_TIMEOUT: number = 3000 // milliseconds
-  private confirmResetAuthDialog = false
-  private showResetSnackBar = false
-  private selectedUserForReset = undefined
-  private readonly loginSource:LoginSource
-  private readonly permissions!: string[]
-
-  private formatDate = CommonUtils.formatDisplayDate
-
-  $refs: {
-    resetAuthenticatorDialog: ModalDialog
-  }
-
-  private get loginSourceEnum ():typeof LoginSource {
-    return LoginSource
-  }
-
-  private headerMembers = [
-    {
-      text: 'Team Member',
-      align: 'left',
-      sortable: true,
-      value: 'name'
-    },
-    {
-      text: 'Role',
-      align: 'left',
-      sortable: true,
-      value: 'role'
-    },
-    {
-      text: 'Last Activity',
-      align: 'left',
-      sortable: true,
-      value: 'lastActive'
-    },
-    {
-      text: 'Actions',
-      align: 'right',
-      value: 'action',
+  props: { userNamefilterText: { default: "", type: String } },
+  setup(props, ctx) {
+    const businesses = computed(
+      () => ctx.root.$store.state.business.businesses
+    );
+    const activeOrgMembers = computed(
+      () => ctx.root.$store.state.org.activeOrgMembers
+    );
+    const currentMembership = computed(
+      () => ctx.root.$store.state.org.currentMembership
+    );
+    const currentOrganization = computed(
+      () => ctx.root.$store.state.org.currentOrganization
+    );
+    const permissions = computed(() => ctx.root.$store.state.org.permissions);
+    const roleInfos = computed(() => ctx.root.$store.state.user.roleInfos);
+    const getRoleInfo = () => ctx.root.$store.dispatch("user/getRoleInfo");
+    const resetOTPAuthenticator = () =>
+      ctx.root.$store.dispatch("user/resetOTPAuthenticator");
+    const { userNamefilterText } = toRefs(props);
+    const businesses = ref<Business[]>(undefined);
+    const activeOrgMembers = ref<Member[]>(undefined);
+    const currentMembership = ref<Member>(undefined);
+    const currentOrganization = ref<Organization>(undefined);
+    const getRoleInfo = ref<() => Promise<RoleInfo[]>>(undefined);
+    const resetOTPAuthenticator = ref<(username: string) => any>(undefined);
+    const roleInfos = ref<RoleInfo[]>(undefined);
+    const SNACKBAR_TIMEOUT = ref<number>(3000);
+    const confirmResetAuthDialog = ref(false);
+    const showResetSnackBar = ref(false);
+    const selectedUserForReset = ref(undefined);
+    const loginSource = ref<LoginSource>(undefined);
+    const permissions = ref<string[]>(undefined);
+    const formatDate = ref(CommonUtils.formatDisplayDate);
+    const $refs = ref<{
+      resetAuthenticatorDialog: ModalDialog;
+    }>(undefined);
+    const headerMembers = ref([
+      {
+        text: "Team Member",
+        align: "left",
+        sortable: true,
+        value: "name",
+      },
+      {
+        text: "Role",
+        align: "left",
+        sortable: true,
+        value: "role",
+      },
+      {
+        text: "Last Activity",
+        align: "left",
+        sortable: true,
+        value: "lastActive",
+      },
+      {
+        text: "Actions",
+        align: "right",
+        value: "action",
+        sortable: false,
+        width: "120",
+      },
+    ]);
+    const authHeaderMember = ref({
+      text: "Authentication",
+      align: "left",
       sortable: false,
-      width: '120'
-    }
-  ]
-
-  private readonly authHeaderMember = {
-    text: 'Authentication',
-    align: 'left',
-    sortable: false,
-    value: 'authentication'
-  }
-
-  private async mounted () {
-    // need not to reload everytime .roles seldom changes
-    if (!this.roleInfos) {
-      await this.getRoleInfo()
-    }
-    if (this.isRegularAccount() && this.canViewLoginSource()) {
-      this.headerMembers.splice(1, 0, this.authHeaderMember)
-    }
-  }
-
-  private getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  private get indexedOrgMembers () {
-    let orgMembers = []
-    if (this.userNamefilterText) {
-      // filter if the filter by username prop is available
-      orgMembers = this.activeOrgMembers.filter((element) => {
-        const username = `${element.user?.firstname || ''} ${element.user?.lastname || ''}`.trim()
-        const found = username.match(new RegExp(this.userNamefilterText, 'i'))
-        if (found?.length) {
-          return element
-        }
-      })
-      this.filteredMembersCount(orgMembers.length)
-    } else {
-      orgMembers = this.activeOrgMembers
-    }
-    // map org members list with custom index and role mapping
-    return orgMembers.map((item, index) => {
-      item.roleDisplayName = this.roleInfos.find(
-        role => role.name === item.membershipTypeCode
-      ).displayName
-      return {
-        index,
-        ...item
-      }
-    })
-  }
-
-  @Emit()
-  private filteredMembersCount (count: number) {
-    return count
-  }
-
-  private isRoleEnabled (role: RoleInfo, member: Member): boolean {
-    // BCeID delegates cannot be upgraded to admins
-    if ((member?.user?.loginSource === LoginSource.BCEID) && (role.name === MembershipType.Admin)) {
-      return false
-    }
-    switch (this.currentMembership.membershipTypeCode) {
-      case MembershipType.Admin:
-        return true
-      case MembershipType.Coordinator:
-        // coordinator cant upgrade/change themselves to admin
-        if (role.name !== MembershipType.Admin) {
-          return true
-        }
-        return false
-      default:
-        return false
-    }
-  }
-
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
-  }
-
-  private canChangeRole (memberBeingChanged: Member): boolean {
-    if (this.currentMembership.membershipStatus !== MembershipStatus.Active) {
-      return false
-    }
-
-    switch (this.currentMembership.membershipTypeCode) {
-      case MembershipType.Admin:
-        // Owners can change roles of other users who are not owners
-        if (
-          !this.isOwnMembership(memberBeingChanged)
-        ) {
-          return true
-        }
-        // And they can downgrade their own role if there is another owner on the team
-        if (this.isOwnMembership(memberBeingChanged) && this.ownerCount() > 1) {
-          return true
-        }
-        return false
-      case MembershipType.Coordinator:
-        // Admins can change roles of their own and users as well
-        return (
-          this.isOwnMembership(memberBeingChanged) ||
-          memberBeingChanged.membershipTypeCode === MembershipType.User
-        )
-      default:
-        return false
-    }
-  }
-
-  private canRemove (memberToRemove: Member): boolean {
-    // Can't remove yourself
-    if (this.currentMembership.user?.username === memberToRemove.user.username) {
-      return false
-    }
-
-    // Can't remove unless Admin/Coordinator
-    if (this.currentMembership.membershipTypeCode === MembershipType.User) {
-      return false
-    }
-
-    // Can't remove Coordinator unless Admin
-    if (
-      this.currentMembership.membershipTypeCode === MembershipType.Coordinator &&
-      memberToRemove.membershipTypeCode === MembershipType.Coordinator
-    ) {
-      return false
-    }
-
-    // Admin can be removed by other admin. #4909
-    if (memberToRemove.membershipTypeCode === MembershipType.Admin) {
-      if (this.currentMembership.membershipTypeCode === MembershipType.Admin) {
-        return true
+      value: "authentication",
+    });
+    const loginSourceEnum = computed((): typeof LoginSource => {
+      return LoginSource;
+    });
+    const indexedOrgMembers = computed(() => {
+      let orgMembers = [];
+      if (userNamefilterText.value) {
+        orgMembers = activeOrgMembers.value.filter((element) => {
+          const username = `${element.user?.firstname || ""} ${
+            element.user?.lastname || ""
+          }`.trim();
+          const found = username.match(
+            new RegExp(userNamefilterText.value, "i")
+          );
+          if (found?.length) {
+            return element;
+          }
+        });
+        filteredMembersCount(orgMembers.length);
       } else {
-        return false
+        orgMembers = activeOrgMembers.value;
       }
-    }
-
-    return true
-  }
-
-  private canLeave (member: Member): boolean {
-    if (this.currentMembership.user?.username !== member.user.username) {
-      return false
-    }
-    return true
-  }
-
-  private canResetAuthenticator (member: Member): boolean {
-    return (member.user.loginSource === LoginSource.BCEID)
-  }
-
-  private ownerCount (): number {
-    return this.activeOrgMembers.filter(
-      member => member.membershipTypeCode === MembershipType.Admin
-    ).length
-  }
-
-  private customSortActive (items, index, isDescending) {
-    const isDesc = isDescending.length > 0 && isDescending[0]
-    switch (index[0]) {
-      case 'name':
-        items.sort((a, b) => {
-          if (isDesc) {
-            return a.user.firstname < b.user.firstname ? -1 : 1
-          } else {
-            return b.user.firstname < a.user.firstname ? -1 : 1
+      return orgMembers.map((item, index) => {
+        item.roleDisplayName = roleInfos.value.find(
+          (role) => role.name === item.membershipTypeCode
+        ).displayName;
+        return {
+          index,
+          ...item,
+        };
+      });
+    });
+    const anonAccount = computed((): boolean => {
+      return currentOrganization.value?.accessType === AccessType.ANONYMOUS;
+    });
+    const getIndexedTag = (tag, index): string => {
+      return `${tag}-${index}`;
+    };
+    const filteredMembersCount = (count: number) => {
+      return count;
+    };
+    const isRoleEnabled = (role: RoleInfo, member: Member): boolean => {
+      if (
+        member?.user?.loginSource === LoginSource.BCEID &&
+        role.name === MembershipType.Admin
+      ) {
+        return false;
+      }
+      switch (currentMembership.value.membershipTypeCode) {
+        case MembershipType.Admin:
+          return true;
+        case MembershipType.Coordinator:
+          if (role.name !== MembershipType.Admin) {
+            return true;
           }
-        })
-        break
-      case 'role':
-        items.sort((a, b) => {
-          if (isDesc) {
-            return a.membershipTypeCode < b.membershipTypeCode ? -1 : 1
-          } else {
-            return b.membershipTypeCode < a.membershipTypeCode ? -1 : 1
+          return false;
+        default:
+          return false;
+      }
+    };
+    const canChangeRole = (memberBeingChanged: Member): boolean => {
+      if (
+        currentMembership.value.membershipStatus !== MembershipStatus.Active
+      ) {
+        return false;
+      }
+      switch (currentMembership.value.membershipTypeCode) {
+        case MembershipType.Admin:
+          if (!isOwnMembership(memberBeingChanged)) {
+            return true;
           }
-        })
-        break
-      case 'lastActive':
-        items.sort((a, b) => {
-          if (isDesc) {
-            return a.user.modified < b.user.modified ? -1 : 1
-          } else {
-            return b.user.modified < a.user.modified ? -1 : 1
+          if (isOwnMembership(memberBeingChanged) && ownerCount() > 1) {
+            return true;
           }
-        })
-    }
-    return items
-  }
-
-  private isAnonymousAccount (): boolean {
-    return (
-      this.currentOrganization &&
-      this.currentOrganization.accessType === AccessType.ANONYMOUS
-    )
-  }
-
-  private isRegularAccount (): boolean {
-    return (
-      this.currentOrganization &&
-      [AccessType.ANONYMOUS.valueOf(), AccessType.GOVM.valueOf()].indexOf(this.currentOrganization.accessType) < 0
-    )
-  }
-
-  private canViewLoginSource () :boolean {
-    return [Permission.VIEW_USER_LOGINSOURCE].some(per => this.permissions.includes(per))
-  }
-
-  @Emit()
-  private confirmRemoveMember (member: Member) {}
-
-  @Emit()
-  private resetPassword (member: Member) {
-    return member.user
-  }
-
-  @Emit()
-  private confirmChangeRole (
-    member: Member,
-    targetRole: string
-  ): ChangeRolePayload {
+          return false;
+        case MembershipType.Coordinator:
+          return (
+            isOwnMembership(memberBeingChanged) ||
+            memberBeingChanged.membershipTypeCode === MembershipType.User
+          );
+        default:
+          return false;
+      }
+    };
+    const canRemove = (memberToRemove: Member): boolean => {
+      if (
+        currentMembership.value.user?.username === memberToRemove.user.username
+      ) {
+        return false;
+      }
+      if (currentMembership.value.membershipTypeCode === MembershipType.User) {
+        return false;
+      }
+      if (
+        currentMembership.value.membershipTypeCode ===
+          MembershipType.Coordinator &&
+        memberToRemove.membershipTypeCode === MembershipType.Coordinator
+      ) {
+        return false;
+      }
+      if (memberToRemove.membershipTypeCode === MembershipType.Admin) {
+        if (
+          currentMembership.value.membershipTypeCode === MembershipType.Admin
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+      return true;
+    };
+    const canLeave = (member: Member): boolean => {
+      if (currentMembership.value.user?.username !== member.user.username) {
+        return false;
+      }
+      return true;
+    };
+    const canResetAuthenticator = (member: Member): boolean => {
+      return member.user.loginSource === LoginSource.BCEID;
+    };
+    const ownerCount = (): number => {
+      return activeOrgMembers.value.filter(
+        (member) => member.membershipTypeCode === MembershipType.Admin
+      ).length;
+    };
+    const customSortActive = (items, index, isDescending) => {
+      const isDesc = isDescending.length > 0 && isDescending[0];
+      switch (index[0]) {
+        case "name":
+          items.sort((a, b) => {
+            if (isDesc) {
+              return a.user.firstname < b.user.firstname ? -1 : 1;
+            } else {
+              return b.user.firstname < a.user.firstname ? -1 : 1;
+            }
+          });
+          break;
+        case "role":
+          items.sort((a, b) => {
+            if (isDesc) {
+              return a.membershipTypeCode < b.membershipTypeCode ? -1 : 1;
+            } else {
+              return b.membershipTypeCode < a.membershipTypeCode ? -1 : 1;
+            }
+          });
+          break;
+        case "lastActive":
+          items.sort((a, b) => {
+            if (isDesc) {
+              return a.user.modified < b.user.modified ? -1 : 1;
+            } else {
+              return b.user.modified < a.user.modified ? -1 : 1;
+            }
+          });
+      }
+      return items;
+    };
+    const isAnonymousAccount = (): boolean => {
+      return (
+        currentOrganization.value &&
+        currentOrganization.value.accessType === AccessType.ANONYMOUS
+      );
+    };
+    const isRegularAccount = (): boolean => {
+      return (
+        currentOrganization.value &&
+        [AccessType.ANONYMOUS.valueOf(), AccessType.GOVM.valueOf()].indexOf(
+          currentOrganization.value.accessType
+        ) < 0
+      );
+    };
+    const canViewLoginSource = (): boolean => {
+      return [Permission.VIEW_USER_LOGINSOURCE].some((per) =>
+        permissions.value.includes(per)
+      );
+    };
+    const confirmRemoveMember = (member: Member) => {};
+    const resetPassword = (member: Member) => {
+      return member.user;
+    };
+    const confirmChangeRole = (
+      member: Member,
+      targetRole: string
+    ): ChangeRolePayload => {
+      return {
+        member,
+        targetRole,
+      };
+    };
+    const confirmLeaveTeam = (member: Member) => {
+      if (
+        member.membershipTypeCode === MembershipType.Admin &&
+        ownerCount() === 1
+      ) {
+        ctx.emit("single-owner-error");
+      } else {
+        ctx.emit("confirm-leave-team");
+      }
+    };
+    const isOwnMembership = (member: Member) => {
+      return (
+        currentMembership.value?.user?.username === member.user.username ||
+        false
+      );
+    };
+    const selectedUsername = () => {
+      return `${selectedUserForReset.value?.user?.firstname} ${selectedUserForReset.value?.user?.lastname}`;
+    };
+    const showResetAuthenticatorDialog = (item) => {
+      selectedUserForReset.value = item;
+      ctx.refs.resetAuthenticatorDialog.open();
+    };
+    const resetAuthenticator = async () => {
+      try {
+        await resetOTPAuthenticator.value(
+          selectedUserForReset.value?.user?.username
+        );
+        showResetSnackBar.value = true;
+        ctx.refs.resetAuthenticatorDialog.close();
+        setTimeout(() => {
+          selectedUserForReset.value = undefined;
+        }, SNACKBAR_TIMEOUT.value);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    const closeResetAuthDialog = () => {
+      ctx.refs.resetAuthenticatorDialog.close();
+      selectedUserForReset.value = undefined;
+    };
+    onMounted(async () => {
+      if (!roleInfos.value) {
+        await getRoleInfo.value();
+      }
+      if (isRegularAccount() && canViewLoginSource()) {
+        headerMembers.value.splice(1, 0, authHeaderMember.value);
+      }
+    });
     return {
-      member,
-      targetRole
-    }
-  }
-
-  private confirmLeaveTeam (member: Member) {
-    if (
-      member.membershipTypeCode === MembershipType.Admin &&
-      this.ownerCount() === 1
-    ) {
-      this.$emit('single-owner-error')
-    } else {
-      this.$emit('confirm-leave-team')
-    }
-  }
-
-  private isOwnMembership (member: Member) {
-    return (
-      this.currentMembership?.user?.username === member.user.username || false
-    )
-  }
-
-  private selectedUsername () {
-    return `${this.selectedUserForReset?.user?.firstname} ${this.selectedUserForReset?.user?.lastname}`
-  }
-
-  private showResetAuthenticatorDialog (item) {
-    this.selectedUserForReset = item
-    this.$refs.resetAuthenticatorDialog.open()
-  }
-
-  private async resetAuthenticator () {
-    try {
-      await this.resetOTPAuthenticator(this.selectedUserForReset?.user?.username)
-      this.showResetSnackBar = true
-      this.$refs.resetAuthenticatorDialog.close()
-      // wait for the SNACKBAR_TIMEOUT value before unsetting the selectedUserForReset,
-      // for rendering the name correctly in the snackbar
-      setTimeout(() => {
-        this.selectedUserForReset = undefined
-      }, this.SNACKBAR_TIMEOUT)
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error)
-    }
-  }
-
-  private closeResetAuthDialog () {
-    this.$refs.resetAuthenticatorDialog.close()
-    this.selectedUserForReset = undefined
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-::v-deep {
-  td {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
-    height: auto;
-  }
-}
-
-.v-list--dense {
-  .v-list-item .v-list-item__title {
-    margin-bottom: 0.25rem;
-    font-weight: 700;
-  }
-}
-
-.role-list {
-  width: 20rem;
-}
-
-.user-role-desc {
-  white-space: normal !important;
-}
-</style>
+      businesses,
+      activeOrgMembers,
+      currentMembership,
+      currentOrganization,
+      permissions,
+      roleInfos,
+      getRoleInfo,
+      resetOTPAuthenticator,
+      businesses,
+      activeOrgMembers,
+      currentMembership,
+      currentOrganization,
+      getRoleInfo,
+      resetOTPAuthenticator,
+      roleInfos,
+      SNACKBAR_TIMEOUT,
+      confirmResetAuthDialog,
+      showResetSnackBar,
+      selectedUserForReset,
+      loginSource,
+      permissions,
+      formatDate,
+      $refs,
+      headerMembers,
+      authHeaderMember,
+      loginSourceEnum,
+      indexedOrgMembers,
+      anonAccount,
+      getIndexedTag,
+      filteredMembersCount,
+      isRoleEnabled,
+      canChangeRole,
+      canRemove,
+      canLeave,
+      canResetAuthenticator,
+      ownerCount,
+      customSortActive,
+      isAnonymousAccount,
+      isRegularAccount,
+      canViewLoginSource,
+      confirmRemoveMember,
+      resetPassword,
+      confirmChangeRole,
+      confirmLeaveTeam,
+      isOwnMembership,
+      selectedUsername,
+      showResetAuthenticatorDialog,
+      resetAuthenticator,
+      closeResetAuthDialog,
+    };
+  },
+});

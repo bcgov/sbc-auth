@@ -1,87 +1,53 @@
-<template>
-  <div class="value__title">
-    <div v-for="(member, index) in getActiveAdmins" v-bind:key="index">
-      <div v-if="!anonAccount">
-        <div>
-          {{ member.user.firstname }} {{ member.user.lastname }}
-        </div>
-        <div v-if="member.user.contacts">
-          <div v-if="member.user.contacts[0].email">
-            {{ member.user.contacts[0].email }}
-          </div>
-          <div v-if="member.user.contacts[0].phone">
-            {{ member.user.contacts[0].phone }} <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
-          </div>
-        </div>
-      </div>
-      <div v-else>
-        {{ member.user.username }}
-      </div>
-    </div>
-  </div>
-</template>
-
-<script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import {
+  defineComponent,
+  computed,
+  ref,
+  onMounted,
+} from "@vue/composition-api";
+import { Component, Emit, Vue } from "vue-property-decorator";
 import {
   Member,
   MembershipStatus,
   MembershipType,
   Organization,
-  RoleInfo
-} from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import { AccessType } from '@/util/constants'
-
-@Component({
-  computed: {
-    ...mapState('org', [
-      'activeOrgMembers',
-      'currentOrganization'
-    ])
+  RoleInfo,
+} from "@/models/Organization";
+import { mapActions, mapState } from "vuex";
+import { AccessType } from "@/util/constants";
+export default defineComponent({
+  props: {},
+  setup(_props, ctx) {
+    const activeOrgMembers = computed(
+      () => ctx.root.$store.state.org.activeOrgMembers
+    );
+    const currentOrganization = computed(
+      () => ctx.root.$store.state.org.currentOrganization
+    );
+    const syncActiveOrgMembers = () =>
+      ctx.root.$store.dispatch("org/syncActiveOrgMembers");
+    const activeOrgMembers = ref<Member[]>(undefined);
+    const syncActiveOrgMembers = ref<() => Member[]>(undefined);
+    const currentOrganization = ref<Organization>(undefined);
+    const getActiveAdmins = computed((): Member[] => {
+      return activeOrgMembers.value.filter(
+        (member) => member.membershipTypeCode === MembershipType.Admin
+      );
+    });
+    const anonAccount = computed((): boolean => {
+      return currentOrganization.value?.accessType === AccessType.ANONYMOUS;
+    });
+    onMounted(async () => {
+      syncActiveOrgMembers.value();
+    });
+    return {
+      activeOrgMembers,
+      currentOrganization,
+      syncActiveOrgMembers,
+      activeOrgMembers,
+      syncActiveOrgMembers,
+      currentOrganization,
+      getActiveAdmins,
+      anonAccount,
+    };
   },
-  methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
-  }
-
-})
-export default class OrgAdminContact extends Vue {
-  private activeOrgMembers!: Member[]
-  private readonly syncActiveOrgMembers!: () => Member[]
-  private readonly currentOrganization!: Organization
-
-  private async mounted () {
-    this.syncActiveOrgMembers()
-  }
-
-  private get getActiveAdmins (): Member[] {
-    return this.activeOrgMembers.filter(member => member.membershipTypeCode === MembershipType.Admin)
-  }
-
-  get anonAccount (): boolean {
-    return this.currentOrganization?.accessType === AccessType.ANONYMOUS
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-@import '$assets/scss/theme.scss';
-
-.v-list--dense {
-  .v-list-item .v-list-item__title {
-    margin-bottom: 0.25rem;
-    font-weight: 700;
-  }
-}
-
-.role-list {
-  width: 20rem;
-}
-.btn-inline {
-  white-space: nowrap;
-}
-
-.user-role-desc {
-  white-space: normal !important;
-}
-</style>
+});

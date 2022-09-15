@@ -1,154 +1,96 @@
-<template>
-  <section v-if="accountFeesDTO.length">
-    <h2 class="mb-5">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''}${title}`}}</h2>
-    <p class="mb-9">{{ $t('productFeeSubTitle') }}</p>
-    <v-form ref="productFeeForm" id="productFeeForm">
-      <div v-for="(accountFee, index) in accountFeesDTO" v-bind:key="index">
-        <h3 class="title font-weight-bold mt-n1">{{ displayProductName(accountFee.product) }}</h3>
-        <v-row>
-            <v-col
-            cols="6"
-            >
-              <v-select
-              filled
-              label="Statutory fee"
-              item-text="text"
-              item-value="value"
-              :items="applyFilingFeesValues"
-              :rules="applyFilingFeesRules"
-              v-model="accountFee.applyFilingFees"
-              @change="selectChange"
-              :data-test="getIndexedTag('select-apply-filing-fees', index)"
-              req
-              :disabled="!canSelect"
-              />
-            </v-col>
-            <v-col
-            cols="6"
-            >
-              <v-select
-              filled
-              label="Service fee"
-              :rules="serviceFeeCodeRules"
-              :items="orgProductFeeCodes"
-              item-text="amount"
-              item-value="code"
-              v-model="accountFee.serviceFeeCode"
-              @change="selectChange"
-              :data-test="getIndexedTag('select-service-fee-code', index)"
-              req
-              :disabled="!canSelect"
-              >
-                <template slot="selection" slot-scope="data">
-                  $ {{ data.item.amount.toFixed(2) }}
-                </template>
-                <template slot="item" slot-scope="data">
-                  {{ displayProductFee(data.item.amount) }}
-                </template>
-              </v-select>
-            </v-col>
-        </v-row>
-      </div>
-    </v-form>
-  </section>
-</template>
-
-<script lang="ts">
-import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
-import { productStatus } from '@/util/constants'
-
-const orgModule = namespace('org')
-
-@Component({})
-export default class ProductFee extends Vue {
-    @Prop({ default: null }) private tabNumber: number
-    @orgModule.State('orgProductFeeCodes') public orgProductFeeCodes!: OrgProductFeeCode[]
-    @orgModule.State('productList') public orgProducts!: OrgProduct[]
-    @orgModule.State('currentAccountFees') public accountFees!: AccountFee[]
-    @orgModule.Mutation('setCurrentAccountFees') public setCurrentAccountFees!:(accountFees: AccountFee[]) =>void
-    @Prop({ default: 'Product Fee' }) private title: string
-    @Prop({ default: false }) private canSelect: boolean
-
-    // Create a DTO array so as to map applyFilingFees(boolean) value to string for v-select
-    private accountFeesDTO: AccountFeeDTO[] = []
-    private applyFilingFeesValues = [
+import { defineComponent, toRefs, ref, onMounted } from "@vue/composition-api";
+import {
+  AccountFee,
+  AccountFeeDTO,
+  OrgProduct,
+  OrgProductFeeCode,
+} from "@/models/Organization";
+import { Component, Prop, Vue } from "vue-property-decorator";
+import { namespace } from "vuex-class";
+import { productStatus } from "@/util/constants";
+const orgModule = namespace("org");
+export default defineComponent({
+  props: {
+    tabNumber: { default: null, type: Number },
+    title: { default: "Product Fee", type: String },
+    canSelect: { default: false, type: Boolean },
+  },
+  setup(props, ctx) {
+    const { tabNumber, title, canSelect } = toRefs(props);
+    const accountFeesDTO = ref<AccountFeeDTO[]>([]);
+    const applyFilingFeesValues = ref([
       {
-        text: 'Yes',
-        value: 'true'
+        text: "Yes",
+        value: "true",
       },
       {
-        text: 'No',
-        value: 'false'
-      }
-    ]
-
-    $refs: {
-    productFeeForm: HTMLFormElement
-    }
-
-    private mounted () {
-      if (!this.accountFees.length) {
-        // prepopulate the array with the subscribed products
-        this.orgProducts.forEach((orgProduct: OrgProduct) => {
-          if (orgProduct.subscriptionStatus === productStatus.ACTIVE) {
-            const accountFeeDTO: AccountFeeDTO = {
-              product: orgProduct.code
-            }
-            this.accountFeesDTO.push(accountFeeDTO)
-          }
-        })
-      } else {
-        // Map account fees details to accountFeesDTO so as to display in v-select
-        this.accountFeesDTO = JSON.parse(JSON.stringify(this.accountFees))
-        this.accountFeesDTO.map((accountFee:AccountFeeDTO) => {
-          accountFee.applyFilingFees = accountFee.applyFilingFees.toString()
-        })
-      }
-    }
-
-    public validateNow () {
-      const isFormValid = this.$refs.productFeeForm?.validate()
-
-      this.$emit('emit-product-fee-change', isFormValid)
-    }
-
-    private displayProductName (productCode: string): string {
-      return this.orgProducts?.find(orgProduct => orgProduct.code === productCode)?.description
-    }
-
-    private displayProductFee (feeAmount: number): string {
-      return `$ ${feeAmount.toFixed(2)} Service fee`
-    }
-
-    private applyFilingFeesRules = [
-      v => !!v || 'A statutory fee is required'
-    ]
-
-    private serviceFeeCodeRules = [
-      v => !!v || 'A service fee is required'
-    ]
-
-    private selectChange (): void {
-      // Wait till next DOM render to emit event so that we capture form validation
-      // this.$nextTick(() => {
-      // Map back to AccountFees to store
-      const accountFees: AccountFee[] = []
-      this.accountFeesDTO.forEach((accountFeeDTO: AccountFeeDTO) => {
+        text: "No",
+        value: "false",
+      },
+    ]);
+    const $refs = ref<{
+      productFeeForm: HTMLFormElement;
+    }>(undefined);
+    const applyFilingFeesRules = ref([
+      (v) => !!v || "A statutory fee is required",
+    ]);
+    const serviceFeeCodeRules = ref([
+      (v) => !!v || "A service fee is required",
+    ]);
+    const validateNow = () => {
+      const isFormValid = ctx.refs.productFeeForm?.validate();
+      ctx.emit("emit-product-fee-change", isFormValid);
+    };
+    const displayProductName = (productCode: string): string => {
+      return orgProducts?.find((orgProduct) => orgProduct.code === productCode)
+        ?.description;
+    };
+    const displayProductFee = (feeAmount: number): string => {
+      return `$ ${feeAmount.toFixed(2)} Service fee`;
+    };
+    const selectChange = (): void => {
+      const accountFees: AccountFee[] = [];
+      accountFeesDTO.value.forEach((accountFeeDTO: AccountFeeDTO) => {
         const accountFee: AccountFee = {
           product: accountFeeDTO.product,
-          applyFilingFees: accountFeeDTO.applyFilingFees === 'true',
-          serviceFeeCode: accountFeeDTO.serviceFeeCode
-        }
-        accountFees.push(accountFee)
-      })
-      this.setCurrentAccountFees(accountFees)
-      // })
-    }
-
-    private getIndexedTag (tag, index): string {
-      return `${tag}-${index}`
-    }
-}
-</script>
+          applyFilingFees: accountFeeDTO.applyFilingFees === "true",
+          serviceFeeCode: accountFeeDTO.serviceFeeCode,
+        };
+        accountFees.push(accountFee);
+      });
+      setCurrentAccountFees(accountFees);
+    };
+    const getIndexedTag = (tag, index): string => {
+      return `${tag}-${index}`;
+    };
+    onMounted(() => {
+      if (!accountFees.length) {
+        orgProducts.forEach((orgProduct: OrgProduct) => {
+          if (orgProduct.subscriptionStatus === productStatus.ACTIVE) {
+            const accountFeeDTO: AccountFeeDTO = {
+              product: orgProduct.code,
+            };
+            accountFeesDTO.value.push(accountFeeDTO);
+          }
+        });
+      } else {
+        accountFeesDTO.value = JSON.parse(JSON.stringify(accountFees));
+        accountFeesDTO.value.map((accountFee: AccountFeeDTO) => {
+          accountFee.applyFilingFees = accountFee.applyFilingFees.toString();
+        });
+      }
+    });
+    return {
+      accountFeesDTO,
+      applyFilingFeesValues,
+      $refs,
+      applyFilingFeesRules,
+      serviceFeeCodeRules,
+      validateNow,
+      displayProductName,
+      displayProductFee,
+      selectChange,
+      getIndexedTag,
+    };
+  },
+});

@@ -1,55 +1,40 @@
-<template>
-  <v-container class="team-mgmt-container">
-    <UserManagement
-      v-if="!isAnonymousAccount()"
-     ></UserManagement>
-    <AnonymousUserManagement
-        v-if="isAnonymousAccount()"
-    ></AnonymousUserManagement>
-  </v-container>
-</template>
-
-<script lang="ts">
-import { AccessType, Role } from '@/util/constants'
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import AnonymousUserManagement from '@/components/auth/account-settings/team-management/AnonymousUserManagement.vue'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import UserManagement from '@/components/auth/account-settings/team-management/UserManagement.vue'
-import { mapState } from 'vuex'
-
-@Component({
+import {
+  defineComponent,
+  computed,
+  toRefs,
+  onMounted,
+} from "@vue/composition-api";
+import { AccessType, Role } from "@/util/constants";
+import { Component, Mixins, Prop } from "vue-property-decorator";
+import AnonymousUserManagement from "@/components/auth/account-settings/team-management/AnonymousUserManagement.vue";
+import NextPageMixin from "@/components/auth/mixins/NextPageMixin.vue";
+import UserManagement from "@/components/auth/account-settings/team-management/UserManagement.vue";
+import { mapState } from "vuex";
+export default defineComponent({
   components: {
     UserManagement,
-    AnonymousUserManagement
+    AnonymousUserManagement,
   },
-  computed: {
-    ...mapState('org', [
-      'currentMembership',
-      'currentOrganization'
-    ])
+  props: { orgId: { default: "", type: String } },
+  setup(props, ctx) {
+    const currentMembership = computed(
+      () => ctx.root.$store.state.org.currentMembership
+    );
+    const currentOrganization = computed(
+      () => ctx.root.$store.state.org.currentOrganization
+    );
+    const { orgId } = toRefs(props);
+    const isAnonymousAccount = (): boolean => {
+      return (
+        currentOrganization.value &&
+        currentOrganization.value.accessType === AccessType.ANONYMOUS
+      );
+    };
+    onMounted(async () => {
+      if (isAnonymousAccount() && !currentUser.roles.includes(Role.Staff)) {
+        redirectTo(getNextPageUrl());
+      }
+    });
+    return { currentMembership, currentOrganization, isAnonymousAccount };
   },
-  methods: {
-
-  }
-})
-export default class TeamManagement extends Mixins(NextPageMixin) {
-  @Prop({ default: '' }) private orgId: string;
-
-  private async mounted () {
-    // redirect to dir search/team management according to dir search user role change
-    if (this.isAnonymousAccount() && !this.currentUser.roles.includes(Role.Staff)) {
-      this.redirectTo(this.getNextPageUrl())
-    }
-  }
-  private isAnonymousAccount (): boolean {
-    return this.currentOrganization &&
-            this.currentOrganization.accessType === AccessType.ANONYMOUS
-  }
-}
-</script>
-
-<style lang="scss" scoped>
-  .team-mgmt-container {
-    overflow: hidden;
-  }
-</style>
+});
