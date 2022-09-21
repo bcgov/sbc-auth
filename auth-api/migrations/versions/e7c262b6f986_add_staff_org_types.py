@@ -34,5 +34,5 @@ def upgrade():
 
 
 def downgrade():
-    op.execute('delete from org_type where code=\'STAFF\'')
-    op.execute('delete from org_type where code=\'SBC_STAFF\'')
+    op.execute('delete from org_types where code=\'STAFF\'')
+    op.execute('delete from org_types where code=\'SBC_STAFF\'')
