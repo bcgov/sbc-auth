@@ -20,15 +20,15 @@ depends_on = None
 def upgrade():
     org_type_table = table('org_types',
                         column('code', String),
-                        column('desc', String),
+                        column('description', String),
                         column('default', Boolean)
                     )
 
     op.bulk_insert(
         org_type_table,
         [
-            {'code': 'STAFF', 'desc': 'BC Registries Staff', 'default': False},
-            {'code': 'SBC_STAFF', 'desc': 'Service BC Staff', 'default': False},
+            {'code': 'STAFF', 'description': 'BC Registries Staff', 'default': False},
+            {'code': 'SBC_STAFF', 'description': 'Service BC Staff', 'default': False},
         ]
     )
 
