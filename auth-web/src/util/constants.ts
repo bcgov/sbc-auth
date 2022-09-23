@@ -91,6 +91,8 @@ export enum Account {
     PREMIUM = 'PREMIUM',
     BASIC = 'BASIC',
     UNLINKED_PREMIUM = 'UNLINKED_PREMIUM', // premium accounts without bcol linking
+    STAFF = 'STAFF',
+    SBC_STAFF = 'SBC_STAFF'
 }
 
 export enum AccountStatus {
