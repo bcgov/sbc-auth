@@ -60,7 +60,7 @@
             <div class="value-column">
               <div class="value" aria-labelledby="accountType">
                 <div class="value__title">
-                  {{ isPremiumAccount ? 'Premium' : 'Basic' }}
+                  {{ accountType }}
                 </div>
               </div>
             </div>
@@ -598,6 +598,15 @@ export default class AccountInfo extends Mixins(
       default:
         return status
     }
+  }
+
+  get accountType () {
+    if (this.isStaffAccount) {
+      return 'BC Registry Staff'
+    } else if (this.isSbcStaffAccount) {
+      return 'SBC Staff'
+    }
+    return this.isPremiumAccount ? 'Premium' : 'Basic'
   }
 }
 </script>
