@@ -602,7 +602,7 @@ export default class AccountInfo extends Mixins(
 
   get accountType () {
     if (this.isStaffAccount) {
-      return 'Staff'
+      return 'BC Registry Staff'
     } else if (this.isSbcStaffAccount) {
       return 'SBC Staff'
     }
