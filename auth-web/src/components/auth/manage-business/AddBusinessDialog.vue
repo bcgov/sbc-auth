@@ -42,7 +42,7 @@
           <v-form ref="addBusinessForm" lazy-validation class="mt-6">
             <!-- Business Identifier -->
             <v-text-field
-              filled req persistent-hint
+              filled req persistent-hint validate-on-blur
               label="Incorporation Number or Registration Number"
               hint="Example: BC1234567, CP1234567 or FM1234567"
               :rules="businessIdentifierRules"
@@ -173,12 +173,7 @@ export default class AddBusinessDialog extends Vue {
   protected folioNumber = ''
   protected isLoading = false
   protected isCertified = false // firms only
-
-  readonly businessIdentifierRules = [
-    v => !!v || 'Incorporation Number or Registration Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) ||
-      'Incorporation Number or Registration Number is not valid'
-  ]
+  protected businessIdentifierRules = []
 
   readonly certifyClause = 'Note: It is an offence to make or assist in making a false or misleading ' +
     'statement in a record filed under the Partnership Act. A person who commits this offence is ' +
@@ -316,6 +311,11 @@ export default class AddBusinessDialog extends Vue {
   }
 
   protected formatBusinessIdentifier (): void {
+    this.businessIdentifierRules = [
+      v => !!v || 'Incorporation Number or Registration Number is required',
+      v => CommonUtils.validateIncorporationNumber(v) ||
+        'Incorporation Number or Registration Number is not valid'
+    ]
     this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 

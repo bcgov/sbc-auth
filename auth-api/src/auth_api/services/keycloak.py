@@ -42,6 +42,7 @@ class KeycloakService:
 
         base_url = config.get('KEYCLOAK_BCROS_BASE_URL')
         realm = config.get('KEYCLOAK_BCROS_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
 
         # Check if the user exists
         if return_if_exists or throw_error_if_exists:
@@ -57,7 +58,8 @@ class KeycloakService:
         }
 
         add_user_url = f'{base_url}/auth/admin/realms/{realm}/users'
-        response = requests.post(add_user_url, data=user.value(), headers=headers)
+        response = requests.post(add_user_url, data=user.value(), headers=headers,
+                                 timeout=timeout)
         response.raise_for_status()
 
         return KeycloakService.get_user_by_username(user.user_name, admin_token)
@@ -71,6 +73,7 @@ class KeycloakService:
 
         base_url = config.get('KEYCLOAK_BCROS_BASE_URL')
         realm = config.get('KEYCLOAK_BCROS_REALMNAME')
+        timeout = current_app.config.get('CONNECT_TIMEOUT', 60)
 
         existing_user = KeycloakService.get_user_by_username(user.user_name, admin_token=admin_token)
         if not existing_user:
@@ -81,7 +84,8 @@ class KeycloakService:
         }
 
         update_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{existing_user.id}'
-        response = requests.put(update_user_url, data=user.value(), headers=headers)
+        response = requests.put(update_user_url, data=user.value(), headers=headers,
+                                timeout=timeout)
         response.raise_for_status()
 
         return KeycloakService.get_user_by_username(user.user_name, admin_token)
@@ -92,6 +96,7 @@ class KeycloakService:
         user = None
         base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
         realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME')
+        timeout = current_app.config.get('CONNECT_TIMEOUT', 60)
         if not admin_token:
             admin_token = KeycloakService._get_admin_token(upstream=True)
 
@@ -102,7 +107,7 @@ class KeycloakService:
 
         # Get the user and return
         query_user_url = f'{base_url}/auth/admin/realms/{realm}/users?username={username}'
-        response = requests.get(query_user_url, headers=headers)
+        response = requests.get(query_user_url, headers=headers, timeout=timeout)
         response.raise_for_status()
         if len(response.json()) == 1:
             user = KeycloakUser(response.json()[0])
@@ -115,6 +120,7 @@ class KeycloakService:
             'KEYCLOAK_BASE_URL')
         realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME') if upstream else current_app.config.get(
             'KEYCLOAK_REALMNAME')
+        timeout = current_app.config.get('CONNECT_TIMEOUT', 60)
         admin_token = KeycloakService._get_admin_token(upstream=upstream)
         headers = {
             'Content-Type': ContentType.JSON.value,
@@ -123,7 +129,7 @@ class KeycloakService:
 
         # Get the user and return
         query_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups'
-        response = requests.get(query_user_url, headers=headers)
+        response = requests.get(query_user_url, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json()
 
@@ -138,6 +144,7 @@ class KeycloakService:
 
         base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
         realm = current_app.config.get('KEYCLOAK_BCROS_REALMNAME')
+        timeout = current_app.config.get('CONNECT_TIMEOUT', 60)
         user = KeycloakService.get_user_by_username(username)
 
         if not user:
@@ -145,7 +152,8 @@ class KeycloakService:
 
         # Delete the user
         delete_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{user.id}'
-        response = requests.delete(delete_user_url, headers=headers)
+        response = requests.delete(delete_user_url, headers=headers,
+                                   timeout=timeout)
         response.raise_for_status()
 
     @staticmethod
@@ -157,12 +165,14 @@ class KeycloakService:
             token_request = f"client_id={current_app.config.get('JWT_OIDC_AUDIENCE')}" \
                             f"&client_secret={current_app.config.get('JWT_OIDC_CLIENT_SECRET')}" \
                             f'&username={username}&password={password}&grant_type=password'
+            timeout = current_app.config.get('CONNECT_TIMEOUT', 60)
 
             headers = {
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
             token_url = f'{base_url}/auth/realms/{realm}/protocol/openid-connect/token'
-            response = requests.post(token_url, data=token_request, headers=headers)
+            response = requests.post(token_url, data=token_request, headers=headers,
+                                     timeout=timeout)
 
             response.raise_for_status()
             return response.json()
@@ -232,6 +242,7 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         # Create an admin token
         admin_token = KeycloakService._get_admin_token()
         # Get the '$group_name' group
@@ -243,7 +254,8 @@ class KeycloakService:
             'Authorization': f'Bearer {admin_token}'
         }
         add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups/{group_id}'
-        response = requests.put(add_to_group_url, headers=headers)
+        response = requests.put(add_to_group_url, headers=headers,
+                                timeout=timeout)
         response.raise_for_status()
 
     @staticmethod
@@ -252,6 +264,7 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         # Create an admin token
         admin_token = KeycloakService._get_admin_token()
         # Get the '$group_name' group
@@ -263,7 +276,8 @@ class KeycloakService:
             'Authorization': f'Bearer {admin_token}'
         }
         remove_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/groups/{group_id}'
-        response = requests.delete(remove_group_url, headers=headers)
+        response = requests.delete(remove_group_url, headers=headers,
+                                   timeout=timeout)
         response.raise_for_status()
 
     @staticmethod
@@ -275,6 +289,7 @@ class KeycloakService:
         admin_client_id = config.get('KEYCLOAK_BCROS_ADMIN_CLIENTID') if upstream else config.get(
             'KEYCLOAK_ADMIN_USERNAME')
         admin_secret = config.get('KEYCLOAK_BCROS_ADMIN_SECRET') if upstream else config.get('KEYCLOAK_ADMIN_SECRET')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
@@ -282,7 +297,8 @@ class KeycloakService:
 
         response = requests.post(token_url,
                                  data=f'client_id={admin_client_id}&grant_type=client_credentials'
-                                      f'&client_secret={admin_secret}', headers=headers)
+                                      f'&client_secret={admin_secret}', headers=headers,
+                                      timeout=timeout)
         return response.json().get('access_token')
 
     @staticmethod
@@ -291,12 +307,13 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         get_group_url = f'{base_url}/auth/admin/realms/{realm}/groups?search={group_name}'
         headers = {
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
-        response = requests.get(get_group_url, headers=headers)
+        response = requests.get(get_group_url, headers=headers, timeout=timeout)
         return KeycloakService._find_group_or_subgroup_id(response.json(), group_name)
 
     @staticmethod
@@ -315,6 +332,7 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         # Create an admin token
         admin_token = KeycloakService._get_admin_token()
 
@@ -331,15 +349,18 @@ class KeycloakService:
             }
         )
 
-        response = requests.put(configure_otp_url, headers=headers, data=input_data)
+        response = requests.put(configure_otp_url, headers=headers, data=input_data,
+                                timeout=timeout)
 
         if response.status_code == 204:
             get_credentials_url = f'{base_url}/auth/admin/realms/{realm}/users/{user_id}/credentials'
-            response = requests.get(get_credentials_url, headers=headers)
+            response = requests.get(get_credentials_url, headers=headers,
+                                    timeout=timeout)
             for credential in response.json():
                 if credential['type'] == 'otp':
                     delete_credential_url = f'{get_credentials_url}/{credential["id"]}'
-                    response = requests.delete(delete_credential_url, headers=headers)
+                    response = requests.delete(delete_credential_url, headers=headers,
+                                               timeout=timeout)
         response.raise_for_status()
 
     @staticmethod
@@ -348,6 +369,7 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         admin_token = KeycloakService._get_admin_token()
 
         headers = {
@@ -356,7 +378,8 @@ class KeycloakService:
         }
 
         create_client_url = f'{base_url}/auth/admin/realms/{realm}/clients'
-        response = requests.post(create_client_url, data=json.dumps(client_representation), headers=headers)
+        response = requests.post(create_client_url, data=json.dumps(client_representation),
+                                 headers=headers, timeout=timeout)
         response.raise_for_status()
 
     @staticmethod
@@ -365,6 +388,7 @@ class KeycloakService:
         config = current_app.config
         base_url = config.get('KEYCLOAK_BASE_URL')
         realm = config.get('KEYCLOAK_REALMNAME')
+        timeout = config.get('CONNECT_TIMEOUT', 60)
         admin_token = KeycloakService._get_admin_token()
 
         headers = {
@@ -373,7 +397,7 @@ class KeycloakService:
         }
         response = requests.get(
             f'{base_url}/auth/admin/realms/{realm}/clients/{client_identifier}/service-account-user',
-            headers=headers
+            headers=headers, timeout=timeout
         )
         response.raise_for_status()
         return response.json()
