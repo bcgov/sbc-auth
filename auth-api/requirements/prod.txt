@@ -28,3 +28,4 @@ asyncio-nats-streaming
 sqlalchemy<1.4
 markupsafe==2.0.1
 protobuf~=3.19.0
+launchdarkly-server-sdk

@@ -34,6 +34,7 @@ from auth_api.models import db, ma
 from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
+from auth_api.services import flags
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))  # important to do this first
 
@@ -54,6 +55,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     from auth_api.resources import TEST_BLUEPRINT  # pylint: disable=import-outside-toplevel
     from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
 
+    flags.init_app(app)
     db.init_app(app)
     ma.init_app(app)
     mail.init_app(app)
