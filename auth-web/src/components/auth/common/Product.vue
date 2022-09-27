@@ -111,6 +111,7 @@
                 />
                 <div v-if="showProductFee">
                   <v-divider class="my-6"></v-divider>
+                  <!-- This links to ProductFeeViewEdit. -->
                   <ProductFee :orgProduct="orgProduct"
                   :orgProductFeeCodes="orgProductFeeCodes"
                   @save:saveProductFee="saveProductFee"

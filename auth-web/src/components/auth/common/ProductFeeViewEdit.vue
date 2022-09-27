@@ -22,7 +22,7 @@
         <div v-else class="d-flex w-100">
           <ProductFeeSelector
             :canSelect="true"
-            :orgProductFeeCodes="orgProductFeeCodes"
+            :orgProductFeeCodes="getOrgProductFeeCodesForProduct(orgProduct.product)"
             @update:updatedProductFee="updatedProductFee"
             :productCode="orgProduct.product"
             :selectedApplyFilingFees="existingFeeCodes"
@@ -131,6 +131,11 @@ export default class ProductFeeViewEdit extends Vue {
   @Emit('save:saveProductFee')
   private saveProductFee () {
     return this.selectedFee
+  }
+
+  // Only allow $1.05 fee code for ESRA aka Site Registry.
+  public getOrgProductFeeCodesForProduct (productCode: string) {
+    return this.orgProductFeeCodes.filter((fee) => fee.code === 'TRF03' || productCode !== 'ESRA')
   }
 
   get existingFeeCodes () {
