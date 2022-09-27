@@ -764,6 +764,7 @@ def test_update_org_type_to_staff_fails(client, jwt, session, keycloak_mock):  #
     rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
     assert rv.json.get('orgType') == OrgType.PREMIUM.value
 
+
 def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
