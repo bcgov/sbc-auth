@@ -820,6 +820,7 @@ def test_update_org_returns_exception(client, jwt, session, keycloak_mock):  # p
         assert rv.status_code == 400
         assert schema_utils.validate(rv.json, 'exception')[0]
 
+
 def test_add_contact(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a contact can be added to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
