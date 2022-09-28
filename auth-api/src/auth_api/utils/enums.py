@@ -90,6 +90,8 @@ class OrgType(Enum):
 
     PREMIUM = 'PREMIUM'
     BASIC = 'BASIC'
+    STAFF = 'STAFF'
+    SBC_STAFF = 'SBC_STAFF'
 
 
 class DocumentType(Enum):

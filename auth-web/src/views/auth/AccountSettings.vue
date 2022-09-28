@@ -157,7 +157,7 @@
                 role="listitem"
                 :to="statementsUrl"
                 data-test="statements-nav-item"
-                v-if="isPremiumAccount"
+                v-if="isPremiumAccount || isSbcStaffAccount || isStaffAccount"
                 v-can:MANAGE_STATEMENTS.hide
               >
                 <v-list-item-icon>
@@ -172,7 +172,7 @@
                 role="listitem"
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
-                v-if="isPremiumAccount"
+                v-if="isPremiumAccount || isSbcStaffAccount || isStaffAccount"
                 v-can:MANAGE_STATEMENTS.hide
               >
                 <v-list-item-icon>
