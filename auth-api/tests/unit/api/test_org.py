@@ -733,6 +733,38 @@ def test_update_premium_org(client, jwt, session, keycloak_mock):  # pylint:disa
     assert schema_utils.validate(rv.json, 'org_response')[0]
 
 
+def test_update_org_type_to_staff_fails(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that org type doesn't get updated."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.bcol_linked()),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    data = TestOrgInfo.update_bcol_linked()
+    data['typeCode'] = OrgType.SBC_STAFF.value
+
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(data),
+                    headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+
+    data['typeCode'] = OrgType.STAFF.value
+    rv = client.put('/api/v1/orgs/{}'.format(org_id), data=json.dumps(data),
+                    headers=headers,
+                    content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    rv = client.get('/api/v1/orgs/{}'.format(org_id), headers=headers, content_type='application/json')
+    assert rv.json.get('orgType') == OrgType.PREMIUM.value
+
+
 def test_get_org_payment_settings(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that an org can be updated via PUT."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)

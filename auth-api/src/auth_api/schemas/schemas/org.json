@@ -35,11 +35,15 @@
       "default": "BASIC",
       "examples": [
         "BASIC",
-        "PREMIUM"
+        "PREMIUM",
+        "STAFF",
+        "SBC_STAFF"
       ],
       "enum": [
         "BASIC",
-        "PREMIUM"
+        "PREMIUM",
+        "STAFF",
+        "SBC_STAFF"
       ],
       "pattern": "^(.*)$"
     },
