@@ -103,7 +103,7 @@ export default class BcolLogin extends Vue {
     return !!this.username && !!this.password
   }
   private usernameRules = [
-    v => !!v.trim() || 'Username is required'
+    v => !!v?.trim() || 'Username is required'
   ]
 
   private passwordRules = [
