@@ -198,7 +198,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
       productData = {
         'product': productCode,
         'applyFilingFees': true,
-        'serviceFeeCode': 'TRF01'
+        'serviceFeeCode': productCode === 'ESRA' ? 'TRF03' : 'TRF01'
       }
     }
 
