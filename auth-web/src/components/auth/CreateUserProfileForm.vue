@@ -146,7 +146,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
     }
 
     private usernameRules = [
-      v => !!v.trim() || 'Username is required',
+      v => !!v?.trim() || 'Username is required',
       v => (v.trim().length >= 8) || this.inputHints.username
     ]
 

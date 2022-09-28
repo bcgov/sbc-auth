@@ -175,7 +175,10 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     const username = this.isExtraProvUser ? '' : `, ${this.currentUser?.fullName},`
     // on re-upload we will not have currentOrganization?.bcolAccountDetails since we are not making connection call which will be avaialble on saved deteails
     // so on re-upload check and set account name
-    const accountName = this.readOnly ? this.currentOrganization.bcolAccountName : this.currentOrganization?.bcolAccountDetails?.orgName
+    const accountName = this.readOnly
+      ? this.currentOrganization.bcolAccountName
+      : (this.currentOrganization?.bcolAccountDetails?.orgName ||
+        this.currentOrganization.bcolAccountName)
     return `I ${username} confirm that I am authorized to grant access to the account ${accountName}`
   }
 

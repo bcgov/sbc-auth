@@ -13,7 +13,7 @@ itsdangerous==2.0.1
 jaeger-client==4.8.0
 jsonschema==4.6.2
 opentracing==2.4.0
-protobuf==3.19.4
+protobuf==3.19.5
 pycountry==22.3.5
 pyrsistent==0.18.1
 python-dotenv==0.20.0
