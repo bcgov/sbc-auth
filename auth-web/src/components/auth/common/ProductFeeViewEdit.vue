@@ -135,7 +135,7 @@ export default class ProductFeeViewEdit extends Vue {
 
   // Only allow $1.05 fee code for ESRA aka Site Registry.
   public getOrgProductFeeCodesForProduct (productCode: string) {
-    return this.orgProductFeeCodes.filter((fee) => fee.code === 'TRF03' || productCode !== 'ESRA')
+    return this.orgProductFeeCodes?.filter((fee) => fee.code === 'TRF03' || productCode !== 'ESRA')
   }
 
   get existingFeeCodes () {
