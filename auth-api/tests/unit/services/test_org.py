@@ -648,12 +648,11 @@ def test_create_staff_org_failure(session, keycloak_mock, monkeypatch):  # pylin
     TestOrgInfo.org1['type_code'] = OrgType.STAFF.value
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.org1, user.id)
-
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
 def test_create_sbc_staff_org_failure(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that count of owners is correct."""
+    """Assert wrong org cannot be created."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
@@ -661,12 +660,11 @@ def test_create_sbc_staff_org_failure(session, keycloak_mock, monkeypatch):  # p
     TestOrgInfo.org1['type_code'] = OrgType.SBC_STAFF.value
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.org1, user.id)
-
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
 def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that count of owners is correct."""
+    """Assert wrong org cannot be created."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
