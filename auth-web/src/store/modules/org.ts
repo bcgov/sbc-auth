@@ -129,7 +129,7 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setGrantAccess (grantAccess: boolean) {
     if (this.currentOrganization) {
-      this.currentOrganization.grantAccess = grantAccess
+      this.currentOrganization = { ...this.currentOrganization, grantAccess }
     }
   }
 
