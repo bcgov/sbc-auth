@@ -645,9 +645,8 @@ def test_create_staff_org_failure(session, keycloak_mock, monkeypatch):  # pylin
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
-    TestOrgInfo.org1['type_code'] = OrgType.STAFF.value
     with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.org1, user.id)
+        OrgService.create_org(TestOrgInfo.staff_org, user.id)
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
@@ -657,9 +656,8 @@ def test_create_sbc_staff_org_failure(session, keycloak_mock, monkeypatch):  # p
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
-    TestOrgInfo.org1['type_code'] = OrgType.SBC_STAFF.value
     with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.org1, user.id)
+        OrgService.create_org(TestOrgInfo.sbc_staff_org, user.id)
     assert exception.value.code == Error.INVALID_INPUT.name
 
 
