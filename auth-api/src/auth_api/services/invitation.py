@@ -453,7 +453,8 @@ class Invitation:
             name = {'first_name': user.first_name, 'last_name': user.last_name}
             ActivityLogPublisher.publish_activity(Activity(membership.org_id,
                                                            ActivityAction.APPROVE_TEAM_MEMBER.value,
-                                                           name=json.dumps(name)
+                                                           name=json.dumps(name),
+                                                           value=membership.membership_type_code
                                                            ))
 
     @staticmethod
