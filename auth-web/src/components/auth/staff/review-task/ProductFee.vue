@@ -30,7 +30,7 @@
               filled
               label="Service fee"
               :rules="serviceFeeCodeRules"
-              :items="orgProductFeeCodes"
+              :items="getOrgProductFeeCodesForProduct(accountFee.product)"
               item-text="amount"
               item-value="code"
               v-model="accountFee.serviceFeeCode"
@@ -149,6 +149,11 @@ export default class ProductFee extends Vue {
 
     private getIndexedTag (tag, index): string {
       return `${tag}-${index}`
+    }
+
+    // Only allow $1.05 fee code for ESRA aka Site Registry.
+    public getOrgProductFeeCodesForProduct (productCode: string) {
+      return this.orgProductFeeCodes?.filter((fee) => fee.code === 'TRF03' || productCode !== 'ESRA')
     }
 }
 </script>
