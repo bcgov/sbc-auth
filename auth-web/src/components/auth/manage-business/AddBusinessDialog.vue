@@ -34,7 +34,7 @@
               </ul>
             </template>
             <span>
-              For individuals, it should be "Last Name, First Name MiddleName".<br>
+              For individuals, it should be "Last Name, First Name Middlename".<br>
               E.g. Watson, John Hamish
             </span>
           </v-tooltip>
@@ -192,7 +192,7 @@ export default class AddBusinessDialog extends Vue {
   }
 
   get passcodeLabel (): string {
-    if (this.isFirm) return 'Proprietor or Partner Name'
+    if (this.isFirm) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
     if (this.isCooperative) return 'Passcode'
     return 'Password'
   }
