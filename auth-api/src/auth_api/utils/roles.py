@@ -14,7 +14,7 @@
 """Role definitions."""
 from enum import Enum
 
-from .enums import OrgStatus, ProductSubscriptionStatus, Status
+from .enums import OrgStatus, OrgType, ProductSubscriptionStatus, Status
 
 
 class Role(Enum):
@@ -57,3 +57,5 @@ CLIENT_ADMIN_ROLES = (COORDINATOR, ADMIN)
 CLIENT_AUTH_ROLES = (*CLIENT_ADMIN_ROLES, USER)
 ALL_ALLOWED_ROLES = (*CLIENT_AUTH_ROLES, STAFF)
 EXCLUDED_FIELDS = ('status_code', 'type_code')
+
+PREMIUM_ORG_TYPES = (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value, OrgType.STAFF.value)

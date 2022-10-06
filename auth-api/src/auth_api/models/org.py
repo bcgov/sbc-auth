@@ -16,12 +16,16 @@
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, event, func
 from sqlalchemy.orm import contains_eager, relationship
+
+from auth_api.exceptions import BusinessException
+from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation
 from auth_api.models.dataclass import OrgSearch
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
+from auth_api.utils.enums import OrgType as OrgTypeEnum
 from auth_api.utils.roles import EXCLUDED_FIELDS, VALID_STATUSES
 
 from .base_model import VersionedModel
@@ -240,3 +244,25 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
             self.save()
         else:
             super().reset()
+
+
+@event.listens_for(Org, 'before_insert')
+def receive_before_insert(mapper, connection, target):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Rejects invalid type_codes on insert."""
+    org = target
+    if org.type_code in (OrgTypeEnum.SBC_STAFF.value, OrgTypeEnum.STAFF.value):
+        raise BusinessException(
+            Error.INVALID_INPUT,
+            None
+        )
+
+
+@event.listens_for(Org, 'before_update', raw=True)
+def receive_before_update(mapper, connection, state):  # pylint: disable=unused-argument; SQLAlchemy callback signature
+    """Rejects invalid type_codes on update."""
+    if Org.type_code.key in state.unmodified:
+        return
+    raise BusinessException(
+        Error.INVALID_INPUT,
+        None
+    )
