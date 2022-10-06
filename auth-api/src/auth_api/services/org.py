@@ -105,10 +105,7 @@ class Org:  # pylint: disable=too-many-public-methods
         if access_type == AccessType.GOVM.value:
             org_info.update({'typeCode': OrgType.PREMIUM.value})
 
-        org_snake = camelback2snake(org_info)
-        if org_snake.get('type_code') in (OrgType.STAFF.value, OrgType.SBC_STAFF.value):
-            raise BusinessException(Error.INVALID_INPUT, None)
-        org = OrgModel.create_from_dict(org_snake)
+        org = OrgModel.create_from_dict(camelback2snake(org_info))
         org.access_type = access_type
 
         # Set the status based on access type

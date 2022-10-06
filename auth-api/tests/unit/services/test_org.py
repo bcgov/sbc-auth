@@ -19,12 +19,14 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
+from sqlalchemy import event
 
 from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
+from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.models import Task as TaskModel
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affidavit as AffidavitService
@@ -49,7 +51,7 @@ from tests.utilities.factory_utils import (
     factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
     factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
     patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put, patch_token_info)
-
+from tests.utilities.sqlalchemy import clear_event_listeners
 
 # noqa: I005
 
@@ -403,6 +405,33 @@ def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatc
                 if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode'])
 
 
+@pytest.mark.parametrize(
+    'org_type', [(OrgType.STAFF.value), (OrgType.SBC_STAFF.value)]
+)
+def test_create_product_subscription_staff(session, keycloak_mock, org_type, monkeypatch):
+    """Assert that updating product subscription works for staff."""
+    user = factory_user_model(TestUserInfo.user_test)
+    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+
+    # Clearing the event listeners here, because we can't change the type_code.
+    clear_event_listeners(OrgModel)
+    org_db = OrgModel.find_by_id(org._model.id)
+    org_db.type_code = org_type
+    org_db.save()
+    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
+    event.listen(OrgModel, 'before_insert', receive_before_insert)
+
+    subscriptions = ProductService.create_product_subscription(org._model.id,
+                                                               TestOrgProductsInfo.org_products2,
+                                                               skip_auth=True)
+
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode'])
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode'])
+
+
 def test_create_org_with_duplicate_name(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org with duplicate name cannot be created."""
     user = factory_user_model()
@@ -639,25 +668,17 @@ def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pyli
     assert org.get_owner_count() == 1
 
 
-def test_create_staff_org_failure(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert that count of owners is correct."""
+@pytest.mark.parametrize(
+    'staff_org', [(TestOrgInfo.staff_org), (TestOrgInfo.sbc_staff_org)]
+)
+def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch):  # pylint:disable=unused-argument
+    """Assert that staff org cannot be created."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.staff_org, user.id)
-    assert exception.value.code == Error.INVALID_INPUT.name
-
-
-def test_create_sbc_staff_org_failure(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
-    """Assert wrong org cannot be created."""
-    user_with_token = TestUserInfo.user_test
-    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
-    user = factory_user_model(user_info=user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
-    with pytest.raises(BusinessException) as exception:
-        OrgService.create_org(TestOrgInfo.sbc_staff_org, user.id)
     assert exception.value.code == Error.INVALID_INPUT.name
 
 

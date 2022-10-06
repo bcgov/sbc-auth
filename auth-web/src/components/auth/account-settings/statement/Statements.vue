@@ -204,7 +204,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   private get isStatementsAllowed (): boolean {
-    return (this.currentOrganization?.orgType === Account.PREMIUM) &&
+    return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(this.currentOrganization?.orgType as Account) &&
       [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
   }
 
