@@ -17,6 +17,7 @@ from flask import current_app
 from auth_api.exceptions import BusinessException, Error
 from auth_api.services.validators.validator_response import ValidatorResponse
 from auth_api.utils.enums import AccessType, OrgType, PaymentMethod
+from auth_api.utils.roles import PREMIUM_ORG_TYPES
 from auth_api.utils.user_context import user_context
 
 
@@ -52,6 +53,6 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
                 raise BusinessException(Error.INVALID_INPUT, None)
     else:
         payment_type = PaymentMethod.BCOL.value if \
-            org_type == OrgType.PREMIUM else default_cc_method
+            org_type in PREMIUM_ORG_TYPES else default_cc_method
     validator_response.add_info({'payment_type': payment_type})
     return validator_response
