@@ -36,7 +36,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
-from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, STAFF
+from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, PREMIUM_ORG_TYPES, STAFF
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
@@ -92,8 +92,7 @@ class Product:
             if product_model:
                 # Check if product needs premium account, if yes skip and continue.
                 if product_model.premium_only and org.type_code \
-                    not in (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value,
-                            OrgType.STAFF.value):
+                    not in PREMIUM_ORG_TYPES:
                     continue
 
                 subscription_status = Product.find_subscription_status(org, product_model)

@@ -29,12 +29,15 @@ def validate(is_fatal=False, **kwargs) -> ValidatorResponse:
     default_cc_method = PaymentMethod.DIRECT_PAY.value if current_app.config.get(
         'DIRECT_PAY_ENABLED') else PaymentMethod.CREDIT_CARD.value
     validator_response = ValidatorResponse()
+    non_ejv_payment_methods = (
+            PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
+            PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
     org_payment_method_mapping = {
         OrgType.BASIC: (
             PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value, PaymentMethod.ONLINE_BANKING.value),
-        OrgType.PREMIUM: (
-            PaymentMethod.CREDIT_CARD.value, PaymentMethod.DIRECT_PAY.value,
-            PaymentMethod.PAD.value, PaymentMethod.BCOL.value)
+        OrgType.PREMIUM: non_ejv_payment_methods,
+        OrgType.SBC_STAFF: non_ejv_payment_methods,
+        OrgType.STAFF: non_ejv_payment_methods,
     }
     if access_type == AccessType.GOVM.value:
         payment_type = PaymentMethod.EJV.value
