@@ -40,6 +40,7 @@ def process(org_id, recipients, template_name, subject, logo_url, **kwargs) -> d
         'logo_url': logo_url,
         **kwargs
     }
+    logger.debug('notification args: %s', jinja_kwargs)
 
     html_out = jnja_template.render(jinja_kwargs)
 
