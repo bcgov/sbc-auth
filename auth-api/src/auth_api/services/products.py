@@ -30,7 +30,7 @@ from auth_api.models import db
 from auth_api.schemas import ProductCodeSchema
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
+    AccessType, ActivityAction, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
     TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
 
