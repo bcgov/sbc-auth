@@ -167,7 +167,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   }
 
   private get isTransactionsAllowed (): boolean {
-    return (this.currentOrganization?.orgType === Account.PREMIUM) &&
+    return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(this.currentOrganization?.orgType as Account) &&
       [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
   }
 }
