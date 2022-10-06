@@ -91,7 +91,9 @@ class Product:
             product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
             if product_model:
                 # Check if product needs premium account, if yes skip and continue.
-                if product_model.premium_only and org.type_code != OrgType.PREMIUM.value:
+                if product_model.premium_only and org.type_code \
+                    not in (OrgType.PREMIUM.value, OrgType.SBC_STAFF.value,
+                            OrgType.STAFF.value):
                     continue
 
                 subscription_status = Product.find_subscription_status(org, product_model)
