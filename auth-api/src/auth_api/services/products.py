@@ -30,8 +30,8 @@ from auth_api.models import db
 from auth_api.schemas import ProductCodeSchema
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
-    TaskRelationshipType, TaskStatus)
+    AccessType, ActivityAction, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType,
+    TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
@@ -91,8 +91,7 @@ class Product:
             product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
             if product_model:
                 # Check if product needs premium account, if yes skip and continue.
-                if product_model.premium_only and org.type_code \
-                    not in PREMIUM_ORG_TYPES:
+                if product_model.premium_only and org.type_code not in PREMIUM_ORG_TYPES:
                     continue
 
                 subscription_status = Product.find_subscription_status(org, product_model)
