@@ -3,6 +3,7 @@
     <div class="header-group" ref="headerGroup">
       <sbc-loader :show="showLoading" />
       <sbc-header
+        class="flex-direction-column"
         :key="$store.state.refreshKey"
         :in-auth="true"
         :show-product-selector="false"
@@ -224,5 +225,10 @@ export default class App extends Mixins(NextPageMixin) {
   .app-body {
     flex: 1 1 auto;
     position: relative;
+  }
+
+  /** We need this until we upgrade Vuetify for sbc-auth. */
+  .flex-direction-column {
+    flex-direction: column;
   }
 </style>
