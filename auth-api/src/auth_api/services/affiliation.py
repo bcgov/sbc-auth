@@ -207,7 +207,7 @@ class Affiliation:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Validate if org_id is valid by calling Org Service.
-        org = OrgService.find_by_org_id(org_id, allowed_roles=CLIENT_AUTH_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
