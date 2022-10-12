@@ -268,17 +268,6 @@ h2 {
 }
 
 ::v-deep {
-  .v-input__append-outer {
-    margin-top: 0 !important;
-  }
-
-  .v-expansion-panel-content__wrap {
-  padding: 0px !important;
-  }
-
-  .v-text-field__details {
-    margin: 0 !important;
-  }
 
   .search-btn {
     margin-left: 0.25rem;
@@ -317,6 +306,18 @@ h2 {
       right: 32px;
       top: 20px;
     }
+  }
+
+  .v-expansion-panel-content__wrap {
+    padding: 0px !important;
+  }
+  
+  .v-input__append-outer {
+    margin-top: 0 !important;
+  }
+
+  .v-text-field__details {
+    margin: 0 !important;
   }
 }
 </style>
