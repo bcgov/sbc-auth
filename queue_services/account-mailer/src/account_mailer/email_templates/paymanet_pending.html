@@ -1,54 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <base href="/">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="origin-when-cross-origin"/>
-    <meta name="author" content="BC Registries and Online Services">
-    <title>Payment is now due for pending transaction on your account</title>
-    [[style.html]]
-  </head>
-  <body style="max-width: initial;">
-    <div style="font-family: Verdana, Arial, sans-serif; font-size: 16px; line-height: 22px; padding: 16px; width: 650px;margin: auto;">
-      <div style="margin-left: -6px;">
-        [[logo.html]]
-      </div>
-      <h1 style="line-height: 40px; font-size: 28px; font-weight: 700;">
-        Payment is now due for pending transaction on your account
-     </h1>
-      <p style="margin: 22px 0 0 ;">The following account has a <strong>balance due of ${{transactionAmount}}.</strong></p>
-      <h5 style="margin-bottom: 10px; line-height: 34px; font-size: 16px; font-weight: 700;">{{ account_name }}</h5>
-      <p style="padding-top: 10px; padding-bottom: 10px">
-        Products and services will not be available until payment is received in full. 
-Online Banking payments can <strong>expect between 2-5 days</strong> for your payment
-to reach us.
-      </p>
-      <hr style="margin: 25px 0px 36px 0;"></hr>
-      <h5 style="margin: 20px 0 10px 0; line-height: 34px; font-size: 16px; font-weight: 700;">
-        How to pay with online banking:
-     </h5>
-     <ul style="list-style: decimal; margin: 20px 0 0 -17px;">
-        <li style="margin: 2px 0;">Go to your financial institution's website or app</li>
-        <li style="margin: 2px 0;">Add "BC Registries and Online Services" as a payee</li>
-        <li style="margin: 2px 0;">Enter your BC Registries and Online Services account number </li>
-        <li style="margin: 2px 0;">Submit your payment for the balance due </li>
-    </ul>
-    <div style="margin: 25px 0;">
-      <p style="padding-bottom: 4px">
-        <span>Payee Name: </span> <span style="margin-left: 68px;"> BC Registries and Online Services</span>
-      </p>
-      <p style="padding-bottom: 10px">
-        <span>Account Number:</span> <span style="margin-left: 35px;">{{cfsAccountId}}</span>
-      </p>
-      </div>
-      <hr style="margin: 26px 0 34px 0;"></hr>
-      <p style="padding-bottom: 10px">
-        Log in to BC Registries and Online Services to access your account.
-      </p>
-      <a style="display: block; width: 116px; padding: 12px 0; color: #ffffff; border: none; border-radius: 6px; background-color: #003366; text-align: center; text-decoration: none; font-size: 16px; font-weight: bold;margin-top: 18px;"
-      href="{{ url }}">Log in
-   </a>
-    </div>
-  </body>
-</html>
+# Payment is now due for pending transaction on your account
+
+The following account has a **balance due of ${{transactionAmount}}.**
+
+## {{ account_name }}
+
+Products and services will not be available until payment is received in full. Online Banking payments can **expect between 2-5 days** for your payment to reach us.
+
+## How to pay with online banking:
+
+* Go to your financial institution's website or app
+* Add "BC Registries and Online Services" as a payee
+* Enter your BC Registries and Online Services account number
+* Submit your payment for the balance due
+
+Payee Name:             BC Registries and Online Services
+Account Number:         {{cfsAccountId}}
+
+Log in to BC Registries and Online Services to access your account.
+
+[Log in]({{ url }})

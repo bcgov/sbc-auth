@@ -1,53 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <base href="/">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="origin-when-cross-origin"/>
-    <meta name="author" content="BC Registries and Online Services">
-    <title> {{ title }}</title>
-    [[style.html]]
-</head>
-<body>
-<table style="width: 100%;" cellspacing="0" cellpadding="0">
-    <tr>
-        <td style="padding-left: 20px; padding-right: 20px;">
-            <table style="max-width: 640px; margin: 0 auto; border: 0; border-collapse: collapse; border-radius: 6px; background-color: #ffffff;"
-                   cellspacing="0" cellpadding="0">
-                <tr>
-                    <td style="padding-top: 30px; padding-bottom: 30px;">
-                        [[logo.html]]
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <h1 style="margin: 0; line-height: 34px; letter-spacing: -1px; font-family: Verdana, Arial, sans-serif; font-size: 24px; font-weight: 700;">
-                            You have been invited to join the <strong>{{ account_name }}</strong> account at Business Registry.
-                        </h1>
-                        <p style="margin-top: 25px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                            <strong>{{ user_first_name }} {{ user_last_name }}</strong> has invited you to join the <strong>{{ account_name }}</strong> account at Business Registry.
-                            {% if role.upper() == 'ACCOUNT ADMINISTRATOR' %}
-                            <span>You will need to log in with a registered BCeID account, and verify your identity by a notarized affidavit. After submitting your information, staff will review your affidavit. If approved you will be able to join the account.</span>
-                            {% else %}
-                            <span>You will need to log in using your BCEID to join this account.</span>
-                            {% endif %}
-                        </p>
-                        <p style="margin-top: 25px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                            <strong>Note: </strong>
-                            Internet Explorer cannot be used with our application. We recommend using the latest version of Microsoft Edge, Google Chrome, Mozilla Firefox or Apple Safari as your browser.
-                        </p>
-                        <div style="margin-top: 25px;">
-                            <!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ context_url }}" style="height:55px; v-text-anchor:middle; width:150px;" arcsize="10%" stroke="f" fillcolor="#003366" alias="CTA1">Join Team<w:anchorlock/> <center> <![endif]-->
-                            <a style="display: inline-block; width: 150px; color: #ffffff; border: none; border-radius: 6px; background-color: #003366; line-height: 55px; text-align: center; text-decoration: none; font-size: 16px; font-weight: bold;"
-                               href="{{ context_url }}">Join Account</a>
-                            <!--[if mso]> </center> </v:roundrect> <![endif]-->
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-</body>
-</html>
+# You have been invited to join the **{{ account_name }}** account at Business Registry.
+
+**{{ user_first_name }} {{ user_last_name }}** has invited you to join the **{{ account_name }}** account at Business Registry.
+
+{% if role.upper() == 'ACCOUNT ADMINISTRATOR' %}
+You will need to log in with a registered BCeID account, and verify your identity by a notarized affidavit. After submitting your information, staff will review your affidavit. If approved you will be able to join the account.
+{% else %}
+You will need to log in using your BCEID to join this account.
+{% endif %}
+
+
+**Note: **
+Internet Explorer cannot be used with our application. We recommend using the latest version of Microsoft Edge, Google Chrome, Mozilla Firefox or Apple Safari as your browser.
+
+[Join Account]({{ context_url }})
