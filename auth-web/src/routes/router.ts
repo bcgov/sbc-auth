@@ -2,6 +2,7 @@ import {
   MyBusinessRegistryBreadcrumb,
   RegistryDashboardBreadcrumb,
   RegistryHomeBreadcrumb,
+  StaffBusinessRegistryBreadcrumb,
   StaffDashboardBreadcrumb
 } from '@/resources/BreadcrumbResources'
 import { Pages, Role, SessionStorageKeys } from '@/util/constants'
@@ -228,10 +229,9 @@ export function getRoutes (): RouteConfig[] {
             disabledRoles: [Role.AnonymousUser],
             requiresAuth: true,
             requiresActiveAccount: true,
-            breadcrumb: [
-              ...isStaff() ? [StaffDashboardBreadcrumb] : [RegistryDashboardBreadcrumb],
-              MyBusinessRegistryBreadcrumb
-            ]
+            breadcrumb: isStaff()
+              ? [StaffDashboardBreadcrumb, StaffBusinessRegistryBreadcrumb]
+              : [RegistryDashboardBreadcrumb, MyBusinessRegistryBreadcrumb]
           }
         }]
     },

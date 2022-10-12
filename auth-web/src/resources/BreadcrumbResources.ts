@@ -16,6 +16,12 @@ export const MyBusinessRegistryBreadcrumb: BreadcrumbIF = {
   href: `${sessionStorage.getItem('AUTH_WEB_URL')}/business`
 }
 
+export const StaffBusinessRegistryBreadcrumb: BreadcrumbIF = {
+  text: 'My Staff Business Registry',
+  to: { name: 'business' },
+  href: `${sessionStorage.getItem('AUTH_WEB_URL')}/business`
+}
+
 export const StaffDashboardBreadcrumb: BreadcrumbIF = {
   text: 'Staff Dashboard',
   href: `${sessionStorage.getItem('AUTH_WEB_URL')}/staff/dashboard/active`
