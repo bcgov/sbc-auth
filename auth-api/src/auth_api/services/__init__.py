@@ -31,3 +31,6 @@ from .reset import ResetTestData
 from .task import Task
 from .user import User
 from .user_settings import UserSettings
+from .flags import Flags
+
+flags = Flags()
