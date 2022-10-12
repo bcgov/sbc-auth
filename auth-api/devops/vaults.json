@@ -49,5 +49,11 @@
             "api_gw",
             "legal-api"
         ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "auth"
+        ]
     }
 ]

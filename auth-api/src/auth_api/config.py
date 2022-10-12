@@ -59,6 +59,7 @@ class _Config:  # pylint: disable=too-few-public-methods
     PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
     SECRET_KEY = 'a secret'
+    AUTH_LD_SDK_KEY = os.getenv('AUTH_LD_SDK_KEY', None)
 
     TESTING = False
     DEBUG = False
