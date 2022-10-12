@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2022 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,15 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""Utility to remove event listeners for models."""
+import ctypes
+from sqlalchemy import event
 
-"""Version of this service in PEP440.
 
-[N!]N(.N)*[{a|b|rc}N][.postN][.devN]
-Epoch segment: N!
-Release segment: N(.N)*
-Pre-release segment: {a|b|rc}N
-Post-release segment: .postN
-Development release segment: .devN
-"""
-
-__version__ = '2.6.5'  # pylint: disable=invalid-name
+def clear_event_listeners(model):
+    """Remove event listeners for a model."""
+    keys = [k for k in event.registry._key_to_collection if k[0] == id(model)]
+    for key in keys:
+        target = model
+        identifier = key[1]
+        fn = ctypes.cast(key[2], ctypes.py_object).value  # get function by id
+        event.remove(target, identifier, fn)

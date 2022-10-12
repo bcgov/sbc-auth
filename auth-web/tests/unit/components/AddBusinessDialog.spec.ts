@@ -29,7 +29,7 @@ const tests = [
   {
     desc: 'renders the component properly for a FM',
     businessIdentifier: 'FM0000000',
-    passcodeLabel: 'Proprietor or Partner Name',
+    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
     certifyExists: true,
     forgotButtonText: null
   }

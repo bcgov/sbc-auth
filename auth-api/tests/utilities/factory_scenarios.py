@@ -548,6 +548,10 @@ class TestOrgInfo(dict, Enum):
         'isBusinessAccount': True
     }
 
+    staff_org = {'name': 'My Test Org', 'typeCode': OrgType.STAFF.value}
+
+    sbc_staff_org = {'name': 'My Test Org', 'typeCode': OrgType.SBC_STAFF.value}
+
     @staticmethod
     def bcol_linked():
         """Return org info for bcol linked info."""

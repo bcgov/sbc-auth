@@ -66,14 +66,11 @@
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
+import { namespace } from 'vuex-class'
+const OrgModule = namespace('org')
+
 @Component({
-  name: 'BcolLogin',
-  computed: {
-    ...mapState('org', ['currentOrganization'])
-  },
-  methods: {
-    ...mapActions('org', ['syncMembership', 'syncOrganization', 'validateBcolAccount'])
-  }
+  name: 'BcolLogin'
 })
 export default class BcolLogin extends Vue {
   private username: string = ''
@@ -82,6 +79,7 @@ export default class BcolLogin extends Vue {
   private isLoading: boolean = false
   @Prop({ default: false }) hideLinkBtn: boolean
   @Prop() defaultUserId: string
+  @OrgModule.Action('validateBcolAccount')
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   private async mounted () {
@@ -103,7 +101,7 @@ export default class BcolLogin extends Vue {
     return !!this.username && !!this.password
   }
   private usernameRules = [
-    v => !!v.trim() || 'Username is required'
+    v => !!v?.trim() || 'Username is required'
   ]
 
   private passwordRules = [

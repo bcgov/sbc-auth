@@ -28,7 +28,7 @@ from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
-from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
+from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from .activity_log_publisher import ActivityLogPublisher
@@ -207,13 +207,14 @@ class Affiliation:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Validate if org_id is valid by calling Org Service.
-        org = OrgService.find_by_org_id(org_id, allowed_roles=CLIENT_AUTH_ROLES)
+        org = OrgService.find_by_org_id(org_id, allowed_roles=(*CLIENT_AUTH_ROLES, STAFF))
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
         # If entity already exists and passcode is already claimed, throw error
-        if entity and entity.as_dict()['pass_code_claimed']:
+        if org.as_dict()['org_type'] not in (OrgType.SBC_STAFF.value, OrgType.STAFF.value) \
+                and entity and entity.as_dict()['pass_code_claimed']:
             raise BusinessException(Error.NR_CONSUMED, None)
 
         # Call the legal-api to verify the NR details
