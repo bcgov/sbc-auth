@@ -1,45 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <base href="/">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="origin-when-cross-origin"/>
-    <meta name="author" content="BC Registries and Online Services">
-    <title> {{ title }}</title>
-    [[style.html]]
-</head>
-<body>
-<table style="width: 100%;" cellspacing="0" cellpadding="0">
-    <tr>
-        <td style="padding-left: 20px; padding-right: 20px;">
-            <table style="max-width: 640px; margin: 0 auto; border: 0; border-collapse: collapse; border-radius: 6px; background-color: #ffffff;"
-                   cellspacing="0" cellpadding="0">
-                <tr>
-                    <td style="padding-top: 30px; padding-bottom: 30px;">
-                         [[logo.html]]
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <h1 style="margin: 0; line-height: 34px; letter-spacing: -1px; font-family: Verdana, Arial, sans-serif; font-size: 24px; font-weight: 700;">
-                        <strong>{{ user_first_name }} {{ user_last_name }}</strong> has accepted your invitation to join the {{ account_name }} account at Business Registry.
-                        </h1>
-                        <p style="margin-top: 20px; margin-bottom: 0; line-height: 24px; font-family: Verdana, Arial, sans-serif; font-size: 16px;">
-                            Log into Business Registry to approve this invitation.
-                        </p>
-                        <div style="margin-top: 45px;">
-                            <!--[if mso]> <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{{ context_url }}" style="height:55px; v-text-anchor:middle; width:250px;" arcsize="10%" stroke="f" fillcolor="#003366" alias="CTA1">Join Team<w:anchorlock/> <center> <![endif]-->
-                            <a style="display: block; width: 250px; padding: 15px 0; color: #ffffff; border: none; border-radius: 6px; background-color: #003366; text-align: center; text-decoration: none; font-size: 16px; font-weight: bold;"
-                               href="{{ context_url }}">Business Registry
-                            </a>
-                            <!--[if mso]> </center> </v:roundrect> <![endif]-->
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-</body>
-</html>
+**{{ user_first_name }} {{ user_last_name }}** has accepted your invitation to join the {{ account_name }} account at Business Registry.
+
+
+Log into Business Registry to approve this invitation.
+
+[Business Registry]({{ context_url }})
