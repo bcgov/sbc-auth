@@ -103,8 +103,9 @@ class Orgs(Resource):
             else:
                 response, status = OrgService.search_orgs(org_search), http_status.HTTP_200_OK
 
-            is_public_user = Role.PUBLIC_USER.value in token.get('realm_access').get('roles')
-            if is_public_user:  # public user cant get the details in search.Gets only status of orgs
+            roles = token.get('realm_access').get('roles')
+            # public user cant get the details in search. Gets only status of orgs.
+            if Role.PUBLIC_USER.value in roles and Role.STAFF.value not in roles:
                 if response and response.get('orgs'):
                     status = http_status.HTTP_200_OK
                 else:
