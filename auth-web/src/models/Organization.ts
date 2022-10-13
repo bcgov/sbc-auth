@@ -304,4 +304,6 @@ export enum OrgAccountTypes {
   GOVM = 'GovM',
   GOVN = 'GovN',
   DIRECTOR_SEARCH = 'Director Search'
+  STAFF = 'BC Registries Staff'
+  SBC_STAFF = 'Service BC Staff'
 }

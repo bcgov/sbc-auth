@@ -252,6 +252,14 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     },
     [OrgAccountTypes.DIRECTOR_SEARCH]: {
       accessType: [AccessType.ANONYMOUS]
+    },
+    [OrgAccountTypes.STAFF]: {
+      accessType: [AccessType.GOVM],
+      orgType: Account.STAFF
+    },
+    [OrgAccountTypes.SBC_STAFF]: {
+      accessType: [AccessType.GOVM],
+      orgType: Account.SBC_STAFF
     }
   }
   protected readonly accountTypes = Array.from(Object.keys(this.accountTypeMap))
