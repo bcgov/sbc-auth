@@ -81,8 +81,8 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info').exists()).toBe(true)
     expect(wrapper.find('.product-info h2').text()).toBe('Staff Personal Property Registry')
     expect(wrapper.find('.product-info p').text()).toContain('claims on personal property.')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-    expect(wrapper.find('.action-btn').text()).toContain('Open')
+    expect(wrapper.find('.product-info__btn').exists()).toBe(true)
+    expect(wrapper.find('.product-info__btn').text()).toContain('Open')
     expect(wrapper.vm.pprUrl).toEqual(pprUrl)
   })
 
@@ -94,8 +94,8 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info').exists()).toBe(true)
     expect(wrapper.find('.product-info h2').text()).toBe('Staff Manufactured Home Registry')
     expect(wrapper.find('.product-info p').text()).toContain('claims on manufactured homes.')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-    expect(wrapper.find('.action-btn').text()).toContain('Open')
+    expect(wrapper.find('.product-info__btn').exists()).toBe(true)
+    expect(wrapper.find('.product-info__btn').text()).toContain('Open')
     expect(wrapper.vm.pprUrl).toEqual(pprUrl)
   })
 
@@ -108,8 +108,8 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info h2').text()).toBe('Staff Asset Registries')
     expect(wrapper.find('.product-info p').text()).toContain('manufactured homes and register or ' +
         'search for legal claims on personal property.')
-    expect(wrapper.find('.action-btn').exists()).toBe(true)
-    expect(wrapper.find('.action-btn').text()).toContain('Open')
+    expect(wrapper.find('.product-info__btn').exists()).toBe(true)
+    expect(wrapper.find('.product-info__btn').text()).toContain('Open')
     expect(wrapper.vm.pprUrl).toEqual(pprUrl)
   })
 })

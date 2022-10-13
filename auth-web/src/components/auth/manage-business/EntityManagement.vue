@@ -8,7 +8,7 @@
 
     <v-container justify class="view-container">
       <div class="view-header align-center">
-        <h1 class="view-header__title">My Business Registry<br>
+        <h1 class="view-header__title">{{ viewTitle }}<br>
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
@@ -211,8 +211,9 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpType, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
@@ -234,15 +235,14 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
-    ...mapState('user', ['userProfile', 'currentUser']),
-    ...mapGetters('org', ['isPremiumAccount'])
+    ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
     ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
     ...mapActions('org', ['syncAddress'])
   }
 })
-export default class EntityManagement extends Mixins(AccountChangeMixin, NextPageMixin) {
+export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
 
   private removeBusinessPayload = null
@@ -261,7 +261,6 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
   /** V-model for dropdown menu. */
   private addAffiliationDropdown: boolean = false
 
-  private readonly isPremiumAccount!: boolean
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
@@ -327,6 +326,10 @@ export default class EntityManagement extends Mixins(AccountChangeMixin, NextPag
 
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+  }
+
+  get viewTitle (): string {
+    return this.isStaffAccount ? 'My Staff Business Registry' : 'My Business Registry'
   }
 
   // open Name Request
