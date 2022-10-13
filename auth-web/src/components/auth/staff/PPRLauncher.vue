@@ -5,10 +5,10 @@
         <!-- to use a dynamic src use 'require(<path>)' -->
         <img class="product-img" :src="getImgUrl(img)" />
       </v-col>
-      <v-col class="product-info">
+      <v-col class="product-info" align-self="baseline">
         <h2>{{ title }}</h2>
-        <p class="pt-3 ma-0">{{ text }}</p>
-        <v-btn class="primary action-btn px-5">
+        <p class="mt-5 mb-0">{{ text }}</p>
+        <v-btn class="primary product-info__btn px-5">
           Open
           <v-icon>mdi-chevron-right</v-icon>
         </v-btn>
@@ -69,13 +69,10 @@ export default class PPRLauncher extends Vue {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-.action-btn {
-  font-weight: 600;
-  height: 40px !important;
-  margin-top: 30px;
-  text-transform: none;
-  pointer-events: none;
+h2 {
+  line-height: 1.5rem;
 }
+
 .product-container {
   border-left: 3px solid transparent;
   box-shadow: none;
@@ -93,11 +90,22 @@ export default class PPRLauncher extends Vue {
   width: 230px;
 }
 .product-info {
+  height: 196px;
   padding-left: 15px !important;
+  position: relative;
 
   p {
     color: $gray7;
     font-size: 1rem;
+  }
+
+  &__btn {
+    font-weight: 600;
+    height: 40px !important;
+    text-transform: none;
+    pointer-events: none;
+    position: absolute;
+    bottom: 0;
   }
 }
 </style>
