@@ -30,5 +30,11 @@
             "jwt-base",
             "sbc-auth-admin"
         ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "auth"
+        ]
     }
 ]
