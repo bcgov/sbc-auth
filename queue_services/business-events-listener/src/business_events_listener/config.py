@@ -65,6 +65,8 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    AUTH_LD_SDK_KEY = os.getenv('AUTH_LD_SDK_KEY', None)
+
     # POSTGRESQL
     DB_USER = os.getenv('DATABASE_USERNAME', '')
     DB_PASSWORD = os.getenv('DATABASE_PASSWORD', '')

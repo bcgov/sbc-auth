@@ -40,5 +40,11 @@
         "application": [
              "relationship-api"
         ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "auth"
+        ]
     }
 ]
