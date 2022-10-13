@@ -9,11 +9,25 @@
 
     <v-row class="ma-0 mb-4" no-gutters>
       <v-col class="pr-2" cols="6">
-        <v-card class="pa-8 srch-card" flat style="height: 100%;">
-          <div class="view-header flex-column mb-10">
-            <h2 class="view-header__title">Search Entities</h2>
-            <p class="mt-3 mb-0">
-              Enter the Entity's Incorporation Number below to access their dashboard.
+        <v-card class="srch-card" flat style="height: 100%;">
+          <div>
+            <h2>Business Registry</h2>
+            <v-row class="mt-4" no-gutters>
+              <v-col class="mr-5" cols="auto">
+                <v-btn class="srch-card__link px-0" color="primary" :ripple="false" small text @click="goToManageBusiness()">
+                  My Staff Business Registry
+                  <v-icon class="ml-1" size="20">mdi-chevron-right-circle-outline</v-icon>
+                </v-btn>
+              </v-col>
+              <v-col>
+                <v-btn class="srch-card__link px-0" color="primary" :href="registrySearchUrl" :ripple="false" small target="blank" text>
+                  Business Search
+                  <v-icon class="ml-1" size="20">mdi-chevron-right-circle-outline</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+            <p class="mb-5 mt-4">
+              Find an existing business to manage:
             </p>
           </div>
 
@@ -26,25 +40,31 @@
           </v-expand-transition>
 
           <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
-            <v-text-field
-              filled dense req persistent-hint
-              label="Incorporation Number or Registration Number"
-              hint="Example: BC1234567, CP1234567 or FM1234567"
-              @blur="formatBusinessIdentifier()"
-              :rules="businessIdentifierRules"
-              v-model="businessIdentifier"
-              id="txtBusinessNumber"
-            />
-            <v-btn
-              color="primary"
-              class="search-btn mt-0"
-              type="submit"
-              depressed
-              :disabled="!isFormValid()"
-              :loading="searchActive"
-            >
-              <span>Search</span>
-            </v-btn>
+            <v-row no-gutters>
+              <v-col>
+                <v-text-field
+                  filled dense req persistent-hint
+                  label="Incorporation Number or Registration Number"
+                  hint="Example: BC1234567, CP1234567 or FM1234567"
+                  @blur="formatBusinessIdentifier()"
+                  :rules="businessIdentifierRules"
+                  v-model="businessIdentifier"
+                  id="txtBusinessNumber"
+                />
+              </v-col>
+              <v-col cols="auto">
+                <v-btn
+                  color="primary"
+                  class="search-btn mt-0"
+                  type="submit"
+                  depressed
+                  :disabled="!isFormValid()"
+                  :loading="searchActive"
+                >
+                  <span>Search</span>
+                </v-btn>
+              </v-col>
+            </v-row>
           </v-form>
 
           <template>
@@ -53,9 +73,6 @@
               :affiliatedOrg="affiliatedOrg"
             ></IncorporationSearchResultView>
           </template>
-          <a v-if="showBusSearchlink" class="srch-card__reg-srch-link" :href="registrySearchUrl" target="_blank">
-            Go to Business Search
-          </a>
         </v-card>
       </v-col>
       <v-col class="pl-2" cols="6">
@@ -105,6 +122,7 @@ import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
@@ -185,8 +203,16 @@ export default class StaffDashboardView extends Vue {
     return LaunchDarklyService.getFlag(LDFlags.BusSearchLink) || false
   }
 
+  get registrySearchUrl (): string {
+    return ConfigHelper.getRegistrySearchUrl()
+  }
+
   protected isFormValid(): boolean {
     return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
+  }
+
+  goToManageBusiness(): void {
+    this.$router.push('/business')
   }
 
   protected async search() {
@@ -227,10 +253,6 @@ export default class StaffDashboardView extends Vue {
     this.businessIdentifier =
       CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
-
-  get registrySearchUrl (): string {
-    return ConfigHelper.getRegistrySearchUrl()
-  }
 }
 </script>
 
@@ -241,16 +263,11 @@ export default class StaffDashboardView extends Vue {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-
-.v-input {
-  display: inline-block;
-  width: 20rem;
+h2 {
+  line-height: 1.5rem;
 }
 
 ::v-deep {
-  .v-input__append-outer {
-    margin-top: 0 !important;
-  }
 
   .search-btn {
     margin-left: 0.25rem;
@@ -262,7 +279,27 @@ export default class StaffDashboardView extends Vue {
     border-bottom-left-radius: 0;
   }
   .srch-card {
-    position: relative;
+    padding: 30px;
+
+    p {
+      color: $gray7;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    &__link {
+
+      .v-btn__content {
+        font-size: 1rem;
+
+        i {
+          margin-top: 1px;
+          opacity: 0.9;
+        }
+      }
+    }
+
+    &__link::before { background-color: white; }
   
     &__reg-srch-link {
       position: absolute;
@@ -270,8 +307,17 @@ export default class StaffDashboardView extends Vue {
       top: 20px;
     }
   }
+
   .v-expansion-panel-content__wrap {
-  padding: 0px !important;
+    padding: 0px !important;
+  }
+  
+  .v-input__append-outer {
+    margin-top: 0 !important;
+  }
+
+  .v-text-field__details {
+    margin: 0 !important;
   }
 }
 </style>
