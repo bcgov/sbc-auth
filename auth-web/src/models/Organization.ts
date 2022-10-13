@@ -303,7 +303,7 @@ export enum OrgAccountTypes {
   PREMIUM_OUT_OF_PROVINCE = 'Premium (out-of-province)',
   GOVM = 'GovM',
   GOVN = 'GovN',
-  DIRECTOR_SEARCH = 'Director Search'
-  STAFF = 'BC Registries Staff'
+  DIRECTOR_SEARCH = 'Director Search',
+  STAFF = 'BC Registries Staff',
   SBC_STAFF = 'Service BC Staff'
 }
