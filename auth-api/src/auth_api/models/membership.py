@@ -108,7 +108,7 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
 
     @classmethod
     def find_active_staff_org_memberships_for_user(cls, user_id) -> List[Membership]:
-        """Find staff orgs for a user."""
+        """Find staff orgs memberships for a user."""
         return cls.query \
             .join(OrgModel) \
             .filter(cls.user_id == user_id) \

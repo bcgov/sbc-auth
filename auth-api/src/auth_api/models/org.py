@@ -114,7 +114,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
     @classmethod
     def find_by_org_type(cls, org_type):
-        """Find Orgs that matches the provided org type and not in INACTIVE status."""
+        """Find Orgs that match the provided org type and not in INACTIVE status."""
         query = db.session.query(Org).filter(Org.status_code != OrgStatusEnum.INACTIVE.value,
                                              Org.org_type == OrgType.get_type_for_code(org_type))
         return query.all()
