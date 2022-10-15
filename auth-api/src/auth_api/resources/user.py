@@ -113,6 +113,10 @@ class Users(Resource):
             if token.get('loginSource', '') == LoginSource.BCROS.value:
                 if len(OrgService.get_orgs(user.identifier, [Status.ACTIVE.value])) > 0:
                     KeycloakService.join_account_holders_group()
+            if user.type == Role.STAFF.name:
+                MembershipService.add_staff_membership(user.identifier)
+            else:
+                MembershipService.remove_staff_membership(user.identifier)
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
