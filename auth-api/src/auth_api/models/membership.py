@@ -23,7 +23,7 @@ from typing import List
 from sqlalchemy import Column, ForeignKey, Integer, and_, desc, func
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.enums import Status
+from auth_api.utils.enums import OrgType, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, USER, VALID_ORG_STATUSES, VALID_STATUSES
 from .base_model import VersionedModel
 from .db import db
@@ -105,6 +105,35 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
             .all()
 
         return list(map(lambda x: x.org, records))
+
+    @classmethod
+    def find_active_staff_org_memberships_for_user(cls, user_id) -> List[Membership]:
+        """Find staff orgs memberships for a user."""
+        return cls.query \
+            .join(OrgModel) \
+            .filter(cls.user_id == user_id) \
+            .filter(cls.status == Status.ACTIVE.value) \
+            .filter(OrgModel.status_code.in_(VALID_ORG_STATUSES)) \
+            .filter(OrgModel.type_code == OrgType.STAFF.value) \
+            .all()
+
+    @classmethod
+    def add_membership_for_staff(cls, user_id):
+        """Add staff membership."""
+        if (staff_orgs := OrgModel.find_by_org_type(OrgType.STAFF.value)):
+            membership = cls.find_membership_by_user_and_org(user_id, staff_orgs[0].id)
+            if not membership:
+                membership = Membership(org_id=staff_orgs[0].id, user_id=user_id, membership_type_code=USER)
+            membership.status = Status.ACTIVE.value
+            membership.save()
+
+    @classmethod
+    def remove_membership_for_staff(cls, user_id):
+        """Remove staff membership."""
+        staff_memberships = cls.find_active_staff_org_memberships_for_user(user_id)
+        for staff_membership in staff_memberships:
+            staff_membership.status = Status.INACTIVE.value
+            staff_membership.save()
 
     @classmethod
     def find_membership_by_user_and_org(cls, user_id, org_id) -> Membership:

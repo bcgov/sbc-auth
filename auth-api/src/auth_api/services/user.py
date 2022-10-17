@@ -56,7 +56,7 @@ ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
-class User:  # pylint: disable=too-many-instance-attributes
+class User:  # pylint: disable=too-many-instance-attributes disable=too-many-public-methods
     """Manages all aspects of the User Entity.
 
     This manages storing the User in the cache,
@@ -82,6 +82,11 @@ class User:  # pylint: disable=too-many-instance-attributes
     def verified(self) -> str:
         """Return the verified flag for the user."""
         return self._model.verified
+
+    @property
+    def type(self) -> str:
+        """Return the type for the user."""
+        return self._model.type
 
     @ServiceTracing.disable_tracing
     def as_dict(self):

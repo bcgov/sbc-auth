@@ -302,3 +302,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
     def get_membership_for_org_and_user_all_status(org_id, user_id):
         """Get the membership for the specified user and org with all memebership statuses."""
         return MembershipModel.find_membership_by_user_and_org_all_status(user_id, org_id)
+
+    @staticmethod
+    def add_staff_membership(user_id):
+        """Add a staff membership for the specified user."""
+        if MembershipModel.find_active_staff_org_memberships_for_user(user_id):
+            return
+        MembershipModel.add_membership_for_staff(user_id)
+
+    @staticmethod
+    def remove_staff_membership(user_id):
+        """Remove staff membership for the specified user."""
+        MembershipModel.remove_membership_for_staff(user_id)
