@@ -535,3 +535,26 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
     assert affiliated_entities
     assert len(affiliated_entities) == 1
     assert affiliated_entities[0]['business_identifier'] == business_incorporated_identifier
+
+
+def test_fix_stale_affiliations(session, auth_mock, nr_mock):
+    """Assert that an affilation doesn't go stale when transitioning from NR to a business."""
+    nr = factory_entity_service(entity_info=TestEntityInfo.name_request).as_dict()
+
+    org_id = factory_org_service().as_dict()['id']
+    affiliation1 = AffiliationService.create_affiliation(org_id, business_identifier=nr['business_identifier'])
+
+    # Create a new entity with the finalized business identifier. (filer usually does this on registration)
+    business = factory_entity_service(entity_info=TestEntityInfo.entity2).as_dict()
+    affiliation2 = AffiliationService.create_affiliation(org_id, business_identifier=business['business_identifier'])
+
+    assert affiliation1.entity.identifier != affiliation2.entity.identifier
+
+    # Run fix stale affiliations to point the affiliations at the new entity.
+    AffiliationService.fix_stale_affiliations({
+        'identifier': business['business_identifier'],
+        'nrNumber': nr['business_identifier'],
+        'bootstrapIdentifier': 'gdsf34324'
+    })
+
+    assert affiliation1.entity.identifier == affiliation2.entity.identifier

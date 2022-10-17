@@ -43,6 +43,11 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
         return cls.query.filter_by(org_id=org_id, entity_id=entity_id).one_or_none()
 
     @classmethod
+    def find_affiliations_by_entity_id(cls, entity_id) -> List[Affiliation]:
+        """Return affiliations for the provided entity id."""
+        return cls.query.filter_by(entity_id=entity_id).all()
+
+    @classmethod
     def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int) -> Affiliation:
         """Return the first Affiliation with the provided ids."""
         return cls.query.filter_by(org_id=org_id).filter_by(id=affiliation_id).one_or_none()
