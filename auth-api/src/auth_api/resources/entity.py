@@ -56,8 +56,9 @@ class EntityResources(Resource):
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
         try:
+            details = request_json.pop('details', None)
             entity = EntityService.save_entity(request_json)
-            if (details := request_json.get('details')):
+            if details:
                 AffiliationService.fix_stale_affiliations(details)
             response, status = entity.as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
