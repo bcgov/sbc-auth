@@ -251,12 +251,17 @@ class Affiliation:
                     'corpTypeCode': CorpType.NR.value,
                     'passCodeClaimed': True
                 })
-            # Create an affiliation with org
-            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
-            affiliation_model.save()
-            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
-                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                               name=entity.name, id=entity.business_identifier))
+
+            # Affiliation may already already exist for staff.
+            if not (affiliation_model :=
+                    AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
+                # Create an affiliation with org
+                affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+                affiliation_model.save()
+
+                if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                                   name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
