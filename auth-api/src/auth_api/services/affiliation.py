@@ -218,6 +218,10 @@ class Affiliation:
                 and entity and entity.as_dict()['pass_code_claimed']:
             raise BusinessException(Error.NR_CONSUMED, None)
 
+        # Affiliation may already already exist for staff.
+        if (AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
         # Call the legal-api to verify the NR details
         nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
 
@@ -252,16 +256,13 @@ class Affiliation:
                     'passCodeClaimed': True
                 })
 
-            # Affiliation may already already exist for staff.
-            if not (affiliation_model :=
-                    AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
-                # Create an affiliation with org
-                affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
-                affiliation_model.save()
+            # Create an affiliation with org
+            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+            affiliation_model.save()
 
-                if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
-                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                                   name=entity.name, id=entity.business_identifier))
+            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                                name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
