@@ -213,7 +213,7 @@ export default class StaffDashboardView extends Mixins(AccountMixin) {
   }
 
   goToManageBusiness(): void {
-    this.$router.push(`/account/business/business?accountid=${this.currentOrganization?.id}`)
+    this.$router.push(`/account/${this.currentOrganization?.id}/business`)
   }
 
   protected async search() {
