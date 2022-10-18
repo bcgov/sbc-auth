@@ -101,7 +101,7 @@ export default class PayWithOnlineBanking extends Vue {
     .payee-name {
       padding-right: 16px;
       margin-right: 16px;
-      border-right: 1px solid #fff;
+      border-right: 1px solid white;
     }
   }
   ol {
