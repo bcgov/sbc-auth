@@ -346,6 +346,9 @@ class OrgAffiliations(Resource):
                     org_id, request_json.get('businessIdentifier'), request_json.get('passCode'), bearer_token).\
                                        as_dict(), http_status.HTTP_201_CREATED
 
+            entity_details = request_json.get('entityDetails', None)
+            if entity_details:
+                AffiliationService.fix_stale_affiliations(org_id, entity_details)
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
@@ -382,13 +385,10 @@ class OrgAffiliation(Resource):
         email_addresses = request_json.get('passcodeResetEmail')
         reset_passcode = request_json.get('resetPasscode', False)
         log_delete_draft = request_json.get('logDeleteDraft', False)
-        entity_details = request_json.get('entityDetails', None)
 
         try:
             AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
                                                   reset_passcode, log_delete_draft)
-            if entity_details:
-                AffiliationService.fix_stale_affiliations(org_id, entity_details)
             response, status = {}, http_status.HTTP_200_OK
 
         except BusinessException as exception:
