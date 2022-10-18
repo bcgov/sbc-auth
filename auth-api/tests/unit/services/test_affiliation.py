@@ -551,7 +551,7 @@ def test_fix_stale_affiliations(session, auth_mock, nr_mock):
     assert affiliation1.entity.identifier != affiliation2.entity.identifier
 
     # Run fix stale affiliations to point the affiliations at the new entity.
-    AffiliationService.fix_stale_affiliations(org_id=org_id, entity_details={
+    AffiliationService.fix_stale_affiliations(org_id=None, entity_details={
         'identifier': business['business_identifier'],
         'nrNumber': nr['business_identifier'],
         'bootstrapIdentifier': 'gdsf34324'
