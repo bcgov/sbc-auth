@@ -307,16 +307,16 @@ class Affiliation:
                                                            name=name, id=entity.business_identifier))
 
     @staticmethod
-    def fix_stale_affiliations(details: Dict):
+    def fix_stale_affiliations(org_id: int, entity_details: Dict):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
         # 2. staff takes NR, creates a business
         # 3. filer updates the business for staff (which creates a new entity)
         # 4. fix_stale_affiliations is called, and fixes the client's affiliation to point at this new entity
-        nr_number: str = details.get('nrNumber')
-        bootstrap_identifier: str = details.get('bootstrapIdentifier')
-        identifier: str = details.get('identifier')
+        nr_number: str = entity_details.get('nrNumber')
+        bootstrap_identifier: str = entity_details.get('bootstrapIdentifier')
+        identifier: str = entity_details.get('identifier')
         current_app.logger.debug(f'<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}')
         from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
@@ -324,6 +324,9 @@ class Affiliation:
                 (to_entity := EntityService.find_by_business_identifier(identifier, skip_auth=True)):
             affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier)
             for affiliation in affiliations:
+                # These are already handled by the filer.
+                if affiliation.org_id == org_id:
+                    continue
                 current_app.logger.debug(
                         f'Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}')
                 affiliation.entity_id = to_entity.identifier
