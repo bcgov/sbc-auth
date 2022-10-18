@@ -116,7 +116,7 @@
 
 <script lang="ts">
 /* eslint-disable */
-import { Component } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -132,6 +132,7 @@ import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import Vue from 'vue'
 import { namespace } from 'vuex-class'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 
 const OrgModule = namespace('org')
 const BusinessModule = namespace('business')
@@ -146,7 +147,7 @@ const userModule = namespace('user')
     PPRLauncher
   }
 })
-export default class StaffDashboardView extends Vue {
+export default class StaffDashboardView extends Mixins(AccountMixin) {
   $refs: {
     searchBusinessForm: HTMLFormElement
   }
@@ -212,7 +213,7 @@ export default class StaffDashboardView extends Vue {
   }
 
   goToManageBusiness(): void {
-    this.$router.push('/business')
+    this.$router.push(`/account/business/business?accountid=${this.currentOrganization?.id}`)
   }
 
   protected async search() {
