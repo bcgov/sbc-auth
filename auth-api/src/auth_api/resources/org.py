@@ -382,7 +382,7 @@ class OrgAffiliation(Resource):
         email_addresses = request_json.get('passcodeResetEmail')
         reset_passcode = request_json.get('resetPasscode', False)
         log_delete_draft = request_json.get('logDeleteDraft', False)
-        entity_details = request.json.get('entityDetails', None)
+        entity_details = request_json.get('entityDetails', None)
 
         try:
             AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
