@@ -346,6 +346,9 @@ class OrgAffiliations(Resource):
                     org_id, request_json.get('businessIdentifier'), request_json.get('passCode'), bearer_token).\
                                        as_dict(), http_status.HTTP_201_CREATED
 
+            entity_details = request_json.get('entityDetails', None)
+            if entity_details:
+                AffiliationService.fix_stale_affiliations(org_id, entity_details)
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 

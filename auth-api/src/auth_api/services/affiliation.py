@@ -32,6 +32,7 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.user_context import UserContext, user_context
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
@@ -251,12 +252,17 @@ class Affiliation:
                     'corpTypeCode': CorpType.NR.value,
                     'passCodeClaimed': True
                 })
-            # Create an affiliation with org
-            affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
-            affiliation_model.save()
-            if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
-                ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                               name=entity.name, id=entity.business_identifier))
+
+            # Affiliation may already already exist.
+            if not (affiliation_model :=
+                    AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
+                # Create an affiliation with org
+                affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+                affiliation_model.save()
+
+                if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
+                    ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
+                                                                   name=entity.name, id=entity.business_identifier))
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
@@ -307,23 +313,30 @@ class Affiliation:
                                                            name=name, id=entity.business_identifier))
 
     @staticmethod
-    def fix_stale_affiliations(details: Dict):
+    @user_context
+    def fix_stale_affiliations(org_id: int, entity_details: Dict, **kwargs):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
         # 2. staff takes NR, creates a business
         # 3. filer updates the business for staff (which creates a new entity)
         # 4. fix_stale_affiliations is called, and fixes the client's affiliation to point at this new entity
-        nr_number: str = details.get('nrNumber')
-        bootstrap_identifier: str = details.get('bootstrapIdentifier')
-        identifier: str = details.get('identifier')
-        current_app.logger.debug(f'<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier} ')
+        user_from_context: UserContext = kwargs['user_context']
+        if not user_from_context.is_system():
+            return
+        nr_number: str = entity_details.get('nrNumber')
+        bootstrap_identifier: str = entity_details.get('bootstrapIdentifier')
+        identifier: str = entity_details.get('identifier')
+        current_app.logger.debug(f'<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}')
         from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
         if from_entity and from_entity.corp_type == 'NR' and \
                 (to_entity := EntityService.find_by_business_identifier(identifier, skip_auth=True)):
             affiliations = AffiliationModel.find_affiliations_by_entity_id(from_entity.identifier)
             for affiliation in affiliations:
+                # These are already handled by the filer.
+                if affiliation.org_id == org_id:
+                    continue
                 current_app.logger.debug(
                         f'Moving affiliation {affiliation.id} from {from_entity.identifier} to {to_entity.identifier}')
                 affiliation.entity_id = to_entity.identifier

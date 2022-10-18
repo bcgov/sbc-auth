@@ -20,7 +20,6 @@ from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
-from auth_api.services import Affiliation as AffiliationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
@@ -57,8 +56,6 @@ class EntityResources(Resource):
 
         try:
             entity = EntityService.save_entity(request_json)
-            if (details := request_json.get('details')):
-                AffiliationService.fix_stale_affiliations(details)
             response, status = entity.as_dict(), http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
