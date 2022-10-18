@@ -9,7 +9,6 @@
         :class="{ 'header-high-layer': dropdown.includes(true) }"
         :headers="getHeaders"
         :items="businesses"
-        :height="getMaxHeight"
         :custom-sort="customSort"
         fixed-header
         disable-pagination
@@ -110,8 +109,11 @@
         </template>
         <template v-slot:no-data>
           <span v-if="loading">Loading...</span>
-          <span v-else>Add an existing company, cooperative or society to manage it or<br> add a Name Request to
-            complete your incorporation or registration.</span>
+          <div v-else>
+            Add an existing company, cooperative or society to manage it or
+            <br>
+            add a Name Request to complete your incorporation or registration.
+          </div>
         </template>
       </v-data-table>
     </v-card>
@@ -173,11 +175,6 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** The headers we want to show. */
   private get getHeaders (): Array<any> {
     return this.headers?.filter(x => x.show)
-  }
-
-  /** The set height when affiliation count exceeds 5 */
-  private get getMaxHeight (): string {
-    return this.entityCount > 5 ? '32rem' : null
   }
 
   /** Returns true if the affiliation is a Name Request */
@@ -520,6 +517,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 }
 </script>
+
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 
@@ -528,6 +526,17 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     display: flex;
     background-color: $app-lt-blue;
     padding: .875rem;
+  }
+
+  // size the table according to window height
+  ::v-deep .v-data-table__wrapper {
+    min-height: 9rem; // height of no-data div
+    height: calc(100vh - 31rem); // full height minus footer
+    background-color: $gray1; // hide unused space below table
+
+    table {
+      background-color: white;
+    }
   }
 
   .names-block {
