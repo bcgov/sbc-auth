@@ -347,7 +347,6 @@ class OrgAffiliations(Resource):
                                        as_dict(), http_status.HTTP_201_CREATED
 
             entity_details = request_json.get('entityDetails', None)
-            # TODO: only allow if system.
             if entity_details:
                 AffiliationService.fix_stale_affiliations(org_id, entity_details)
         except BusinessException as exception:

@@ -32,6 +32,7 @@ from auth_api.services.org import Org as OrgService
 from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
+from auth_api.utils.user_context import UserContext, user_context
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
@@ -312,13 +313,17 @@ class Affiliation:
                                                            name=name, id=entity.business_identifier))
 
     @staticmethod
-    def fix_stale_affiliations(org_id: int, entity_details: Dict):
+    @user_context
+    def fix_stale_affiliations(org_id: int, entity_details: Dict, **kwargs):
         """Corrects affiliations to point at the latest entity."""
         # Example staff/client scenario:
         # 1. client creates an NR (that gets affiliated) - realizes they need help to create a business
         # 2. staff takes NR, creates a business
         # 3. filer updates the business for staff (which creates a new entity)
         # 4. fix_stale_affiliations is called, and fixes the client's affiliation to point at this new entity
+        user_from_context: UserContext = kwargs['user_context']
+        if not user_from_context.is_system():
+            return
         nr_number: str = entity_details.get('nrNumber')
         bootstrap_identifier: str = entity_details.get('bootstrapIdentifier')
         identifier: str = entity_details.get('identifier')
