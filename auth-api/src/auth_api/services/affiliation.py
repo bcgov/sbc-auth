@@ -317,7 +317,7 @@ class Affiliation:
         nr_number: str = details.get('nrNumber')
         bootstrap_identifier: str = details.get('bootstrapIdentifier')
         identifier: str = details.get('identifier')
-        current_app.logger.debug(f'<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier} ')
+        current_app.logger.debug(f'<fix_stale_affiliations - {nr_number} {bootstrap_identifier} {identifier}')
         from_entity: Entity = EntityService.find_by_business_identifier(nr_number, skip_auth=True)
         # Find entity with nr_number (stale, because this is now a business)
         if from_entity and from_entity.corp_type == 'NR' and \

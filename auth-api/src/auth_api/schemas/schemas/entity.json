@@ -1,5 +1,4 @@
 {
-  "definitions": {},
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/entity",
   "type": "object",
@@ -8,6 +7,26 @@
   "required": [
     "businessIdentifier"
   ],
+  "definitions": {
+    "details": {
+      "type": "object",
+      "properties": {
+        "bootstrapIdentifier": {
+          "type": "string"
+        },
+        "identifier": {
+          "type": "string"
+        },
+        "nrNumber": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "identifier",
+        "nrNumber"
+      ]
+    }
+  },
   "properties": {
     "businessIdentifier": {
       "$id": "#/properties/businessIdentifier",
@@ -98,6 +117,11 @@
         "HISTORICAL"
       ],
       "pattern": "^(.*)$"
+    },
+    "details": {
+      "$id": "#/properties/details",
+      "type": "object",
+      "$ref": "#/definitions/details"
     }
   }
 }
