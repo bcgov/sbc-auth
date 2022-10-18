@@ -5,7 +5,7 @@
         <div>
           {{ member.user.firstname }} {{ member.user.lastname }}
         </div>
-        <div v-if="member.user.contacts">
+        <div v-if="member.user.contacts && member.user.contacts[0]">
           <div v-if="member.user.contacts[0].email">
             {{ member.user.contacts[0].email }}
           </div>
