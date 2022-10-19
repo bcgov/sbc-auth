@@ -229,11 +229,14 @@ export function getRoutes (): RouteConfig[] {
             disabledRoles: [Role.AnonymousUser],
             requiresAuth: true,
             requiresActiveAccount: true,
-            breadcrumb: isStaff()
-              ? [StaffDashboardBreadcrumb, StaffBusinessRegistryBreadcrumb]
-              : [RegistryDashboardBreadcrumb, MyBusinessRegistryBreadcrumb]
+            get breadcrumb () {
+              return isStaff()
+                ? [StaffDashboardBreadcrumb, StaffBusinessRegistryBreadcrumb]
+                : [RegistryDashboardBreadcrumb, MyBusinessRegistryBreadcrumb]
+            }
           }
-        }]
+        }
+      ]
     },
     {
       path: '/account/:orgId/settings',
