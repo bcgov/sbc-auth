@@ -18,6 +18,7 @@
           :value="xmlData"
           :autofocus="true"
           spellcheck="false"
+          @input="emitInput($event)"
         />
       </v-card-text>
       <v-card-actions class="pt-0">
@@ -63,9 +64,14 @@ export default class ResubmitRequest extends Vue {
   @Prop({ default: false })
   readonly submitActive: boolean
 
+  private modifiedXml: string
+  private emitInput (val: string): void {
+    this.modifiedXml = val
+  }
+
   @Emit('resubmit')
   private resubmit (): string {
-    return this.xmlData
+    return this.modifiedXml
   }
 
   @Emit('close')
