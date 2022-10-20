@@ -25,7 +25,7 @@ from auth_api.services import Task as TaskService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-
+from auth_api.models.dataclass import TaskSearch
 
 API = Namespace('tasks', description='Endpoints for tasks management')
 TRACER = Tracer.get_instance()
@@ -44,15 +44,19 @@ class Tasks(Resource):
         """Fetch tasks."""
         try:
             # Search based on request arguments
-            task_type = request.args.get('type', None)
-            task_relationship_status = request.args.get('relationshipStatus', None)
-            task_status = request.args.getlist('status', None)
-            page = request.args.get('page', 1)
-            limit = request.args.get('limit', 10)
+            task_search = TaskSearch(
+                name=request.args.get('name', None),
+                start_date=request.args.get('startDate', None),
+                end_date=request.args.get('endDate', None),
+                relationship_status=request.args.get('relationshipStatus', None),
+                type=request.args.get('type', None),
+                status=request.args.getlist('status', None),
+                page=int(request.args.get('page', 1)),
+                limit=int(request.args.get('limit', 10))
+            )
 
-            response, status = TaskService.fetch_tasks(task_relationship_status=task_relationship_status,
-                                                       task_type=task_type, task_status=task_status,
-                                                       page=page, limit=limit), http_status.HTTP_200_OK
+            response, status = TaskService.fetch_tasks(task_search), http_status.HTTP_200_OK
+
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
