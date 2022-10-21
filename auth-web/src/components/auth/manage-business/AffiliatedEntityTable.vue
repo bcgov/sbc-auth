@@ -568,10 +568,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   private updateSortedItems (val): void {
     if (val) this.filteredItems = [...val]
     else this.filteredItems = []
-    // reset filters
-    for (const i in this.headers) {
-      continue
-    }
+    this.clearFilters()
     this.applyHeaders()
   }
 
