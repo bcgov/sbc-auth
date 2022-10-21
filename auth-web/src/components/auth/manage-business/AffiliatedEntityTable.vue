@@ -340,7 +340,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     switch (true) {
       case (this.isNameRequest(item.corpType.code) && !!item.nameRequest):
         // Format name request state value for Display
-        if (!NrState[item.nameRequest.state]) return 'Unknown'
+        if (!NrState[item.nameRequest?.state]) return 'Unknown'
         return NrDisplayStates[NrState[item.nameRequest.state]] || 'Unknown'
       case this.isTemporaryBusinessRegistration(item.corpType.code):
         return BusinessState.DRAFT
