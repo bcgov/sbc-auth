@@ -8,29 +8,77 @@
         id="affiliated-entity-table"
         :class="{ 'header-high-layer': dropdown.includes(true) }"
         :headers="getHeaders"
-        :items="businesses"
+        :items="filteredItems"
         :height="getMaxHeight"
-        :custom-sort="customSort"
         fixed-header
         disable-pagination
         hide-default-footer
+        hide-default-header
       >
+        <template v-slot:header="{ props }">
+          <thead>
+            <tr>
+              <th v-for="(header, index) in props.headers" :key="header.value + index">
+                <div :style="header.value === 'action' ? {'min-width': '140px', 'text-align': 'center'} : ''">
+                  <span v-html="header.text" />
+                </div>
+              </th>
+            </tr>
+            <tr>
+              <th
+                v-for="header, i in props.headers"
+                :key="header.value + 'filter' + i"
+                :style="{'width': header.width}"
+              >
+                <v-select
+                  v-if="header.filterType === 'select'"
+                  class="table-filter"
+                  clearable
+                  dense
+                  filled
+                  hide-details
+                  :items="header.filterSelections"
+                  :label="header.filterLabel || ''"
+                  :menu-props="{ bottom: true, offsetY: true }"
+                  single-line
+                  v-model="filterParams[header.value]"
+                />
+                <v-text-field
+                  v-else-if="header.filterType === 'text'"
+                  class="table-filter"
+                  clearable
+                  dense
+                  filled
+                  hide-details
+                  :label="header.filterLabel || ''"
+                  single-line
+                  type="text"
+                  v-model="filterParams[header.value]"
+                />
+                <v-btn
+                  v-else-if="showClearFilters"
+                  class="clear-btn mx-auto"
+                  color="primary"
+                  outlined
+                  @click="clearFilters()"
+                >
+                  Clear Filters
+                  <v-icon class="ml-1 mt-1">mdi-close</v-icon>
+                </v-btn>
+              </th>
+            </tr>
+          </thead>
+        </template>
         <template v-slot:item="{ item, index }">
           <tr>
-            <td
-              v-if="isNameRequest(item.corpType.code) && item.nameRequest"
-              class="header"
-              :class="{ 'col-wide': getHeaders.length < 7 }"
-            >
+            <td v-if="isNameRequest(item.corpType.code) && item.nameRequest" class="header col-wide">
               <div v-for="(name, i) in item.nameRequest.names" :key="`nrName: ${i}`" class="pb-1 names-block">
                 <v-icon v-if="isRejectedName(name)" color="red" class="names-text pr-1" small>mdi-close</v-icon>
                 <v-icon v-if="isApprovedName(name)" color="green" class="names-text pr-1" small>mdi-check</v-icon>
                 <strong class="names-text">{{ name.name }}</strong><br>
               </div>
             </td>
-            <td v-else class="header" :class="{ 'col-wide': getHeaders.length < 7 }">
-              <strong>{{ name(item) }}</strong>
-            </td>
+            <td v-else class="header col-wide"><strong>{{ name(item) }}</strong></td>
             <td v-if="showCol(headers[1].text)">{{ number(item) }}</td>
             <td v-if="showCol(headers[2].text)" class="type-col">
               <span class="header"><strong>{{ type(item) }}</strong></span><br>
@@ -39,11 +87,8 @@
               </span>
             </td>
             <td v-if="showCol(headers[3].text)" class="status">{{ status(item) }}</td>
-            <td v-if="showCol(headers[4].text)">{{ folio(item) }}</td>
-            <td v-if="showCol(headers[5].text)">{{ lastModified(item) }}</td>
-            <td v-if="showCol(headers[6].text)">{{ modifiedBy(item) }}</td>
             <td class="action-cell">
-              <div class="actions" :id="`action-menu-${index}`">
+              <div class="actions mx-auto" :id="`action-menu-${index}`">
                 <span class="open-action">
                   <v-btn
                     small
@@ -58,7 +103,7 @@
                 </span>
 
                 <!-- More Actions Menu -->
-                <span class="more-actions mr-4">
+                <span class="more-actions">
                   <v-menu
                     :attach="`#action-menu-${index}`"
                     v-model="dropdown[index]"
@@ -110,11 +155,8 @@
         </template>
         <template v-slot:no-data>
           <span v-if="loading">Loading...</span>
-          <div v-else>
-            Add an existing company, cooperative or society to manage it or
-            <br>
-            add a Name Request to complete your incorporation or registration.
-          </div>
+          <span v-else>Add an existing company, cooperative or society to manage it or<br> add a Name Request to
+            complete your incorporation or registration.</span>
         </template>
       </v-data-table>
     </v-card>
@@ -162,8 +204,12 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
   private readonly createNamedBusiness!: (filingBody: BusinessRequest, nrNumber: string) => Promise<any>
-  private headers: Array<any> = []
+  private headers: any[] = []
   private isLoading: boolean = false
+
+  private filteredItems: Business[] = []
+  private filterActive = { name: false, number: false, status: false, type: false }
+  private filterParams = { name: null, number: null, status: null, type: null }
 
   /** V-model for dropdown menus. */
   private dropdown: Array<boolean> = []
@@ -181,6 +227,25 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** The set height when affiliation count exceeds 5 */
   private get getMaxHeight (): string {
     return this.entityCount > 5 ? '32rem' : null
+  }
+
+  private get showClearFilters (): boolean {
+    return Object.values(this.filterActive).includes(true)
+  }
+
+  private clearFilters (): void {
+    for (const key in this.filterActive) this.filterActive[key] = false
+    for (const key in this.filterParams) this.filterParams[key] = null
+  }
+
+  private getSelections (selectFn: (item: Business) => string): string[] {
+    const items = []
+    for (const i in this.businesses) {
+      if (!items.includes(selectFn(this.businesses[i]))) {
+        items.push(selectFn(this.businesses[i]))
+      }
+    }
+    return items
   }
 
   /** Returns true if the affiliation is a Name Request */
@@ -211,6 +276,12 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Returns the Name value for the affiliation */
   private name (item: Business): string {
     return this.isNumberedIncorporationApplication(item) ? 'Numbered Benefit Company' : item.name
+  }
+
+  private parseName (item: Business): string {
+    if (this.isNameRequest(item.corpType.code)) {
+      return item.nameRequest.names.map(name => name.name).join('\n')
+    } else return this.name(item)
   }
 
   /** Returns true if the Name Request is approved */
@@ -429,73 +500,28 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return this.selectedColumns.includes(col)
   }
 
-  /** Custom sorting method to handle consolidated Nr and Affiliations data. */
-  private customSort (items, index, isDesc): any {
-    items.sort((a, b) => {
-      switch (index[0]) {
-        case 'lastModified':
-          let dateA, dateB
-          if (a.lastModified) {
-            dateA = a.lastModified
-          } else {
-            dateA = a.modified
-          }
-          if (b.lastModified) {
-            dateB = b.lastModified
-          } else {
-            dateB = b.modified
-          }
-
-          if (!isDesc[0]) {
-            return +new Date(dateB) - +new Date(dateA)
-          } else {
-            return +new Date(dateA) - +new Date(dateB)
-          }
-        case 'name':
-          let nameA, nameB
-          if (a.nameRequest) {
-            nameA = a.nameRequest?.names[0].name
-          } else {
-            nameA = this.isNumberedIncorporationApplication(a) ? 'Numbered Benefit Company' : a.name
-          }
-          if (b.nameRequest) {
-            nameB = b.nameRequest?.names[0].name
-          } else {
-            nameB = this.isNumberedIncorporationApplication(b) ? 'Numbered Benefit Company' : b.name
-          }
-
-          if (!isDesc[0]) {
-            return nameA.toLowerCase().localeCompare(nameB.toLowerCase())
-          } else {
-            return nameB.toLowerCase().localeCompare(nameA.toLowerCase())
-          }
-        case 'number':
-          if (!isDesc[0]) {
-            return this.number(a).toLowerCase().localeCompare(this.number(b).toLowerCase())
-          } else {
-            return this.number(b).toLowerCase().localeCompare(this.number(a).toLowerCase())
-          }
-        case 'type':
-          if (!isDesc[0]) {
-            return this.type(a).toLowerCase().localeCompare(this.type(b).toLowerCase())
-          } else {
-            return this.type(b).toLowerCase().localeCompare(this.type(a).toLowerCase())
-          }
-        case 'status':
-          if (!isDesc[0]) {
-            return this.status(a).toLowerCase().localeCompare(this.status(b).toLowerCase())
-          } else {
-            return this.status(b).toLowerCase().localeCompare(this.status(a).toLowerCase())
-          }
-        case 'modifiedBy':
-          if (!isDesc[0]) {
-            return this.modifiedBy(a).toLowerCase().localeCompare(this.modifiedBy(b).toLowerCase())
-          } else {
-            return this.modifiedBy(b).toLowerCase().localeCompare(this.modifiedBy(a).toLowerCase())
-          }
+  private filter (items: Business[]): Business[] {
+    let newItems = [...items]
+    for (const i in this.getHeaders) {
+      const header = this.getHeaders[i]
+      if (this.filterParams[header.value]) this.filterActive[header.value] = true
+      if (header.filterFn && this.filterActive[header.value]) {
+        newItems = newItems.filter((item) => {
+          if (header.filterType === 'select') return this.selectFilter(header.filterFn(item), this.filterParams[header.value])
+          else return this.textFilter(header.filterFn(item), this.filterParams[header.value])
+        })
       }
-    })
-    return items
+      if (!this.filterParams[header.value]) this.filterActive[header.value] = false
+    }
+    return newItems
+  }
+
+  private selectFilter = (itemVal: string, filterVal: string) => {
+    return !filterVal || itemVal.toUpperCase() === filterVal.toUpperCase()
+  }
+
+  private textFilter = (itemVal: string, filterVal: string) => {
+    return !filterVal || itemVal.toUpperCase().includes(filterVal.toUpperCase())
   }
 
   /** Emit business/nr information to be unaffiliated. */
@@ -511,19 +537,26 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   @Watch('selectedColumns', { immediate: true })
   private applyHeaders (): void {
     this.headers = [
-      { text: 'Business Name', align: 'start', value: 'name', sortable: true, show: true },
-      { text: 'Number', value: 'number', sortable: true, show: this.showCol('Number') },
-      { text: 'Type', value: 'type', sortable: true, show: this.showCol('Type') },
-      { text: 'Status', value: 'status', sortable: true, show: this.showCol('Status') },
-      { text: 'Folio', value: 'folio', sortable: false, show: this.showCol('Folio') },
-      { text: 'Last Modified', value: 'lastModified', sortable: true, show: this.showCol('Last Modified') },
-      { text: 'Modified By', value: 'modifiedBy', sortable: true, show: this.showCol('Modified By') },
-      { text: 'Actions', align: 'end', value: 'action', sortable: false, show: true }
+      { text: 'Business Name', value: 'name', show: true, filterType: 'text', filterFn: this.parseName, filterLabel: 'Name', width: '30%' },
+      { text: 'Number', value: 'number', show: this.showCol('Number'), filterType: 'text', filterFn: this.number, filterLabel: 'Number', width: '17%' },
+      { text: 'Type', value: 'type', show: this.showCol('Type'), filterType: 'select', filterSelections: this.getSelections(this.type), filterFn: this.type, filterLabel: 'Type', width: '25%' },
+      { text: 'Status', value: 'status', show: this.showCol('Status'), filterType: 'select', filterSelections: this.getSelections(this.status), filterFn: this.status, filterLabel: 'Status', width: '25%' },
+      { text: 'Actions', value: 'action', show: true, width: '3%' }
     ]
   }
+
+  @Watch('businesses', { immediate: true, deep: true })
+  private updateSortedItems (val): void {
+    if (val) this.filteredItems = [...val]
+    else this.filteredItems = []
+    this.clearFilters()
+    this.applyHeaders()
+  }
+
+  @Watch('filterParams', { deep: true })
+  private handleFilterChange () { this.filteredItems = this.filter(this.businesses) }
 }
 </script>
-
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 
@@ -534,6 +567,16 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     padding: .875rem;
   }
 
+  .table-filter {
+    color: $gray7;
+    font-weight: normal;
+    font-size: $px-14;
+  }
+
+  .clear-btn {
+    width: 130px;
+  }
+
   .names-block {
     display: table;
   }
@@ -541,10 +584,6 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   .names-text {
     display: table-cell;
     vertical-align: top;
-  }
-
-  .v-btn {
-    background-color: $app-blue !important;
   }
 
   tbody {
@@ -580,22 +619,18 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       .type-col {
         min-width: 12rem;
       }
-
-      td:last-child {
-        padding-right: 5px;
-      }
     }
   }
 
   .action-cell {
     max-width: 0;
     max-height: 30px !important;
-    text-align: end !important;
-    padding-right: 0;
+    text-align: center;
   }
 
   .actions {
     height:30px;
+    width: 140px;
 
     .open-action {
       border-right: 1px solid $gray1;
@@ -636,15 +671,15 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   z-index: 1;
 }
 
-::v-deep .theme--light.v-data-table thead tr:last-child th:last-child span {
-  padding-right: 85px;
-}
-
 ::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
   color: $app-blue;
   .v-icon.v-icon {
     color: $app-blue;
   }
+}
+
+::v-deep label {
+  font-size: $px-14;
 }
 
 // Class binding a vuetify override.
