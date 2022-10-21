@@ -224,41 +224,28 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return this.headers?.filter(x => x.show)
   }
 
-  private get getStatuses (): string[] {
-    const items = []
-    for (const i in this.filteredItems) {
-      if (!items.includes(this.status(this.filteredItems[i]))) {
-        items.push(this.status(this.filteredItems[i]))
-      }
-    }
-    return items
-  }
-
-  private get getTypes (): string[] {
-    const items = []
-    for (const i in this.filteredItems) {
-      if (!items.includes(this.type(this.filteredItems[i]))) {
-        items.push(this.type(this.filteredItems[i]))
-      }
-    }
-    return items
-  }
-
   /** The set height when affiliation count exceeds 5 */
   private get getMaxHeight (): string {
     return this.entityCount > 5 ? '32rem' : null
   }
 
   private get showClearFilters (): boolean {
-    for (const key in this.filterActive) {
-      if (this.filterActive[key]) return true
-    }
-    return false
+    return Object.values(this.filterActive).includes(true)
   }
 
   private clearFilters (): void {
     for (const key in this.filterActive) this.filterActive[key] = false
     for (const key in this.filterParams) this.filterParams[key] = null
+  }
+
+  private getSelections (selectFn: (item: Business) => string): string[] {
+    const items = []
+    for (const i in this.businesses) {
+      if (!items.includes(selectFn(this.businesses[i]))) {
+        items.push(selectFn(this.businesses[i]))
+      }
+    }
+    return items
   }
 
   /** Returns true if the affiliation is a Name Request */
@@ -293,11 +280,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   private parseName (item: Business): string {
     if (this.isNameRequest(item.corpType.code)) {
-      let name = ''
-      for (const i in item.nameRequest.names) {
-        name += item.nameRequest.names[i].name + '\n'
-      }
-      return name
+      return item.nameRequest.names.map(name => name.name).join('\n')
     } else return this.name(item)
   }
 
@@ -534,13 +517,11 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 
   private selectFilter = (itemVal: string, filterVal: string) => {
-    if (filterVal) return itemVal.toUpperCase() === filterVal.toUpperCase()
-    return true
+    return !filterVal || itemVal.toUpperCase() === filterVal.toUpperCase()
   }
 
   private textFilter = (itemVal: string, filterVal: string) => {
-    if (filterVal) return itemVal.toUpperCase().includes(filterVal.toUpperCase())
-    return true
+    return !filterVal || itemVal.toUpperCase().includes(filterVal.toUpperCase())
   }
 
   /** Emit business/nr information to be unaffiliated. */
@@ -558,8 +539,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     this.headers = [
       { text: 'Business Name', value: 'name', show: true, filterType: 'text', filterFn: this.parseName, filterLabel: 'Name', width: '30%' },
       { text: 'Number', value: 'number', show: this.showCol('Number'), filterType: 'text', filterFn: this.number, filterLabel: 'Number', width: '17%' },
-      { text: 'Type', value: 'type', show: this.showCol('Type'), filterType: 'select', filterSelections: this.getTypes, filterFn: this.type, filterLabel: 'Type', width: '25%' },
-      { text: 'Status', value: 'status', show: this.showCol('Status'), filterType: 'select', filterSelections: this.getStatuses, filterFn: this.status, filterLabel: 'Status', width: '25%' },
+      { text: 'Type', value: 'type', show: this.showCol('Type'), filterType: 'select', filterSelections: this.getSelections(this.type), filterFn: this.type, filterLabel: 'Type', width: '25%' },
+      { text: 'Status', value: 'status', show: this.showCol('Status'), filterType: 'select', filterSelections: this.getSelections(this.status), filterFn: this.status, filterLabel: 'Status', width: '25%' },
       { text: 'Actions', value: 'action', show: true, width: '3%' }
     ]
   }
