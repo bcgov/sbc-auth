@@ -170,7 +170,8 @@ export enum NrState {
     CONDITIONAL = 'CONDITIONAL',
     REFUND_REQUESTED = 'REFUND_REQUESTED',
     CANCELLED = 'CANCELLED',
-    EXPIRED = 'EXPIRED'
+    EXPIRED = 'EXPIRED',
+    CONSUMED = 'CONSUMED'
 }
 
 export enum NrDisplayStates {
@@ -181,7 +182,8 @@ export enum NrDisplayStates {
     CONDITIONAL = 'Conditional Approval',
     REFUND_REQUESTED = 'Cancelled, Refund Requested',
     CANCELLED = 'Cancelled',
-    EXPIRED = 'Expired'
+    EXPIRED = 'Expired',
+    CONSUMED = 'Consumed'
 }
 
 export enum NrConditionalStates {
