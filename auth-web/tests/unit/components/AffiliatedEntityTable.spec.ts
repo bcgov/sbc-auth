@@ -71,29 +71,15 @@ describe('AffiliatedEntityTable.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('Shows empty panel message if no affiliated entities', () => {
+  it('Renders affiliated entity table', () => {
     const wrapper = shallowMount(AffiliatedEntityTable, {
       store,
       localVue,
       propsData: {
-        selectedColumns: ['Number', 'Type', 'Status', 'Last Modified', 'Modified By']
+        selectedColumns: ['Number', 'Type', 'Status']
       },
       mocks: { $t }
     })
-    expect(wrapper.text()).toContain('')
-  })
-
-  it('Renders affiliated entity list', async () => {
-    const wrapper = shallowMount(AffiliatedEntityTable, {
-      store,
-      localVue,
-      propsData: {
-        selectedColumns: ['Number', 'Type', 'Status', 'Last Modified', 'Modified By']
-      },
-      mocks: { $t }
-    })
-    await Vue.nextTick()
-
     expect(wrapper.find('.table-header').text()).toBe('My List (1)')
     expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
   })
