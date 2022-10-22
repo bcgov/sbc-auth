@@ -57,7 +57,6 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
 @pytest.mark.parametrize('test_name, endpoint', [
     ('status', 'status=OPEN'),
     ('relationshipStatus', 'relationshipStatus=PENDING_STAFF_REVIEW'),
-    ('dateSubmitted', 'endDate=2022-10-22'), 
     ('dateSubmitted', 'startDate=2022-10-20'),
     ('type', 'type=New Account'),
     ('name', 'name=foo')
