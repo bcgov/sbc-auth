@@ -234,16 +234,24 @@ export default class ChooseAuthMethodView extends Vue {
   private isGovNBCeID = false
   private currCheckBox = ''
   private showHelp = false
-  private serviceCardURL = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card'
-  private bceIdURL = 'https://www.bceid.ca/'
-  private serviceBCURL = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc'
-
   private govnConfirmModalTitle = 'Create Government Agency Account?'
   private govnConfirmModalText = this.$t('govnConfirmText')
   private govnAccountDescription = this.$t('govnAccountDescription')
 
   $refs: {
     govnConfirmModal: ModalDialog
+  }
+
+  private get serviceCardURL (): string {
+    return 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card'
+  }
+
+  private get bceIdURL (): string {
+    return 'https://www.bceid.ca/'
+  }
+
+  private get serviceBCURL (): string {
+    return 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc'
   }
 
   private get disableGovnAccountCreation (): boolean {
