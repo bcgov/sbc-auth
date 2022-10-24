@@ -125,7 +125,7 @@
                 <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCSC'">
                   {{ authType == 'BCSC' ? 'Selected' : 'Select' }}
                 </v-btn>
-              </div>               
+              </div>
             </div>
           </v-card>
         </v-col>
