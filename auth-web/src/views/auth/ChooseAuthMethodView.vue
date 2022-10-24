@@ -309,26 +309,16 @@ export default class ChooseAuthMethodView extends Vue {
 
   private confirmGovnCreateAccount (): void {
     this.$refs.govnConfirmModal.close()
-    if (this.currCheckBox === LoginSource.BCSC) {
-      this.isGovNBCSC = true
-      this.isGovNBCeID = false
-    } else if (this.currCheckBox === LoginSource.BCEID) {
-      this.isGovNBCSC = false
-      this.isGovNBCeID = true
-    }
+    this.isGovNBCSC = this.currCheckBox === LoginSource.BCSC
+    this.isGovNBCeID = this.currCheckBox === LoginSource.BCEID
     this.currCheckBox = ''
   }
 
   private closeConfirmModal (): void {
     this.$refs.govnConfirmModal.close()
     // Set isGovn flag back to false
-    if (this.currCheckBox === LoginSource.BCSC) {
-      this.isGovNBCSC = false
-      this.isGovNBCeID = false
-    } else if (this.currCheckBox === LoginSource.BCEID) {
-      this.isGovNBCeID = false
-      this.isGovNBCSC = false
-    }
+    this.isGovNBCSC = false
+    this.isGovNBCeID = false
     this.currCheckBox = ''
   }
 }
