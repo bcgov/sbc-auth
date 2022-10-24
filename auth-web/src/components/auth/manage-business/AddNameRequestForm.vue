@@ -4,21 +4,19 @@
       <fieldset>
         <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
         <v-text-field
-          filled
+          ref="nrNumber"
+          filled persistent-hint validate-on-blur
           label="Enter a Name Request Number"
           hint="Example: NR 1234567"
-          req
-          persistent-hint
           :rules="nrNumberRules"
           v-model="nrNumber"
           @blur="formatNrNumber()"
           data-test="nr-number"
         />
         <v-text-field
-          filled
+          filled persistent-hint
           label="Enter the Applicant Phone Number"
           hint="Example: 555-555-5555"
-          persistent-hint
           :rules="applicantPhoneNumberRules"
           v-model="applicantPhoneNumber"
           type="tel"
@@ -26,10 +24,9 @@
         />
         <div class="font-weight-bold ml-3 mb-2">or</div>
         <v-text-field
-          filled
+          filled persistent-hint
           label="Enter the Applicant Email Address"
           hint="Example: name@email.com"
-          persistent-hint
           :rules="applicantEmailRules"
           v-model="applicantEmail"
           data-test="applicant-email"
@@ -99,21 +96,24 @@ export default class AddNameRequestForm extends Vue {
   private readonly currentOrganization!: Organization
   private readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
 
-  private helpDialogBlurb = 'If you have lost your receipt and name results email and ' +
+  readonly helpDialogBlurb = 'If you have lost your receipt and name results email and ' +
     'need assistance finding your Name Request (NR) Number, please contact use at:'
 
-  private nrNumberRules = [
+  readonly nrNumberRules = [
     v => !!v || 'Name Request Number is required',
     v => CommonUtils.validateNameRequestNumber(v) || 'Name Request Number is invalid'
   ]
-  private applicantPhoneNumberRules = [
+
+  readonly applicantPhoneNumberRules = [
     v => this.isInputEntered(v, 'phone') || 'Phone number is required',
     v => CommonUtils.validatePhoneNumber(v) || 'Phone number is invalid'
   ]
-  private applicantEmailRules = [
+
+  readonly applicantEmailRules = [
     v => this.isInputEntered(v, 'email') || 'Email is required',
     v => this.isValidateEmail(v) || 'Email is Invalid'
   ]
+
   private nrNumber = ''
   private applicantPhoneNumber = ''
   private applicantEmail = ''
@@ -121,6 +121,7 @@ export default class AddNameRequestForm extends Vue {
 
   $refs: {
     addNRForm: HTMLFormElement,
+    nrNumber: HTMLFormElement,
     helpDialog: HelpDialog
   }
 
@@ -181,8 +182,10 @@ export default class AddNameRequestForm extends Vue {
     }
   }
 
-  private formatNrNumber (): void {
+  protected async formatNrNumber (): Promise<void> {
     this.nrNumber = CommonUtils.formatIncorporationNumber(this.nrNumber, true)
+    await Vue.nextTick() // wait for component to update
+    this.$refs.nrNumber.validate()
   }
 
   private openHelp (): void {
