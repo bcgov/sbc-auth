@@ -22,7 +22,12 @@
           <div class="mt-4">
             The BC Services Card is a means of logging into BC government online services with a verified identity.
             You can use the BC Services Card app on a mobile device, or a username and password with the BC Services
-            Card token (available at a Service BC location).
+            Card token (available at a
+            <a href="https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc"
+              target="_blank" class="learn-more-link">
+              Service BC location
+              <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
+            </a>).
           </div>
           <ul class="mt-4">
             <li>BC Services Card requires a one-time verification and can then be used for multiple government services.
@@ -90,7 +95,7 @@
             @click="selectBCSCAuth()" :class="{'active': authType == 'BCSC'}">
             <div class="account-type d-flex flex-column">
               <div class="account-type__icon mb-4">
-                <v-icon color="primary" class="account-card-icon">mdi-map-marker</v-icon>
+                <v-icon color="primary" class="account-card-icon">mdi-account-card-details-outline</v-icon>
               </div>
               <div class="account-type__title mb-6">
                 BC Services Card
@@ -134,7 +139,7 @@
             @click="selectBCEIDAuth()" :class="{'active': authType == 'BCEID'}">
             <div class="account-type d-flex flex-column">
               <div class="account-type__icon mb-4">
-                <v-icon color="primary" class="account-card-icon">mdi-map-marker-off</v-icon>
+                <v-icon color="primary" class="account-card-icon">mdi-certificate-outline</v-icon>
               </div>
               <div class="account-type__title mb-6">
                 BCeID + 2FA
