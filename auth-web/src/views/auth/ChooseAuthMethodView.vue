@@ -23,8 +23,7 @@
             The BC Services Card is a means of logging into BC government online services with a verified identity.
             You can use the BC Services Card app on a mobile device, or a username and password with the BC Services
             Card token (available at a
-            <a href="https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc"
-              target="_blank" class="learn-more-link">
+            <a :href="serviceBCURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
               Service BC location
               <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
             </a>).
@@ -42,8 +41,7 @@
               token.</li>
           </ul>
           <div class="mt-4">
-            <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank"
-              class="learn-more-link">
+            <a :href="serviceCardURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
               Learn more about the BC Services card
               <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
             </a>
@@ -68,7 +66,7 @@
               (2FA).</li>
           </ul>
           <div class="mt-4">
-            <a href="https://www.bceid.ca/" target="_blank" class="learn-more-link">
+            <a :href="bceIdURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
               Learn more about BCeID
               <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
             </a>
@@ -107,8 +105,8 @@
                 </div>
               </div>
               <div class="mb-4">
-                <a href="https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card" target="_blank"
-                  class="learn-more-link">
+                <a :href="serviceCardURL" target="_blank"
+                  class="learn-more-link" rel="noopener noreferrer">
                   Learn more about the BC Services card
                   <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
                 </a>
@@ -155,7 +153,7 @@
                 </div>
               </div>
               <div class="mb-4">
-                <a href="https://www.bceid.ca/" target="_blank" class="learn-more-link">
+                <a :href="bceIdURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
                   Learn more about BCeID
                   <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
                 </a>
@@ -236,6 +234,9 @@ export default class ChooseAuthMethodView extends Vue {
   private isGovNBCeID = false
   private currCheckBox = ''
   private showHelp = false
+  private serviceCardURL = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card'
+  private bceIdURL = 'https://www.bceid.ca/'
+  private serviceBCURL = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc'
 
   private govnConfirmModalTitle = 'Create Government Agency Account?'
   private govnConfirmModalText = this.$t('govnConfirmText')
