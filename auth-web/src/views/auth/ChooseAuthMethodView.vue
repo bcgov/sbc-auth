@@ -125,10 +125,7 @@
                 <v-btn large depressed block color="primary" class="font-weight-bold" :outlined="authType != 'BCSC'">
                   {{ authType == 'BCSC' ? 'Selected' : 'Select' }}
                 </v-btn>
-              </div>
-              <!--<div class="notary-link">
-                <router-link class="caption"  v-on:click.native="linkToNext" to="/nonbcsc-info">Verify with a notary instead</router-link>
-              </div>-->
+              </div>               
             </div>
           </v-card>
         </v-col>
