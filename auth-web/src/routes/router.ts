@@ -578,6 +578,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'active',
           component: StaffActiveAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -592,6 +594,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'invitations',
           component: StaffPendingAccountInvitationsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -606,6 +610,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'review',
           component: StaffPendingAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -620,6 +626,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'rejected',
           component: StaffRejectedAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
@@ -634,6 +642,8 @@ export function getRoutes (): RouteConfig[] {
           name: 'suspended',
           component: StaffSuspendedAccountsTable,
           meta: {
+            requiresAuth: true,
+            allowedRoles: [Role.Staff],
             breadcrumb: [
               {
                 text: StaffDashboardBreadcrumb.text,
