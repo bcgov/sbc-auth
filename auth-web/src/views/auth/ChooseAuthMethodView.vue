@@ -18,11 +18,10 @@
             There are two ways to log into a BC Registries account:
           </p>
 
-          <div class="bold-text">1) The BC Services Card</div>
+          <div class="bold-text">1) The BC Services Card Login</div>
           <div class="mt-4">
-            The BC Services Card is a means of logging into BC government online services with a verified identity.
-            You can use the BC Services Card app on a mobile device, or a username and password with the BC Services
-            Card token (available at a
+            The BC Services Card is a means of logging into BC government online services with a verified identity. You
+            can use the BC Services Card mobile app, or an email and password with the BC token (available at a
             <a :href="serviceBCURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
               Service BC location
               <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
@@ -47,7 +46,7 @@
             </a>
           </div>
 
-          <div class="bold-text mt-4">2) A BCeID</div>
+          <div class="bold-text mt-4">2) BCeID Login</div>
           <div class="mt-4">
             A BCeID is an account that provides a username and password to allow secure electronic access to online
             government
@@ -57,7 +56,7 @@
             <li>You can sign up for a BCeID when creating your BC Registries account or use an existing BCeID if you
               already have one.
             </li>
-            <li>Your identity will need to be verified by obtaining a notorized affidavit from a notary or lawyer before
+            <li>Your identity will need to be verified by obtaining a notarized affidavit from a notary or lawyer before
               you can
               access BC Registry services. Note: Most notaries and lawyers charge a fee for this service; fees will
               vary.</li>
@@ -90,7 +89,7 @@
       <v-row>
         <v-col class="d-flex align-stretch" sm="12" md="6">
           <v-card flat outlined hover class="account-card text-center pa-10 elevation-2 d-flex"
-            @click="selectBCSCAuth()" :class="{'active': authType == 'BCSC'}">
+            @click="selectBCSCAuth()" :class="{ 'active': authType == 'BCSC' }">
             <div class="account-type d-flex flex-column">
               <div class="account-type__icon mb-4">
                 <v-icon color="primary" class="account-card-icon">mdi-account-card-details-outline</v-icon>
@@ -99,14 +98,13 @@
                 BC Services Card
               </div>
               <div class="account-type__details mb-6">
-                All Canadian citizens can use the BC Services Card app or token to log in.
+                Canadian citizens can use the BC Services Card app or token to log in.
                 <div class="mt-6">
                   BC Services Card is the most common method of logging into a BC Registries account.
                 </div>
               </div>
               <div class="mb-4">
-                <a :href="serviceCardURL" target="_blank"
-                  class="learn-more-link" rel="noopener noreferrer">
+                <a :href="serviceCardURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
                   Learn more about the BC Services card
                   <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
                 </a>
@@ -131,7 +129,7 @@
         </v-col>
         <v-col class="d-flex align-stretch" sm="12" md="6">
           <v-card flat outlined hover class="account-card text-center pa-10 elevation-2 d-flex"
-            @click="selectBCEIDAuth()" :class="{'active': authType == 'BCEID'}">
+            @click="selectBCEIDAuth()" :class="{ 'active': authType == 'BCEID' }">
             <div class="account-type d-flex flex-column">
               <div class="account-type__icon mb-4">
                 <v-icon color="primary" class="account-card-icon">mdi-certificate-outline</v-icon>
@@ -181,7 +179,7 @@
         Cancel
       </v-btn>
       <v-spacer></v-spacer>
-      <v-btn large color="primary" class="next-btn font-weight-bold" :disabled="authType ==''" @click="goNext()">
+      <v-btn large color="primary" class="next-btn font-weight-bold" :disabled="authType == ''" @click="goNext()">
         Next
         <v-icon class="ml-2">
           mdi-arrow-right
@@ -239,46 +237,46 @@ export default class ChooseAuthMethodView extends Vue {
     govnConfirmModal: ModalDialog
   }
 
-  private get serviceCardURL (): string {
+  private get serviceCardURL(): string {
     return 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card'
   }
 
-  private get bceIdURL (): string {
+  private get bceIdURL(): string {
     return 'https://www.bceid.ca/'
   }
 
-  private get serviceBCURL (): string {
+  private get serviceBCURL(): string {
     return 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc'
   }
 
-  private get disableGovnAccountCreation (): boolean {
+  private get disableGovnAccountCreation(): boolean {
     return LaunchDarklyService.getFlag(LDFlags.DisableGovNAccountCreation) || false
   }
 
-  private selectBCSCAuth () {
+  private selectBCSCAuth() {
     this.authType = LoginSource.BCSC
     if (this.isGovNBCeID) {
       this.isGovNBCeID = false
     }
   }
 
-  private selectBCEIDAuth () {
+  private selectBCEIDAuth() {
     this.authType = LoginSource.BCEID
     if (this.isGovNBCSC) {
       this.isGovNBCSC = false
     }
   }
 
-  private linkToNext () {
+  private linkToNext() {
     ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
     ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
   }
 
-  private goPrevious () {
+  private goPrevious() {
     this.$router.go(-1)
   }
 
-  private goNext () {
+  private goNext() {
     ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
     // TODO might need to set some session variables
     switch (this.authType) {
@@ -302,19 +300,19 @@ export default class ChooseAuthMethodView extends Vue {
     }
   }
 
-  private openGovnWarningModal (selection: string): void {
+  private openGovnWarningModal(selection: string): void {
     this.currCheckBox = selection
     this.$refs.govnConfirmModal.open()
   }
 
-  private confirmGovnCreateAccount (): void {
+  private confirmGovnCreateAccount(): void {
     this.$refs.govnConfirmModal.close()
     this.isGovNBCSC = this.currCheckBox === LoginSource.BCSC
     this.isGovNBCeID = this.currCheckBox === LoginSource.BCEID
     this.currCheckBox = ''
   }
 
-  private closeConfirmModal (): void {
+  private closeConfirmModal(): void {
     this.$refs.govnConfirmModal.close()
     // Set isGovn flag back to false
     this.isGovNBCSC = false
