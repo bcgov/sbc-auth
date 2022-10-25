@@ -237,46 +237,46 @@ export default class ChooseAuthMethodView extends Vue {
     govnConfirmModal: ModalDialog
   }
 
-  private get serviceCardURL(): string {
+  private get serviceCardURL (): string {
     return 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card'
   }
 
-  private get bceIdURL(): string {
+  private get bceIdURL (): string {
     return 'https://www.bceid.ca/'
   }
 
-  private get serviceBCURL(): string {
+  private get serviceBCURL (): string {
     return 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/servicebc'
   }
 
-  private get disableGovnAccountCreation(): boolean {
+  private get disableGovnAccountCreation (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.DisableGovNAccountCreation) || false
   }
 
-  private selectBCSCAuth() {
+  private selectBCSCAuth () {
     this.authType = LoginSource.BCSC
     if (this.isGovNBCeID) {
       this.isGovNBCeID = false
     }
   }
 
-  private selectBCEIDAuth() {
+  private selectBCEIDAuth () {
     this.authType = LoginSource.BCEID
     if (this.isGovNBCSC) {
       this.isGovNBCSC = false
     }
   }
 
-  private linkToNext() {
+  private linkToNext () {
     ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
     ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
   }
 
-  private goPrevious() {
+  private goPrevious () {
     this.$router.go(-1)
   }
 
-  private goNext() {
+  private goNext () {
     ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
     // TODO might need to set some session variables
     switch (this.authType) {
@@ -300,19 +300,19 @@ export default class ChooseAuthMethodView extends Vue {
     }
   }
 
-  private openGovnWarningModal(selection: string): void {
+  private openGovnWarningModal (selection: string): void {
     this.currCheckBox = selection
     this.$refs.govnConfirmModal.open()
   }
 
-  private confirmGovnCreateAccount(): void {
+  private confirmGovnCreateAccount (): void {
     this.$refs.govnConfirmModal.close()
     this.isGovNBCSC = this.currCheckBox === LoginSource.BCSC
     this.isGovNBCeID = this.currCheckBox === LoginSource.BCEID
     this.currCheckBox = ''
   }
 
-  private closeConfirmModal(): void {
+  private closeConfirmModal (): void {
     this.$refs.govnConfirmModal.close()
     // Set isGovn flag back to false
     this.isGovNBCSC = false
