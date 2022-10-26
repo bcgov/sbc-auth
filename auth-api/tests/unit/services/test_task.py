@@ -22,6 +22,7 @@ from unittest.mock import patch
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
@@ -42,9 +43,13 @@ def test_fetch_tasks(session, auth_mock):  # pylint:disable=unused-argument
     dictionary = task.as_dict()
     name = dictionary['name']
 
-    fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                           page=1,
-                                           limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    fetched_task = TaskService.fetch_tasks(task_search)
 
     assert fetched_task['tasks']
     for item in fetched_task['tasks']:
@@ -115,9 +120,13 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -150,9 +159,13 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -212,9 +225,14 @@ def test_create_task_govm(session,
 
         # Assert the task that is created
         patch_token_info(token_info, monkeypatch)
-        fetched_task = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                               page=1,
-                                               limit=10)
+
+        task_search = TaskSearch(
+            status=[TaskStatus.OPEN.value],
+            page=1,
+            limit=10
+        )
+
+        fetched_task = TaskService.fetch_tasks(task_search)
 
         for item in fetched_task['tasks']:
             assert item['name'] == dictionary['name']
