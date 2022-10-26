@@ -72,6 +72,18 @@ def test_get_user_authorizations_for_entity(session, monkeypatch):  # pylint:dis
     assert authorization is not None
     assert authorization.get('orgMembership', None) is None
 
+    # test with api_gw source user
+    patch_token_info({
+        'Account-Id': org.id,
+        'loginSource': 'API_GW',
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, monkeypatch)
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
+
 
 def test_get_user_authorizations_for_org(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that user authorizations for entity is working."""
