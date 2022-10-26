@@ -21,7 +21,8 @@ from flask import abort, current_app
 
 from auth_api.models.views.authorization import Authorization as AuthorizationView
 from auth_api.services.permissions import Permissions as PermissionsService
-from auth_api.utils.enums import LoginSource, ProductTypeCode as ProductTypeCodeEnum
+from auth_api.utils.enums import LoginSource
+from auth_api.utils.enums import ProductTypeCode as ProductTypeCodeEnum
 from auth_api.utils.roles import STAFF, Role
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -127,7 +128,9 @@ class Authorization:
                     )
 
                 if auth:
-                    permissions = PermissionsService.get_permissions_for_membership(auth.status_code, auth.org_membership)
+                    permissions = PermissionsService.get_permissions_for_membership(
+                        auth.status_code, auth.org_membership
+                    )
                     auth_response = Authorization(auth).as_dict(expanded)
                     auth_response['roles'] = permissions
 
