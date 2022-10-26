@@ -47,7 +47,9 @@ def test_get_user_authorizations_for_entity(session, monkeypatch):  # pylint:dis
     assert authorization.get('orgMembership', None) == membership.membership_type_code
 
     # Test with invalid user
-    patch_token_info({'sub': str(uuid.uuid4()), 'realm_access': {
+    patch_token_info({
+        'sub': str(uuid.uuid4()),
+        'realm_access': {
         'roles': ['basic']
     }}, monkeypatch)
     authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
@@ -55,7 +57,10 @@ def test_get_user_authorizations_for_entity(session, monkeypatch):  # pylint:dis
     assert authorization.get('orgMembership', None) is None
 
     # Test for passcode users with invalid username
-    patch_token_info({'loginSource': 'PASSCODE', 'username': 'INVALID', 'realm_access': {
+    patch_token_info({
+        'loginSource': 'PASSCODE',
+        'username': 'INVALID',
+        'realm_access': {
         'roles': ['basic']
     }}, monkeypatch)
     authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
@@ -64,13 +69,31 @@ def test_get_user_authorizations_for_entity(session, monkeypatch):  # pylint:dis
     assert authorization.get('orgMembership', None) is None
 
     # Test for staff users
-    patch_token_info(
-        {'loginSource': '', 'realm_access': {'roles': ['staff']}},
+    patch_token_info({
+        'loginSource': '',
+        'realm_access': {'roles': ['staff']}},
         monkeypatch)
     authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
 
     assert authorization is not None
     assert authorization.get('orgMembership', None) is None
+
+    # test with api_gw source user
+    # user = factory_user_model()
+    # org = factory_org_model()
+    # membership = factory_membership_model(user.id, org.id)
+    # entity = factory_entity_model()
+    # factory_affiliation_model(entity.id, org.id)
+    patch_token_info({
+        'Account-Id': org.id,
+        'loginSource': 'API_GW',
+        'sub': str(user.keycloak_guid),
+        'realm_access': {
+            'roles': ['basic']
+        }}, monkeypatch)
+    authorization = Authorization.get_user_authorizations_for_entity(entity.business_identifier)
+    assert authorization is not None
+    assert authorization.get('orgMembership', None) == membership.membership_type_code
 
 
 def test_get_user_authorizations_for_org(session, monkeypatch):  # pylint:disable=unused-argument

@@ -109,13 +109,13 @@ class Authorization:
                     permissions = PermissionsService.get_permissions_for_membership(auth.status_code, 'SYSTEM')
                     auth_response['roles'] = permissions
         else:
-            if business_identifier and (org_id := user_from_context.account_id_claim):
+            if business_identifier:
 
                 # if this is an API GW account, check if the account has access to the resource
                 if user_from_context.login_source == LoginSource.API_GW.value:
                     auth = AuthorizationView.find_user_authorization_by_business_number(
                         business_identifier=business_identifier,
-                        org_id=org_id
+                        org_id=user_from_context.account_id_claim
                     )
 
                 # Check if the user has access to the resource
@@ -123,7 +123,7 @@ class Authorization:
                     auth = AuthorizationView.find_user_authorization_by_business_number(
                         business_identifier=business_identifier,
                         keycloak_guid=keycloak_guid,
-                        org_id=org_id
+                        org_id=user_from_context.account_id
                     )
 
                 if auth:
