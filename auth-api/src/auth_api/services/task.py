@@ -34,6 +34,7 @@ from auth_api.schemas import TaskSchema
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskAction
 from auth_api.utils.util import camelback2snake  # noqa: I005
+from auth_api.models.dataclass import TaskSearch
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -237,34 +238,17 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>_update_product_subscription ')
 
     @staticmethod
-    def fetch_tasks(**kwargs):
+    def fetch_tasks(task_search: TaskSearch):
         """Search all tasks."""
-        task_type = kwargs.get('task_type')
-        task_status = kwargs.get('task_status') or [TaskStatus.OPEN.value]
-        task_relationship_status = kwargs.get('task_relationship_status')
-
-        tasks = {'tasks': []}
-        page: int = int(kwargs.get('page'))
-        limit: int = int(kwargs.get('limit'))
-        search_args = (task_type,
-                       task_status,
-                       task_relationship_status,
-                       page,
-                       limit)
-
         current_app.logger.debug('<fetch_tasks ')
-        task_models, count = TaskModel.fetch_tasks(*search_args)  # pylint: disable=unused-variable
+        task_models, count = TaskModel.fetch_tasks(task_search)  # pylint: disable=unused-variable
 
-        if not task_models:
-            return tasks
-
-        for task in task_models:
-            task_dict = Task(task).as_dict(exclude=['user'])
-            tasks['tasks'].append(task_dict)
-
-        tasks['total'] = count
-        tasks['page'] = page
-        tasks['limit'] = limit
+        tasks = {
+            'tasks': [Task(task).as_dict(exclude=['user']) for task in task_models],
+            'total': count,
+            'page': task_search.page,
+            'limit': task_search.limit
+        }
 
         current_app.logger.debug('>fetch_tasks ')
         return tasks

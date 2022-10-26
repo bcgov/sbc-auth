@@ -20,6 +20,7 @@ import json
 import pytest
 
 from auth_api import status as http_status
+from auth_api.models.dataclass import TaskSearch
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -53,15 +54,45 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
     assert rv.status_code == http_status.HTTP_200_OK
 
 
-def test_fetch_tasks_with_status(client, jwt, session):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('test_name, endpoint', [
+    ('status', 'status=OPEN'),
+    ('relationshipStatus', 'relationshipStatus=PENDING_STAFF_REVIEW'),
+    ('dateSubmitted', 'startDate=2022-10-20'),
+    ('type', 'type=New Account'),
+    ('name', 'name=foo')
+])
+def test_fetch_tasks_with_params(test_name, client, jwt, endpoint, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
     factory_task_service(user.id)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks?status=OPEN',
+    rv = client.get(f'/api/v1/tasks?{endpoint}',
                     headers=headers, content_type='application/json')
     item_list = rv.json
+    assert item_list['tasks']
+    assert len(item_list['tasks']) > 0
+    assert item_list['tasks'][0][test_name]
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+@pytest.mark.parametrize('test_name, endpoint', [
+    ('with-2-params', 'status=OPEN&relationshipStatus=PENDING_STAFF_REVIEW'),
+    ('with-many-params', 'status=OPEN&relationshipStatus=PENDING_STAFF_REVIEW&page=1&limit=10')
+])
+def test_fetch_tasks_with_many_params(test_name, client, jwt, endpoint, session):
+    """Assert that the tasks can be fetched."""
+    user = factory_user_model()
+    factory_task_service(user.id)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get(f'/api/v1/tasks?{endpoint}',
+                    headers=headers, content_type='application/json')
+    item_list = rv.json
+    assert item_list['tasks']
+    assert len(item_list['tasks']) > 0
+    assert item_list['tasks'][0]['relationshipStatus']
     assert schema_utils.validate(item_list, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
@@ -86,7 +117,12 @@ def test_put_task_org(client, jwt, session, keycloak_mock, monkeypatch):  # pyli
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -137,7 +173,13 @@ def test_put_task_org_on_hold(client, jwt, session, keycloak_mock, monkeypatch):
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
     org_id = org_dict['id']
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[0]
 
@@ -205,9 +247,13 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
     assert len(tasks['tasks']) == 1
 
     product_which_needs_approval = TestOrgProductsInfo.org_products_vs
@@ -217,9 +263,7 @@ def test_put_task_product(client, jwt, session, keycloak_mock, monkeypatch):  # 
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value],
-                                    page=1,
-                                    limit=10)
+    tasks = TaskService.fetch_tasks(task_search)
     fetched_tasks = tasks['tasks']
     fetched_task = fetched_tasks[1]
     assert fetched_task['relationship_type'] == TaskRelationshipType.PRODUCT.value

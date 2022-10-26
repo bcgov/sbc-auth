@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
-from typing import List
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
+from auth_api.models.dataclass import TaskSearch
 from ..utils.enums import TaskRelationshipStatus, TaskRelationshipType, TaskStatus
 from .base_model import BaseModel
 from .db import db
@@ -49,25 +49,26 @@ class Task(BaseModel):
     user = relationship('User', foreign_keys=[related_to], lazy='select')
 
     @classmethod
-    def fetch_tasks(cls, task_type: str, task_status: List[str],  # pylint:disable=too-many-arguments
-                    task_relationship_status: str,
-                    page: int, limit: int):
+    def fetch_tasks(cls, task_search: TaskSearch):
         """Fetch all tasks."""
         query = db.session.query(Task)
-
-        if task_type:
-            query = query.filter(Task.type == task_type)
-        if task_status:
-            query = query.filter(Task.status.in_(task_status))
-        if task_relationship_status:
-            if task_relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
-                query = query.filter(Task.relationship_status == task_relationship_status).order_by(
-                    Task.date_submitted.asc())
-            else:
-                query = query.filter(Task.relationship_status == task_relationship_status)
+        if task_search.name:
+            query = query.filter(Task.name.ilike(f'%{task_search.name}%'))
+        if task_search.type:
+            query = query.filter(Task.type == task_search.type)
+        if task_search.status:
+            query = query.filter(Task.status.in_(task_search.status))
+        if task_search.start_date:
+            query = query.filter(Task.date_submitted >= task_search.start_date)
+        if task_search.end_date:
+            query = query.filter(Task.date_submitted <= task_search.end_date)
+        if task_search.relationship_status:
+            query = query.filter(Task.relationship_status == task_search.relationship_status)
+        if task_search.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
+            query = query.order_by(Task.date_submitted.asc())
 
         # Add pagination
-        pagination = query.paginate(per_page=limit, page=page)
+        pagination = query.paginate(per_page=task_search.limit, page=task_search.page)
         return pagination.items, pagination.total
 
     @classmethod

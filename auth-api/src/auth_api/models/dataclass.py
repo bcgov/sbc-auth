@@ -45,3 +45,18 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
     org_type: str
     page: int
     limit: int
+
+
+@dataclass
+class TaskSearch:
+    """Used for searching tasks."""
+
+    status: List[str] = field()
+    relationship_status: str = ''
+    name: str = ''
+    start_date: str = ''
+    end_date: str = ''
+    type: str = ''
+    page: int = 1
+    limit: int = 10
+    type: str = ''

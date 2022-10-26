@@ -31,6 +31,7 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.org import Org
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import Invitation as InvitationService
@@ -1489,9 +1490,14 @@ def test_approve_org_with_pending_affidavits(client, jwt, session, keycloak_mock
                                content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
-    fetched_tasks = tasks['tasks']
-    fetched_task = fetched_tasks[0]
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
+    fetched_task = tasks['tasks'][0]
 
     update_task_payload = {
         'status': TaskStatus.COMPLETED.value,
@@ -1559,9 +1565,14 @@ def test_approve_org_with_pending_affidavits_duplicate_affidavit(client, jwt, se
                                content_type='application/json')
     assert org_response.status_code == http_status.HTTP_201_CREATED
 
-    tasks = TaskService.fetch_tasks(task_status=[TaskStatus.OPEN.value], page=1, limit=10)
-    fetched_tasks = tasks['tasks']
-    fetched_task = fetched_tasks[0]
+    task_search = TaskSearch(
+        status=[TaskStatus.OPEN.value],
+        page=1,
+        limit=10
+    )
+
+    tasks = TaskService.fetch_tasks(task_search)
+    fetched_task = tasks['tasks'][0]
 
     update_task_payload = {
         'status': TaskStatus.COMPLETED.value,
