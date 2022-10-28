@@ -64,6 +64,8 @@ class Task(BaseModel):
             query = query.filter(Task.date_submitted <= task_search.end_date)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)
+        if task_search.modified_by:
+            query = query.filter(Task.modified_by.ilike(f'%{task_search.modified_by}%'))
         if task_search.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
             query = query.order_by(Task.date_submitted.asc())
 
