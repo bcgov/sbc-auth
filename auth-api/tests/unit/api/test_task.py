@@ -60,7 +60,7 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
     ('dateSubmitted', 'startDate=2022-10-20'),
     ('type', 'type=New Account'),
     ('name', 'name=foo'),
-    ('modifiedBy', 'modifiedBy=foo'),
+    ('modifiedBy', 'modifiedBy=User'),
 ])
 def test_fetch_tasks_with_params(test_name, client, jwt, endpoint, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
