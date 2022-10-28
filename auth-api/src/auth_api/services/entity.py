@@ -148,14 +148,11 @@ class Entity:
         if not entity_info or not business_identifier:
             return None
         user_from_context: UserContext = kwargs['user_context']
-        # todo No memberhsip created at this point. check_auth wont work.ideally we shud put the logic in here
-        # check_auth(token_info, one_of_roles=allowed_roles, business_identifier=business_identifier)
+        if not user_context.is_system():
+            check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None or entity.corp_type_code is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        # if entity.corp_type_code != token_info.get('corp_type', None):
-        #    raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
-
         if user_from_context.is_system():
             if entity_info.get('passCode') is not None:
                 entity_info['passCode'] = passcode_hash(entity_info['passCode'])
