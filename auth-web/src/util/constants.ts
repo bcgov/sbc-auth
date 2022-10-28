@@ -11,6 +11,7 @@ export enum SessionStorageKeys {
     PaginationOptions = 'PAGINATION_OPTIONS',
     PaginationNumberOfItems = 'PAGINATION_NUMBER_OF_ITEMS',
     OrgSearchFilter = 'ORG_SEARCH_FILTER',
+    PendingAccountsSearchFilter = 'PENDING_ACCOUNTS_SEARCH_FILTER',
     AuthApiUrl = 'AUTH_API_URL',
     AuthWebUrl = 'AUTH_WEB_URL',
     RegistryHomeUrl = 'REGISTRY_HOME_URL',

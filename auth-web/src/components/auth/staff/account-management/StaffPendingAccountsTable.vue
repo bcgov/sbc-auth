@@ -93,10 +93,11 @@
 
 <script lang="ts">
 import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { SessionStorageKeys, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
-import { TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { ProductCode } from '@/models/Staff'
@@ -195,6 +196,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   @Watch('searchParams', { deep: true })
   async searchChanged (value: TaskFilterParams) {
     this.searchParamsExist = this.doSearchParametersExist(value)
+    this.setPendingSearchFilterToStorage(JSON.stringify(value))
     await this.searchStaffTasks()
   }
 
@@ -209,6 +211,12 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       this.products.forEach((element, index, array) => {
         this.accountTypes.push({ desc: element.desc, val: element.desc })
       })
+    }
+    const pendingAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter) || ''
+    try {
+      this.searchParams = JSON.parse(pendingAccountsSearchFilter)
+    } catch {
+      // Do nothing
     }
     this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
     if (this.hasCachedPageInfo) {
@@ -254,6 +262,10 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
       taskFilterParams.type.length > 0 ||
       taskFilterParams.status.length > 0 ||
       taskFilterParams.dateSubmitted.length > 0
+  }
+
+  private setPendingSearchFilterToStorage (val:string):void {
+    ConfigHelper.addToSession(SessionStorageKeys.PendingAccountsSearchFilter, val)
   }
 }
 </script>
