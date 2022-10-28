@@ -1,94 +1,92 @@
 <template>
-  <v-form class="fas-search account-pending-search">
-    <v-row dense class="row-margin">
-      <v-col sm="12" cols="6">
-        <transition name="slide-fade">
-          <v-data-table class="user-list" :headers="headerAccounts" :items="staffTasks"
-            :server-items-length="totalStaffTasks" :no-data-text="$t('noActiveAccountsLabel')"
-            :options.sync="tableDataOptions" :custom-sort="columnSort" :footer-props="{
-              itemsPerPageOptions: getPaginationOptions
-            }" :loading="isTableLoading" @update:items-per-page="saveItemsPerPage" hide-default-header fixed-header>
-            <template v-slot:loading>
-              Loading...
-            </template>
+  <v-container>
+    <DatePicker v-show="showDatePicker" ref="datePicker" @submit="updateDateRange($event)"/>
+    <v-form class="fas-search account-pending-search">
+      <v-row dense class="row-margin">
+        <v-col sm="12" cols="6">
+          <transition name="slide-fade">
+            <v-data-table class="user-list" :headers="headerAccounts" :items="staffTasks"
+              :server-items-length="totalStaffTasks" :no-data-text="$t('noActiveAccountsLabel')"
+              :options.sync="tableDataOptions" :custom-sort="columnSort" :footer-props="{
+                itemsPerPageOptions: getPaginationOptions
+              }" :loading="isTableLoading" @update:items-per-page="saveItemsPerPage" hide-default-header fixed-header>
+              <template v-slot:loading>
+                Loading...
+              </template>
 
-            <template v-slot:header="{}">
-              <thead class="v-data-table-header">
-                <tr class="header-row-1">
-                  <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row', i)"
-                    class="font-weight-bold">
-                    {{ header.text }}
-                  </th>
-                </tr>
+              <template v-slot:header="{}">
+                <thead class="v-data-table-header">
+                  <tr class="header-row-1">
+                    <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row', i)"
+                      class="font-weight-bold">
+                      {{ header.text }}
+                    </th>
+                  </tr>
 
-                <tr class="header-row-2 mt-2 px-2">
-                  <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row2', i)">
-                    <v-text-field v-if="!['status', 'action', 'dateSubmitted', 'type'].includes(header.value)"
-                      :id="header.value" input type="search" autocomplete="off" class="text-input-style" filled
-                      :placeholder="header.text" v-model.trim="searchParams[header.value]" dense hide-details="auto" />
+                  <tr class="header-row-2 mt-2 px-2">
+                    <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row2', i)">
+                      <v-text-field v-if="!['status', 'action', 'dateSubmitted', 'type'].includes(header.value)"
+                        :id="header.value" input type="search" autocomplete="off" class="text-input-style" filled
+                        :placeholder="header.text" v-model.trim="searchParams[header.value]" dense
+                        hide-details="auto" />
 
-                    <div v-else-if="['status'].includes(header.value)" class="mt-0">
-                      <v-select :items="statuses" v-model="searchParams[header.value]" filled item-text="text"
-                        item-value="code" data-test="select-status" v-bind="$attrs" v-on="$listeners"
-                        hide-details="auto" :placeholder="header.text" :menu-props="{ bottom: true, offsetY: true }" />
-                    </div>
+                      <div v-else-if="['status'].includes(header.value)" class="mt-0">
+                        <v-select :items="statuses" v-model="searchParams[header.value]" filled item-text="text"
+                          item-value="code" data-test="select-status" v-bind="$attrs" v-on="$listeners"
+                          hide-details="auto" :placeholder="header.text"
+                          :menu-props="{ bottom: true, offsetY: true }" />
+                      </div>
 
-                    <div v-else-if="['type'].includes(header.value)" class="mt-0">
-                      <v-select :items="accountTypes" v-model="searchParams[header.value]" filled v-bind="$attrs"
-                        v-on="$listeners" hide-details="auto" :placeholder="header.text" item-text="desc" item-value="val"
-                        :menu-props="{ bottom: true, offsetY: true }" class="account-type-list"/>
-                    </div>
+                      <div v-else-if="['type'].includes(header.value)" class="mt-0">
+                        <v-select :items="accountTypes" v-model="searchParams[header.value]" filled v-bind="$attrs"
+                          v-on="$listeners" hide-details="auto" :placeholder="header.text" item-text="desc"
+                          item-value="val" :menu-props="{ bottom: true, offsetY: true }" class="account-type-list" />
+                      </div>
 
-                    <div v-else-if="['dateSubmitted'].includes(header.value)">
-                      <v-menu v-model="datePicker" :close-on-content-click="false" transition="scale-transition"
-                        offset-y max-width="290px" min-width="290px">
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field v-model="dateTxt" :label="header.text" filled hide-details readonly
-                            v-bind="attrs" v-on="on" append-icon="mdi-calendar"></v-text-field>
-                        </template>
-                        <v-date-picker color="primary" class="text-center" v-model="searchParams[header.value]" no-title
-                          @input="datePicker = false" />
-                      </v-menu>
-                    </div>
+                      <div v-else-if="['dateSubmitted'].includes(header.value)" @click="showDatePicker = true" class="mt-0 pt-5">
+                        <v-text-field class="text-input-style" append-icon="mdi-calendar" dense filled hide-details="true"
+                        :label="header.text" v-model="dateTxt" />
+                      </div>
 
-                    <v-btn v-else-if="searchParamsExist && header.value === 'action'" outlined color="primary"
-                      class="action-btn clear-filter-button" @click="clearSearchParams()">
-                      <span class="clear-filter cursor-pointer">
-                        Clear Filters
-                        <v-icon small color="primary">mdi-close</v-icon>
-                      </span>
-                    </v-btn>
-                  </th>
-                </tr>
-              </thead>
-            </template>
+                      <v-btn v-else-if="searchParamsExist && header.value === 'action'" outlined color="primary"
+                        class="action-btn clear-filter-button" @click="clearSearchParams()">
+                        <span class="clear-filter cursor-pointer">
+                          Clear Filters
+                          <v-icon small color="primary">mdi-close</v-icon>
+                        </span>
+                      </v-btn>
+                    </th>
+                  </tr>
+                </thead>
+              </template>
 
-            <template v-slot:[`item.dateSubmitted`]="{ item }">
-              {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
-            </template>
-            <template v-slot:[`item.type`]="{ item }">
-              {{ item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
-                  item.type
-              }}
-            </template>
-            <template v-slot:[`item.status`]="{ item }">
-              <span class="status" :class="{ 'onhold': item.status == 'HOLD' }">{{ item.status == 'HOLD' ? `On hold` :
-                  item.status.toLowerCase()
-              }}</span>
-            </template>
-            <template v-slot:[`item.action`]="{ item }">
-              <div class="btn-inline">
-                <v-btn outlined color="primary" :data-test="getIndexedTag('reset-password-button', item.id)"
-                  @click="review(item)">
-                  Review
-                </v-btn>
-              </div>
-            </template>
-          </v-data-table>
-        </transition>
-      </v-col>
-    </v-row>
-  </v-form>
+              <template v-slot:[`item.dateSubmitted`]="{ item }">
+                {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
+              </template>
+              <template v-slot:[`item.type`]="{ item }">
+                {{ item.relationshipType === TaskRelationshipTypeEnum.PRODUCT ? `Access Request (${item.type})` :
+                    item.type
+                }}
+              </template>
+              <template v-slot:[`item.status`]="{ item }">
+                <span class="status" :class="{ 'onhold': item.status == 'HOLD' }">{{ item.status == 'HOLD' ? `On hold` :
+                    item.status.toLowerCase()
+                }}</span>
+              </template>
+              <template v-slot:[`item.action`]="{ item }">
+                <div class="btn-inline">
+                  <v-btn outlined color="primary" :data-test="getIndexedTag('reset-password-button', item.id)"
+                    @click="review(item)">
+                    Review
+                  </v-btn>
+                </div>
+              </template>
+            </v-data-table>
+          </transition>
+        </v-col>
+      </v-row>
+    </v-form>
+  </v-container>
 </template>
 
 <script lang="ts">
@@ -99,13 +97,18 @@ import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
+import DatePicker from '@/components/auth/common/DatePicker.vue'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { ProductCode } from '@/models/Staff'
+import moment from 'moment'
 import { namespace } from 'vuex-class'
 
 const TaskModule = namespace('task')
 
 @Component({
+  components: {
+    DatePicker
+  },
   computed: {
     ...mapState('staff', ['products'])
   },
@@ -124,8 +127,9 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   private isTableLoading: boolean = false
   public TaskRelationshipTypeEnum = TaskRelationshipType
   protected searchParamsExist = false
-  private datePicker: boolean = false
+  private datePicker = null
   private dateTxt = ''
+  private showDatePicker = false
 
   private readonly getProducts!: () => Promise<ProductCode[]>
   private readonly products!: ProductCode[]
@@ -177,7 +181,8 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
   private searchParams: TaskFilterParams = {
     name: '',
-    dateSubmitted: '',
+    startDate: '',
+    endDate: '',
     type: '',
     status: ''
   }
@@ -185,10 +190,12 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   protected clearSearchParams () {
     this.searchParams = {
       name: '',
-      dateSubmitted: '',
+      startDate: '',
+      endDate: '',
       type: '',
       status: ''
     }
+    this.dateTxt = ''
   }
 
   private formatDate = CommonUtils.formatDisplayDate
@@ -261,11 +268,24 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     return taskFilterParams.name.length > 0 ||
       taskFilterParams.type.length > 0 ||
       taskFilterParams.status.length > 0 ||
-      taskFilterParams.dateSubmitted.length > 0
+      taskFilterParams.startDate.length > 0 ||
+      taskFilterParams.endDate.length > 0
   }
 
-  private setPendingSearchFilterToStorage (val:string):void {
+  private setPendingSearchFilterToStorage (val: string): void {
     ConfigHelper.addToSession(SessionStorageKeys.PendingAccountsSearchFilter, val)
+  }
+
+  private updateDateRange (event) {
+    if (!(event.endDate && event.startDate)) {
+      this.dateTxt = ''
+    } else {
+      this.dateTxt = `${moment(event.startDate).format('MMM DD, YYYY')} - ${moment(event.endDate).format('MMM DD, YYYY')}`
+    }
+
+    this.searchParams.startDate = event.startDate
+    this.searchParams.endDate = event.endDate
+    this.showDatePicker = false
   }
 }
 </script>
@@ -295,7 +315,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 }
 
 .account-pending-search {
-  table > thead > tr > th {
+  table>thead>tr>th {
     width: 210px !important;
     min-width: 210px !important;
   }

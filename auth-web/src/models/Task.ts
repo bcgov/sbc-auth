@@ -26,6 +26,8 @@ export interface TaskFilterParams {
     statuses?: string[];
     type?: string;
     name?: string;
+    startDate?: string;
+    endDate?: string;
     relationshipStatus?: string;
     pageNumber?: number;
     pageLimit?: number;
