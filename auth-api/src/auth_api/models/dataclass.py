@@ -57,6 +57,6 @@ class TaskSearch:
     start_date: str = ''
     end_date: str = ''
     type: str = ''
+    modified_by: str = ''
     page: int = 1
     limit: int = 10
-    type: str = ''
