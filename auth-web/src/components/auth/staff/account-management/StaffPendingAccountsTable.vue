@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="pa-0">
     <DatePicker v-show="showDatePicker" ref="datePicker" @submit="updateDateRange($event)"/>
     <v-form class="fas-search account-pending-search">
       <v-row dense class="row-margin">

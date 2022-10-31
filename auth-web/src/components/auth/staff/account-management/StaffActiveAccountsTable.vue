@@ -217,6 +217,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'decisionMadeBy'
     },
     {
+      text: 'Account Type',
       value: 'orgType'
     },
     {
