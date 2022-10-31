@@ -28,6 +28,15 @@ export default class TaskService {
     if (taskFilter.pageLimit) {
       params.append('limit', taskFilter.pageLimit.toString())
     }
+    if (taskFilter.name) {
+      params.append('name', taskFilter.name)
+    }
+    if (taskFilter.startDate) {
+      params.append('startDate', taskFilter.startDate)
+    }
+    if (taskFilter.endDate) {
+      params.append('endDate', taskFilter.endDate)
+    }
 
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/tasks`, { params })
   }
