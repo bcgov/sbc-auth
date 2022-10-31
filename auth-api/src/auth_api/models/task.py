@@ -13,7 +13,7 @@
 # limitations under the License.
 """This model manages a Task item in the Auth Service."""
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text
 from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 
@@ -64,6 +64,10 @@ class Task(BaseModel):
             query = query.filter(Task.date_submitted <= task_search.end_date)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)
+        if task_search.modified_by:
+            query = query.join(Task.modified_by) \
+                            .filter(text("lower(users.first_name || ' ' || users.last_name) like lower(:search_text)"))\
+                            .params(search_text=f'%{task_search.modified_by}%')
         if task_search.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
             query = query.order_by(Task.date_submitted.asc())
 

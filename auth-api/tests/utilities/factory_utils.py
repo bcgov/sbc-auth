@@ -245,12 +245,12 @@ def factory_product_model(org_id: str,
 
 def factory_task_service(user_id: int = 1, org_id: int = 1):
     """Produce a templated task service."""
-    task_model = factory_task_model(user_id, org_id)
+    task_model = factory_task_model(user_id, org_id, modified_by_id=user_id)
     service = TaskService(task_model)
     return service
 
 
-def factory_task_model(user_id: int = 1, org_id: int = 1):
+def factory_task_model(user_id: int = 1, org_id: int = 1, modified_by_id: int = None):
     """Produce a Task model."""
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
     task = TaskModel(id=1,
@@ -261,7 +261,8 @@ def factory_task_model(user_id: int = 1, org_id: int = 1):
                      type=task_type,
                      status=TaskStatus.OPEN.value,
                      related_to=user_id,
-                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+                     relationship_status=TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
+                     modified_by_id=modified_by_id
                      )
     task.save()
     return task

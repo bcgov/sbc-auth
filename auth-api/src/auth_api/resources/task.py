@@ -51,6 +51,7 @@ class Tasks(Resource):
                 relationship_status=request.args.get('relationshipStatus', None),
                 type=request.args.get('type', None),
                 status=request.args.getlist('status', None),
+                modified_by=request.args.get('modifiedBy', None),
                 page=int(request.args.get('page', 1)),
                 limit=int(request.args.get('limit', 10))
             )
