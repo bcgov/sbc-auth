@@ -172,6 +172,14 @@ def factory_affiliation_model(entity_id, org_id) -> AffiliationModel:
     return affiliation
 
 
+def factory_affiliation_model_by_identifier(business_identifier, org_id) -> AffiliationModel:
+    """Produce a templated affiliation model."""
+    entity = EntityModel.find_by_business_identifier(business_identifier)
+    affiliation = AffiliationModel(entity_id=entity.id, org_id=org_id)
+    affiliation.save()
+    return affiliation
+
+
 def factory_affiliation_service(entity_id, org_id):
     """Produce a templated affiliation service."""
     affiliation = AffiliationModel(entity=entity_id, org=org_id)
