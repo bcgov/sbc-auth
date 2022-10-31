@@ -117,6 +117,17 @@
                   <a :href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
                 </li>
               </ul>
+              <p class="mb-5">
+                <strong>{{ $t('labelHoursOfOperation') }}</strong><br>
+                {{ $t('hoursOfOperation') }}
+              </p>
+              <p class="mb-0">For account setup and login support, contact us at:</p>
+              <ul class="contact-info__list mb-5">
+                <li>
+                  <span>{{ $t('labelTollFree') }}</span>
+                  <a :href="`tel:+${$t('maximusSupportTollFree')}`">{{ $t('maximusSupportTollFree') }}</a>
+                </li>
+              </ul>
               <p class="mb-0">
                 <strong>{{ $t('labelHoursOfOperation') }}</strong><br>
                 {{ $t('hoursOfOperation') }}
