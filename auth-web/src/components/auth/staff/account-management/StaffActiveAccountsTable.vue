@@ -84,7 +84,6 @@
                             v-bind="$attrs"
                             v-on="$listeners"
                             hide-details="auto"
-                            :placeholder="header.text"
                           />
                       </div>
 
