@@ -148,7 +148,7 @@ class Entity:
         if not entity_info or not business_identifier:
             return None
         user_from_context: UserContext = kwargs['user_context']
-        if not user_context.is_system():
+        if not user_from_context.is_system():
             check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
         entity = EntityModel.find_by_business_identifier(business_identifier)
         if entity is None or entity.corp_type_code is None:
