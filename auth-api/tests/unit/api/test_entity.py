@@ -28,8 +28,8 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services import Entity as EntityService
 from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_membership_model, factory_org_model,
-    factory_user_model)
+    factory_affiliation_model, factory_affiliation_model_by_identifier, factory_auth_header, factory_entity_model,
+    factory_membership_model, factory_org_model, factory_user_model)
 
 
 def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument
@@ -232,13 +232,14 @@ def test_update_entity_success(client, jwt, session):  # pylint:disable=unused-a
 
     # test business id alone can be updated
     rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity2['businessIdentifier']),
-                      data=json.dumps({'businessIdentifier': 'CPNEW123'}),
+                      data=json.dumps({'businessIdentifier': 'CPNEW123', 'folioNumber': '123'}),
                       headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'business')[0]
 
     dictionary = json.loads(rv.data)
     assert dictionary['businessIdentifier'] == 'CPNEW123'
+    assert dictionary['folioNumber'] == '123'
 
 
 def test_update_entity_with_folio_number(client, jwt, session):  # pylint:disable=unused-argument
@@ -255,6 +256,21 @@ def test_update_entity_with_folio_number(client, jwt, session):  # pylint:disabl
     rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
                       data=json.dumps(TestEntityInfo.entity_folio_number),
                       headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_403_FORBIDDEN
+
+    user = factory_user_model()
+    org = factory_org_model()
+    factory_membership_model(user.id, org.id)
+    factory_affiliation_model_by_identifier(TestEntityInfo.entity1['businessIdentifier'], org.id)
+
+    claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
+    claims['sub'] = str(user.keycloak_guid)
+
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    rv = client.patch('/api/v1/entities/{}'.format(TestEntityInfo.entity1['businessIdentifier']),
+                      data=json.dumps(TestEntityInfo.entity_folio_number),
+                      headers=headers, content_type='application/json')
+
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'business')[0]
     dictionary = json.loads(rv.data)
