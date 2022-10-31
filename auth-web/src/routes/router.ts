@@ -560,7 +560,7 @@ export function getRoutes (): RouteConfig[] {
       path: Pages.ADMIN_DASHBOARD,
       component: AdminDashboardView,
       props: true,
-      meta: { requiresAuth: true, allowedRoles: [Role.AdminEdit] }
+      meta: { requiresAuth: true, allowedRoles: [Role.AdminEdit, Role.BnEdit] }
     },
     {
       path: Pages.STAFF_DASHBOARD,
