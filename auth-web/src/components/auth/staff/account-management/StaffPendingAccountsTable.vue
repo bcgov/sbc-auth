@@ -23,7 +23,7 @@
                     </th>
                   </tr>
 
-                  <tr class="header-row-2 mt-2 px-2">
+                  <tr class="header-row-2 header-row-2-no-padding" id="header-filter-row">
                     <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row2', i)">
                       <v-text-field v-if="!['status', 'action', 'dateSubmitted', 'type'].includes(header.value)"
                         :id="header.value" input type="search" autocomplete="off" class="text-input-style" filled
@@ -45,7 +45,7 @@
 
                       <div v-else-if="['dateSubmitted'].includes(header.value)" @click="showDatePicker = true" class="mt-0 pt-5">
                         <v-text-field class="text-input-style" append-icon="mdi-calendar" dense filled hide-details="true"
-                        :label="header.text" v-model="dateTxt" />
+                        :placeholder="header.text" v-model="dateTxt" />
                       </div>
 
                       <v-btn v-else-if="searchParamsExist && header.value === 'action'" outlined color="primary"
@@ -216,12 +216,15 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     await this.getProducts()
     if (this.products) {
       this.products.forEach((element, index, array) => {
-        this.accountTypes.push({ desc: element.desc, val: element.desc })
+        this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
       })
     }
     const pendingAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter) || ''
     try {
       this.searchParams = JSON.parse(pendingAccountsSearchFilter)
+      if (this.searchParams.startDate && this.searchParams.endDate) {
+        this.dateTxt = `${moment(this.searchParams.startDate).format('MMM DD, YYYY')} - ${moment(this.searchParams.endDate).format('MMM DD, YYYY')}`
+      }
     } catch {
       // Do nothing
     }
@@ -294,6 +297,11 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 @import '@/assets/scss/theme.scss';
 @import '~fas-ui/src/assets/scss/search.scss';
 
+ #header-filter-row {
+    th {
+      padding: 0px 3px 0px 3px !important;
+    }
+  }
 ::v-deep .theme--light.v-data-table .v-data-table__empty-wrapper {
   color: $gray7;
 
