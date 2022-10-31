@@ -26,6 +26,7 @@ export enum SessionStorageKeys {
 
 export enum Role {
     AdminEdit = 'admin_edit',
+    BnEdit = 'bn_edit',
     Staff = 'staff',
     Public = 'public_user',
     Edit = 'edit',
