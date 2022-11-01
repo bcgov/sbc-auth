@@ -84,7 +84,6 @@
                             v-bind="$attrs"
                             v-on="$listeners"
                             hide-details="auto"
-                            :placeholder="header.text"
                           />
                       </div>
 
@@ -217,6 +216,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
       value: 'decisionMadeBy'
     },
     {
+      text: 'Account Type',
       value: 'orgType'
     },
     {
