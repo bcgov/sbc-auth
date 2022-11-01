@@ -160,7 +160,9 @@ export enum CorpType {
     NEW_REGISTRATION = 'RTMP',
     BCOMP = 'BEN',
     NAME_REQUEST = 'NR',
-    TEMP = 'TMP'
+    TEMP = 'TMP',
+    SOLE_PROP = 'SP',
+    PARTNERSHIP = 'GP'
 }
 
 export enum NrState {
