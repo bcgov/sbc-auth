@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="pa-0">
     <DatePicker v-show="showDatePicker" ref="datePicker" @submit="updateDateRange($event)"/>
     <v-form class="fas-search account-pending-search">
       <v-row dense class="row-margin">
@@ -33,13 +33,12 @@
                       <div v-else-if="['status'].includes(header.value)" class="mt-0">
                         <v-select :items="statuses" v-model="searchParams[header.value]" filled item-text="text"
                           item-value="code" data-test="select-status" v-bind="$attrs" v-on="$listeners"
-                          hide-details="auto" :placeholder="header.text"
-                          :menu-props="{ bottom: true, offsetY: true }" />
+                          hide-details="auto" :menu-props="{ bottom: true, offsetY: true }" />
                       </div>
 
                       <div v-else-if="['type'].includes(header.value)" class="mt-0">
                         <v-select :items="accountTypes" v-model="searchParams[header.value]" filled v-bind="$attrs"
-                          v-on="$listeners" hide-details="auto" :placeholder="header.text" item-text="desc"
+                          v-on="$listeners" hide-details="auto" item-text="desc"
                           item-value="val" :menu-props="{ bottom: true, offsetY: true }" class="account-type-list" />
                       </div>
 
