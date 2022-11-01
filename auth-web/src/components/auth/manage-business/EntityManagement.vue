@@ -428,6 +428,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_REGISTRATION) {
       this.populateRegistrationModalValues()
       this.$refs.removalConfirmDialog.open()
+    } else if (removeBusinessPayload.business.corpType.code === CorpType.PARTNERSHIP ||
+      removeBusinessPayload.business.corpType.code === CorpType.SOLE_PROP) {
+      this.populateFirmModalValues()
+      this.$refs.removalConfirmDialog.open()
     } else {
       this.$refs.passcodeResetOptionsModal.open()
     }
@@ -459,6 +463,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.primaryBtnHandler = this.confirmRemovalRegistration
     this.secondaryBtnHandler = this.cancelRemoval
   }
+  private populateFirmModalValues () {
+    this.dialogTitle = this.$t('removeFirmConfirmTitle').toString()
+    this.dialogText = this.$t('removeFirmConfirmText').toString()
+    this.primaryBtnText = 'Remove Registration'
+    this.secondaryBtnText = 'Keep Registration'
+    this.primaryBtnHandler = this.confirmRemovalFirm
+    this.secondaryBtnHandler = this.cancelRemoval
+  }
 
   cancelRemoval () {
     this.$refs.removalConfirmDialog.close()
@@ -477,6 +489,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   confirmRemovalNr () {
     this.$refs.removalConfirmDialog.close()
     this.remove('', false, 'removeNRSuccessTitle', 'removeNRSuccessText')
+  }
+
+  confirmRemovalFirm () {
+    this.$refs.removalConfirmDialog.close()
+    this.remove('', false, 'removeFirmSuccessTitle', 'removeFirmSuccessText')
   }
 
   cancelAddBusiness () {

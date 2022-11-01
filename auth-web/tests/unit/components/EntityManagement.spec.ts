@@ -114,7 +114,20 @@ describe('Entity Management Component', () => {
     expect(mockedNrMethod).toHaveBeenCalledTimes(0)
     expect(mockedPasscodeResetMethod).toHaveBeenCalled()
   })
-
+  it('calls the IA open modal with correct buttons', async () => {
+    const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('SP')
+    wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
+    expect(mockedNrMethod).toHaveBeenCalled()
+    expect(wrapper.vm.primaryBtnText).toBe('Remove Registration')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
+  })
+  it('calls the IA open modal with correct buttons', async () => {
+    const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('GP')
+    wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
+    expect(mockedNrMethod).toHaveBeenCalled()
+    expect(wrapper.vm.primaryBtnText).toBe('Remove Registration')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
+  })
   it('all buttons, tooltips and v-menu selections exist', async () => {
     // All buttons exist
     expect(wrapper.find('#add-existing-btn').exists()).toBe(true)
