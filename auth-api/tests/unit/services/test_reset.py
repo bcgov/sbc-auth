@@ -36,6 +36,7 @@ def test_reset(session, auth_mock, monkeypatch):  # pylint: disable=unused-argum
     """Assert that can be reset data by the provided token."""
     user_with_token = TestUserInfo.user_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.tester_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.tester_role['idp_userid']
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
     factory_membership_model(user.id, org.id)
@@ -96,6 +97,7 @@ def test_reset_bceid_user(session, auth_mock, monkeypatch):  # pylint: disable=u
     user_id = user.id
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = user_id
+    user_with_token['idp_userid'] = user_id
     user = factory_user_model(user_info=user_with_token)
     org = factory_org_model(user_id=user.id)
 

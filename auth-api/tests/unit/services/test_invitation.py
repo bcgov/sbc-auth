@@ -41,7 +41,7 @@ def test_as_dict(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disa
     """Assert that the Invitation is exported correctly as a dictionary."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model()
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -54,7 +54,7 @@ def test_create_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
     """Assert that an Invitation can be created."""
     with patch.object(InvitationService, 'send_invitation', return_value=None) as mock_notify:
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -75,7 +75,7 @@ def test_find_invitation_by_id(session, auth_mock, keycloak_mock, monkeypatch): 
     """Find an existing invitation with the provided id."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -95,7 +95,7 @@ def test_delete_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
     """Delete the specified invitation."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -117,7 +117,7 @@ def test_update_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -131,7 +131,7 @@ def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_
     """Update the specified invitation with new data."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -155,7 +155,7 @@ def test_validate_token_valid(session, auth_mock, keycloak_mock, monkeypatch):  
     """Validate the invitation token."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         invitation_info = factory_invitation(org_dictionary['id'])
@@ -169,7 +169,7 @@ def test_validate_token_accepted(session, auth_mock, keycloak_mock, monkeypatch)
     """Validate invalid invitation token."""
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         user_invitee = factory_user_model(TestUserInfo.user1)
@@ -199,8 +199,9 @@ def test_accept_invitation(session, auth_mock, keycloak_mock, monkeypatch):  # p
             with patch.object(InvitationService, 'notify_admin', return_value=None):
                 user_with_token = TestUserInfo.user_test
                 user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+                user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
                 user = factory_user_model(user_with_token)
-                patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+                patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
 
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
@@ -254,7 +255,7 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, monkeyp
         with patch.object(auth, 'check_auth', return_value=True):
             with patch.object(InvitationService, 'notify_admin', return_value=None):
                 user = factory_user_model(TestUserInfo.user_test)
-                patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+                patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
                 org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
                 org_dictionary = org.as_dict()
                 invitation_info = factory_invitation(org_dictionary['id'])
@@ -292,7 +293,7 @@ def test_get_invitations_by_org_id(session, auth_mock, keycloak_mock, monkeypatc
         user_with_token = TestUserInfo.user_test
         user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
         user = factory_user_model(user_with_token)
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         org_dictionary = org.as_dict()
         org_id = org_dictionary['id']

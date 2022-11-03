@@ -40,7 +40,7 @@ def test_get_products(session):  # pylint:disable=unused-argument
 def test_update_product_subscription(session, keycloak_mock, monkeypatch):
     """Assert that updating product subscription works."""
     user = factory_user_model(TestUserInfo.user_test)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = Org.create_org(TestOrgInfo.org1, user_id=user.id)
     product_subscription = ProductSubscription(org_id=org._model.id,
                                                product_code='PPR',

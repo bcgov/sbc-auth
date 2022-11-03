@@ -28,6 +28,7 @@ def test_user_settings(session, auth_mock, keycloak_mock, monkeypatch):  # pylin
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 

@@ -68,7 +68,7 @@ def test_as_dict(session):  # pylint:disable=unused-argument
 def test_create_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -78,7 +78,7 @@ def test_create_org(session, keycloak_mock, monkeypatch):  # pylint:disable=unus
 def test_create_org_products(session, keycloak_mock, monkeypatch):
     """Assert that an Org with products can be created."""
     user = factory_user_model()
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
         org = OrgService.create_org(TestOrgInfo.org_with_products, user_id=user.id)
         mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
@@ -93,7 +93,7 @@ def test_create_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
     with patch.object(RestService, 'post') as mock_post:
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
         assert org
         dictionary = org.as_dict()
@@ -116,7 +116,7 @@ def test_pay_request_is_correct_with_branch_name(session,
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
     with patch.object(RestService, 'post') as mock_post:
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user.id)
         assert org
         dictionary = org.as_dict()
@@ -139,7 +139,7 @@ def test_update_basic_org_assert_pay_request_activity(session, keycloak_mock, mo
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     # Have to patch this because the pay spec is wrong and returns 201, not 202 or 200.
     patch_pay_account_post(monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
@@ -162,7 +162,7 @@ def test_update_basic_org_assert_pay_request_is_correct(session, keycloak_mock,
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     with patch.object(RestService, 'put') as mock_put:
         new_payment_method = TestPaymentMethodInfo.get_payment_method_input(PaymentMethod.ONLINE_BANKING)
@@ -206,7 +206,7 @@ def test_create_basic_org_assert_pay_request_is_correct_online_banking(session,
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
     with patch.object(RestService, 'post') as mock_post:
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org_onlinebanking, user_id=user.id)
         assert org
         dictionary = org.as_dict()
@@ -256,10 +256,10 @@ def test_put_basic_org_assert_pay_request_is_govm(session,
     """Assert that while org creation , pay-api gets called with proper data for basic accounts."""
     user = factory_user_model()
     staff_token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
-                                                   roles=['create_accounts'])
+                                                   roles=['create_accounts'], idp_userid=user.idp_userid)
     user2 = factory_user_model(TestUserInfo.user2)
     public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
-                                                    roles=['gov_account_user'])
+                                                    roles=['gov_account_user'], idp_userid=user2.idp_userid)
     patch_token_info(staff_token_info, monkeypatch)
     org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)
     assert org
@@ -307,7 +307,7 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
 
     with patch.object(RestService, 'post', side_effect=[bcol_response, pay_api_response]) as mock_post:
         user = factory_user_model()
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
         assert org
         dictionary = org.as_dict()
@@ -330,7 +330,7 @@ def test_create_premium_org_assert_pay_request_is_correct(session, keycloak_mock
 def test_create_org_assert_payment_types(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -345,7 +345,7 @@ def test_create_product_single_subscription(session, keycloak_mock, monkeypatch)
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
     user = factory_user_model(user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -364,7 +364,7 @@ def test_create_product_single_subscription_duplicate_error(session, keycloak_mo
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
     user = factory_user_model(user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -388,8 +388,9 @@ def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatc
     """Assert that an Org can be created."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_bceid_user['idp_userid']
     user = factory_user_model(user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -411,7 +412,7 @@ def test_create_product_multiple_subscription(session, keycloak_mock, monkeypatc
 def test_create_product_subscription_staff(session, keycloak_mock, org_type, monkeypatch):
     """Assert that updating product subscription works for staff."""
     user = factory_user_model(TestUserInfo.user_test)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
     # Clearing the event listeners here, because we can't change the type_code.
@@ -440,7 +441,7 @@ def test_create_org_with_duplicate_name(session, monkeypatch):  # pylint:disable
     factory_org_model(org_info=TestOrgInfo.org2, org_type_info=TestOrgTypeInfo.implicit)
 
     with pytest.raises(BusinessException) as exception:
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org.create_org(TestOrgInfo.org2, user_id=user.id)
     assert exception.value.code == Error.DATA_CONFLICT.name
 
@@ -450,7 +451,7 @@ def test_create_org_with_similar_name(session, keycloak_mock, monkeypatch):  # p
     user = factory_user_model()
     org = factory_org_service()
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     new_org = org.create_org({'name': 'My Test'}, user_id=user.id)
     dictionary = new_org.as_dict()
 
@@ -473,7 +474,7 @@ def test_create_org_with_duplicate_name_bcol(session, keycloak_mock, monkeypatch
     with patch.object(RestService, 'post', side_effect=[bcol_response, pay_api_response]):
         user = factory_user_model()
         with pytest.raises(BusinessException) as exception:
-            patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+            patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
             org.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
         assert exception.value.code == Error.DATA_CONFLICT.name
 
@@ -512,7 +513,8 @@ def test_suspend_org(session, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be updated."""
     org = factory_org_service()
     user = factory_user_model_with_contact()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
 
     patch_token_info(token_info, monkeypatch)
     updated_org = org.change_org_status(OrgStatus.SUSPENDED.value,
@@ -623,8 +625,9 @@ def test_get_members(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     """Assert that members for an org can be retrieved."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user = factory_user_model(user_info=user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     org_dictionary = org.as_dict()
 
@@ -641,9 +644,10 @@ def test_get_invitations(session, auth_mock, keycloak_mock, monkeypatch):  # pyl
     with patch.object(InvitationService, 'send_invitation', return_value=None):
         user_with_token = TestUserInfo.user_test
         user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+        user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
         user = factory_user_model(user_info=user_with_token)
 
-        patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+        patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
         org = OrgService.create_org(TestOrgInfo.org1, user.id)
         org_dictionary = org.as_dict()
 
@@ -663,7 +667,7 @@ def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pyli
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     assert org.get_owner_count() == 1
 
@@ -676,7 +680,7 @@ def test_create_staff_org_failure(session, keycloak_mock, staff_org, monkeypatch
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.staff_org, user.id)
     assert exception.value.code == Error.INVALID_INPUT.name
@@ -688,7 +692,7 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypat
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
 
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     user2 = factory_user_model(user_info=TestUserInfo.user2)
@@ -702,9 +706,10 @@ def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch)
     """Assert that an org can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user = factory_user_model(user_info=user_with_token)
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     user2 = factory_user_model(user_info=TestUserInfo.user2)
     factory_membership_model(user2.id, org._model.id, member_type='COORDINATOR')
@@ -726,7 +731,7 @@ def test_delete_org_with_affiliation(session, auth_mock, keycloak_mock,
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
     user = factory_user_model(user_info=user_with_token)
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
     org_id = org.as_dict()['id']
 
@@ -748,6 +753,7 @@ def test_delete_org_with_members_success(session, auth_mock, keycloak_mock,
     """Assert that an org can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user = factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
@@ -812,7 +818,7 @@ def test_create_org_adds_user_to_account_holders_group(session, monkeypatch):  #
     kc_user = keycloak_service.get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
     user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
@@ -832,7 +838,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
     kc_user = keycloak_service.get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     patch_pay_account_delete(monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     OrgService.delete_org(org.as_dict().get('id'))
@@ -854,7 +860,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
     kc_user = keycloak_service.get_user_by_username(request.user_name)
     user = factory_user_model(TestUserInfo.get_user_with_kc_guid(kc_guid=kc_user.id))
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     patch_pay_account_delete(monkeypatch)
     org1 = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     OrgService.create_org(TestOrgInfo.org2, user_id=user.id)
@@ -870,7 +876,7 @@ def test_delete_does_not_remove_user_from_account_holder_group(session, monkeypa
 def test_create_org_with_linked_bcol_account(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model()
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -895,7 +901,7 @@ def test_create_org_with_different_name_than_bcol_account(session, keycloak_mock
     """Assert that an Org can be created."""
     user = factory_user_model()
 
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.bcol_linked_different_name(), user_id=user.id)
     assert org
     dictionary = org.as_dict()
@@ -918,7 +924,7 @@ def test_bcol_account_not_exists(session):  # pylint:disable=unused-argument
 def test_create_org_with_a_linked_bcol_details(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that org creation with an existing linked BCOL account fails."""
     user = factory_user_model()
-    patch_token_info({'sub': user.keycloak_guid}, monkeypatch)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.bcol_linked(), user_id=user.id)
     assert org
     # Create again
@@ -931,7 +937,8 @@ def test_create_org_with_a_linked_bcol_details(session, keycloak_mock, monkeypat
 def test_create_org_by_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model_with_contact()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
@@ -947,7 +954,8 @@ def test_create_org_by_bceid_user(session, keycloak_mock, monkeypatch):  # pylin
 def test_create_org_by_in_province_bceid_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org can be created."""
     user = factory_user_model_with_contact()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
 
     with patch.object(OrgService, 'send_staff_review_account_reminder', return_value=None) as mock_notify:
@@ -963,7 +971,8 @@ def test_create_org_by_in_province_bceid_user(session, keycloak_mock, monkeypatc
 def test_create_org_invalid_access_type_user(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert that an Org cannot be created by providing wrong access type."""
     user = factory_user_model_with_contact()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     monkeypatch.setattr('auth_api.utils.user_context._get_token_info', lambda: token_info)
     with pytest.raises(BusinessException) as exception:
         OrgService.create_org(TestOrgInfo.org_regular, user_id=user.id)
@@ -978,7 +987,8 @@ def test_create_org_by_verified_bceid_user(session, keycloak_mock, monkeypatch):
     # 3. Approve Org, which will mark the affidavit as approved
     # 4. Same user create new org, which should be ACTIVE.
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -1008,7 +1018,8 @@ def test_create_org_by_rejected_bceid_user(session, keycloak_mock, monkeypatch):
     # 3. Reject Org, which will mark the affidavit as rejected
     # 4. Same user create new org, which should be PENDING_STAFF_REVIEW.
     user = factory_user_model_with_contact(user_info=TestUserInfo.user_bceid_tester)
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
 
     patch_token_info(token_info, monkeypatch)
     affidavit_info = TestAffidavit.get_test_affidavit_with_contact()
@@ -1054,7 +1065,8 @@ def test_patch_org_status(session, monkeypatch, auth_mock):  # pylint:disable=un
     """Assert that an Org status can be updated."""
     org = factory_org_service()
     user = factory_user_model_with_contact()
-    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.BCEID.value)
+    token_info = TestJwtClaims.get_test_user(
+        sub=user.keycloak_guid, source=LoginSource.BCEID.value, idp_userid=user.idp_userid)
     patch_token_info(token_info, monkeypatch)
 
     # Validate and update org status

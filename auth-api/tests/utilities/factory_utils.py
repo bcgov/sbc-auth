@@ -81,6 +81,7 @@ def factory_user_model(user_info: dict = TestUserInfo.user1):
                      type=user_type,
                      email='test@test.com',
                      login_source=user_info.get('login_source', None),
+                     idp_userid=user_info.get('idp_userid', None)
                      )
 
     user.save()
@@ -96,7 +97,8 @@ def factory_user_model_with_contact(user_info: dict = TestUserInfo.user1, keyclo
                      keycloak_guid=user_info.get('keycloak_guid', keycloak_guid),
                      type=user_type,
                      email='test@test.com',
-                     login_source=user_info.get('loginSource')
+                     login_source=user_info.get('loginSource'),
+                     idp_userid=user_info.get('idp_userid', None)
                      )
 
     user.save()
