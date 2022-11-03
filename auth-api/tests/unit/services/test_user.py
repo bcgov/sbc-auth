@@ -417,6 +417,7 @@ def test_add_contact_to_user(session, monkeypatch):  # pylint: disable=unused-ar
     """Assert that a contact can be added to a user."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -439,6 +440,7 @@ def test_add_contact_to_user_already_exists(session, monkeypatch):  # pylint: di
     """Assert that a contact cannot be added to a user that already has a contact."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -453,6 +455,7 @@ def test_update_contact_for_user(session, monkeypatch):  # pylint: disable=unuse
     """Assert that a contact can be updated for a user."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -524,6 +527,7 @@ def test_delete_contact_for_user(session, monkeypatch):  # pylint: disable=unuse
     """Assert that a contact can be deleted for a user."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     patch_token_info(TestJwtClaims.user_test, monkeypatch)
@@ -572,6 +576,7 @@ def test_user_find_by_token(session, monkeypatch):  # pylint: disable=unused-arg
     """Assert that a user can be found by token."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     factory_user_model(user_info=user_with_token)
 
     found_user = UserService.find_by_jwt_token()
@@ -665,6 +670,7 @@ def test_delete_user(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:
     """Assert that a user can be deleted."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.user_test['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.user_test['idp_userid']
     user_model = factory_user_model(user_info=user_with_token)
     contact = factory_contact_model()
     contact_link = ContactLinkModel()
