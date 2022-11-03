@@ -39,6 +39,7 @@ def test_get_user_settings(client, jwt, session, keycloak_mock, monkeypatch):  #
 
     claims = copy.deepcopy(TestJwtClaims.updated_test.value)
     claims['sub'] = str(kc_id)
+    claims['idp_userid'] = str(user_model.idp_userid)
     patch_token_info(claims, monkeypatch)
 
     OrgService.create_org(TestOrgInfo.org_branch_name, user_id=user_model.id)

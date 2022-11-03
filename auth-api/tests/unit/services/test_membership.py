@@ -42,6 +42,7 @@ def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:d
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
         return {
             'sub': str(kc_user.id),
+            'idp_userid': str(kc_user.id),
             'username': 'public_user',
             'realm_access': {
                 'roles': [
@@ -91,6 +92,7 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
     def token_info():  # pylint: disable=unused-argument; mocks of library methods
         return {
             'sub': str(kc_user.id),
+            'idp_userid': str(kc_user.id),
             'username': 'public_user',
             'realm_access': {
                 'roles': [

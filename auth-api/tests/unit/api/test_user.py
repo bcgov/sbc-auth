@@ -95,7 +95,7 @@ def test_delete_bcros_valdiations(client, jwt, session, keycloak_mock, monkeypat
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
     factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
 
     patch_token_info(owner_claims, monkeypatch)
     member = TestAnonymousMembership.generate_random_user(USER)
@@ -165,7 +165,7 @@ def test_add_back_a_delete_bcros(client, jwt, session, keycloak_mock, monkeypatc
     user = factory_user_model(user_info=TestUserInfo.user_bcros_active)
     factory_membership_model(user.id, org.id)
     factory_product_model(org.id, product_code=ProductCode.DIR_SEARCH.value)
-    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid)
+    owner_claims = TestJwtClaims.get_test_real_user(user.keycloak_guid, idp_userid=user.idp_userid)
     member = TestAnonymousMembership.generate_random_user(USER)
     membership = [member,
                   TestAnonymousMembership.generate_random_user(COORDINATOR)]
@@ -696,6 +696,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model.keycloak_guid)
+    claims['idp_userid'] = str(user_model.idp_userid)
 
     patch_token_info(claims, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
@@ -732,6 +733,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
 
     claims = copy.deepcopy(TestJwtClaims.public_user_role.value)
     claims['sub'] = str(user_model2.keycloak_guid)
+    claims['idp_userid'] = str(user_model2.idp_userid)
 
     patch_token_info(claims, monkeypatch)
 

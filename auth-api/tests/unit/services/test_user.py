@@ -631,6 +631,7 @@ def test_delete_contact_user_link(session, auth_mock, keycloak_mock, monkeypatch
     """Assert that a contact can not be deleted if contact link exists."""
     user_with_token = TestUserInfo.user_test
     user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
     user_model = factory_user_model(user_info=user_with_token)
     user = UserService(user_model)
 
@@ -727,7 +728,8 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
     contact_link.user = user_model
     contact_link.commit()
 
-    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid,
+                     idp_userid=user_model.idp_userid), monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
@@ -748,7 +750,8 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
                                  membership_type_status=Status.ACTIVE.value)
     membership.save()
 
-    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid,
+                     idp_userid=user_model2.idp_userid), monkeypatch)
     UserService.delete_user()
 
     updated_user = UserModel.find_by_jwt_token()
@@ -770,7 +773,8 @@ def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mo
     contact_link.user = user_model
     contact_link.commit()
 
-    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model.keycloak_guid,
+                     idp_userid=user_model.idp_userid), monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user_model.id)
     org_dictionary = org.as_dict()
     org_id = org_dictionary['id']
@@ -793,7 +797,8 @@ def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mo
     membership.commit()
 
     # with pytest.raises(BusinessException) as exception:
-    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid), monkeypatch)
+    patch_token_info(TestJwtClaims.get_test_user(user_model2.keycloak_guid,
+                     idp_userid=user_model2.idp_userid), monkeypatch)
     UserService.delete_user()
 
     updated_user = UserModel.find_by_jwt_token()
