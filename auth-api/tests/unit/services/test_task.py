@@ -108,6 +108,7 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_bceid_user['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
@@ -147,6 +148,7 @@ def test_hold_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unuse
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
+    user_with_token['idp_userid'] = TestJwtClaims.public_bceid_user['idp_userid']
     user = factory_user_model_with_contact(user_with_token)
 
     patch_token_info(TestJwtClaims.public_bceid_user, monkeypatch)
@@ -189,10 +191,10 @@ def test_create_task_govm(session,
     """Assert that a task can be created when updating a GOVM account."""
     user = factory_user_model()
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value,
-                                             roles=['create_accounts'])
+                                             roles=['create_accounts'], idp_userid=user.idp_userid)
     user2 = factory_user_model(TestUserInfo.user2)
     public_token_info = TestJwtClaims.get_test_user(sub=user2.keycloak_guid, source=LoginSource.STAFF.value,
-                                                    roles=['gov_account_user'])
+                                                    roles=['gov_account_user'], idp_userid=user2.idp_userid)
 
     patch_token_info(token_info, monkeypatch)
     org: OrgService = OrgService.create_org(TestOrgInfo.org_govm, user_id=user.id)

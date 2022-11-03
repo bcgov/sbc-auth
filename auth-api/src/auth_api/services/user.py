@@ -348,7 +348,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
         is_anonymous_user = user_from_context.token_info.get('accessType', None) == AccessType.ANONYMOUS.value
         if not is_anonymous_user:
-            existing_user = UserModel.find_by_jwt_token()
+            existing_user = UserModel.find_by_jwt_idp_userid()
         else:
             existing_user = UserModel.find_by_username(user_from_context.user_name)
 

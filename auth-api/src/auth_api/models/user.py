@@ -23,7 +23,7 @@ from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, a
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from auth_api.utils.enums import AccessType, LoginSource, Status, UserStatus
+from auth_api.utils.enums import LoginSource, Status, UserStatus
 from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -92,6 +92,16 @@ class User(BaseModel):
 
     @classmethod
     @user_context
+    def find_by_jwt_idp_userid(cls, **kwargs):
+        """Find an existing user by idp_userid."""
+        user_from_context: UserContext = kwargs['user_context']
+        if idp_userid := user_from_context.token_info.get('idp_userid', None):
+            return db.session.query(User).filter(
+                User.idp_userid == idp_userid).one_or_none()
+        return None
+
+    @classmethod
+    @user_context
     def create_from_jwt_token(cls, first_name: str, last_name: str, **kwargs):
         """Create a User from the provided JWT."""
         user_from_context: UserContext = kwargs['user_context']
@@ -149,8 +159,7 @@ class User(BaseModel):
 
         user.modified = datetime.datetime.now()
 
-        if token.get('accessType', None) == AccessType.ANONYMOUS.value:  # update kcguid for anonymous users
-            user.keycloak_guid = user_from_context.sub or user.keycloak_guid
+        user.keycloak_guid = user_from_context.sub or user.keycloak_guid
 
         # If this user is marked as Inactive, this login will re-activate them
         user.status = UserStatus.ACTIVE.value

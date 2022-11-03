@@ -43,6 +43,7 @@ class TestJwtClaims(dict, Enum):
     no_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302065',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302065',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -62,6 +63,7 @@ class TestJwtClaims(dict, Enum):
     public_user_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -75,6 +77,7 @@ class TestJwtClaims(dict, Enum):
     public_account_holder_user = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -89,6 +92,7 @@ class TestJwtClaims(dict, Enum):
     gov_account_holder_user = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -104,6 +108,7 @@ class TestJwtClaims(dict, Enum):
     public_bceid_user = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -120,6 +125,7 @@ class TestJwtClaims(dict, Enum):
     public_bceid_account_holder_user = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -137,6 +143,7 @@ class TestJwtClaims(dict, Enum):
     edit_user_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -150,6 +157,7 @@ class TestJwtClaims(dict, Enum):
     edit_role_2 = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302075',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302075',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -163,6 +171,7 @@ class TestJwtClaims(dict, Enum):
     view_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -176,6 +185,7 @@ class TestJwtClaims(dict, Enum):
     staff_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -190,6 +200,7 @@ class TestJwtClaims(dict, Enum):
     staff_view_accounts_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -204,6 +215,7 @@ class TestJwtClaims(dict, Enum):
     staff_manage_accounts_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -219,6 +231,7 @@ class TestJwtClaims(dict, Enum):
     staff_admin_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -237,6 +250,7 @@ class TestJwtClaims(dict, Enum):
     staff_admin_dir_search_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -257,6 +271,7 @@ class TestJwtClaims(dict, Enum):
     bcol_admin_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -278,6 +293,7 @@ class TestJwtClaims(dict, Enum):
     system_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -292,6 +308,7 @@ class TestJwtClaims(dict, Enum):
     passcode = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -312,6 +329,7 @@ class TestJwtClaims(dict, Enum):
     updated_test = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -323,6 +341,7 @@ class TestJwtClaims(dict, Enum):
     user_test = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04',
+        'idp_userid': '1b20db59-19a0-4727-affe-c6f64309fd04',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': 'CP1234567',
@@ -338,6 +357,7 @@ class TestJwtClaims(dict, Enum):
     tester_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -352,6 +372,7 @@ class TestJwtClaims(dict, Enum):
     anonymous_bcros_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302069',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302069',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': f'{IdpHint.BCROS.value}/{fake.user_name()}',
@@ -370,6 +391,7 @@ class TestJwtClaims(dict, Enum):
     tester_bceid_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -383,11 +405,12 @@ class TestJwtClaims(dict, Enum):
     }
 
     @staticmethod
-    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype='', roles=[]):
+    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype='', roles=[], idp_userid=None):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
             'sub': str(sub),
+            'idp_userid': idp_userid or str(sub),
             'firstname': fake.first_name(),
             'lastname': fake.last_name(),
             'accessType': access_ype,
@@ -403,11 +426,12 @@ class TestJwtClaims(dict, Enum):
         }
 
     @staticmethod
-    def get_test_user(sub, source: str = 'PASSCODE', roles=['edit', 'staff', 'tester']):
+    def get_test_user(sub, source: str = 'PASSCODE', roles=['edit', 'staff', 'tester'], idp_userid=None):
         """Return test user with subject from argument."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
             'sub': sub,
+            'idp_userid': idp_userid or str(sub),
             'firstname': fake.first_name(),
             'lastname': fake.last_name(),
             'preferred_username': 'CP1234567',
@@ -766,7 +790,8 @@ class TestUserInfo(dict, Enum):
         'firstname': fake.first_name(),
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}',
-        'keycloak_guid': uuid.uuid4()
+        'keycloak_guid': uuid.uuid4(),
+        'idp_userid': uuid.uuid4()
     }
     user_staff_admin = {
         'username': fake.user_name(),
@@ -774,6 +799,7 @@ class TestUserInfo(dict, Enum):
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, staff_admin}',
         'keycloak_guid': uuid.uuid4(),
+        'idp_userid': uuid.uuid4(),
         'type': 'STAFF'
 
     }
@@ -782,28 +808,32 @@ class TestUserInfo(dict, Enum):
         'firstname': fake.first_name(),
         'lastname': 'User',
         'roles': '{edit, uma_authorization, staff}',
-        'keycloak_guid': uuid.uuid4()
+        'keycloak_guid': uuid.uuid4(),
+        'idp_userid': uuid.uuid4()
     }
     user3 = {
         'username': fake.user_name(),
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, staff}',
-        'keycloak_guid': uuid.uuid4()
+        'keycloak_guid': uuid.uuid4(),
+        'idp_userid': uuid.uuid4()
     }
     user_test = {
         'username': 'CP1234567',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, staff}',
-        'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
+        'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04',
+        'idp_userid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
     user_tester = {
         'username': 'CP1234567',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, tester}',
-        'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04'
+        'keycloak_guid': '1b20db59-19a0-4727-affe-c6f64309fd04',
+        'idp_userid': '1b20db59-19a0-4727-affe-c6f64309fd04'
     }
     user_anonymous_1 = {
         'username': fake.user_name(),
@@ -823,6 +853,7 @@ class TestUserInfo(dict, Enum):
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, staff}',
         'keycloak_guid': uuid.uuid4(),
+        'idp_userid': uuid.uuid4(),
         'access_type': 'ANONYMOUS',
     }
     user_bceid_tester = {
@@ -831,6 +862,7 @@ class TestUserInfo(dict, Enum):
         'lastname': fake.last_name(),
         'roles': '{edit, uma_authorization, tester}',
         'keycloak_guid': uuid.uuid4(),
+        'idp_userid': uuid.uuid4(),
         'access_type': 'BCEID',
         'loginSource': LoginSource.BCEID.value
     }
@@ -844,6 +876,7 @@ class TestUserInfo(dict, Enum):
             'lastname': fake.last_name(),
             'roles': '{edit, uma_authorization, staff}',
             'keycloak_guid': kc_guid,
+            'idp_userid': kc_guid,
             'access_type': 'BCEID',
             'login_source': LoginSource.BCEID.value
         }
@@ -856,7 +889,8 @@ class TestUserInfo(dict, Enum):
             'firstname': fake.first_name(),
             'lastname': fake.last_name(),
             'roles': '{edit, uma_authorization, staff}',
-            'keycloak_guid': kc_guid
+            'keycloak_guid': kc_guid,
+            'idp_userid': kc_guid
         }
 
 
