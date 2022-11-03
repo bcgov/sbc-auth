@@ -137,7 +137,7 @@
                         v-can:REMOVE_BUSINESS.disable
                         @click="removeBusiness(item)"
                       >
-                        <v-list-item-subtitle v-if="isTemporaryBusinessRegistration(item.corpType.code)">
+                        <v-list-item-subtitle v-if="isTemporaryBusiness(item.corpType.code)">
                           <v-icon small>mdi-delete-forever</v-icon>
                           <span class="pl-1">Delete {{tempDescription(item.corpType.code)}}</span>
                         </v-list-item-subtitle>
@@ -167,17 +167,15 @@
 import {
   AffiliationTypes,
   BusinessState,
-  CorpType,
+  CorpTypes,
   FilingTypes,
   LDFlags,
-  LegalTypes,
   NrDisplayStates,
-  NrEntityType,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { Business, BusinessRequest, NameRequest, Names } from '@/models/business'
+import { Business, NameRequest, Names } from '@/models/business'
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -203,7 +201,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   // Local Properties
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
-  private readonly createNamedBusiness!: (filingBody: BusinessRequest, nrNumber: string) => Promise<any>
+  private readonly createNamedBusiness!: ({ filingType, business }) => Promise<any>
   private headers: any[] = []
   private isLoading: boolean = false
 
@@ -250,17 +248,23 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   /** Returns true if the affiliation is a Name Request */
   private isNameRequest (corpType: string): boolean {
-    return corpType === CorpType.NAME_REQUEST
+    return (corpType === CorpTypes.NAME_REQUEST)
   }
 
-  /** Returns true if the affiliation is a Temp Registration */
-  private isTemporaryBusinessRegistration (corpType: string): boolean {
-    return corpType === CorpType.NEW_BUSINESS || corpType === CorpType.NEW_REGISTRATION
+  /** Returns true if the affiliation is a temporary business */
+  private isTemporaryBusiness (corpType: string): boolean {
+    return (
+      corpType === CorpTypes.INCORPORATION_APPLICATION ||
+      corpType === CorpTypes.REGISTRATION
+    )
   }
 
-  /** Returns true if the affiliation is a Numbered Company */
+  /** Returns true if the affiliation is a numbered company */
   private isNumberedIncorporationApplication (item: Business): boolean {
-    return item.corpType.code === CorpType.NEW_BUSINESS && item.name === item.businessIdentifier
+    return (
+      item.corpType.code === CorpTypes.INCORPORATION_APPLICATION &&
+      item.name === item.businessIdentifier
+    )
   }
 
   /** Returns true if the affiliation is approved to start an IA or Registration */
@@ -273,15 +277,27 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       supportedEntityFlags.includes(business.nameRequest?.legalType) // Feature flagged Nr types
   }
 
-  /** Returns the Name value for the affiliation */
+  /** Returns the name of the affiliation */
   private name (item: Business): string {
-    return this.isNumberedIncorporationApplication(item) ? 'Numbered Benefit Company' : item.name
+    if (this.isNumberedIncorporationApplication(item)) {
+      switch (item.corpType.legalType) {
+        case CorpTypes.BC_CCC: return 'Numbered Community Contribution Company'
+        case CorpTypes.BC_COMPANY: return 'Numbered Limited Company'
+        case CorpTypes.BC_ULC_COMPANY: return 'Numbered Unlimited Liability Company'
+        case CorpTypes.BENEFIT_COMPANY: return 'Numbered Benefit Company'
+        case CorpTypes.COOP: return 'Numbered Cooperative Association'
+        default: return 'Numbered Company'
+      }
+    }
+    return item.name
   }
 
   private parseName (item: Business): string {
     if (this.isNameRequest(item.corpType.code)) {
       return item.nameRequest.names.map(name => name.name).join('\n')
-    } else return this.name(item)
+    } else {
+      return this.name(item)
+    }
   }
 
   /** Returns true if the Name Request is approved */
@@ -294,45 +310,45 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return name.state === NrState.REJECTED
   }
 
-  /** Returns the identifier for the affiliation */
+  /** Returns the identifier of the affiliation */
   private number (item: Business): string {
-    switch (true) {
-      case (this.isNumberedIncorporationApplication(item)):
-        return 'Pending'
-      case (this.isTemporaryBusinessRegistration(item.corpType.code)):
-        return item.nrNumber
-      case this.isNameRequest(item.corpType.code):
-        return item.nameRequest?.nrNumber
-      default:
-        return item.businessIdentifier
+    if (this.isNumberedIncorporationApplication(item)) {
+      return 'Pending'
+    } else if (this.isTemporaryBusiness(item.corpType.code)) {
+      return item.nrNumber
+    } else if (this.isNameRequest(item.corpType.code)) {
+      return item.nameRequest?.nrNumber
+    } else {
+      return item.businessIdentifier
     }
   }
 
   /** Returns the type of the affiliation */
   private type (item: Business): string {
-    switch (true) {
-      case (this.isNameRequest(item.corpType.code)):
-        return AffiliationTypes.NAME_REQUEST
-      case this.isTemporaryBusinessRegistration(item.corpType.code):
-        return this.tempDescription(item.corpType.code as CorpType)
-      default:
-        return this.typeDescription(item.corpType.code as CorpTypeCd)
+    if (this.isNameRequest(item.corpType.code)) {
+      return AffiliationTypes.NAME_REQUEST
+    } else if (this.isTemporaryBusiness(item.corpType.code)) {
+      return this.tempDescription(item.corpType.code)
+    } else {
+      return this.typeDescription(item.corpType.code)
     }
   }
 
   /** Returns the temp corp description for display */
-  private tempDescription (corpType: CorpType): string {
-    switch (corpType) {
-      case CorpType.NEW_BUSINESS:
+  private tempDescription (corpType: string): string {
+    switch (corpType as CorpTypes) {
+      case CorpTypes.INCORPORATION_APPLICATION:
         return AffiliationTypes.INCORPORATION_APPLICATION
-      case CorpType.NEW_REGISTRATION:
+      case CorpTypes.REGISTRATION:
         return AffiliationTypes.REGISTRATION
+      default:
+        return ''
     }
   }
 
   /** Returns the corp full description for display */
-  private typeDescription (corpType: CorpTypeCd): string {
-    return GetCorpFullDescription(corpType)
+  private typeDescription (corpType: string): string {
+    return GetCorpFullDescription(corpType as CorpTypeCd)
   }
 
   /** Returns the status for the affiliation */
@@ -342,7 +358,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         // Format name request state value for Display
         if (!NrState[item.nameRequest?.state]) return 'Unknown'
         return NrDisplayStates[NrState[item.nameRequest.state]] || 'Unknown'
-      case this.isTemporaryBusinessRegistration(item.corpType.code):
+      case this.isTemporaryBusiness(item.corpType.code):
         return BusinessState.DRAFT
       case !!item.status:
         return item.status.charAt(0)?.toUpperCase() + item.status?.slice(1)?.toLowerCase()
@@ -376,7 +392,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   /** Redirect handler for Dashboard OPEN action */
   private open (item: Business): void {
-    if (item.corpType.code === CorpType.NAME_REQUEST) {
+    if (item.corpType.code === CorpTypes.NAME_REQUEST) {
       this.goToNameRequest(item.nameRequest)
     } else {
       this.goToDashboard(item.businessIdentifier)
@@ -389,7 +405,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       case NrTargetTypes.LEAR:
         // Create new IA if the selected item is Name Request
         let businessIdentifier = item.businessIdentifier
-        if (item.corpType.code === CorpType.NAME_REQUEST) {
+        if (item.corpType.code === CorpTypes.NAME_REQUEST) {
           this.isLoading = true
           businessIdentifier = await this.createBusinessRecord(item)
           this.isLoading = false
@@ -431,69 +447,26 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   /** Create a business record in Lear */
   private async createBusinessRecord (business: Business): Promise<string> {
+    const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
+    const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
+      CorpTypes.BC_ULC_COMPANY]
+
     let filingResponse = null
-    if ([LegalTypes.SP, LegalTypes.GP].includes(business.nameRequest?.legalType as LegalTypes)) {
-      filingResponse = await this.createBusinessRegistration(business)
-    } else {
-      filingResponse = await this.createBusinessIA(business)
+
+    if (regTypes.includes(business.nameRequest?.legalType as CorpTypes)) {
+      filingResponse =
+        await this.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
+    } else if (iaTypes.includes(business.nameRequest?.legalType as CorpTypes)) {
+      filingResponse =
+        await this.createNamedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
     }
 
     if (filingResponse?.errorMsg) {
       this.$emit('add-unknown-error')
       return ''
-    } else {
-      return filingResponse.data.filing.business.identifier
     }
-  }
 
-  private async createBusinessIA (business: Business): Promise<any> {
-    const filingBody: BusinessRequest = {
-      filing: {
-        header: {
-          name: FilingTypes.INCORPORATION_APPLICATION,
-          accountId: this.currentOrganization.id
-        },
-        business: {
-          legalType: business.nameRequest.legalType
-        },
-        incorporationApplication: {
-          nameRequest: {
-            legalType: business.nameRequest.legalType,
-            nrNumber: business.businessIdentifier
-          }
-        }
-      }
-    }
-    return this.createNamedBusiness(filingBody, business.businessIdentifier)
-  }
-
-  private async createBusinessRegistration (business: Business): Promise<any> {
-    const filingBody: BusinessRequest = {
-      filing: {
-        header: {
-          name: FilingTypes.REGISTRATION,
-          accountId: this.currentOrganization.id
-        },
-        registration: {
-          nameRequest: {
-            legalType: business.nameRequest.legalType,
-            nrNumber: business.businessIdentifier
-          },
-          business: {
-            natureOfBusiness: business.nameRequest.natureOfBusiness
-          }
-        }
-      }
-    }
-    // businessType is only required for legalType SP to differentiate Sole Proprietor / Sole Proprietor (DBA)
-    if (business.nameRequest.legalType === LegalTypes.SP) {
-      if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
-        filingBody.filing.registration.businessType = 'SP'
-      } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
-        filingBody.filing.registration.businessType = 'DBA'
-      }
-    }
-    return this.createNamedBusiness(filingBody, business.businessIdentifier)
+    return filingResponse.data.filing.business.identifier
   }
 
   /** Is true when the selected columns includes the column argument. */
@@ -558,6 +531,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   private handleFilterChange () { this.filteredItems = this.filter(this.businesses) }
 }
 </script>
+
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 

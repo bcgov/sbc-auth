@@ -1,4 +1,4 @@
-import { LearFilingTypes, NrTargetTypes } from '@/util/constants'
+import { CorpTypes, FilingTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
 import { Contact } from './contact'
 
 export interface LoginPayload {
@@ -14,8 +14,10 @@ export interface FolioNumberload {
 }
 
 export interface CorpType {
-    code: string
+    code: string // may be corp type or TMP / NR / RTMP
+    default?: boolean
     desc: string
+    legalType: CorpTypes // actual corp type
 }
 
 export interface Business {
@@ -58,16 +60,16 @@ export interface NameRequest {
     actions?: Array<Actions>
     consentFlag?: string
     names?: Array<Names>
-    id?: number,
-    legalType: string,
-    nrNumber?: string,
-    state?: string,
-    applicantEmail?: string,
-    applicantPhone?: string,
-    enableIncorporation?: boolean,
-    folioNumber?: string,
-    target?: NrTargetTypes,
-    entityTypeCd?: string,
+    id?: number
+    legalType: CorpTypes
+    nrNumber?: string
+    state?: string
+    applicantEmail?: string
+    applicantPhone?: string
+    enableIncorporation?: boolean
+    folioNumber?: string
+    target?: NrTargetTypes
+    entityTypeCd?: string
     natureOfBusiness?: string
 }
 
@@ -92,19 +94,19 @@ export interface Actions {
 export interface BusinessRequest {
     filing: {
         header: {
-            name: string,
+            name: FilingTypes
             accountId: number
         },
         // business is only used in incorporationApplication filing
         business?: {
-            legalType: string
+            legalType: CorpTypes
         },
         incorporationApplication?: {
             nameRequest: NameRequest
         },
         registration?: {
             nameRequest: NameRequest
-            businessType?: string
+            businessType?: string // SP or DBA
             business: {
                 natureOfBusiness?: string
             }

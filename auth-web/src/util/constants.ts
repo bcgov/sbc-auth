@@ -145,23 +145,22 @@ export enum LearFilingTypes {
     REGISTRATION = 'Registration'
 }
 
-export enum LegalTypes {
-    BCOMP = 'BEN',
+// NB: Corp Type is sometimes called Legal Type
+// see also https://github.com/bcgov/bcrs-shared-components/blob/main/src/modules/corp-type-module/corp-type-module.ts
+export enum CorpTypes {
+    // actual corp types
+    BC_CCC = 'CC',
+    BC_COMPANY = 'BC',
+    BC_ULC_COMPANY = 'ULC',
+    BENEFIT_COMPANY = 'BEN',
     COOP = 'CP',
-    CORP = 'CR',
-    SP = 'SP',
-    GP = 'GP'
-}
-
-export enum CorpType {
-    COOP = 'CP',
-    NEW_BUSINESS = 'TMP',
-    NEW_REGISTRATION = 'RTMP',
-    BCOMP = 'BEN',
-    NAME_REQUEST = 'NR',
-    TEMP = 'TMP',
+    PARTNERSHIP = 'GP',
     SOLE_PROP = 'SP',
-    PARTNERSHIP = 'GP'
+
+    // overloaded values
+    INCORPORATION_APPLICATION = 'TMP',
+    NAME_REQUEST = 'NR',
+    REGISTRATION = 'RTMP'
 }
 
 export enum NrState {
@@ -203,29 +202,29 @@ export enum NrTargetTypes {
 
 export enum NrEntityType {
     // BC Entity Types:
-    FR = 'FR',
+    BC = 'BC', // Benefit Company
+    CC = 'CC', // Community Contribution Company
+    CP = 'CP', // Cooperative Association
+    CR = 'CR', // BC Limited Company
     DBA = 'DBA',
-    CR = 'CR',
-    UL = 'UL',
-    GP = 'GP',
-    LP = 'LP',
-    LL = 'LL',
-    CP = 'CP',
-    BC = 'BC',
-    CC = 'CC',
-    SO = 'SO',
-    PA = 'PA',
     FI = 'FI',
+    FR = 'FR',
+    GP = 'GP',
+    LL = 'LL',
+    LP = 'LP',
+    PA = 'PA',
     PAR = 'PAR',
+    SO = 'SO',
+    UL = 'UL', // Unlimited Liability Company
 
     // XPRO Entity Types:
-    XCR = 'XCR',
-    XUL = 'XUL',
     RLC = 'RLC',
-    XLP = 'XLP',
-    XLL = 'XLL',
     XCP = 'XCP',
+    XCR = 'XCR',
+    XLL = 'XLL',
+    XLP = 'XLP',
     XSO = 'XSO',
+    XUL = 'XUL',
 
     INFO = 'INFO', // special value for sub-menu
 }
@@ -283,14 +282,14 @@ export enum LDFlags {
     IaSupportedEntities = 'ia-supported-entities',
     EnableFasDashboard = 'enable-fas-dashboard',
     DisableGovNAccountCreation='disable-govn-account',
-    EnableSpGpDba='enable-sp-gp-dba',
-    ProductBusSearchStatus='product-BUSINESS_SEARCH-status',
-    ProductBusSearchPremTooltip='product-BUSINESS_SEARCH-prem-tooltip',
-    ProductCSOStatus='product-CSO-status',
-    ProductWillsStatus='product-VS-status',
-    ProductSiteRegistryStatus='product-ESRA-status',
-    ProductBCAStatus='product-BCA-status',
-    BusSearchLink='bus-search-staff-link'
+    EnableBcCccUlc = 'enable-bc-ccc-ulc',
+    ProductBusSearchStatus = 'product-BUSINESS_SEARCH-status',
+    ProductBusSearchPremTooltip = 'product-BUSINESS_SEARCH-prem-tooltip',
+    ProductCSOStatus = 'product-CSO-status',
+    ProductWillsStatus = 'product-VS-status',
+    ProductSiteRegistryStatus = 'product-ESRA-status',
+    ProductBCAStatus = 'product-BCA-status',
+    BusSearchLink = 'bus-search-staff-link'
 }
 
 export enum DateFilterCodes {

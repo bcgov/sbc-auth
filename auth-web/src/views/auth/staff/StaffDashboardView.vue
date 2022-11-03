@@ -162,7 +162,7 @@ export default class StaffDashboardView extends Mixins(AccountMixin) {
   private searchBusiness!: (businessIdentifier: string) => Promise<any>
 
   @BusinessModule.Action('resetCurrentBusiness')
-  private resetCurrentBusiness!: () => Promise<any>
+  private resetCurrentBusiness!: () => void
 
   @BusinessModule.State('currentBusiness')
   private currentBusiness!: Business

@@ -2,12 +2,12 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import {
-  CorpType,
+  CorpTypes,
   FilingTypes,
   LDFlags,
   LearFilingTypes,
-  LegalTypes,
   NrConditionalStates,
+  NrEntityType,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
@@ -28,6 +28,10 @@ export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
   businesses: Business[] = []
 
+  private get currentOrganization (): Organization {
+    return this.context.rootState.org.currentOrganization
+  }
+
   @Mutation
   public setCurrentBusiness (business: Business) {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business?.businessIdentifier)
@@ -41,7 +45,7 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async syncBusinesses (): Promise<void> {
-    const enableSpGpDba = LaunchDarklyService.getFlag(LDFlags.EnableSpGpDba) || false
+    const enableBcCccUlc = LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
 
     /** Returns NR's approved name. */
     const getApprovedName = (nr): string =>
@@ -64,9 +68,10 @@ export default class BusinessModule extends VuexModule {
 
     /** Returns target conditionally. */
     const getTarget = (nr): NrTargetTypes => {
-      if ([LegalTypes.SP, LegalTypes.GP].includes(nr.legalType) && !enableSpGpDba) {
-        // Fallback to onestop if SpGpDba is not enabled
-        return NrTargetTypes.ONESTOP
+      const bcCorpTypes = [CorpTypes.BC_CCC, CorpTypes.BC_COMPANY, CorpTypes.BC_ULC_COMPANY]
+      if (bcCorpTypes.includes(nr.legalType)) {
+        // if FF is enabled then route to LEAR, else route to COLIN
+        return enableBcCccUlc ? NrTargetTypes.LEAR : NrTargetTypes.COLIN
       }
       return nr.target
     }
@@ -75,19 +80,18 @@ export default class BusinessModule extends VuexModule {
     this.setBusinesses([])
 
     // get current organization
-    const organization = this.context.rootState.org.currentOrganization as Organization
-    if (!organization) {
+    if (!this.currentOrganization) {
       console.log('Invalid organization') // eslint-disable-line no-console
       return
     }
 
     // get affiliated entities for this organization
-    const affiliatedEntities = await OrgService.getAffiliatiatedEntities(organization.id)
+    const affiliatedEntities = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
       .then(response => {
         if (response?.data?.entities && response?.status === 200) {
           return response.data.entities
         }
-        throw new Error(`Invalid response = ${response}`)
+        throw Error(`Invalid response = ${response}`)
       })
       .catch(error => {
         console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
@@ -99,7 +103,7 @@ export default class BusinessModule extends VuexModule {
 
     // get data for NR entities
     const getNrDataPromises = affiliatedEntities.map(entity => {
-      if (entity.corpType.code === CorpType.NAME_REQUEST) {
+      if (entity.corpType.code === CorpTypes.NAME_REQUEST) {
         return BusinessService.getNrData(entity.businessIdentifier)
       }
       return null
@@ -111,7 +115,12 @@ export default class BusinessModule extends VuexModule {
     // attach NR data to affiliated entities
     getNrDataResponses.forEach((resp, i) => {
       const nr = resp['value']?.data
+
       if (nr) {
+        // *** TODO: delete this when no longer needed (#14126)
+        // (at the moment, Namex API is passing CCC instead of CC)
+        nr.legalType = (nr.legalType === 'CCC' ? 'CC' : nr.entity_type_cd)
+
         affiliatedEntities[i].nameRequest = {
           names: nr.names,
           id: nr.id,
@@ -160,10 +169,8 @@ export default class BusinessModule extends VuexModule {
       passCode: payload.passCode
     }
 
-    const currentOrganization: Organization = this.context.rootState.org.currentOrganization
-
     // Create an affiliation between implicit org and requested business
-    return OrgService.createAffiliation(currentOrganization.id, requestBody)
+    return OrgService.createAffiliation(this.currentOrganization.id, requestBody)
   }
 
   @Action({ rawError: true })
@@ -183,8 +190,7 @@ export default class BusinessModule extends VuexModule {
     } catch (error) {
       // delete the created affiliation if the update failed for avoiding orphan records
       // unable to do these from backend, since it causes a circular dependency
-      const orgId = this.context.rootState.org.currentOrganization?.id
-      await OrgService.removeAffiliation(orgId, businessNumber, undefined, false)
+      await OrgService.removeAffiliation(this.currentOrganization.id, businessNumber, undefined, false)
       return {
         errorMsg: 'Cannot add business due to some technical reasons'
       }
@@ -193,27 +199,82 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ rawError: true })
   public async addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
-    const currentOrganization: Organization = this.context.rootState.org.currentOrganization
-
     // Create an affiliation between implicit org and requested business
-    return OrgService.createNRAffiliation(currentOrganization.id, requestBody)
+    return OrgService.createNRAffiliation(this.currentOrganization.id, requestBody)
   }
 
   @Action({ rawError: true })
-  public async createNamedBusiness (filingBody: BusinessRequest, nrNumber: string) {
-    // Create an affiliation between implicit org and requested business
-    const updateResponse = await BusinessService.createDraftFiling(filingBody)
-    if (updateResponse?.status >= 200 && updateResponse?.status < 300) {
-      return updateResponse
-    } else {
-      // delete the created affiliation if the update failed for avoiding orphan records
-      // unable to do these from backend, since it causes a circular dependency
-      const orgId = filingBody?.filing?.header?.accountId
-      await OrgService.removeAffiliation(orgId, nrNumber, undefined, false)
-      return {
-        errorMsg: 'Cannot add business due to some technical reasons'
+  public async createNamedBusiness ({ filingType, business }) {
+    let filingBody: BusinessRequest = null
+
+    switch (filingType) {
+      case FilingTypes.INCORPORATION_APPLICATION: {
+        filingBody = {
+          filing: {
+            business: {
+              legalType: business.nameRequest.legalType
+            },
+            header: {
+              accountId: this.currentOrganization.id,
+              name: filingType
+            },
+            incorporationApplication: {
+              nameRequest: {
+                legalType: business.nameRequest.legalType,
+                nrNumber: business.businessIdentifier
+              }
+            }
+          }
+        }
+
+        break
+      }
+
+      case FilingTypes.REGISTRATION: {
+        filingBody = {
+          filing: {
+            header: {
+              accountId: this.currentOrganization.id,
+              name: filingType
+            },
+            registration: {
+              business: {
+                natureOfBusiness: business.nameRequest.natureOfBusiness
+              },
+              nameRequest: {
+                legalType: business.nameRequest.legalType,
+                nrNumber: business.businessIdentifier
+              }
+            }
+          }
+        }
+
+        // add in Business Type for SP
+        if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
+          if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
+            filingBody.filing.registration.businessType = 'SP'
+          } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
+            filingBody.filing.registration.businessType = 'DBA'
+          }
+        }
+
+        break
       }
     }
+
+    // create an affiliation between implicit org and requested business
+    const response = await BusinessService.createDraftFiling(filingBody)
+    if (response?.status >= 200 && response?.status < 300) {
+      return response
+    }
+
+    // delete the created affiliation if the update failed for avoiding orphan records
+    // unable to do this from backend, since it causes a circular dependency
+    const orgIdentifier = this.currentOrganization.id
+    const incorporationNumber = business.businessIdentifier
+    await OrgService.removeAffiliation(orgIdentifier, incorporationNumber, undefined, false)
+
+    return { errorMsg: 'Cannot add business due to some technical reasons' }
   }
 
   // Following searchBusiness will search data from legal-api.
@@ -258,45 +319,47 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createNumberedBusiness (accountId: number) {
+  public async createNumberedBusiness ({ filingType, business }): Promise<void> {
     const filingBody: BusinessRequest = {
       filing: {
-        header: {
-          name: FilingTypes.INCORPORATION_APPLICATION,
-          accountId: accountId
-        },
         business: {
-          legalType: LegalTypes.BCOMP
+          legalType: business.nameRequest.legalType
+        },
+        header: {
+          accountId: this.currentOrganization.id,
+          name: filingType
         },
         incorporationApplication: {
           nameRequest: {
-            legalType: LegalTypes.BCOMP
+            legalType: business.nameRequest.legalType
           }
         }
       }
     }
 
-    await BusinessService.createDraftFiling(filingBody)
-      .then(response => {
-        if (response && response.data && (response.status === 200 || response.status === 201)) {
-          const tempRegNum = response.data.filing?.business?.identifier
-          if (tempRegNum) {
-            ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
-            const redirectURL = `${ConfigHelper.getBusinessURL()}${tempRegNum}`
+    try {
+      // create an affiliation between implicit org and requested business
+      const response = await BusinessService.createDraftFiling(filingBody)
+      if (!response?.data) throw Error('Invalid response data')
+      if (response.status !== 200 && response.status !== 201) throw Error('Invalid response status')
 
-            window.location.href = decodeURIComponent(redirectURL)
-          }
-        }
-      }).catch(error => {
-        // eslint-disable-next-line no-console
-        console.log(error) // ToDo: Handle error: Redirect back to Homeview? Feedback required here
-      })
+      const tempRegNum = response.data.filing?.business?.identifier
+      if (!tempRegNum) throw Error('Invalid temporary registration number')
+
+      // redirect to Filings UI
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, tempRegNum)
+      const redirectURL = `${ConfigHelper.getBusinessURL()}${tempRegNum}`
+      window.location.href = decodeURIComponent(redirectURL)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error) // ToDo: Handle error: Redirect back to Homeview? Feedback required here
+    }
   }
 
   @Action({ rawError: true })
   public async removeBusiness (payload: RemoveBusinessPayload) {
     // If the business is a new registration then remove the business filing from legal-db
-    if (payload.business.corpType.code === CorpType.NEW_BUSINESS) {
+    if (payload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
       let filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
       if (filingResponse && filingResponse.data && filingResponse.status === 200) {
         let filingId = filingResponse?.data?.filing?.header?.filingId
@@ -333,7 +396,7 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async resetCurrentBusiness (): Promise<void> {
+  public resetCurrentBusiness (): void {
     this.context.commit('setCurrentBusiness', undefined)
     ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
   }

@@ -72,7 +72,7 @@
               :userProfile="userProfile"
               @login="login()"
               @account-dialog="accountDialog = true"
-              @manage-businesses="goToManageBusinesses($event)"/>
+              @manage-businesses="goToManageBusinesses()"/>
           </transition>
         </v-container>
       </div>
@@ -181,10 +181,8 @@ export default class HomeView extends Vue {
     return !!this.currentAccountSettings
   }
 
-  private goToManageBusinesses (isNumberedCompanyRequest: boolean = false): void {
-    let manageBusinessUrl: any = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
-    if (isNumberedCompanyRequest) manageBusinessUrl.query = { isNumberedCompanyRequest }
-
+  private goToManageBusinesses (): void {
+    let manageBusinessUrl = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
     this.$router.push(manageBusinessUrl)
   }
 
