@@ -1,4 +1,3 @@
-
 export enum SessionStorageKeys {
     KeyCloakToken = 'KEYCLOAK_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',
@@ -334,7 +333,7 @@ export enum StaffCreateAccountsTypes {
     GOVM_BUSINESS = 'GOVM_BUSINESS'
 }
 
-export enum productStatus {
+export enum ProductStatus {
     NOT_SUBSCRIBED = 'NOT_SUBSCRIBED',
     PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW',
     ACTIVE = 'ACTIVE',

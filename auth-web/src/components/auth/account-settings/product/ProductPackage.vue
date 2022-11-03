@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, Role, productStatus } from '@/util/constants'
+import { AccessType, Account, ProductStatus, Role } from '@/util/constants'
 import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
 import { Component, Mixins, Vue } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -193,7 +193,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
       productData = (orgProd && orgProd[0])
     }
 
-    if (!productData && subscriptionStatus !== productStatus.NOT_SUBSCRIBED) {
+    if (!productData && subscriptionStatus !== ProductStatus.NOT_SUBSCRIBED) {
       // set default value
       productData = {
         'product': productCode,

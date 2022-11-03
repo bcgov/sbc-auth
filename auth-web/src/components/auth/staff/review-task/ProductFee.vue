@@ -56,8 +56,8 @@
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { ProductStatus } from '@/util/constants'
 import { namespace } from 'vuex-class'
-import { productStatus } from '@/util/constants'
 
 const orgModule = namespace('org')
 
@@ -92,7 +92,7 @@ export default class ProductFee extends Vue {
       if (!this.accountFees.length) {
         // prepopulate the array with the subscribed products
         this.orgProducts.forEach((orgProduct: OrgProduct) => {
-          if (orgProduct.subscriptionStatus === productStatus.ACTIVE) {
+          if (orgProduct.subscriptionStatus === ProductStatus.ACTIVE) {
             const accountFeeDTO: AccountFeeDTO = {
               product: orgProduct.code
             }

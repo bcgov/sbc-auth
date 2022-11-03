@@ -6,9 +6,9 @@ import {
   PatchActions,
   PaymentTypes,
   Permission,
+  ProductStatus,
   Role,
-  SessionStorageKeys,
-  productStatus
+  SessionStorageKeys
 } from '@/util/constants'
 import {
   AccountFee,
@@ -1025,7 +1025,7 @@ export default class OrgModule extends VuexModule {
   public async setSubscribedProducts (): Promise<any> {
     const productList = this.context.state['productList']
     let currentSelectedProducts = []
-    currentSelectedProducts = productList.filter(product => product.subscriptionStatus === productStatus.ACTIVE).map((prod) => (prod.code))
+    currentSelectedProducts = productList.filter(product => product.subscriptionStatus === ProductStatus.ACTIVE).map((prod) => (prod.code))
     this.context.commit('setCurrentSelectedProducts', currentSelectedProducts)
   }
 

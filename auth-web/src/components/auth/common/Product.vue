@@ -135,7 +135,7 @@
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, productStatus } from '@/util/constants'
+import { DisplayModeValues, ProductStatus } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
@@ -194,19 +194,19 @@ export default class Product extends Vue {
     if (this.isAccountSettingsView) {
       const status = this.productDetails.subscriptionStatus
       switch (status) {
-        case productStatus.ACTIVE: {
+        case ProductStatus.ACTIVE: {
           subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
           decisionMadeIcon = 'mdi-check-circle'
           decisionMadeColorCode = 'success'
           break
         }
-        case productStatus.REJECTED: {
+        case ProductStatus.REJECTED: {
           subTitle = `${code && code.toLowerCase()}CodeRejectedSubtitle` || ''
           decisionMadeIcon = 'mdi-close-circle'
           decisionMadeColorCode = 'error'
           break
         }
-        case productStatus.PENDING_STAFF_REVIEW: {
+        case ProductStatus.PENDING_STAFF_REVIEW: {
           subTitle = 'productPendingSubtitle'
           decisionMadeIcon = 'mdi-clock-outline'
           break
@@ -238,7 +238,7 @@ export default class Product extends Vue {
       return true
     }
     // returns true if product subscription status is unsubscribed and in account settings view
-    if (([productStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
+    if (([ProductStatus.NOT_SUBSCRIBED] as Array<string>).includes(this.productDetails.subscriptionStatus)) {
       return true
     }
     this.termsAccepted = true
