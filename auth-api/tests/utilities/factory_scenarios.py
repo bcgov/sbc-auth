@@ -250,7 +250,7 @@ class TestJwtClaims(dict, Enum):
     staff_admin_dir_search_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
-        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',        
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -329,7 +329,7 @@ class TestJwtClaims(dict, Enum):
     updated_test = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
-        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',        
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': fake.user_name(),
@@ -341,7 +341,7 @@ class TestJwtClaims(dict, Enum):
     user_test = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': '1b20db59-19a0-4727-affe-c6f64309fd04',
-        'idp_userid': '1b20db59-19a0-4727-affe-c6f64309fd04',        
+        'idp_userid': '1b20db59-19a0-4727-affe-c6f64309fd04',
         'firstname': fake.first_name(),
         'lastname': fake.last_name(),
         'preferred_username': 'CP1234567',
@@ -405,7 +405,7 @@ class TestJwtClaims(dict, Enum):
     }
 
     @staticmethod
-    def get_test_real_user(sub,  preferred_username=fake.user_name(), access_ype='', roles=[], idp_userid=None):
+    def get_test_real_user(sub, preferred_username=fake.user_name(), access_ype='', roles=[], idp_userid=None):
         """Produce a created user."""
         return {
             'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
