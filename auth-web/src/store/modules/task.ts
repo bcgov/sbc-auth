@@ -1,6 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { SessionStorageKeys, TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams } from '@/models/Task'
-import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
+import ConfigHelper from '@/util/config-helper'
 import TaskService from '@/services/task.services'
 
 @Module({ namespaced: true })
@@ -35,16 +36,24 @@ export default class TaskModule extends VuexModule {
     // TODO: Add a new API call for fetching counts alone to reduce initial overload - For all calls made in StaffAccountManagement
     @Action({ rawError: true })
     public async syncTasks () {
-      let taskFilter: TaskFilterParams = {
-        relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
-        statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
+      const rejectedAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.RejectedAccountsSearchFilter) || ''
+      const pendingAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter) || ''
+
+      if (!pendingAccountsSearchFilter) {
+        let taskFilter: TaskFilterParams = {
+          relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
+          statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
+        }
+        await this.context.dispatch('fetchTasks', taskFilter)
       }
-      await this.context.dispatch('fetchTasks', taskFilter)
-      taskFilter = {
-        relationshipStatus: TaskRelationshipStatus.REJECTED,
-        statuses: [TaskStatus.COMPLETED]
+
+      if (!rejectedAccountsSearchFilter) {
+        let taskFilter: TaskFilterParams = {
+          relationshipStatus: TaskRelationshipStatus.REJECTED,
+          statuses: [TaskStatus.COMPLETED]
+        }
+        await this.context.dispatch('fetchTasks', taskFilter)
       }
-      await this.context.dispatch('fetchTasks', taskFilter)
     }
 
     @Action({ rawError: true })
