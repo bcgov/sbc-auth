@@ -33,6 +33,7 @@ export interface TaskFilterParams {
     pageLimit?: number;
     dateSubmitted?: string;
     status?: string
+    modifiedBy?: string
 }
 
 export interface TaskList {
