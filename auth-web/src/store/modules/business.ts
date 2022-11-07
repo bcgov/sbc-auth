@@ -101,7 +101,7 @@ export default class BusinessModule extends VuexModule {
     // update store with initial results
     this.setBusinesses(affiliatedEntities)
 
-    // get data for NR entities
+    // get data for NR entities (not async)
     const getNrDataPromises = affiliatedEntities.map(entity => {
       if (entity.corpType.code === CorpTypes.NAME_REQUEST) {
         return BusinessService.getNrData(entity.businessIdentifier)
@@ -109,7 +109,7 @@ export default class BusinessModule extends VuexModule {
       return null
     })
 
-    // wait for all calls to finish
+    // wait for all calls to finish (async)
     const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
 
     // attach NR data to affiliated entities
@@ -119,7 +119,7 @@ export default class BusinessModule extends VuexModule {
       if (nr) {
         // *** TODO: delete this when no longer needed (#14126)
         // (at the moment, Namex API is passing CCC instead of CC)
-        nr.legalType = (nr.legalType === 'CCC' ? 'CC' : nr.entity_type_cd)
+        nr.legalType = (nr.legalType === 'CCC' ? 'CC' : nr.legalType)
 
         affiliatedEntities[i].nameRequest = {
           names: nr.names,

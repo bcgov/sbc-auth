@@ -69,24 +69,32 @@
             </tr>
           </thead>
         </template>
+
         <template v-slot:item="{ item, index }">
           <tr>
-            <td v-if="isNameRequest(item.corpType.code) && item.nameRequest" class="header col-wide">
+            <!-- Name Request Name(s) / Business Name -->
+            <td v-if="isNameRequest(item)" class="col-wide gray-9">
               <div v-for="(name, i) in item.nameRequest.names" :key="`nrName: ${i}`" class="pb-1 names-block">
                 <v-icon v-if="isRejectedName(name)" color="red" class="names-text pr-1" small>mdi-close</v-icon>
                 <v-icon v-if="isApprovedName(name)" color="green" class="names-text pr-1" small>mdi-check</v-icon>
-                <strong class="names-text">{{ name.name }}</strong><br>
+                <div class="names-text font-weight-bold">{{ name.name }}</div>
               </div>
             </td>
-            <td v-else class="header col-wide"><strong>{{ name(item) }}</strong></td>
+            <td v-else class="col-wide gray-9 font-weight-bold">{{ name(item) }}</td>
+
+            <!-- Number -->
             <td v-if="showCol(headers[1].text)">{{ number(item) }}</td>
-            <td v-if="showCol(headers[2].text)" class="type-col">
-              <span class="header"><strong>{{ type(item) }}</strong></span><br>
-              <span v-if="isNameRequest(item.corpType.code) && item.nameRequest">
-                {{ typeDescription(item.nameRequest.legalType) }}
-              </span>
+
+            <!-- Type -->
+            <td v-if="showCol(headers[2].text)" class="type-column">
+              <div class="gray-9 font-weight-bold">{{ type(item) }}</div>
+              <div>{{ typeDescription(item) }}</div>
             </td>
-            <td v-if="showCol(headers[3].text)" class="status">{{ status(item) }}</td>
+
+            <!-- Status -->
+            <td v-if="showCol(headers[3].text)" class="text-capitalize">{{ status(item) }}</td>
+
+            <!-- Actions -->
             <td class="action-cell">
               <div class="actions mx-auto" :id="`action-menu-${index}`">
                 <span class="open-action">
@@ -137,9 +145,9 @@
                         v-can:REMOVE_BUSINESS.disable
                         @click="removeBusiness(item)"
                       >
-                        <v-list-item-subtitle v-if="isTemporaryBusiness(item.corpType.code)">
+                        <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
                           <v-icon small>mdi-delete-forever</v-icon>
-                          <span class="pl-1">Delete {{tempDescription(item.corpType.code)}}</span>
+                          <span class="pl-1">Delete {{tempDescription(item)}}</span>
                         </v-list-item-subtitle>
                         <v-list-item-subtitle v-else>
                           <v-icon small>mdi-delete</v-icon>
@@ -153,6 +161,7 @@
             </td>
           </tr>
         </template>
+
         <template v-slot:no-data>
           <span v-if="loading">Loading...</span>
           <span v-else>Add an existing company, cooperative or society to manage it or<br> add a Name Request to
@@ -177,7 +186,11 @@ import {
 } from '@/util/constants'
 import { Business, NameRequest, Names } from '@/models/business'
 import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
+import {
+  CorpTypeCd,
+  GetCorpFullDescription,
+  GetCorpNumberedDescription
+} from '@bcrs-shared-components/corp-type-module'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
@@ -195,16 +208,17 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   }
 })
 export default class AffiliatedEntityTable extends Mixins(DateMixin) {
-  @Prop({ default: [] }) readonly selectedColumns: Array<string>
-  @Prop({ default: false }) readonly loading: boolean
+  @Prop({ default: [] }) readonly selectedColumns!: Array<string>
+  @Prop({ default: false }) readonly loading!: boolean
 
-  // Local Properties
+  // State/Action Properties
   private readonly businesses!: Business[]
   private readonly currentOrganization!: Organization
   private readonly createNamedBusiness!: ({ filingType, business }) => Promise<any>
+
+  // Local Properties
   private headers: any[] = []
   private isLoading: boolean = false
-
   private filteredItems: Business[] = []
   private filterActive = { name: false, number: false, status: false, type: false }
   private filterParams = { name: null, number: null, status: null, type: null }
@@ -212,26 +226,26 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** V-model for dropdown menus. */
   private dropdown: Array<boolean> = []
 
-  /** The number of affiliated entities or name requests. */
-  private get entityCount (): number {
+  /** The number of affiliated entities and name requests. */
+  get entityCount (): number {
     return this.businesses.length
   }
 
   /** The headers we want to show. */
-  private get getHeaders (): Array<any> {
+  get getHeaders (): Array<any> {
     return this.headers?.filter(x => x.show)
   }
 
   /** The set height when affiliation count exceeds 5 */
-  private get getMaxHeight (): string {
+  get getMaxHeight (): string {
     return this.entityCount > 5 ? '32rem' : null
   }
 
-  private get showClearFilters (): boolean {
+  get showClearFilters (): boolean {
     return Object.values(this.filterActive).includes(true)
   }
 
-  private clearFilters (): void {
+  protected clearFilters (): void {
     for (const key in this.filterActive) this.filterActive[key] = false
     for (const key in this.filterParams) this.filterParams[key] = null
   }
@@ -246,20 +260,20 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return items
   }
 
-  /** Returns true if the affiliation is a Name Request */
-  private isNameRequest (corpType: string): boolean {
-    return (corpType === CorpTypes.NAME_REQUEST)
+  /** Returns true if the affiliation is a Name Request. */
+  protected isNameRequest (business: Business): boolean {
+    return (business.corpType.code === CorpTypes.NAME_REQUEST && !!business.nameRequest)
   }
 
-  /** Returns true if the affiliation is a temporary business */
-  private isTemporaryBusiness (corpType: string): boolean {
+  /** Returns true if the affiliation is a temporary business. */
+  protected isTemporaryBusiness (business: Business): boolean {
     return (
-      corpType === CorpTypes.INCORPORATION_APPLICATION ||
-      corpType === CorpTypes.REGISTRATION
+      business.corpType.code === CorpTypes.INCORPORATION_APPLICATION ||
+      business.corpType.code === CorpTypes.REGISTRATION
     )
   }
 
-  /** Returns true if the affiliation is a numbered company */
+  /** Returns true if the affiliation is a numbered IA. */
   private isNumberedIncorporationApplication (item: Business): boolean {
     return (
       item.corpType.code === CorpTypes.INCORPORATION_APPLICATION &&
@@ -267,131 +281,139 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     )
   }
 
-  /** Returns true if the affiliation is approved to start an IA or Registration */
-  private canUseNameRequest (business: Business): boolean {
+  /** Returns true if the affiliation is approved to start an IA or Registration. */
+  protected canUseNameRequest (business: Business): boolean {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
 
-    return this.isNameRequest(business.corpType.code) && // Is this a Name Request
-      business.nameRequest?.enableIncorporation && // Is the Nr state approved (conditionally) or registration
-      supportedEntityFlags.includes(business.nameRequest?.legalType) // Feature flagged Nr types
+    return (
+      this.isNameRequest(business) && // Is this a Name Request
+      business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
+      supportedEntityFlags.includes(business.nameRequest.legalType) // Feature flagged Nr types
+    )
   }
 
-  /** Returns the name of the affiliation */
-  private name (item: Business): string {
+  /** Returns the name of the affiliation. */
+  protected name (item: Business): string {
     if (this.isNumberedIncorporationApplication(item)) {
-      switch (item.corpType.legalType) {
-        case CorpTypes.BC_CCC: return 'Numbered Community Contribution Company'
-        case CorpTypes.BC_COMPANY: return 'Numbered Limited Company'
-        case CorpTypes.BC_ULC_COMPANY: return 'Numbered Unlimited Liability Company'
-        case CorpTypes.BENEFIT_COMPANY: return 'Numbered Benefit Company'
-        case CorpTypes.COOP: return 'Numbered Cooperative Association'
-        default: return 'Numbered Company'
-      }
+      const legalType: unknown = item.corpType.legalType
+      // *** TODO: remove fallback once namex API returns legal type?
+      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
     }
     return item.name
   }
 
-  private parseName (item: Business): string {
-    if (this.isNameRequest(item.corpType.code)) {
-      return item.nameRequest.names.map(name => name.name).join('\n')
+  private parseName (business: Business): string {
+    if (this.isNameRequest(business)) {
+      return business.nameRequest.names.map(name => name.name).join('\n')
     } else {
-      return this.name(item)
+      return this.name(business)
     }
   }
 
-  /** Returns true if the Name Request is approved */
-  private isApprovedName (name: Names): boolean {
-    return name.state === NrState.APPROVED
+  /** Returns true if the name is approved. */
+  protected isApprovedName (name: Names): boolean {
+    return (name.state === NrState.APPROVED)
   }
 
-  /** Returns true if the Name Request is rejected */
-  private isRejectedName (name: Names): boolean {
-    return name.state === NrState.REJECTED
+  /** Returns true if the name is rejected. */
+  protected isRejectedName (name: Names): boolean {
+    return (name.state === NrState.REJECTED)
   }
 
-  /** Returns the identifier of the affiliation */
-  private number (item: Business): string {
-    if (this.isNumberedIncorporationApplication(item)) {
+  /** Returns the identifier of the affiliation. */
+  protected number (business: Business): string {
+    if (this.isNumberedIncorporationApplication(business)) {
       return 'Pending'
-    } else if (this.isTemporaryBusiness(item.corpType.code)) {
-      return item.nrNumber
-    } else if (this.isNameRequest(item.corpType.code)) {
-      return item.nameRequest?.nrNumber
-    } else {
-      return item.businessIdentifier
     }
+    if (this.isTemporaryBusiness(business)) {
+      return business.nrNumber
+    }
+    if (this.isNameRequest(business)) {
+      return business.nameRequest.nrNumber
+    }
+    return business.businessIdentifier
   }
 
-  /** Returns the type of the affiliation */
-  private type (item: Business): string {
-    if (this.isNameRequest(item.corpType.code)) {
+  /** Returns the type of the affiliation. */
+  protected type (business: Business): string {
+    if (this.isNameRequest(business)) {
       return AffiliationTypes.NAME_REQUEST
-    } else if (this.isTemporaryBusiness(item.corpType.code)) {
-      return this.tempDescription(item.corpType.code)
-    } else {
-      return this.typeDescription(item.corpType.code)
     }
+    if (this.isTemporaryBusiness(business)) {
+      return this.tempDescription(business)
+    }
+    return GetCorpFullDescription(business.corpType.code as CorpTypeCd)
   }
 
-  /** Returns the temp corp description for display */
-  private tempDescription (corpType: string): string {
-    switch (corpType as CorpTypes) {
+  /** Returns the temp business description. */
+  protected tempDescription (business: Business): string {
+    switch (business.corpType.code as CorpTypes) {
       case CorpTypes.INCORPORATION_APPLICATION:
         return AffiliationTypes.INCORPORATION_APPLICATION
       case CorpTypes.REGISTRATION:
         return AffiliationTypes.REGISTRATION
       default:
-        return ''
+        return '' // should never happen
     }
   }
 
-  /** Returns the corp full description for display */
-  private typeDescription (corpType: string): string {
-    return GetCorpFullDescription(corpType as CorpTypeCd)
-  }
-
-  /** Returns the status for the affiliation */
-  private status (item: Business): string {
-    switch (true) {
-      case (this.isNameRequest(item.corpType.code) && !!item.nameRequest):
-        // Format name request state value for Display
-        if (!NrState[item.nameRequest?.state]) return 'Unknown'
-        return NrDisplayStates[NrState[item.nameRequest.state]] || 'Unknown'
-      case this.isTemporaryBusiness(item.corpType.code):
-        return BusinessState.DRAFT
-      case !!item.status:
-        return item.status.charAt(0)?.toUpperCase() + item.status?.slice(1)?.toLowerCase()
-      default:
-        return BusinessState.ACTIVE
+  /** Returns the type description. */
+  protected typeDescription (business: Business): string {
+    // if this is a name request then show legal type
+    if (this.isNameRequest(business)) {
+      const legalType: unknown = business.nameRequest.legalType
+      return GetCorpFullDescription(legalType as CorpTypeCd)
     }
-  }
-
-  /** Returns the folio number or a default message */
-  private folio (item: Business): string {
-    return item.nameRequest && (item.nameRequest.folioNumber || '')
-  }
-
-  /** Returns the last modified date string or a default message */
-  private lastModified (item: Business): string {
-    switch (true) {
-      case (!!item.lastModified):
-        return this.dateToPacificDate(new Date(item.lastModified))
-      case (!!item.modified):
-        return this.dateToPacificDate(new Date(item.modified))
-      default: return this.$t('notAvailable').toString()
+    // if this is an IA or registration then show legal type
+    if (this.isTemporaryBusiness(business)) {
+      const legalType: unknown = business.corpType.legalType
+      return GetCorpFullDescription(legalType as CorpTypeCd)
     }
+    // else show nothing
+    return ''
   }
 
-  /** Returns the modified by value or a default message */
-  private modifiedBy (item: Business): string {
-    if (item.modifiedBy === 'None None' || !item.modifiedBy) {
-      return this.$t('notAvailable').toString()
-    } else { return item.modifiedBy || this.$t('notAvailable').toString() }
+  /** Returns the status of the affiliation. */
+  protected status (business: Business): string {
+    if (this.isNameRequest(business)) {
+      // Format name request state value
+      const state = NrState[business.nameRequest.state]
+      if (!state) return 'Unknown'
+      else return NrDisplayStates[state] || 'Unknown'
+    }
+    if (this.isTemporaryBusiness(business)) {
+      return BusinessState.DRAFT
+    }
+    if (business.status) {
+      return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
+    }
+    return BusinessState.ACTIVE
   }
 
-  /** Redirect handler for Dashboard OPEN action */
-  private open (item: Business): void {
+  /** Returns the last modified date string or a default message. */
+  // NOT USED AT THE MOMENT
+  // protected lastModified (item: Business): string {
+  //   if (item.lastModified) {
+  //     return this.dateToPacificDate(new Date(item.lastModified))
+  //   }
+  //   if (item.modified) {
+  //     return this.dateToPacificDate(new Date(item.modified))
+  //   }
+  //   return this.$t('notAvailable').toString()
+  // }
+
+  /** Returns the modified by value or a default message. */
+  // NOT USED AT THE MOMENT
+  // protected modifiedBy (item: Business): string {
+  //   if (item.modifiedBy === 'None None' || !item.modifiedBy) {
+  //     return this.$t('notAvailable').toString()
+  //   }
+  //   return item.modifiedBy || this.$t('notAvailable').toString()
+  // }
+
+  /** Handler for open action */
+  protected open (item: Business): void {
     if (item.corpType.code === CorpTypes.NAME_REQUEST) {
       this.goToNameRequest(item.nameRequest)
     } else {
@@ -399,8 +421,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     }
   }
 
-  /** Handler method for draft IA creation and navigation */
-  async useNameRequest (item: Business) {
+  /** Handler for draft IA creation and navigation */
+  protected async useNameRequest (item: Business) {
     switch (item.nameRequest.target) {
       case NrTargetTypes.LEAR:
         // Create new IA if the selected item is Name Request
@@ -413,10 +435,10 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         this.goToDashboard(businessIdentifier)
         break
       case NrTargetTypes.ONESTOP:
-        this.goToOneStop() // Navigate to onestop for firms
+        this.goToOneStop()
         break
       case NrTargetTypes.COLIN:
-        this.goToCorpOnline() // Navigate to Corporate Online for Corps
+        this.goToCorpOnline()
         break
     }
   }
@@ -425,11 +447,10 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   private goToDashboard (businessIdentifier: string): void {
     ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
     let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
-
     window.location.href = appendAccountId(decodeURIComponent(redirectURL))
   }
 
-  /** Navigation handler for name request application */
+  /** Navigation handler for Name Request application */
   private goToNameRequest (nameRequest: NameRequest): void {
     ConfigHelper.setNrCredentials(nameRequest)
     window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`)
@@ -445,7 +466,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
   }
 
-  /** Create a business record in Lear */
+  /** Create a business record in LEAR. */
   private async createBusinessRecord (business: Business): Promise<string> {
     const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
     const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
@@ -469,8 +490,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return filingResponse.data.filing.business.identifier
   }
 
-  /** Is true when the selected columns includes the column argument. */
-  private showCol = (col): boolean => {
+  /** Returns true when the selected columns includes the column argument. */
+  protected showCol (col): boolean {
     return this.selectedColumns.includes(col)
   }
 
@@ -490,17 +511,17 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return newItems
   }
 
-  private selectFilter = (itemVal: string, filterVal: string) => {
+  private selectFilter (itemVal: string, filterVal: string): boolean {
     return !filterVal || itemVal.toUpperCase() === filterVal.toUpperCase()
   }
 
-  private textFilter = (itemVal: string, filterVal: string) => {
+  private textFilter (itemVal: string, filterVal: string): boolean {
     return !filterVal || itemVal.toUpperCase().includes(filterVal.toUpperCase())
   }
 
   /** Emit business/nr information to be unaffiliated. */
   @Emit()
-  removeBusiness (business: Business): RemoveBusinessPayload {
+  protected removeBusiness (business: Business): RemoveBusinessPayload {
     return {
       orgIdentifier: this.currentOrganization.id,
       business
@@ -528,7 +549,9 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   }
 
   @Watch('filterParams', { deep: true })
-  private handleFilterChange () { this.filteredItems = this.filter(this.businesses) }
+  private handleFilterChange (): void {
+    this.filteredItems = this.filter(this.businesses)
+  }
 }
 </script>
 
@@ -569,10 +592,6 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         background-color: transparent !important;
       }
 
-      .header {
-        color: $gray9;
-      }
-
       td {
         height: 80px !important;
         color: $gray7;
@@ -591,7 +610,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
         max-width: 8rem;
       }
 
-      .type-col {
+      .type-column {
         min-width: 12rem;
       }
     }
@@ -699,10 +718,6 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   ::v-deep .v-data-table__wrapper::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background-color: lightgray;
-  }
-
-  .status {
-    text-transform: capitalize;
   }
 }
 </style>
