@@ -29,7 +29,7 @@ from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
-from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
+from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -214,10 +214,6 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-        # If entity already exists and passcode is already claimed, throw error
-        if org.as_dict()['org_type'] not in (OrgType.SBC_STAFF.value, OrgType.STAFF.value) \
-                and entity and entity.as_dict()['pass_code_claimed']:
-            raise BusinessException(Error.NR_CONSUMED, None)
 
         # Call the legal-api to verify the NR details
         nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
