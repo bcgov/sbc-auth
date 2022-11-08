@@ -1,6 +1,7 @@
 <template>
   <v-container class="pa-0">
-    <DatePicker v-show="showDatePicker" ref="datePicker" @submit="updateDateRange($event)" />
+    <DatePicker v-show="showDatePicker" ref="datePicker" @submit="updateDateRange($event)"
+    :setEndDate="searchParams.endDate" :setStartDate="searchParams.startDate"/>
     <v-form class="fas-search account-rejected-search">
       <v-row dense class="row-margin">
         <v-col sm="12" cols="6">
