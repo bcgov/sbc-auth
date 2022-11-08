@@ -52,7 +52,7 @@ class Tasks(Resource):
                 type=request.args.get('type', None),
                 status=request.args.getlist('status', None),
                 modified_by=request.args.get('modifiedBy', None),
-                sort_order=request.args.get('sortOrder', None),
+                submitted_sort_order=request.args.get('submittedSortOrder', None),
                 page=int(request.args.get('page', 1)),
                 limit=int(request.args.get('limit', 10))
             )

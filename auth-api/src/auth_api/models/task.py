@@ -14,7 +14,7 @@
 """This model manages a Task item in the Auth Service."""
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, text, func
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import ARRAY  # noqa: I005
 from sqlalchemy.orm import relationship
 
 from auth_api.models.dataclass import TaskSearch
@@ -70,9 +70,9 @@ class Task(BaseModel):
                             .params(search_text=f'%{task_search.modified_by}%')
         if task_search.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
             query = query.order_by(Task.date_submitted.asc())
-        if task_search.sort_order == 'asc':
+        if task_search.submitted_sort_order == 'asc':
             query = query.order_by(Task.date_submitted.asc())
-        if task_search.sort_order == 'desc':
+        if task_search.submitted_sort_order == 'desc':
             query = query.order_by(Task.date_submitted.desc())
 
         # Add pagination

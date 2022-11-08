@@ -58,6 +58,6 @@ class TaskSearch:
     end_date: str = ''
     type: str = ''
     modified_by: str = ''
-    sort_order: str = 'asc'
+    submitted_sort_order: str = 'asc'
     page: int = 1
     limit: int = 10
