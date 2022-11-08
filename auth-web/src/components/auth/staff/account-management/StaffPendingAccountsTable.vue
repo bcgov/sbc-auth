@@ -203,6 +203,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   @Watch('searchParams', { deep: true })
   async searchChanged (value: TaskFilterParams) {
     this.searchParamsExist = this.doSearchParametersExist(value)
+    this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1 }
     this.setPendingSearchFilterToStorage(JSON.stringify(value))
     await this.searchStaffTasks()
   }
