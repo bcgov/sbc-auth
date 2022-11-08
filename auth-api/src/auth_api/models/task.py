@@ -70,6 +70,10 @@ class Task(BaseModel):
                             .params(search_text=f'%{task_search.modified_by}%')
         if task_search.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value:
             query = query.order_by(Task.date_submitted.asc())
+        if task_search.sort_order == 'asc':
+            query = query.order_by(Task.date_submitted.asc())
+        if task_search.sort_order == 'desc':
+            query = query.order_by(Task.date_submitted.desc())
 
         # Add pagination
         pagination = query.paginate(per_page=task_search.limit, page=task_search.page)
