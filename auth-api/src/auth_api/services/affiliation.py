@@ -214,10 +214,6 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-        # If entity already exists and passcode is already claimed, throw error
-        if org.as_dict()['org_type'] not in (OrgType.SBC_STAFF.value, OrgType.STAFF.value) \
-                and entity and entity.as_dict()['pass_code_claimed']:
-            raise BusinessException(Error.NR_CONSUMED, None)
 
         # Call the legal-api to verify the NR details
         nr_json = Affiliation._get_nr_details(business_identifier, bearer_token)
