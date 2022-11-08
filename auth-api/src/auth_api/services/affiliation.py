@@ -29,7 +29,7 @@ from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
-from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
+from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
