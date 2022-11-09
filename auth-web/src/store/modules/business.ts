@@ -117,8 +117,7 @@ export default class BusinessModule extends VuexModule {
       const nr = resp['value']?.data
 
       if (nr) {
-        // *** TODO: delete this when no longer needed (#14126)
-        // (at the moment, Namex API is passing CCC instead of CC)
+        // *** TODO: delete this once Namex API returns CC (#14126)
         nr.legalType = (nr.legalType === 'CCC' ? 'CC' : nr.legalType)
 
         affiliatedEntities[i].nameRequest = {

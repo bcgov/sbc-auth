@@ -297,8 +297,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   protected name (item: Business): string {
     if (this.isNumberedIncorporationApplication(item)) {
       const legalType: unknown = item.corpType.legalType
-      // *** TODO: remove fallback once namex API returns legal type?
-      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
+      // *** TODO: remove fallback once Auth API returns legal type (#14183)
+      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Benefit Company'
     }
     return item.name
   }
