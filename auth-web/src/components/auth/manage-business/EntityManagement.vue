@@ -70,7 +70,7 @@
                 outlined dark large
                 v-bind="attrs"
                 v-on="on"
-                @click="startNumberedCompany()"
+                @click="startNumberedCompany(CorpTypes.BENEFIT_COMPANY)"
               >
                 <v-icon>mdi-plus</v-icon>
                 <span><strong>Incorporate a Numbered Benefit Company</strong></span>
@@ -209,7 +209,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpType, LDFlags, LoginSource, Pages } from '@/util/constants'
+import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -245,11 +245,13 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
 
+  // for template
+  readonly CorpTypes = CorpTypes
+
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
   private isLoading = -1 // truthy
-  private resetPasscodeEmail: string = null
   businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
@@ -263,7 +265,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
-  private readonly createNumberedBusiness!: (accountId: Number) => Promise<void>
+  private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
   private selectedColumns = ['Number', 'Type', 'Status']
@@ -306,7 +308,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.setup()
   }
 
-  private async setup () {
+  private async setup (): Promise<void> {
     // ensure syncBusinesses isn't already running
     if (this.isLoading === 1) {
       return
@@ -318,7 +320,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
 
     this.isLoading = 1 // truthy
-    this.$route.query.isNumberedCompanyRequest && await this.createNumberedBusiness(this.currentAccountSettings.id)
     await this.syncBusinesses()
     this.lastSyncBusinesses = Date.now()
     this.isLoading = 0 // falsy
@@ -337,9 +338,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
   }
 
-  // create a numbered company
-  protected async startNumberedCompany () {
-    await this.createNumberedBusiness(this.currentOrganization.id)
+  /** Creates a numbered IA filing (temp business). */
+  protected async startNumberedCompany (corpType: CorpTypes): Promise<void> {
+    const business = {
+      nameRequest: {
+        legalType: corpType
+      }
+    }
+    await this.createNumberedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
     await this.syncBusinesses()
   }
 
@@ -419,17 +425,19 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showConfirmationOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
     this.removeBusinessPayload = removeBusinessPayload
-    if (removeBusinessPayload.business.corpType.code === CorpType.NAME_REQUEST) {
+    if (removeBusinessPayload.business.corpType.code === CorpTypes.NAME_REQUEST) {
       this.populateNRmodalValues()
       this.$refs.removalConfirmDialog.open()
-    } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_BUSINESS) {
+    } else if (removeBusinessPayload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
       this.populateIAmodalValues()
       this.$refs.removalConfirmDialog.open()
-    } else if (removeBusinessPayload.business.corpType.code === CorpType.NEW_REGISTRATION) {
+    } else if (removeBusinessPayload.business.corpType.code === CorpTypes.REGISTRATION) {
       this.populateRegistrationModalValues()
       this.$refs.removalConfirmDialog.open()
-    } else if (removeBusinessPayload.business.corpType.code === CorpType.PARTNERSHIP ||
-      removeBusinessPayload.business.corpType.code === CorpType.SOLE_PROP) {
+    } else if (
+      removeBusinessPayload.business.corpType.code === CorpTypes.PARTNERSHIP ||
+      removeBusinessPayload.business.corpType.code === CorpTypes.SOLE_PROP
+    ) {
       this.populateFirmModalValues()
       this.$refs.removalConfirmDialog.open()
     } else {
