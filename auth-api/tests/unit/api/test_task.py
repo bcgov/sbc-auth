@@ -48,7 +48,7 @@ def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     item_list = rv.json
     assert schema_utils.validate(item_list, 'paged_response')[0]
-    assert rv.status_code == http_status.HTTP_200_OKfe
+    assert rv.status_code == http_status.HTTP_200_OK
 
 
 def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-argument
