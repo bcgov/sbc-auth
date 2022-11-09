@@ -18,6 +18,7 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 import json
 
 import pytest
+import datetime as dt
 
 from auth_api import status as http_status
 from auth_api.models.dataclass import TaskSearch
@@ -34,6 +35,9 @@ from tests.utilities.factory_scenarios import (
 from tests.utilities.factory_utils import (
     factory_auth_header, factory_task_service, factory_user_model, factory_user_model_with_contact, patch_token_info)
 
+current_dt = dt.datetime.now()
+current_date_str = current_dt.strftime('%Y-%m-%d')
+
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
@@ -44,7 +48,7 @@ def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
     rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
     item_list = rv.json
     assert schema_utils.validate(item_list, 'paged_response')[0]
-    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.status_code == http_status.HTTP_200_OKfe
 
 
 def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-argument
@@ -57,7 +61,7 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
 @pytest.mark.parametrize('test_name, endpoint', [
     ('status', 'status=OPEN'),
     ('relationshipStatus', 'relationshipStatus=PENDING_STAFF_REVIEW'),
-    ('dateSubmitted', 'endDate=2022-10-20'),
+    ('dateSubmitted', current_date_str),
     ('dateSubmitted', 'startDate=2022-10-20'),
     ('type', 'type=New Account'),
     ('name', 'name=foo'),
