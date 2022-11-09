@@ -1,4 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import Vue from 'vue'
@@ -16,12 +17,13 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-function getPayLoad (type:string) {
+function getPayLoad (type: string) {
   const removeNRPayload: RemoveBusinessPayload = {
     business: {
       corpType: {
         code: type,
-        desc: type
+        desc: type,
+        legalType: type as CorpTypes
       },
       businessIdentifier: 'test',
       folioNumber: 'test'

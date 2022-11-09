@@ -128,15 +128,13 @@ export default class IncorpOrRegisterView extends Vue {
   }
 
   @Emit('login')
-  private emitLogin () {}
+  private emitLogin (): void {}
 
   @Emit('account-dialog')
-  private emitAccountDialog () {}
+  private emitAccountDialog (): void {}
 
   @Emit('manage-businesses')
-  private emitManageBusinesses (isNumberedCompanyRequest: boolean = false) {
-    return isNumberedCompanyRequest
-  }
+  private emitManageBusinesses (): void {}
 }
 </script>
 

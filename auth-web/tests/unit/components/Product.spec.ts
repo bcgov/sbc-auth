@@ -1,10 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import Product from '@/components/auth/common/Product.vue'
+import { ProductStatus } from '@/util/constants'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import { productStatus } from '@/util/constants'
 
 Vue.use(Vuetify)
 
@@ -23,14 +22,14 @@ describe('Product.vue', () => {
     'description': 'test',
     'url': 'url',
     'type': 'PARTNER',
-    'subscriptionStatus': productStatus.NOT_SUBSCRIBED
+    'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED
   }
   const pprProduct = {
     'code': 'PPR',
     'description': 'ppr',
     'url': 'url',
     'type': 'PARTNER',
-    'subscriptionStatus': productStatus.NOT_SUBSCRIBED,
+    'subscriptionStatus': ProductStatus.NOT_SUBSCRIBED,
     'premiumOnly': false
   }
   const isSelected = false
@@ -116,7 +115,7 @@ describe('Product.vue', () => {
   })
 
   it('active product should not display checkbox', async () => {
-    pprProduct.subscriptionStatus = productStatus.ACTIVE
+    pprProduct.subscriptionStatus = ProductStatus.ACTIVE
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
 
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
@@ -129,7 +128,7 @@ describe('Product.vue', () => {
   })
 
   it('pending product should not display checkbox', async () => {
-    pprProduct.subscriptionStatus = productStatus.PENDING_STAFF_REVIEW
+    pprProduct.subscriptionStatus = ProductStatus.PENDING_STAFF_REVIEW
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
 
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
@@ -142,7 +141,7 @@ describe('Product.vue', () => {
   })
 
   it('rejected product should not display checkbox', async () => {
-    pprProduct.subscriptionStatus = productStatus.REJECTED
+    pprProduct.subscriptionStatus = ProductStatus.REJECTED
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true })
 
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
@@ -155,7 +154,7 @@ describe('Product.vue', () => {
   })
 
   it('premium product should be disabled in basic account settings', async () => {
-    pprProduct.subscriptionStatus = productStatus.NOT_SUBSCRIBED
+    pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
     pprProduct.premiumOnly = true
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true, isBasicAccount: true })
 
@@ -170,7 +169,7 @@ describe('Product.vue', () => {
   })
 
   it('creation flow should display check box', async () => {
-    pprProduct.subscriptionStatus = productStatus.NOT_SUBSCRIBED
+    pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
     wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false })
 
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeFalsy()

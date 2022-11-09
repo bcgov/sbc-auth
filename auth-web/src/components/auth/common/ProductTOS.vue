@@ -31,8 +31,6 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { OrgProduct } from '@/models/Organization'
-import { productStatus } from '@/util/constants'
 
 @Component
 export default class ProductTOS extends Vue {
