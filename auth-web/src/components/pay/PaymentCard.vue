@@ -129,7 +129,7 @@ export default class PaymentCard extends Vue {
     this.cfsAccountId = this.paymentCardData?.cfsAccountId || ''
     this.payWithCreditCard = this.showPayWithOnlyCC
     this.credit = this.paymentCardData.credit
-    this.doHaveCredit = this.paymentCardData.credit !== undefined && this.paymentCardData.credit !== 0
+    this.doHaveCredit = this.paymentCardData?.credit > 0
     if (this.doHaveCredit) {
       this.overCredit = this.credit >= this.totalBalanceDue
       this.partialCredit = this.credit < this.totalBalanceDue
