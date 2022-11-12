@@ -122,6 +122,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   private async save () {
+    this.isLoading = true
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
     try {
       const bcolAccountDetails = await this.validateBcolAccount(this.currentOrganization.bcolProfile)
