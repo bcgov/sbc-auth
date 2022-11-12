@@ -9,10 +9,18 @@
       :currentSelectedPaymentMethod="currentOrgPaymentType"
       @payment-method-selected="setSelectedPayment"
       @is-pad-valid="setPADValid"
+      @emit-bcol-info="getBcolInfo"
       :isInitialTOSAccepted="readOnly"
       :isInitialAcknowledged="readOnly"
       v-display-mode
     ></PaymentMethods>
+    <v-slide-y-transition>
+        <div class="pb-2" v-show="errorMessage">
+          <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
+            {{errorMessage}}
+          </v-alert>
+        </div>
+    </v-slide-y-transition>
     <v-divider class="my-10"></v-divider>
      <v-row>
       <v-col class="py-0 d-inline-flex">
@@ -33,7 +41,8 @@
           class="save-continue-button mr-2 font-weight-bold"
           @click="save"
           data-test="save-button"
-          :disabled="!isEnableCreateBtn"
+          :disabled="!isEnableCreateBtn || isLoading"
+          :loading="isLoading"
         >
         <!-- need to show submit button on review payment -->
          {{ readOnly ? 'Submit' : 'Create Account'}}
@@ -49,6 +58,7 @@
 
 <script lang="ts">
 import { Account, PaymentTypes } from '@/util/constants'
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -69,15 +79,20 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   // need toi show TOS as checked in stepper BCEID re-upload time.
   // show submit button on final stepper to update info, even this page is read only
   @Prop({ default: false }) readOnly: boolean
+  @OrgModule.Action('validateBcolAccount')
+  private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   @OrgModule.State('currentOrganization') private readonly currentOrganization!: Organization
   @OrgModule.State('currentOrganizationType') private readonly currentOrganizationType!: string
   @OrgModule.State('currentOrgPaymentType') private readonly currentOrgPaymentType!: string
 
   @OrgModule.Mutation('setCurrentOrganizationPaymentType') private setCurrentOrganizationPaymentType!: (paymentType: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationBcolProfile') private setCurrentOrganizationBcolProfile!: (bcolProfile: BcolProfile) => void
 
   private selectedPaymentMethod: string = ''
   private isPADValid: boolean = false
+  private isLoading: boolean = false
+  private errorMessage: string = ''
 
   private goBack () {
     this.stepBack()
@@ -88,8 +103,13 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   private get isEnableCreateBtn () {
-    return (this.selectedPaymentMethod === PaymentTypes.PAD)
-      ? (this.selectedPaymentMethod && this.isPADValid) : !!this.selectedPaymentMethod
+    if (this.selectedPaymentMethod === PaymentTypes.PAD) {
+      return this.isPADValid
+    } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
+      return !(this.currentOrganization.bcolProfile?.password === undefined || this.currentOrganization.bcolProfile?.password === '')
+    } else {
+      return !!this.selectedPaymentMethod
+    }
   }
 
   private setSelectedPayment (payment) {
@@ -101,13 +121,38 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
     this.isPADValid = isValid
   }
 
-  private save () {
+  private async save () {
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
-    this.createAccount()
+    try {
+      const bcolAccountDetails = await this.validateBcolAccount(this.currentOrganization.bcolProfile)
+      this.errorMessage = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
+      this.setCurrentOrganizationBcolProfile(this.currentOrganization.bcolProfile)
+    } catch (err) {
+      switch (err.response.status) {
+        case 409:
+          this.errorMessage = err.response.data.message
+          break
+        case 400:
+          this.errorMessage = err.response.data.message
+          break
+        default:
+          this.errorMessage = 'An error occurred while attempting to create your account.'
+      }
+    } finally {
+      this.isLoading = false
+    }
+    if (!this.errorMessage) {
+      this.createAccount()
+    }
   }
 
   @Emit('final-step-action')
   private createAccount () {
+  }
+
+  @Emit('emit-bcol-info')
+  private getBcolInfo (bcolProfile: BcolProfile) {
+    this.setCurrentOrganizationBcolProfile(bcolProfile)
   }
 }
 </script>

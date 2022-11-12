@@ -315,6 +315,11 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
+  public setCurrentOrganizationBcolProfile (bcolProfile: BcolProfile) {
+    this.currentOrganization = { ...this.currentOrganization, bcolProfile }
+  }
+
+  @Mutation
   public resetCurrentSelectedProducts () {
     this.currentSelectedProducts = []
   }
