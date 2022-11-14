@@ -18,7 +18,7 @@
       :isAcknowledgeNeeded="isAcknowledgeNeeded"
       @payment-method-selected="setSelectedPayment"
       @get-PAD-info="getPADInfo"
-      @emit-bcol-info="getBcolInfo"
+      @emit-bcol-info="setBcolInfo"
       @is-pad-valid="isPADValid"
       isTouchedUpdate="true"
       :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
@@ -198,7 +198,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   }
 
   @Emit('emit-bcol-info')
-  private getBcolInfo (bcolProfile: BcolProfile) {
+  private setBcolInfo (bcolProfile: BcolProfile) {
     this.bcolInfo = bcolProfile
   }
 

@@ -9,7 +9,7 @@
       :currentSelectedPaymentMethod="currentOrgPaymentType"
       @payment-method-selected="setSelectedPayment"
       @is-pad-valid="setPADValid"
-      @emit-bcol-info="getBcolInfo"
+      @emit-bcol-info="setBcolInfo"
       :isInitialTOSAccepted="readOnly"
       :isInitialAcknowledged="readOnly"
       v-display-mode
@@ -106,7 +106,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
     if (this.selectedPaymentMethod === PaymentTypes.PAD) {
       return this.isPADValid
     } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
-      return !(this.currentOrganization.bcolProfile?.password === undefined || this.currentOrganization.bcolProfile?.password === '')
+      return !(!!this.currentOrganization.bcolProfile?.password)
     } else {
       return !!this.selectedPaymentMethod
     }
@@ -152,7 +152,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   @Emit('emit-bcol-info')
-  private getBcolInfo (bcolProfile: BcolProfile) {
+  private setBcolInfo (bcolProfile: BcolProfile) {
     this.setCurrentOrganizationBcolProfile(bcolProfile)
   }
 }
