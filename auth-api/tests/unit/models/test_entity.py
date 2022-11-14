@@ -63,5 +63,20 @@ def test_create_from_dict(session):  # pylint:disable=unused-argument
 def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     """Assert that an Entity can not be created without schema."""
     result_entity = EntityModel.create_from_dict(None)
-
     assert result_entity is None
+
+
+def test_bootstrap_entity_with_sub_type(session):
+    """Assert that an Entity can be retrieved via business identifier."""
+    entity = EntityModel(business_identifier='tmp000123', name='Test',
+                         corp_type_code='TMP', corp_sub_type_code='ULC')
+    session.add(entity)
+    session.commit()
+
+    business_id = 'tmp000123'
+
+    result_entity = EntityModel.find_by_business_identifier(business_identifier=business_id)
+
+    assert result_entity.id is not None
+    assert result_entity.corp_type_code == 'TMP'
+    assert result_entity.corp_sub_type_code == 'ULC'
