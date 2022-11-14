@@ -37,6 +37,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
     business_number = Column('business_number', String(100), nullable=True)
     name = Column('name', String(250), nullable=True)
     corp_type_code = Column(String(15), ForeignKey('corp_types.code'), nullable=False)
+    corp_sub_type_code = Column(String(15), ForeignKey('corp_types.code'))
     folio_number = Column('folio_number', String(50), nullable=True, index=True)
     status = Column(String(), nullable=True)
     last_modified_by = Column(String(), nullable=True)
@@ -44,6 +45,7 @@ class Entity(BaseModel):  # pylint: disable=too-few-public-methods, too-many-ins
 
     contacts = relationship('ContactLink', back_populates='entity')
     corp_type = relationship('CorpType', foreign_keys=[corp_type_code], lazy='joined', innerjoin=True)
+    corp_sub_type = relationship('CorpType', foreign_keys=[corp_sub_type_code])
     affiliations = relationship('Affiliation', cascade='all,delete,delete-orphan', lazy='joined')
 
     @classmethod

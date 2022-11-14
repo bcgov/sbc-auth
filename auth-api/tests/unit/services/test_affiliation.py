@@ -443,7 +443,7 @@ def test_find_affiliations_for_new_business(session, auth_mock, nr_mock, monkeyp
     business_identifier1 = entity_dictionary1['business_identifier']
     name1 = entity_dictionary1['name']
 
-    entity_service2 = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
+    entity_service2 = factory_entity_service(entity_info=TestEntityInfo.temp_business)
     entity_dictionary2 = entity_service2.as_dict()
     business_identifier2 = entity_dictionary2['business_identifier']
 
@@ -491,7 +491,7 @@ def test_find_affiliations_for_new_business_incorporation_complete(session, auth
     entity_dictionary1 = nr_entity.as_dict()
     nr_business_identifier = entity_dictionary1['business_identifier']
 
-    tmp_entity = factory_entity_service(entity_info=TestEntityInfo.tenp_business)
+    tmp_entity = factory_entity_service(entity_info=TestEntityInfo.temp_business)
     entity_dictionary2 = tmp_entity.as_dict()
     tmp_business_identifier = entity_dictionary2['business_identifier']
 

@@ -19,6 +19,7 @@ Test-Suite to ensure that the /entities endpoint is working as expected.
 
 import copy
 import json
+import pytest
 from unittest.mock import patch
 
 from auth_api import status as http_status
@@ -39,6 +40,36 @@ def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument
                      headers=headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv.json, 'business')[0]
+
+
+@pytest.mark.parametrize(
+    'test_name, legal_type', [
+        ('Benefit Company', 'BEN'),
+        ('BC Limited Company', 'BC'),
+        ('BC Community Contribution Company', 'CC'),
+        ('BC Unlimited Liability Company', 'ULC')
+    ])
+def test_temp_business_with_subtype(client, jwt, session, test_name, legal_type):  # pylint:disable=unused-argument
+    """Assert that a temp business with subtype can be POSTed and retrieved."""
+    temp_business_json = {
+        'businessIdentifier': 'QWERTYUIO',
+        'name': 'NR 1234567',
+        'corpTypeCode': 'TMP',
+        'corpSubTypeCode': legal_type
+    }
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv = client.post('/api/v1/entities', data=json.dumps(temp_business_json),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'business')[0]
+
+    entity_rv = client.get('/api/v1/entities/{}'.format(temp_business_json['businessIdentifier']),
+                           headers=headers, content_type='application/json')
+
+    assert entity_rv.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(entity_rv.json, 'business')[0]
+    dictionary = json.loads(entity_rv.data)
+    assert dictionary['corpSubType']['code'] == legal_type
 
 
 def test_add_entity_invalid_returns_400(client, jwt, session):  # pylint:disable=unused-argument
