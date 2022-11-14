@@ -17,11 +17,12 @@ Test-Suite to ensure that the /tasks endpoint is working as expected.
 """
 import json
 
+import datetime as dt
 import pytest
 
 from auth_api import status as http_status
-from auth_api.models.dataclass import TaskSearch
 from auth_api.models import ProductCode as ProductCodeModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
@@ -32,7 +33,11 @@ from auth_api.utils.enums import (
 from tests.utilities.factory_scenarios import (
     TestAffidavit, TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_auth_header, factory_task_service, factory_user_model, factory_user_model_with_contact, patch_token_info)
+    factory_auth_header, factory_task_model, factory_task_service, factory_user_model, factory_user_model_with_contact,
+    patch_token_info)
+
+current_dt = dt.datetime.now()
+current_date_str = current_dt.strftime('%Y-%m-%d')
 
 
 def test_fetch_tasks(client, jwt, session):  # pylint:disable=unused-argument
@@ -57,7 +62,7 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
 @pytest.mark.parametrize('test_name, endpoint', [
     ('status', 'status=OPEN'),
     ('relationshipStatus', 'relationshipStatus=PENDING_STAFF_REVIEW'),
-    ('dateSubmitted', 'startDate=2022-10-20'),
+    ('dateSubmitted', f'startDate=2022-10-1&endDate={current_date_str}'),
     ('type', 'type=New Account'),
     ('name', 'name=foo'),
     ('modifiedBy', 'modifiedBy=User'),
@@ -65,7 +70,8 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
 def test_fetch_tasks_with_params(test_name, client, jwt, endpoint, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
-    factory_task_service(user.id)
+    date_submitted = dt.datetime(2022, 10, 20, 12, 0, 0)
+    factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get(f'/api/v1/tasks?{endpoint}',
@@ -94,6 +100,29 @@ def test_fetch_tasks_with_many_params(test_name, client, jwt, endpoint, session)
     assert item_list['tasks']
     assert len(item_list['tasks']) > 0
     assert item_list['tasks'][0]['relationshipStatus']
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+
+
+def test_fetch_tasks_end_of_day(client, jwt, session):
+    """Assert that task is only fetched on end of end_date."""
+    user = factory_user_model(TestUserInfo.user1)
+    user_2 = factory_user_model(TestUserInfo.user2)
+
+    date_submitted_1 = dt.datetime(2022, 7, 10, 15, 59, 59)
+    date_submitted_2 = dt.datetime(2022, 7, 11, 0, 0, 0)
+
+    factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted_1)
+    factory_task_model(user_id=user_2.id, modified_by_id=user_2.id, date_submitted=date_submitted_2)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks?startDate=2022-7-10&endDate=2022-7-10',
+                    headers=headers, content_type='application/json')
+    item_list = rv.json
+
+    assert item_list['tasks']
+    assert len(item_list['tasks']) > 0 and len(item_list['tasks']) <= 1
+    assert item_list['tasks'][0]['dateSubmitted'] == '2022-07-10T15:59:59+00:00'
     assert schema_utils.validate(item_list, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
