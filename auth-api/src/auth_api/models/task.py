@@ -63,12 +63,11 @@ class Task(BaseModel):
             query = query.filter(Task.status.in_(task_search.status))
         if task_search.start_date:
             # convert PST start_date to UTC then filter
-            start_date_utc = cls._str_to_utc_dt(task_search.start_date)
+            start_date_utc = cls._str_to_utc_dt(task_search.start_date, False)
             query = query.filter(Task.date_submitted >= start_date_utc)
         if task_search.end_date:
             # convert PST end_date to UTC then set time to end of day then filter
-            end_date_utc = cls._str_to_utc_dt(task_search.end_date)
-            end_date_utc = dt.datetime(end_date_utc.year, end_date_utc.month, end_date_utc.day, 23, 59, 59)
+            end_date_utc = cls._str_to_utc_dt(task_search.end_date, True)
             query = query.filter(Task.date_submitted <= end_date_utc)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)
@@ -114,10 +113,13 @@ class Task(BaseModel):
             .first()
 
     @classmethod
-    def _str_to_utc_dt(cls, date: str):
+    def _str_to_utc_dt(cls, date: str, add_time: bool):
         """Convert ISO formatted dates into dateTime objects in UTC."""
         time_zone = pytz.timezone('Canada/Pacific')
         naive_dt = dt.datetime.strptime(date, '%Y-%m-%d')
         local_dt = time_zone.localize(naive_dt, is_dst=None)
+        if add_time:
+            local_dt = dt.datetime(local_dt.year, local_dt.month, local_dt.day, 23, 59, 59)
         utc_dt = local_dt.astimezone(pytz.utc)
+
         return utc_dt
