@@ -44,7 +44,6 @@ def test_add_entity(client, jwt, session):  # pylint:disable=unused-argument
 
 @pytest.mark.parametrize(
     'test_name, legal_type', [
-        ('Benefit Company', 'BEN'),
         ('BC Limited Company', 'BC'),
         ('BC Community Contribution Company', 'CC'),
         ('BC Unlimited Liability Company', 'ULC')
