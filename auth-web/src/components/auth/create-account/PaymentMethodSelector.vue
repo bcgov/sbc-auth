@@ -106,7 +106,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
     if (this.selectedPaymentMethod === PaymentTypes.PAD) {
       return this.isPADValid
     } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
-      return !(!!this.currentOrganization.bcolProfile?.password)
+      return this.currentOrganization.bcolProfile?.password
     } else {
       return !!this.selectedPaymentMethod
     }
@@ -115,6 +115,9 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   private setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
+    if (this.selectedPaymentMethod !== PaymentTypes.BCOL) {
+      this.errorMessage = ''
+    }
   }
 
   private setPADValid (isValid) {
@@ -124,6 +127,10 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   private async save () {
     this.isLoading = true
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
+    if (this.selectedPaymentMethod !== PaymentTypes.BCOL) {
+      this.createAccount()
+      return
+    }
     try {
       const bcolAccountDetails = await this.validateBcolAccount(this.currentOrganization.bcolProfile)
       this.errorMessage = bcolAccountDetails ? null : 'Error - No account details provided for this account.'
