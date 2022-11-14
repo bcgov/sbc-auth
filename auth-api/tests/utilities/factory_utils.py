@@ -264,8 +264,7 @@ def factory_task_model(user_id: int = 1, org_id: int = 1,
                        modified_by_id: int = None, date_submitted: datetime = datetime.datetime.now()):
     """Produce a Task model."""
     task_type = TaskTypePrefix.NEW_ACCOUNT_STAFF_REVIEW.value
-    task = TaskModel(id=user_id,
-                     name='foo',
+    task = TaskModel(name='foo',
                      date_submitted=date_submitted,
                      relationship_type=TaskRelationshipType.ORG.value,
                      relationship_id=org_id,

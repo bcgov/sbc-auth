@@ -108,8 +108,8 @@ def test_fetch_tasks_end_of_day(client, jwt, session):
     user = factory_user_model(TestUserInfo.user1)
     user_2 = factory_user_model(TestUserInfo.user2)
 
-    date_submitted_1 = dt.datetime(2022, 7, 10, 23, 59, 59)
-    date_submitted_2 = dt.datetime(2022, 7, 11, 8, 0, 0)
+    date_submitted_1 = dt.datetime(2022, 7, 10, 15, 59, 59)
+    date_submitted_2 = dt.datetime(2022, 7, 11, 0, 0, 0)
 
     factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted_1)
     factory_task_model(user_id=user_2.id, modified_by_id=user_2.id, date_submitted=date_submitted_2)
@@ -121,7 +121,7 @@ def test_fetch_tasks_end_of_day(client, jwt, session):
 
     assert item_list['tasks']
     assert len(item_list['tasks']) > 0 and len(item_list['tasks']) <= 1
-    assert item_list['tasks'][0]['dateSubmitted'] == '2022-07-10T23:59:59+00:00'
+    assert item_list['tasks'][0]['dateSubmitted'] == '2022-07-10T15:59:59+00:00'
     assert schema_utils.validate(item_list, 'paged_response')[0]
     assert rv.status_code == http_status.HTTP_200_OK
 
