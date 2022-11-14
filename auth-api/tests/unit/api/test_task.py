@@ -62,7 +62,7 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
 @pytest.mark.parametrize('test_name, endpoint', [
     ('status', 'status=OPEN'),
     ('relationshipStatus', 'relationshipStatus=PENDING_STAFF_REVIEW'),
-    ('dateSubmitted', f'startDate=2020-10-20&endDate={current_date_str}'),
+    ('dateSubmitted', f'startDate=2022-10-1&endDate={current_date_str}'),
     ('type', 'type=New Account'),
     ('name', 'name=foo'),
     ('modifiedBy', 'modifiedBy=User'),
@@ -70,7 +70,8 @@ def test_fetch_tasks_no_content(client, jwt, session):  # pylint:disable=unused-
 def test_fetch_tasks_with_params(test_name, client, jwt, endpoint, session):  # pylint:disable=unused-argument
     """Assert that the tasks can be fetched."""
     user = factory_user_model()
-    factory_task_service(user.id)
+    date_submitted = dt.datetime(2022, 10, 20, 12, 0, 0)
+    factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
     rv = client.get(f'/api/v1/tasks?{endpoint}',
