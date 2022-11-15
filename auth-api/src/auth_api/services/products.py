@@ -21,7 +21,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
@@ -219,8 +218,6 @@ class Product:
         if is_new_transaction:  # Commit the transaction if it's a new transaction
             db.session.commit()
 
-        # Get the org and to get admin mail address
-        org: OrgModel = OrgModel.find_by_org_id(org_id)
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)

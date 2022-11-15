@@ -24,7 +24,6 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException, Error
-from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
@@ -182,7 +181,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             mailer_type = 'resubmitBceidOrg'
 
         if admin_emails == '':
-            current_app.logger.error('No admin email record for org id {}', org_id)
+            current_app.logger.error('No admin email record for org id {}', org.id)
             current_app.logger.error('<send_approval_notification_to_member failed')
             return
 
