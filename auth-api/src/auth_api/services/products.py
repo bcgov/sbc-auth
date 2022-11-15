@@ -28,6 +28,7 @@ from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import ProductCodeSchema
+from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
     AccessType, ActivityAction, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType,
@@ -220,18 +221,22 @@ class Product:
 
         # Get the org and to get admin mail address
         org: OrgModel = OrgModel.find_by_org_id(org_id)
-        # Find admin email address
-        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
-        Product.send_approved_product_subscription_notification(admin_email, product_model.description,
-                                                                product_subscription.status_code)
+        # Find admin email addresses
+        admin_emails = UserService.get_admin_emails_for_org(org_id)
+        if admin_emails != '':
+            Product.send_approved_product_subscription_notification(admin_emails, product_model.description,
+                                                                    product_subscription.status_code)
+        else:
+            # continue but log error
+            current_app.logger.error('No admin email record for org id {}', org_id)
         if is_approved:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                                            name=product_model.description))
         current_app.logger.debug('>update_task_product ')
 
     @staticmethod
-    def send_approved_product_subscription_notification(receipt_admin_email, product_name,
+    def send_approved_product_subscription_notification(receipt_admin_emails, product_name,
                                                         product_subscription_status: ProductSubscriptionStatus):
         """Send Approved product subscription notification to the user."""
         current_app.logger.debug('<send_approved_prod_subscription_notification')
@@ -242,7 +247,7 @@ class Product:
             notification_type = 'prodPackageRejectedNotification'
         data = {
             'productName': product_name,
-            'emailAddresses': receipt_admin_email
+            'emailAddresses': receipt_admin_emails
         }
         try:
             publish_to_mailer(notification_type, data=data)
