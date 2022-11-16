@@ -1,7 +1,6 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { SessionStorageKeys, TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams } from '@/models/Task'
-import ConfigHelper from '@/util/config-helper'
+import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import TaskService from '@/services/task.services'
 
 @Module({ namespaced: true })
