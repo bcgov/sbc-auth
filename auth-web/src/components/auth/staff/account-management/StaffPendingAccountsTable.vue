@@ -179,7 +179,8 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
     { desc: 'GovN', val: 'GovN' }
   ]
 
-  private searchParams: TaskFilterParams = {
+  private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter)) ||
+  {
     name: '',
     startDate: '',
     endDate: '',
@@ -200,11 +201,15 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
   private formatDate = CommonUtils.formatDisplayDate
 
-  @Watch('searchParams', { deep: true })
+  @Watch('searchParams', { deep: true, immediate: true })
   async searchChanged (value: TaskFilterParams) {
     this.searchParamsExist = this.doSearchParametersExist(value)
     const itemsPerPage = this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
-    this.tableDataOptions = { page: 1, ...this.getAndPruneCachedPageInfo(), itemsPerPage }
+    if (this.cachedPageInfo()) {
+      this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), itemsPerPage }
+    } else {
+      this.tableDataOptions = { ...this.tableDataOptions, page: 1, itemsPerPage }
+    }
     this.setPendingSearchFilterToStorage(JSON.stringify(value))
   }
 
@@ -220,18 +225,12 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
         this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
       })
     }
-    const pendingAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter) || ''
     try {
-      this.searchParams = JSON.parse(pendingAccountsSearchFilter)
       if (this.searchParams.startDate && this.searchParams.endDate) {
         this.dateTxt = `${moment(this.searchParams.startDate).format('MMM DD, YYYY')} - ${moment(this.searchParams.endDate).format('MMM DD, YYYY')}`
       }
     } catch {
       // Do nothing
-    }
-    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
-    if (this.hasCachedPageInfo) {
-      this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
   }
 

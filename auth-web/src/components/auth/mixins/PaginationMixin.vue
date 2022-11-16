@@ -53,6 +53,14 @@ export default class PaginationMixin extends Vue {
   }
 
   /**
+   * Helps to retain the current page information when the user went to detailed page and pressed refresh.
+   */
+  protected cachedPageInfo ():boolean {
+    const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
+    return Object.keys(paginationOptions).length !== 0
+  }
+
+  /**
    * Return the pagination option.
    * Removes from session storage ; b
    *    because the information should be used only once when user comes back from detail page to list view.
