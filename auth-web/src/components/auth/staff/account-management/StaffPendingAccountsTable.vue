@@ -136,7 +136,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
   private readonly headerAccounts = [
     {
-      text: 'Date Submittted',
+      text: 'Date Submitted',
       align: 'left',
       sortable: false,
       value: 'dateSubmitted',
