@@ -31,7 +31,7 @@ export default class PaginationMixin extends Vue {
     return this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
   }
 
-  private getNumberOfItemsFromSessionStorage (): number|undefined {
+  protected getNumberOfItemsFromSessionStorage (): number|undefined {
     let items = +ConfigHelper.getFromSession(SessionStorageKeys.PaginationNumberOfItems)
     return !isNaN(items) ? items : undefined
   }
