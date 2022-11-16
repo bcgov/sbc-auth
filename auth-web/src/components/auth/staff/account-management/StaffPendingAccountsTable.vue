@@ -204,7 +204,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
   async searchChanged (value: TaskFilterParams) {
     this.searchParamsExist = this.doSearchParametersExist(value)
     const itemsPerPage = this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
-    this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1, itemsPerPage }
+    this.tableDataOptions = { page: 1, ...this.getAndPruneCachedPageInfo(), itemsPerPage }
     this.setPendingSearchFilterToStorage(JSON.stringify(value))
   }
 
