@@ -31,7 +31,7 @@ export default class PaginationMixin extends Vue {
     return this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
   }
 
-  private getNumberOfItemsFromSessionStorage (): number|undefined {
+  protected getNumberOfItemsFromSessionStorage (): number|undefined {
     let items = +ConfigHelper.getFromSession(SessionStorageKeys.PaginationNumberOfItems)
     return !isNaN(items) ? items : undefined
   }
@@ -48,6 +48,14 @@ export default class PaginationMixin extends Vue {
    * Helps to retain the current page information when the user went to detailed page and pressed refresh.
    */
   get hasCachedPageInfo ():boolean {
+    const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
+    return Object.keys(paginationOptions).length !== 0
+  }
+
+  /**
+   * Helps to retain the current page information when the user went to detailed page and pressed refresh.
+   */
+  protected cachedPageInfo ():boolean {
     const paginationOptions = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.PaginationOptions) || '{}')
     return Object.keys(paginationOptions).length !== 0
   }

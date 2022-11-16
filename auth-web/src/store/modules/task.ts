@@ -1,14 +1,13 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { SessionStorageKeys, TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams } from '@/models/Task'
-import ConfigHelper from '@/util/config-helper'
+import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import TaskService from '@/services/task.services'
 
 @Module({ namespaced: true })
 export default class TaskModule extends VuexModule {
     currentTask: Task
-    pendingTasksCount: number = 0
-    rejectedTasksCount: number = 0
+    pendingTasksCount: number = null
+    rejectedTasksCount: number = null
 
     @Mutation
     public setCurrentTask (task: Task) {
@@ -36,24 +35,17 @@ export default class TaskModule extends VuexModule {
     // TODO: Add a new API call for fetching counts alone to reduce initial overload - For all calls made in StaffAccountManagement
     @Action({ rawError: true })
     public async syncTasks () {
-      const rejectedAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.RejectedAccountsSearchFilter) || ''
-      const pendingAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.PendingAccountsSearchFilter) || ''
-
-      if (!pendingAccountsSearchFilter) {
-        let taskFilter: TaskFilterParams = {
-          relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
-          statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
-        }
-        await this.context.dispatch('fetchTasks', taskFilter)
+      let taskFilter: TaskFilterParams = {
+        relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
+        statuses: [TaskStatus.OPEN, TaskStatus.HOLD]
       }
+      await this.context.dispatch('fetchTasks', taskFilter)
 
-      if (!rejectedAccountsSearchFilter) {
-        let taskFilter: TaskFilterParams = {
-          relationshipStatus: TaskRelationshipStatus.REJECTED,
-          statuses: [TaskStatus.COMPLETED]
-        }
-        await this.context.dispatch('fetchTasks', taskFilter)
+      taskFilter = {
+        relationshipStatus: TaskRelationshipStatus.REJECTED,
+        statuses: [TaskStatus.COMPLETED]
       }
+      await this.context.dispatch('fetchTasks', taskFilter)
     }
 
     @Action({ rawError: true })
@@ -61,9 +53,13 @@ export default class TaskModule extends VuexModule {
       const response = await TaskService.fetchTasks(filterParams)
       if (response?.data) {
         if (filterParams.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW) {
-          this.context.commit('setPendingTasksCount', response.data.total)
+          if (!this.pendingTasksCount) {
+            this.context.commit('setPendingTasksCount', response.data.total)
+          }
         } else if (filterParams.relationshipStatus === TaskRelationshipStatus.REJECTED) {
-          this.context.commit('setRejectedTasksCount', response.data.total)
+          if (!this.rejectedTasksCount) {
+            this.context.commit('setRejectedTasksCount', response.data.total)
+          }
         }
         return {
           limit: response.data.limit,

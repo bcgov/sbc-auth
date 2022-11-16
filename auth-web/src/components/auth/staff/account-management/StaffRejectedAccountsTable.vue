@@ -165,7 +165,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
     { desc: 'GovN', val: 'GovN' }
   ]
 
-  private searchParams: TaskFilterParams = {
+  private searchParams: TaskFilterParams = JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.RejectedAccountsSearchFilter)) || {
     name: '',
     startDate: '',
     endDate: '',
@@ -186,12 +186,16 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
 
   private formatDate = CommonUtils.formatDisplayDate
 
-  @Watch('searchParams', { deep: true })
+  @Watch('searchParams', { deep: true, immediate: true })
   async searchChanged (value: TaskFilterParams) {
     this.searchParamsExist = this.doSearchParametersExist(value)
-    this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), page: 1 }
+    const itemsPerPage = this.getNumberOfItemsFromSessionStorage() || this.DEFAULT_ITEMS_PER_PAGE
+    if (this.cachedPageInfo()) {
+      this.tableDataOptions = { ...this.getAndPruneCachedPageInfo(), itemsPerPage }
+    } else {
+      this.tableDataOptions = { ...this.tableDataOptions, page: 1, itemsPerPage }
+    }
     this.setRejectedSearchFilterToStorage(JSON.stringify(value))
-    await this.searchStaffTasks()
   }
 
   @Watch('tableDataOptions', { deep: true })
@@ -210,18 +214,12 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
         this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
       })
     }
-    const rejectedAccountsSearchFilter = ConfigHelper.getFromSession(SessionStorageKeys.RejectedAccountsSearchFilter) || ''
     try {
-      this.searchParams = JSON.parse(rejectedAccountsSearchFilter)
       if (this.searchParams.startDate && this.searchParams.endDate) {
         this.dateTxt = `${moment(this.searchParams.startDate).format('MMM DD, YYYY')} - ${moment(this.searchParams.endDate).format('MMM DD, YYYY')}`
       }
     } catch {
       // Do nothing
-    }
-    this.tableDataOptions = this.DEFAULT_DATA_OPTIONS
-    if (this.hasCachedPageInfo) {
-      this.tableDataOptions = this.getAndPruneCachedPageInfo()
     }
   }
 
