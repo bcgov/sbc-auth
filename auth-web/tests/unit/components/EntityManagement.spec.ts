@@ -17,13 +17,12 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-function getPayLoad (type: string) {
+function getPayLoad (type: any) {
   const removeNRPayload: RemoveBusinessPayload = {
     business: {
       corpType: {
-        code: type,
-        desc: type,
-        legalType: type as CorpTypes
+        code: type as CorpTypes,
+        desc: type as string
       },
       businessIdentifier: 'test',
       folioNumber: 'test'
