@@ -15,10 +15,11 @@
 
 Test suite to ensure that the Task service routines are working as expected.
 """
-
+import pytest
 from datetime import datetime
 from unittest.mock import patch
 
+from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import User as UserModel
 from auth_api.models import Task as TaskModel
@@ -26,6 +27,7 @@ from auth_api.models.dataclass import TaskSearch
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
+from auth_api.services import User as UserService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.enums import (
     LoginSource, OrgStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskTypePrefix)
@@ -104,7 +106,11 @@ def test_create_task_product(session, keycloak_mock):  # pylint:disable=unused-a
     assert dictionary['relationship_type'] == TaskRelationshipType.PRODUCT.value
 
 
-def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('test_name, rmv_contact', [
+    ('has_contact', False),
+    ('no_contact', True),
+])
+def test_update_task(session, keycloak_mock, monkeypatch, test_name, rmv_contact):  # pylint:disable=unused-argument
     """Assert that a task can be updated."""
     user_with_token = TestUserInfo.user_bceid_tester
     user_with_token['keycloak_guid'] = TestJwtClaims.public_bceid_user['sub']
@@ -118,6 +124,13 @@ def test_update_task(session, keycloak_mock, monkeypatch):  # pylint:disable=unu
     org_dict = org.as_dict()
     assert org_dict['org_status'] == OrgStatus.PENDING_STAFF_REVIEW.value
 
+    if rmv_contact:
+        # remove contact link
+        contact_link = ContactLinkModel.find_by_user_id(user.id)
+        contact_link.user_id = None
+        session.add(contact_link)
+        session.commit()
+        assert UserService.get_admin_emails_for_org(org_dict['id']) == ''
     token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
     patch_token_info(token_info, monkeypatch)
 

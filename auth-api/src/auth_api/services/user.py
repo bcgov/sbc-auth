@@ -552,11 +552,17 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
 
     @staticmethod
     def get_admins_for_membership(membership_id, status=Status.ACTIVE.value):
-        """Get admins for an org."""
+        """Get admins for a membership's org."""
         membership = MembershipModel.find_membership_by_id(membership_id)
         org_id = membership.org_id
 
         return UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
+
+    @staticmethod
+    def get_admin_emails_for_org(org_id: int, status=Status.ACTIVE.value):
+        """Get admin emails for an org."""
+        admin_list = UserModel.find_users_by_org_id_by_status_by_roles(org_id, CLIENT_ADMIN_ROLES, status)
+        return ','.join([str(x.contacts[0].contact.email) for x in admin_list if x.contacts])
 
     @staticmethod
     def delete_user():

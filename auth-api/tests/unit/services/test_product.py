@@ -15,6 +15,7 @@
 
 Test suite to ensure that the Product service routines are working as expected.
 """
+import pytest
 
 from unittest.mock import ANY, patch
 from auth_api.models.dataclass import Activity
@@ -22,6 +23,7 @@ from auth_api.models.contact_link import ContactLink as ContactLinkModel
 from auth_api.models.product_subscription import ProductSubscription
 from auth_api.services import Product as ProductService
 from auth_api.services import Org
+from auth_api.services import User as UserService
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 from auth_api.utils.enums import ActivityAction, ProductSubscriptionStatus
 from tests.utilities.factory_scenarios import TestOrgInfo, TestUserInfo
@@ -37,7 +39,11 @@ def test_get_products(session):  # pylint:disable=unused-argument
         assert item['code'] and item['description']
 
 
-def test_update_product_subscription(session, keycloak_mock, monkeypatch):
+@pytest.mark.parametrize('test_name, has_contact', [
+    ('has_contact', True),
+    ('no_contact', False),
+])
+def test_update_product_subscription(session, keycloak_mock, monkeypatch, test_name, has_contact):
     """Assert that updating product subscription works."""
     user = factory_user_model(TestUserInfo.user_test)
     patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
@@ -53,8 +59,14 @@ def test_update_product_subscription(session, keycloak_mock, monkeypatch):
     class MockPerson(object):
         def __init__(self, contact: MockContact):
             self.contact = contact
+
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
-        with patch.object(ContactLinkModel, 'find_by_user_id', return_value=MockPerson(contact=MockContact())):
+        if has_contact:
+            with patch.object(ContactLinkModel, 'find_by_user_id', return_value=MockPerson(contact=MockContact())):
+                ProductService.update_product_subscription(product_subscription.id, True, org._model.id)
+        else:
+            assert UserService.get_admin_emails_for_org(org.as_dict()['id']) == ''
             ProductService.update_product_subscription(product_subscription.id, True, org._model.id)
-            mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
-                                        org_id=ANY, value=ANY, id=ANY, name='Personal Property Registry'))
+
+        mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
+                                             org_id=ANY, value=ANY, id=ANY, name='Personal Property Registry'))
