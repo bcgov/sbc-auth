@@ -47,6 +47,16 @@
         "1112223333"
       ],
       "pattern": "^(.*)$"
+    },
+    "certifiedByName": {
+      "$id": "#/properties/certifiedByName",
+      "type": "string",
+      "title": "Certified By Name",
+      "default": "",
+      "examples": [
+        "Last, First"
+      ],
+      "pattern": "^(.*)$"
     }
   }
 }

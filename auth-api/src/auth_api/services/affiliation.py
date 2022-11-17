@@ -138,6 +138,7 @@ class Affiliation:
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
+        # Security check below.
         org = OrgService.find_by_org_id(org_id, allowed_roles=ALL_ALLOWED_ROLES)
         if org is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -157,25 +158,11 @@ class Affiliation:
             else:
                 authorized = Affiliation._validate_firms_party(bearer_token, business_identifier, pass_code)
         else:
-            # Unauthorized if the entity has been claimed
-            # Leaving the code as it may come back. Removing as part of #8863
-            # if entity.as_dict()['pass_code_claimed']:
-            #     authorized = False
-            #     already_claimed = True
-            # If a passcode was provided...
             if pass_code:
-                # ... and the entity has a passcode on it, check that they match
                 authorized = validate_passcode(pass_code, entity.pass_code)
-            # If a passcode was not provided...
             else:
-                # ... check that the entity does not have a passcode protecting it
                 if entity.pass_code:
                     authorized = False
-
-        # show a different message when the passcode is already claimed
-        # if already_claimed:
-        #     current_app.logger.debug('<create_affiliation passcode already claimed')
-        #     raise BusinessException(Error.ALREADY_CLAIMED_PASSCODE, None)
 
         if not authorized:
             current_app.logger.debug('<create_affiliation not authorized')
@@ -200,7 +187,7 @@ class Affiliation:
 
     @staticmethod
     def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
-                                        business_identifier=None, email=None, phone=None,
+                                        business_identifier=None, email=None, phone=None, certified_by_name=None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -252,8 +239,10 @@ class Affiliation:
             # Affiliation may already already exist.
             if not (affiliation_model :=
                     AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
+                # TODO check if STAFF or SBC STAFF, allow certified by name.
                 # Create an affiliation with org
-                affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity.identifier)
+                affiliation_model = AffiliationModel(
+                    org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
                 affiliation_model.save()
 
                 if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
