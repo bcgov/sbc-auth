@@ -117,9 +117,6 @@ export default class BusinessModule extends VuexModule {
       const nr = resp['value']?.data
 
       if (nr) {
-        // *** TODO: delete this once Namex API returns CC (#14126)
-        nr.legalType = (nr.legalType === 'CCC' ? 'CC' : nr.legalType)
-
         affiliatedEntities[i].nameRequest = {
           names: nr.names,
           id: nr.id,
@@ -225,7 +222,6 @@ export default class BusinessModule extends VuexModule {
             }
           }
         }
-
         break
       }
 
@@ -256,7 +252,6 @@ export default class BusinessModule extends VuexModule {
             filingBody.filing.registration.businessType = 'DBA'
           }
         }
-
         break
       }
     }

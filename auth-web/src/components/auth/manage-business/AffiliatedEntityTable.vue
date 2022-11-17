@@ -296,9 +296,9 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
   /** Returns the name of the affiliation. */
   protected name (item: Business): string {
     if (this.isNumberedIncorporationApplication(item)) {
-      const legalType: unknown = item.corpType.legalType
-      // *** TODO: remove fallback once Auth API returns legal type (#14183)
-      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Benefit Company'
+      const legalType: unknown = item.corpSubType?.code
+      // provide fallback for old numbered IAs without corpSubType
+      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
     }
     return item.name
   }
@@ -343,7 +343,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     if (this.isTemporaryBusiness(business)) {
       return this.tempDescription(business)
     }
-    return GetCorpFullDescription(business.corpType.code as CorpTypeCd)
+    const code: unknown = business.corpType.code
+    return GetCorpFullDescription(code as CorpTypeCd)
   }
 
   /** Returns the temp business description. */
@@ -367,8 +368,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     }
     // if this is an IA or registration then show legal type
     if (this.isTemporaryBusiness(business)) {
-      const legalType: unknown = business.corpType.legalType
-      return GetCorpFullDescription(legalType as CorpTypeCd)
+      const legalType: unknown = business.corpSubType?.code
+      return GetCorpFullDescription(legalType as CorpTypeCd) // may return ''
     }
     // else show nothing
     return ''
@@ -474,10 +475,10 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
     let filingResponse = null
 
-    if (regTypes.includes(business.nameRequest?.legalType as CorpTypes)) {
+    if (regTypes.includes(business.nameRequest?.legalType)) {
       filingResponse =
         await this.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
-    } else if (iaTypes.includes(business.nameRequest?.legalType as CorpTypes)) {
+    } else if (iaTypes.includes(business.nameRequest?.legalType)) {
       filingResponse =
         await this.createNamedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
     }
