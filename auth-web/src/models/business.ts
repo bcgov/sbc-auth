@@ -14,10 +14,9 @@ export interface FolioNumberload {
 }
 
 export interface CorpType {
-    code: string // may be corp type or TMP / NR / RTMP
+    code: CorpTypes // may be actual corp type or overloaded value
     default?: boolean
     desc: string
-    legalType: CorpTypes // actual corp type
 }
 
 export interface Business {
@@ -25,9 +24,10 @@ export interface Business {
     businessNumber?: string
     name?: string
     contacts?: Contact[]
-    corpType: CorpType,
-    folioNumber: string,
-    lastModified?: string,
+    corpType: CorpType
+    corpSubType?: CorpType
+    folioNumber: string
+    lastModified?: string
     modified?: string
     modifiedBy?: string
     nameRequest?: NameRequest
