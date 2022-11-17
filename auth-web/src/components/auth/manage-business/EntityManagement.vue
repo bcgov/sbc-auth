@@ -31,15 +31,15 @@
           <v-menu
             v-model="addAffiliationDropdown"
           >
-            <template v-slot:activator="{ on: onMenu }">
+            <template v-slot:activator="{ on: onExistingMenu }">
               <v-tooltip top content-class="top-tooltip">
-                <template v-slot:activator="{ on: onTooltip }">
+                <template v-slot:activator="{ on: onExistingTooltip }">
                   <v-btn
                     id="add-existing-btn"
                     class="mt-2 mr-4"
                     color="primary"
                     dark large
-                    v-on="{ ...onMenu, ...onTooltip }"
+                    v-on="{ ...onExistingMenu, ...onExistingTooltip }"
                     @click="addAffiliationDropdown = !addAffiliationDropdown"
                   >
                     <v-icon>mdi-plus</v-icon>
@@ -61,23 +61,123 @@
               <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
             </v-list>
           </v-menu>
-          <v-tooltip top max-width="361px" content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                id="incorporate-numbered-btn"
-                class="mt-2 mr-4"
-                color="primary"
-                outlined dark large
-                v-bind="attrs"
-                v-on="on"
-                @click="startNumberedCompany(CorpTypes.BENEFIT_COMPANY)"
-              >
-                <v-icon>mdi-plus</v-icon>
-                <span><strong>Incorporate a Numbered Benefit Company</strong></span>
-              </v-btn>
+
+          <!-- Incorporate a Numbered BC Company or Business -->
+          <v-menu v-model="incorporateNumberedDropdown">
+            <template v-slot:activator="{ on: onNumberedMenu }">
+              <v-tooltip top content-class="top-tooltip">
+                <template v-slot:activator="{ on: onNumberedTooltip }">
+                  <v-btn
+                    id="incorporate-numbered-btn"
+                    class="mt-2 mr-4"
+                    color="primary"
+                    outlined dark large
+                    v-on="{ ...onNumberedMenu, ...onNumberedTooltip }"
+                    @click="incorporateNumberedDropdown = !incorporateNumberedDropdown"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                    <span><strong>Incorporate a Numbered BC Company</strong></span>
+                    <v-icon class="ml-2 mr-n2">{{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                  </v-btn>
+                </template>
+                <span>Start an incorporation application for a numbered company in B.C.</span>
+              </v-tooltip>
             </template>
-            <span>Start an incorporation application for a numbered benefit company in B.C.</span>
-          </v-tooltip>
+            <v-list>
+              <v-list-item>
+                <v-list-item-title class="d-inline-flex">
+                  <v-icon>mdi-plus</v-icon>
+                  <div class="ml-1 mt-1 add-existing-title">Incorporate a...</div>
+                </v-list-item-title>
+              </v-list-item>
+              <v-tooltip right content-class="right-tooltip">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-list-item
+                    v-bind="attrs"
+                    v-on="on"
+                    class="add-existing-item"
+                    id="incorporate-numbered-ben-btn"
+                    @click="startNumberedCompany(CorpTypes.BENEFIT_COMPANY)">
+                  Numbered Benefit Company
+                  </v-list-item>
+                </template>
+                <div>
+                  A type of corporation with special commitments to conduct business in a responsible and
+                  sustainable way.
+                  <ul>
+                    <li>Must publish and post an audited annual benefit report</li>
+                    <li>Reported as Corporate tax</li>
+                    <li>Has name protection in BC</li>
+                  </ul>
+                </div>
+              </v-tooltip>
+              <!-- Feature Flagged Buttons -->
+              <div v-if="enableBcCccUlc">
+                <v-tooltip right content-class="right-tooltip">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-list-item
+                      v-bind="attrs"
+                      v-on="on"
+                      class="add-existing-item"
+                      id="incorporate-numbered-limited-btn"
+                      @click="startNumberedCompany(CorpTypes.BC_COMPANY)">
+                    Numbered Limited Company
+                    </v-list-item>
+                  </template>
+                  <div>
+                    A company that may have one or more people who own shares with some personal responsibility for debt
+                    and liabilities.
+                    <ul>
+                      <li>Has many of the same rights of an individual</li>
+                      <li>Reported separately as Corporate tax</li>
+                      <li>Has name protection in BC</li>
+                    </ul>
+                  </div>
+                </v-tooltip>
+                <v-tooltip right content-class="right-tooltip">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-list-item
+                      v-bind="attrs"
+                      v-on="on"
+                      class="add-existing-item"
+                      id="incorporate-numbered-unlimited-btn"
+                      @click="startNumberedCompany(CorpTypes.BC_ULC_COMPANY)">
+                    Numbered Unlimited Liability Company
+                    </v-list-item>
+                  </template>
+                  <div>
+                    A type of corporation that is often used by American corporations as a Canadian subsidiary or to hold
+                    Canadian assets.
+                    <ul>
+                      <li>Shareholders liable for debts and liabilities</li>
+                      <li>Reported separately as Canadian Corporate tax</li>
+                      <li>Has name protection in BC</li>
+                    </ul>
+                  </div>
+                </v-tooltip>
+                <v-tooltip right content-class="right-tooltip">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-list-item
+                      v-bind="attrs"
+                      v-on="on"
+                      class="add-existing-item"
+                      id="incorporate-numbered-ccc-btn"
+                      @click="startNumberedCompany(CorpTypes.BC_CCC)">
+                    Numbered Community Contribution Company
+                    </v-list-item>
+                  </template>
+                  <div>
+                    A type of corporation that has a benefit to the community. It is intended to bridge the gap between
+                    for-profit and non-profit companies.
+                    <ul>
+                      <li>Reported as Corporate tax</li>
+                      <li>Has name protection in BC</li>
+                    </ul>
+                  </div>
+                </v-tooltip>
+              </div>
+            </v-list>
+          </v-menu>
         </v-col>
         <v-col>
           <v-select
@@ -260,8 +360,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private lastSyncBusinesses = 0
   protected addBusinessDialog = false
 
-  /** V-model for dropdown menu. */
+  /** V-model for dropdown menus. */
   private addAffiliationDropdown: boolean = false
+  private incorporateNumberedDropdown: boolean = false
 
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
@@ -327,6 +428,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
+  }
+
+  get enableBcCccUlc (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
   }
 
   get viewTitle (): string {
@@ -577,6 +682,16 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   border-right: 10px solid transparent !important;
   border-left: 10px solid transparent !important;
   border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
+}
+
+.right-tooltip:after {
+  top: 50% !important;
+  right: 100% !important;
+  margin-top: -10px !important;
+  border-bottom: 10px solid transparent !important;
+  border-left: 10px solid transparent !important;
+  border-top: 10px solid transparent !important;
+  border-right: 8px solid RGBA(73, 80, 87, 0.95) !important;
 }
 
 .view-header {
