@@ -24,13 +24,13 @@ from jinja2 import Environment, FileSystemLoader
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api.exceptions import BusinessException, Error
-from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
 from auth_api.schemas import TaskSchema
+from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
 from auth_api.utils.enums import Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskAction
 from auth_api.utils.util import camelback2snake  # noqa: I005
@@ -168,7 +168,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
                 f"{current_app.config.get('BCEID_ADMIN_SETUP_ROUTE')}/"
                 f'{task_model.account_id}/'
                 f'{membership_id}')
-            admin_email = user.contacts[0].contact.email
+            admin_emails = user.contacts[0].contact.email if user.contacts else ''
             account_id = task_model.account_id
             mailer_type = 'resubmitBceidAdmin'
 
@@ -176,18 +176,23 @@ class Task:  # pylint: disable=too-many-instance-attributes
             create_account_signin_route = urllib.parse. \
                 quote_plus(f"{current_app.config.get('BCEID_ACCOUNT_SETUP_ROUTE')}/"
                            f'{org.id}')
-            admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
+            admin_emails = UserService.get_admin_emails_for_org(org.id)
             account_id = org.id
             mailer_type = 'resubmitBceidOrg'
+
+        if admin_emails == '':
+            current_app.logger.error('No admin email record for org id {}', org.id)
+            current_app.logger.error('<send_approval_notification_to_member failed')
+            return
 
         data = {
             'remarks': task_model.remarks,
             'applicationDate': f"{task_model.created.strftime('%m/%d/%Y')}",
             'accountId': account_id,
-            'emailAddresses': admin_email,
+            'emailAddresses': admin_emails,
             'contextUrl': f"{current_app.config.get('WEB_APP_URL')}"
-                          f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
-                          f'{create_account_signin_route}'
+            f"/{current_app.config.get('BCEID_SIGNIN_ROUTE')}/"
+            f'{create_account_signin_route}'
         }
         try:
             publish_to_mailer(mailer_type, org_id=account_id, data=data)

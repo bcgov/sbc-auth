@@ -35,6 +35,7 @@ from auth_api.models import Task as TaskModel
 from auth_api.models.affidavit import Affidavit as AffidavitModel
 from auth_api.models.org import OrgSearch
 from auth_api.schemas import ContactSchema, InvitationSchema, OrgSchema
+from auth_api.services.user import User as UserService
 from auth_api.services.validators.access_type import validate as access_type_validate
 from auth_api.services.validators.account_limit import validate as account_limit_validate
 from auth_api.services.validators.bcol_credentials import validate as bcol_credentials_validate
@@ -809,14 +810,17 @@ class Org:  # pylint: disable=too-many-public-methods
         # TODO Publish to activity stream
 
         org.save()
-
-        # Find admin email address
-        admin_email = ContactLinkModel.find_by_user_id(org.members[0].user.id).contact.email
-        if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
-            Org.send_approved_rejected_notification(admin_email, org.name, org.id, org.status_code, origin_url)
-        elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
-            Org.send_approved_rejected_govm_govn_notification(admin_email, org.name, org.id, org.status_code,
-                                                              origin_url)
+        # Find admin email addresses
+        admin_emails = UserService.get_admin_emails_for_org(org_id)
+        if admin_emails != '':
+            if org.access_type in (AccessType.EXTRA_PROVINCIAL.value, AccessType.REGULAR_BCEID.value):
+                Org.send_approved_rejected_notification(admin_emails, org.name, org.id, org.status_code, origin_url)
+            elif org.access_type in (AccessType.GOVM.value, AccessType.GOVN.value):
+                Org.send_approved_rejected_govm_govn_notification(admin_emails, org.name, org.id, org.status_code,
+                                                                  origin_url)
+        else:
+            # continue but log error
+            current_app.logger.error('No admin email record for org id {}', org_id)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
@@ -851,7 +855,7 @@ class Org:  # pylint: disable=too-many-public-methods
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def send_approved_rejected_notification(receipt_admin_email, org_name, org_id, org_status: OrgStatus, origin_url):
+    def send_approved_rejected_notification(receipt_admin_emails, org_name, org_id, org_status: OrgStatus, origin_url):
         """Send Approved/Rejected notification to the user."""
         current_app.logger.debug('<send_approved_rejected_notification')
 
@@ -864,7 +868,7 @@ class Org:  # pylint: disable=too-many-public-methods
         app_url = f"{origin_url}/{current_app.config.get('AUTH_WEB_TOKEN_CONFIRM_PATH')}"
         data = {
             'accountId': org_id,
-            'emailAddresses': receipt_admin_email,
+            'emailAddresses': receipt_admin_emails,
             'contextUrl': app_url,
             'orgName': org_name
         }

@@ -152,6 +152,9 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         current_app.logger.debug(f'<send {notification_type} notification')
         org_name = self._model.org.name
         org_id = self._model.org.id
+        if not self._model.user.contacts:
+            current_app.logger.error('No user contact record for user id {}', self._model.user_id)
+            current_app.logger.error('<send_notification_to_member failed')
         recipient = self._model.user.contacts[0].contact.email
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         app_url = f'{origin_url}/{context_path}'
@@ -245,14 +248,15 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         if user_from_context.is_staff() and not is_bcros_user and len(updated_fields) != 0:
             publish_to_mailer(notification_type='teamModified', org_id=self._model.org.id)
 
-        # send mail to the person itself who is getting removed by staff ;if he is admin
+        # send mail to the person itself who is getting removed by staff ;if he is admin and has an email on record
         if user_from_context.is_staff() and not is_bcros_user and admin_getting_removed:
-            recipient_email = ContactLinkModel.find_by_user_id(self._model.user.id).contact.email
-            data = {
-                'accountId': self._model.org.id,
-                'recipientEmail': recipient_email
-            }
-            publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
+            contact_link = ContactLinkModel.find_by_user_id(self._model.user.id)
+            if contact_link and contact_link.contact.email:
+                data = {
+                    'accountId': self._model.org.id,
+                    'recipientEmail': contact_link.contact.email
+                }
+                publish_to_mailer(notification_type='adminRemoved', org_id=self._model.org.id, data=data)
 
         current_app.logger.debug('>update_membership')
         return self
