@@ -73,7 +73,12 @@ describe('Entity Management Component', () => {
       localVue,
       store,
       sync: false,
-      mocks: { $t }
+      mocks: { $t },
+      computed: {
+        enableBcCccUlc () {
+          return true
+        }
+      }
     })
     mockedNrMethod = jest.fn()
     wrapper.vm.$refs.removalConfirmDialog.open = mockedNrMethod
@@ -142,5 +147,17 @@ describe('Entity Management Component', () => {
 
     // tooltips exist
     expect(wrapper.findAll('.top-tooltip').length).toBe(2)
+  })
+
+  it('all incorporate numbered businesses btns exist', async () => {
+    // Enter the Incorporate a Numbered BC Company drop down.
+    const incorporateNumberedBtn = wrapper.find('#incorporate-numbered-btn')
+    incorporateNumberedBtn.trigger('click')
+    await Vue.nextTick()
+
+    expect(wrapper.find('#incorporate-numbered-ben-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-limited-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-unlimited-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-ccc-btn').exists()).toBe(true)
   })
 })
