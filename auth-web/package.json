@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "1.1.23",
+  "version": "1.1.24",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@bcrs-shared-components/bread-crumb": "^1.0.2",
-    "@bcrs-shared-components/corp-type-module": "1.0.6",
+    "@bcrs-shared-components/corp-type-module": "1.0.9",
     "@bcrs-shared-components/interfaces": "1.0.28",
     "@mdi/font": "^4.5.95",
     "@sentry/browser": "^5.27.2",
