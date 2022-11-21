@@ -62,7 +62,9 @@ class Error(Enum):
     # NR_EXPIRED = 'The specified name request has expired', http_status.HTTP_400_BAD_REQUEST
     NR_CONSUMED = 'The specified name request has already been consumed.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_APPROVED = 'The specified name request has not been approved.', http_status.HTTP_400_BAD_REQUEST
+    NR_INVALID_STATUS = 'The specified name request cannot be used.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_FOUND = 'The specified name request number could not be found.', http_status.HTTP_400_BAD_REQUEST
+    NR_NOT_PAID = 'The payment for the specified name request number is not complete.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CONTACT = 'Invalid email or phone number.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CORP_TYPE = 'The business type associated with this name request is not yet supported.', \
                            http_status.HTTP_400_BAD_REQUEST
