@@ -22,6 +22,7 @@ from unittest.mock import patch
 
 import pytest
 from faker import Faker
+from http import HTTPStatus
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
@@ -39,7 +40,7 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, OrgStatus, OrgType, PatchActions, PaymentMethod, ProductCode,
+    AccessType, AffidavitStatus, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod, ProductCode,
     ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
 from auth_api.utils.roles import ADMIN  # noqa: I005
@@ -1417,22 +1418,57 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     assert rv.status_code == http_status.HTTP_201_CREATED
 
 
-def test_new_business_affiliation(client, jwt, session, keycloak_mock, nr_mock):  # pylint:disable=unused-argument
+@pytest.mark.parametrize('test_name, nr_status, payment_status, err_code, err_msg', [
+    ('NR_Approved', NRStatus.APPROVED.value, 'COMPLETED', None, None),
+    ('NR_Draft', NRStatus.DRAFT.value, 'COMPLETED', None, None),
+    ('NR_Draft', NRStatus.DRAFT.value, 'REJECTED', HTTPStatus.BAD_REQUEST, None),
+    ('NR_Consumed', NRStatus.CONSUMED.value, 'COMPLETED', HTTPStatus.BAD_REQUEST, None)
+])
+def test_new_business_affiliation(client, jwt, session, keycloak_mock, mocker, test_name, nr_status, payment_status,
+                                  err_code, err_msg):
     """Assert that an NR can be affiliated to an org."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
                      headers=headers, content_type='application/json')
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
+    nr_response = {
+        'applicants': {
+            'emailAddress': '',
+            'phoneNumber': TestAffliationInfo.nr_affiliation['phone'],
+        },
+        'names': [{
+            'name': 'TEST INC.',
+            'state': nr_status
+        }],
+        'state': nr_status,
+        'requestTypeCd': 'BC'
+    }
+
+    payment_response = {
+        'invoices': [{
+            'statusCode': payment_status
+        }]
+    }
+
+    mocker.patch('auth_api.services.affiliation.Affiliation._get_nr_details', return_value=nr_response)
+
+    mocker.patch('auth_api.services.affiliation.Affiliation.get_nr_payment_details',
+                 return_value=payment_response)
+
     rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
                      data=json.dumps(TestAffliationInfo.nr_affiliation), content_type='application/json')
-    assert rv.status_code == http_status.HTTP_201_CREATED
-    assert schema_utils.validate(rv.json, 'affiliation_response')[0]
-    dictionary = json.loads(rv.data)
-    assert dictionary['organization']['id'] == org_id
-    assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+    if err_code is None:
+        assert rv.status_code == http_status.HTTP_201_CREATED
+        assert schema_utils.validate(rv.json, 'affiliation_response')[0]
+        dictionary = json.loads(rv.data)
+        assert dictionary['organization']['id'] == org_id
+        assert dictionary['business']['businessIdentifier'] == TestAffliationInfo.nr_affiliation['businessIdentifier']
+    else:
+        assert rv.status_code == err_code
 
 
 def test_get_org_admin_affidavits(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
