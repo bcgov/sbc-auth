@@ -100,7 +100,6 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Organization, PADInfo } from '@/models/Organization'
 import { BcolProfile } from '@/models/bcol'
@@ -108,6 +107,7 @@ import ConfigHelper from '@/util/config-helper'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
+import { PaymentTypes } from '@/util/constants'
 import { namespace } from 'vuex-class'
 
 const PAYMENT_METHODS = {

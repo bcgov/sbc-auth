@@ -41,8 +41,7 @@
           class="save-continue-button mr-2 font-weight-bold"
           @click="save"
           data-test="save-button"
-          :disabled="!isEnableCreateBtn || isLoading"
-          :loading="isLoading"
+          :disabled="!isEnableCreateBtn"
         >
         <!-- need to show submit button on review payment -->
          {{ readOnly ? 'Submit' : 'Create Account'}}
@@ -91,8 +90,11 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
 
   private selectedPaymentMethod: string = ''
   private isPADValid: boolean = false
-  private isLoading: boolean = false
   private errorMessage: string = ''
+
+  private mounted () {
+    this.selectedPaymentMethod = this.currentOrgPaymentType
+  }
 
   private goBack () {
     this.stepBack()
@@ -125,9 +127,10 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   private async save () {
-    this.isLoading = true
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
     if (this.selectedPaymentMethod !== PaymentTypes.BCOL) {
+      // It's possible this is already set from being linked, so we need to empty it out.
+      this.setCurrentOrganizationBcolProfile(null)
       this.createAccount()
       return
     }
@@ -146,8 +149,6 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
         default:
           this.errorMessage = 'An error occurred while attempting to create your account.'
       }
-    } finally {
-      this.isLoading = false
     }
     if (!this.errorMessage) {
       this.createAccount()
