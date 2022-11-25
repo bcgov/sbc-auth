@@ -388,6 +388,11 @@ class Affiliation:
                 party_name = officer.get('lastName') + ', ' + officer.get('firstName')
                 if officer.get('middleInitial'):
                     party_name = party_name + ' ' + officer.get('middleInitial')
+
+            # remove duplicate spaces
+            party_name_str = ' '.join(party_name_str.split())
+            party_name = ' '.join(party_name.split())
+
             if party_name_str.upper() == party_name.upper():
                 return True
         return False
