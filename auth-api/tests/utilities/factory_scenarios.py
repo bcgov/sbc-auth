@@ -724,7 +724,7 @@ class TestEntityInfo(dict, Enum):
         'corpTypeCode': 'NR'
     }
 
-    tenp_business = {
+    temp_business = {
         'businessIdentifier': 'QWERTYUIO',
         'name': 'NR 1234567',
         'corpTypeCode': 'TMP'

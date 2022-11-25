@@ -43,16 +43,14 @@
           <div class="bold-text mt-4">2) BCeID Login</div>
           <div class="mt-4">
             A BCeID is an account that provides a username and password to allow secure electronic access to online
-            government
-            services.
+            government services.
           </div>
           <ul class="mt-4">
             <li>You can sign up for a BCeID when creating your BC Registries account or use an existing BCeID if you
               already have one.
             </li>
             <li>Your identity will need to be verified by obtaining a notarized affidavit from a notary or lawyer before
-              you can
-              access BC Registry services. Note: Most notaries and lawyers charge a fee for this service; fees will
+              you can access BC Registry services. Note: Most notaries and lawyers charge a fee for this service; fees will
               vary.</li>
             <li>The affidavit will need to be reviewed by BC Registries staff before it can be used.</li>
             <li>Logging in with a BCeID will require the use of a 3rd party application for 2-factor authentication (2FA) on a
@@ -70,7 +68,7 @@
         <div class="mt-4 mb-6">
           If you are a member of a Canadian government agency (other than B.C. provincial), select the method you will
           use to login, and then check the box "I am a Canadian government agency". Once this has been reviewed by
-          staff, you account will be authorized for government access.
+          staff, your account will be authorized for government access.
         </div>
 
         <div class="help-info__close-btn-section">
@@ -96,11 +94,12 @@
                   ID issued in Canada
                 </a> the BC Services Card app is an easy and secure way to access your BC Registries account
                 <div class="mt-6">
-                  If you are a BC resident, you can instead be issued a secure BC Token in person.
+                  If you have a BC Services Card and don't have a mobile device, you can set up a username and password
+                  with a <a :href="bcTokenURL" target="_blank" class="id-info-link" rel="noopener noreferrer">BC Token</a>.
                 </div>
               </div>
               <div class="mb-4">
-                <a :href="serviceCardURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
+                <a :href="serviceCardLearnMoreURL" target="_blank" class="learn-more-link" rel="noopener noreferrer">
                   Learn more about BC Services Card Login
                   <v-icon color="primary" class="small-icon">mdi-open-in-new</v-icon>
                 </a>
@@ -244,6 +243,14 @@ export default class ChooseAuthMethodView extends Vue {
 
   private get idURL (): string {
     return 'https://www2.gov.bc.ca/gov/content?id=5F8782A92E464066885149242E050814'
+  }
+
+  private get bcTokenURL (): string {
+    return 'https://www2.gov.bc.ca/gov/content?id=1DEAA1AC5566450FA60F05F084CB157E'
+  }
+
+  private get serviceCardLearnMoreURL (): string {
+    return 'https://www2.gov.bc.ca/gov/content?id=B2B3A21E797A421A8FD39EEA86E245D6'
   }
 
   private get disableGovnAccountCreation (): boolean {

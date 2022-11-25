@@ -223,8 +223,15 @@ class Affiliation:
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
 
-            if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value):
-                raise BusinessException(Error.NR_NOT_APPROVED, None)
+            if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value, NRStatus.DRAFT.value):
+                raise BusinessException(Error.NR_INVALID_STATUS, None)
+
+            if status == NRStatus.DRAFT.value:
+                invoices = Affiliation.get_nr_payment_details(business_identifier)
+
+                # Ideally there should be only one or two (priority fees) payment request for the NR.
+                if not (invoices and invoices['invoices'] and invoices['invoices'][0].get('statusCode') == 'COMPLETED'):
+                    raise BusinessException(Error.NR_NOT_PAID, None)
 
             # If consentFlag is not R, N or Null for a CONDITIONAL NR throw error
             if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
@@ -244,7 +251,7 @@ class Affiliation:
 
                 entity = EntityService.save_entity({
                     'businessIdentifier': business_identifier,
-                    'name': name,
+                    'name': name or business_identifier,
                     'corpTypeCode': CorpType.NR.value,
                     'passCodeClaimed': True
                 })
@@ -264,6 +271,16 @@ class Affiliation:
             raise BusinessException(Error.NR_NOT_FOUND, None)
 
         return Affiliation(affiliation_model)
+
+    @staticmethod
+    def get_nr_payment_details(business_identifier):
+        """Get the NR payment details."""
+        pay_api_url = current_app.config.get('PAY_API_URL')
+        invoices = RestService.get(
+            f'{pay_api_url}/payment-requests?businessIdentifier={business_identifier}',
+            token=RestService.get_service_account_token()
+        ).json()
+        return invoices
 
     @staticmethod
     def delete_affiliation(org_id, business_identifier, email_addresses: str = None,
@@ -371,6 +388,11 @@ class Affiliation:
                 party_name = officer.get('lastName') + ', ' + officer.get('firstName')
                 if officer.get('middleInitial'):
                     party_name = party_name + ' ' + officer.get('middleInitial')
+
+            # remove duplicate spaces
+            party_name_str = ' '.join(party_name_str.split())
+            party_name = ' '.join(party_name.split())
+
             if party_name_str.upper() == party_name.upper():
                 return True
         return False

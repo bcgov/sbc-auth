@@ -59,6 +59,20 @@
       ],
       "pattern": "^(.*)$"
     },
+    "corpSubTypeCode": {
+      "$id": "#/properties/corpSubTypeCode",
+      "type": "string",
+      "title": "corpSubTypeCode",
+      "default": "",
+      "examples": [
+        "BEN",
+        "CC",
+        "ULC",
+        "SP",
+        "GP"
+      ],
+      "pattern": "^(.*)$"
+    },
     "folioNumber": {
       "$id": "#/properties/folioNumber",
       "type": "string",
