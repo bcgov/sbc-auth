@@ -167,6 +167,20 @@ def test_create_affiliation_firms(session, auth_mock, monkeypatch):  # pylint:di
     assert affiliation.entity.identifier == entity_service.identifier
     assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
 
+
+def test_create_affiliation_firms_party_with_additional_space(session,
+                                                              auth_mock,
+                                                              monkeypatch):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be created."""
+    patch_get_firms_parties(monkeypatch)
+    entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock3)
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['business_identifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
     # When party name has additional space
     pass_code = TestEntityInfo.entity_lear_mock3['passCode'].replace(' ', '  ')
     affiliation = AffiliationService.create_affiliation(org_id, business_identifier,
