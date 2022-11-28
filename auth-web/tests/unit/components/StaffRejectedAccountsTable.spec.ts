@@ -59,11 +59,8 @@ describe('StaffRejectedAccountsTable.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('is a Vue instance', () => {
+  it('is a Vue instance and has a data table', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
-  })
-
-  it('Should have data table', () => {
     expect(wrapper.find('.user-list')).toBeTruthy()
   })
 })

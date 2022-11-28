@@ -78,12 +78,10 @@ export default class BcolLogin extends Vue {
   private errorMessage: string = ''
   private isLoading: boolean = false
   @Prop({ default: false }) hideLinkBtn: boolean
-  @Prop() defaultUserId: string
   @OrgModule.Action('validateBcolAccount')
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   private async mounted () {
-    this.username = this.defaultUserId || this.username
     this.password = ''
   }
 
