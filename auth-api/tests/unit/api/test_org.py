@@ -1251,7 +1251,7 @@ def test_add_affiliation_no_org_returns_404(client, jwt, session):  # pylint:dis
     """Assert that adding a contact to a non-existant org returns 404."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.post('/api/v1/orgs/{}/affiliations'.format(99), headers=headers,
-                     data=json.dumps(TestAffliationInfo.affliation1), content_type='application/json')
+                     data=json.dumps(TestAffliationInfo.affiliation1), content_type='application/json')
     assert rv.status_code == http_status.HTTP_404_NOT_FOUND
 
 
@@ -1270,7 +1270,7 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
     with patch.object(AffiliationService, 'create_affiliation',
                       side_effect=BusinessException(Error.DATA_ALREADY_EXISTS, None)):
         rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
-                         data=json.dumps(TestAffliationInfo.affliation1),
+                         data=json.dumps(TestAffliationInfo.affiliation1),
                          headers=headers,
                          content_type='application/json')
         assert rv.status_code == 400

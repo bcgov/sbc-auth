@@ -762,8 +762,8 @@ class TestEntityInfo(dict, Enum):
 class TestAffliationInfo(dict, Enum):
     """Test scenarios of affiliation."""
 
-    affliation1 = {'businessIdentifier': 'CP1234567'}
-    affliation2 = {'businessIdentifier': 'CP1234568', 'certifiedByName': 'John Wick'}
+    affiliation1 = {'businessIdentifier': 'CP1234567'}
+    affiliation2 = {'businessIdentifier': 'CP1234568'}
     affiliation3 = {'businessIdentifier': 'CP0002103', 'passCode': '222222222'}
     affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
     nr_affiliation = {'businessIdentifier': 'NR 1234567', 'phone': '1112223333'}
