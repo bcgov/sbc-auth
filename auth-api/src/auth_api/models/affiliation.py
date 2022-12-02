@@ -17,7 +17,7 @@ An Affiliation is between an Org and an Entity.
 """
 from __future__ import annotations
 from typing import List
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import VersionedModel
@@ -33,6 +33,7 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     id = Column(Integer, primary_key=True, autoincrement=True)
     entity_id = Column(ForeignKey('entities.id'), nullable=False, index=True)
     org_id = Column(ForeignKey('orgs.id'), nullable=False)
+    certified_by_name = Column(String(100), nullable=True)
 
     entity = relationship('Entity', foreign_keys=[entity_id], lazy='select')
     org = relationship('Org', foreign_keys=[org_id], lazy='select')

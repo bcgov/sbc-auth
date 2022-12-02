@@ -339,7 +339,7 @@ class OrgAffiliations(Resource):
             if is_new_business:
                 response, status = AffiliationService.create_new_business_affiliation(
                     org_id, request_json.get('businessIdentifier'), request_json.get('email'),
-                    request_json.get('phone'),
+                    request_json.get('phone'), request_json.get('certifiedByName'),
                     bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = AffiliationService.create_affiliation(
