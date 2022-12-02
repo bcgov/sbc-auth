@@ -22,6 +22,7 @@ from unittest.mock import patch
 
 import pytest
 from faker import Faker
+from sqlalchemy import event
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
@@ -30,7 +31,8 @@ from auth_api.models import Affidavit as AffidavitModel
 from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
-from auth_api.models.org import Org
+from auth_api.models import Org as OrgModel
+from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
@@ -50,6 +52,7 @@ from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
     factory_invitation_anonymous, factory_membership_model, factory_user_model, patch_pay_account_delete,
     patch_pay_account_delete_error)
+from tests.utilities.sqlalchemy import clear_event_listeners
 
 FAKE = Faker()
 
@@ -1274,6 +1277,39 @@ def test_add_affiliation_returns_exception(client, jwt, session, keycloak_mock):
         assert schema_utils.validate(rv.json, 'exception')[0]
 
 
+def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock, nr_mock):
+    """Assert that an affiliation can be added by staff."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity_lear_mock),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # Clearing the event listeners here, because we can't change the type_code.
+    clear_event_listeners(OrgModel)
+    org_db = OrgModel.find_by_id(org_id)
+    org_db.type_code = OrgType.SBC_STAFF.value
+    org_db.save()
+    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
+    event.listen(OrgModel, 'before_insert', receive_before_insert)
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_business)
+    rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
+                     data=json.dumps(TestAffliationInfo.new_business_affiliation), content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv.json, 'affiliation_response')[0]
+
+    dictionary = json.loads(rv.data)
+    assert dictionary['organization']['id'] == org_id
+    assert dictionary['certifiedByName'] == TestAffliationInfo.new_business_affiliation['certifiedByName']
+
+    # Future ticket, have this show up on the GET side.
+
+
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -1944,7 +1980,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     dictionary = json.loads(rv.data)
     org_id_1 = dictionary['id']
     decision_made_by = 'barney'
-    org: Org = Org.find_by_org_id(org_id_1)
+    org: OrgModel = OrgModel.find_by_org_id(org_id_1)
     org.decision_made_by = decision_made_by
     org.status_code = OrgStatus.ACTIVE.value
     org.save()
@@ -1958,7 +1994,7 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
 
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
-    org: Org = Org.find_by_org_id(org_id)
+    org: OrgModel = OrgModel.find_by_org_id(org_id)
     org.status_code = OrgStatus.ACTIVE.value
     org.save()
 

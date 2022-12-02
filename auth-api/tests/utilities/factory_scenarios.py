@@ -197,6 +197,22 @@ class TestJwtClaims(dict, Enum):
         }
     }
 
+    staff_manage_business = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'staff',
+                'edit',
+                'manage_business'
+            ]
+        }
+    }
+
     staff_view_accounts_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -747,10 +763,12 @@ class TestAffliationInfo(dict, Enum):
     """Test scenarios of affiliation."""
 
     affliation1 = {'businessIdentifier': 'CP1234567'}
-    affliation2 = {'businessIdentifier': 'CP1234568'}
+    affliation2 = {'businessIdentifier': 'CP1234568', 'certifiedByName': 'John Wick'}
     affiliation3 = {'businessIdentifier': 'CP0002103', 'passCode': '222222222'}
     affiliation4 = {'businessIdentifier': 'CP0002106', 'passCode': '222222222'}
     nr_affiliation = {'businessIdentifier': 'NR 1234567', 'phone': '1112223333'}
+    new_business_affiliation = {'businessIdentifier': 'CP1234568',
+                                'certifiedByName': 'John Wick', 'phone': '1112223333', 'email': 'test@test.com'}
     invalid = {'name': 'CP1234567'}
 
 

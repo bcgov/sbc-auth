@@ -29,7 +29,7 @@ from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
-from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
+from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -122,7 +122,8 @@ class Affiliation:
     def find_affiliations_by_org_id(org_id):
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
-        subquery = db.session.query(AffiliationModel.entity_id, AffiliationModel.created) \
+        subquery = db.session.query(
+                AffiliationModel.entity_id, AffiliationModel.created) \
             .join(Entity).filter(AffiliationModel.org_id == org_id) \
             .subquery()
 
@@ -236,18 +237,20 @@ class Affiliation:
                     'passCodeClaimed': True
                 })
 
+            certified_by_name = certified_by_name if org.as_dict()['org_type'] in (
+                OrgType.SBC_STAFF.value, OrgType.STAFF.value) else ''
             # Affiliation may already already exist.
             if not (affiliation_model :=
                     AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
-                # TODO check if STAFF or SBC STAFF, allow certified by name.
                 # Create an affiliation with org
                 affiliation_model = AffiliationModel(
                     org_id=org_id, entity_id=entity.identifier, certified_by_name=certified_by_name)
-                affiliation_model.save()
 
                 if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
                     ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
                                                                    name=entity.name, id=entity.business_identifier))
+            affiliation_model.certified_by_name = certified_by_name
+            affiliation_model.save()
             entity.set_pass_code_claimed(True)
         else:
             raise BusinessException(Error.NR_NOT_FOUND, None)
