@@ -123,7 +123,7 @@ class Affiliation:
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
         subquery = db.session.query(
-                AffiliationModel.entity_id, AffiliationModel.created) \
+                AffiliationModel.entity_id, AffiliationModel.created, AffiliationModel.certified_by_name) \
             .join(Entity).filter(AffiliationModel.org_id == org_id) \
             .subquery()
 

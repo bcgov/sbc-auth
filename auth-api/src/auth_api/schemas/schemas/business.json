@@ -8,7 +8,11 @@
     "examples": [
         {
             "affiliations": [
-                1
+                {
+                    "id": 1,
+                    "certifiedByName": "Rodney Leonard",
+                    "created": "2022-01-01"
+                }
             ],
             "businessIdentifier": "CP0002103",
             "businessNumber": "791861078BC0001",
@@ -43,7 +47,11 @@
             "default": [],
             "examples": [
                 [
-                    1
+                    {
+                        "id": 1,
+                        "certifiedByName": "Rodney Leonard",
+                        "created": "2022-01-01"
+                    }
                 ]
             ],
             "additionalItems": true,
@@ -52,12 +60,49 @@
                 "anyOf": [
                     {
                         "$id": "#/properties/affiliations/items/anyOf/0",
-                        "type": "integer",
+                        "type": "object",
                         "title": "The first anyOf schema",
-                        "default": 0,
+                        "default": {},
                         "examples": [
-                            1
-                        ]
+                            {
+                                "id": 1,
+                                "certifiedByName": "Rodney Leonard",
+                                "created": "2022-01-01"
+                            }
+                        ],
+                        "required": [
+                            "id",
+                            "created"
+                        ],
+                        "properties": {
+                            "id": {
+                                "$id": "#/properties/affiliations/items/anyOf/0/properties/id",
+                                "type": "integer",
+                                "title": "id",
+                                "default": 0,
+                                "examples": [
+                                    1
+                                ]
+                            },
+                            "certifiedByName": {
+                                "$id": "#/properties/affiliations/items/anyOf/0/properties/certifiedByName",
+                                "type": "string",
+                                "title": "Certified By Name",
+                                "default": "",
+                                "examples": [
+                                    "Rodney Leonard"
+                                ]
+                            },
+                            "created": {
+                                "$id": "#/properties/affiliations/items/anyOf/0/properties/created",
+                                "type": "string",
+                                "title": "Created",
+                                "default": "",
+                                "examples": [
+                                    "2020-11-06T19:15:21.347010+00:00"
+                                ]
+                            }
+                        }
                     }
                 ]
             }
