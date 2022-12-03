@@ -17,13 +17,12 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-function getPayLoad (type: string) {
+function getPayLoad (type: any) {
   const removeNRPayload: RemoveBusinessPayload = {
     business: {
       corpType: {
-        code: type,
-        desc: type,
-        legalType: type as CorpTypes
+        code: type as CorpTypes,
+        desc: type as string
       },
       businessIdentifier: 'test',
       folioNumber: 'test'
@@ -74,7 +73,12 @@ describe('Entity Management Component', () => {
       localVue,
       store,
       sync: false,
-      mocks: { $t }
+      mocks: { $t },
+      computed: {
+        enableBcCccUlc () {
+          return true
+        }
+      }
     })
     mockedNrMethod = jest.fn()
     wrapper.vm.$refs.removalConfirmDialog.open = mockedNrMethod
@@ -143,5 +147,17 @@ describe('Entity Management Component', () => {
 
     // tooltips exist
     expect(wrapper.findAll('.top-tooltip').length).toBe(2)
+  })
+
+  it('all incorporate numbered businesses btns exist', async () => {
+    // Enter the Incorporate a Numbered BC Company drop down.
+    const incorporateNumberedBtn = wrapper.find('#incorporate-numbered-btn')
+    incorporateNumberedBtn.trigger('click')
+    await Vue.nextTick()
+
+    expect(wrapper.find('#incorporate-numbered-ben-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-limited-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-unlimited-btn').exists()).toBe(true)
+    expect(wrapper.find('#incorporate-numbered-ccc-btn').exists()).toBe(true)
   })
 })

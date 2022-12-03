@@ -234,7 +234,7 @@ export default class PADInfoForm extends Vue {
   }
 
   private get showPremiumPADInfo () {
-    return (this.isChangeView || (this.currentOrganizationType === Account.PREMIUM))
+    return this.isChangeView
   }
 
   @Emit()

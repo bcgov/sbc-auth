@@ -65,8 +65,8 @@
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import { namespace } from 'vuex-class'
+
 const OrgModule = namespace('org')
 
 @Component({
@@ -78,12 +78,10 @@ export default class BcolLogin extends Vue {
   private errorMessage: string = ''
   private isLoading: boolean = false
   @Prop({ default: false }) hideLinkBtn: boolean
-  @Prop() defaultUserId: string
   @OrgModule.Action('validateBcolAccount')
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   private async mounted () {
-    this.username = this.defaultUserId
     this.password = ''
   }
 
@@ -101,11 +99,12 @@ export default class BcolLogin extends Vue {
     return !!this.username && !!this.password
   }
   private usernameRules = [
-    v => !!v?.trim() || 'Username is required'
+    v => !!v || 'Username is required'
   ]
 
   private passwordRules = [
-    value => !!value || 'Password is required'
+    value => !!value || 'Password is required',
+    value => (value?.trim().length <= 8) || 'Use only first 8 characters for password'
   ]
 
   $refs: {

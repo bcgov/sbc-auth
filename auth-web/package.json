@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "1.1.22",
+  "version": "1.1.25",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,11 +15,12 @@
   },
   "dependencies": {
     "@bcrs-shared-components/bread-crumb": "^1.0.2",
-    "@bcrs-shared-components/corp-type-module": "1.0.6",
+    "@bcrs-shared-components/corp-type-module": "1.0.9",
     "@bcrs-shared-components/interfaces": "1.0.28",
     "@mdi/font": "^4.5.95",
     "@sentry/browser": "^5.27.2",
     "@sentry/integrations": "^5.27.2",
+    "@vue/compiler-dom": "^3.2.45",
     "axios": "^0.21.1",
     "babel-plugin-transform-require-context": "^0.1.1",
     "core-js": "^3.3.3",
@@ -30,7 +31,7 @@
     "moment": "^2.29.4",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
-    "sbc-common-components": "3.0.3",
+    "sbc-common-components": "3.0.5",
     "vue": "2.6.12",
     "vue-i18n": "^8.0.0",
     "vue-plugin-helper-decorator": "0.0.12",
@@ -51,6 +52,7 @@
     "@types/vuelidate": "^0.7.13",
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
+    "@volar-plugins/vetur": "latest",
     "@vue/cli-plugin-babel": "^4.5.17",
     "@vue/cli-plugin-e2e-nightwatch": "^4.5.17",
     "@vue/cli-plugin-eslint": "^4.5.17",

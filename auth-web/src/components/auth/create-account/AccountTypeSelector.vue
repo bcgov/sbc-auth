@@ -176,7 +176,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   private async mounted () {
     // first time to the page , start afresh..this is Create New account flow
-    if (!this.currentOrganization) {
+    if (this.currentOrganization) {
       this.setCurrentOrganization({ name: '' })
     } else {
       // need to set org type if its re-upload bceid flow

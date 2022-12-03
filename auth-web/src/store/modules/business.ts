@@ -43,6 +43,7 @@ export default class BusinessModule extends VuexModule {
     this.businesses = [...businesses]
   }
 
+  /** This is the function that fetches and updates data for all NRs. */
   @Action({ rawError: true })
   public async syncBusinesses (): Promise<void> {
     const enableBcCccUlc = LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
@@ -51,20 +52,29 @@ export default class BusinessModule extends VuexModule {
     const getApprovedName = (nr): string =>
       nr.names.find(name => [NrState.APPROVED, NrState.CONDITION].includes(name.state))?.name
 
-    /** Returns True if NR is approved for incorporation. */
-    const isApprovedForIa = (nr): boolean =>
-      (nr.state === NrState.APPROVED &&
-        nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION))
+    /** Returns True if NR is approved. */
+    const isApproved = (nr): boolean => (nr.state === NrState.APPROVED)
 
-    /** Returns True if NR is conditionally approved. */
-    const isConditionallyApproved = (nr): boolean =>
-      (nr.state === NrState.CONDITIONAL &&
-        [NrConditionalStates.RECEIVED, NrConditionalStates.WAIVED].includes(nr.consentFlag))
+    /** Returns True if NR is conditionally approved. NB: consent flag=null means "not required". */
+    const isConditionallyApproved = (nr): boolean => (
+      nr.state === NrState.CONDITIONAL && (
+        nr.consentFlag === null ||
+        nr.consentFlag === NrConditionalStates.RECEIVED ||
+        nr.consentFlag === NrConditionalStates.WAIVED
+      )
+    )
+
+    /** Returns True if NR is approved for incorporation. */
+    const isApprovedForIa = (nr): boolean => (
+      (isApproved(nr) || isConditionallyApproved(nr)) &&
+      nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION)
+    )
 
     /** Returns True if NR is approved for registration. */
-    const isApprovedForRegistration = (nr): boolean =>
-      (nr.state === NrState.APPROVED &&
-        nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION))
+    const isApprovedForRegistration = (nr): boolean => (
+      (isApproved(nr) || isConditionallyApproved(nr)) &&
+      nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION)
+    )
 
     /** Returns target conditionally. */
     const getTarget = (nr): NrTargetTypes => {
@@ -117,9 +127,6 @@ export default class BusinessModule extends VuexModule {
       const nr = resp['value']?.data
 
       if (nr) {
-        // *** TODO: delete this once Namex API returns CC (#14126)
-        nr.legalType = (nr.legalType === 'CCC' ? 'CC' : nr.legalType)
-
         affiliatedEntities[i].nameRequest = {
           names: nr.names,
           id: nr.id,
@@ -128,7 +135,7 @@ export default class BusinessModule extends VuexModule {
           state: nr.state,
           applicantEmail: nr.applicants?.emailAddress,
           applicantPhone: nr.applicants?.phoneNumber,
-          enableIncorporation: isApprovedForIa(nr) || isConditionallyApproved(nr) || isApprovedForRegistration(nr),
+          enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
           entityTypeCd: nr.entity_type_cd,
@@ -225,7 +232,6 @@ export default class BusinessModule extends VuexModule {
             }
           }
         }
-
         break
       }
 
@@ -256,7 +262,6 @@ export default class BusinessModule extends VuexModule {
             filingBody.filing.registration.businessType = 'DBA'
           }
         }
-
         break
       }
     }

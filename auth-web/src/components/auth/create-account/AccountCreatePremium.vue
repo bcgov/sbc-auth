@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts">
-import { Account, LoginSource } from '@/util/constants'
+import { Account, LoginSource, PaymentTypes } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
@@ -148,6 +148,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   @OrgModule.Mutation('setCurrentOrganization') private readonly setCurrentOrganization!: (organization: Organization) => void
   @OrgModule.Mutation('setCurrentOrganizationAddress') private readonly setCurrentOrganizationAddress!: (address: Address) => void
   @OrgModule.Mutation('setCurrentOrganizationName') private readonly setCurrentOrganizationName!: (name: string) => void
+  @OrgModule.Mutation('setCurrentOrganizationPaymentType') private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
   @OrgModule.Mutation('resetBcolDetails') private readonly resetBcolDetails!: () => void
   @OrgModule.Mutation('setGrantAccess') private readonly setGrantAccess!: (grantAccess: boolean) => void
   @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
@@ -242,6 +243,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
       bcolAccountName: details.bcolAccountDetails.orgName
     }
     this.setCurrentOrganization(org)
+    this.setCurrentOrganizationPaymentType(PaymentTypes.BCOL)
     this.setCurrentOrganizationAddress(details.bcolAccountDetails.address)
     await this.validateAccountNameUnique()
   }
