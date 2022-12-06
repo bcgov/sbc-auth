@@ -1315,8 +1315,6 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     affiliations = json.loads(rv.data)
 
     assert affiliations['entities'][0]['affiliations'][0]['certifiedByName'] == certified_by_name
-    assert 'created' in affiliations['entities'][0]['affiliations'][0]
-    assert 'id' in affiliations['entities'][0]['affiliations'][0]
 
 
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
