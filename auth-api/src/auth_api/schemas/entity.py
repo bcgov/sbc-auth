@@ -33,3 +33,4 @@ class EntitySchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-p
     contacts = fields.Pluck('ContactLinkSchema', 'contact', many=True)
     corp_type = fields.Nested(CorpTypeSchema, many=False)
     corp_sub_type = fields.Nested(CorpTypeSchema, many=False)
+    affiliations = fields.Nested('AffiliationSchema', many=True, only=('id', 'created', 'certified_by_name'))
