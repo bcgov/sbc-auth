@@ -1302,12 +1302,19 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
                      data=json.dumps(TestAffliationInfo.new_business_affiliation), content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv.json, 'affiliation_response')[0]
+    certified_by_name = TestAffliationInfo.new_business_affiliation['certifiedByName']
 
     dictionary = json.loads(rv.data)
     assert dictionary['organization']['id'] == org_id
-    assert dictionary['certifiedByName'] == TestAffliationInfo.new_business_affiliation['certifiedByName']
+    assert dictionary['certifiedByName'] == certified_by_name
 
-    # Future ticket, have this show up on the GET side.
+    rv = client.get('/api/v1/orgs/{}/affiliations'.format(org_id), headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv.json, 'affiliations_response')[0]
+    affiliations = json.loads(rv.data)
+
+    assert affiliations['entities'][0]['affiliations'][0]['certifiedByName'] == certified_by_name
 
 
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
