@@ -10,7 +10,7 @@
             "affiliations": [
                 {
                     "id": 1,
-                    "certifiedByName": "Rodney Leonard",
+                    "certifiedByName": "Leonard, Rodney",
                     "created": "2022-01-01"
                 }
             ],
@@ -49,7 +49,7 @@
                 [
                     {
                         "id": 1,
-                        "certifiedByName": "Rodney Leonard",
+                        "certifiedByName": "Leonard, Rodney",
                         "created": "2022-01-01"
                     }
                 ]
@@ -66,7 +66,7 @@
                         "examples": [
                             {
                                 "id": 1,
-                                "certifiedByName": "Rodney Leonard",
+                                "certifiedByName": "Leonard, Rodney",
                                 "created": "2022-01-01"
                             }
                         ],
@@ -90,7 +90,7 @@
                                 "title": "Certified By Name",
                                 "default": "",
                                 "examples": [
-                                    "Rodney Leonard"
+                                    "Leonard, Rodney"
                                 ]
                             },
                             "created": {
