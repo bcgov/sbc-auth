@@ -1,14 +1,13 @@
 
 import { AccessType, AccountStatus } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { getTestAddress, getTestOrg } from '../test-utils'
 import { AccountInformation } from '@/components/auth/staff/review-task'
 import { OrgAccountTypes } from '@/models/Organization'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-
-import { getTestAddress, getTestOrg } from '../test-utils'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)

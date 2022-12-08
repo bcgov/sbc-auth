@@ -1,5 +1,5 @@
-import { OrgAccountTypes, Organization } from '@/models/Organization'
 import { AccessType, AccountStatus } from '@/util/constants'
+import { OrgAccountTypes, Organization } from '@/models/Organization'
 
 // default basic values
 const organization: Organization = {
