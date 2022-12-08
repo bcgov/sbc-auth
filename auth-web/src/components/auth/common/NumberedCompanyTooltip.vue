@@ -1,13 +1,14 @@
 <template>
   <v-tooltip top max-width="450px" light content-class="tooltip">
     <template v-slot:activator="{ on }">
-      <span v-on="on" class="tooltip-text">Numbered Benefit Company</span>
+      <span v-on="on" class="tooltip-text">Numbered Company</span>
     </template>
     <v-card class="tooltip-content">
-      <h3 class="mb-3">Numbered Benefit Company</h3>
-      <span>A Benefit Company can choose to use as its name the incorporation number of the company followed by “B.C.
-        Ltd.” The incorporation number is assigned by the Business Registry after the Incorporation Application is filed
-        and the company is incorporated.</span>
+      <h3 class="mb-3">Numbered Company</h3>
+      <span>A Company can choose to use as its name the incorporation number of the company followed by “B.C. Ltd.”,
+        "B.C. Unlimited Liability Company", or "B.C. Community Contribution Company." The incorporation number is
+        assigned by the Business Registry after the Incorporation Application is filed and the company is incorporated.
+      </span>
     </v-card>
   </v-tooltip>
 </template>

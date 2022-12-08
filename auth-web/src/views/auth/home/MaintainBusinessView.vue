@@ -121,12 +121,14 @@ export default class MaintainBusinessView extends Vue {
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   private readonly bulletPoints: Array<any> = [
-    { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
-    { text: 'By managing your business through your BC Registry account you can:',
+    { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
+      'business up to date with the Registry.' },
+    { text: 'You can manage your business information using your BC Registries account:',
       subText: [
         { text: 'See which Annual Reports are due for your corporation and file each year.' },
         { text: 'View and change your current directors or owners and addresses.' },
-        { text: 'See the history of your business\' filings and download copies of all documents including your Statement of Registration, Certificate of Incorporation and more.' }
+        { text: 'See the history of your business\' filings and download copies of all documents including your ' +
+          'Statement of Registration, Certificate of Incorporation and more.' }
       ]
     }
   ]
