@@ -19,7 +19,7 @@ jobs:
     if: github.repository == 'bcgov/sbc-auth'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: "true"
 
   linting:
@@ -31,7 +31,7 @@ jobs:
         node-version: [16.14.2]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -52,7 +52,7 @@ jobs:
         node-version: [16.14.2]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -65,7 +65,7 @@ jobs:
         run: |
           make test
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           flags: authweb
           name: codecov-auth-web
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: build to check strictness
         id: build
         run: |
