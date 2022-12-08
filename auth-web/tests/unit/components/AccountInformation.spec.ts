@@ -56,6 +56,8 @@ describe('AccountInformation.vue basic tests', () => {
     })
   })
 
+  afterEach(() => { wrapper.destroy() })
+
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
