@@ -11,6 +11,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 // eslint-disable-next-line sort-imports
 import './routes/componentHooks'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import { Vue as VueIntegration } from '@sentry/integrations'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
@@ -25,6 +26,8 @@ import vuetify from './plugins/vuetify'
 import Search from 'fas-ui'
 
 Vue.config.productionTip = false
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuelidate)
 Vue.use(Search, { store, i18n })
 
