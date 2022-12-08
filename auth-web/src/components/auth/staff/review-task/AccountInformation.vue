@@ -122,7 +122,7 @@ export default defineComponent({
     const changedAccess = ref(false)
 
     const selectedAccessType = ref(props.accountUnderReview.accessType as AccessType)
-    watch(() => props.accountUnderReview.accessType, (val) => selectedAccessType.value = val as AccessType)
+    watch(() => props.accountUnderReview.accessType, (val) => { selectedAccessType.value = val as AccessType })
 
     const accessTypeDesc = computed((): string => {
       switch (selectedAccessType.value) {

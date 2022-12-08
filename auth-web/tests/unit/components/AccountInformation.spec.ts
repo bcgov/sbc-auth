@@ -1,13 +1,12 @@
 
+import { AccessType, AccountStatus } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { AccountInformation } from '@/components/auth/staff/review-task'
+import { OrgAccountTypes } from '@/models/Organization'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-
-import { AccountInformation } from '@/components/auth/staff/review-task'
-import { OrgAccountTypes, Organization } from '@/models/Organization'
-import { AccessType, AccountStatus } from '@/util/constants'
 
 import { getTestAddress, getTestOrg } from '../test-utils'
 
@@ -135,8 +134,8 @@ describe('AccountInformation.vue basic tests', () => {
     // verify change
     expect(wrapper.find('.access-type__radio-grp').exists()).toBe(false)
     expect(wrapper.find('.access-type__desc').text()).toBe('Regular Access')
-    expect(wrapper.emitted('emit-access-type').at(0).length).toBe(1)
-    expect(wrapper.emitted('emit-access-type').at(0)).toEqual([AccessType.REGULAR])
+    expect(wrapper.emitted('emit-access-type')[0].length).toBe(1)
+    expect(wrapper.emitted('emit-access-type')[0]).toEqual([AccessType.REGULAR])
     // undo change
     const button = wrapper.find('.access-type button')
     expect(button.exists()).toBe(true)
