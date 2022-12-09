@@ -1153,8 +1153,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async updateOrganizationAccessType (accessType: string, syncOrg: boolean = true): Promise<boolean> {
-    const orgId = this.context.state['currentOrganization']?.id
+  public async updateOrganizationAccessType ({ accessType, orgId = null, syncOrg = true }): Promise<boolean> {
+    if (!orgId) orgId = this.context.state['currentOrganization']?.id as number
     if (orgId && accessType) {
       try {
         const patchOrgPayload: PatchOrgPayload = {

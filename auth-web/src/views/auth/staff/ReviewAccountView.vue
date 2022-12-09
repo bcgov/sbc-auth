@@ -153,7 +153,7 @@ export default class ReviewAccountView extends Vue {
   @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
   @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
   @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
-  @orgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!:(accessType: string, syncOrg?: boolean) => Promise<boolean>
+  @orgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!:({ accessType, orgId, syncOrg }) => Promise<boolean>
 
   @CodesModule.Action('getOnholdReasonCodes') public getOnholdReasonCodes!: () => Promise<Code[]>
   @CodesModule.State('onholdReasonCodes') private readonly onholdReasonCodes!: Code[]
@@ -309,6 +309,7 @@ export default class ReviewAccountView extends Vue {
       console.error(ex)
     } finally {
       this.isLoading = false
+      console.log(this.accountUnderReview)
     }
   }
 
@@ -363,7 +364,9 @@ export default class ReviewAccountView extends Vue {
       const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
       try {
         if (this.accountInfoAccessType && this.accountInfoAccessType !== this.accountUnderReview.accessType) {
-          const success = await this.updateOrganizationAccessType(this.accountInfoAccessType as string, false)
+          console.log(this.accountUnderReview)
+          console.log(this.accountUnderReview.id)
+          const success = await this.updateOrganizationAccessType({ accessType: this.accountInfoAccessType as string, orgId: this.accountUnderReview.id, syncOrg: false })
           if (!success) throw new Error('Error updating account access type prevented review completion.')
         }
         if (isApprove) {
