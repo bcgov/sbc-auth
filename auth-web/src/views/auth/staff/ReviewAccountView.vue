@@ -309,7 +309,6 @@ export default class ReviewAccountView extends Vue {
       console.error(ex)
     } finally {
       this.isLoading = false
-      console.log(this.accountUnderReview)
     }
   }
 
