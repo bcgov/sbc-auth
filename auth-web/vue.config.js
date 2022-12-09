@@ -16,6 +16,10 @@ module.exports = {
       }
     }
   },
+  chainWebpack(config) {
+    // disable type check for build (composition api library fails)
+    if (process.env.NODE_ENV === 'production') config.plugins.delete('fork-ts-checker')
+  },
   publicPath: process.env.VUE_APP_PATH,
   transpileDependencies: ['vuetify', 'vuex-persist', 'fas-ui', 'clickout-event', 'vue-plugin-helper-decorator'],
   devServer: {
