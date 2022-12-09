@@ -363,8 +363,6 @@ export default class ReviewAccountView extends Vue {
       const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
       try {
         if (this.accountInfoAccessType && this.accountInfoAccessType !== this.accountUnderReview.accessType) {
-          console.log(this.accountUnderReview)
-          console.log(this.accountUnderReview.id)
           const success = await this.updateOrganizationAccessType({ accessType: this.accountInfoAccessType as string, orgId: this.accountUnderReview.id, syncOrg: false })
           if (!success) throw new Error('Error updating account access type prevented review completion.')
         }
