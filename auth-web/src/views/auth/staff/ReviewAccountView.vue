@@ -43,10 +43,10 @@
               <div class="form-btns d-flex justify-end" >
 
                 <div v-display-mode="!canEdit ? viewOnly : false ">
-                  <v-btn large color="success" class="font-weight-bold mr-2 select-button" @click="openModal()" >
+                  <v-btn large color="primary" class="font-weight-bold mr-2 select-button" @click="openModal()" >
                     <span>Approve</span>
                   </v-btn>
-                  <v-btn large outlined color="red" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
+                  <v-btn large outlined color="primary" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
                     <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
@@ -87,12 +87,12 @@
 </template>
 
 <script lang="ts">
+import { AccessType, DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
-import { DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
-import AccountInformation from '@/components/auth/staff/review-task/AccountInformation.vue'
+import { AccountInformation } from '@/components/auth/staff/review-task'
 import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.vue'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
@@ -153,6 +153,7 @@ export default class ReviewAccountView extends Vue {
   @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
   @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
   @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
+  @orgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!:({ accessType, orgId, syncOrg }) => Promise<boolean>
 
   @CodesModule.Action('getOnholdReasonCodes') public getOnholdReasonCodes!: () => Promise<Code[]>
   @CodesModule.State('onholdReasonCodes') private readonly onholdReasonCodes!: Code[]
@@ -171,6 +172,9 @@ export default class ReviewAccountView extends Vue {
   public taskRelationshipType:string = ''
   private productFeeFormValid: boolean = false
   private viewOnly = DisplayModeValues.VIEW_ONLY
+  accountInfoAccessType: AccessType = null
+  accountInfoValid = true
+  showAccountInfoValidations = false
 
   $refs: {
     accessRequest: AccessRequestModal,
@@ -244,19 +248,23 @@ export default class ReviewAccountView extends Vue {
           { ...this.componentNotaryInformation(4) }
         ]
       case TaskType.GOVN_REVIEW:
+        let list = []
         if (this.task.action === TaskAction.ACCOUNT_REVIEW) {
-          return [{ ...this.componentAccountInformation(1) },
+          list = [{ ...this.componentAccountInformation(1) },
             { ...this.componentAccountAdministrator(2) },
             { ...this.componentProductFee(3) }
           ]
         } else {
-          return [{ ...this.compDownloadAffidavit(1) },
+          list = [{ ...this.compDownloadAffidavit(1) },
             { ...this.componentAccountInformation(2) },
             { ...this.componentAccountAdministrator(3) },
             { ...this.componentNotaryInformation(4) },
             { ...this.componentProductFee(5) }
           ]
         }
+        // if account access type was changed to regular remove the product fee comp
+        if (this.accountInfoAccessType === AccessType.REGULAR) list.pop()
+        return list
       default:
         // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
         // Also, we double check by task relationship type
@@ -310,6 +318,11 @@ export default class ReviewAccountView extends Vue {
   }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false) {
+    if (!this.accountInfoValid) {
+      this.showAccountInfoValidations = true
+      window.scrollTo({ top: 200, behavior: 'smooth' })
+      return false
+    }
     if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFormValid) {
       // validate form before showing pop-up
       (this.$refs.productFeeRef[0] as any).validateNow()
@@ -349,6 +362,10 @@ export default class ReviewAccountView extends Vue {
       // both cases we need to call reject API than hold
       const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
       try {
+        if (this.accountInfoAccessType && this.accountInfoAccessType !== this.accountUnderReview.accessType) {
+          const success = await this.updateOrganizationAccessType({ accessType: this.accountInfoAccessType as string, orgId: this.accountUnderReview.id, syncOrg: false })
+          if (!success) throw new Error('Error updating account access type prevented review completion.')
+        }
         if (isApprove) {
           await this.approveAccountUnderReview(this.task)
         } else {
@@ -419,9 +436,14 @@ export default class ReviewAccountView extends Vue {
       {
         title: 'Account Information',
         accountUnderReview: this.accountUnderReview,
-        accountUnderReviewAddress: this.accountUnderReviewAddress
+        accountUnderReviewAddress: this.accountUnderReviewAddress,
+        isGovnReview: this.isGovNAccountReview,
+        showValidations: this.showAccountInfoValidations
       },
-      null
+      {
+        'emit-access-type': (event: AccessType) => { this.accountInfoAccessType = event },
+        'emit-valid': (event: boolean) => { this.accountInfoValid = event }
+      }
     )
   }
   componentAccountAdministrator (tabNumber:number = 1) {

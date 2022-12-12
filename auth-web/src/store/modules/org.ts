@@ -1153,8 +1153,8 @@ export default class OrgModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async updateOrganizationAccessType (accessType: string) {
-    const orgId = this.context.state['currentOrganization']?.id
+  public async updateOrganizationAccessType ({ accessType, orgId = null, syncOrg = true }): Promise<boolean> {
+    if (!orgId) orgId = this.context.state['currentOrganization']?.id as number
     if (orgId && accessType) {
       try {
         const patchOrgPayload: PatchOrgPayload = {
@@ -1162,12 +1162,14 @@ export default class OrgModule extends VuexModule {
           accessType: accessType
         }
         const response = await OrgService.patchOrg(orgId, patchOrgPayload)
-        if (response && response.status === 200) {
+        if (response && response.status === 200 && syncOrg) {
           await this.context.dispatch('syncOrganization', orgId)
         }
+        return true
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('update Organization AccessType operation failed! - ', error)
+        return false
       }
     }
   }
