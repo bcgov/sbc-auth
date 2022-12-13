@@ -63,16 +63,16 @@
     <v-row v-if="isGovnReview" class="access-type" :class="showValidations && editing ? 'error-border': ''">
       <v-col class="col-12 col-sm-3">
         <p :class="showValidations && editing ? 'error-color ma-0': 'ma-0'">Access Type</p>
-        <v-chip v-if="changedAccess" color="primary" label text-color="white" x-small>Changed</v-chip>
+        <v-chip v-if="changedAccess" color="primary" label text-color="white">CHANGED</v-chip>
       </v-col>
       <v-col>
         <v-row v-if="!editing" no-gutters>
           <v-col class="access-type__desc">{{ accessTypeDesc }}</v-col>
           <v-col v-if="accountUnderReview.accessType === AccessType.GOVN" cols="auto">
-            <v-btn v-if="changedAccess" class="mt-n1" color="primary" text @click="resetAccess()">
+            <v-btn v-if="changedAccess" class="access-type__btn" color="primary" text @click="resetAccess()">
               <v-icon class="mr-1" color="primary" size="16">mdi-undo</v-icon>Undo
             </v-btn>
-            <v-btn v-else class="mt-n1" color="primary" text @click="editing=true">
+            <v-btn v-else class="access-type__btn" color="primary" text @click="editing=true">
               <v-icon class="mr-1" color="primary" size="16">mdi-pencil</v-icon>Change
             </v-btn>
           </v-col>
@@ -170,6 +170,13 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+  .access-type {
+
+    &__btn {
+      height: 20px !important;
+      margin-top: -2px;
+    }
+  }
   // BC Online Account Information
   .bcol-acc__name {
     font-size: 1.125rem;
@@ -208,6 +215,11 @@ export default defineComponent({
     list-style-type: none;
     margin: 0;
     padding: 0;
+  }
+
+  .v-chip.v-size--default {
+    font-size: 0.625rem;
+    height: 20px;
   }
 
 </style>
