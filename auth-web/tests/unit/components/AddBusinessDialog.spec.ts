@@ -1,10 +1,9 @@
-import { Wrapper, createLocalVue, shallowMount, mount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import UserModule from '@/store/modules/user'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -21,18 +20,18 @@ const tests = [
     forgotButtonText: 'I lost or forgot my passcode'
   },
   {
-    desc: 'renders the component properly for a FM',
-    businessIdentifier: 'FM0000000',
-    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
-    certifyExists: true,
-    forgotButtonText: null
-  },
-  {
     desc: 'renders the component properly for a BC',
     businessIdentifier: 'BC0000000',
     passcodeLabel: 'Password',
     certifyExists: false,
     forgotButtonText: 'I lost or forgot my password'
+  },
+  {
+    desc: 'renders the component properly for a FM',
+    businessIdentifier: 'FM0000000',
+    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
+    certifyExists: true,
+    forgotButtonText: null
   }
 ]
 
@@ -45,12 +44,10 @@ describe('Add Business Form', () => {
       state: {
         currentUser: {
           firstName: 'Nadia',
-          lastName: 'Woodie'
+          lastName: 'Woodie',
+          roles: ['staff']
         }
-      },
-      // actions: UserModule.actions,
-      // mutations: UserModule.mutations,
-      // getters: UserModule.getters
+      }
     }
 
     const orgModule = {

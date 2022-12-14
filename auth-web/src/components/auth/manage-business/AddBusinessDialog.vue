@@ -219,7 +219,7 @@ export default class AddBusinessDialog extends Vue {
   }
 
   get isStaffAccount (): boolean {
-    return this.currentUser.roles.includes(Role.StaffManageAccounts)
+    return this.currentUser.roles.some((role) => (role === Role.Staff || role === Role.GOVMAccountUser))
   }
 
   get currentUserName (): string {
