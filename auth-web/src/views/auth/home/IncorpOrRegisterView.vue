@@ -138,7 +138,7 @@ export default class IncorpOrRegisterView extends Vue {
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
   private readonly bulletPoints: Array<any> = [
     { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
-    { text: 'Incorporate a benefit company or a cooperative association.' }
+    { text: 'Incorporate a B.C. based company or a cooperative association.' }
   ]
 
   // Use this when feature flag 'EnableBcCccUlc' no longer used. Change name and refrences
@@ -154,9 +154,10 @@ export default class IncorpOrRegisterView extends Vue {
         { text: 'The name(s) and address(es) of the proprietor or partner(s).' }
       ]
     },
-    { text: 'Benefit Company',
+    { text: 'B.C. Based Company',
       items: [
-        { text: 'Office addresses, director names and addresses, share structure and articles.' }
+        { text: 'You can incorporate the following B.C. based company types: Limited Company, Unlimited Liability ' +
+          'Company, Benefit Company, and Community Contribution Company.' }
       ]
     },
     { text: 'Cooperative Association',
