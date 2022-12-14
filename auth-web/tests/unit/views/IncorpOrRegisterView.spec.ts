@@ -36,6 +36,11 @@ describe('IncorpOrRegisterView.vue', () => {
         vuetify,
         propsData: {
           ...propsData
+        },
+        computed: {
+          enableBcCccUlc () {
+            return true
+          }
         }
       })
     }
@@ -91,49 +96,21 @@ describe('IncorpOrRegisterView.vue', () => {
   })
 
   it('renders the correct text and number of bullet points', () => {
-    wrapper.vm.bulletPoints = [
-      { text: 'Bullet 1' },
-      { text: 'Bullet 2' },
-      { text: 'Bullet 3' }
-    ]
-
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item .list-item')
 
-    expect(bulletListItems[0].textContent).toContain('Bullet 1')
-    expect(bulletListItems[1].textContent).toContain('Bullet 2')
-    expect(bulletListItems[2].textContent).toContain('Bullet 3')
+    expect(bulletListItems[0].textContent).toContain('Register a firm such as a sole proprietorship, a Doing Business')
+    expect(bulletListItems[1].textContent).toContain('Incorporate a B.C. based company or a cooperative association.')
 
     // List item count will be +1 due to our fixed tooltip bullet point
-    expect(bulletListItems.length).toStrictEqual(3)
+    expect(bulletListItems.length).toStrictEqual(2)
   })
 
   it('renders the correct text and number of expansion panels', async () => {
-    wrapper.vm.expansionPanels = [
-      { text: 'Expansion 1',
-        items: [
-          { text: 'Expansion 1 Text 1' }
-        ]
-      },
-      { text: 'Expansion 2',
-        items: [
-          { text: 'Expansion 2 Text 1' },
-          { text: 'Expansion 2 Text 2' },
-          { text: 'Expansion 2 Text 3' }
-        ]
-      },
-      { text: 'Expansion 3',
-        items: [
-          { text: 'Expansion 3 Text 1' },
-          { text: 'Expansion 3 Text 2' }
-        ]
-      }
-    ]
-
     const expansionItems = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-header')
 
-    expect(expansionItems[0].textContent).toContain('Expansion 1')
-    expect(expansionItems[1].textContent).toContain('Expansion 2')
-    expect(expansionItems[2].textContent).toContain('Expansion 3')
+    expect(expansionItems[0].textContent).toContain('Sole Proprietorship, DBA, and General Partnership')
+    expect(expansionItems[1].textContent).toContain('B.C. Based Company')
+    expect(expansionItems[2].textContent).toContain('Cooperative Association')
 
     // List item count will be 3
     expect(expansionItems.length).toStrictEqual(3)
@@ -145,14 +122,13 @@ describe('IncorpOrRegisterView.vue', () => {
 
     const expansionSubList = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-content .list-item-text')
 
-    expect(expansionSubList[0].textContent).toContain('Expansion 1 Text 1')
-    expect(expansionSubList[1].textContent).toContain('Expansion 2 Text 1')
-    expect(expansionSubList[2].textContent).toContain('Expansion 2 Text 2')
-    expect(expansionSubList[3].textContent).toContain('Expansion 2 Text 3')
-    expect(expansionSubList[4].textContent).toContain('Expansion 3 Text 1')
-    expect(expansionSubList[5].textContent).toContain('Expansion 3 Text 2')
+    expect(expansionSubList[0].textContent).toContain('The name(s) and address(es) of the proprietor or partner(s).')
+    expect(expansionSubList[1].textContent).toContain('You can incorporate the following B.C. based company types: ' +
+      'Limited Company, Unlimited Liability Company, Benefit Company, and Community Contribution Company.')
+    expect(expansionSubList[2].textContent).toContain('Office addresses, director names and addresses, rules of ' +
+      'the association and memorandum.')
 
     // List item count will be 6
-    expect(expansionSubList.length).toStrictEqual(6)
+    expect(expansionSubList.length).toStrictEqual(3)
   })
 })
