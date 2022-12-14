@@ -30,7 +30,12 @@ describe('RequestNameView.vue', () => {
     wrapper = mount(RequestNameView, {
       store,
       localVue,
-      vuetify
+      vuetify,
+      computed: {
+        enableBcCccUlc () {
+          return false
+        }
+      }
     })
   })
 
@@ -64,15 +69,12 @@ describe('RequestNameView.vue', () => {
   })
 
   it('renders the correct text and number of bullet points', () => {
-    wrapper.vm.bulletPoints = [
-      { text: 'Bullet Mock 1' },
-      { text: 'Bullet Mock 2' }
-    ]
-
     const bulletList = wrapper.vm.$el.querySelectorAll('.list-item')
 
-    expect(bulletList[0].textContent).toContain('Bullet Mock 1')
-    expect(bulletList[1].textContent).toContain('Bullet Mock 2')
+    expect(bulletList[0].textContent).toContain('You can choose to have a name or use the incorporation number as ' +
+      'the name of the business.')
+    expect(bulletList[1].textContent).toContain('If you choose to have a name for your business, create a unique ' +
+      'name that ensures the public is not confused or mislead by similar corporate names.')
     expect(bulletList[2].textContent).toContain('Submit your name choices for examination')
     expect(bulletList[3].textContent).toContain('If your name is approved')
 
