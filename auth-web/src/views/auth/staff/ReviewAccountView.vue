@@ -374,7 +374,10 @@ export default class ReviewAccountView extends Vue {
         }
         const taskType: any = this.task.type
 
-        if ([TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType)) {
+        if (
+          [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
+          (!this.accountInfoAccessType || [AccessType.GOVN, AccessType.GOVM].includes(this.accountInfoAccessType))
+        ) {
           await this.createAccountFees(this.task.relationshipId)
         }
         this.openModal(!isApprove, true, isRejecting)
