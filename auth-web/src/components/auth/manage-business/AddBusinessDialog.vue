@@ -69,11 +69,28 @@
               />
             </v-expand-transition>
 
+            <!-- Certified By Name -->
+            <v-expand-transition>
+              <v-text-field
+                v-if="isBusinessIdentifierValid && isFirm && isStaffAccount"
+                filled
+                persistent-hint
+                :label="certifiedByNameLabel"
+                :rules="certifiedByNameRules"
+                :maxlength="passcodeMaxLength"
+                :aria-label="certifiedByNameLabel"
+                v-model="certifiedByName"
+                autocomplete="off"
+                class="certifier mt-6 mb-n2"
+              />
+            </v-expand-transition>
+
             <!-- Certify (firms only) -->
             <v-expand-transition>
               <Certify
                 v-if="isBusinessIdentifierValid && isFirm"
                 :clause="certifyClause"
+                :currentUserName="currentUserName"
                 entity="registered entity"
                 @update:isCertified="isCertified = $event"
                 class="certify mt-6"
@@ -139,8 +156,13 @@ import { FolioNumberload, LoginPayload } from '@/models/business'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Role } from '@/util/constants'
 import { StatusCodes } from 'http-status-codes'
 import { mapActions } from 'vuex'
+import { namespace } from 'vuex-class'
+
+const UserModule = namespace('user')
 
 @Component({
   components: {
@@ -161,6 +183,8 @@ export default class AddBusinessDialog extends Vue {
     helpDialog: HelpDialog
   }
 
+  @UserModule.State('currentUser') readonly currentUser!: KCUserProfile
+
   @Prop({ default: false }) readonly dialog: boolean
 
   private readonly addBusiness!: (loginPayload: LoginPayload) => any
@@ -174,10 +198,13 @@ export default class AddBusinessDialog extends Vue {
   protected isLoading = false
   protected isCertified = false // firms only
   protected businessIdentifierRules = []
+  protected certifiedByName = ''
 
   readonly certifyClause = 'Note: It is an offence to make or assist in making a false or misleading ' +
     'statement in a record filed under the Partnership Act. A person who commits this offence is ' +
     'subject to a maximum fine of $5,000.'
+
+  readonly certifiedByNameLabel = 'Legal name of certified person (e.g., Last Name, First Name)'
 
   get isBusinessIdentifierValid (): boolean {
     return CommonUtils.validateIncorporationNumber(this.businessIdentifier)
@@ -189,6 +216,22 @@ export default class AddBusinessDialog extends Vue {
 
   get isFirm (): boolean {
     return CommonUtils.isFirmNumber(this.businessIdentifier)
+  }
+
+  get isStaffAccount (): boolean {
+    return this.currentUser.roles.includes(Role.StaffManageAccounts)
+  }
+
+  get currentUserName (): string {
+    if (this.isStaffAccount) return this.certifiedByName
+    return `${this.currentUser.lastName}, ${this.currentUser.firstName}`
+  }
+
+  get certifiedByNameRules (): any[] {
+    return [
+      v => !!v || 'Certification is required',
+      v => v.length <= 150 || 'Maximum 150 characters'
+    ]
   }
 
   get passcodeLabel (): string {
@@ -252,6 +295,7 @@ export default class AddBusinessDialog extends Vue {
       !!this.businessIdentifier &&
       !!this.passcode &&
       (!this.isFirm || this.isCertified) &&
+      (!!this.isStaffAccount && this.certifiedByName) &&
       this.$refs.addBusinessForm.validate()
     )
   }
@@ -264,6 +308,7 @@ export default class AddBusinessDialog extends Vue {
         // try to add business
         const addResponse = await this.addBusiness({
           businessIdentifier: this.businessIdentifier,
+          certifiedByName: this.certifiedByName,
           passCode: this.passcode
         })
         // check if add didn't succeed
@@ -303,6 +348,7 @@ export default class AddBusinessDialog extends Vue {
     this.businessIdentifier = ''
     this.passcode = ''
     this.folioNumber = ''
+    this.certifiedByName = ''
     this.$refs.addBusinessForm.resetValidation()
     this.isLoading = false
     if (emitCancel) {
