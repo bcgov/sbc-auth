@@ -120,15 +120,10 @@ describe('IncorpOrRegisterView.vue', () => {
     await wrapper.findAll('.v-expansion-panel-header').at(1).trigger('click')
     await wrapper.findAll('.v-expansion-panel-header').at(2).trigger('click')
 
-    const expansionSubList = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-content .list-item-text')
-
-    expect(expansionSubList[0].textContent).toContain('The name(s) and address(es) of the proprietor or partner(s).')
-    expect(expansionSubList[1].textContent).toContain('You can incorporate the following B.C. based company types: ' +
-      'Limited Company, Unlimited Liability Company, Benefit Company, and Community Contribution Company.')
-    expect(expansionSubList[2].textContent).toContain('Office addresses, director names and addresses, rules of ' +
-      'the association and memorandum.')
-
-    // List item count will be 6
-    expect(expansionSubList.length).toStrictEqual(3)
+    expect(wrapper.find('#expPnlContent1').text()).toContain('The name(s) and address(es) of the proprietor')
+    expect(wrapper.find('#expPnlContent2').text()).toContain('Office addresses, director names and addresses, ' +
+      'share structure')
+    expect(wrapper.find('#expPnlContent3').text()).toContain('Office addresses, director names and addresses, rules of ' +
+      'the association')
   })
 })
