@@ -51,10 +51,10 @@
                     Sole Proprietorship, DBA, and General Partnership
                   </v-expansion-panel-header>
                   <v-expansion-panel-content class="list-item-text py-3">
-                    The name(s) and address(es) of the proprietor or partner(s).
+                    <span id="expPnlContent1">The name(s) and address(es) of the proprietor or partner(s).</span>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
-                <v-tooltip bottom max-width="450px" light content-class="tooltip">
+                <v-tooltip top max-width="450px" light content-class="tooltip">
                   <template v-slot:activator="{ on }">
                     <v-expansion-panel class="incorp-expansion-panels">
                       <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
@@ -63,10 +63,11 @@
                             $expand
                           </v-icon>
                         </template>
-                        <span v-on="on">B.C. Based Company</span>
+                        <span class="tooltip-text" v-on="on">B.C. Based Company</span>
                       </v-expansion-panel-header>
                       <v-expansion-panel-content class="list-item-text py-3">
-                        Office addresses, director names and addresses, share structure and articles.
+                        <span id="expPnlContent2">Office addresses, director names and addresses, share structure and
+                          articles.</span>
                       </v-expansion-panel-content>
                     </v-expansion-panel>
                   </template>
@@ -88,13 +89,12 @@
                     Cooperative Association
                   </v-expansion-panel-header>
                   <v-expansion-panel-content class="list-item-text py-3">
-                    Office addresses, director names and addresses, rules of the association and memorandum.
+                    <span id="expPnlContent3">Office addresses, director names and addresses, rules of the association
+                      and memorandum.</span>
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
             </div>
-
-            <!-- For BEN only as feature flag 'EnableBcCccUlc' enabled. Remove section when FF removed -->
             <div v-else>
               <v-expansion-panels flat tile accordion>
                 <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
@@ -178,7 +178,7 @@ export default class IncorpOrRegisterView extends Vue {
     { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
     { text: 'Incorporate a B.C. based company or a cooperative association.' }
   ]
-
+  
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
   private readonly expansionPanels: Array<any> = [
     { text: 'Sole Proprietorship, DBA, and General Partnership',
@@ -188,8 +188,7 @@ export default class IncorpOrRegisterView extends Vue {
     },
     { text: 'B.C. Based Company',
       items: [
-        { text: 'You can incorporate the following B.C. based company types: Limited Company, Unlimited Liability ' +
-          'Company, Benefit Company, and Community Contribution Company.' }
+        { text: 'Office addresses, director names and addresses, share structure and articles.' }
       ]
     },
     { text: 'Cooperative Association',
