@@ -20,7 +20,7 @@ const tests = [
     forgotButtonText: 'I lost or forgot my passcode',
     isGovStaffAccount: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie',
+    userLastName: 'Woodie'
   },
   {
     desc: 'renders the component properly for a BC',
@@ -30,7 +30,7 @@ const tests = [
     forgotButtonText: 'I lost or forgot my password',
     isGovStaffAccount: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie',
+    userLastName: 'Woodie'
   },
   {
     desc: 'renders the component properly for a FM (client User)',
@@ -40,7 +40,7 @@ const tests = [
     forgotButtonText: null,
     isGovStaffAccount: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie',
+    userLastName: 'Woodie'
   },
   {
     desc: 'renders the component properly for a FM (staff user)',
@@ -50,7 +50,7 @@ const tests = [
     forgotButtonText: null,
     isGovStaffAccount: true,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie',
+    userLastName: 'Woodie'
   },
   {
     desc: 'renders the component properly for a FM (sbc staff)',
@@ -60,7 +60,7 @@ const tests = [
     forgotButtonText: null,
     isGovStaffAccount: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie',
+    userLastName: 'Woodie'
   }
 ]
 tests.forEach(test => {
@@ -100,7 +100,7 @@ tests.forEach(test => {
       wrapper = shallowMount(AddBusinessDialog, {
         store,
         vuetify,
-        propsData: { 
+        propsData: {
           dialog: true,
           isGovStaffAccount: test.isGovStaffAccount,
           userFirstName: test.userFirstName,

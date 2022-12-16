@@ -229,8 +229,7 @@ export default class AddBusinessDialog extends Vue {
 
   get certifiedByNameRules (): any[] {
     return [
-      v => !!v || 'Certification is required',
-      v => v.length <= 150 || 'Maximum 150 characters'
+      v => !!v || 'Certification is required'
     ]
   }
 
