@@ -176,17 +176,7 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
 
   private async mounted () {
     // first time to the page , start afresh..this is Create New account flow
-    if (this.currentOrganization) {
-      this.setCurrentOrganization({ name: '' })
-    } else {
-      // need to set org type if its re-upload bceid flow
-      this.selectAccountType(this.currentOrganization.orgType)
-    }
-    // when some one goes back into product page and come, this will be true and selectedAccountType as undefined.
-    if (!this.currentOrganization && this.resetAccountTypeOnSetupAccount) {
-      this.selectAccountType(undefined)
-      this.setResetAccountTypeOnSetupAccount(false) // reset back flag for coming back
-    }
+    this.setCurrentOrganization({ name: '' })
 
     // first time stepper hits step 2 after selecting a premium product/service in step 1
     if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
@@ -196,7 +186,6 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
       this.selectedAccountType = (this.currentOrganizationType === this.ACCOUNT_TYPE.UNLINKED_PREMIUM)
         ? this.ACCOUNT_TYPE.PREMIUM : this.currentOrganizationType
     }
-
     this.setAccessType(this.getOrgAccessType())
     const accessType = this.getOrgAccessType()
     this.setCurrentOrganization({ ...this.currentOrganization, ...{ accessType: accessType } })
