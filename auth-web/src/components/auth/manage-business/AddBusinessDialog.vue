@@ -77,7 +77,7 @@
                 persistent-hint
                 :label="certifiedByNameLabel"
                 :rules="certifiedByNameRules"
-                :maxlength="passcodeMaxLength"
+                :maxlength="certifiedByNameMaxLength"
                 :aria-label="certifiedByNameLabel"
                 v-model="certifiedByName"
                 autocomplete="off"
@@ -205,6 +205,8 @@ export default class AddBusinessDialog extends Vue {
     'subject to a maximum fine of $5,000.'
 
   readonly certifiedByNameLabel = 'Legal name of certified person (e.g., Last Name, First Name)'
+
+  readonly certifiedByNameMaxLength = 100
 
   get isBusinessIdentifierValid (): boolean {
     return CommonUtils.validateIncorporationNumber(this.businessIdentifier)
