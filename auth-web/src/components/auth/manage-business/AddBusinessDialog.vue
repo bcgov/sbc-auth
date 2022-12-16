@@ -72,7 +72,7 @@
             <!-- Certified By Name -->
             <v-expand-transition>
               <v-text-field
-                v-if="isBusinessIdentifierValid && isFirm && isStaffAccount"
+                v-if="isBusinessIdentifierValid && showCertifier"
                 filled
                 persistent-hint
                 :label="certifiedByNameLabel"
@@ -156,13 +156,8 @@ import { FolioNumberload, LoginPayload } from '@/models/business'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { Role } from '@/util/constants'
 import { StatusCodes } from 'http-status-codes'
 import { mapActions } from 'vuex'
-import { namespace } from 'vuex-class'
-
-const UserModule = namespace('user')
 
 @Component({
   components: {
@@ -183,9 +178,13 @@ export default class AddBusinessDialog extends Vue {
     helpDialog: HelpDialog
   }
 
-  @UserModule.State('currentUser') readonly currentUser!: KCUserProfile
-
   @Prop({ default: false }) readonly dialog: boolean
+
+  @Prop({ default: false }) readonly isGovStaffAccount: boolean
+
+  @Prop({ default: '' }) readonly userFirstName: string
+
+  @Prop({ default: '' }) readonly userLastName: string
 
   private readonly addBusiness!: (loginPayload: LoginPayload) => any
   private readonly updateBusinessName!: (businessNumber: string) => any
@@ -199,6 +198,7 @@ export default class AddBusinessDialog extends Vue {
   protected isCertified = false // firms only
   protected businessIdentifierRules = []
   protected certifiedByName = ''
+  protected validCertifier = true
 
   readonly certifyClause = 'Note: It is an offence to make or assist in making a false or misleading ' +
     'statement in a record filed under the Partnership Act. A person who commits this offence is ' +
@@ -218,13 +218,13 @@ export default class AddBusinessDialog extends Vue {
     return CommonUtils.isFirmNumber(this.businessIdentifier)
   }
 
-  get isStaffAccount (): boolean {
-    return this.currentUser.roles.some((role) => (role === Role.Staff || role === Role.GOVMAccountUser))
+  get showCertifier (): boolean {
+    return this.isFirm && this.isGovStaffAccount
   }
 
   get currentUserName (): string {
-    if (this.isStaffAccount) return this.certifiedByName
-    return `${this.currentUser.lastName}, ${this.currentUser.firstName}`
+    if (this.isGovStaffAccount) return this.certifiedByName
+    return `${this.userLastName}, ${this.userFirstName}`
   }
 
   get certifiedByNameRules (): any[] {
@@ -290,12 +290,14 @@ export default class AddBusinessDialog extends Vue {
     // business id is required
     // passcode is required
     // firms must accept certify clause
+    // staff users must enter names
     // validate the form itself (according to the components' rules/state)
+    if (this.isGovStaffAccount && this.certifiedByName === '') this.validCertifier = false
     return (
       !!this.businessIdentifier &&
       !!this.passcode &&
       (!this.isFirm || this.isCertified) &&
-      (!!this.isStaffAccount && this.certifiedByName) &&
+      this.validCertifier &&
       this.$refs.addBusinessForm.validate()
     )
   }

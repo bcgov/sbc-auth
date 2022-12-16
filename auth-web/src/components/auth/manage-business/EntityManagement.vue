@@ -208,6 +208,9 @@
       <!-- Add an Existing Business Dialog -->
       <AddBusinessDialog
         :dialog="addBusinessDialog"
+        :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
+        :userFirstName="currentUser.firstName"
+        :userLastName="currentUser.lastName"
         @add-success="showAddSuccessModal()"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"

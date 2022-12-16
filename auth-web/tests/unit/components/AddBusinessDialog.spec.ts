@@ -17,81 +17,102 @@ const tests = [
     businessIdentifier: 'CP0000000',
     passcodeLabel: 'Passcode',
     certifyExists: false,
-    forgotButtonText: 'I lost or forgot my passcode'
+    forgotButtonText: 'I lost or forgot my passcode',
+    isGovStaffAccount: false,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
   },
   {
     desc: 'renders the component properly for a BC',
     businessIdentifier: 'BC0000000',
     passcodeLabel: 'Password',
     certifyExists: false,
-    forgotButtonText: 'I lost or forgot my password'
+    forgotButtonText: 'I lost or forgot my password',
+    isGovStaffAccount: false,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
   },
   {
-    desc: 'renders the component properly for a FM',
+    desc: 'renders the component properly for a FM (client User)',
     businessIdentifier: 'FM0000000',
     passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
     certifyExists: true,
-    forgotButtonText: null
+    forgotButtonText: null,
+    isGovStaffAccount: false,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+  },
+  {
+    desc: 'renders the component properly for a FM (staff user)',
+    businessIdentifier: 'FM0000000',
+    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
+    certifyExists: true,
+    forgotButtonText: null,
+    isGovStaffAccount: true,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+  },
+  {
+    desc: 'renders the component properly for a FM (sbc staff)',
+    businessIdentifier: 'FM0000000',
+    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
+    certifyExists: true,
+    forgotButtonText: null,
+    isGovStaffAccount: false,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
   }
 ]
+tests.forEach(test => {
+  describe('Add Business Form', () => {
+    let wrapper: Wrapper<any>
 
-describe('Add Business Form', () => {
-  let wrapper: Wrapper<any>
-
-  beforeAll(() => {
-    const userModule: any = {
-      namespaced: true,
-      state: {
-        currentUser: {
-          firstName: 'Nadia',
-          lastName: 'Woodie',
-          roles: ['staff']
+    beforeAll(() => {
+      const orgModule = {
+        namespaced: true,
+        state: {
+          currentOrganization: {
+            name: 'new org'
+          }
         }
       }
-    }
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'new org'
+      const businessModule = {
+        namespaced: true,
+        state: {
+
+        },
+        action: {
+          addBusiness: jest.fn(),
+          updateBusinessName: jest.fn(),
+          updateFolioNumber: jest.fn()
         }
       }
-    }
 
-    const businessModule = {
-      namespaced: true,
-      state: {
+      const store = new Vuex.Store({
+        strict: false,
+        modules: {
+          org: orgModule,
+          business: businessModule
+        }
+      })
 
-      },
-      action: {
-        addBusiness: jest.fn(),
-        updateBusinessName: jest.fn(),
-        updateFolioNumber: jest.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        business: businessModule,
-        user: userModule
-      }
+      wrapper = shallowMount(AddBusinessDialog, {
+        store,
+        vuetify,
+        propsData: { 
+          dialog: true,
+          isGovStaffAccount: test.isGovStaffAccount,
+          userFirstName: test.userFirstName,
+          userLastName: test.userLastName
+        }
+      })
     })
 
-    wrapper = shallowMount(AddBusinessDialog, {
-      store,
-      vuetify,
-      propsData: { dialog: true }
+    afterAll(() => {
+      wrapper.destroy()
     })
-  })
 
-  afterAll(() => {
-    wrapper.destroy()
-  })
-
-  tests.forEach(test => {
     it(test.desc, () => {
       wrapper.setData({ businessIdentifier: test.businessIdentifier })
 
@@ -105,6 +126,10 @@ describe('Add Business Form', () => {
       expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
       expect(wrapper.find('.certify').exists()).toBe(test.certifyExists)
       expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
+      expect(wrapper.find('.certifier').exists()).toBe(test.isGovStaffAccount)
+      if (test.isGovStaffAccount) {
+        expect(wrapper.find('.certifier').attributes('label')).toContain('Legal name of certified person')
+      }
 
       // verify buttons
       if (!test.certifyExists) {

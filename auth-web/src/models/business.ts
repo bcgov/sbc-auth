@@ -6,7 +6,7 @@ export interface LoginPayload {
     passCode?: string
     phone?: string
     email?: string
-    certifiedByName?: string
+    certifiedByName: string
 }
 
 export interface FolioNumberload {
