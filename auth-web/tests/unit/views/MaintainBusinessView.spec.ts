@@ -38,11 +38,6 @@ describe('MaintainBusinessView.vue', () => {
         },
         mocks: {
           $t: (mock) => mock
-        },
-        computed: {
-          enableBcCccUlc () {
-            return true
-          }
         }
       })
     }
@@ -92,22 +87,26 @@ describe('MaintainBusinessView.vue', () => {
   })
 
   it('renders the correct text and number of bullet points', () => {
+    wrapper.vm.bulletPoints = [
+      { text: 'Bullet 1' },
+      { text: 'Bullet 2',
+        subText: [
+          { text: 'Sub Bullet 3' },
+          { text: 'Sub Bullet 4' }
+        ]
+      }
+    ]
+
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
     const bulletListSubItems = wrapper.vm.$el.querySelectorAll('.list-item-sub')
 
-    expect(bulletListItems[0].textContent).toContain('Once your business is incorporated or registered you are ' +
-      'required to keep information about your business up to date with the Registry.')
-    expect(bulletListItems[1].textContent).toContain('You can manage your business information using your BC ' +
-      'Registries account:')
+    expect(bulletListItems[0].textContent).toContain('Bullet 1')
+    expect(bulletListItems[1].textContent).toContain('Bullet 2')
 
-    expect(bulletListSubItems[0].textContent).toContain('See which Annual Reports are due for your corporation and ' +
-      'file each year.')
-    expect(bulletListSubItems[1].textContent).toContain('View and change your current directors or owners and ' +
-      'addresses.')
-    expect(bulletListSubItems[2].textContent).toContain('See the history of your business\' filings and download ' +
-      'copies of all documents including your Statement of Registration, Certificate of Incorporation and more.')
+    expect(bulletListSubItems[0].textContent).toContain('Sub Bullet 3')
+    expect(bulletListSubItems[1].textContent).toContain('Sub Bullet 4')
 
-    expect(bulletListItems.length).toStrictEqual(5)
-    expect(bulletListSubItems.length).toStrictEqual(3)
+    expect(bulletListItems.length).toStrictEqual(4)
+    expect(bulletListSubItems.length).toStrictEqual(2)
   })
 })
