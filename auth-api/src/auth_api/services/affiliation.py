@@ -123,7 +123,8 @@ class Affiliation:
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
         subquery = db.session.query(
-                AffiliationModel.entity_id, AffiliationModel.created, AffiliationModel.certified_by_name) \
+                AffiliationModel.entity_id, AffiliationModel.created, \
+                     AffiliationModel.certified_by_name, AffiliationModel.org_id) \
             .join(Entity).filter(AffiliationModel.org_id == org_id) \
             .subquery()
 
@@ -244,8 +245,6 @@ class Affiliation:
                     'passCodeClaimed': True
                 })
 
-            certified_by_name = certified_by_name if org.as_dict()['org_type'] in (
-                OrgType.SBC_STAFF.value, OrgType.STAFF.value) else ''
             # Affiliation may already already exist.
             if not (affiliation_model :=
                     AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
