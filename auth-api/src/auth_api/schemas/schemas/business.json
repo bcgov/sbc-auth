@@ -50,8 +50,7 @@
                     {
                         "id": 1,
                         "certifiedByName": "Leonard, Rodney",
-                        "created": "2022-01-01",
-                        "orgId": 1
+                        "created": "2022-01-01"
                     }
                 ]
             ],
@@ -101,15 +100,6 @@
                                 "default": "",
                                 "examples": [
                                     "2020-11-06T19:15:21.347010+00:00"
-                                ]
-                            },
-                            "orgId": {
-                                "$id": "#/properties/affiliations/items/anyOf/0/properties/orgId",
-                                "type": "number",
-                                "title": "Org Id",
-                                "default": "",
-                                "examples": [
-                                    1
                                 ]
                             }
                         }

@@ -17,7 +17,7 @@ from typing import Dict
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import subqueryload, contains_eager
 
 from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -122,18 +122,19 @@ class Affiliation:
     def find_affiliations_by_org_id(org_id):
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
-        subquery = db.session.query(
-                AffiliationModel.entity_id, AffiliationModel.created,
-                AffiliationModel.certified_by_name, AffiliationModel.org_id) \
-            .join(Entity).filter(AffiliationModel.org_id == org_id) \
-            .subquery()
-
         entities = db.session.query(Entity) \
-            .options(subqueryload(Entity.contacts).subqueryload(ContactLink.contact)) \
-            .join(subquery, subquery.c.entity_id == Entity.id) \
-            .order_by(subquery.c.created.desc()) \
+            .join(AffiliationModel) \
+            .options(
+                contains_eager(Entity.affiliations),
+                subqueryload(Entity.contacts).subqueryload(ContactLink.contact),
+                subqueryload(Entity.created_by),
+                subqueryload(Entity.modified_by)) \
+            .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id)) \
+            .order_by(AffiliationModel.created.desc()) \
             .all()
-        return [EntityService(entity).as_dict() for entity in entities]
+
+        entities = [EntityService(entity).as_dict() for entity in entities]
+        return entities
 
     @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None, bearer_token=None):
