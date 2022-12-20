@@ -14,17 +14,18 @@
 """Service for managing Affiliation data."""
 
 from typing import Dict
+
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-from sqlalchemy.orm import subqueryload, contains_eager
+from sqlalchemy.orm import contains_eager, subqueryload
 
-from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.contact_link import ContactLink
+from auth_api.models.dataclass import Activity
 from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
