@@ -50,6 +50,7 @@
               @blur="formatBusinessIdentifier()"
               class="business-identifier mb-n2"
               aria-label="Incorporation Number and Password or Passcode"
+              autofocus
             />
 
             <!-- Passcode -->
@@ -69,31 +70,34 @@
               />
             </v-expand-transition>
 
-            <!-- Certified By Name -->
+            <!-- Authorization Name -->
             <v-expand-transition>
-              <v-text-field
-                v-if="isBusinessIdentifierValid && showCertifier"
-                filled
-                persistent-hint
-                :label="certifiedByNameLabel"
-                :rules="certifiedByNameRules"
-                :maxlength="certifiedByNameMaxLength"
-                :aria-label="certifiedByNameLabel"
-                v-model="certifiedByName"
-                autocomplete="off"
-                class="certifier mt-6 mb-n2"
-              />
+              <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
+                <header class="font-weight-bold">Authorization</header>
+                <v-text-field
+                  filled
+                  persistent-hint
+                  :label="authorizationLabel"
+                  :rules="authorizationRules"
+                  :maxlength="authorizationMaxLength"
+                  :aria-label="authorizationLabel"
+                  v-model="authorizationName"
+                  autocomplete="off"
+                  class="authorization mt-4 pb-1"
+                  hide-details="auto"
+                />
+              </section>
             </v-expand-transition>
 
             <!-- Certify (firms only) -->
             <v-expand-transition>
               <Certify
                 v-if="isBusinessIdentifierValid && isFirm"
-                :clause="certifyClause"
-                :currentUserName="currentUserName"
+                :certifiedBy="certifiedBy"
                 entity="registered entity"
                 @update:isCertified="isCertified = $event"
-                class="certify mt-6"
+                class="certify"
+                :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
               />
             </v-expand-transition>
 
@@ -179,11 +183,8 @@ export default class AddBusinessDialog extends Vue {
   }
 
   @Prop({ default: false }) readonly dialog: boolean
-
   @Prop({ default: false }) readonly isGovStaffAccount: boolean
-
   @Prop({ default: '' }) readonly userFirstName: string
-
   @Prop({ default: '' }) readonly userLastName: string
 
   private readonly addBusiness!: (loginPayload: LoginPayload) => any
@@ -197,16 +198,11 @@ export default class AddBusinessDialog extends Vue {
   protected isLoading = false
   protected isCertified = false // firms only
   protected businessIdentifierRules = []
-  protected certifiedByName = ''
-  protected validCertifier = true
+  protected authorizationName = ''
 
-  readonly certifyClause = 'Note: It is an offence to make or assist in making a false or misleading ' +
-    'statement in a record filed under the Partnership Act. A person who commits this offence is ' +
-    'subject to a maximum fine of $5,000.'
+  readonly authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
 
-  readonly certifiedByNameLabel = 'Legal name of certified person (e.g., Last Name, First Name)'
-
-  readonly certifiedByNameMaxLength = 100
+  readonly authorizationMaxLength = 100
 
   get isBusinessIdentifierValid (): boolean {
     return CommonUtils.validateIncorporationNumber(this.businessIdentifier)
@@ -220,18 +216,18 @@ export default class AddBusinessDialog extends Vue {
     return CommonUtils.isFirmNumber(this.businessIdentifier)
   }
 
-  get showCertifier (): boolean {
-    return this.isFirm && this.isGovStaffAccount
+  get showAuthorization (): boolean {
+    return (this.isFirm && this.isGovStaffAccount)
   }
 
-  get currentUserName (): string {
-    if (this.isGovStaffAccount) return this.certifiedByName
-    return `${this.userLastName}, ${this.userFirstName}`
+  get certifiedBy (): string {
+    if (this.isGovStaffAccount) return this.authorizationName
+    else return `${this.userLastName}, ${this.userFirstName}`
   }
 
-  get certifiedByNameRules (): any[] {
+  get authorizationRules (): any[] {
     return [
-      v => !!v || 'Certification is required'
+      v => !!v || 'Authorization is required'
     ]
   }
 
@@ -288,17 +284,18 @@ export default class AddBusinessDialog extends Vue {
   }
 
   get isFormValid (): boolean {
+    const validCertifier = (this.isGovStaffAccount && !this.authorizationName)
+
     // business id is required
     // passcode is required
     // firms must accept certify clause
     // staff users must enter names
     // validate the form itself (according to the components' rules/state)
-    if (this.isGovStaffAccount && this.certifiedByName === '') this.validCertifier = false
     return (
       !!this.businessIdentifier &&
       !!this.passcode &&
       (!this.isFirm || this.isCertified) &&
-      this.validCertifier &&
+      validCertifier &&
       this.$refs.addBusinessForm.validate()
     )
   }
@@ -311,7 +308,7 @@ export default class AddBusinessDialog extends Vue {
         // try to add business
         const addResponse = await this.addBusiness({
           businessIdentifier: this.businessIdentifier,
-          certifiedByName: this.certifiedByName,
+          certifiedByName: this.authorizationName,
           passCode: this.passcode
         })
         // check if add didn't succeed
@@ -351,7 +348,7 @@ export default class AddBusinessDialog extends Vue {
     this.businessIdentifier = ''
     this.passcode = ''
     this.folioNumber = ''
-    this.certifiedByName = ''
+    this.authorizationName = ''
     this.$refs.addBusinessForm.resetValidation()
     this.isLoading = false
     if (emitCancel) {
@@ -455,6 +452,13 @@ export default class AddBusinessDialog extends Vue {
     color: white !important;
     background-color: $app-blue !important;
     opacity: 0.4;
+  }
+}
+
+// remove whitespace below error message
+.authorization {
+  ::v-deep .v-text-field__details {
+    margin-bottom: 0 !important;
   }
 }
 </style>

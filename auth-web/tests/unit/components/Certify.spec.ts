@@ -1,6 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import Certify from '@/components/auth/manage-business/Certify.vue'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -11,29 +10,11 @@ const vuetify = new Vuetify({})
 describe('Add Business Form', () => {
   let wrapper: Wrapper<any>
 
-  const userModule: any = {
-    namespaced: true,
-    state: {
-      currentUser: {
-        firstName: 'Nadia',
-        lastName: 'Woodie'
-      }
-    },
-    actions: UserModule.actions,
-    mutations: UserModule.mutations,
-    getters: UserModule.getters
-  }
-
   beforeAll(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: userModule
-      }
-    })
+    const store = new Vuex.Store({ strict: false })
 
     wrapper = mount(Certify, {
       store,
@@ -41,8 +22,7 @@ describe('Add Business Form', () => {
       vuetify,
       propsData: {
         entity: 'entity',
-        clause: 'Lorem ipsum dolor sit amet.',
-        currentUserName: 'Woodie, Nadia'
+        certifiedBy: 'Woodie, Nadia'
       }
     })
   })
@@ -56,11 +36,11 @@ describe('Add Business Form', () => {
     expect(wrapper.attributes('id')).toBe('certify')
     expect(wrapper.find('#certify').isVisible()).toBe(true)
 
-    // verify checkbox
-    const fmCertifyLabel = wrapper.find('.certify-checkbox label').text()
-    expect(fmCertifyLabel).toContain('Woodie, Nadia')
-    expect(fmCertifyLabel).toContain('certifies that')
-    expect(fmCertifyLabel).toContain('of the entity')
-    expect(wrapper.find('.certify-clause').text()).toBe('Lorem ipsum dolor sit amet.')
+    // verify checkbox label text
+    const text = wrapper.find('.certify-checkbox label').text()
+    expect(text).toContain('Woodie, Nadia')
+    expect(text).toContain('certifies that')
+    expect(text).toContain('they have relevant')
+    expect(text).toContain('on behalf of this')
   })
 })

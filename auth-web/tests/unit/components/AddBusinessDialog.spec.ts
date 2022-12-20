@@ -122,13 +122,15 @@ tests.forEach(test => {
       expect(wrapper.find(HelpDialog).exists()).toBe(true)
 
       // verify input fields
-      expect(wrapper.find('.business-identifier').attributes('label')).toBe('Incorporation Number or Registration Number')
+      expect(wrapper.find('.business-identifier').attributes('label'))
+        .toBe('Incorporation Number or Registration Number')
       expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
       expect(wrapper.find('.certify').exists()).toBe(test.certifyExists)
       expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
-      expect(wrapper.find('.certifier').exists()).toBe(test.isGovStaffAccount)
+      expect(wrapper.find('.authorization').exists()).toBe(test.isGovStaffAccount)
+
       if (test.isGovStaffAccount) {
-        expect(wrapper.find('.certifier').attributes('label')).toContain('Legal name of certified person')
+        expect(wrapper.find('.authorization').attributes('label')).toContain('Legal name of Authorized Person')
       }
 
       // verify buttons

@@ -12,6 +12,7 @@
           v-model="nrNumber"
           @blur="formatNrNumber()"
           data-test="nr-number"
+          autofocus
         />
         <v-text-field
           filled persistent-hint
