@@ -39,12 +39,12 @@ export default class Certify extends Vue {
   @Prop({ default: '' })
   readonly clause: string
 
+  /** Certified by Name */
+  @Prop({ default: '' })
+  readonly currentUserName: string
+
   // local variable
   protected isCertified = false
-
-  get currentUserName (): string {
-    return `${this.currentUser.lastName}, ${this.currentUser.firstName}`
-  }
 
   /** Emits an event to update the Is Certified prop. */
   @Emit('update:isCertified')

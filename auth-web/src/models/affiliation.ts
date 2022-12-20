@@ -3,6 +3,7 @@ import { Organization } from '@/models/Organization'
 
 export interface CreateRequestBody {
   businessIdentifier: string
+  certifiedByName: string
   passCode: string
 }
 

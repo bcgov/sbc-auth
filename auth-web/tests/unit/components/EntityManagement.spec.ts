@@ -44,7 +44,8 @@ describe('Entity Management Component', () => {
       namespaced: true,
       state: {
         currentOrganization: {
-          name: 'new org'
+          name: 'new org',
+          orgType: 'STAFF'
         }
       }
     }
@@ -61,11 +62,22 @@ describe('Entity Management Component', () => {
       }
     }
 
+    const userModule: any = {
+      namespaced: true,
+      state: {
+        currentUser: {
+          firstName: 'Nadia',
+          lastName: 'Woodie'
+        }
+      }
+    }
+
     const store = new Vuex.Store({
       strict: false,
       modules: {
         org: orgModule,
-        business: businessModule
+        business: businessModule,
+        user: userModule
       }
     })
     wrapper = mount(EntityManagement, {
