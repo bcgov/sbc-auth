@@ -9,46 +9,40 @@
     >
       <template slot="label">
         <span>
-          <strong>{{ currentUserName }}</strong>
-          certifies that they have relevant knowledge of the {{ entity }} and is authorized
-          to act on behalf of this business.
+          <strong>{{ trimmedCertifiedBy || "[Legal Name]" }}</strong> certifies that
+          they have relevant knowledge of the {{ entity }} and is authorized to act
+          on behalf of this business.
         </span>
       </template>
     </v-checkbox>
-
-    <p class="certify-clause">{{ clause }}</p>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import { namespace } from 'vuex-class'
-
-const UserModule = namespace('user')
 
 @Component({})
 export default class Certify extends Vue {
-  @UserModule.State('currentUser') readonly currentUser!: KCUserProfile
-
   /** Entity name. */
   @Prop({ default: 'business' })
   readonly entity: string
 
-  /** Certify clause. */
+  /** Certified by name. */
   @Prop({ default: '' })
-  readonly clause: string
-
-  /** Certified by Name */
-  @Prop({ default: '' })
-  readonly currentUserName: string
+  readonly certifiedBy: string
 
   // local variable
   protected isCertified = false
 
+  /** The trimmed "Certified By" string (may be falsy). */
+  get trimmedCertifiedBy (): string {
+    // remove repeated inline whitespace, and leading/trailing whitespace
+    return this.certifiedBy && this.certifiedBy.replace(/\s+/g, ' ').trim()
+  }
+
   /** Emits an event to update the Is Certified prop. */
   @Emit('update:isCertified')
-  private emitIsCertified (isCertified: boolean): void {}
+  protected emitIsCertified (isCertified: boolean): void {}
 }
 </script>
 
@@ -70,19 +64,20 @@ export default class Certify extends Vue {
     align-items: flex-start;
   }
 
-  // override label size and color
+  // override checkbox color (unchecked, with or without error)
+  .v-icon.mdi-checkbox-blank-outline {
+    color: $gray6 !important;
+    caret-color: $gray6 !important;
+  }
+
+  // override label size
   .v-label {
     font-size: $px-14 !important;
+  }
+
+  // override label color (without error)
+  .v-label:not(.error--text) {
     color: $gray9 !important;
   }
-}
-
-.certify-clause {
-  margin: 0;
-  padding-top: 1rem;
-  padding-left: 2rem;
-  line-height: 1.2rem;
-  color: $gray9;
-  font-size: $px-13;
 }
 </style>
