@@ -41,7 +41,8 @@ describe('Add Business Form', () => {
       vuetify,
       propsData: {
         entity: 'entity',
-        clause: 'Lorem ipsum dolor sit amet.'
+        clause: 'Lorem ipsum dolor sit amet.',
+        currentUserName: 'Woodie, Nadia'
       }
     })
   })
