@@ -133,8 +133,7 @@ class Affiliation:
             .order_by(AffiliationModel.created.desc()) \
             .all()
 
-        entities = [EntityService(entity).as_dict() for entity in entities]
-        return entities
+        return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None, bearer_token=None):
