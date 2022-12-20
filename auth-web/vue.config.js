@@ -16,7 +16,7 @@ module.exports = {
       }
     }
   },
-  chainWebpack(config) {
+  chainWebpack (config) {
     // disable type check for build (composition api library fails)
     if (process.env.NODE_ENV === 'production') config.plugins.delete('fork-ts-checker')
   },
