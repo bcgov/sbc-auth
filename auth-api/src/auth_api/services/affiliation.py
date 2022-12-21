@@ -14,22 +14,23 @@
 """Service for managing Affiliation data."""
 
 from typing import Dict
+
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
-from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import contains_eager, subqueryload
 
-from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.contact_link import ContactLink
+from auth_api.models.dataclass import Activity
 from auth_api.models.entity import Entity
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
-from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus, OrgType
+from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
 from auth_api.utils.user_context import UserContext, user_context
@@ -122,16 +123,17 @@ class Affiliation:
     def find_affiliations_by_org_id(org_id):
         """Return business affiliations for the org."""
         # Accomplished in service instead of model (easier to avoid circular reference issues).
-        subquery = db.session.query(
-                AffiliationModel.entity_id, AffiliationModel.created, AffiliationModel.certified_by_name) \
-            .join(Entity).filter(AffiliationModel.org_id == org_id) \
-            .subquery()
-
         entities = db.session.query(Entity) \
-            .options(subqueryload(Entity.contacts).subqueryload(ContactLink.contact)) \
-            .join(subquery, subquery.c.entity_id == Entity.id) \
-            .order_by(subquery.c.created.desc()) \
+            .join(AffiliationModel) \
+            .options(
+                contains_eager(Entity.affiliations),
+                subqueryload(Entity.contacts).subqueryload(ContactLink.contact),
+                subqueryload(Entity.created_by),
+                subqueryload(Entity.modified_by)) \
+            .filter(AffiliationModel.org_id == org_id, Entity.affiliations.any(AffiliationModel.org_id == org_id)) \
+            .order_by(AffiliationModel.created.desc()) \
             .all()
+
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
@@ -244,8 +246,6 @@ class Affiliation:
                     'passCodeClaimed': True
                 })
 
-            certified_by_name = certified_by_name if org.as_dict()['org_type'] in (
-                OrgType.SBC_STAFF.value, OrgType.STAFF.value) else ''
             # Affiliation may already already exist.
             if not (affiliation_model :=
                     AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity.identifier)):
