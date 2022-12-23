@@ -11,6 +11,8 @@ module.exports = {
     ],
     resolve: {
       alias: {
+        // Important to have this line otherwise wrong vue instance can happen while including fas-ui.
+        '@vue/composition-api': path.resolve('./node_modules/@vue/composition-api'),
         'vue': path.resolve('./node_modules/vue'),
         '$assets': path.resolve('./src/assets/')
       }
