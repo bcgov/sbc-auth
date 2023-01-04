@@ -284,8 +284,6 @@ export default class AddBusinessDialog extends Vue {
   }
 
   get isFormValid (): boolean {
-    const validCertifier = (this.isGovStaffAccount && !this.authorizationName)
-
     // business id is required
     // passcode is required
     // firms must accept certify clause
@@ -295,7 +293,7 @@ export default class AddBusinessDialog extends Vue {
       !!this.businessIdentifier &&
       !!this.passcode &&
       (!this.isFirm || this.isCertified) &&
-      validCertifier &&
+      !!this.certifiedBy &&
       this.$refs.addBusinessForm.validate()
     )
   }
