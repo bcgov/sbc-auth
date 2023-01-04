@@ -129,8 +129,6 @@ describe('IncorpOrRegisterView.vue', () => {
       }
     ]
 
-    await Vue
-
     const expansionItems = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-header')
 
     expect(expansionItems[0].textContent).toContain('Expansion 1')
