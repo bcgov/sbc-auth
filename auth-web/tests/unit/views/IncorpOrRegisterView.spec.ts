@@ -129,6 +129,8 @@ describe('IncorpOrRegisterView.vue', () => {
       }
     ]
 
+    await Vue
+
     const expansionItems = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-header')
 
     expect(expansionItems[0].textContent).toContain('Expansion 1')
@@ -142,6 +144,7 @@ describe('IncorpOrRegisterView.vue', () => {
     await wrapper.findAll('.v-expansion-panel-header').at(0).trigger('click')
     await wrapper.findAll('.v-expansion-panel-header').at(1).trigger('click')
     await wrapper.findAll('.v-expansion-panel-header').at(2).trigger('click')
+    await Vue.nextTick()
 
     const expansionSubList = wrapper.vm.$el.querySelectorAll('.v-expansion-panel-content .list-item-text')
 

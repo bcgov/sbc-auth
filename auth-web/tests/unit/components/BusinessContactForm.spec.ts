@@ -9,6 +9,8 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
+const vuetify = new Vuetify({})
+
 describe('BusinessContactForm.vue', () => {
   let wrapper: Wrapper<BusinessContactForm>
   const config = {
@@ -52,7 +54,8 @@ describe('BusinessContactForm.vue', () => {
 
     wrapper = mount(BusinessContactForm, {
       store,
-      localVue
+      localVue,
+      vuetify
     })
 
     jest.resetModules()

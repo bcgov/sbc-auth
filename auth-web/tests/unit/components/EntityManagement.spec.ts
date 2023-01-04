@@ -158,7 +158,7 @@ describe('Entity Management Component', () => {
     expect(wrapper.findAll('.add-existing-item').length).toBe(2)
 
     // tooltips exist
-    expect(wrapper.findAll('.top-tooltip').length).toBe(2)
+    expect(wrapper.findAll('.v-tooltip--top').length).toBe(2)
   })
 
   it('all incorporate numbered businesses btns exist', async () => {

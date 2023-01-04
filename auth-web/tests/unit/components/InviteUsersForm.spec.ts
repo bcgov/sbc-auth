@@ -15,6 +15,8 @@ document.body.setAttribute('data-app', 'true')
 
 jest.mock('../../../src/services/bcol.services')
 
+const vuetify = new Vuetify({})
+
 describe('InviteUsersForm.vue', () => {
   let store
   let wrapper: any
@@ -105,6 +107,7 @@ describe('InviteUsersForm.vue', () => {
     wrapper = shallowMount(InviteUsersForm, {
       store,
       localVue,
+      vuetify,
       mocks: { $t }
     })
     expect(wrapper.find('.invite-list')).toBeTruthy()
@@ -116,6 +119,7 @@ describe('InviteUsersForm.vue', () => {
     wrapper = mount(InviteUsersForm, {
       store,
       localVue,
+      vuetify,
       mocks: { $t },
       stubs: {
         'v-overflow-btn': `<div/>`
@@ -146,6 +150,7 @@ describe('InviteUsersForm.vue', () => {
     wrapper = mount(InviteUsersForm, {
       store,
       localVue,
+      vuetify,
       mocks: { $t },
       stubs: {
         'v-overflow-btn': `<div/>`
