@@ -5,19 +5,19 @@
       <span v-on="on" class="tooltip-text" v-else>Numbered Benefit Company</span>
     </template>
     <v-card class="tooltip-content">
-      <div v-if="enableBcCccUlc">
+      <template v-if="enableBcCccUlc">
         <h3 class="mb-3">Numbered Company</h3>
         <span>A Company can choose to use as its name the incorporation number of the company followed by “B.C. Ltd.”,
           "B.C. Unlimited Liability Company", or "B.C. Community Contribution Company." The incorporation number is
           assigned by the Business Registry after the Incorporation Application is filed and the company is
           incorporated.</span>
-      </div>
-      <div v-else>
+      </template>
+      <template v-else>
         <h3 class="mb-3">Numbered Benefit Company</h3>
         <span>A Benefit Company can choose to use as its name the incorporation number of the company followed by “B.C.
           Ltd.” The incorporation number is assigned by the Business Registry after the Incorporation Application is
           filed and the company is incorporated.</span>
-      </div>
+      </template>
     </v-card>
   </v-tooltip>
 </template>
@@ -30,7 +30,7 @@ import Vue from 'vue'
 
 @Component({})
 export default class NumberedCompanyTooltip extends Vue {
-  private get enableBcCccUlc (): boolean {
+  public get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
   }
 }
@@ -50,7 +50,7 @@ export default class NumberedCompanyTooltip extends Vue {
     .tooltip-content {
       min-width: 30rem;
       padding: 2rem;
-      font-size: 0.75rem;
+      font-size: $px-12;
     }
   }
 

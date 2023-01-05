@@ -14,8 +14,8 @@
                   My Business Registry</a>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
-              <div v-if="enableBcCccUlc">
-                <v-list-item class="list-item" v-for="(item, index) in bulletPointsAll" :key="index" >
+              <template>
+                <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index" >
                   <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
                   <v-list-item-content>
                     <v-list-item-subtitle class="list-item-text">
@@ -23,23 +23,14 @@
                     </v-list-item-subtitle>
                   </v-list-item-content>
                 </v-list-item>
-              </div>
-              <div v-else>
-                <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index" >
-                  <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-                  <v-list-item-content>
-                    <v-list-item-subtitle class="list-item-text">
-                      {{item.text}}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </div>
+              </template>
             </v-list-item-content>
           </v-list-item>
           <div class="pb-3">To register or incorporate, you will be asked for the following information:</div>
+
+          <!-- enableBcCccUlc feature flag-->
           <template>
-            <!-- enableBcCccUlc feature flag-->
-            <div v-if="enableBcCccUlc">
+            <template v-if="enableBcCccUlc">
               <v-expansion-panels flat tile accordion>
                 <v-expansion-panel class="incorp-expansion-panels">
                   <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
@@ -96,10 +87,8 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-            </div>
-
-            <!-- For BEN only as feature flag 'EnableBcCccUlc' enabled. Remove section when FF removed -->
-            <div v-else>
+            </template>
+            <template v-else>
               <v-expansion-panels flat tile accordion>
                 <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
                   <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
@@ -123,7 +112,7 @@
                   </v-expansion-panel-content>
                 </v-expansion-panel>
               </v-expansion-panels>
-            </div>
+            </template>
           </template>
         </v-list>
         <!-- Panel Btns -->
@@ -172,13 +161,13 @@ export default class IncorpOrRegisterView extends Vue {
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
-  private readonly bulletPoints: Array<any> = [
+  readonly bulletPointsBEN: Array<any> = [
     { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
-    { text: 'Incorporate a B.C. based company or a cooperative association.' }
+    { text: 'Incorporate a benefit company or a cooperative association.' }
   ]
 
   // Use this when feature flag 'EnableBcCccUlc' no longer used. Change name and refrences
-  private readonly bulletPointsAll: Array<any> = [
+  readonly bulletPointsIA: Array<any> = [
     { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
     { text: 'Incorporate a B.C. based company or a cooperative association.' }
   ]
@@ -190,7 +179,7 @@ export default class IncorpOrRegisterView extends Vue {
         { text: 'The name(s) and address(es) of the proprietor or partner(s).' }
       ]
     },
-    { text: 'B.C. Based Company',
+    { text: 'Benefit Company',
       items: [
         { text: 'Office addresses, director names and addresses, share structure and articles.' }
       ]
@@ -222,8 +211,16 @@ export default class IncorpOrRegisterView extends Vue {
   @Emit('manage-businesses')
   private emitManageBusinesses (): void {}
 
-  private get enableBcCccUlc (): boolean {
+  public get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
+  }
+
+  public get bulletPointList (): Array<any> {
+    if (this.enableBcCccUlc) {
+      return this.bulletPointsIA
+    } else {
+      return this.bulletPointsBEN
+    }
   }
 }
 </script>
@@ -298,7 +295,7 @@ export default class IncorpOrRegisterView extends Vue {
     .tooltip-content {
       min-width: 30rem;
       padding: 2rem;
-      font-size: 0.75rem;
+      font-size: $px-12;
     }
   }
 

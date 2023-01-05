@@ -5,8 +5,8 @@
       <v-col cols="12" md="6">
         <h2>Manage and Maintain Your Business</h2>
         <v-list class="py-0 my-4" color="transparent">
-          <div v-if="enableBcCccUlc">
-            <v-list-item class="list-item" v-for="(item, index) in bulletPointsAll" :key="index">
+          <template>
+            <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index">
               <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
               <v-list-item-content>
                 <v-list-item-subtitle class="list-item-text">
@@ -22,26 +22,7 @@
                 </v-list-item>
               </v-list-item-content>
             </v-list-item>
-          </div>
-          <div v-else>
-            <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-              <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-              <v-list-item-content>
-                <v-list-item-subtitle class="list-item-text">
-                  {{item.text}}
-                </v-list-item-subtitle>
-                <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
-                  <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-                  <v-list-item-content>
-                    <v-list-item-subtitle class="list-item-text">
-                      {{item.text}}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-content>
-            </v-list-item>
-          </div>
-
+          </template>
         </v-list>
         <!-- Panel Btns -->
         <div class="incorporate-btns">
@@ -144,7 +125,7 @@ export default class MaintainBusinessView extends Vue {
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
-  private readonly bulletPoints: Array<any> = [
+  private readonly bulletPointsBEN: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
       'business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
@@ -158,7 +139,7 @@ export default class MaintainBusinessView extends Vue {
   ]
 
   // Use this when feature flag 'EnableBcCccUlc' no longer used. Change name and refrences accordingly.
-  private readonly bulletPointsAll: Array<any> = [
+  private readonly bulletPointsIA: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
       'business up to date with the Registry.' },
     { text: 'You can manage your business information using your BC Registries account:',
@@ -191,8 +172,16 @@ export default class MaintainBusinessView extends Vue {
   @Emit('manage-businesses')
   private emitManageBusinesses () {}
 
-  private get enableBcCccUlc (): boolean {
+  public get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
+  }
+
+  public get bulletPointList (): Array<any> {
+    if (this.enableBcCccUlc) {
+      return this.bulletPointsIA
+    } else {
+      return this.bulletPointsBEN
+    }
   }
 }
 </script>
