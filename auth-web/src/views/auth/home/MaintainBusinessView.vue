@@ -5,24 +5,22 @@
       <v-col cols="12" md="6">
         <h2>Manage and Maintain Your Business</h2>
         <v-list class="py-0 my-4" color="transparent">
-          <template>
-            <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index">
-              <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-              <v-list-item-content>
-                <v-list-item-subtitle class="list-item-text">
-                  {{item.text}}
-                </v-list-item-subtitle>
-                <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
-                  <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-                  <v-list-item-content>
-                    <v-list-item-subtitle class="list-item-text">
-                      {{item.text}}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-content>
-            </v-list-item>
-          </template>
+          <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index">
+            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+            <v-list-item-content>
+              <v-list-item-subtitle class="list-item-text">
+                {{item.text}}
+              </v-list-item-subtitle>
+              <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
+                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+                <v-list-item-content>
+                  <v-list-item-subtitle class="list-item-text">
+                    {{item.text}}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list-item-content>
+          </v-list-item>
         </v-list>
         <!-- Panel Btns -->
         <div class="incorporate-btns">
@@ -172,11 +170,11 @@ export default class MaintainBusinessView extends Vue {
   @Emit('manage-businesses')
   private emitManageBusinesses () {}
 
-  public get enableBcCccUlc (): boolean {
+  get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
   }
 
-  public get bulletPointList (): Array<any> {
+  get bulletPointList (): Array<any> {
     if (this.enableBcCccUlc) {
       return this.bulletPointsIA
     } else {

@@ -30,7 +30,7 @@ import Vue from 'vue'
 
 @Component({})
 export default class NumberedCompanyTooltip extends Vue {
-  public get enableBcCccUlc (): boolean {
+  get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
   }
 }

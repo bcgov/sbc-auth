@@ -29,90 +29,88 @@
           <div class="pb-3">To register or incorporate, you will be asked for the following information:</div>
 
           <!-- enableBcCccUlc feature flag-->
-          <template>
-            <template v-if="enableBcCccUlc">
-              <v-expansion-panels flat tile accordion>
-                <v-expansion-panel class="incorp-expansion-panels">
-                  <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                    <template v-slot:actions>
-                      <v-icon color="primary" class="incorp-icon">
-                        $expand
-                      </v-icon>
-                    </template>
-                    Sole Proprietorship, DBA, and General Partnership
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                    <span id="expPnlContent1" class="list-item-text py-3">
-                      The name(s) and address(es) of the proprietor or partner(s).</span>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-                <v-tooltip top max-width="450px" light content-class="tooltip">
-                  <template v-slot:activator="{ on }">
-                    <v-expansion-panel class="incorp-expansion-panels">
-                      <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                        <template v-slot:actions>
-                          <v-icon color="primary">
-                            $expand
-                          </v-icon>
-                        </template>
-                        <span class="tooltip-text" v-on="on">B.C. Based Company</span>
-                      </v-expansion-panel-header>
-                      <v-expansion-panel-content>
-                        <span id="expPnlContent2" class="list-item-text py-3">
-                          Office addresses, director names and addresses, share structure and articles.</span>
-                      </v-expansion-panel-content>
-                    </v-expansion-panel>
+          <template v-if="enableBcCccUlc">
+            <v-expansion-panels flat tile accordion>
+              <v-expansion-panel class="incorp-expansion-panels">
+                <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                  <template v-slot:actions>
+                    <v-icon color="primary" class="incorp-icon">
+                      $expand
+                    </v-icon>
                   </template>
-                  <v-card class="tooltip-content">
-                    <div>
-                      <h3 class="mb-3">B.C. Based Company</h3>
-                      <span>You can incorporate the following B.C. based company types: Limited Company, Unlimited
-                        Liability Company, Benefit Company, and Community Contribution Company.</span>
-                    </div>
-                  </v-card>
-                </v-tooltip>
-                <v-expansion-panel class="incorp-expansion-panels">
-                  <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                    <template v-slot:actions>
-                      <v-icon color="primary">
-                        $expand
-                      </v-icon>
-                    </template>
-                    Cooperative Association
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                    <span id="expPnlContent3" class="list-item-text py-3">
-                      Office addresses, director names and addresses, rules of the association
-                      and memorandum.</span>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </template>
-            <template v-else>
-              <v-expansion-panels flat tile accordion>
-                <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
-                  <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                    <template v-slot:actions>
-                      <v-icon color="primary">
-                        $expand
-                      </v-icon>
-                    </template>
-                    {{ item.text }}
-                  </v-expansion-panel-header>
-                  <v-expansion-panel-content>
-                      <v-list-item-content>
-                        <v-list-item class="list-item" v-for="(subItem, subIndex) in item.items" :key="subIndex">
-                          <v-list-item-content>
-                            <v-list-item-subtitle class="list-item-text py-3">
-                              {{subItem.text}}
-                            </v-list-item-subtitle>
-                          </v-list-item-content>
-                        </v-list-item>
-                      </v-list-item-content>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </template>
+                  Sole Proprietorship, DBA, and General Partnership
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <span id="expPnlContent1" class="list-item-text py-3">
+                    The name(s) and address(es) of the proprietor or partner(s).</span>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+              <v-tooltip top max-width="450px" light content-class="tooltip">
+                <template v-slot:activator="{ on }">
+                  <v-expansion-panel class="incorp-expansion-panels">
+                    <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                      <template v-slot:actions>
+                        <v-icon color="primary">
+                          $expand
+                        </v-icon>
+                      </template>
+                      <span class="tooltip-text" v-on="on">B.C. Based Company</span>
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <span id="expPnlContent2" class="list-item-text py-3">
+                        Office addresses, director names and addresses, share structure and articles.</span>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </template>
+                <v-card class="tooltip-content">
+                  <div>
+                    <h3 class="mb-3">B.C. Based Company</h3>
+                    <span>You can incorporate the following B.C. based company types: Limited Company, Unlimited
+                      Liability Company, Benefit Company, and Community Contribution Company.</span>
+                  </div>
+                </v-card>
+              </v-tooltip>
+              <v-expansion-panel class="incorp-expansion-panels">
+                <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                  <template v-slot:actions>
+                    <v-icon color="primary">
+                      $expand
+                    </v-icon>
+                  </template>
+                  Cooperative Association
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <span id="expPnlContent3" class="list-item-text py-3">
+                    Office addresses, director names and addresses, rules of the association
+                    and memorandum.</span>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </template>
+          <template v-else>
+            <v-expansion-panels flat tile accordion>
+              <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
+                <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                  <template v-slot:actions>
+                    <v-icon color="primary">
+                      $expand
+                    </v-icon>
+                  </template>
+                  {{ item.text }}
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                    <v-list-item-content>
+                      <v-list-item class="list-item" v-for="(subItem, subIndex) in item.items" :key="subIndex">
+                        <v-list-item-content>
+                          <v-list-item-subtitle class="list-item-text py-3">
+                            {{subItem.text}}
+                          </v-list-item-subtitle>
+                        </v-list-item-content>
+                      </v-list-item>
+                    </v-list-item-content>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </template>
         </v-list>
         <!-- Panel Btns -->
@@ -211,11 +209,11 @@ export default class IncorpOrRegisterView extends Vue {
   @Emit('manage-businesses')
   private emitManageBusinesses (): void {}
 
-  public get enableBcCccUlc (): boolean {
+  get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
   }
 
-  public get bulletPointList (): Array<any> {
+  get bulletPointList (): Array<any> {
     if (this.enableBcCccUlc) {
       return this.bulletPointsIA
     } else {
