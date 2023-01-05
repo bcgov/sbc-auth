@@ -137,7 +137,7 @@ class Affiliation:
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None, bearer_token=None):
+    def create_affiliation(org_id, business_identifier, pass_code=None, certified_by_name=None, bearer_token=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -177,7 +177,7 @@ class Affiliation:
         if affiliation is not None:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
-        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id)
+        affiliation = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=certified_by_name)
         affiliation.save()
 
         if entity_type not in ['SP', 'GP']:
