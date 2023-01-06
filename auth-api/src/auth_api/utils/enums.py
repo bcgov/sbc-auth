@@ -12,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Enum definitions."""
-from enum import Enum
+from .base_enum import BaseEnum
 
 
-class AuthHeaderType(Enum):
+class AuthHeaderType(BaseEnum):
     """Authorization header types."""
 
     BASIC = 'Basic {}'
     BEARER = 'Bearer {}'
 
 
-class ContentType(Enum):
+class ContentType(BaseEnum):
     """Http Content Types."""
 
     JSON = 'application/json'
@@ -30,14 +30,14 @@ class ContentType(Enum):
     PDF = 'application/pdf'
 
 
-class NotificationType(Enum):
+class NotificationType(BaseEnum):
     """notification types."""
 
     ROLE_CHANGED = 'ROLE_CHANGED'
     MEMBERSHIP_APPROVED = 'MEMBERSHIP_APPROVED'
 
 
-class CorpType(Enum):
+class CorpType(BaseEnum):
     """Corp Types."""
 
     NR = 'NR'
@@ -50,14 +50,14 @@ class CorpType(Enum):
     CC = 'CC'  # Community Contribution
 
 
-class ProductTypeCode(Enum):
+class ProductTypeCode(BaseEnum):
     """Product Type code."""
 
     INTERNAL = 'INTERNAL'
     PARTNER = 'PARTNER'
 
 
-class RequiredAction(Enum):
+class RequiredAction(BaseEnum):
     """Keycloak required actions."""
 
     VERIFY_EMAIL = 'VERIFY_EMAIL'
@@ -66,7 +66,7 @@ class RequiredAction(Enum):
     UPDATE_PASSWORD = 'UPDATE_PASSWORD'
 
 
-class PaymentMethod(Enum):
+class PaymentMethod(BaseEnum):
     """Payment types."""
 
     CREDIT_CARD = 'CC'
@@ -77,7 +77,7 @@ class PaymentMethod(Enum):
     EJV = 'EJV'
 
 
-class PaymentAccountStatus(Enum):
+class PaymentAccountStatus(BaseEnum):
     """Payment types."""
 
     CREATED = 'CREATED'
@@ -85,7 +85,7 @@ class PaymentAccountStatus(Enum):
     FAILED = 'FAILED'
 
 
-class OrgType(Enum):
+class OrgType(BaseEnum):
     """Org types."""
 
     PREMIUM = 'PREMIUM'
@@ -94,7 +94,7 @@ class OrgType(Enum):
     SBC_STAFF = 'SBC_STAFF'
 
 
-class DocumentType(Enum):
+class DocumentType(BaseEnum):
     """Document types."""
 
     TERMS_OF_USE = 'termsofuse'
@@ -104,7 +104,7 @@ class DocumentType(Enum):
     TERMS_OF_USE_PAD = 'termsofuse_pad'
 
 
-class NRStatus(Enum):
+class NRStatus(BaseEnum):
     """NR statuses."""
 
     APPROVED = 'APPROVED'
@@ -113,14 +113,14 @@ class NRStatus(Enum):
     CONSUMED = 'CONSUMED'
 
 
-class NRNameStatus(Enum):
+class NRNameStatus(BaseEnum):
     """NR name statuses."""
 
     APPROVED = 'APPROVED'
     CONDITION = 'CONDITION'
 
 
-class AffidavitStatus(Enum):
+class AffidavitStatus(BaseEnum):
     """Affidavit statuses."""
 
     PENDING = 'PENDING'
@@ -129,7 +129,7 @@ class AffidavitStatus(Enum):
     INACTIVE = 'INACTIVE'
 
 
-class AccessType(Enum):
+class AccessType(BaseEnum):
     """Access Types."""
 
     REGULAR = 'REGULAR'
@@ -140,7 +140,7 @@ class AccessType(Enum):
     GOVN = 'GOVN'  # for govt non-ministry
 
 
-class Status(Enum):
+class Status(BaseEnum):
     """User Membership status."""
 
     ACTIVE = 1
@@ -150,14 +150,14 @@ class Status(Enum):
     PENDING_STAFF_REVIEW = 5
 
 
-class UserStatus(Enum):
+class UserStatus(BaseEnum):
     """User Membership status."""
 
     ACTIVE = 1
     INACTIVE = 2
 
 
-class OrgStatus(Enum):
+class OrgStatus(BaseEnum):
     """User Membership status."""
 
     ACTIVE = 'ACTIVE'
@@ -170,7 +170,7 @@ class OrgStatus(Enum):
     PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'  # user created , staff need to approve.
 
 
-class ProductSubscriptionStatus(Enum):
+class ProductSubscriptionStatus(BaseEnum):
     """Product Subscription status."""
 
     ACTIVE = 'ACTIVE'
@@ -181,7 +181,7 @@ class ProductSubscriptionStatus(Enum):
     SUSPENDED = 'SUSPENDED'  # this is basically staff suspended for now
 
 
-class SuspensionReasonCode(Enum):
+class SuspensionReasonCode(BaseEnum):
     """Suspension Reason Code for suspending an account."""
 
     OWNER_CHANGE = 'Account Ownership Change'
@@ -190,7 +190,7 @@ class SuspensionReasonCode(Enum):
     FRAUDULENT = 'Fraudulent Activity'
 
 
-class InvitationType(Enum):
+class InvitationType(BaseEnum):
     """Invitation type."""
 
     GOVM = 'GOVM'  # Used to indicate an anonymous account invitation
@@ -198,21 +198,21 @@ class InvitationType(Enum):
     STANDARD = 'STANDARD'  # Used to indicate the standard email invite with admin approval
 
 
-class IdpHint(Enum):
+class IdpHint(BaseEnum):
     """IdpHint for user login."""
 
     BCROS = 'bcros'
     BCEID = 'bceid'
 
 
-class InvitationStatus(Enum):
+class InvitationStatus(BaseEnum):
     """Invitation statuses."""
 
     ACCEPTED = 'ACCEPTED'
     PENDING = 'PENDING'
 
 
-class LoginSource(Enum):
+class LoginSource(BaseEnum):
     """Login source values."""
 
     PASSCODE = 'PASSCODE'
@@ -223,7 +223,7 @@ class LoginSource(Enum):
     API_GW = 'API_GW'
 
 
-class ProductCode(Enum):
+class ProductCode(BaseEnum):
     """Product code."""
 
     BUSINESS = 'BUSINESS'
@@ -236,7 +236,7 @@ class ProductCode(Enum):
     MHR = 'MHR'
 
 
-class TaskRelationshipType(Enum):
+class TaskRelationshipType(BaseEnum):
     """Task relationship type."""
 
     ORG = 'ORG'  # Task related to Org staff review
@@ -245,7 +245,7 @@ class TaskRelationshipType(Enum):
     USER = 'USER'
 
 
-class TaskStatus(Enum):
+class TaskStatus(BaseEnum):
     """Task relationship type."""
 
     OPEN = 'OPEN'  # Open Task - needs to be taken action
@@ -254,7 +254,7 @@ class TaskStatus(Enum):
     CLOSED = 'CLOSED'
 
 
-class TaskRelationshipStatus(Enum):
+class TaskRelationshipStatus(BaseEnum):
     """Task Relationship status."""
 
     ACTIVE = 'ACTIVE'
@@ -267,7 +267,7 @@ class TaskRelationshipStatus(Enum):
     PENDING_STAFF_REVIEW = 'PENDING_STAFF_REVIEW'  # user created , staff need to approve.
 
 
-class TaskTypePrefix(Enum):
+class TaskTypePrefix(BaseEnum):
     """Task Type prefix to be appended to type column while saving a task."""
 
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account'
@@ -276,7 +276,7 @@ class TaskTypePrefix(Enum):
     GOVN_REVIEW = 'GovN'
 
 
-class TaskAction(Enum):
+class TaskAction(BaseEnum):
     """Task action."""
 
     AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW'
@@ -284,7 +284,7 @@ class TaskAction(Enum):
     PRODUCT_REVIEW = 'PRODUCT_REVIEW'
 
 
-class ActivityAction(Enum):
+class ActivityAction(BaseEnum):
     """Different actions in an activity."""
 
     INVITE_TEAM_MEMBER = 'INVITE_TEAM_MEMBER'
@@ -301,7 +301,7 @@ class ActivityAction(Enum):
     ADD_PRODUCT_AND_SERVICE = 'ADD_PRODUCT_AND_SERVICE'
 
 
-class PatchActions(Enum):
+class PatchActions(BaseEnum):
     """Patch Actions."""
 
     UPDATE_STATUS = 'updateStatus'

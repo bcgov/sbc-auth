@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Enum definitions."""
-from enum import Enum
+from auth_api.utils.base_enum import BaseEnum
 
 
-class MessageType(Enum):
+class MessageType(BaseEnum):
     """Event Types."""
 
     REFUND_DIRECT_PAY_REQUEST = 'bc.registry.payment.direct_pay.refundRequest'
@@ -56,7 +56,7 @@ class MessageType(Enum):
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
 
 
-class SubjectType(Enum):
+class SubjectType(BaseEnum):
     """Event Types."""
 
     NSF_LOCK_ACCOUNT_SUBJECT = '[BC Registries and Online Services] Your account has been suspended'
@@ -102,7 +102,7 @@ class SubjectType(Enum):
                                         'Update your information.'
 
 
-class TitleType(Enum):
+class TitleType(BaseEnum):
     """Event Title Types."""
 
     ADMIN_NOTIFICATION = 'Notification from Business Registry'
@@ -126,7 +126,7 @@ class TitleType(Enum):
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
 
 
-class TemplateType(Enum):
+class TemplateType(BaseEnum):
     """Template Types."""
 
     NSF_LOCK_ACCOUNT_TEMPLATE_NAME = 'account_suspended_email'
@@ -163,7 +163,7 @@ class TemplateType(Enum):
     RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
 
 
-class Constants(Enum):
+class Constants(BaseEnum):
     """Constants."""
 
     RESET_PASSCODE_HEADER = 'BC Registries have generated a new passcode for your business.'
