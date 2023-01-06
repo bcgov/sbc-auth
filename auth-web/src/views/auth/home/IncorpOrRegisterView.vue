@@ -14,18 +14,80 @@
                   My Business Registry</a>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
-              <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
-                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-                <v-list-item-content>
-                  <v-list-item-subtitle class="list-item-text">
-                    {{item.text}}
-                  </v-list-item-subtitle>
-                </v-list-item-content>
-              </v-list-item>
+              <template>
+                <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index" >
+                  <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+                  <v-list-item-content>
+                    <v-list-item-subtitle class="list-item-text">
+                      {{item.text}}
+                    </v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </template>
             </v-list-item-content>
           </v-list-item>
           <div class="pb-3">To register or incorporate, you will be asked for the following information:</div>
-          <template>
+
+          <!-- enableBcCccUlc feature flag-->
+          <template v-if="enableBcCccUlc">
+            <v-expansion-panels flat tile accordion>
+              <v-expansion-panel class="incorp-expansion-panels">
+                <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                  <template v-slot:actions>
+                    <v-icon color="primary" class="incorp-icon">
+                      $expand
+                    </v-icon>
+                  </template>
+                  Sole Proprietorship, DBA, and General Partnership
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <span id="expPnlContent1" class="list-item-text py-3">
+                    The name(s) and address(es) of the proprietor or partner(s).</span>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+              <v-tooltip top max-width="450px" light content-class="tooltip">
+                <template v-slot:activator="{ on }">
+                  <v-expansion-panel class="incorp-expansion-panels">
+                    <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                      <template v-slot:actions>
+                        <v-icon color="primary">
+                          $expand
+                        </v-icon>
+                      </template>
+                      <span class="tooltip-text" v-on="on">B.C. Based Company</span>
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <span id="expPnlContent2" class="list-item-text py-3">
+                        Office addresses, director names and addresses, share structure and articles.</span>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </template>
+                <v-card class="tooltip-content">
+                  <div>
+                    <h3 class="mb-3">B.C. Based Company</h3>
+                    <span>You can incorporate the following B.C. based company types: Limited Company, Unlimited
+                      Liability Company, Benefit Company, and Community Contribution Company.</span>
+                  </div>
+                </v-card>
+              </v-tooltip>
+              <v-expansion-panel class="incorp-expansion-panels">
+                <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
+                  <template v-slot:actions>
+                    <v-icon color="primary">
+                      $expand
+                    </v-icon>
+                  </template>
+                  Cooperative Association
+                </v-expansion-panel-header>
+                <v-expansion-panel-content>
+                  <span id="expPnlContent3" class="list-item-text py-3">
+                    Office addresses, director names and addresses, rules of the association
+                    and memorandum.</span>
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
+          </template>
+          <template v-else>
             <v-expansion-panels flat tile accordion>
               <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
                 <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
@@ -80,6 +142,8 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import { User } from '@/models/user'
@@ -93,11 +157,20 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 })
 export default class IncorpOrRegisterView extends Vue {
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
-  private readonly bulletPoints: Array<any> = [
+
+  // For BEN only as feature flag 'EnableBcCccUlc' enabled
+  readonly bulletPointsBEN: Array<any> = [
     { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
     { text: 'Incorporate a benefit company or a cooperative association.' }
   ]
 
+  // Use this when feature flag 'EnableBcCccUlc' no longer used. Change name and refrences
+  readonly bulletPointsIA: Array<any> = [
+    { text: 'Register a firm such as a sole proprietorship, a Doing Business As name (DBA), or a general partnership.' },
+    { text: 'Incorporate a B.C. based company or a cooperative association.' }
+  ]
+
+  // For BEN only as feature flag 'EnableBcCccUlc' enabled
   private readonly expansionPanels: Array<any> = [
     { text: 'Sole Proprietorship, DBA, and General Partnership',
       items: [
@@ -135,6 +208,18 @@ export default class IncorpOrRegisterView extends Vue {
 
   @Emit('manage-businesses')
   private emitManageBusinesses (): void {}
+
+  get enableBcCccUlc (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
+  }
+
+  get bulletPointList (): Array<any> {
+    if (this.enableBcCccUlc) {
+      return this.bulletPointsIA
+    } else {
+      return this.bulletPointsBEN
+    }
+  }
 }
 </script>
 
@@ -199,5 +284,25 @@ export default class IncorpOrRegisterView extends Vue {
     .my-registry-text {
       text-decoration: underline;
     }
+  }
+
+  .tooltip {
+    background-color: transparent;
+    opacity: 1 !important;
+
+    .tooltip-content {
+      min-width: 30rem;
+      padding: 2rem;
+      font-size: $px-12;
+    }
+  }
+
+  .tooltip-text {
+    text-decoration: underline dotted;
+    text-underline-offset: 2px;
+  }
+
+  .tooltip-text:hover {
+    cursor: pointer;
   }
 </style>
