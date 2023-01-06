@@ -5,7 +5,7 @@
       <v-col cols="12" md="6">
         <h2>Manage and Maintain Your Business</h2>
         <v-list class="py-0 my-4" color="transparent">
-          <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index">
+          <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index">
             <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
@@ -106,6 +106,8 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { User } from '@/models/user'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
@@ -120,13 +122,30 @@ export default class MaintainBusinessView extends Vue {
   private readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card'
   protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
-  private readonly bulletPoints: Array<any> = [
-    { text: 'Once your business is incorporated or registered you are required to keep information about your business up to date with the Registry.' },
+  // For BEN only as feature flag 'EnableBcCccUlc' enabled
+  private readonly bulletPointsBEN: Array<any> = [
+    { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
+      'business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
       subText: [
         { text: 'See which Annual Reports are due for your corporation and file each year.' },
         { text: 'View and change your current directors or owners and addresses.' },
-        { text: 'See the history of your business\' filings and download copies of all documents including your Statement of Registration, Certificate of Incorporation and more.' }
+        { text: 'See the history of your business\' filings and download copies of all documents including your ' +
+          'Statement of Registration, Certificate of Incorporation and more.' }
+      ]
+    }
+  ]
+
+  // Use this when feature flag 'EnableBcCccUlc' no longer used. Change name and refrences accordingly.
+  private readonly bulletPointsIA: Array<any> = [
+    { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
+      'business up to date with the Registry.' },
+    { text: 'You can manage your business information using your BC Registries account:',
+      subText: [
+        { text: 'See which Annual Reports are due for your corporation and file each year.' },
+        { text: 'View and change your current directors or owners and addresses.' },
+        { text: 'See the history of your business\' filings and download copies of all documents including your ' +
+          'Statement of Registration, Certificate of Incorporation and more.' }
       ]
     }
   ]
@@ -150,6 +169,18 @@ export default class MaintainBusinessView extends Vue {
 
   @Emit('manage-businesses')
   private emitManageBusinesses () {}
+
+  get enableBcCccUlc (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
+  }
+
+  get bulletPointList (): Array<any> {
+    if (this.enableBcCccUlc) {
+      return this.bulletPointsIA
+    } else {
+      return this.bulletPointsBEN
+    }
+  }
 }
 </script>
 
