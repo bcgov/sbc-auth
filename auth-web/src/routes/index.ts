@@ -26,7 +26,7 @@ const router = new Router({
   base: process.env.BASE_URL
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // If the user is authenticated;
   //    If there are allowed or disabled roles specified on the route check if the user has those roles else route to unauthorized
   // If the user is not authenticated
@@ -68,18 +68,22 @@ router.beforeEach((to, from, next) => {
   }
 
   // Enforce navigation guards are checked before navigating anywhere else
-  // If store is not ready, we place a watch on it, then proceed when ready
-  if (store.getters.loading) {
-    store.watch(
-      (state, getters) => getters.loading,
-      value => {
-        if (value === false) {
+  // If store is not ready, we place a watch on it, and wait for it to be ready
+  await new Promise<void>((resolve) => {
+    resolve()
+    if (!store.getters.loading) {
+      proceed()
+      resolve()
+    } else {
+      const unwatch = store.watch(
+        (state, getters) => getters.loading,
+        value => {
+          resolve()
           proceed(to)
-        }
-      })
-  } else {
-    proceed()
-  }
+          unwatch()
+        })
+    }
+  })
 
   function proceed (originalTarget?: Route) {
     const userContact: Contact = (store.state as any)?.user?.userContact
