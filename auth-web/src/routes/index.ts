@@ -17,6 +17,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { User } from '@/models/user'
 import Vue from 'vue'
+import { getRoutes } from './router'
 import store from '@/store'
 
 Vue.use(Router)
@@ -25,6 +26,8 @@ const router = new Router({
   mode: 'history',
   base: process.env.BASE_URL
 })
+
+router.addRoutes(getRoutes())
 
 router.beforeEach(async (to, from, next) => {
   // If the user is authenticated;
@@ -68,23 +71,20 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Enforce navigation guards are checked before navigating anywhere else
-  // If store is not ready, we place a watch on it, and wait for it to be ready
-  await new Promise<void>((resolve) => {
-    if (!store.getters.loading) {
-      proceed()
-      resolve()
-    } else {
-      const unwatch = store.watch(
-        (state, getters) => getters.loading,
-        value => {
-          unwatch()
-          proceed(to)
-          resolve()
-        })
-    }
-  })
+  // If store is not ready, we place a watch on it, then proceed when ready
+  if (store.getters.loading) {
+    store.watch(
+      (state, getters) => getters.loading,
+      value => {
+        if (value === false) {
+          proceed()
+        }
+      })
+  } else {
+    proceed()
+  }
 
-  function proceed (originalTarget?: Route) {
+  function proceed () {
     const userContact: Contact = (store.state as any)?.user?.userContact
     const userProfile: User = (store.state as any)?.user?.userProfile
     const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
@@ -167,7 +167,7 @@ router.beforeEach(async (to, from, next) => {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }
-    originalTarget ? next(originalTarget) : next()
+    next()
   }
 })
 
