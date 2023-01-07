@@ -70,7 +70,6 @@ router.beforeEach(async (to, from, next) => {
   // Enforce navigation guards are checked before navigating anywhere else
   // If store is not ready, we place a watch on it, and wait for it to be ready
   await new Promise<void>((resolve) => {
-    resolve()
     if (!store.getters.loading) {
       proceed()
       resolve()
@@ -78,9 +77,9 @@ router.beforeEach(async (to, from, next) => {
       const unwatch = store.watch(
         (state, getters) => getters.loading,
         value => {
-          resolve()
-          proceed(to)
           unwatch()
+          proceed(to)
+          resolve()
         })
     }
   })
