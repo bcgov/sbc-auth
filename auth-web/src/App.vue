@@ -38,7 +38,7 @@
       <pay-system-alert />
     </div>
     <div class="app-body">
-      <router-view  />
+      <router-view :key="$route.path" />
     </div>
     <sbc-footer></sbc-footer>
   </v-app>
