@@ -17,6 +17,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { User } from '@/models/user'
 import Vue from 'vue'
+import { getRoutes } from './router'
 import store from '@/store'
 
 Vue.use(Router)
@@ -26,7 +27,9 @@ const router = new Router({
   base: process.env.BASE_URL
 })
 
-router.beforeEach((to, from, next) => {
+router.addRoutes(getRoutes())
+
+router.beforeEach(async (to, from, next) => {
   // If the user is authenticated;
   //    If there are allowed or disabled roles specified on the route check if the user has those roles else route to unauthorized
   // If the user is not authenticated
@@ -74,14 +77,14 @@ router.beforeEach((to, from, next) => {
       (state, getters) => getters.loading,
       value => {
         if (value === false) {
-          proceed(to)
+          proceed()
         }
       })
   } else {
     proceed()
   }
 
-  function proceed (originalTarget?: Route) {
+  function proceed () {
     const userContact: Contact = (store.state as any)?.user?.userContact
     const userProfile: User = (store.state as any)?.user?.userProfile
     const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
@@ -164,7 +167,7 @@ router.beforeEach((to, from, next) => {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }
-    originalTarget ? next(originalTarget) : next()
+    next()
   }
 })
 
