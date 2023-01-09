@@ -16,12 +16,12 @@
 Standardize error message to display user friendly messages.
 """
 
-from enum import Enum
+from auth_api.utils.base_enum import BaseEnum
 
 from auth_api import status as http_status
 
 
-class Error(Enum):
+class Error(BaseEnum):
     """Error Codes."""
 
     INVALID_INPUT = 'Invalid input, please check.', http_status.HTTP_400_BAD_REQUEST

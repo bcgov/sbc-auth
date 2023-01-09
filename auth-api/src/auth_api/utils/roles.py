@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Role definitions."""
-from enum import Enum
+from auth_api.utils.base_enum import BaseEnum
 
 from .enums import OrgStatus, OrgType, ProductSubscriptionStatus, Status
 
 
-class Role(Enum):
+class Role(BaseEnum):
     """User Role."""
 
     VIEWER = 'view'

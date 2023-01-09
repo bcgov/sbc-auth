@@ -16,7 +16,7 @@
 Test Utility for creating test scenarios.
 """
 import uuid
-from enum import Enum
+from auth_api.utils.base_enum import BaseEnum
 from random import choice
 from string import ascii_lowercase, ascii_uppercase
 
@@ -37,7 +37,7 @@ JWT_HEADER = {
 }
 
 
-class TestJwtClaims(dict, Enum):
+class TestJwtClaims(dict, BaseEnum):
     """Test scenarios of jwt claims."""
 
     no_role = {
@@ -460,20 +460,20 @@ class TestJwtClaims(dict, Enum):
         }
 
 
-class TestOrgTypeInfo(dict, Enum):
+class TestOrgTypeInfo(dict, BaseEnum):
     """Test scenarios of org type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
     implicit = {'code': 'BASIC', 'desc': 'BASIC'}
 
 
-class TestPaymentTypeInfo(dict, Enum):
+class TestPaymentTypeInfo(dict, BaseEnum):
     """Test scenarios of payment type."""
 
     test_type = {'code': 'TEST', 'desc': 'Test'}
 
 
-class TestPaymentMethodInfo(dict, Enum):
+class TestPaymentMethodInfo(dict, BaseEnum):
     """Test scenarios of payment type."""
 
     @staticmethod
@@ -494,7 +494,7 @@ class TestPaymentMethodInfo(dict, Enum):
         return {'paymentInfo': {'paymentMethod': payment_method.value, 'revenueAccount': revenue_account_details}}
 
 
-class TestAnonymousMembership(dict, Enum):
+class TestAnonymousMembership(dict, BaseEnum):
     """Test scenarios of org status."""
 
     @staticmethod
@@ -504,13 +504,13 @@ class TestAnonymousMembership(dict, Enum):
                 'membershipType': membership}
 
 
-class TestOrgStatusInfo(dict, Enum):
+class TestOrgStatusInfo(dict, BaseEnum):
     """Test scenarios of org status."""
 
     test_status = {'code': 'TEST', 'desc': 'Test'}
 
 
-class TestOrgInfo(dict, Enum):
+class TestOrgInfo(dict, BaseEnum):
     """Test scenarios of org."""
 
     org1 = {'name': 'My Test Org'}
@@ -669,7 +669,7 @@ class TestOrgInfo(dict, Enum):
         }
 
 
-class TestOrgProductsInfo(dict, Enum):
+class TestOrgProductsInfo(dict, BaseEnum):
     """Test scenarios of attaching products to org."""
 
     org_products1 = {'subscriptions': [{'productCode': 'PPR'}]}
@@ -679,7 +679,7 @@ class TestOrgProductsInfo(dict, Enum):
     org_products_business = {'subscriptions': [{'productCode': 'BUSINESS'}]}
 
 
-class TestEntityInfo(dict, Enum):
+class TestEntityInfo(dict, BaseEnum):
     """Test scenarios of entity."""
 
     entity1 = {'businessIdentifier': 'CP1234567',
@@ -759,7 +759,7 @@ class TestEntityInfo(dict, Enum):
     }
 
 
-class TestAffliationInfo(dict, Enum):
+class TestAffliationInfo(dict, BaseEnum):
     """Test scenarios of affiliation."""
 
     affiliation1 = {'businessIdentifier': 'CP1234567'}
@@ -772,14 +772,14 @@ class TestAffliationInfo(dict, Enum):
     invalid = {'name': 'CP1234567'}
 
 
-class DeleteAffiliationPayload(dict, Enum):
+class DeleteAffiliationPayload(dict, BaseEnum):
     """Test scenarios of delete affiliation."""
 
     delete_affiliation1 = {'passcodeResetEmail': 'test@gmail.com', 'resetPasscode': True}
     delete_affiliation2 = {'resetPasscode': False}
 
 
-class TestContactInfo(dict, Enum):
+class TestContactInfo(dict, BaseEnum):
     """Test scenarios of contact."""
 
     contact1 = {
@@ -800,7 +800,7 @@ class TestContactInfo(dict, Enum):
     email_valid = {'email': "abc!#$%&'*+-/=?^_`{|.123@test-test.com"}
 
 
-class TestUserInfo(dict, Enum):
+class TestUserInfo(dict, BaseEnum):
     """Test scenarios of user."""
 
     user1 = {
@@ -971,7 +971,7 @@ class BulkUserTestScenario:
         }
 
 
-class TestBCOLInfo(dict, Enum):
+class TestBCOLInfo(dict, BaseEnum):
     """Test scenarios of org."""
 
     bcol1 = {'bcol_account_id': 'BCOL1'}

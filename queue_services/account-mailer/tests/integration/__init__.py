@@ -13,7 +13,7 @@
 # limitations under the License.
 """Test suite for the integrations to NATS Queue."""
 import uuid
-from enum import Enum
+from auth_api.utils.base_enum import BaseEnum
 
 from auth_api.models import Contact as ContactModel
 from auth_api.models import ContactLink as ContactLinkModel
@@ -92,7 +92,7 @@ def factory_contact_model():
     return contact
 
 
-class TestUserInfo(dict, Enum):
+class TestUserInfo(dict, BaseEnum):
     """Test scenarios of user."""
 
     user1 = {
