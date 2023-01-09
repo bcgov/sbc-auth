@@ -332,7 +332,7 @@ export function getRoutes (): RouteConfig[] {
     },
     {
       path: '/setup-govm-account',
-      name: 'setupaccount',
+      name: 'setup-govm-account',
       component: GovmAccountSetupView,
       props: true,
       meta: { requiresAuth: true, requiresProfile: true }
