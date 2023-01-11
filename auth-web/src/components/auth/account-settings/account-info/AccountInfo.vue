@@ -396,7 +396,7 @@ export default class AccountInfo extends Mixins(
   ]
 
   private async mounted () {
-    await this.syncOrganization(parseInt(this.$route.params.orgId))
+    await this.syncOrganization(parseInt(this.$route.params['orgId']))
     this.setAccountChangedHandler(this.setup)
     await this.setup()
   }
