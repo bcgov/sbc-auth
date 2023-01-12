@@ -6,11 +6,14 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
@@ -35,9 +38,14 @@ describe('ReviewBankInformation.vue', () => {
       state: {
         currentOrganization: {}
       },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
+      actions: {
+        getOrgPayments: jest.fn(),
+        updateOrg: jest.fn(),
+        updatePadInfo: jest.fn(),
+        validatePADInfo: jest.fn()
+      },
+      mutations: {},
+      getters: {}
     }
 
     const store = new Vuex.Store({

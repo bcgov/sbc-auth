@@ -87,11 +87,8 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { User } from '@/models/user'
-import documentService from '@/services/document.services.ts'
-import { getModule } from 'vuex-module-decorators'
+import { mapState } from 'vuex'
 
 @Component({
   components: {
