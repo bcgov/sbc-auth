@@ -1,4 +1,4 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import Vuetify from 'vuetify'
@@ -27,7 +27,7 @@ describe('FasSearchComponent.vue', () => {
 
     const vuetify = new Vuetify({})
 
-    var config = {
+    const config = {
       'FAS_WEB_URL': 'https://fas-dev.apps.silver.devops.gov.bc.ca/',
       'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
     }
