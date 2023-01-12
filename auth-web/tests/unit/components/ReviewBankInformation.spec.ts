@@ -38,9 +38,14 @@ describe('ReviewBankInformation.vue', () => {
       state: {
         currentOrganization: {}
       },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
+      actions: {
+        getOrgPayments: jest.fn(),
+        updateOrg: jest.fn(),
+        updatePadInfo: jest.fn(),
+        validatePADInfo: jest.fn()
+      },
+      mutations: {},
+      getters: {}
     }
 
     const store = new Vuex.Store({
