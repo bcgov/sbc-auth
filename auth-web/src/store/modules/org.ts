@@ -522,6 +522,11 @@ export default class OrgModule extends VuexModule {
     return response?.data
   }
 
+  @Action({ commit: 'setCurrentOrganizationPADInfo', rawError: true })
+  public updatePadInfo (padInfo: PADInfo): PADInfo {
+    return padInfo
+  }
+
   @Action({ rawError: true })
   public async validatePADInfo (): Promise<PADInfoValidation> {
     const padInfo: PADInfo = { ...this.context.state['currentOrgPADInfo'] }

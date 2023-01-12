@@ -6,11 +6,14 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
