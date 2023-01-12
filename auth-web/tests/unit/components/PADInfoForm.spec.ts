@@ -1,13 +1,13 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
-import can from '@/directives/can'
-import { axios } from '@/util/http-util'
-import sinon from 'sinon'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { axios } from '@/util/http-util'
+import can from '@/directives/can'
+import sinon from 'sinon'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -94,7 +94,7 @@ describe('PADInfoForm.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()    
+    expect(wrapper.isVueInstance()).toBeTruthy()
   })
   it('renders with base values', () => {
     expect(wrapper.find(PADInfoForm).exists()).toBe(true)
