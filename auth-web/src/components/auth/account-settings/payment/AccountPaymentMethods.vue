@@ -161,7 +161,6 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
   private get isDisableSaveBtn () {
     let disableSaveBtn = false
-
     if (this.isBtnSaved) {
       disableSaveBtn = false
     } else if ((this.selectedPaymentMethod === PaymentTypes.PAD && !this.padValid) ||

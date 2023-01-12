@@ -46,10 +46,12 @@ export default class TermsOfUse extends Vue {
 
   async mounted () {
     const termsOfService = await this.getTermsOfUse(this.tosType)
-    this.termsContent = termsOfService.content
-    const hasLatestTermsAccepted = this.hasAcceptedLatestTos(termsOfService.versionId)
-    if (!hasLatestTermsAccepted) {
-      this.$emit('tos-version-updated')
+    if (termsOfService) {
+      this.termsContent = termsOfService.content
+      const hasLatestTermsAccepted = this.hasAcceptedLatestTos(termsOfService?.versionId)
+      if (!hasLatestTermsAccepted) {
+        this.$emit('tos-version-updated')
+      }
     }
   }
 

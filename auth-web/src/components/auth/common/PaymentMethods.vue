@@ -6,6 +6,7 @@
     <template v-else-if="!isPaymentEJV">
       <v-card
         outlined
+        :ripple="false"
         hover
         class="payment-card py-8 px-8 mb-4 elevation-1"
         :class="{'selected': isPaymentSelected(payment)}"
@@ -85,14 +86,14 @@
       <v-col cols="9" class="py-0">
         <PADInfoForm
           :padInformation="{}"
-          @is-pre-auth-debit-form-valid="isPADValid"
-          @emit-pre-auth-debit-info="getPADInfo"
+          @is-pre-auth-debit-form-valid="isPADValid($event)"
+          @emit-pre-auth-debit-info="getPADInfo($event)"
           :isChangeView="isChangeView"
           :isAcknowledgeNeeded="isAcknowledgeNeeded"
           :isInitialTOSAccepted="isInitialTOSAccepted"
           :isInitialAcknowledged="isInitialAcknowledged"
           :clearOnEdit="isInitialTOSAccepted"
-          @is-pad-info-touched="isPadInfoTouched"
+          @is-pad-info-touched="isPadInfoTouched($event)"
         ></PADInfoForm>
       </v-col>
     </v-row>
@@ -218,7 +219,7 @@ export default class PaymentMethods extends Vue {
   }
 
   // set on change of input only for single allowed payments
-  private isPadInfoTouched (isTouched) {
+  private isPadInfoTouched (isTouched: boolean) {
     this.isTouched = isTouched
   }
 
@@ -260,7 +261,8 @@ export default class PaymentMethods extends Vue {
     if (isValid) {
       this.paymentMethodSelected({ type: PaymentTypes.PAD }, this.isTouched)
     }
-    return isValid
+    // if !this.isTouched then nothing has changed (keeps save btn disabled)
+    return isValid && this.isTouched
   }
 }
 </script>
