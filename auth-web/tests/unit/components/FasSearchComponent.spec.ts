@@ -28,7 +28,8 @@ describe('FasSearchComponent.vue', () => {
     const vuetify = new Vuetify({})
 
     var config = {
-      'FAS_WEB_URL': 'https://fas-dev.apps.silver.devops.gov.bc.ca/'
+      'FAS_WEB_URL': 'https://fas-dev.apps.silver.devops.gov.bc.ca/',
+      'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
     }
 
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
