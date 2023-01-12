@@ -29,12 +29,13 @@ describe('FasSearchComponent.vue', () => {
 
     const config = {
       'FAS_WEB_URL': 'https://fas-dev.apps.silver.devops.gov.bc.ca/',
-      'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
+      'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca',
+      'PAY_API_VERSION': '/api/v1'
     }
 
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-    wrapper = mount({ template: `<fas-search-component :isLibraryMode="true"/>` }, {
+    wrapper = mount({ template: `<fas-search-component :isLibraryMode='true'/>` }, {
       store,
       i18n,
       localVue,
