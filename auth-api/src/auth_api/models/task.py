@@ -64,12 +64,10 @@ class Task(BaseModel):
         if task_search.start_date:
             # convert PST start_date to UTC then filter
             start_date_utc = cls._str_to_utc_dt(task_search.start_date, False)
-            print(start_date_utc)
             query = query.filter(Task.date_submitted >= start_date_utc)
         if task_search.end_date:
             # convert PST end_date to UTC then set time to end of day then filter
             end_date_utc = cls._str_to_utc_dt(task_search.end_date, True)
-            print(end_date_utc)
             query = query.filter(Task.date_submitted <= end_date_utc)
         if task_search.relationship_status:
             query = query.filter(Task.relationship_status == task_search.relationship_status)

@@ -120,7 +120,6 @@ def test_fetch_tasks_end_of_day(client, jwt, session):
     rv = client.get('/api/v1/tasks?startDate=2022-7-10&endDate=2022-7-10',
                     headers=headers, content_type='application/json')
     item_list = rv.json
-    print(rv.json)
 
     assert item_list['tasks']
     assert len(item_list['tasks']) > 0 and len(item_list['tasks']) <= 1
