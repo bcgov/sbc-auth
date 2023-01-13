@@ -50,7 +50,7 @@ from tests.utilities.factory_scenarios import (
     TestOrgInfo, TestPaymentMethodInfo)
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
-    factory_invitation_anonymous, factory_membership_model, factory_user_model, patch_pay_account_delete,
+    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model, patch_pay_account_delete,
     patch_pay_account_delete_error)
 from tests.utilities.sqlalchemy import clear_event_listeners
 
@@ -168,6 +168,15 @@ def test_duplicate_name(client, jwt, session, keycloak_mock):  # pylint:disable=
                     headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
+
+    # does not conflict with rejected accounts
+    rejected_org = factory_org_model(org_info=TestOrgInfo.org2)
+    rejected_org.status_code = OrgStatus.REJECTED.value
+    rejected_org.save()
+
+    rv = client.get(f'/api/v1/orgs?validateName=true&name={rejected_org.name}&branchName=',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_204_NO_CONTENT
 
 
 def test_search_org_by_client_multiple_status(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument

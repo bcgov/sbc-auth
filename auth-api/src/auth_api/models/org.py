@@ -212,7 +212,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
         query = cls.query.filter(and_(
             func.upper(Org.name) == name.upper(),
             (func.upper(func.coalesce(Org.branch_name, '')) == ((branch_name or '').upper())))
-        ).filter(Org.status_code != OrgStatusEnum.INACTIVE.value)
+        ).filter(~Org.status_code.in_([OrgStatusEnum.INACTIVE.value, OrgStatusEnum.REJECTED.value]))
 
         if org_id:
             query = query.filter(Org.id != org_id)

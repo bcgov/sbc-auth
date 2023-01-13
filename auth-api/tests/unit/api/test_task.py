@@ -110,7 +110,8 @@ def test_fetch_tasks_end_of_day(client, jwt, session):
     user_2 = factory_user_model(TestUserInfo.user2)
 
     date_submitted_1 = dt.datetime(2022, 7, 10, 15, 59, 59)
-    date_submitted_2 = dt.datetime(2022, 7, 11, 0, 0, 0)
+    # this is the utc value so needs to be 8 + hours ahead of midnight or will be returned
+    date_submitted_2 = dt.datetime(2022, 7, 11, 9, 0, 0)
 
     factory_task_model(user_id=user.id, modified_by_id=user.id, date_submitted=date_submitted_1)
     factory_task_model(user_id=user_2.id, modified_by_id=user_2.id, date_submitted=date_submitted_2)
@@ -119,6 +120,7 @@ def test_fetch_tasks_end_of_day(client, jwt, session):
     rv = client.get('/api/v1/tasks?startDate=2022-7-10&endDate=2022-7-10',
                     headers=headers, content_type='application/json')
     item_list = rv.json
+    print(rv.json)
 
     assert item_list['tasks']
     assert len(item_list['tasks']) > 0 and len(item_list['tasks']) <= 1

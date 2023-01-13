@@ -547,14 +547,22 @@ def test_find_org_by_id_no_org(session, auth_mock):  # pylint:disable=unused-arg
 
 def test_find_org_by_name(session, auth_mock):  # pylint:disable=unused-argument
     """Assert that an org can be retrieved by its name."""
-    org = factory_org_service()
-    dictionary = org.as_dict()
+    org_service = factory_org_service()
+    dictionary = org_service.as_dict()
     org_name = dictionary['name']
 
     found_org = OrgService.find_by_org_name(org_name)
 
     assert found_org
     assert found_org.get('orgs')[0].get('name') == org_name
+
+    # does not return rejected orgs
+    org = OrgModel.find_by_org_id(dictionary['id'])
+    org.status_code = OrgStatus.REJECTED.value
+    org.save()
+
+    not_found_org = OrgService.find_by_org_name(org_name)
+    assert not_found_org is None
 
 
 def test_find_org_by_name_branch_name(session, auth_mock):  # pylint:disable=unused-argument
