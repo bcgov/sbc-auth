@@ -23,7 +23,7 @@ import json
 from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.utils.enums import OrgStatus
-from tests.utilities.factory_scenarios import TestBCOLInfo, TestJwtClaims, TestOrgInfo
+from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_auth_header, factory_org_model
 
 
@@ -51,8 +51,10 @@ def test_bcol_id_already_linked(client, jwt, session):
     bcol_org.bcol_account_id = rv.json['accountNumber']
     bcol_org.save()
 
-    rv_duplicate = client.post('/api/v1/bcol-profiles', data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                               headers=headers, content_type='application/json')
+    rv_duplicate = client.post('/api/v1/bcol-profiles',
+                               data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
+                               headers=headers,
+                               content_type='application/json')
     assert rv_duplicate.status_code == http_status.HTTP_409_CONFLICT
 
 
@@ -69,6 +71,8 @@ def test_bcol_id_already_linked_to_rejected(client, jwt, session):
     bcol_org.status_code = OrgStatus.REJECTED.value
     bcol_org.save()
 
-    rv_duplicate = client.post('/api/v1/bcol-profiles', data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
-                               headers=headers, content_type='application/json')
+    rv_duplicate = client.post('/api/v1/bcol-profiles',
+                               data=json.dumps(TestOrgInfo.bcol_linked().get('bcOnlineCredential')),
+                               headers=headers,
+                               content_type='application/json')
     assert rv_duplicate.status_code == http_status.HTTP_200_OK
