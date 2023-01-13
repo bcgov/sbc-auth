@@ -347,7 +347,8 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     ]
 
     private phoneRules = [
-      v => !v || (v.length === 0 || v.length === 14) || 'Phone number is invalid'
+      v => !!v || 'Phone number is required',
+      v => !v || (v.length === 14) || 'Phone number is invalid'
     ]
 
     private extensionRules = [
