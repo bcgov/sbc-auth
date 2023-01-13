@@ -50,8 +50,8 @@ from tests.utilities.factory_scenarios import (
     TestOrgInfo, TestPaymentMethodInfo)
 from tests.utilities.factory_utils import (
     factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
-    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model, patch_pay_account_delete,
-    patch_pay_account_delete_error)
+    factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model,
+    patch_pay_account_delete, patch_pay_account_delete_error)
 from tests.utilities.sqlalchemy import clear_event_listeners
 
 FAKE = Faker()
