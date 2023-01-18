@@ -30,8 +30,8 @@ describe('Deactivated card.vue', () => {
       localVue,
       router,
       mocks: {
-        $t: (mock) => mock,
-      },
+        $t: (mock) => mock
+      }
     })
 
     expect(wrapper.isVueInstance()).toBeTruthy()
