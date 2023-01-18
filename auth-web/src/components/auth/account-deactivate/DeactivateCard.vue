@@ -21,35 +21,34 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator'
+import { computed, defineComponent, ref } from '@vue/composition-api'
 import Vue from 'vue'
+import { useI18n } from 'vue-i18n-bridge'
 
-@Component({
-})
-export default class DeactivateCard extends Vue {
-  @Prop() private type: string
+export default defineComponent({
+  name: 'DeactivateCard',
+  props: {
+    type: String
+  },
+  setup (props) {
+    const { t } = useI18n()
+    const infoArray = ref([
+      { title: 'deactivateMemberRemovalTitle', description: 'deactivateMemberRemovalDesc' },
+      { title: 'businessRemovalTitle', description: 'businessRemovalDesc' },
+      { title: 'padRemovalTitle', type: 'PREMIUM' }
+    ] as any)
 
-  // no type matches means show it for all types
-  private infoArray: { title: string, description?: string, type?: string }[] = [
-    {
-      title: 'deactivateMemberRemovalTitle',
-      description: 'deactivateMemberRemovalDesc'
-    },
-    {
-      title: 'businessRemovalTitle',
-      description: 'businessRemovalDesc'
-    },
-    {
-      title: 'padRemovalTitle',
-      type: 'PREMIUM'
+    const info = computed(() => {
+      return infoArray.value.filter(obj => !obj.type || obj.type === props.type)
+    })
+
+    return {
+      infoArray,
+      t,
+      info
     }
-
-  ]
-
-  private get info () {
-    return this.infoArray.filter(obj => !obj.type || obj.type === this.type)
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
