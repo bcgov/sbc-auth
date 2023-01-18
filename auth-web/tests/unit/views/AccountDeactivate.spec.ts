@@ -6,6 +6,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import i18n from '@/plugins/i18n'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
