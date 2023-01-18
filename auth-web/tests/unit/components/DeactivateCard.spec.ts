@@ -33,13 +33,10 @@ describe('Deactivated card.vue', () => {
   const localVue = createLocalVue()
   localVue.use(Vuex)
   localVue.use(i18n)
-<<<<<<< HEAD
 
   afterEach(() => {
     wrapper.destroy()
   })
-=======
->>>>>>> converted deactivateCard.vue to composition api
 
   it('Truthy and basic test', () => {
     wrapper = mount(DeactivateCard, {
