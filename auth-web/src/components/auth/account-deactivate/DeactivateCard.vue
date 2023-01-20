@@ -13,7 +13,7 @@
         </div>
         <div class="ml-3 mt-1">
           <h4 class="font-weight-bold">{{ t(item.title) }}</h4>
-          <p>{{ t(item.description) }}</p>
+          <p v-if="item.description">{{ t(item.description) }}</p>
         </div>
       </div>
     </v-card-text>
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api'
+import { PropType, computed, defineComponent } from '@vue/composition-api'
 import { Account } from '@/util/constants'
 import Vue from 'vue'
 import { useI18n } from 'vue-i18n-bridge'
@@ -29,7 +29,7 @@ import { useI18n } from 'vue-i18n-bridge'
 export default defineComponent({
   name: 'DeactivateCard',
   props: {
-    type: () => Account
+    type: String as PropType<Account>
   },
   setup (props) {
     const { t } = useI18n()
@@ -37,7 +37,7 @@ export default defineComponent({
       { title: 'deactivateMemberRemovalTitle', description: 'deactivateMemberRemovalDesc' },
       { title: 'businessRemovalTitle', description: 'businessRemovalDesc' },
       { title: 'padRemovalTitle', type: Account.PREMIUM }
-    ]
+    ] as { title: string, description?: string, type?: Account }[]
 
     const info = computed(() => {
       return infoArray.filter(obj => !obj.type || obj.type === props.type)
