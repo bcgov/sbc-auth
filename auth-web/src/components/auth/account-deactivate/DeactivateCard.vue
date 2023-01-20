@@ -13,11 +13,7 @@
         </div>
         <div class="ml-3 mt-1">
           <h4 class="font-weight-bold">{{ t(item.title) }}</h4>
-<<<<<<< HEAD
           <p v-if="item.description">{{ t(item.description) }}</p>
-=======
-          <p>{{ t(item.description) }}</p>
->>>>>>> fixes based on feedback
         </div>
       </div>
     </v-card-text>
