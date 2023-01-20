@@ -1,0 +1,33 @@
+import i18n from '@/plugins/i18n'
+import VueI18n, { LocaleMessages } from 'vue-i18n'
+import { castToVueI18n, createI18n } from 'vue-i18n-bridge'
+import Vue from 'vue'
+
+export default {
+    mock() {
+        Vue.use(VueI18n, { bridge: true })
+
+        function loadLocaleMessages (): LocaleMessages {
+            const locales = require.context('../locales', true, /[A-Za-z0-9-_,\s]+\.json$/i)
+            const messages: LocaleMessages = {}
+            locales.keys().forEach((key) => {
+              const matched = key.match(/([A-Za-z0-9-_]+)\./i)
+              if (matched && matched.length > 1) {
+                const locale = matched[1]
+                messages[locale] = locales(key)
+              }
+            })
+            return messages
+        }
+
+        const i18n = castToVueI18n(createI18n({
+            legacy: false,
+            locale: process.env.VUE_APP_I18N_LOCALE || 'en',
+            fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
+            messages: loadLocaleMessages()
+          }, VueI18n))
+
+        return i18n
+          
+    }
+}
