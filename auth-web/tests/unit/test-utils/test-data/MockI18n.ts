@@ -3,7 +3,7 @@ import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 
 export default {
-  mock () {
+  mock (en) {
     Vue.use(VueI18n, { bridge: true })
 
     const i18n = castToVueI18n(createI18n({
@@ -11,9 +11,7 @@ export default {
       locale: 'en',
       fallbackLocale: 'en',
       messages: {
-        en: {
-          msg: 'Test Message'
-        }
+        en: en
       }
     }, VueI18n))
 

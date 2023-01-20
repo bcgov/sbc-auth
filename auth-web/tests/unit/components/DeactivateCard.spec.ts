@@ -11,13 +11,20 @@ Vue.use(VueRouter)
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 const router = new VueRouter()
-const i18n = MockI18n.mock()
+const en = {
+  businessRemovalDesc: 'i8n businessRemovalDesc',
+  businessRemovalTitle: 'i8n businessRemovalTitle',
+  deactivateMemberRemovalDesc: 'i8n deactivateMemberRemovalDesc',
+  deactivateMemberRemovalTitle: 'i8n deactivateMemberRemovalTitle',
+  padRemovalTitle: 'i8n padRemovalTitle'
+}
+const i18n = MockI18n.mock(en)
 
 function assertElements (wrapper: any) {
-  expect(wrapper.text()).toContain('i8n' + 'deactivateMemberRemovalTitle')
-  expect(wrapper.text()).toContain('i8n' + 'businessRemovalTitle')
-  expect(wrapper.text()).toContain('i8n' + 'deactivateMemberRemovalDesc')
-  expect(wrapper.text()).toContain('i8n' + 'businessRemovalDesc')
+  expect(wrapper.text()).toContain(en.deactivateMemberRemovalTitle)
+  expect(wrapper.text()).toContain(en.businessRemovalTitle)
+  expect(wrapper.text()).toContain(en.deactivateMemberRemovalDesc)
+  expect(wrapper.text()).toContain(en.businessRemovalDesc)
 }
 
 describe('Deactivated card.vue', () => {
@@ -26,14 +33,15 @@ describe('Deactivated card.vue', () => {
   localVue.use(Vuex)
   localVue.use(i18n)
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('Truthy and basic test', () => {
     wrapper = mount(DeactivateCard, {
       vuetify,
       localVue,
-      router,
-      mocks: {
-        t: (mock) => mock
-      }
+      router
     })
 
     expect(wrapper.isVueInstance()).toBeTruthy()
@@ -46,58 +54,52 @@ describe('Deactivated card.vue', () => {
       vuetify,
       localVue,
       router,
-      mocks: {
-        t: (mock) => mock
-      },
       propsData: {
         type: Account.BASIC
       }
     })
 
     expect(wrapper.isVueInstance()).toBeTruthy()
-    expect(wrapper.props('type')).toBe('BASIC')
+    expect(wrapper.props('type')).toBe(Account.BASIC)
   })
 
   it('assert subtitle for a default org', () => {
-    const t = (params: string) => { return 'i8n' + params }
-
     wrapper = mount(DeactivateCard, {
       vuetify,
       localVue,
-      router,
-      mocks: { t }
+      router
     })
 
+    expect(wrapper.props('type')).not.toBe(Account.PREMIUM)
     assertElements(wrapper)
-    expect(wrapper.text()).not.toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
-    wrapper.destroy()
+    expect(wrapper.text()).not.toContain(en.padRemovalTitle) // this is only for premium orgs
   })
   it('assert subtitle for a premium org', async () => {
-    const t = (params: string) => { return 'i8n' + params }
-
     wrapper = mount(DeactivateCard, {
       vuetify,
       localVue,
       router,
-      mocks: { t }
+      propsData: {
+        type: Account.PREMIUM
+      }
     })
-    await wrapper.setProps({ type: 'PREMIUM' })
+
+    expect(wrapper.props('type')).toBe(Account.PREMIUM)
     assertElements(wrapper)
-    expect(wrapper.text()).toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
-    wrapper.destroy()
+    expect(wrapper.text()).toContain(en.padRemovalTitle) // this is only for premium orgs
   })
   it('assert subtitle for a basic org', async () => {
-    const t = (params: string) => { return 'i8n' + params }
-
     wrapper = mount(DeactivateCard, {
       vuetify,
       localVue,
       router,
-      mocks: { t }
+      propsData: {
+        type: Account.BASIC
+      }
     })
-    await wrapper.setProps({ type: 'BASIC' })
+
+    expect(wrapper.props('type')).toBe(Account.BASIC)
     assertElements(wrapper)
-    expect(wrapper.text()).not.toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
-    wrapper.destroy()
+    expect(wrapper.text()).not.toContain(en.padRemovalTitle) // this is only for premium orgs
   })
 })
