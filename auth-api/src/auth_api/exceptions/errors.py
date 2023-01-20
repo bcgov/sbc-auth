@@ -86,6 +86,8 @@ class Error(Enum):
                                    http_status.HTTP_400_BAD_REQUEST
     PATCH_INVALID_ACTION = 'PATCH_INVALID_ACTION', http_status.HTTP_400_BAD_REQUEST
 
+    MEMBERSHIP_NOT_FOUND = 'The requested membership record could not be found.', http_status.HTTP_404_NOT_FOUND
+
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
         obj = object.__new__(cls)
