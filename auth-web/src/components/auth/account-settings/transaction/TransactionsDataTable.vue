@@ -1,270 +1,163 @@
 <template>
   <div>
-    <v-data-table
+    <date-picker v-show="showDatePicker" @submit="updateDateRange($event)" />
+    <base-v-data-table
       class="transaction-list"
-      :headers="headerTranscations"
-      :items="transactionList"
-      :custom-sort="customSortActive"
-      :no-data-text="$t('noTransactionList')"
-      :server-items-length="totalTransactionsCount"
-      :options.sync="tableDataOptions"
-      :loading="isDataLoading"
-      loading-text="loading text"
-      :footer-props="{
-        itemsPerPageOptions: getPaginationOptions
-      }"
+      :initialHeaders="headers"
+      :initialTableDataOptions="tableDataOptions"
+      itemKey="id"
+      :loading="transactions.loading"
+      loadingText="loading text"
+      :noDataText="$t('noTransactionList')"
+      :setItems="transactions.results"
+      :totalItems="transactions.totalResults"
+      @update-table-options="tableDataOptions = $event"
     >
-      <template v-slot:loading>
-        Loading...
-      </template>
-
-      <template v-slot:[`header.status`]="{ header }">
-        {{header.text}}
+      <!-- header title slots -->
+      <template v-slot:header-title-slot-statusCode="{ header }">
+        {{ header.value }}
         <v-tooltip bottom color="grey darken-4">
           <template v-slot:activator="{ on }">
-            <v-icon small class="status-tooltip-icon" v-on="on">mdi-information-outline</v-icon>
+            <v-icon color="primary" v-on="on">mdi-information-outline</v-icon>
           </template>
-          <div v-for="(status, index) in transactionStatus" :key="index">
-            {{status.status}} - {{status.description}}
+          <div v-for="statusCodeDesc, i in statusCodeDescs" :key="statusCodeDesc.value + i">
+            {{ statusCodeDesc.value }} - {{ statusCodeDesc.description }}
           </div>
         </v-tooltip>
       </template>
-      <!-- Need to show detaisl in another tr  -->
-      <template
-        v-slot:body="{ headers, items }"
-        >
-        <tbody v-for="item in items"
-        class="product-tr-body"
-          :key="item.id">
-          <tr class="product-tr">
-            <td>
-              <div class="product-purchased font-weight-bold"
-                :data-test="getIndexedTag('transaction-name', item.index)"
-                >
-                <div class="product-name font-weight-bold"
-                  v-for="(name, nameIndex) in item.transactionNames"
-                  :key="nameIndex">
-                  {{ name }}
-                </div>
-              </div>
-            </td>
-            <td>{{item.folioNumber}}</td>
-            <td><span style="white-space: nowrap;">{{formatInitiatedBy(item.initiatedBy)}}</span></td>
-            <td><span style="white-space: nowrap;">{{formatDate(item.transactionDate, 'MMMM DD, YYYY hh:mm A')}}</span></td>
-            <td>
-              <div class="font-weight-bold text-right">
-                ${{item.totalAmount}}
-              </div>
-            </td>
-            <td>
-              <v-chip
-                small
-                label
-                :color="getStatusColor(item.status)"
-                class="text-uppercase font-weight-bold mt-n1"
-                >
-                {{formatStatus(item.status)}}
-              </v-chip>
-            </td>
-          </tr>
-          <!-- no tr if no details -->
-          <tr class="product-details-tr" v-if="item.details && item.details.length > 0">
-            <td :colspan="headers.length">
-              <div  v-for="detail in item.details"
-                :key="detail && detail.id"
-                >
-                {{detail && detail.label}}&nbsp;{{detail && detail.value}}
-              </div>
-            </td>
-          </tr>
-        </tbody>
+      <!-- header filter slots -->
+      <template v-slot:header-filter-slot-createdOn>
+        <v-text-field
+          class="base-table__header__filter__textbox"
+          :append-icon="'mdi-calendar'"
+          clearable
+          dense
+          filled
+          hide-details
+          :placeholder="'Date'"
+          :value="dateRangeSelected ? 'Custom' : ''"
+          @focus="showDatePicker = true"
+        />
       </template>
-
-    </v-data-table>
+      <!-- item slots -->
+      <template v-slot:item-slot-lineItems="{ item }">
+        <b v-for="lineItem, i in item.lineItems" :key="lineItem.description + i" class="dark-text">
+          {{ lineItem.description }}
+        </b><br/>
+        <span v-for="detail, i in item.details" :key="detail.label + i">
+          <!-- ux requested to remove all number labels -->
+          <span v-if="!detail.label.toLowerCase().includes('number')">{{ detail.label }}</span>
+          {{ detail.value }}
+        </span><br/>
+      </template>
+      <template v-slot:item-slot-total="{ item }">
+        <span v-if="item.statusCode === InvoiceStatus.CANCELLED">$0.00</span>
+        <span v-else>{{ '$' + item.total.toFixed(2) }}</span>
+      </template>
+    </base-v-data-table>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { TransactionFilter, TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
-import { mapActions, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
-import { Organization } from '@/models/Organization'
-import { TransactionStatus } from '@/util/constants'
+import { BaseVDataTable, DatePicker } from '@/components'
+import { Ref, computed, defineComponent, reactive, ref, watch } from '@vue/composition-api'
+import { BaseTableHeaderI } from '@/components/datatable/interfaces'
+import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
+import { DataOptions } from 'vuetify'
+import { InvoiceStatus } from '@/util/constants'
+import { TransactionTableHeaders } from '@/resources/table-headers'
+import _ from 'lodash'
+import { invoiceStatusDisplay } from '@/resources/display-mappers'
+import { useTransactions } from '@/composables'
 
-@Component({
-  computed: {
-    ...mapState('org', [
-      'currentOrganization'
-    ])
-  },
-  methods: {
-    ...mapActions('org', [
-      'getTransactionList'
-    ])
+export default defineComponent({
+  name: 'TransactionsDataTable',
+  components: { BaseVDataTable, DatePicker },
+  setup () {
+    const { transactions, loadTransactionList } = useTransactions()
+
+    // FUTURE: in vue3 we can pull this out and add it within the resource
+    const headers = _.cloneDeep(TransactionTableHeaders) as BaseTableHeaderI[]
+    headers.forEach((header) => {
+      if (header.hasFilter) header.customFilter.filterApiFn = (val: any) => loadTransactionList(header.col, val || '')
+    })
+
+    const dateRangeSelected = ref(false)
+    const showDatePicker = ref(false)
+    const updateDateRange = (val: { endDate: string, startDate: string }) => {
+      console.log(val)
+      showDatePicker.value = false
+      if (val.endDate && val.startDate) dateRangeSelected.value = true
+      else dateRangeSelected.value = false
+      // loadTransactionList('createdOn', )
+    }
+
+    const statusCodeDescs = [
+      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
+      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
+      { description: 'Transaction is pending', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
+      { description: 'Transaction is in progress', value: invoiceStatusDisplay[InvoiceStatus.APPROVED].toUpperCase() },
+      { description: 'Refund has been requested', value: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED].toUpperCase() },
+      { description: 'Refund process is completed', value: invoiceStatusDisplay[InvoiceStatus.REFUNDED].toUpperCase() }
+    ]
+
+    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
+
+    watch(() => tableDataOptions.value, (val: DataOptions) => {
+      transactions.filters.pageNumber = val?.page || DEFAULT_DATA_OPTIONS.page
+      transactions.filters.pageLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+    })
+
+    return {
+      InvoiceStatus,
+      dateRangeSelected,
+      headers,
+      invoiceStatusDisplay,
+      showDatePicker,
+      statusCodeDescs,
+      tableDataOptions,
+      transactions,
+      updateDateRange
+    }
   }
 })
-export default class TransactionsDataTable extends Vue {
-  @Prop({ default: () => ({} as TransactionFilter) }) private transactionFilters: TransactionFilter;
-  private readonly currentOrganization!: Organization
-  private readonly getTransactionList!: (filterParams: TransactionFilterParams) => TransactionTableList
+//   @Emit('total-transaction-count')
+//   private emitTotalCount () {
+//     return this.totalTransactionsCount
+//   }
 
-  private readonly ITEMS_PER_PAGE = 5
-  private readonly PAGINATION_COUNTER_STEP = 4
-  private transactionList: TransactionTableRow[] = [];
-  private formatDate = CommonUtils.formatDisplayDate
-  private totalTransactionsCount = 0
-  private isDataLoading = false
-  private tableDataOptions: any = {}
+//   private getStatusClass (item) {
+//     switch (item.status) {
+//       case TransactionStatus.COMPLETED: return 'status-paid'
+//       case TransactionStatus.PENDING: return 'status-pending'
+//       case TransactionStatus.CANCELLED: return 'status-deleted'
+//       default: return ''
+//     }
+//   }
 
-  private readonly headerTranscations = [
-    {
-      text: 'Transaction',
-      align: 'left',
-      sortable: false,
-      value: 'transactionNames'
-    },
-    {
-      text: 'Folio Number',
-      align: 'left',
-      sortable: false,
-      value: 'folioNumber'
-    },
-    {
-      text: 'Initiated by',
-      align: 'left',
-      sortable: false,
-      value: 'initiatedBy',
-      width: '170'
-    },
-    {
-      text: 'Date (Pacific Time)',
-      align: 'left',
-      value: 'transactionDate',
-      sortable: false,
-      width: '110'
-    },
-    {
-      text: 'Total Amount',
-      align: 'right',
-      value: 'totalAmount',
-      sortable: false
-    },
-    {
-      text: 'Status',
-      align: 'left',
-      value: 'status',
-      sortable: false,
-      width: '110'
-    }
-  ]
+//   private formatStatus (status) {
+//     // status show as pending array
+//     const statusMapToPending = ['Settlement Scheduled', 'PAD Invoice Approved']
+//     return statusMapToPending.includes(status) ? 'Pending' : status
+//   }
 
-  private readonly transactionStatus = [
-    {
-      status: TransactionStatus.COMPLETED.toUpperCase(),
-      description: 'Funds received'
-    },
-    {
-      status: TransactionStatus.PENDING.toUpperCase(),
-      description: 'Transaction is pending'
-    },
-    {
-      status: TransactionStatus.CANCELLED.toUpperCase(),
-      description: 'Transaction is cancelled'
-    }
-  ]
-
-  private get getPaginationOptions () {
-    return [...Array(this.PAGINATION_COUNTER_STEP)].map((value, index) => this.ITEMS_PER_PAGE * (index + 1))
-  }
-
-  private async loadTransactionList (pageNumber?: number, itemsPerPage?: number) {
-    this.isDataLoading = true
-    const filterParams: TransactionFilterParams = {
-      filterPayload: this.transactionFilters,
-      pageNumber: pageNumber,
-      pageLimit: itemsPerPage
-    }
-    const resp = await this.getTransactionList(filterParams)
-    this.transactionList = resp?.transactionsList || []
-    this.totalTransactionsCount = resp?.total || 0
-    this.emitTotalCount()
-    this.isDataLoading = false
-  }
-
-  @Watch('tableDataOptions', { deep: true })
-  async getTransactions (val, oldVal) {
-    const pageNumber = val.page || 1
-    const itemsPerPage = val.itemsPerPage
-    await this.loadTransactionList(pageNumber, itemsPerPage)
-  }
-
-  @Emit('total-transaction-count')
-  private emitTotalCount () {
-    return this.totalTransactionsCount
-  }
-
-  private getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  private getStatusClass (item) {
-    switch (item.status) {
-      case TransactionStatus.COMPLETED: return 'status-paid'
-      case TransactionStatus.PENDING: return 'status-pending'
-      case TransactionStatus.CANCELLED: return 'status-deleted'
-      default: return ''
-    }
-  }
-
-  private customSortActive (items, index, isDescending) {
-    const isDesc = isDescending.length > 0 && isDescending[0]
-    items.sort((a, b) => {
-      return (isDesc) ? (a[index[0]] < b[index[0]] ? -1 : 1) : (b[index[0]] < a[index[0]] ? -1 : 1)
-    })
-    return items
-  }
-
-  private formatInitiatedBy (name) {
-    return (name === 'None None') ? '-' : name
-  }
-
-  private formatStatus (status) {
-    // status show as pending array
-    const statusMapToPending = ['Settlement Scheduled', 'PAD Invoice Approved']
-    return statusMapToPending.includes(status) ? 'Pending' : status
-  }
-
-  private getStatusColor (status) {
-    switch (status?.toUpperCase()) {
-      case TransactionStatus.COMPLETED.toUpperCase():
-        return 'success'
-      case TransactionStatus.CANCELLED.toUpperCase():
-        return 'error'
-      default:
-        return ''
-    }
-  }
-}
+//   private getStatusColor (status) {
+//     switch (status?.toUpperCase()) {
+//       case TransactionStatus.COMPLETED.toUpperCase():
+//         return 'success'
+//       case TransactionStatus.CANCELLED.toUpperCase():
+//         return 'error'
+//       default:
+//         return ''
+//     }
+//   }
+// }
 </script>
 
 <style lang="scss" scoped>
-.v-list--dense {
-  .v-list-item {
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-  }
-
-  .v-list-item .v-list-item__title {
-    margin-bottom: 0.25rem;
-    font-weight: 700;
-  }
-}
-
-.status-tooltip-icon {
-  margin-top: -4px;
-  margin-right: 5px;
-  margin-left: 2px;
+@import "$assets/scss/theme.scss";
+.date-filter {
+  font-size: 0.875rem;
 }
 
 .v-tooltip__content:before {
@@ -278,49 +171,5 @@ export default class TransactionsDataTable extends Vue {
   border-width: 10px 10px 10px 10px;
   border-style: solid;
   border-color: transparent transparent var(--v-grey-darken4) transparent;
-}
-
-::v-deep {
-  th {
-    white-space: nowrap;
-  }
-
-  td {
-    padding-bottom: .5rem !important;
-    height: auto;
-    vertical-align: top;
-    overflow: hidden;
-  }
-
-  .transaction-list {
-    .v-data-table-header {
-      margin-bottom: -2px;
-    }
-
-    .product-name {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-}
-
-thead + thead {
-  position: absolute;
-  top: -2px;
-}
-.product-tr-body{
-  &:hover{
-    background: #eee;
-  }
-  & .product-tr > td {
-      border-bottom: none !important;
-      padding-top: 1rem !important;
-  }
-
-  & tr:last-child > td{
-      border-bottom: thin solid rgba(0,0,0,.12) !important;
-      padding-bottom: 1rem !important;
-  }
 }
 </style>

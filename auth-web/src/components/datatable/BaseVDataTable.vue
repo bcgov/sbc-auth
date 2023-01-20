@@ -1,0 +1,252 @@
+<template>
+  <v-data-table
+    class="base-table"
+    :disable-sort="true"
+    fixed-header
+    :footer-props="{ itemsPerPageOptions: INITIAL_ITEMS_PER_PAGE_OPTIONS }"
+    :headers="headers"
+    hide-default-header
+    :items="sortedItems"
+    :loading="filtering || loading"
+    :mobile-breakpoint="0"
+    :options.sync="tableDataOptions"
+    :server-items-length="totalItems"
+  >
+    <!-- Headers (two rows) -->
+    <template v-slot:header>
+      <thead class="base-table__header">
+        <!-- First row has titles. -->
+        <slot name="header-title-slot" :headers="headers">
+          <tr :style="{ 'background-color': headerBg }">
+            <th
+              v-for="header, i in headers"
+              :key="header.col + i"
+              :class="[header.class, 'base-table__header__title']"
+              :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : ''"
+            >
+              <slot :name="'header-title-slot-' + header.col" :header="header">
+                <span v-html="header.value" />
+              </slot>
+            </th>
+          </tr>
+        </slot>
+        <!-- Second row has filters. -->
+        <slot name="header-filter-slot" :headers="headers">
+          <tr :style="{ 'background-color': headerBg }">
+            <th
+              v-for="header in headers"
+              :key="header.col"
+              :class="[header.class, 'base-table__header__filter pb-5']"
+            >
+              <slot :name="'header-filter-slot-' + header.col" :header="header">
+                <v-select
+                  v-if="header.hasFilter && header.customFilter.type === 'select'"
+                  :class="['base-table__header__filter__select']"
+                  :clearable="header.customFilter.clearable"
+                  dense
+                  filled
+                  hide-details
+                  item-text="text"
+                  item-value="value"
+                  :items="header.customFilter.items"
+                  :label="!header.customFilter.value ? header.customFilter.label || '' : ''"
+                  :open-on-clear="true"
+                  v-model="header.customFilter.value"
+                  @reset="filter(header)"
+                  @input="filter(header)"
+                />
+                <v-text-field
+                  v-else-if="header.hasFilter && header.customFilter.type === 'text'"
+                  :class="['base-table__header__filter__textbox', header.customFilter.value ? 'active' : '']"
+                  :clearable="header.customFilter.clearable"
+                  dense
+                  filled
+                  hide-details
+                  :placeholder="!header.customFilter.value ? header.customFilter.label || '' : ''"
+                  v-model="header.customFilter.value"
+                  @reset="filter(header)"
+                  @input="filter(header)"
+                />
+              </slot>
+            </th>
+          </tr>
+        </slot>
+      </thead>
+    </template>
+
+    <!-- Items -->
+    <template v-slot:item="{ item }">
+      <tr :key="item[itemKey]">
+        <td
+          v-for="header in headers" :key="'item-' + header.col"
+          :class="[header.itemClass, 'base-table__item']"
+        >
+          <slot :header="header" :item="item" :name="'item-slot-' + header.col">
+            <span v-if="header.itemFn" v-html="header.itemFn(item[header.col])" />
+            <span v-else>{{ item[header.col] }}</span>
+          </slot>
+        </td>
+      </tr>
+    </template>
+
+    <!-- Loading -->
+    <template v-slot:loading>
+      <div class="py-8 base-table__text" v-html="loadingText" />
+    </template>
+
+    <!-- No data -->
+    <template v-slot:no-data>
+      <div class="py-8 base-table__text" v-html="noDataText" />
+    </template>
+  </v-data-table>
+</template>
+
+<script lang="ts">
+import { computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { BaseTableHeaderI } from './interfaces'
+import { DEFAULT_DATA_OPTIONS } from './resources'
+import { DataOptions } from 'vuetify'
+import _ from 'lodash'
+
+// FUTURE: remove this in vue 3 upgrade (typing will be inferred properly)
+interface BaseTableStateI {
+  filtering: boolean,
+  headers: BaseTableHeaderI[],
+  sortedItems: object[],
+  tableDataOptions: DataOptions
+}
+
+export default defineComponent({
+  name: 'BaseVDataTable',
+  emits: ['update-table-options'],
+  props: {
+    headerBg: { default: 'white' },
+    initialHeaders: { default: [] as BaseTableHeaderI[] },
+    initialTableDataOptions: { default: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
+    itemKey: { type: String },
+    loading: { default: false },
+    loadingText: { default: 'Loading...' },
+    noDataText: { default: 'No results found.' },
+    resetFilters: { default: false },
+    setItems: { default: [] as object[] },
+    totalItems: { type: Number }
+  },
+  setup (props, { emit }) {
+    // static vars (for initializing)
+    const ITEMS_PER_PAGE = 5
+    const PAGINATION_COUNTER_STEP = 4
+    const INITIAL_ITEMS_PER_PAGE_OPTIONS = [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
+    // reactive vars
+    const state = (reactive({
+      filtering: false,
+      headers: _.cloneDeep(props.initialHeaders),
+      sortedItems: [...props.setItems],
+      tableDataOptions: props.initialTableDataOptions
+    }) as unknown) as BaseTableStateI
+
+    const filter = _.debounce(async (header: BaseTableHeaderI) => {
+      // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
+      console.log('filter')
+      if (header.customFilter.filterApiFn) {
+        state.filtering = true
+        console.log('filter', header.customFilter.value, header.customFilter.filterApiFn)
+        await header.customFilter.filterApiFn(header.customFilter.value)
+        state.filtering = false
+      }
+    }, 500)
+
+    watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] })
+    watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
+
+    return {
+      INITIAL_ITEMS_PER_PAGE_OPTIONS,
+      filter,
+      ...toRefs(state)
+    }
+  }
+})
+</script>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/theme.scss';
+.base-table {
+
+  &__header {
+
+    &__filter {
+      padding-top: 10px;
+
+      &__select,
+      &__textbox {
+        font-size: 0.825rem !important;
+      }
+    }
+
+    &__title {
+      color: $gray9 !important;
+      font-size: 0.875rem;
+    }
+
+  }
+
+  &__item {
+    border: 0px;
+    font-size: 0.875rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  &__text {
+    border: 0px;
+    position: sticky;
+    width: 1230px;
+    left: 0;
+    flex-grow: 0;
+    flex-shrink: 0;
+  }
+
+  ::v-deep .v-data-footer {
+    min-width: 100%;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar {
+    width: .625rem;
+    height: 0.50rem;
+    overflow-x: hidden;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar-track {
+    overflow: auto;
+  }
+
+  ::v-deep .v-data-table__wrapper::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    background-color: lightgray;
+  }
+
+  ::v-deep .v-label {
+    color: $gray7;
+    font-size: .875rem;
+  }
+
+  ::v-deep .v-input__slot {
+    font-weight: normal;
+    height: 42px !important;
+    min-height: 42px !important;
+
+    .v-select__slot label {
+      top: 12px;
+    }
+
+    .v-text-field__slot input,
+    .v-text-field__slot input::placeholder {
+      color: $gray7;
+      font-size: 0.825rem !important;
+    }
+  }
+
+  ::v-deep .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo) .v-input__append-inner {
+    margin-top: 10px;
+  }
+}
+</style>

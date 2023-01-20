@@ -37,8 +37,7 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
-import { StatementFilterParams, StatementListItem, StatementNotificationSettings, StatementSettings } from '@/models/statement'
-import { TransactionFilter, TransactionFilterParams, TransactionTableList, TransactionTableRow } from '@/models/transaction'
+import { StatementFilterParams, StatementNotificationSettings, StatementSettings } from '@/models/statement'
 
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
@@ -89,7 +88,6 @@ export default class OrgModule extends VuexModule {
   currentSelectedProducts:any = [] // selected product list code in array
 
   currentStatementNotificationSettings: StatementNotificationSettings = {} as StatementNotificationSettings
-  currentOrgTransactionList: TransactionTableRow[] = []
   statementSettings: StatementSettings = {} as StatementSettings
   orgProductFeeCodes: OrgProductFeeCode[] = []
   currentAccountFees: AccountFee[] = []
@@ -224,11 +222,6 @@ export default class OrgModule extends VuexModule {
   @Mutation
   public setFailedUsers (users: BulkUsersFailed[]) {
     this.failedUsers = users
-  }
-
-  @Mutation
-  public setCurrentOrgTransactionList (transactionResp: TransactionTableList) {
-    this.currentOrgTransactionList = transactionResp.transactionsList
   }
 
   @Mutation
@@ -790,51 +783,6 @@ export default class OrgModule extends VuexModule {
     const successUsers: BulkUsersSuccess[] = [{ username: addUserBody.username, password: addUserBody.password }]
     this.context.commit('setCreatedUsers', successUsers)
     this.context.commit('setFailedUsers', [])
-  }
-
-  @Action({ commit: 'setCurrentOrgTransactionList', rawError: true })
-  public async getTransactionList (filterParams: TransactionFilterParams) {
-    const response = await PaymentService.getTransactions(this.context.state['currentOrganization'].id, filterParams)
-    if (response?.data) {
-      const formattedList = await this.formatTransactionTableData(response.data.items || [])
-      return {
-        limit: response.data.limit,
-        page: response.data.page,
-        total: response.data.total,
-        transactionsList: formattedList
-      }
-    }
-    return {}
-  }
-
-  @Action({ rawError: true })
-  public async getTransactionReport (filterParams: TransactionFilter) {
-    const response = await PaymentService.getTransactionReports(this.context.state['currentOrganization'].id, filterParams)
-    return response?.data
-  }
-
-  // This function will be used to format the transaction response to a required table display format
-  @Action({ rawError: true })
-  private formatTransactionTableData (transactionList) {
-    let transactionTableData = []
-    transactionList.forEach(transaction => {
-      let transactionNames = []
-      transaction?.lineItems?.forEach(lineItem => {
-        transactionNames.push(lineItem.description)
-      })
-      transactionTableData.push({
-        id: transaction.id,
-        transactionNames: transactionNames,
-        folioNumber: transaction?.folioNumber || '',
-        businessIdentifier: transaction?.businessIdentifier || '',
-        initiatedBy: transaction.createdName,
-        transactionDate: transaction.createdOn,
-        totalAmount: (transaction?.total || 0).toFixed(2),
-        status: transaction.statusCode,
-        details: transaction.details || []
-      })
-    })
-    return transactionTableData
   }
 
   @Action({ rawError: true })

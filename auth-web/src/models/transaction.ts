@@ -1,41 +1,37 @@
+import { InvoiceStatus, PaymentTypes } from '@/util/constants'
+import { LineItem } from '.'
+
 export interface Transaction {
+  businessIdentifier: string
   createdName: string
   createdOn: string
-  id: number,
-  paymentMethod: string
-  statusCode: string
-  updatedName: string
-  updatedOn: string
-  businessIdentifier: string
   folioNumber: string
+  id: number
   lineItems: LineItem[]
   paid: number
+  paymentAccount: {
+    accountId: string
+    accountName: string
+    billable: boolean
+  }
+  paymentMethod: PaymentTypes
   refund: number
+  statusCode: InvoiceStatus
   total: number
-  transactionFees: number
-}
-
-export interface LineItem {
-  description: string
-  filingFees: number
-  filingTypeCode: string
-  futureEffectiveFees: number
-  gst: number
-  priorityFees: number
-  pst: number
-  quantity: number
-  total: number
-  waivedBy: string
-  waivedFees: number
+  updatedOn: string
 }
 
 export interface TransactionFilter {
+  createdBy?: string,
+  createdName?: string,
   dateFilter: {
     startDate: string
     endDate: string
   },
   folioNumber?: string,
-  createdBy?: string,
+  id?: string,
+  paymentMethod?: PaymentTypes,
+  statusCode?: InvoiceStatus
 }
 
 export interface TransactionFilterParams {
@@ -51,19 +47,9 @@ export interface TransactionListResponse {
   total: number
 }
 
-export interface TransactionTableList {
-  transactionsList: TransactionTableRow[]
-  limit: number
-  page: number
-  total: number
-}
-
-export interface TransactionTableRow {
-  id: number
-  transactionNames: string[]
-  folioNumber: string
-  initiatedBy: string
-  transactionDate: string
-  totalAmount: number
-  status: string
+export interface TransactionState {
+  filters: TransactionFilterParams
+  loading: boolean
+  results: Transaction[]
+  totalResults: number
 }

@@ -1,8 +1,7 @@
 <template>
   <v-container class="transaction-container">
-    <header class="view-header align-center mb-7">
+    <header class="view-header align-center mb-5">
       <h2 class="view-header__title">Transactions</h2>
-
     </header>
      <section v-if="credit !==0">
        <v-divider class="mb-8"></v-divider>
@@ -12,46 +11,34 @@
       </section>
     <section>
       <div class="d-flex">
-      <SearchFilterInput
-        :filterParams="searchFilter"
-        :filteredRecordsCount="totalTransactionsCount"
-        @filter-texts="setAppliedFilterValue"
-        :isDataFetchCompleted="isTransactionFetchDone"
-      ></SearchFilterInput>
-       <v-btn
+        <v-btn
           large
           color="primary"
-          class="font-weight-bold ml-auto"
+          class="font-weight-bold"
           :loading="isLoading"
           @click="exportCSV"
           :disabled="isLoading"
           data-test="btn-export-csv"
-        >Export CSV
-       </v-btn>
-         </div>
+        >Export CSV</v-btn>
+      </div>
       <TransactionsDataTable
         class="mt-4"
         :transactionFilters="transactionFilterProp"
         :key="updateTransactionTableCounter"
-        @total-transaction-count="setTotalTransactionCount"
-      ></TransactionsDataTable>
-
+      />
     </section>
   </v-container>
 </template>
 
 <script lang="ts">
-import { Account, Pages, SearchFilterCodes } from '@/util/constants'
+import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
-import { TransactionFilter, TransactionFilterParams, TransactionTableList } from '@/models/transaction'
-import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import CommonUtils from '@/util/common-util'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
+import { TransactionFilter } from '@/models/transaction'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
-import moment from 'moment'
 
 import { namespace } from 'vuex-class'
 
@@ -70,7 +57,6 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   @OrgModule.State('currentMembership') private currentMembership!: Member
   @OrgModule.State('currentOrgPaymentDetails') private currentOrgPaymentDetails!: OrgPaymentDetails
 
-  @OrgModule.Action('getTransactionReport') private getTransactionReport!: (filterParams: TransactionFilter) => TransactionTableList
   @OrgModule.Action('getOrgPayments') private getOrgPayments!: (orgId: number) => OrgPaymentDetails
 
   private updateTransactionTableCounter: number = 0
@@ -82,8 +68,7 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   public credit:any = 0
 
   private async mounted () {
-    this.setAccountChangedHandler(this.initFilter)
-    this.initFilter()
+    this.setAccountChangedHandler(this.initUser)
   }
 
   private async getPaymentDetails () {
@@ -96,56 +81,56 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     }
   }
 
-  private initializeFilters () {
-    this.searchFilter = [
-      {
-        id: SearchFilterCodes.DATERANGE,
-        placeholder: 'Date Range',
-        labelKey: 'Date',
-        appliedFilterValue: '',
-        filterInput: ''
-      },
-      {
-        id: SearchFilterCodes.USERNAME,
-        placeholder: 'Initiated by',
-        labelKey: 'Initiated by',
-        appliedFilterValue: '',
-        filterInput: ''
-      },
-      {
-        id: SearchFilterCodes.FOLIONUMBER,
-        placeholder: 'Folio Number',
-        labelKey: 'Folio Number',
-        appliedFilterValue: '',
-        filterInput: ''
-      }
-    ]
-    this.isTransactionFetchDone = false
-  }
+  // private initializeFilters () {
+  //   this.searchFilter = [
+  //     {
+  //       id: SearchFilterCodes.DATERANGE,
+  //       placeholder: 'Date Range',
+  //       labelKey: 'Date',
+  //       appliedFilterValue: '',
+  //       filterInput: ''
+  //     },
+  //     {
+  //       id: SearchFilterCodes.USERNAME,
+  //       placeholder: 'Initiated by',
+  //       labelKey: 'Initiated by',
+  //       appliedFilterValue: '',
+  //       filterInput: ''
+  //     },
+  //     {
+  //       id: SearchFilterCodes.FOLIONUMBER,
+  //       placeholder: 'Folio Number',
+  //       labelKey: 'Folio Number',
+  //       appliedFilterValue: '',
+  //       filterInput: ''
+  //     }
+  //   ]
+  //   this.isTransactionFetchDone = false
+  // }
 
-  private setAppliedFilterValue (filters: SearchFilterParam[]) {
-    filters.forEach(filter => {
-      switch (filter.id) {
-        case SearchFilterCodes.DATERANGE:
-          this.transactionFilterProp.dateFilter = filter.appliedFilterValue || {}
-          break
-        case SearchFilterCodes.FOLIONUMBER:
-          this.transactionFilterProp.folioNumber = filter.appliedFilterValue
-          break
-        case SearchFilterCodes.USERNAME:
-          this.transactionFilterProp.createdBy = filter.appliedFilterValue
-          break
-      }
-    })
-    this.isTransactionFetchDone = false
-    this.updateTransactionTableCounter++
-  }
+  // private setAppliedFilterValue (filters: SearchFilterParam[]) {
+  //   filters.forEach(filter => {
+  //     switch (filter.id) {
+  //       case SearchFilterCodes.DATERANGE:
+  //         this.transactionFilterProp.dateFilter = filter.appliedFilterValue || {}
+  //         break
+  //       case SearchFilterCodes.FOLIONUMBER:
+  //         this.transactionFilterProp.folioNumber = filter.appliedFilterValue
+  //         break
+  //       case SearchFilterCodes.USERNAME:
+  //         this.transactionFilterProp.createdBy = filter.appliedFilterValue
+  //         break
+  //     }
+  //   })
+  //   this.isTransactionFetchDone = false
+  //   this.updateTransactionTableCounter++
+  // }
 
-  private initFilter () {
+  private initUser () {
     if (this.isTransactionsAllowed) {
-      this.initializeFilters()
+      // this.initializeFilters()
       this.getPaymentDetails()
-      this.updateTransactionTableCounter++
+      // this.updateTransactionTableCounter++
     } else {
       // if the account switing happening when the user is already in the transaction page,
       // redirect to account info if its a basic account
@@ -153,16 +138,16 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
     }
   }
 
-  private setTotalTransactionCount (value) {
-    this.totalTransactionsCount = value
-    this.isTransactionFetchDone = true
-  }
+  // private setTotalTransactionCount (value) {
+  //   this.totalTransactionsCount = value
+  //   this.isTransactionFetchDone = true
+  // }
 
   private async exportCSV () {
     this.isLoading = true
-    const filterParams: TransactionFilter = this.transactionFilterProp
-    const downloadData = await this.getTransactionReport(filterParams)
-    CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+    // grab from composable**
+    // const downloadData = await this.getTransactionReport(filterParams)
+    // CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
     this.isLoading = false
   }
 
@@ -257,11 +242,11 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
       margin-top: -2px !important
     }
   }
-  .cad-credit{
+  .cad-credit {
     font-size: 14px;
     color: $gray6;
   }
-  .credit-details{
+  .credit-details {
      color: $gray7;
   }
 </style>
