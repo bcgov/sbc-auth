@@ -35,7 +35,6 @@
     "sbc-common-components": "3.0.5",
     "vue": "2.6.12",
     "vue-i18n": "^8.0.0",
-    "vue-i18n-bridge": "^9.2.2",
     "vue-plugin-helper-decorator": "0.0.12",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.0.3",
