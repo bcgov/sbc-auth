@@ -29,7 +29,6 @@ Vue.config.productionTip = false
 Vue.use(VueCompositionAPI)
 Vue.use(Vuelidate)
 Vue.use(Search, { store, i18n })
-Vue.use(i18n)
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all

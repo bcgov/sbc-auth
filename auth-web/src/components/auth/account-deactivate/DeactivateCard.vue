@@ -12,8 +12,8 @@
           >
         </div>
         <div class="ml-3 mt-1">
-          <h4 class="font-weight-bold">{{ t(item.title) }}</h4>
-          <p v-if="item.description">{{ t(item.description) }}</p>
+          <h4 class="font-weight-bold">{{ $t(item.title) }}</h4>
+          <p>{{ $t(item.description) }}</p>
         </div>
       </div>
     </v-card-text>
@@ -21,35 +21,35 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent } from '@vue/composition-api'
-import { Account } from '@/util/constants'
+import { Component, Prop } from 'vue-property-decorator'
 import Vue from 'vue'
-import { useI18n } from 'vue-i18n-bridge'
 
-export default defineComponent({
-  name: 'DeactivateCard',
-  props: {
-    type: String as PropType<Account>
-  },
-  setup (props) {
-    const { t } = useI18n()
-    const infoArray = [
-      { title: 'deactivateMemberRemovalTitle', description: 'deactivateMemberRemovalDesc' },
-      { title: 'businessRemovalTitle', description: 'businessRemovalDesc' },
-      { title: 'padRemovalTitle', type: Account.PREMIUM }
-    ] as { title: string, description?: string, type?: Account }[]
-
-    const info = computed(() => {
-      return infoArray.filter(obj => !obj.type || obj.type === props.type)
-    })
-
-    return {
-      infoArray,
-      t,
-      info
-    }
-  }
+@Component({
 })
+export default class DeactivateCard extends Vue {
+  @Prop() private type: string
+
+  // no type matches means show it for all types
+  private infoArray: { title: string, description?: string, type?: string }[] = [
+    {
+      title: 'deactivateMemberRemovalTitle',
+      description: 'deactivateMemberRemovalDesc'
+    },
+    {
+      title: 'businessRemovalTitle',
+      description: 'businessRemovalDesc'
+    },
+    {
+      title: 'padRemovalTitle',
+      type: 'PREMIUM'
+    }
+
+  ]
+
+  private get info () {
+    return this.infoArray.filter(obj => !obj.type || obj.type === this.type)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
