@@ -153,6 +153,10 @@ export default class ConfigHelper {
     return ConfigHelper.getValue('REGISTRY_SEARCH_URL')
   }
 
+  static getHotjarId () {
+    return ConfigHelper.getValue('HOTJAR_ID')
+  }
+
   static getValue (key: String) {
     // @ts-ignore
     return JSON.parse(sessionStorage.getItem(SessionStorageKeys.ApiConfigKey))[key]
