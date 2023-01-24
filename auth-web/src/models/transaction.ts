@@ -24,7 +24,7 @@ export interface Transaction {
 export interface TransactionFilter {
   createdBy?: string,
   createdName?: string,
-  dateFilter: {
+  dateFilter?: {
     startDate: string
     endDate: string
   },
@@ -35,6 +35,7 @@ export interface TransactionFilter {
 }
 
 export interface TransactionFilterParams {
+  isActive: boolean
   filterPayload: TransactionFilter
   pageNumber?: number
   pageLimit?: number

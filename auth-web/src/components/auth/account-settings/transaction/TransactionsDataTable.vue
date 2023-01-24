@@ -1,29 +1,35 @@
 <template>
   <div>
-    <date-picker v-show="showDatePicker" @submit="updateDateRange($event)" />
+    <date-picker v-show="showDatePicker" :reset="dateRangeReset" ref="datePicker" class="date-picker" @submit="updateDateRange($event)" />
     <base-v-data-table
       class="transaction-list"
-      :initialHeaders="headers"
+      :clearFilters="clearFiltersTrigger"
       :initialTableDataOptions="tableDataOptions"
       itemKey="id"
       :loading="transactions.loading"
       loadingText="loading text"
       :noDataText="$t('noTransactionList')"
       :setItems="transactions.results"
+      :setHeaders="headers"
       :totalItems="transactions.totalResults"
       @update-table-options="tableDataOptions = $event"
     >
+      <template v-slot:header-filter-slot-actions>
+        <v-btn
+          v-if="transactions.filters.isActive"
+          class="clear-btn mx-auto mt-auto"
+          color="primary"
+          outlined
+          @click="clearFilters()"
+        >
+          Clear Filters
+          <v-icon class="ml-1 mt-1">mdi-close</v-icon>
+        </v-btn>
+      </template>
       <!-- header title slots -->
       <template v-slot:header-title-slot-statusCode="{ header }">
         {{ header.value }}
-        <v-tooltip bottom color="grey darken-4">
-          <template v-slot:activator="{ on }">
-            <v-icon color="primary" v-on="on">mdi-information-outline</v-icon>
-          </template>
-          <div v-for="statusCodeDesc, i in statusCodeDescs" :key="statusCodeDesc.value + i">
-            {{ statusCodeDesc.value }} - {{ statusCodeDesc.description }}
-          </div>
-        </v-tooltip>
+        <icon-tooltip icon="mdi-information-outline" :text="getStatusCodeHelpText()" />
       </template>
       <!-- header filter slots -->
       <template v-slot:header-filter-slot-createdOn>
@@ -36,7 +42,8 @@
           hide-details
           :placeholder="'Date'"
           :value="dateRangeSelected ? 'Custom' : ''"
-          @focus="showDatePicker = true"
+          @click:clear="dateRangeReset++"
+          @click="scrollToDatePicker()"
         />
       </template>
       <!-- item slots -->
@@ -54,42 +61,87 @@
         <span v-if="item.statusCode === InvoiceStatus.CANCELLED">$0.00</span>
         <span v-else>{{ '$' + item.total.toFixed(2) }}</span>
       </template>
+      <template v-slot:item-slot-statusCode="{ item }">
+        <v-row no-gutters>
+          <v-col cols="auto">
+            <v-icon
+              v-if="[InvoiceStatus.COMPLETED, InvoiceStatus.PAID, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              color="success"
+              :style="{ 'margin-top': '-6px', 'margin-right': '2px' }"
+            >
+              mdi-check
+            </v-icon>
+            <b>{{ invoiceStatusDisplay[item.statusCode] }}</b>
+            <br/>
+            <span v-if="item.updatedOn" v-html="displayDate(item.updatedOn)" />
+          </v-col>
+          <v-col class="pl-2" align-self="center">
+            <icon-tooltip
+              v-if="[InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              icon="mdi-information-outline"
+              maxWidth="300px"
+              :text="getRefundHelpText(item)"
+            />
+          </v-col>
+        </v-row>
+      </template>
     </base-v-data-table>
   </div>
 </template>
 
 <script lang="ts">
-import { BaseVDataTable, DatePicker } from '@/components'
-import { Ref, computed, defineComponent, reactive, ref, watch } from '@vue/composition-api'
+import { BaseVDataTable, DatePicker, IconTooltip } from '@/components'
+import { Ref, computed, defineComponent, nextTick, ref, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
+import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
 import { InvoiceStatus } from '@/util/constants'
-import { TransactionTableHeaders } from '@/resources/table-headers'
 import _ from 'lodash'
 import { invoiceStatusDisplay } from '@/resources/display-mappers'
 import { useTransactions } from '@/composables'
 
 export default defineComponent({
   name: 'TransactionsDataTable',
-  components: { BaseVDataTable, DatePicker },
-  setup () {
-    const { transactions, loadTransactionList } = useTransactions()
+  components: { BaseVDataTable, DatePicker, IconTooltip },
+  props: {
+    headers: { default: [] as BaseTableHeaderI[] }
+  },
+  setup (props) {
+    // refs
+    const datePicker = ref(null)
+    // composables
+    const { transactions, loadTransactionList, clearAllFilters } = useTransactions()
 
-    // FUTURE: in vue3 we can pull this out and add it within the resource
-    const headers = _.cloneDeep(TransactionTableHeaders) as BaseTableHeaderI[]
-    headers.forEach((header) => {
-      if (header.hasFilter) header.customFilter.filterApiFn = (val: any) => loadTransactionList(header.col, val || '')
-    })
+    const getHeaders = computed(() => props.headers)
 
+    // date picker stuff
+    const dateRangeReset = ref(0)
     const dateRangeSelected = ref(false)
     const showDatePicker = ref(false)
-    const updateDateRange = (val: { endDate: string, startDate: string }) => {
-      console.log(val)
+    const scrollToDatePicker = async () => {
+      showDatePicker.value = true
+      await nextTick()
+      datePicker.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    const updateDateRange = (val: { endDate?: string, startDate?: string }) => {
       showDatePicker.value = false
       if (val.endDate && val.startDate) dateRangeSelected.value = true
-      else dateRangeSelected.value = false
-      // loadTransactionList('createdOn', )
+      else {
+        dateRangeSelected.value = false
+        val = { startDate: '', endDate: '' }
+      }
+      loadTransactionList('dateFilter', val)
+    }
+
+    // clear filters
+    const clearFiltersTrigger = ref(0)
+    const clearFilters = () => {
+      // clear values in table
+      clearFiltersTrigger.value++
+      dateRangeReset.value++
+      // clear transactions state filters and trigger search
+      clearAllFilters()
     }
 
     const statusCodeDescs = [
@@ -100,6 +152,16 @@ export default defineComponent({
       { description: 'Refund has been requested', value: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED].toUpperCase() },
       { description: 'Refund process is completed', value: invoiceStatusDisplay[InvoiceStatus.REFUNDED].toUpperCase() }
     ]
+    const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => text + statusCode.value + ' - ' + statusCode.description + '<br/>', '')
+    const getRefundHelpText = (item: any) => {
+      if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
+        return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
+      }
+      if (item?.statusCode === InvoiceStatus.REFUNDED) {
+        return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this trasaction.'
+      }
+      return ''
+    }
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
@@ -108,68 +170,34 @@ export default defineComponent({
       transactions.filters.pageLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
     })
 
+    const displayDate = (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY')
+
     return {
       InvoiceStatus,
+      clearFilters,
+      clearFiltersTrigger,
+      datePicker,
+      dateRangeReset,
       dateRangeSelected,
-      headers,
+      getHeaders,
       invoiceStatusDisplay,
       showDatePicker,
       statusCodeDescs,
+      getRefundHelpText,
+      getStatusCodeHelpText,
       tableDataOptions,
       transactions,
+      displayDate,
+      scrollToDatePicker,
       updateDateRange
     }
   }
 })
-//   @Emit('total-transaction-count')
-//   private emitTotalCount () {
-//     return this.totalTransactionsCount
-//   }
-
-//   private getStatusClass (item) {
-//     switch (item.status) {
-//       case TransactionStatus.COMPLETED: return 'status-paid'
-//       case TransactionStatus.PENDING: return 'status-pending'
-//       case TransactionStatus.CANCELLED: return 'status-deleted'
-//       default: return ''
-//     }
-//   }
-
-//   private formatStatus (status) {
-//     // status show as pending array
-//     const statusMapToPending = ['Settlement Scheduled', 'PAD Invoice Approved']
-//     return statusMapToPending.includes(status) ? 'Pending' : status
-//   }
-
-//   private getStatusColor (status) {
-//     switch (status?.toUpperCase()) {
-//       case TransactionStatus.COMPLETED.toUpperCase():
-//         return 'success'
-//       case TransactionStatus.CANCELLED.toUpperCase():
-//         return 'error'
-//       default:
-//         return ''
-//     }
-//   }
-// }
 </script>
 
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
-.date-filter {
-  font-size: 0.875rem;
-}
-
-.v-tooltip__content:before {
-  content: ' ';
-  position: absolute;
-  top: -20px;
-  left: 50%;
-  margin-left: -10px;
-  width: 20px;
-  height: 20px;
-  border-width: 10px 10px 10px 10px;
-  border-style: solid;
-  border-color: transparent transparent var(--v-grey-darken4) transparent;
+.date-picker {
+  left: 52%
 }
 </style>

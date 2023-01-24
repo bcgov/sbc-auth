@@ -2,10 +2,11 @@
   <v-data-table
     class="base-table"
     :disable-sort="true"
-    fixed-header
+    :fixed-header="height ? true : false"
     :footer-props="{ itemsPerPageOptions: INITIAL_ITEMS_PER_PAGE_OPTIONS }"
     :headers="headers"
     hide-default-header
+    :height="height ? height : ''"
     :items="sortedItems"
     :loading="filtering || loading"
     :mobile-breakpoint="0"
@@ -120,8 +121,9 @@ export default defineComponent({
   name: 'BaseVDataTable',
   emits: ['update-table-options'],
   props: {
+    clearFilters: { default: 1 },
     headerBg: { default: 'white' },
-    initialHeaders: { default: [] as BaseTableHeaderI[] },
+    height: { type: String },
     initialTableDataOptions: { default: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     itemKey: { type: String },
     loading: { default: false },
@@ -129,6 +131,7 @@ export default defineComponent({
     noDataText: { default: 'No results found.' },
     resetFilters: { default: false },
     setItems: { default: [] as object[] },
+    setHeaders: { default: [] as BaseTableHeaderI[] },
     totalItems: { type: Number }
   },
   setup (props, { emit }) {
@@ -139,23 +142,37 @@ export default defineComponent({
     // reactive vars
     const state = (reactive({
       filtering: false,
-      headers: _.cloneDeep(props.initialHeaders),
+      headers: _.cloneDeep(props.setHeaders),
       sortedItems: [...props.setItems],
       tableDataOptions: props.initialTableDataOptions
     }) as unknown) as BaseTableStateI
 
     const filter = _.debounce(async (header: BaseTableHeaderI) => {
       // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
-      console.log('filter')
       if (header.customFilter.filterApiFn) {
         state.filtering = true
-        console.log('filter', header.customFilter.value, header.customFilter.filterApiFn)
         await header.customFilter.filterApiFn(header.customFilter.value)
         state.filtering = false
       }
     }, 500)
 
     watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] })
+    watch(() => props.setHeaders, (val: BaseTableHeaderI[]) => {
+      // maintain filters
+      const filters = {}
+      state.headers.forEach((header) => {
+        if (header.hasFilter) filters[header.col] = header.customFilter.value
+      })
+      val.forEach((header) => {
+        if (Object.keys(filters).includes(header.col)) header.customFilter.value = filters[header.col]
+      })
+      state.headers = val
+    })
+    watch(() => props.clearFilters, () => {
+      state.headers.forEach((header) => {
+        if (header.hasFilter) header.customFilter.value = ''
+      })
+    })
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
@@ -179,6 +196,10 @@ export default defineComponent({
       &__select,
       &__textbox {
         font-size: 0.825rem !important;
+
+        .v-input__control .v-input__slot .v-input__append-inner .v-input__icon.v-input__icon--clear .v-icon {
+          color: $app-blue;
+        }
       }
     }
 
@@ -194,12 +215,12 @@ export default defineComponent({
     font-size: 0.875rem;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+    vertical-align: top;
   }
 
   &__text {
     border: 0px;
     position: sticky;
-    width: 1230px;
     left: 0;
     flex-grow: 0;
     flex-shrink: 0;
@@ -226,7 +247,7 @@ export default defineComponent({
 
   ::v-deep .v-label {
     color: $gray7;
-    font-size: .875rem;
+    font-size: .825rem;
   }
 
   ::v-deep .v-input__slot {
@@ -243,6 +264,10 @@ export default defineComponent({
       color: $gray7;
       font-size: 0.825rem !important;
     }
+  }
+
+  ::v-deep .v-input__icon--clear .theme--light.v-icon {
+    color: $app-blue;
   }
 
   ::v-deep .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo) .v-input__append-inner {

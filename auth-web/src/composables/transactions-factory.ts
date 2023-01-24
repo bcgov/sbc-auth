@@ -6,13 +6,12 @@ import { useStore } from 'vuex-composition-helpers'
 
 const transactions = (reactive({
   filters: {
+    isActive: false,
     filterPayload: {
       dateFilter: {
         startDate: '',
         endDate: ''
-      },
-      folioNumber: '',
-      createdBy: ''
+      }
     },
     pageLimit: 0,
     pageNumber: 1
@@ -27,9 +26,15 @@ export const useTransactions = () => {
   const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
   const loadTransactionList = async (filterField?: string, value?: any) => {
-    console.log('loadTransactionList')
     transactions.loading = true
     if (filterField) transactions.filters.filterPayload[filterField] = value
+    let filtersActive = false
+    for (const i in transactions.filters.filterPayload) {
+      if (i === 'dateFilter') {
+        if (transactions.filters.filterPayload[i].endDate) filtersActive = true
+      } else if (transactions.filters.filterPayload[i]) filtersActive = true
+    }
+    transactions.filters.isActive = filtersActive
     try {
       const response = await PaymentService.getTransactions(currentOrganization.value.id, transactions.filters)
       if (response?.data) {
@@ -43,7 +48,6 @@ export const useTransactions = () => {
   }
 
   watch(() => [transactions.filters, transactions.filters.filterPayload], () => {
-    console.log('watch transactions.filters')
     loadTransactionList()
   }, { deep: true })
 
@@ -57,8 +61,15 @@ export const useTransactions = () => {
     }
   }
 
+  const clearAllFilters = () => {
+    transactions.filters.filterPayload = { dateFilter: { startDate: '', endDate: '' } }
+    transactions.filters.isActive = false
+    loadTransactionList()
+  }
+
   return {
     transactions,
+    clearAllFilters,
     loadTransactionList,
     getTransactionReport
   }

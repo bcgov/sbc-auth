@@ -3,6 +3,7 @@ import {
   CreateRequestBody as CreateOrganizationRequestBody,
   Member,
   Members,
+  OrgPaymentDetails,
   OrgProduct,
   OrgProductsRequestBody,
   Organization,
@@ -114,7 +115,7 @@ export default class OrgService {
     return response.data?.loginOption
   }
 
-  static async getOrgPayments (orgId: number): Promise<AxiosResponse> {
+  static async getOrgPayments (orgId: number): Promise<AxiosResponse<OrgPaymentDetails>> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${orgId}`)
   }
 

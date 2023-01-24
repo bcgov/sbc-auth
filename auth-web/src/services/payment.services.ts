@@ -85,7 +85,6 @@ export default class PaymentService {
     if (filterParams.pageLimit) {
       params.append('limit', filterParams.pageLimit.toString())
     }
-    console.log(filterParams.filterPayload)
     const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
     return axios.post(url, filterParams.filterPayload, { params })
   }

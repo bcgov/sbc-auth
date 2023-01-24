@@ -1,3 +1,4 @@
+<!-- Copied from PPR. Move into sbc-common or bcrs-shared after vue 3 upgrade -->
 <template>
   <v-card class="date-selection registration-date" elevation="6" ref="datePicker">
     <v-row no-gutters>
@@ -68,6 +69,7 @@ import {
   watch
 } from '@vue/composition-api'
 
+// FUTURE: remove after vue 3 upgrade
 interface DatePickerI {
   datePickerErr: boolean
   endDate: string,
@@ -79,6 +81,7 @@ interface DatePickerI {
 export default defineComponent({
   name: 'DatePicker',
   props: {
+    reset: { default: 1 },
     setEndDate: { type: String },
     setStartDate: { type: String }
   },
@@ -104,10 +107,7 @@ export default defineComponent({
       ) {
         emit('submit', { endDate: null, startDate: null })
       } else {
-        emit(
-          'submit',
-          { endDate: state.endDate, startDate: state.startDate }
-        )
+        emit('submit', { endDate: state.endDate, startDate: state.startDate })
       }
     }
     const resetDateRange = (): void => {
@@ -134,19 +134,16 @@ export default defineComponent({
     watch(() => props.setEndDate, (val: string) => {
       if (!val) {
         state.endDate = state.defaultMonth.value
-        setTimeout(() => {
-          state.endDate = null
-        }, 10)
+        setTimeout(() => { state.endDate = null }, 10)
       } else state.endDate = val
     })
     watch(() => props.setStartDate, (val: string) => {
       if (!val) {
         state.startDate = state.defaultMonth.value
-        setTimeout(() => {
-          state.startDate = null
-        }, 10)
+        setTimeout(() => { state.startDate = null }, 10)
       } else state.startDate = val
     })
+    watch(() => props.reset, () => { console.log('reset'); resetDateRange() })
 
     return {
       emitDateRange,

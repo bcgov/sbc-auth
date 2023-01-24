@@ -26,7 +26,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    minWidth: '100px',
+    minWidth: '125px',
     value: 'Folio #'
   },
   {
@@ -39,13 +39,13 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemFn: (val: string) => (val === 'None None') ? '-' : val,
-    minWidth: '130px',
+    minWidth: '155px',
     value: 'Initiated by'
   },
   {
     col: 'createdOn',
     hasFilter: false,
-    itemFn: (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY hh:mm A'),
+    itemFn: (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY<br/>h:mm A'),
     minWidth: '165px',
     value: 'Date (Pacific Time)'
   },
@@ -65,7 +65,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    minWidth: '155px',
+    minWidth: '175px',
     value: 'Transaction ID'
   },
   {
@@ -74,16 +74,10 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       clearable: true,
       items: [
         { text: paymentTypeDisplay[PaymentTypes.BCOL], value: PaymentTypes.BCOL },
-        { text: paymentTypeDisplay[PaymentTypes.CASH], value: PaymentTypes.CASH },
-        { text: paymentTypeDisplay[PaymentTypes.CHEQUE], value: PaymentTypes.CHEQUE },
         { text: paymentTypeDisplay[PaymentTypes.CREDIT_CARD], value: PaymentTypes.CREDIT_CARD },
         { text: paymentTypeDisplay[PaymentTypes.DIRECT_PAY], value: PaymentTypes.DIRECT_PAY },
-        { text: paymentTypeDisplay[PaymentTypes.EFT], value: PaymentTypes.EFT },
-        { text: paymentTypeDisplay[PaymentTypes.EJV], value: PaymentTypes.EJV },
-        { text: paymentTypeDisplay[PaymentTypes.INTERNAL], value: PaymentTypes.INTERNAL },
         { text: paymentTypeDisplay[PaymentTypes.ONLINE_BANKING], value: PaymentTypes.ONLINE_BANKING },
-        { text: paymentTypeDisplay[PaymentTypes.PAD], value: PaymentTypes.PAD },
-        { text: paymentTypeDisplay[PaymentTypes.WIRE], value: PaymentTypes.WIRE }
+        { text: paymentTypeDisplay[PaymentTypes.PAD], value: PaymentTypes.PAD }
       ],
       label: 'Payment Method',
       type: 'select',
@@ -91,7 +85,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemFn: (val: PaymentTypes) => paymentTypeDisplay[val],
-    minWidth: '195px',
+    minWidth: '185px',
     value: 'Payment Method'
   },
   {
@@ -112,7 +106,14 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     },
     itemFn: (val: InvoiceStatus) => invoiceStatusDisplay[val],
     hasFilter: true,
-    minWidth: '175px',
+    minWidth: '195px',
     value: 'Payment Status'
+  },
+  {
+    col: 'actions',
+    hasFilter: false,
+    minWidth: '164px',
+    value: '',
+    width: '164px'
   }
 ]

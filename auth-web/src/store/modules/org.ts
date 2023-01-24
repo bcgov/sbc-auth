@@ -91,7 +91,7 @@ export default class OrgModule extends VuexModule {
   statementSettings: StatementSettings = {} as StatementSettings
   orgProductFeeCodes: OrgProductFeeCode[] = []
   currentAccountFees: AccountFee[] = []
-  currentOrgPaymentDetails:OrgPaymentDetails[] = []
+  currentOrgPaymentDetails: OrgPaymentDetails = null
   isCurrentSelectedProductsPremiumOnly = false
   resetAccountTypeOnSetupAccount = false // this flag use to check need to reset accounttype select when moving back and forth in stepper
   vDisplayModeValue = ''// DisplayModeValues.VIEW_ONLY
@@ -250,7 +250,7 @@ export default class OrgModule extends VuexModule {
   }
 
   @Mutation
-  public setCurrentOrganizationPaymentDetails (orgPaymentDetails: OrgPaymentDetails[]) {
+  public setCurrentOrganizationPaymentDetails (orgPaymentDetails: OrgPaymentDetails) {
     this.currentOrgPaymentDetails = orgPaymentDetails
   }
 

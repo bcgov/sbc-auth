@@ -10,156 +10,159 @@
        <v-divider class="mb-8 mt-8"></v-divider>
       </section>
     <section>
-      <div class="d-flex">
-        <v-btn
-          large
-          color="primary"
-          class="font-weight-bold"
-          :loading="isLoading"
-          @click="exportCSV"
-          :disabled="isLoading"
-          data-test="btn-export-csv"
-        >Export CSV</v-btn>
-      </div>
-      <TransactionsDataTable
-        class="mt-4"
-        :transactionFilters="transactionFilterProp"
-        :key="updateTransactionTableCounter"
-      />
+      <v-row justify="end" no-gutters>
+        <v-col>
+          <v-btn
+            large
+            color="primary"
+            class="font-weight-bold"
+            :loading="isLoading"
+            @click="exportCSV"
+            :disabled="isLoading"
+            data-test="btn-export-csv"
+          >Export CSV</v-btn>
+        </v-col>
+        <v-col align-self="end" cols="auto">
+          <v-select
+            dense
+            filled
+            hide-details
+            item-text="value"
+            :items="headerSelections"
+            :menu-props="{
+              bottom: true,
+              minWidth: '200px',
+              maxHeight: 'none',
+              offsetY: true
+            }"
+            multiple
+            return-object
+            style="width: 200px;"
+            v-model="headersSelected"
+          >
+            <template v-slot:selection="{ index }">
+              <span v-if="index === 0" class="columns-to-show">Columns to show</span>
+            </template>
+          </v-select>
+        </v-col>
+      </v-row>
+      <TransactionsDataTable class="mt-4" :headers="sortedHeaders" />
     </section>
   </v-container>
 </template>
 
 <script lang="ts">
 import { Account, Pages } from '@/util/constants'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from '@vue/composition-api'
+import { useAccountChangeHandler, useTransactions } from '@/composables'
+import { BaseTableHeaderI } from '@/components/datatable/interfaces'
+import CommonUtils from '@/util/common-util'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import { SearchFilterParam } from '@/models/searchfilter'
-import { TransactionFilter } from '@/models/transaction'
-import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
+import { TransactionTableHeaders } from '@/resources/table-headers'
+import { TransactionsDataTable } from '@/components/auth/account-settings/transaction'
+import _ from 'lodash'
+import moment from 'moment'
+import { useStore } from 'vuex-composition-helpers'
 
-import { namespace } from 'vuex-class'
+export default defineComponent({
+  name: 'Transactions',
+  components: { TransactionsDataTable, SearchFilterInput },
+  setup (props, { root }) {
+    // store stuff
+    const store = useStore()
+    const currentOrgPaymentDetails = computed(() => store.state.org.currentOrgPaymentDetails as OrgPaymentDetails)
+    const getOrgPayments = (orgId?: number) => store.dispatch('org/getOrgPayments', orgId)
+    const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
+    const currentMembership = computed(() => store.state.org.currentMembership as Member)
 
-const OrgModule = namespace('org')
+    const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
+    const { getTransactionReport, loadTransactionList } = useTransactions()
 
-@Component({
-  components: {
-    TransactionsDataTable,
-    SearchFilterInput
+    // FUTURE: vue3 we can set this fn explicitly in the resource instead of doing it here
+    const headers = (_.cloneDeep(TransactionTableHeaders) as BaseTableHeaderI[])
+    headers.forEach((header) => {
+      if (header.hasFilter) header.customFilter.filterApiFn = (val: any) => loadTransactionList(header.col, val || '')
+    })
+
+    // dynamic header selection stuff
+    const headerSelections: BaseTableHeaderI[] = []
+    const headersSelected: Ref<BaseTableHeaderI[]> = ref([])
+    headers.forEach((header) => {
+      // don't push actions to selection options (want it to be invisible to user)
+      if (header.col !== 'actions') headerSelections.push(header)
+      if (['lineItems', 'createdOn', 'total', 'paymentMethod', 'statusCode', 'actions'].includes(header.col)) {
+        headersSelected.value.push(header)
+      }
+    })
+    const sortedHeaders: Ref<BaseTableHeaderI[]> = ref([...headersSelected.value])
+    watch(() => headersSelected.value, (val: BaseTableHeaderI[]) => {
+      // sort headers
+      sortedHeaders.value = []
+      headers.forEach((header) => {
+        if (val.find((selectedHeader) => selectedHeader.col === header.col)) sortedHeaders.value.push(header)
+      })
+      // push actions
+    })
+
+    const credit = ref(0)
+    const isLoading = ref(false)
+
+    const isTransactionsAllowed = computed((): boolean => {
+      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(currentOrganization.value.orgType as Account) &&
+        [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
+    })
+
+    const getPaymentDetails = async () => {
+      const accountId = currentOrgPaymentDetails.value.accountId
+      if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
+        const paymentDetails: OrgPaymentDetails = await getOrgPayments(currentOrganization.value?.id)
+        credit.value = Number(paymentDetails?.credit || 0)
+      } else {
+        credit.value = Number(currentOrgPaymentDetails.value?.credit || 0)
+      }
+    }
+
+    const initUser = () => {
+      if (isTransactionsAllowed) getPaymentDetails()
+      else {
+        // if the account switing happening when the user is already in the transaction page,
+        // redirect to account info if its a basic account
+        root.$router.push(`/${Pages.MAIN}/currentOrganization.id}/settings/account-info`)
+      }
+    }
+
+    onMounted(() => { setAccountChangedHandler(initUser) })
+    onBeforeUnmount(() => { beforeDestroy() })
+
+    const exportCSV = async () => {
+      isLoading.value = true
+      // grab from composable**
+      const downloadData = await getTransactionReport()
+      CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+      isLoading.value = false
+    }
+
+    return {
+      headers,
+      headerSelections,
+      headersSelected,
+      sortedHeaders,
+      credit,
+      isLoading,
+      exportCSV
+    }
   }
 })
-export default class Transactions extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: string;
-
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.State('currentMembership') private currentMembership!: Member
-  @OrgModule.State('currentOrgPaymentDetails') private currentOrgPaymentDetails!: OrgPaymentDetails
-
-  @OrgModule.Action('getOrgPayments') private getOrgPayments!: (orgId: number) => OrgPaymentDetails
-
-  private updateTransactionTableCounter: number = 0
-  private totalTransactionsCount: number = 0
-  private isLoading: boolean = false
-  private searchFilter: SearchFilterParam[] = []
-  private transactionFilterProp: TransactionFilter = {} as TransactionFilter
-  private isTransactionFetchDone: boolean = false
-  public credit:any = 0
-
-  private async mounted () {
-    this.setAccountChangedHandler(this.initUser)
-  }
-
-  private async getPaymentDetails () {
-    const { accountId, credit } = this.currentOrgPaymentDetails
-    if (!accountId || Number(accountId) !== this.currentOrganization?.id) {
-      const paymentDetails: OrgPaymentDetails = await this.getOrgPayments(this.currentOrganization?.id)
-      this.credit = paymentDetails.credit && paymentDetails.credit !== null ? paymentDetails.credit : 0
-    } else {
-      this.credit = credit && credit !== null ? credit : 0
-    }
-  }
-
-  // private initializeFilters () {
-  //   this.searchFilter = [
-  //     {
-  //       id: SearchFilterCodes.DATERANGE,
-  //       placeholder: 'Date Range',
-  //       labelKey: 'Date',
-  //       appliedFilterValue: '',
-  //       filterInput: ''
-  //     },
-  //     {
-  //       id: SearchFilterCodes.USERNAME,
-  //       placeholder: 'Initiated by',
-  //       labelKey: 'Initiated by',
-  //       appliedFilterValue: '',
-  //       filterInput: ''
-  //     },
-  //     {
-  //       id: SearchFilterCodes.FOLIONUMBER,
-  //       placeholder: 'Folio Number',
-  //       labelKey: 'Folio Number',
-  //       appliedFilterValue: '',
-  //       filterInput: ''
-  //     }
-  //   ]
-  //   this.isTransactionFetchDone = false
-  // }
-
-  // private setAppliedFilterValue (filters: SearchFilterParam[]) {
-  //   filters.forEach(filter => {
-  //     switch (filter.id) {
-  //       case SearchFilterCodes.DATERANGE:
-  //         this.transactionFilterProp.dateFilter = filter.appliedFilterValue || {}
-  //         break
-  //       case SearchFilterCodes.FOLIONUMBER:
-  //         this.transactionFilterProp.folioNumber = filter.appliedFilterValue
-  //         break
-  //       case SearchFilterCodes.USERNAME:
-  //         this.transactionFilterProp.createdBy = filter.appliedFilterValue
-  //         break
-  //     }
-  //   })
-  //   this.isTransactionFetchDone = false
-  //   this.updateTransactionTableCounter++
-  // }
-
-  private initUser () {
-    if (this.isTransactionsAllowed) {
-      // this.initializeFilters()
-      this.getPaymentDetails()
-      // this.updateTransactionTableCounter++
-    } else {
-      // if the account switing happening when the user is already in the transaction page,
-      // redirect to account info if its a basic account
-      this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
-    }
-  }
-
-  // private setTotalTransactionCount (value) {
-  //   this.totalTransactionsCount = value
-  //   this.isTransactionFetchDone = true
-  // }
-
-  private async exportCSV () {
-    this.isLoading = true
-    // grab from composable**
-    // const downloadData = await this.getTransactionReport(filterParams)
-    // CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
-    this.isLoading = false
-  }
-
-  private get isTransactionsAllowed (): boolean {
-    return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(this.currentOrganization?.orgType as Account) &&
-      [MembershipType.Admin, MembershipType.Coordinator].includes(this.currentMembership.membershipTypeCode)
-  }
-}
 </script>
 
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
+  .columns-to-show {
+    color: $gray7;
+    font-size: 0.825rem;
+  }
+
   .view-header {
     display: flex;
     flex-direction: row;
@@ -226,16 +229,6 @@ export default class Transactions extends Mixins(AccountChangeMixin) {
   ::v-deep {
     .v-text-field--outlined.v-input--dense .v-label {
       top: 14px !important;
-    }
-
-    .date-picker-disable {
-      .v-date-picker-table {
-        pointer-events: none;
-      }
-    }
-
-    .date-range-label strong {
-      margin-right: 0.25rem;
     }
 
     .v-progress-linear {
