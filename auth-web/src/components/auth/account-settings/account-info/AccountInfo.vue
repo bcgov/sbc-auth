@@ -539,7 +539,7 @@ export default class AccountInfo extends Mixins(
           break
         default:
           this.errorMessage =
-            'An error occurred while attempting to create your account.'
+            'An error occurred while attempting to update your account.'
       }
     }
   }

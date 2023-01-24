@@ -169,10 +169,6 @@ export default defineComponent({
     // static vars
     const accountMask = CommonUtils.accountMask()
 
-    const accountNumberRules = [
-      v => !!v || 'Account Number is required',
-      v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
-    ]
     const institutionNumberRules = [
       v => !!v || 'Institution Number is required',
       v => (v.length === 3) || 'Institution Number should be 3 digits'
@@ -203,6 +199,17 @@ export default defineComponent({
           : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
       })
     }) as unknown) as PADInfoFormState
+
+    const accountNumberRules = computed((): ((v: any) => true | string)[] => {
+      const rules: ((v: any) => true | string)[] = [
+        v => !!v || 'Account Number is required',
+        v => (v.length >= 7 && v.length <= 12) || 'Account Number should be between 7 to 12 digits'
+      ]
+      if (state.isTouched) {
+        rules.push(v => (!v.includes('X') || 'Edited payment information should not contain masked digits (i.e. XXX)'))
+      }
+      return rules
+    })
 
     // emits
     const emitIsPreAuthDebitFormValid = () => {
