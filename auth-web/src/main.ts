@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/browser'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
+import Hotjar from 'vue-hotjar'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 // eslint-disable-next-line sort-imports
@@ -47,6 +48,14 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
       dsn: ConfigHelper.getValue('SENTRY_DSN'),
       integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
     })
+  }
+
+  // initialize Hotjar
+  const hotjarId = ConfigHelper.getValue('HOTJAR_ID');
+  (<any>window).hotJarId = hotjarId
+  if (hotjarId) {
+    console.info('Initializing Hotjar...') // eslint-disable-line no-console
+    Vue.use(Hotjar, { id: hotjarId })
   }
 
   await syncSession()
