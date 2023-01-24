@@ -57,5 +57,11 @@
         "application": [
             "auth-web"
         ]
+    },
+    {
+        "vault": "hotjar",
+        "application": [
+            "auth-web"
+        ]
     }
 ]
