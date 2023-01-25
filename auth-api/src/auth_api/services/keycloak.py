@@ -223,7 +223,7 @@ class KeycloakService:
         if not keycloak_guid:
             user_from_context: UserContext = kwargs['user_context']
             # check if the role 'account_holder' is present.
-            if Role.ACCOUNT_HOLDER.value not in user_from_context.roles:
+            if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
                 raise BusinessException(Error.MEMBERSHIP_NOT_FOUND, None)
             keycloak_guid: Dict = user_from_context.sub
 
