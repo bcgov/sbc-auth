@@ -223,7 +223,7 @@ class KeycloakService:
         user_from_context: UserContext = kwargs['user_context']
         if not keycloak_guid:
             keycloak_guid: Dict = user_from_context.sub
-            
+
         if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
             KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
