@@ -849,6 +849,7 @@ def test_delete_org_removes_user_from_account_holders_group(session, auth_mock,
     patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     patch_pay_account_delete(monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    patch_token_info(TestJwtClaims.gov_account_holder_user, monkeypatch)
     OrgService.delete_org(org.as_dict().get('id'))
 
     user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)

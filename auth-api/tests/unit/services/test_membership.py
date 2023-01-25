@@ -96,7 +96,8 @@ def test_remove_member_removes_group_to_the_user(session, monkeypatch):  # pylin
             'username': 'public_user',
             'realm_access': {
                 'roles': [
-                    'edit'
+                    'edit',
+                    'account_holder'
                 ]
             },
             'product_code': ProductCode.BUSINESS.value
