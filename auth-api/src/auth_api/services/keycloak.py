@@ -220,14 +220,12 @@ class KeycloakService:
     @user_context
     def remove_from_account_holders_group(keycloak_guid: str = None, **kwargs):
         """Remove user from the group."""
+        user_from_context: UserContext = kwargs['user_context']
         if not keycloak_guid:
-            user_from_context: UserContext = kwargs['user_context']
-            # check if the role 'account_holder' is present.
-            if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
-                raise BusinessException(Error.MEMBERSHIP_NOT_FOUND, None)
             keycloak_guid: Dict = user_from_context.sub
-
-        KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
+            
+        if Role.ACCOUNT_HOLDER.value in user_from_context.roles:
+            KeycloakService._remove_user_from_group(keycloak_guid, GROUP_ACCOUNT_HOLDERS)
 
     @staticmethod
     @user_context
