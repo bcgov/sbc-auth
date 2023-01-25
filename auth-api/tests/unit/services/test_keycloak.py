@@ -202,7 +202,7 @@ def test_join_account_holders_group_from_token(session, monkeypatch):
     assert GROUP_ACCOUNT_HOLDERS in groups
 
 
-def test_remove_from_account_holders_group(session):
+def test_remove_from_account_holders_group(session, monkeypatch):
     """Assert that the account_holders group is removed from the user."""
     request = KeycloakScenario.create_user_request()
     KEYCLOAK_SERVICE.add_user(request, return_if_exists=True)
@@ -215,6 +215,7 @@ def test_remove_from_account_holders_group(session):
     for group in user_groups:
         groups.append(group.get('name'))
     assert GROUP_ACCOUNT_HOLDERS in groups
+    patch_token_info(TestJwtClaims.gov_account_holder_user, monkeypatch)
     KEYCLOAK_SERVICE.remove_from_account_holders_group(keycloak_guid=user_id)
     user_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user_id)
     groups = []
