@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "queue_services/business-events-listener/**"
+      - "queue_services/names-events-listener/**"
       - "auth-api/src/auth_api/models/**"
   workflow_dispatch:
     inputs:
@@ -17,14 +17,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./queue_services/business-events-listener
+    working-directory: ./queue_services/names-events-listener
 
 env:
-  APP_NAME: "business-events-listener"
+  APP_NAME: "names-events-listener"
   TAG_NAME: "dev"
 
 jobs:
-  business-events-listener-cd-by-push:
+  names-events-listener-cd-by-push:
     runs-on: ubuntu-20.04
 
     if: github.event_name == 'push' && github.repository == 'bcgov/sbc-auth'
@@ -67,7 +67,7 @@ jobs:
           commit: true
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  business-events-listener-cd-by-dispatch:
+  names-events-listener-cd-by-dispatch:
     runs-on: ubuntu-20.04
 
     if: github.event_name == 'workflow_dispatch' && github.repository == 'bcgov/sbc-auth'
