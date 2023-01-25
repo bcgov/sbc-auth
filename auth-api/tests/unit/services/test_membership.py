@@ -25,9 +25,8 @@ from auth_api.services import Org as OrgService
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import ActivityAction, ProductCode, Status
-from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo, TestJwtClaims
-from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model,\
-    patch_token_info
+from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_utils import factory_membership_model, factory_product_model, factory_user_model
 
 
 def test_accept_invite_adds_group_to_the_user(session, monkeypatch):  # pylint:disable=unused-argument
