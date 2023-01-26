@@ -53,7 +53,7 @@
         </b><br/>
         <span v-for="detail, i in item.details" :key="detail.label + i">
           <!-- ux requested to remove all number labels -->
-          <span v-if="!detail.label.toLowerCase().includes('number')">{{ detail.label }}</span>
+          <span v-if="detail.label && !detail.label.toLowerCase().includes('number')">{{ detail.label }}</span>
           {{ detail.value }}
         </span><br/>
       </template>

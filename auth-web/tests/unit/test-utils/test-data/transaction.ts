@@ -6,7 +6,7 @@ export const transactionResponse: TransactionListResponse = {
     {
       businessIdentifier: '123',
       createdName: 'tester 123',
-      createdOn: '2023-01-24T23:09:46+00:00',
+      createdOn: new Date('2023-01-24T23:09:46+00:00'),
       folioNumber: 'ab12',
       id: 25663,
       lineItems: [{
@@ -37,7 +37,7 @@ export const transactionResponse: TransactionListResponse = {
     {
       businessIdentifier: '234',
       createdName: 'tester 234',
-      createdOn: '2023-01-23T23:09:46+00:00',
+      createdOn: new Date('2023-01-23T23:09:46+00:00'),
       folioNumber: 'ab12',
       id: 25664,
       lineItems: [{

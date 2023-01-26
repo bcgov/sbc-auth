@@ -89,7 +89,7 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(1).text()).toBe('ab12')
     expect(row1Cells.at(2).text()).toBe('tester 123')
     // GHA not converting date to PST so hour is off in CI
-    expect(row1Cells.at(3).text()).toContain('January 24, 2023')
+    expect(row1Cells.at(3).text()).toContain('January 24, 20233:09 PM')
     expect(row1Cells.at(4).text()).toBe('$0.00')
     expect(row1Cells.at(5).text()).toBe('25663')
     expect(row1Cells.at(6).text()).toBe('Routing Slip')

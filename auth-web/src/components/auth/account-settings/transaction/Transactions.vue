@@ -113,7 +113,7 @@ export default defineComponent({
     })
 
     const getPaymentDetails = async () => {
-      const accountId = currentOrgPaymentDetails.value.accountId
+      const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
         const paymentDetails: OrgPaymentDetails = await getOrgPayments(currentOrganization.value?.id)
         credit.value = Number(paymentDetails?.credit || 0)
