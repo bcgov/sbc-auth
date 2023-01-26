@@ -43,6 +43,7 @@ export const useTransactions = () => {
         transactions.totalResults = response.data.total
       } else throw new Error('No response from getTransactions')
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get transaction list.', error)
     }
     transactions.loading = false
@@ -54,6 +55,7 @@ export const useTransactions = () => {
       if (!response?.data) throw new Error('No response from getTransactionReports')
       return response.data
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to get transaction report.', error)
     }
   }
