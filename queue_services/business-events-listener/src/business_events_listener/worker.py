@@ -59,12 +59,14 @@ async def process_event(event_message, flask_app):
     with flask_app.app_context():
         message_type = event_message.get('type', None)
 
-        if message_type == 'bc.registry.names.events': # TODO Fix
+        if message_type == 'bc.registry.names.events':  # TODO Fix
             await process_business_events(event_message)
 
 
 async def process_business_events(event_message: Dict[str, any]):
     """TODO reads from entity filer queue.
+
+    Will fill in soon.
     """
     logger.debug('>>>>>>>process_business_events>>>>>')
     if event_message:
