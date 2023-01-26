@@ -386,12 +386,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   private async mounted () {
     if (this.currentMembership === undefined) {
-      this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
+      this.$router?.push(`/${Pages.CREATE_ACCOUNT}`)
       return
     }
     // If pending approval on current account, redirect away
     if (this.currentMembership?.membershipStatus !== MembershipStatus.Active) {
-      this.$router.push(this.getNextPageUrl())
+      this.$router?.push(this.getNextPageUrl())
       return
     }
     // check if address info is complete
@@ -402,7 +402,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         // sync and try again
         await this.syncAddress()
         if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
-          await this.$router.push(`/${Pages.MAIN}/${this.orgId}/settings/account-info`)
+          await this.$router?.push(`/${Pages.MAIN}/${this.orgId}/settings/account-info`)
           return
         }
       }

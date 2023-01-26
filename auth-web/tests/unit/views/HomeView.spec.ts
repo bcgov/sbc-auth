@@ -7,6 +7,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -76,6 +77,7 @@ describe('HomeView.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
@@ -103,7 +105,7 @@ describe('HomeView.vue', () => {
   it('renders the correct buttons when not authenticated', async () => {
     // Render Un-authenticated
     userModule.state.userProfile = null
-
+    await flushPromises()
     const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
     const loginBtn = bannerBtns[0]
     const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')

@@ -5,6 +5,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -40,6 +41,7 @@ describe('DecideBusinessView.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
@@ -51,10 +53,11 @@ describe('DecideBusinessView.vue', () => {
     expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
   })
 
-  it('renders the correct text and number of bullet points', () => {
+  it('renders the correct text and number of bullet points', async () => {
     wrapper.vm.bulletPoints = [
       { text: 'Bullet 1' }, { text: 'Bullet 2' }, { text: 'Bullet 3' }
     ]
+    await flushPromises()
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
 
     expect(bulletListItems[0].textContent).toContain('Bullet 1')

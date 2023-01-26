@@ -7,6 +7,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -55,6 +56,10 @@ describe('PaymentReview.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
@@ -72,9 +77,10 @@ describe('PaymentReview.vue', () => {
     expect(wrapper.find('.v-btn').text('Back')).toBeTruthy()
   })
 
-  it('should enable procced btn once acknowledged', () => {
+  it('should enable procced btn once acknowledged', async () => {
     expect(wrapper.find('.proceed-btn').props().disabled).toBe(true)
     wrapper.vm.isAcknowledged = true
+    await flushPromises()
     expect(wrapper.find('.proceed-btn').props().disabled).toBe(false)
   })
 })

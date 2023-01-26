@@ -84,7 +84,6 @@ describe('Entity Management Component', () => {
       vuetify,
       localVue,
       store,
-      sync: false,
       mocks: { $t },
       computed: {
         enableBcCccUlc () {
@@ -97,6 +96,7 @@ describe('Entity Management Component', () => {
   })
 
   afterEach(() => {
+    wrapper.destroy()
     jest.resetModules()
     jest.clearAllMocks()
   })

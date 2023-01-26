@@ -59,6 +59,7 @@ describe('AccountAdministrator.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {

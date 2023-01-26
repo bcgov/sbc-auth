@@ -5,6 +5,7 @@ import RequestNameView from '@/views/auth/home/RequestNameView.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -37,6 +38,7 @@ describe('RequestNameView.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {
@@ -63,11 +65,12 @@ describe('RequestNameView.vue', () => {
     expect(statusLink.text()).toContain('Check your Name Request Status')
   })
 
-  it('renders the correct text and number of bullet points', () => {
+  it('renders the correct text and number of bullet points', async () => {
     wrapper.vm.bulletPoints = [
       { text: 'Bullet Mock 1' },
       { text: 'Bullet Mock 2' }
     ]
+    await flushPromises()
 
     const bulletList = wrapper.vm.$el.querySelectorAll('.list-item')
 

@@ -8,6 +8,7 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -80,6 +81,10 @@ describe('AccountTypeSelector.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance', () => {
     wrapper = shallowMount(AccountTypeSelector, {
       store,
@@ -116,7 +121,7 @@ describe('AccountTypeSelector.vue', () => {
     expect(wrapper.find("[data-test='badge-account-premium']").exists()).toBeTruthy()
   })
 
-  it('enables basic type when non premium products are selected', () => {
+  it('enables basic type when non premium products are selected', async () => {
     wrapper = shallowMount(AccountTypeSelector, {
       store,
       localVue,
@@ -131,6 +136,7 @@ describe('AccountTypeSelector.vue', () => {
       }
     })
     store.commit('org/setIsCurrentProductsPremiumOnly')
+    await flushPromises()
     expect(wrapper.find("[data-test='div-stepper-basic']").attributes('disabled')).toBeFalsy()
     expect(wrapper.find("[data-test='div-stepper-premium']").attributes('disabled')).toBeFalsy()
     expect(wrapper.find("[data-test='badge-account-premium']").exists()).toBeFalsy()

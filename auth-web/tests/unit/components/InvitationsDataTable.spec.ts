@@ -51,5 +51,6 @@ describe('InvitationsDataTable.vue', () => {
       mocks: { $t }
     })
     expect(wrapper.text()).toContain('')
+    wrapper.destroy()
   })
 })

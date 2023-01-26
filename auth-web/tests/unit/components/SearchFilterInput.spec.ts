@@ -51,12 +51,15 @@ describe('SearchFilterInput.vue', () => {
         filterParams: filterParams,
         filteredRecordsCount: filteredRecordsCount
       },
-      sync: false,
       attachToDocument: true
     })
 
     jest.resetModules()
     jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {

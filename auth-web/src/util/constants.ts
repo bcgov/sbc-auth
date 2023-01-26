@@ -122,10 +122,23 @@ export enum LoginSource {
     BCEID = 'BCEID'
 }
 
-export enum TransactionStatus {
-    COMPLETED = 'Completed',
-    PENDING = 'Pending',
-    CANCELLED = 'Cancelled'
+// keep in sync with the pay-api invoice status enum
+export enum InvoiceStatus {
+    APPROVED = 'APPROVED',
+    CANCELLED = 'CANCELLED',
+    CREATED = 'CREATED',
+    CREDITED = 'CREDITED',
+    COMPLETED = 'COMPLETED', // NOTE: this === PAID value (api alters it from PAID to COMPLETED in postdump)
+    DELETE_ACCEPTED = 'DELETE_ACCEPTED',
+    DELETED = 'DELETED',
+    PAID = 'PAID',
+    PARTIAL = 'PARTIAL_PAID',
+    PENDING = 'PENDING',
+    REFUND_REQUESTED = 'REFUND_REQUESTED',
+    REFUNDED = 'REFUNDED',
+    SETTLEMENT_SCHEDULED = 'SETTLEMENT_SCHED',
+    UPDATE_REVENUE_ACCOUNT = 'GL_UPDATED',
+    UPDATE_REVENUE_ACCOUNT_REFUND = 'GL_UPDATED_REFUND'
 }
 
 export enum AffiliationTypes {
@@ -309,12 +322,17 @@ export enum SearchFilterCodes {
 }
 
 export enum PaymentTypes {
+    CASH = 'CASH',
+    CHEQUE = 'CHEQUE',
     CREDIT_CARD = 'CC',
     BCOL = 'DRAWDOWN',
     DIRECT_PAY = 'DIRECT_PAY',
+    EFT = 'EFT',
+    INTERNAL = 'INTERNAL',
     ONLINE_BANKING = 'ONLINE_BANKING',
     PAD = 'PAD',
-    EJV = 'EJV'
+    EJV = 'EJV',
+    WIRE = 'WIRE'
 }
 
 export enum paymentErrorType {

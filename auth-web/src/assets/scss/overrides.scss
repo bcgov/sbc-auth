@@ -72,6 +72,17 @@
   color: $gray9;
 }
 
+// v-list-items
+.v-list--dense .v-list-item:hover,
+.v-list-item__content:hover,
+.v-list-item__action:hover {
+  background-color: $gray1;
+  color: $app-blue;
+}
+.v-list-item--active {
+  background-color: $app-background-blue;
+}
+
 // Form Inputs
 
 // Adjust font size of help messages

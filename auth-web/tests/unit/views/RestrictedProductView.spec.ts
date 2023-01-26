@@ -34,6 +34,7 @@ describe('RestrictedProductView.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('RestrictedProductView is a Vue instance', () => {
