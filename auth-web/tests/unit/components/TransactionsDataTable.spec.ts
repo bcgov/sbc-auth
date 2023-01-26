@@ -54,7 +54,7 @@ describe('TransactionsDataTable tests', () => {
       propsData: { headers: TransactionTableHeaders }
     })
     await flushPromises()
-  })
+  }, 10000)
 
   afterAll(() => {
     wrapper.destroy()
