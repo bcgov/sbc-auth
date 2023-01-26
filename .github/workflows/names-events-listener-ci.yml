@@ -1,4 +1,4 @@
-name: Business Events Listener Queue CI
+name: Names Events Listener Queue CI
 
 on:
   pull_request:
