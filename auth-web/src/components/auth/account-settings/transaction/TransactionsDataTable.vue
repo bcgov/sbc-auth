@@ -3,12 +3,12 @@
     <date-picker v-show="showDatePicker" :reset="dateRangeReset" ref="datePicker" class="date-picker" @submit="updateDateRange($event)" />
     <base-v-data-table
       class="transaction-list"
-      :clearFilters="clearFiltersTrigger"
+      :clearFiltersTrigger="clearFiltersTrigger"
       :initialTableDataOptions="tableDataOptions"
       itemKey="id"
       :loading="transactions.loading"
       loadingText="loading text"
-      :noDataText="$t('noTransactionList')"
+      noDataText="No Transaction Records"
       :setItems="transactions.results"
       :setHeaders="headers"
       :totalItems="transactions.totalResults"
@@ -34,7 +34,7 @@
       <!-- header filter slots -->
       <template v-slot:header-filter-slot-createdOn>
         <v-text-field
-          class="base-table__header__filter__textbox"
+          class="base-table__header__filter__textbox date-filter"
           :append-icon="'mdi-calendar'"
           clearable
           dense
@@ -121,6 +121,7 @@ export default defineComponent({
     const showDatePicker = ref(false)
     const scrollToDatePicker = async () => {
       showDatePicker.value = true
+      // await for datePicker ref to update
       await nextTick()
       datePicker.value.$el.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -152,7 +153,7 @@ export default defineComponent({
       { description: 'Refund has been requested', value: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED].toUpperCase() },
       { description: 'Refund process is completed', value: invoiceStatusDisplay[InvoiceStatus.REFUNDED].toUpperCase() }
     ]
-    const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => text + statusCode.value + ' - ' + statusCode.description + '<br/>', '')
+    const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => `${text}${statusCode.value} - ${statusCode.description}<br/>`, '')
     const getRefundHelpText = (item: any) => {
       if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
         return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
@@ -168,6 +169,7 @@ export default defineComponent({
     watch(() => tableDataOptions.value, (val: DataOptions) => {
       transactions.filters.pageNumber = val?.page || DEFAULT_DATA_OPTIONS.page
       transactions.filters.pageLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+      loadTransactionList()
     })
 
     const displayDate = (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY')
@@ -189,7 +191,8 @@ export default defineComponent({
       transactions,
       displayDate,
       scrollToDatePicker,
-      updateDateRange
+      updateDateRange,
+      loadTransactionList
     }
   }
 })

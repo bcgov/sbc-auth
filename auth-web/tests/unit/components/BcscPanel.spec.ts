@@ -5,6 +5,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -87,7 +88,7 @@ describe('BcscPanel.vue', () => {
     expect(authenticatedBtns[1].textContent).toContain('Learn More')
   })
 
-  it('renders the correct text and number of bullet points', () => {
+  it('renders the correct text and number of bullet points', async () => {
     wrapper.vm.secureBulletPoints = [
       { text: 'Bullet 1' }, { text: 'Bullet 2' }
     ]
@@ -95,6 +96,7 @@ describe('BcscPanel.vue', () => {
     wrapper.vm.easeBulletPoints = [
       { text: 'Bullet 3' }, { text: 'Bullet 4' }
     ]
+    await flushPromises()
 
     const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
 

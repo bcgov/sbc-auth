@@ -24,6 +24,7 @@
         </v-col>
         <v-col align-self="end" cols="auto">
           <v-select
+            class="column-selections"
             dense
             filled
             hide-details
@@ -58,7 +59,6 @@ import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch 
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
-import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { TransactionTableHeaders } from '@/resources/table-headers'
 import { TransactionsDataTable } from '@/components/auth/account-settings/transaction'
 import _ from 'lodash'
@@ -67,7 +67,7 @@ import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   name: 'Transactions',
-  components: { TransactionsDataTable, SearchFilterInput },
+  components: { TransactionsDataTable },
   setup (props, { root }) {
     // store stuff
     const store = useStore()
@@ -102,7 +102,6 @@ export default defineComponent({
       headers.forEach((header) => {
         if (val.find((selectedHeader) => selectedHeader.col === header.col)) sortedHeaders.value.push(header)
       })
-      // push actions
     })
 
     const credit = ref(0)
@@ -132,7 +131,10 @@ export default defineComponent({
       }
     }
 
-    onMounted(() => { setAccountChangedHandler(initUser) })
+    onMounted(() => {
+      setAccountChangedHandler(initUser)
+      loadTransactionList()
+    })
     onBeforeUnmount(() => { beforeDestroy() })
 
     const exportCSV = async () => {

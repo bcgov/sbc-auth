@@ -2,6 +2,7 @@ import { Transaction, TransactionFilterParams, TransactionState } from '@/models
 import { computed, reactive, watch } from '@vue/composition-api'
 import { Organization } from '@/models/Organization'
 import PaymentService from '@/services/payment.services'
+import debounce from 'lodash/throttle'
 import { useStore } from 'vuex-composition-helpers'
 
 const transactions = (reactive({
@@ -25,14 +26,14 @@ export const useTransactions = () => {
   const store = useStore()
   const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
-  const loadTransactionList = async (filterField?: string, value?: any) => {
+  const loadTransactionList = debounce(async (filterField?: string, value?: any) => {
     transactions.loading = true
     if (filterField) transactions.filters.filterPayload[filterField] = value
     let filtersActive = false
-    for (const i in transactions.filters.filterPayload) {
-      if (i === 'dateFilter') {
-        if (transactions.filters.filterPayload[i].endDate) filtersActive = true
-      } else if (transactions.filters.filterPayload[i]) filtersActive = true
+    for (const key in transactions.filters.filterPayload) {
+      if (key === 'dateFilter') {
+        if (transactions.filters.filterPayload[key].endDate) filtersActive = true
+      } else if (transactions.filters.filterPayload[key]) filtersActive = true
     }
     transactions.filters.isActive = filtersActive
     try {
@@ -45,11 +46,7 @@ export const useTransactions = () => {
       console.error('Failed to get transaction list.', error)
     }
     transactions.loading = false
-  }
-
-  watch(() => [transactions.filters, transactions.filters.filterPayload], () => {
-    loadTransactionList()
-  }, { deep: true })
+  }, 200)
 
   const getTransactionReport = async () => {
     try {

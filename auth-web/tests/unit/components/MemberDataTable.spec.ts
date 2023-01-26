@@ -208,8 +208,7 @@ describe('MemberDataTable.vue', () => {
       store,
       router,
       vuetify,
-      mocks: { $t },
-      sync: false
+      mocks: { $t }
     })
 
     jest.resetModules()

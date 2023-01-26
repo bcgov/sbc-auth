@@ -77,7 +77,8 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: paymentTypeDisplay[PaymentTypes.CREDIT_CARD], value: PaymentTypes.CREDIT_CARD },
         { text: paymentTypeDisplay[PaymentTypes.DIRECT_PAY], value: PaymentTypes.DIRECT_PAY },
         { text: paymentTypeDisplay[PaymentTypes.ONLINE_BANKING], value: PaymentTypes.ONLINE_BANKING },
-        { text: paymentTypeDisplay[PaymentTypes.PAD], value: PaymentTypes.PAD }
+        { text: paymentTypeDisplay[PaymentTypes.PAD], value: PaymentTypes.PAD },
+        { text: paymentTypeDisplay[PaymentTypes.INTERNAL], value: PaymentTypes.INTERNAL }
       ],
       label: 'Payment Method',
       type: 'select',

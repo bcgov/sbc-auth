@@ -83,8 +83,7 @@ describe('Account settings ActivityLog.vue', () => {
         mocks: { $t },
         propsData: {
           ...propsData
-        },
-        sync: false
+        }
       })
     }
 

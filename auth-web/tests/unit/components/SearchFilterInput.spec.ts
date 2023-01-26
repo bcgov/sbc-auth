@@ -51,7 +51,6 @@ describe('SearchFilterInput.vue', () => {
         filterParams: filterParams,
         filteredRecordsCount: filteredRecordsCount
       },
-      sync: false,
       attachToDocument: true
     })
 

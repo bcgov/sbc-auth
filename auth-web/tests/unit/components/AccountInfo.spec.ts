@@ -11,6 +11,7 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -140,7 +141,7 @@ describe('AccountInfo.vue', () => {
     expect(wrapper.vm.showSuspendAccountDialog).toBeCalled()
   })
 
-  it('Account status and number displayed properly', () => {
+  it('Account status and number displayed properly', async () => {
     wrapper = shallowMount(AccountInfo, {
       store,
       localVue,
@@ -157,6 +158,7 @@ describe('AccountInfo.vue', () => {
     expect(wrapper.vm.$store.state.org.currentOrganization.name).toBe('testOrg')
     expect(wrapper.find("[data-test='btn-suspend-account']").text()).toBe('Suspend Account')
     store.commit('org/setCurrentOrganization')
+    await flushPromises()
     expect(wrapper.vm.$store.state.org.currentOrganization.name).toBe('testOrg_suspended')
     expect(wrapper.find("[data-test='btn-suspend-account']").text()).toBe('Unsuspend Account')
     expect(wrapper.find("[data-test='div-account-number']").text()).toBe('1234')

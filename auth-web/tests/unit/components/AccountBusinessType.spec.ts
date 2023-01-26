@@ -8,6 +8,7 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -102,6 +103,7 @@ describe('AccountBusinessType.vue', () => {
     })
     await wrapper.setData({ isLoading: false })
     wrapper.find("[data-test='radio-business-account-type']").trigger('click')
+    await flushPromises()
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeTruthy()
   })

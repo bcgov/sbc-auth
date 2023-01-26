@@ -21,6 +21,7 @@
       <v-col cols="6">
         <v-date-picker
           color="primary"
+          :key="'start' + datePickerKey"
           :max="endDate ? endDate : today"
           v-model="startDate"
         />
@@ -28,6 +29,7 @@
       <v-col cols="6">
         <v-date-picker
           color="primary"
+          :key="'end' + datePickerKey"
           :min="startDate ? startDate : null"
           :max="today"
           v-model="endDate"
@@ -72,6 +74,7 @@ import {
 // FUTURE: remove after vue 3 upgrade
 interface DatePickerI {
   datePickerErr: boolean
+  datePickerKey: number
   endDate: string,
   startDate: string,
   defaultMonth: ComputedRef<string>
@@ -89,6 +92,7 @@ export default defineComponent({
   setup (props, { emit }) {
     const state = (reactive({
       datePickerErr: false,
+      datePickerKey: 0,
       endDate: null,
       startDate: null,
       defaultMonth: computed((): string => {
@@ -100,25 +104,18 @@ export default defineComponent({
         return todayDate.toLocaleDateString('en-CA')
       })
     }) as unknown) as DatePickerI
+
     const emitDateRange = (): void => {
-      if (
-        state.startDate === state.defaultMonth.value ||
-        state.endDate === state.defaultMonth.value
-      ) {
-        emit('submit', { endDate: null, startDate: null })
-      } else {
-        emit('submit', { endDate: state.endDate, startDate: state.startDate })
-      }
+      const datesAreDefault = state.startDate === state.defaultMonth.value || state.endDate === state.defaultMonth.value
+      const startDate = datesAreDefault ? null : state.startDate
+      const endDate = datesAreDefault ? null : state.endDate
+      emit('submit', { endDate: endDate, startDate: startDate })
     }
     const resetDateRange = (): void => {
-      // reset dates by setting year/month with no day (defaults back to current month)
-      state.endDate = state.defaultMonth.value
-      state.startDate = state.defaultMonth.value
-      // set to null after to clear
-      setTimeout(() => {
-        state.endDate = null
-        state.startDate = null
-      }, 10)
+      state.endDate = null
+      state.startDate = null
+      // rerender to reset default dates (so it opens at the default date again)
+      state.datePickerKey++
       state.datePickerErr = false
       emitDateRange()
     }
@@ -133,17 +130,18 @@ export default defineComponent({
 
     watch(() => props.setEndDate, (val: string) => {
       if (!val) {
-        state.endDate = state.defaultMonth.value
-        setTimeout(() => { state.endDate = null }, 10)
+        state.endDate = null
+        // rerender to reset default date (so it opens at the default date again)
+        state.datePickerKey++
       } else state.endDate = val
     })
     watch(() => props.setStartDate, (val: string) => {
       if (!val) {
-        state.startDate = state.defaultMonth.value
-        setTimeout(() => { state.startDate = null }, 10)
+        // rerender to reset default date (so it opens at the default date again)
+        state.datePickerKey++
       } else state.startDate = val
     })
-    watch(() => props.reset, () => { console.log('reset'); resetDateRange() })
+    watch(() => props.reset, () => { resetDateRange() })
 
     return {
       emitDateRange,

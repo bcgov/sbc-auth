@@ -1,94 +1,108 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import '../util/composition-api-setup' // important to import this first
+import { createLocalVue, mount, Wrapper } from '@vue/test-utils'
+import { BaseVDataTable } from '@/components/datatable'
+import { DatePicker } from '@/components'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
-import UserService from '../../../src/services/user.services'
-
+import { TransactionTableHeaders } from '@/resources/table-headers'
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { axios } from '@/util/http-util'
+import sinon from 'sinon'
+import { transactionResponse } from '../test-utils'
 
-Vue.use(VueI18n)
-Vue.use(VueRouter)
 Vue.use(Vuetify)
+Vue.use(Vuex)
 
-describe('TransactionsDataTable.vue', () => {
-  let localVue
-  let store
+const vuetify = new Vuetify({})
+
+// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
+document.body.setAttribute('data-app', 'true')
+
+// selectors
+const header = '.base-table__header'
+const headerTitles = `${header}__title`
+const itemRow = '.base-table__item-row'
+const itemCell = '.base-table__item-cell'
+
+describe('TransactionsDataTable tests', () => {
+  let wrapper: Wrapper<any>
+  let sandbox: any
 
   const config = {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',
     PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
   }
-
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
-  beforeEach(() => {
-    localVue = createLocalVue()
-    localVue.use(Vuex)
-    const orgModule = {
-      namespaced: true,
-      actions: {
-        getTransactionList: jest.fn(() => {
-          return [
-            {
-              'id': 9656,
-              'transactionNames': [
-                'Priority Request fee'
-              ],
-              'folioNumber': '',
-              'businessIdentifier': '',
-              'initiatedBy': 'BCREGTEST Bena TEST',
-              'transactionDate': '2021-05-10T21:49:21.412338+00:00',
-              'totalAmount': '101.50',
-              'status': 'PAD Invoice Approved',
-              'details': [
-                {
-                  'label': 'NR Number:',
-                  'value': 'NR1234567'
-                },
-                {
-                  'label': 'Name Choices:',
-                  'value': ''
-                },
-                {
-                  'label': '1.',
-                  'value': 'CINEXTREME LEGAL SERVICES LIMITED'
-                },
-                {
-                  'label': '2.',
-                  'value': 'BRUNETTE HUNTING AND TRAPPING LIMITED'
-                },
-                {
-                  'label': '3.',
-                  'value': 'ALKEM CLOTHING STORES LIMITED'
-                }
-              ]
-            }]
-        })
-      },
-      state: {
-        currentOrganization: []
-      }
-    }
-    store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+  beforeEach(async () => {
+    const localVue = createLocalVue()
+    // store
+    const orgModule = { namespaced: true, state: { currentOrganization: { id: 123 } } }
+    const store = new Vuex.Store({ strict: false, modules: { org: orgModule } })
+
+    // stub get transactions get call
+    sandbox = sinon.createSandbox()
+    const get = sandbox.stub(axios, 'post')
+    get.returns(new Promise(resolve => resolve({ data: transactionResponse,  })))
+
+    wrapper = mount(TransactionsDataTable, {
+      localVue,
+      vuetify,
+      store,
+      propsData: { headers: TransactionTableHeaders }
+    })
   })
 
-  it('Shows empty panel message', () => {
-    UserService.getOrganizations = jest.fn().mockResolvedValue({ orgs: [] })
-    const $t = () => ''
-    const wrapper = shallowMount(TransactionsDataTable, {
-      store,
-      localVue,
-      mocks: { $t }
-    })
-    expect(wrapper.text()).toContain('')
+  afterEach(() => {
+    wrapper.destroy()
+    sandbox.restore()
+  })
+
+  it('renders transaction table with child components', async () => {
+    // trigger load
+    await wrapper.vm.loadTransactionList()
+    expect(wrapper.find(BaseVDataTable).exists()).toBe(true)
+    expect(wrapper.find(DatePicker).exists()).toBe(true)
+    expect(wrapper.find(DatePicker).isVisible()).toBe(false)
+    // table headers
+    expect(wrapper.find(BaseVDataTable).find(header).exists()).toBe(true)
+    const titles = wrapper.find(BaseVDataTable).findAll(headerTitles)
+    expect(titles.length).toBe(TransactionTableHeaders.length)
+    expect(titles.at(0).text()).toBe('Transaction Type')
+    expect(titles.at(1).text()).toBe('Folio #')
+    expect(titles.at(2).text()).toBe('Initiated by')
+    expect(titles.at(3).text()).toBe('Date (Pacific Time)')
+    expect(titles.at(4).text()).toBe('Total Amount')
+    expect(titles.at(5).text()).toBe('Transaction ID')
+    expect(titles.at(6).text()).toBe('Payment Method')
+    expect(titles.at(7).text()).toBe('Payment Status')
+    expect(titles.at(8).text()).toBe('')
+    // table items
+    const itemRows = wrapper.find(BaseVDataTable).findAll(itemRow)
+    expect(itemRows.length).toBe(transactionResponse.items.length)
+    // test cell data
+    const row1Cells = itemRows.at(0).findAll(itemCell)
+    expect(row1Cells.at(0).text()).toBe('Statement of Registration')
+    expect(row1Cells.at(1).text()).toBe('ab12')
+    expect(row1Cells.at(2).text()).toBe('tester 123')
+    expect(row1Cells.at(3).text()).toBe('January 24, 20233:09 PM')
+    expect(row1Cells.at(4).text()).toBe('$0.00')
+    expect(row1Cells.at(5).text()).toBe('25663')
+    expect(row1Cells.at(6).text()).toBe('Routing Slip')
+    expect(row1Cells.at(7).text()).toBe('Completed  January 24, 2023')
+    expect(row1Cells.at(8).text()).toBe('')
+    // clear filters is hidden
+    expect(wrapper.find('.clear-btn').exists()).toBe(false)
+  })
+
+  it('shows date picker when date filter clicked', async () => {
+    // verify setup
+    expect(wrapper.find(DatePicker).isVisible()).toBe(false)
+    expect(wrapper.find('.date-filter').exists()).toBe(true)
+    // simulate click (trigger click not working in this test)
+    wrapper.vm.showDatePicker = true
+    await Vue.nextTick()
+    expect(wrapper.find(DatePicker).isVisible()).toBe(true)
   })
 })

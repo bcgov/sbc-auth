@@ -31,7 +31,6 @@ describe('DateRangeFilter.vue', () => {
       propsData: {
         dateFilterProp: {}
       },
-      sync: false,
       attachToDocument: true
     })
 

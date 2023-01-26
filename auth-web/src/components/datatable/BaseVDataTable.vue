@@ -77,10 +77,10 @@
 
     <!-- Items -->
     <template v-slot:item="{ item }">
-      <tr :key="item[itemKey]">
+      <tr class="base-table__item-row" :key="item[itemKey]">
         <td
           v-for="header in headers" :key="'item-' + header.col"
-          :class="[header.itemClass, 'base-table__item']"
+          :class="[header.itemClass, 'base-table__item-cell']"
         >
           <slot :header="header" :item="item" :name="'item-slot-' + header.col">
             <span v-if="header.itemFn" v-html="header.itemFn(item[header.col])" />
@@ -103,7 +103,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
@@ -121,15 +121,14 @@ export default defineComponent({
   name: 'BaseVDataTable',
   emits: ['update-table-options'],
   props: {
-    clearFilters: { default: 1 },
+    clearFiltersTrigger: { default: 1 },
     headerBg: { default: 'white' },
     height: { type: String },
-    initialTableDataOptions: { default: _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
+    initialTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     itemKey: { type: String },
     loading: { default: false },
     loadingText: { default: 'Loading...' },
     noDataText: { default: 'No results found.' },
-    resetFilters: { default: false },
     setItems: { default: [] as object[] },
     setHeaders: { default: [] as BaseTableHeaderI[] },
     totalItems: { type: Number }
@@ -168,7 +167,7 @@ export default defineComponent({
       })
       state.headers = val
     })
-    watch(() => props.clearFilters, () => {
+    watch(() => props.clearFiltersTrigger, () => {
       state.headers.forEach((header) => {
         if (header.hasFilter) header.customFilter.value = ''
       })
@@ -210,7 +209,7 @@ export default defineComponent({
 
   }
 
-  &__item {
+  &__item-cell {
     border: 0px;
     font-size: 0.875rem;
     padding-top: 0.5rem;

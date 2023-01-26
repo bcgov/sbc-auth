@@ -71,7 +71,6 @@ describe('Account settings ExistingAPIKeys.vue', () => {
         propsData: {
           ...propsData
         },
-        sync: false,
         stubs: {
           'v-btn': {
             template: `<button @click='$listeners.click'></button>`

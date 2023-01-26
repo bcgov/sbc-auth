@@ -84,7 +84,6 @@ describe('Entity Management Component', () => {
       vuetify,
       localVue,
       store,
-      sync: false,
       mocks: { $t },
       computed: {
         enableBcCccUlc () {

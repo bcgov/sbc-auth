@@ -8,6 +8,7 @@ import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -122,7 +123,7 @@ describe('AccountInformation.vue basic tests', () => {
     await Vue.nextTick()
     // click regular
     wrapper.findAll('.access-type__radio-grp input').at(0).trigger('click')
-    await Vue.nextTick()
+    await flushPromises()
     const radioOptions = wrapper.findAll('.access-type__radio-grp .v-radio')
     expect(radioOptions.at(0).attributes()['class']).toContain('v-item--active')
     expect(radioOptions.at(1).attributes()['class']).not.toContain('v-item--active')

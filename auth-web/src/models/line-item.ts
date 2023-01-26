@@ -3,12 +3,12 @@ export interface LineItem {
   filingFees: number
   futureEffectiveFees: number
   gst: number
-  id: number
+  id?: number
   priorityFees: number
   pst: number
   quantity: number
   serviceFees: number
-  statusCode: string
+  statusCode?: string
   total: number
   waivedBy: string
   waivedFees: number

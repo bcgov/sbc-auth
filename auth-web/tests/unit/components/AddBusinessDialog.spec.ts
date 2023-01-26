@@ -4,6 +4,7 @@ import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -113,8 +114,9 @@ tests.forEach(test => {
       wrapper.destroy()
     })
 
-    it(test.desc, () => {
+    it(test.desc, async () => {
       wrapper.setData({ businessIdentifier: test.businessIdentifier })
+      await flushPromises()
 
       // verify components
       expect(wrapper.attributes('id')).toBe('add-business-dialog')

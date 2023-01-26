@@ -7,8 +7,8 @@ export const paymentTypeDisplay = {
   [PaymentTypes.CREDIT_CARD]: 'Credit Card',
   [PaymentTypes.DIRECT_PAY]: 'Direct Pay',
   [PaymentTypes.EFT]: 'Electronic Funds Transfer',
-  [PaymentTypes.EJV]: 'Equity Joint Venture',
-  [PaymentTypes.INTERNAL]: 'Internal',
+  [PaymentTypes.EJV]: 'Electronic Journal Voucher',
+  [PaymentTypes.INTERNAL]: 'Routing Slip',
   [PaymentTypes.ONLINE_BANKING]: 'Online Banking',
   [PaymentTypes.PAD]: 'Pre-Authorized Debit',
   [PaymentTypes.WIRE]: 'Wire Transfer'

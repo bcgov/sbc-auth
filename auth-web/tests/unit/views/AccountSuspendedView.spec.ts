@@ -5,6 +5,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
@@ -55,8 +56,9 @@ describe('AccountSuspendedView.vue', () => {
     expect(wrapper.find('[data-test="div-is-admin"]').exists()).toBeFalsy()
   })
 
-  it('Validate is-admin message', () => {
+  it('Validate is-admin message', async () => {
     wrapper.setProps({ isAdmin: true })
+    await flushPromises()
     expect(wrapper.find('h1').text()).toBe('Account Suspended')
     expect(wrapper.find('[data-test="div-is-admin"]').text()).toContain('Your account is suspended. For more information,')
     expect(wrapper.find('[data-test="div-is-admin"]').text()).toContain('please contact the BC Online Partnership Office at: Email: bconline@gov.bc.ca Telephone: 1-800-663-6102')
