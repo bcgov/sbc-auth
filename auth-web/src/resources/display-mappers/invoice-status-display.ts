@@ -14,6 +14,6 @@ export const invoiceStatusDisplay = {
   [InvoiceStatus.REFUNDED]: 'Refunded',
   [InvoiceStatus.REFUND_REQUESTED]: 'Refund Requested',
   [InvoiceStatus.SETTLEMENT_SCHEDULED]: 'Non-sufficient Funds',
-  [InvoiceStatus.UPDATE_REVENUE_ACCOUNT]: 'Completed',
+  [InvoiceStatus.UPDATE_REVENUE_ACCOUNT]: 'Processing',
   [InvoiceStatus.UPDATE_REVENUE_ACCOUNT_REFUND]: 'Refunded'
 }
