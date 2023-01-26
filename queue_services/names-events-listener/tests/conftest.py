@@ -26,7 +26,7 @@ from nats.aio.client import Client as Nats
 from sqlalchemy import event, text
 from stan.aio.client import Client as Stan
 
-from business_events_listener.config import get_named_config
+from names_events_listener.config import get_named_config
 
 
 @contextmanager

@@ -29,10 +29,10 @@ from dotenv import find_dotenv, load_dotenv
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'business_events_listener.config.DevConfig',
-    'testing': 'business_events_listener.config.TestConfig',
-    'production': 'business_events_listener.config.ProdConfig',
-    'default': 'business_events_listener.config.ProdConfig'
+    'development': 'names_events_listener.config.DevConfig',
+    'testing': 'names_events_listener.config.TestConfig',
+    'production': 'names_events_listener.config.ProdConfig',
+    'default': 'names_events_listener.config.ProdConfig'
 }
 
 
