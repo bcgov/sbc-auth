@@ -91,6 +91,7 @@ describe('Account settings ActivityLog.vue', () => {
   })
 
   afterEach(() => {
+    wrapper.destroy()
     jest.resetModules()
     jest.clearAllMocks()
   })

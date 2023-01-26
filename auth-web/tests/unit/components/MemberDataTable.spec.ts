@@ -214,6 +214,9 @@ describe('MemberDataTable.vue', () => {
     jest.resetModules()
     jest.clearAllMocks()
   })
+  afterEach(() => {
+    wrapper.destroy()
+  })
 
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()

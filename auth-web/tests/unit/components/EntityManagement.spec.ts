@@ -96,6 +96,7 @@ describe('Entity Management Component', () => {
   })
 
   afterEach(() => {
+    wrapper.destroy()
     jest.resetModules()
     jest.clearAllMocks()
   })
