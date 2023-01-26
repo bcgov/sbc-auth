@@ -1,0 +1,40 @@
+[
+    {
+        "vault": "nats",
+        "application": [
+            "base",
+            "names-events-listener"
+        ]
+    },
+    {
+        "vault": "relationship",
+        "application": [
+            "postgres-auth"
+        ]
+    },
+    {
+        "vault": "sentry",
+        "application": [
+             "relationship-api"
+        ]
+    },
+    {
+        "vault": "API",
+        "application": [
+            "pay-api"
+        ]
+    },
+    {
+        "vault": "keycloak",
+        "application": [
+            "jwt-base",
+            "sbc-auth-admin"
+        ]
+    },
+    {
+        "vault": "launchdarkly",
+        "application": [
+            "auth"
+        ]
+    }
+]
