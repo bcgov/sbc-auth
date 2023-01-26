@@ -1,13 +1,10 @@
-// Libraries
-import Vue from 'vue'
-import Vuetify from 'vuetify'
-import VueCompositionAPI from '@vue/composition-api'
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils'
-
-// local components
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { BaseVDataTable } from '@/components/datatable'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
+import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
+import Vuetify from 'vuetify'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -143,7 +140,7 @@ describe('Base datatable tests', () => {
 
   it('dynamically updates headers and items', async () => {
     const itemsUpdated = [...items]
-    itemsUpdated.push({id:'3', desc1: 'updated 1', desc2: 'updated 2' })
+    itemsUpdated.push({ id: '3', desc1: 'updated 1', desc2: 'updated 2' })
     // update props
     wrapper.setProps({ setHeaders: headersUpdated, setItems: itemsUpdated })
     await Vue.nextTick()

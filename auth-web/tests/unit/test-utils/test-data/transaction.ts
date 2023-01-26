@@ -19,7 +19,7 @@ export const transactionResponse: TransactionListResponse = {
         quantity: 1,
         serviceFees: 0,
         total: 0,
-        waivedBy: "tester123",
+        waivedBy: 'tester123',
         waivedFees: 40
       }],
       paid: 0,

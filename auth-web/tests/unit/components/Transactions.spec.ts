@@ -1,5 +1,5 @@
 import '../util/composition-api-setup' // important to import this first
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { MembershipType } from '@/models/Organization'
 import Transactions from '@/components/auth/account-settings/transaction/Transactions.vue'
 import { TransactionsDataTable } from '@/components/auth/account-settings/transaction'
@@ -39,14 +39,14 @@ describe('TransactionsDataTable tests', () => {
         currentOrganization: { id: 123 },
         currentMembership: { membershipTypeCode: MembershipType.Admin }
       },
-      actions: { getOrgPayments: jest.fn(() => { credit: 0 }) }
+      actions: { getOrgPayments: jest.fn(() => { return { credit: 0 } }) }
     }
     const store = new Vuex.Store({ strict: false, modules: { org: orgModule } })
 
     // stub get transactions get call
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'post')
-    get.returns(new Promise(resolve => resolve({ data: transactionResponse,  })))
+    get.returns(new Promise(resolve => resolve({ data: transactionResponse })))
 
     wrapper = mount(Transactions, {
       localVue,

@@ -1,9 +1,9 @@
 import '../util/composition-api-setup' // important to import this first
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components/datatable'
 import { DatePicker } from '@/components'
-import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import { TransactionTableHeaders } from '@/resources/table-headers'
+import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -44,7 +44,7 @@ describe('TransactionsDataTable tests', () => {
     // stub get transactions get call
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'post')
-    get.returns(new Promise(resolve => resolve({ data: transactionResponse,  })))
+    get.returns(new Promise(resolve => resolve({ data: transactionResponse })))
 
     wrapper = mount(TransactionsDataTable, {
       localVue,

@@ -1,11 +1,8 @@
-// Libraries
-import Vue from 'vue'
-import Vuetify from 'vuetify'
-import VueCompositionAPI from '@vue/composition-api'
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils'
-
-// local components
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { IconTooltip } from '@/components'
+import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
+import Vuetify from 'vuetify'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
