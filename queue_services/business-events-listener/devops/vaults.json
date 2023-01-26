@@ -3,7 +3,7 @@
         "vault": "nats",
         "application": [
             "base",
-            "names-events-listener"
+            "business-events-listener"
         ]
     },
     {

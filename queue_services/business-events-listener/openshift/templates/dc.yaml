@@ -106,7 +106,7 @@ parameters:
     displayName: Name
     description: The name assigned to all of the OpenShift resources associated to the server instance.
     required: true
-    value: names-events-listener
+    value: business-events-listener
 
   - name: TAG
     displayName: Environment TAG name

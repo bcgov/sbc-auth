@@ -18,7 +18,7 @@ As of 2018-02-22 in **ALPHA**
 
 ## Documentation
 
-The names-events-listener is used to update entities within sbc-auth
+The business-events-listener is used to update entities within sbc-auth
 It's a bridge between entity filer -> sbc-auth via queue, based on events.
 
 ## Security
