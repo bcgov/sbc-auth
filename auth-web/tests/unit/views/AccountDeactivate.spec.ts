@@ -50,6 +50,7 @@ describe('AccountDeactivate.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('AccountDeactivate is a Vue instance', () => {

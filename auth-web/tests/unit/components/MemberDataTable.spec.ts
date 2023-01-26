@@ -208,12 +208,14 @@ describe('MemberDataTable.vue', () => {
       store,
       router,
       vuetify,
-      mocks: { $t },
-      sync: false
+      mocks: { $t }
     })
 
     jest.resetModules()
     jest.clearAllMocks()
+  })
+  afterAll(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {

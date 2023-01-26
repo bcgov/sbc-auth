@@ -71,7 +71,6 @@ describe('Account settings ExistingAPIKeys.vue', () => {
         propsData: {
           ...propsData
         },
-        sync: false,
         stubs: {
           'v-btn': {
             template: `<button @click='$listeners.click'></button>`
@@ -87,6 +86,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {

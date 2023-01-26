@@ -59,6 +59,10 @@ describe('BusinessContactForm.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })

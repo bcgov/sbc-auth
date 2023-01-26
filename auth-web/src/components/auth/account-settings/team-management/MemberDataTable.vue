@@ -508,7 +508,7 @@ export default class MemberDataTable extends Vue {
   }
 
   private canViewLoginSource () :boolean {
-    return [Permission.VIEW_USER_LOGINSOURCE].some(per => this.permissions.includes(per))
+    return [Permission.VIEW_USER_LOGINSOURCE].some(per => this.permissions?.includes(per))
   }
 
   @Emit()

@@ -31,12 +31,15 @@ describe('DateRangeFilter.vue', () => {
       propsData: {
         dateFilterProp: {}
       },
-      sync: false,
       attachToDocument: true
     })
 
     jest.resetModules()
     jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    wrapper.destroy()
   })
 
   it('is a Vue instance', () => {

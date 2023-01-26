@@ -77,5 +77,6 @@ describe('PendingMemberDataTable.vue', () => {
       mocks: { $t }
     })
     expect(wrapper.find('.user-list')).toBeTruthy()
+    wrapper.destroy()
   })
 })

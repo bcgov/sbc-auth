@@ -31,6 +31,10 @@ describe('AccountAccessType.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance', () => {
     const $t = () => ''
     wrapper = mount(AccountAccessType, {

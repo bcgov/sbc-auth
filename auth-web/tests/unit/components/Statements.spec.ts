@@ -97,6 +97,7 @@ describe('Statements.vue', () => {
       mocks: { $t }
     })
     expect(wrapper.isVueInstance()).toBeTruthy()
+    wrapper.destroy()
   })
 
   it('renders proper header content', () => {
@@ -107,5 +108,6 @@ describe('Statements.vue', () => {
       mocks: { $t }
     })
     expect(wrapper.find('h2').text()).toBe('Statements')
+    wrapper.destroy()
   })
 })

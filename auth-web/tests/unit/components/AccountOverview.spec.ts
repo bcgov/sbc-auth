@@ -55,6 +55,10 @@ describe('AccountOverview.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterAll(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
   })
