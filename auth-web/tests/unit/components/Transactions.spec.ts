@@ -48,34 +48,34 @@ describe('TransactionsDataTable tests', () => {
     const get = sandbox.stub(axios, 'post')
     get.returns(new Promise(resolve => resolve({ data: transactionResponse })))
 
-    // wrapper = mount(Transactions, {
-    //   localVue,
-    //   vuetify,
-    //   store
-    // })
+    wrapper = mount(Transactions, {
+      localVue,
+      vuetify,
+      store
+    })
   })
 
   afterEach(() => {
-    // wrapper.destroy()
+    wrapper.destroy()
     sandbox.restore()
   })
 
   it('renders transaction with child components', () => {
-    // expect(wrapper.find(Transactions).exists()).toBe(true)
-    // expect(wrapper.find(TransactionsDataTable).exists()).toBe(true)
-    // expect(wrapper.find('.view-header__title').text()).toBe('Transactions')
-    // expect(wrapper.find('.cad-credit').exists()).toBe(false)
-    // expect(wrapper.find('.credit-details').exists()).toBe(false)
-    // expect(wrapper.find("[data-test='btn-export-csv']").exists()).toBe(true)
-    // expect(wrapper.find('.column-selections').exists()).toBe(true)
+    expect(wrapper.find(Transactions).exists()).toBe(true)
+    expect(wrapper.find(TransactionsDataTable).exists()).toBe(true)
+    expect(wrapper.find('.view-header__title').text()).toBe('Transactions')
+    expect(wrapper.find('.cad-credit').exists()).toBe(false)
+    expect(wrapper.find('.credit-details').exists()).toBe(false)
+    expect(wrapper.find("[data-test='btn-export-csv']").exists()).toBe(true)
+    expect(wrapper.find('.column-selections').exists()).toBe(true)
   })
 
   it('shows credit message when credit updated', async () => {
-    // wrapper.vm.credit = 1
-    // await Vue.nextTick()
-    // expect(wrapper.find('.cad-credit').exists()).toBe(true)
-    // expect(wrapper.find('.credit-details').exists()).toBe(true)
-    // expect(wrapper.find('.cad-credit').text()).toContain('CAD')
-    // expect(wrapper.find('.credit-details').text()).toContain('$1.00')
+    wrapper.vm.credit = 1
+    await Vue.nextTick()
+    expect(wrapper.find('.cad-credit').exists()).toBe(true)
+    expect(wrapper.find('.credit-details').exists()).toBe(true)
+    expect(wrapper.find('.cad-credit').text()).toContain('CAD')
+    expect(wrapper.find('.credit-details').text()).toContain('$1.00')
   })
 })

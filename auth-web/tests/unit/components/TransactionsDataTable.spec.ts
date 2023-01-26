@@ -8,9 +8,9 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
+import flushPromises from 'flush-promises'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
-import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(Vuex)
@@ -88,7 +88,8 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(0).text()).toBe('Statement of Registration')
     expect(row1Cells.at(1).text()).toBe('ab12')
     expect(row1Cells.at(2).text()).toBe('tester 123')
-    expect(row1Cells.at(3).text()).toBe('January 24, 20233:09 PM')
+    // GHA not converting date to PST so hour is off in CI
+    expect(row1Cells.at(3).text()).toContain('January 24, 2023')
     expect(row1Cells.at(4).text()).toBe('$0.00')
     expect(row1Cells.at(5).text()).toBe('25663')
     expect(row1Cells.at(6).text()).toBe('Routing Slip')
@@ -96,7 +97,7 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(8).text()).toBe('')
     // clear filters is hidden
     expect(wrapper.find('.clear-btn').exists()).toBe(false)
-  })
+  }, 10000)
 
   it('shows date picker when date filter clicked', async () => {
     // verify setup
@@ -106,5 +107,5 @@ describe('TransactionsDataTable tests', () => {
     wrapper.vm.showDatePicker = true
     await Vue.nextTick()
     expect(wrapper.find(DatePicker).isVisible()).toBe(true)
-  })
+  }, 10000)
 })

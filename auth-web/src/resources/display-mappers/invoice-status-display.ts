@@ -13,8 +13,7 @@ export const invoiceStatusDisplay = {
   [InvoiceStatus.PENDING]: 'Pending',
   [InvoiceStatus.REFUNDED]: 'Refunded',
   [InvoiceStatus.REFUND_REQUESTED]: 'Refund Requested',
-  // not sure about below
-  [InvoiceStatus.SETTLEMENT_SCHEDULED]: 'Processing',
+  [InvoiceStatus.SETTLEMENT_SCHEDULED]: 'Non-sufficient Funds',
   [InvoiceStatus.UPDATE_REVENUE_ACCOUNT]: 'Completed',
   [InvoiceStatus.UPDATE_REVENUE_ACCOUNT_REFUND]: 'Refunded'
 }
