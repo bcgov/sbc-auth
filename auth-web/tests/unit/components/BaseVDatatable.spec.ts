@@ -28,12 +28,12 @@ const itemCell = '.base-table__item-cell'
 const items = [{ id: '0', desc1: 'lala 1', desc2: 'lala 2' }, { id: '1', desc1: 'weewaa 1', desc2: 'weewaa 1' }]
 const headersBasic: BaseTableHeaderI[] = [
   { col: 'id', hasFilter: false, value: 'ID Header' },
-  { col: 'desc1', hasFilter: false, itemFn: (val: string) => `${val}111`, value: 'Title Desc 1' }
+  { col: 'desc1', hasFilter: false, itemFn: (val: any) => `${val.desc1}111`, value: 'Title Desc 1' }
 ]
 const headersUpdated: BaseTableHeaderI[] = [
   { col: 'id', hasFilter: false, value: 'ID Header' },
-  { col: 'desc1', hasFilter: false, itemFn: (val: string) => `${val}111`, value: 'Title Desc 1' },
-  { col: 'desc2', hasFilter: false, itemFn: (val: string) => `${val}222`, value: 'Desc 2' }
+  { col: 'desc1', hasFilter: false, itemFn: (val: any) => `${val.desc1}111`, value: 'Title Desc 1' },
+  { col: 'desc2', hasFilter: false, itemFn: (val: any) => `${val.desc2}222`, value: 'Desc 2' }
 ]
 const headersWithFilters: BaseTableHeaderI[] = [
   {
@@ -93,7 +93,7 @@ const validateItems = async (wrapper: Wrapper<any>) => {
       if (headers[k].itemFn) {
         expect(cells.at(k).text()).toEqual(headers[k].itemFn(sortedItems[i]))
       } else {
-        expect(cells.at(k).text()).toEqual(sortedItems[i])
+        expect(cells.at(k).text()).toEqual(sortedItems[i][headers[k].col])
       }
     }
   }
