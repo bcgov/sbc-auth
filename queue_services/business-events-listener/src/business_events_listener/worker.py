@@ -30,15 +30,8 @@ import os
 from typing import Dict
 
 import nats
-from auth_api.models import ActivityLog as ActivityModel
-from auth_api.models import Affiliation as AffiliationModel
-from auth_api.models import Entity as EntityModel
-from auth_api.models import Org as OrgModel
 from auth_api.models import db
 from auth_api.services import Flags
-from auth_api.services.rest_service import RestService
-from auth_api.utils.enums import AccessType, ActivityAction, CorpType
-from dateutil import parser
 from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
@@ -74,6 +67,8 @@ async def process_business_events(event_message: Dict[str, any]):
     """TODO reads from entity filer queue.
     """
     logger.debug('>>>>>>>process_business_events>>>>>')
+    if event_message:
+        logger.debug('have event message')
 
     logger.debug('<<<<<<<process_business_events<<<<<<<<<<')
 
