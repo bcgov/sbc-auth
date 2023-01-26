@@ -21,7 +21,7 @@ describe('GovmAccountSetupView.vue', () => {
   let wrapper: any
   let userModule: any
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 

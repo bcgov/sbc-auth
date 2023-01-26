@@ -214,7 +214,7 @@ describe('MemberDataTable.vue', () => {
     jest.resetModules()
     jest.clearAllMocks()
   })
-  afterEach(() => {
+  afterAll(() => {
     wrapper.destroy()
   })
 

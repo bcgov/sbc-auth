@@ -13,6 +13,10 @@ describe('Search Business Form: Initial', () => {
     propsData: {}
   })
 
+  afterAll(() => {
+    wrapper.destroy()
+  })
+
   it('renders the component properly', () => {
     // verify component
     expect(wrapper.find('#txtBusinessNumber').isVisible()).toBe(true)
@@ -24,6 +28,10 @@ describe('Search Business Form: Result', () => {
   const wrapper: Wrapper<any> = shallowMount(AdministrativeBN, {
     vuetify,
     propsData: {}
+  })
+
+  afterAll(() => {
+    wrapper.destroy()
   })
 
   it('renders the component properly', async () => {

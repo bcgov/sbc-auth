@@ -92,6 +92,10 @@ describe('AccountInfo.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterAll(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance', () => {
     wrapper = shallowMount(AccountInfo, {
       store,

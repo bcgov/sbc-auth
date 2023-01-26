@@ -27,6 +27,7 @@ describe('SetupGovmAccountView.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
   beforeEach(() => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)

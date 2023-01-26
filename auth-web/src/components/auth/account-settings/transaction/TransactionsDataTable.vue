@@ -167,9 +167,14 @@ export default defineComponent({
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
     watch(() => tableDataOptions.value, (val: DataOptions) => {
-      transactions.filters.pageNumber = val?.page || DEFAULT_DATA_OPTIONS.page
-      transactions.filters.pageLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
-      loadTransactionList()
+      const newPage = val?.page || DEFAULT_DATA_OPTIONS.page
+      const newLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+      // need this check or jest test continuously loops on initialization
+      if (transactions.filters.pageNumber !== newPage || transactions.filters.pageLimit !== newLimit) {
+        transactions.filters.pageNumber = val?.page || DEFAULT_DATA_OPTIONS.page
+        transactions.filters.pageLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+        loadTransactionList()
+      }
     })
 
     const displayDate = (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY')

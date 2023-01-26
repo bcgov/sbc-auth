@@ -100,6 +100,10 @@ describe('InviteUsersForm.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('Mounting works', () => {
     const $t = () => 'test'
     wrapper = shallowMount(InviteUsersForm, {

@@ -10,6 +10,7 @@ import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(Vuex)
@@ -35,7 +36,7 @@ describe('TransactionsDataTable tests', () => {
   }
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const localVue = createLocalVue()
     // store
     const orgModule = { namespaced: true, state: { currentOrganization: { id: 123 } } }
@@ -52,9 +53,10 @@ describe('TransactionsDataTable tests', () => {
       store,
       propsData: { headers: TransactionTableHeaders }
     })
+    await flushPromises()
   })
 
-  afterEach(() => {
+  afterAll(() => {
     wrapper.destroy()
     sandbox.restore()
   })

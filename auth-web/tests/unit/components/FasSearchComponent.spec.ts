@@ -46,6 +46,10 @@ describe('FasSearchComponent.vue', () => {
     jest.clearAllMocks()
   })
 
+  afterEach(() => {
+    wrapper.destroy()
+  })
+
   it('is a Vue instance and has default text', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
     // It should display the receipt number, and the no data message at the very least.

@@ -22,6 +22,7 @@ describe('StaffCreateAccountModal.vue', () => {
   afterEach(() => {
     jest.resetModules()
     jest.clearAllMocks()
+    wrapper.destroy()
   })
 
   it('Should have a Modal', () => {

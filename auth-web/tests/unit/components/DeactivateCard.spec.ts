@@ -34,6 +34,7 @@ describe('Deactivated card.vue', () => {
 
     expect(wrapper.isVueInstance()).toBeTruthy()
     expect(wrapper.find("[data-test='title-deactivate']").text()).toBe('When this account is deactivated...')
+    wrapper.destroy()
   })
 
   it('assert subtitle for a default org', () => {
@@ -48,6 +49,7 @@ describe('Deactivated card.vue', () => {
 
     assertElements(wrapper)
     expect(wrapper.text()).not.toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
+    wrapper.destroy()
   })
   it('assert subtitle for a premium org', async () => {
     const $t = (params: string) => { return 'i8n' + params }
@@ -61,6 +63,7 @@ describe('Deactivated card.vue', () => {
     await wrapper.setProps({ type: 'PREMIUM' })
     assertElements(wrapper)
     expect(wrapper.text()).toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
+    wrapper.destroy()
   })
   it('assert subtitle for a basic org', async () => {
     const $t = (params: string) => { return 'i8n' + params }
@@ -74,5 +77,6 @@ describe('Deactivated card.vue', () => {
     await wrapper.setProps({ type: 'BASIC' })
     assertElements(wrapper)
     expect(wrapper.text()).not.toContain('i8n' + 'padRemovalTitle') // this is only for premium orgs
+    wrapper.destroy()
   })
 })

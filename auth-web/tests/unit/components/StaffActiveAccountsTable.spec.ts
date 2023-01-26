@@ -77,6 +77,10 @@ describe('StaffActiveAccountsTable.vue', () => {
     jest.resetModules()
     jest.clearAllMocks()
   })
+
+  afterEach(() => {
+    wrapper.destroy()
+  })
   // TOFIX fix orgs undefiend
   it('is a Vue instance', () => {
     expect(wrapper.isVueInstance()).toBeTruthy()
