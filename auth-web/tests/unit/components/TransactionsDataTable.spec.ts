@@ -92,7 +92,7 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(3).text()).toContain('January 24, 20233:09 PM')
     expect(row1Cells.at(4).text()).toBe('$0.00')
     expect(row1Cells.at(5).text()).toBe('25663')
-    expect(row1Cells.at(6).text()).toBe('Routing Slip')
+    expect(row1Cells.at(6).text()).toBe('N/A')
     expect(row1Cells.at(7).text()).toBe('Completed  January 24, 2023')
     expect(row1Cells.at(8).text()).toBe('')
     // clear filters is hidden

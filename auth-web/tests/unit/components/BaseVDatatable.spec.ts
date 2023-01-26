@@ -90,11 +90,10 @@ const validateItems = async (wrapper: Wrapper<any>) => {
     const cells = itemRows.at(i).findAll(itemCell)
     expect(cells.length).toBe(headers.length)
     for (let k = 0; k < cells.length; k++) {
-      const itemDisplay = sortedItems[i][headers[k].col]
       if (headers[k].itemFn) {
-        expect(cells.at(k).text()).toEqual(headers[k].itemFn(itemDisplay))
+        expect(cells.at(k).text()).toEqual(headers[k].itemFn(sortedItems[i]))
       } else {
-        expect(cells.at(k).text()).toEqual(itemDisplay)
+        expect(cells.at(k).text()).toEqual(sortedItems[i])
       }
     }
   }
