@@ -83,7 +83,7 @@
           :class="[header.itemClass, 'base-table__item-cell']"
         >
           <slot :header="header" :item="item" :name="'item-slot-' + header.col">
-            <span v-if="header.itemFn" v-html="header.itemFn(item[header.col])" />
+            <span v-if="header.itemFn" v-html="header.itemFn(item)" />
             <span v-else>{{ item[header.col] }}</span>
           </slot>
         </td>
@@ -212,8 +212,7 @@ export default defineComponent({
   &__item-cell {
     border: 0px;
     font-size: 0.875rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding: 8px 0 8px 16px;
     vertical-align: top;
   }
 

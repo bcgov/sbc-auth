@@ -2,6 +2,7 @@ import { InvoiceStatus, PaymentTypes } from '@/util/constants'
 import { invoiceStatusDisplay, paymentTypeDisplay } from '@/resources/display-mappers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
+import { Transaction } from '@/models/transaction'
 
 export const TransactionTableHeaders: BaseTableHeaderI[] = [
   {
@@ -38,14 +39,14 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    itemFn: (val: string) => (val === 'None None') ? '-' : val,
+    itemFn: (val: Transaction) => (val.createdName === 'None None') ? '-' : val.createdName,
     minWidth: '155px',
     value: 'Initiated by'
   },
   {
     col: 'createdOn',
     hasFilter: false,
-    itemFn: (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY<br/>h:mm A'),
+    itemFn: (val: Transaction) => CommonUtils.formatDisplayDate(val.createdOn, 'MMMM DD, YYYY<br/>h:mm A'),
     minWidth: '165px',
     value: 'Date (Pacific Time)'
   },
@@ -85,7 +86,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    itemFn: (val: PaymentTypes) => paymentTypeDisplay[val],
+    itemFn: (val: Transaction) => (val.total === 0 && val.paymentMethod === PaymentTypes.INTERNAL) ? 'N/A' : paymentTypeDisplay[val.paymentMethod],
     minWidth: '185px',
     value: 'Payment Method'
   },
@@ -105,7 +106,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       type: 'select',
       value: ''
     },
-    itemFn: (val: InvoiceStatus) => invoiceStatusDisplay[val],
+    itemFn: (val: Transaction) => invoiceStatusDisplay[val.statusCode],
     hasFilter: true,
     minWidth: '195px',
     value: 'Payment Status'
