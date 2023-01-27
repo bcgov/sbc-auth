@@ -4,7 +4,7 @@ import { LineItem } from '.'
 export interface Transaction {
   businessIdentifier: string
   createdName: string
-  createdOn: string
+  createdOn: Date
   folioNumber: string
   id: number
   lineItems: LineItem[]
