@@ -23,7 +23,7 @@ from setuptools import find_packages, setup
 
 _version_re = re.compile(r'__version__\s+=\s+(.*)')  # pylint: disable=invalid-name
 
-with open('src/business_events_listener/version.py', 'rb') as f:
+with open('src/names_events_listener/version.py', 'rb') as f:
     version = str(ast.literal_eval(_version_re.search(  # pylint: disable=invalid-name
         f.read().decode('utf-8')).group(1)))
 
@@ -54,7 +54,7 @@ def read(filepath):
 REQUIREMENTS = read_requirements('requirements.txt')
 
 setup(
-    name="business_events_listener",
+    name="names_events_listener",
     version=version,
     author_email='',
     packages=find_packages('src'),

@@ -43,7 +43,7 @@ from entity_queue_common.service import QueueServiceManager
 from entity_queue_common.service_utils import QueueException, logger
 from flask import Flask  # pylint: disable=wrong-import-order
 
-from business_events_listener import config
+from names_events_listener import config
 
 
 async def cb_nr_subscription_handler(msg: nats.aio.client.Msg):

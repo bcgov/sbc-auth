@@ -1,17 +1,17 @@
-name: Business Events Listener Queue CI
+name: Names Events Listener Queue CI
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - "queue_services/business-events-listener/**"
+      - "queue_services/names-events-listener/**"
       - "auth-api/src/auth_api/models/**"
 
 defaults:
   run:
     shell: bash
-    working-directory: ./queue_services/business-events-listener
+    working-directory: ./queue_services/names-events-listener
 
 jobs:
   setup-job:
@@ -88,9 +88,9 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
         with:
-          file: ./queue_services/business-events-listener/coverage.xml
+          file: ./queue_services/names-events-listener/coverage.xml
           flags: businesseventlistenerqueue
-          name: codecov-business-events-listener
+          name: codecov-names-events-listener
           fail_ci_if_error: false
 
   build-check:
