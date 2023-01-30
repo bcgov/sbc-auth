@@ -451,3 +451,10 @@ export enum Product {
     RPT = 'RPT',
     VS = 'VS'
 }
+
+export enum EntityDetailTypes {
+    FROZEN = 'FROZEN',
+    BADSTANDING = 'BAD_STANDING',
+    LIQUIDATION = 'LIQUIDATION',
+    DISSOLUTION = 'DISSOLUTION'
+}

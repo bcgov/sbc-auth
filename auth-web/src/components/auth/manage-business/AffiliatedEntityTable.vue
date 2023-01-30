@@ -93,8 +93,8 @@
 
             <!-- Status -->
             <td v-if="showCol(headers[3].text)" class="text-capitalize">
-              {{ status(item) }}
-              <EntityStatusAlert />
+                {{ status(item) }}
+                <EntityDetailsAlert />
             </td>
 
             <!-- Actions -->
@@ -198,12 +198,12 @@ import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
-import EntityStatusAlert from './EntityStatusAlert.vue'
+import EntityDetailsAlert from './EntityDetailsAlert.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
-  components: { EntityStatusAlert },
+  components: { EntityDetailsAlert },
   computed: {
     ...mapState('business', ['businesses']),
     ...mapState('org', ['currentOrganization'])
