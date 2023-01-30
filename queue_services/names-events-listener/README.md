@@ -18,7 +18,7 @@ As of 2018-02-22 in **ALPHA**
 
 ## Documentation
 
-The business-events-listener is used to create entities within sbc-auth and affiliate them to orgs (accounts).
+The names-events-listener is used to create entities within sbc-auth and affiliate them to orgs (accounts).
 It's a bridge between namerequest -> sbc-auth via queue, based on events.
 
 ## Security

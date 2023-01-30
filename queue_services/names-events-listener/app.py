@@ -19,7 +19,7 @@ import asyncio
 import random
 from copy import deepcopy
 
-from business_events_listener.worker import APP_CONFIG, cb_nr_subscription_handler, qsm
+from names_events_listener.worker import APP_CONFIG, cb_nr_subscription_handler, qsm
 
 
 if __name__ == '__main__':
