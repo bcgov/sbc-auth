@@ -136,11 +136,14 @@
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, ProductStatus } from '@/util/constants'
+import { DisplayModeValues, ProductStatus, Role } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
+import { namespace } from 'vuex-class'
 
+const userModule = namespace('user')
 const TOS_NEEDED_PRODUCT = ['VS']
 
 @Component({
@@ -164,6 +167,7 @@ export default class Product extends Vue {
   @Prop({ default: false }) isBasicAccount: boolean // to confirm if the current organization is basic and the product instance is premium only
   @Prop({ default: false }) canManageProductFee: boolean
 
+  @userModule.State('currentUser') public currentUser!: KCUserProfile
   private termsAccepted: boolean = false
   public productSelected:boolean = false
   private viewOnly = DisplayModeValues.VIEW_ONLY
@@ -180,15 +184,18 @@ export default class Product extends Vue {
   get showProductFee () {
     return this.canManageProductFee && this.orgProduct && this.orgProduct.product
   }
-
+  private get isStaff (): boolean {
+    return this.currentUser.roles.includes(Role.Staff)
+  }
   get productLabel () {
     // this is mapping product code with lang file.
     // lang file have subtitle and description with product code prefix.
     // eg: pprCodeSubtitle, pprCodeDescription
     // Also, returns check box icon and color if the product has been reviewed.
     const { code } = this.productDetails
-    let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
-    let details = `${code && code.toLowerCase()}CodeDescription` || ''
+    let notStaff = !this.isStaff && code.toLowerCase() === 'mhr' ? 'NotStaff' : ''
+    let subTitle = `${code && code.toLowerCase()}${notStaff}CodeSubtitle` || ''
+    let details = `${code && code.toLowerCase()}${notStaff}CodeDescription` || ''
     let decisionMadeIcon = null
     let decisionMadeColorCode = null
 
@@ -196,7 +203,7 @@ export default class Product extends Vue {
       const status = this.productDetails.subscriptionStatus
       switch (status) {
         case ProductStatus.ACTIVE: {
-          subTitle = `${code && code.toLowerCase()}CodeActiveSubtitle` || ''
+          subTitle = `${code && code.toLowerCase()}${notStaff}CodeActiveSubtitle` || ''
           decisionMadeIcon = 'mdi-check-circle'
           decisionMadeColorCode = 'success'
           break
