@@ -1,13 +1,12 @@
-import '../util/composition-api-setup' // important to import this first
+import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { MembershipType } from '@/models/Organization'
-import Transactions from '@/components/auth/account-settings/transaction/Transactions.vue'
-import { TransactionsDataTable } from '@/components/auth/account-settings/transaction'
+import { Transactions } from '@/components/auth/account-settings/transaction'
+import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
-import flushPromises from 'flush-promises'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
 

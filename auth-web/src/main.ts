@@ -1,3 +1,4 @@
+import './composition-api-setup' // ensure this happens before any imports trigger use of composition-api
 import 'core-js/stable' // to polyfill ECMAScript features
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
@@ -26,8 +27,6 @@ import vuetify from './plugins/vuetify'
 import Search from 'fas-ui'
 
 Vue.config.productionTip = false
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuelidate)
 Vue.use(Search, { store, i18n })
 

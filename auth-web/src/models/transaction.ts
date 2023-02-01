@@ -1,12 +1,14 @@
-import { InvoiceStatus, PaymentTypes } from '@/util/constants'
+import { InvoiceStatus, PaymentTypes, Product } from '@/util/constants'
 import { LineItem } from '.'
 
 export interface Transaction {
   businessIdentifier: string
   createdName: string
   createdOn: Date
+  details?: { label: string, value: string }[]
   folioNumber: string
   id: number
+  invoiceNumber: string
   lineItems: LineItem[]
   paid: number
   paymentAccount: {
@@ -15,6 +17,7 @@ export interface Transaction {
     billable: boolean
   }
   paymentMethod: PaymentTypes
+  product: Product
   refund: number
   statusCode: InvoiceStatus
   total: number
@@ -22,15 +25,22 @@ export interface Transaction {
 }
 
 export interface TransactionFilter {
+  accountName?: string,
+  businessIdentifier?: string,
   createdBy?: string,
   createdName?: string,
   dateFilter?: {
     startDate: string
     endDate: string
   },
+  details?: string,
   folioNumber?: string,
   id?: string,
+  invoiceNumber?: string,
+  lineItems?: string,
+  lineItemsAndDetails?: string,
   paymentMethod?: PaymentTypes,
+  product?: string,
   statusCode?: InvoiceStatus
 }
 

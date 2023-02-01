@@ -1,10 +1,61 @@
-import { InvoiceStatus, PaymentTypes } from '@/util/constants'
-import { invoiceStatusDisplay, paymentTypeDisplay } from '@/resources/display-mappers'
+import { InvoiceStatus, PaymentTypes, Product } from '@/util/constants'
+import { invoiceStatusDisplay, paymentTypeDisplay, productDisplay } from '@/resources/display-mappers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import { Transaction } from '@/models/transaction'
 
 export const TransactionTableHeaders: BaseTableHeaderI[] = [
+  {
+    col: 'accountName',
+    customFilter: {
+      clearable: true,
+      label: 'Account Name',
+      type: 'text',
+      value: ''
+    },
+    hasFilter: true,
+    itemFn: (val: Transaction) => val.paymentAccount?.accountName || 'N/A',
+    minWidth: '200px',
+    value: 'Account Name'
+  },
+  {
+    col: 'product',
+    customFilter: {
+      clearable: true,
+      items: [
+        { text: productDisplay[Product.BCA], value: Product.BCA },
+        { text: productDisplay[Product.BUSINESS], value: Product.BUSINESS },
+        { text: productDisplay[Product.BUSINESS_SEARCH], value: Product.BUSINESS_SEARCH },
+        { text: productDisplay[Product.CSO], value: Product.CSO },
+        { text: productDisplay[Product.ESRA], value: Product.ESRA },
+        { text: productDisplay[Product.MHR], value: Product.MHR },
+        { text: productDisplay[Product.PPR], value: Product.PPR },
+        { text: productDisplay[Product.RPPR], value: Product.RPPR },
+        { text: productDisplay[Product.RPT], value: Product.RPT },
+        { text: productDisplay[Product.VS], value: Product.VS }
+      ],
+      label: 'Application Type',
+      type: 'select',
+      value: ''
+    },
+    hasFilter: true,
+    itemFn: (val: Transaction) => (Object.keys(productDisplay)).includes(val.product) ? productDisplay[val.product] : '',
+    minWidth: '200px',
+    value: 'Application Type'
+  },
+  {
+    col: 'lineItemsAndDetails',
+    customFilter: {
+      clearable: true,
+      label: 'Transaction Type',
+      type: 'text',
+      value: ''
+    },
+    hasFilter: true,
+    itemClass: 'line-item',
+    minWidth: '250px',
+    value: 'Transaction Type'
+  },
   {
     col: 'lineItems',
     customFilter: {
@@ -15,8 +66,35 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemClass: 'line-item',
+    itemFn: (val: Transaction) => val.lineItems.reduce((resp, lineItem) => `${resp + lineItem.description}<br/>`, ''),
     minWidth: '200px',
     value: 'Transaction Type'
+  },
+  {
+    col: 'details',
+    customFilter: {
+      clearable: true,
+      label: 'Transaction Details',
+      type: 'text',
+      value: ''
+    },
+    hasFilter: true,
+    itemFn: (val: Transaction) => val.details?.reduce((resp, detail) => `${resp}${detail.label || ''} ${detail.value}<br/>`, '') || 'N/A',
+    minWidth: '200px',
+    value: 'Transaction Details'
+  },
+  {
+    col: 'businessIdentifier',
+    customFilter: {
+      clearable: true,
+      label: 'Number',
+      type: 'text',
+      value: ''
+    },
+    hasFilter: true,
+    itemFn: (val: Transaction) => val.businessIdentifier || 'N/A',
+    minWidth: '200px',
+    value: 'Number'
   },
   {
     col: 'folioNumber',
@@ -70,6 +148,18 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     value: 'Transaction ID'
   },
   {
+    col: 'invoiceNumber',
+    customFilter: {
+      clearable: true,
+      label: 'Reference Number',
+      type: 'text',
+      value: ''
+    },
+    hasFilter: true,
+    minWidth: '250px',
+    value: 'Invoice Reference Number'
+  },
+  {
     col: 'paymentMethod',
     customFilter: {
       clearable: true,
@@ -79,7 +169,8 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
         { text: paymentTypeDisplay[PaymentTypes.DIRECT_PAY], value: PaymentTypes.DIRECT_PAY },
         { text: paymentTypeDisplay[PaymentTypes.ONLINE_BANKING], value: PaymentTypes.ONLINE_BANKING },
         { text: paymentTypeDisplay[PaymentTypes.PAD], value: PaymentTypes.PAD },
-        { text: paymentTypeDisplay[PaymentTypes.INTERNAL], value: PaymentTypes.INTERNAL }
+        { text: paymentTypeDisplay[PaymentTypes.INTERNAL], value: PaymentTypes.INTERNAL },
+        { text: paymentTypeDisplay[PaymentTypes.NO_FEE], value: PaymentTypes.NO_FEE }
       ],
       label: 'Payment Method',
       type: 'select',

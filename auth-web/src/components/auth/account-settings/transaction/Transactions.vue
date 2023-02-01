@@ -1,21 +1,21 @@
 <template>
   <v-container class="transaction-container">
-    <header class="view-header align-center mb-5">
-      <h2 class="view-header__title">Transactions</h2>
+    <header v-if="title" class="view-header align-center mb-5 ml-4">
+      <h2 class="view-header__title">{{ title }}</h2>
     </header>
-     <section v-if="credit !==0">
-       <v-divider class="mb-8"></v-divider>
-          <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{credit.toFixed(2)}}</h2>
-          <p class="credit-details mt-1">You have a credit of ${{credit.toFixed(2)}} on this account.</p>
-       <v-divider class="mb-8 mt-8"></v-divider>
-      </section>
+    <section v-if="showCredit && credit !== 0">
+      <v-divider class="mb-8"></v-divider>
+      <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{credit.toFixed(2)}}</h2>
+      <p class="credit-details mt-1">You have a credit of ${{credit.toFixed(2)}} on this account.</p>
+      <v-divider class="mb-8 mt-8"></v-divider>
+    </section>
     <section>
       <v-row justify="end" no-gutters>
-        <v-col>
+        <v-col v-if="showExport">
           <v-btn
             large
             color="primary"
-            class="font-weight-bold"
+            class="font-weight-bold ml-4"
             :loading="isLoading"
             @click="exportCSV"
             :disabled="isLoading"
@@ -47,7 +47,7 @@
           </v-select>
         </v-col>
       </v-row>
-      <TransactionsDataTable class="mt-4" :headers="sortedHeaders" />
+      <TransactionsDataTable class="mt-4" :extended="extended" :headers="sortedHeaders" />
     </section>
   </v-container>
 </template>
@@ -59,15 +59,20 @@ import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch 
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
-import { TransactionTableHeaders } from '@/resources/table-headers'
-import { TransactionsDataTable } from '@/components/auth/account-settings/transaction'
-import _ from 'lodash'
+import TransactionsDataTable from './TransactionsDataTable.vue'
+import { getTransactionTableHeaders } from '@/resources/table-headers'
 import moment from 'moment'
 import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   name: 'Transactions',
   components: { TransactionsDataTable },
+  props: {
+    extended: { default: false },
+    showCredit: { default: true },
+    showExport: { default: true },
+    title: { default: '' }
+  },
   setup (props, { root }) {
     // store stuff
     const store = useStore()
@@ -77,24 +82,31 @@ export default defineComponent({
     const currentMembership = computed(() => store.state.org.currentMembership as Member)
 
     const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
-    const { getTransactionReport, loadTransactionList } = useTransactions()
+    const { getTransactionReport, loadTransactionList, setViewAll } = useTransactions()
 
     // FUTURE: vue3 we can set this fn explicitly in the resource instead of doing it here
-    const headers = (_.cloneDeep(TransactionTableHeaders) as BaseTableHeaderI[])
+    const headers = getTransactionTableHeaders(props.extended)
     headers.forEach((header) => {
-      if (header.hasFilter) header.customFilter.filterApiFn = (val: any) => loadTransactionList(header.col, val || '')
+      if (header.hasFilter) {
+        header.customFilter.filterApiFn = (val: any) => loadTransactionList(header.col, val || '', props.extended)
+      }
     })
 
     // dynamic header selection stuff
-    const headerSelections: BaseTableHeaderI[] = []
-    const headersSelected: Ref<BaseTableHeaderI[]> = ref([])
+    let preSelectedHeaders = ['createdOn', 'total', 'paymentMethod', 'statusCode', 'actions']
+    if (props.extended) preSelectedHeaders = ['accountName', 'appType', 'lineItems', ...preSelectedHeaders]
+    else preSelectedHeaders = ['lineItemsAndDetails', ...preSelectedHeaders]
+
+    const headerSelections: BaseTableHeaderI[] = [] // what the user sees in the dropdown
+    const headersSelected: Ref<BaseTableHeaderI[]> = ref([]) // headers shown in the table
     headers.forEach((header) => {
       // don't push actions to selection options (want it to be invisible to user)
       if (header.col !== 'actions') headerSelections.push(header)
-      if (['lineItems', 'createdOn', 'total', 'paymentMethod', 'statusCode', 'actions'].includes(header.col)) {
+      if (preSelectedHeaders.includes(header.col)) {
         headersSelected.value.push(header)
       }
     })
+    // NB: keeps headers in order after selecting/unselecting columns
     const sortedHeaders: Ref<BaseTableHeaderI[]> = ref([...headersSelected.value])
     watch(() => headersSelected.value, (val: BaseTableHeaderI[]) => {
       // sort headers
@@ -133,6 +145,7 @@ export default defineComponent({
 
     onMounted(() => {
       setAccountChangedHandler(initUser)
+      setViewAll(props.extended)
       loadTransactionList()
     })
     onBeforeUnmount(() => { beforeDestroy() })

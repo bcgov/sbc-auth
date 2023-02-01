@@ -45,7 +45,6 @@ export default class AccountMixin extends Vue {
     return this.currentOrganization?.accessType === AccessType.GOVN
   }
 
-  // Note: this hasn't been migrated on the backend yet.
   protected get isStaffAccount (): boolean {
     return this.currentOrganization?.orgType === Account.STAFF
   }

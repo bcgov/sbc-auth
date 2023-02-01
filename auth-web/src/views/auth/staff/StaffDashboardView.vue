@@ -90,39 +90,36 @@
       <GLCodesListView />
     </v-card>
 
+    <!-- Transactions -->
+    <base-v-expansion-panel class="mb-4" title="Transaction Records">
+      <template v-slot:content>
+        <Transactions class="mt-5 pa-0 pr-2" :extended="true" :showCredit="false" :showExport="false" />
+      </template>
+    </base-v-expansion-panel>
+
     <!-- FAS UI  -->
-    <v-expansion-panels class="mb-4" accordion v-if="canSearchFAS && isFasDashboardEnabled">
-      <v-expansion-panel class="pa-8">
-        <v-expansion-panel-header class="px-0">
-          <header>
-            <h2 class="view-header__title">Fee Accounting System</h2>
-            <p class="mt-3 mb-0">
-              Search and manage routing slips
-            </p>
-          </header>
-          <template v-slot:actions>
-            <v-icon large>
-              mdi-chevron-down
-            </v-icon>
-          </template>
-        </v-expansion-panel-header>
-        <v-expansion-panel-content>
-            <fas-search-component :isLibraryMode="true"/>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+    <base-v-expansion-panel
+      v-if="canSearchFAS && isFasDashboardEnabled"
+      info="Search and manage routing slips"
+      title="Fee Accounting System"
+      style="z-index: 0;"
+    >
+      <template v-slot:content>
+        <fas-search-component :isLibraryMode="true"/>
+      </template>
+    </base-v-expansion-panel>
   </v-container>
 </template>
 
 <script lang="ts">
 /* eslint-disable */
 import { Component, Mixins } from 'vue-property-decorator'
+import { BaseVExpansionPanel } from '@/components'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
@@ -130,7 +127,7 @@ import { LDFlags, Role } from '@/util/constants'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import Vue from 'vue'
+import { Transactions } from '@/components/auth/account-settings/transaction'
 import { namespace } from 'vuex-class'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 
@@ -140,11 +137,13 @@ const userModule = namespace('user')
 
 @Component({
   components: {
+    BaseVExpansionPanel,
     GLCodesListView,
     SupportInfoCard,
     StaffAccountManagement,
     IncorporationSearchResultView,
-    PPRLauncher
+    PPRLauncher,
+    Transactions
   }
 })
 export default class StaffDashboardView extends Mixins(AccountMixin) {

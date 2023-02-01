@@ -1,8 +1,8 @@
-import '../util/composition-api-setup' // important to import this first
+import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { BaseVDataTable } from '@/components/datatable'
 import { DatePicker } from '@/components'
-import { TransactionTableHeaders } from '@/resources/table-headers'
+import { getTransactionTableHeaders } from '@/resources/table-headers'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
@@ -36,6 +36,8 @@ describe('TransactionsDataTable tests', () => {
   }
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
+  const headers = getTransactionTableHeaders()
+
   beforeAll(async () => {
     const localVue = createLocalVue()
     // store
@@ -51,7 +53,7 @@ describe('TransactionsDataTable tests', () => {
       localVue,
       vuetify,
       store,
-      propsData: { headers: TransactionTableHeaders }
+      propsData: { headers: headers }
     })
     await flushPromises()
   }, 50000)
@@ -70,7 +72,7 @@ describe('TransactionsDataTable tests', () => {
     // table headers
     expect(wrapper.find(BaseVDataTable).find(header).exists()).toBe(true)
     const titles = wrapper.find(BaseVDataTable).findAll(headerTitles)
-    expect(titles.length).toBe(TransactionTableHeaders.length)
+    expect(titles.length).toBe(headers.length)
     expect(titles.at(0).text()).toBe('Transaction Type')
     expect(titles.at(1).text()).toBe('Folio #')
     expect(titles.at(2).text()).toBe('Initiated by')
