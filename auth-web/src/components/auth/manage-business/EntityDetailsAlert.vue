@@ -1,48 +1,38 @@
-<!-- TODO:
-        get overlay colour
-        get alert icon colour
-        get header font and font size
-        compute array so that instead of mock arrays we get passed an array
-            of statuses then turn that array of statuses into an array of messages
-            then render those messages instead
-        align alert icon with bottom of status
-        change names of variables from status to something else
-         -->
-
 <template>
-   <v-tooltip top color="grey darken-4">
-     <template v-slot:activator="{ on }">
-       <v-icon :color=iconColour v-on="on">mdi-alert</v-icon>
-     </template>
-     <div class="py-2" :style="{'max-width': '300px'}">
-        <span>
-            {{ alertMessage }}
-        </span>
-        <ul>
-            <li v-for="message, i in detailMessages" :key="i">
-                {{ message.message }}
-            </li>
-        </ul>
-     </div>
-   </v-tooltip>
+  <IconTooltip icon="mdi-alert" :colour="iconColour" maxWidth="300px" :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}" :location="{top: true}" >
+    <div class="alert-content">
+      <span class="alert-header" :style="{ 'font-weight': 'bold' }">
+        {{ alertHeader }}
+      </span>
+      <ul class="alert-content">
+        <li v-for="message, i in alertMessages" :key="i">
+          {{ message.message }}
+        </li>
+      </ul>
+    </div>
+  </IconTooltip>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, nextTick, ref } from '@vue/composition-api'
 import { EntityDetailTypes } from '@/util/constants'
+import IconTooltip from '@/components/IconTooltip.vue'
 import { PropType } from 'vue'
+import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'EntityDetailsAlert',
+  components: { IconTooltip },
   props: {
-    statuses: Array as PropType<Array<String>>
+    details: {
+      type: Array as PropType<Array<EntityDetailTypes>>,
+      required: true
+    }
   },
   setup (props) {
     // testing for now
-    const mockArray = ['FROZEN', 'BAD_STANDING', 'DISSOLUTION', 'LIQUIDATION'] as Array<String>
+    // const mockStatuses = ['FROZEN', 'BAD_STANDING', 'DISSOLUTION', 'LIQUIDATION'] as Array<EntityDetailTypes>
 
     // actual stuff
-
     const generateMessage = (status: String): { message: String, colour: String, priority: Number } => {
       switch (status) {
         case EntityDetailTypes.FROZEN:
@@ -68,45 +58,24 @@ export default defineComponent({
       return 0
     }
 
-    const detailMessages = computed(() => {
+    const makeMessages = () => {
       let temp = []
-      for (let detail of mockArray) {
+      for (let detail of props.details) {
         temp.push(generateMessage(detail))
       }
       temp.sort(compareMessages)
       return temp
-    })
+    }
 
-    const alertMessage = computed(() => {
-      return detailMessages.value.length > 1 ? 'Alerts' : 'Alert'
-    })
-
-    const iconColour = computed(() => {
-      return detailMessages.value[0].colour
-    })
+    const alertMessages = makeMessages()
+    const alertHeader = alertMessages.length > 1 ? 'Alerts:' : 'Alert:'
+    const iconColour = alertMessages[0].colour
 
     return {
-      detailMessages,
-      alertMessage,
+      alertMessages,
+      alertHeader,
       iconColour
     }
   }
 })
 </script>
-
-<style lang="scss" scoped>
-@import "$assets/scss/theme.scss";
-.v-tooltip__content:after {
-  content: ' ';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -10px;
-  width: 20px;
-  height: 20px;
-  border-width: 10px 10px 10px 10px;
-  border-style: solid;
-  border-color: transparent transparent var(--v-grey-darken4) transparent;
-  transform: rotate(180deg);
-}
-</style>
