@@ -34,6 +34,7 @@ export const useTransactions = () => {
     if (val) {
       // check authorized
       if (!currentUser.value.roles.includes(Role.ViewAllTransactions)) {
+        // eslint-disable-next-line no-console
         console.error('User is not authorized to view all transactions.')
         return
       }

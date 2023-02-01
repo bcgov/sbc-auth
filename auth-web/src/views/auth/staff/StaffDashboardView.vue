@@ -112,148 +112,140 @@
 </template>
 
 <script lang="ts">
-/* eslint-disable */
-import { Component, Mixins } from 'vue-property-decorator'
+import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
+import { LDFlags, Role } from '@/util/constants'
 import { BaseVExpansionPanel } from '@/components'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
-import { LDFlags, Role } from '@/util/constants'
-import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
+import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
-import { namespace } from 'vuex-class'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { useStore } from 'vuex-composition-helpers'
 
-const OrgModule = namespace('org')
-const BusinessModule = namespace('business')
-const userModule = namespace('user')
+// FUTURE: remove after vue 3 upgrade
+interface StaffDashboardViewI {
+  businessIdentifier: string
+  searchedBusinessNumber: string
+  searchActive: boolean
+  errorMessage: string
+  canViewIncorporationSearchResult: boolean
+  affiliatedOrg: Organization
+  canSearchFAS: ComputedRef<boolean>
+  canViewAccounts: ComputedRef<boolean>
+  canViewGLCodes: ComputedRef<boolean>
+  isFasDashboardEnabled: ComputedRef<boolean>
+  showBusSearchlink: ComputedRef<boolean>
+  registrySearchUrl: ComputedRef<boolean>
+}
 
-@Component({
+export default defineComponent({
+  name: 'StaffDashboardView',
   components: {
     BaseVExpansionPanel,
     GLCodesListView,
-    SupportInfoCard,
-    StaffAccountManagement,
     IncorporationSearchResultView,
     PPRLauncher,
+    SupportInfoCard,
+    StaffAccountManagement,
     Transactions
-  }
-})
-export default class StaffDashboardView extends Mixins(AccountMixin) {
-  $refs: {
-    searchBusinessForm: HTMLFormElement
-  }
+  },
+  setup (props, { root }) {
+    // refs
+    const searchBusinessForm: Ref<HTMLFormElement> = ref(null)
+    // store
+    const store = useStore()
+    const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
+    const currentUser = computed(() => store.state.user.currentUser as KCUserProfile)
+    const getOrganizationForAffiliate = (): Promise<Organization> => store.dispatch('org/getOrganizationForAffiliate')
+    const loadBusiness = (): Promise<Business> => store.dispatch('business/loadBusiness')
+    const resetCurrentBusiness = (): Promise<Business> => store.dispatch('business/resetCurrentBusiness')
+    const searchBusiness = (businessIdentifier: string) => store.dispatch('business/searchBusiness', businessIdentifier)
 
-  @OrgModule.Action('getOrganizationForAffiliate')
-  private getOrganizationForAffiliate!: () => Promise<Organization>
+    // static vars
+    const businessIdentifierRules = [
+      v => !!v || 'Incorporation Number or Registration Number is required',
+      v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number or Registration Number is not valid'
+    ]
 
-  @userModule.State('currentUser')
-  private currentUser!: KCUserProfile
+    // local reactive variables
+    const localVars = (reactive({
+      businessIdentifier: '',
+      searchedBusinessNumber: '',
+      searchActive: false,
+      errorMessage: '',
+      canViewIncorporationSearchResult: false,
+      affiliatedOrg: {},
+      canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
+      canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
+      canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
+      isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
+      showBusSearchlink: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false),
+      registrySearchUrl: computed((): boolean => ConfigHelper.getRegistrySearchUrl())
+    }) as unknown) as StaffDashboardViewI
 
-  @BusinessModule.Action('searchBusiness')
-  private searchBusiness!: (businessIdentifier: string) => Promise<any>
+    const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
 
-  @BusinessModule.Action('resetCurrentBusiness')
-  private resetCurrentBusiness!: () => void
+    const goToManageBusiness = () => root.$router.push(`/account/${currentOrganization.value?.id}/business`)
 
-  @BusinessModule.State('currentBusiness')
-  private currentBusiness!: Business
-
-  @BusinessModule.Action('loadBusiness')
-  private loadBusiness!: () => Promise<Business>
-
-  // local variables
-  protected businessIdentifier = ''
-  protected searchedBusinessNumber = ''
-  protected searchActive = false
-  protected errorMessage = ''
-  protected canViewIncorporationSearchResult = false
-  protected affiliatedOrg = {}
-
-  readonly businessIdentifierRules = [
-    v => !!v || 'Incorporation Number or Registration Number is required',
-    v => CommonUtils.validateIncorporationNumber(v) ||
-      'Incorporation Number or Registration Number is not valid'
-  ]
-
-  get canViewAccounts (): boolean {
-    return this.currentUser?.roles?.includes(Role.StaffViewAccounts)
-  }
-
-  get canViewGLCodes (): boolean {
-    return this.currentUser?.roles?.includes(Role.ManageGlCodes)
-  }
-
-  get canSearchFAS (): boolean {
-    return this.currentUser?.roles?.includes(Role.FasSearch)
-  }
-
-  get isFasDashboardEnabled (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false
-  }
-
-  get showBusSearchlink (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.BusSearchLink) || false
-  }
-
-  get registrySearchUrl (): string {
-    return ConfigHelper.getRegistrySearchUrl()
-  }
-
-  protected isFormValid(): boolean {
-    return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
-  }
-
-  goToManageBusiness(): void {
-    this.$router.push(`/account/${this.currentOrganization?.id}/business`)
-  }
-
-  protected async search() {
-    if (this.isFormValid()) {
-      this.searchActive = true
-
+    const updateCurrentBusiness = async () => {
       try {
         // Search for business, action will set session storage
-        await this.searchBusiness(this.businessIdentifier)
-        this.errorMessage = ''
-        await this.updateCurrentBusiness()
+        await loadBusiness()
+        localVars.affiliatedOrg = await getOrganizationForAffiliate()
+        localVars.canViewIncorporationSearchResult = true
       } catch (exception) {
-        this.searchedBusinessNumber = this.businessIdentifier
-        this.resetCurrentBusiness()
-        this.errorMessage = this.$t('noIncorporationNumberFound').toString()
-        this.canViewIncorporationSearchResult = false
-      } finally {
-        this.searchActive = false
+        // eslint-disable-next-line no-console
+        console.log('Error during search incorporations event!')
+        localVars.canViewIncorporationSearchResult = false
+        resetCurrentBusiness()
       }
     }
-  }
 
-  private async updateCurrentBusiness() {
-    try {
-      // Search for business, action will set session storage
-      await this.loadBusiness()
-      this.affiliatedOrg = await this.getOrganizationForAffiliate()
-      this.canViewIncorporationSearchResult = true
-    } catch (exception) {
-      // eslint-disable-next-line no-console
-      console.log('Error during search incorporations event!')
-      this.canViewIncorporationSearchResult = false
-      this.resetCurrentBusiness()
+    const search = async () => {
+      if (isFormValid()) {
+        localVars.searchActive = true
+
+        try {
+          // Search for business, action will set session storage
+          await searchBusiness(localVars.businessIdentifier)
+          localVars.errorMessage = ''
+          await updateCurrentBusiness()
+        } catch (exception) {
+          localVars.searchedBusinessNumber = localVars.businessIdentifier
+          resetCurrentBusiness()
+          // FUTURE: get this from t(noIncorporationNumberFound)
+          // having trouble with composition version of $t in the build.
+          localVars.errorMessage = 'No match found for Incorporation Number'
+          localVars.canViewIncorporationSearchResult = false
+        } finally {
+          localVars.searchActive = false
+        }
+      }
+    }
+
+    const formatBusinessIdentifier = () => {
+      localVars.businessIdentifier =
+        CommonUtils.formatIncorporationNumber(localVars.businessIdentifier)
+    }
+
+    return {
+      searchBusinessForm,
+      businessIdentifierRules,
+      isFormValid,
+      goToManageBusiness,
+      search,
+      formatBusinessIdentifier,
+      ...toRefs(localVars)
     }
   }
-
-  protected formatBusinessIdentifier () {
-    this.businessIdentifier =
-      CommonUtils.formatIncorporationNumber(this.businessIdentifier)
-  }
-}
+})
 </script>
 
 <style lang="scss" >
@@ -300,7 +292,7 @@ h2 {
     }
 
     &__link::before { background-color: white; }
-  
+
     &__reg-srch-link {
       position: absolute;
       right: 32px;
@@ -311,7 +303,7 @@ h2 {
   .v-expansion-panel-content__wrap {
     padding: 0px !important;
   }
-  
+
   .v-input__append-outer {
     margin-top: 0 !important;
   }
