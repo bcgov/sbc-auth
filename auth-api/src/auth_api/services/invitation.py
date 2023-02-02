@@ -431,7 +431,7 @@ class Invitation:
 
             if group_name == GROUP_GOV_ACCOUNT_USERS:
                 # Add contact to the user.
-                user.add_contact(dict(email=user_from_context.token_info.get('email', None)),
+                user.add_contact({'email': user_from_context.token_info.get('email', None)},
                                  throw_error_for_duplicates=False)
 
         current_app.logger.debug('<accept_invitation')

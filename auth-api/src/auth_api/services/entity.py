@@ -183,13 +183,13 @@ class Entity:
         entity.pass_code_claimed = False
         entity.save()
         if email_addresses:
-            mailer_payload = dict(
-                emailAddresses=email_addresses,
-                passCode=new_pass_code,
-                businessIdentifier=business_identifier,
-                businessName=entity.name,
-                isStaffInitiated=user_from_context.is_staff()
-            )
+            mailer_payload = {
+                'emailAddresses': email_addresses,
+                'passCode': new_pass_code,
+                'businessIdentifier': business_identifier,
+                'businessName': entity.name,
+                'isStaffInitiated': user_from_context.is_staff()
+            }
             publish_to_mailer(
                 notification_type='resetPasscode', business_identifier=business_identifier, data=mailer_payload
             )

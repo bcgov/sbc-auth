@@ -259,7 +259,7 @@ def _check_for_roles(role: str, kwargs):
         if kwargs.get('disabled_roles', None):
             is_authorized = role not in kwargs.get('disabled_roles')
         if kwargs.get('equals_role', None):
-            is_authorized = (role == kwargs.get('equals_role'))
+            is_authorized = role == kwargs.get('equals_role')
 
     if not is_authorized:
         abort(403)
