@@ -144,7 +144,7 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(8).text()).toBe('$0.00')
     expect(row1Cells.at(9).text()).toBe('25663')
     expect(row1Cells.at(10).text()).toBe('REG000123442')
-    expect(row1Cells.at(11).text()).toBe('N/A')
+    expect(row1Cells.at(11).text()).toBe('No Fee')
     expect(row1Cells.at(12).text()).toBe('Completed  January 24, 2023')
     expect(row1Cells.at(13).text()).toBe('')
   })
