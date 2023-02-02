@@ -49,7 +49,7 @@ describe('StaffDashboardView tests', () => {
         currentUser: {
           roles: [Role.FasSearch, Role.Staff, Role.ViewAllTransactions, Role.StaffViewAccounts, Role.ManageGlCodes]
         }
-      },
+      }
     }
     const codeModule = {
       namespaced: true,
