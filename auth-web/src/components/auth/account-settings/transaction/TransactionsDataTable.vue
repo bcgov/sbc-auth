@@ -154,8 +154,8 @@ export default defineComponent({
     }
 
     const statusCodeDescs = [
-      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
-      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
+      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
+      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
       { description: 'Funds have been credited', value: invoiceStatusDisplay[InvoiceStatus.CREDITED].toUpperCase() },
       { description: 'Transaction is waiting to be processed', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
       { description: 'Transaction is in progress', value: invoiceStatusDisplay[InvoiceStatus.APPROVED].toUpperCase() },
