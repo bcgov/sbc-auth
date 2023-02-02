@@ -1,5 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
-import BusinessModule from '@/store/modules/business'
+import { createLocalVue, mount } from '@vue/test-utils'
 import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
 import UserService from '../../../src/services/user.services'
 import Vue from 'vue'
@@ -11,6 +10,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
+const vuetify = new Vuetify({})
 
 describe('InvitationsDataTable.vue', () => {
   let localVue
@@ -45,8 +45,9 @@ describe('InvitationsDataTable.vue', () => {
   it('Shows empty panel message', () => {
     UserService.getOrganizations = jest.fn().mockResolvedValue({ orgs: [] })
     const $t = () => ''
-    const wrapper = shallowMount(InvitationsDataTable, {
+    const wrapper = mount(InvitationsDataTable, {
       store,
+      vuetify,
       localVue,
       mocks: { $t }
     })
