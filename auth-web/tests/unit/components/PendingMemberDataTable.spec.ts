@@ -1,4 +1,4 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import OrgModule from '@/store/modules/org'
 import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
 import Vue from 'vue'
@@ -10,6 +10,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
+const vuetify = new Vuetify({})
 
 jest.mock('../../../src/services/bcol.services')
 
@@ -71,8 +72,9 @@ describe('PendingMemberDataTable.vue', () => {
 
   it('Mounting works', () => {
     const $t = () => 'test'
-    const wrapper = shallowMount(PendingMemberDataTable, {
+    const wrapper = mount(PendingMemberDataTable, {
       store,
+      vuetify,
       localVue,
       mocks: { $t }
     })

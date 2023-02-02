@@ -82,7 +82,7 @@ export default defineComponent({
     const currentMembership = computed(() => store.state.org.currentMembership as Member)
 
     const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
-    const { getTransactionReport, loadTransactionList, setViewAll } = useTransactions()
+    const { clearAllFilters, getTransactionReport, loadTransactionList, setViewAll } = useTransactions()
 
     // FUTURE: vue3 we can set this fn explicitly in the resource instead of doing it here
     const headers = getTransactionTableHeaders(props.extended)
@@ -146,6 +146,7 @@ export default defineComponent({
     onMounted(() => {
       setAccountChangedHandler(initUser)
       setViewAll(props.extended)
+      clearAllFilters()
       loadTransactionList()
     })
     onBeforeUnmount(() => { beforeDestroy() })

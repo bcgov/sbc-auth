@@ -71,7 +71,7 @@
         <v-row no-gutters>
           <v-col cols="auto">
             <v-icon
-              v-if="[InvoiceStatus.COMPLETED, InvoiceStatus.PAID, InvoiceStatus.REFUNDED].includes(item.statusCode)"
+              v-if="[InvoiceStatus.COMPLETED, InvoiceStatus.PAID, InvoiceStatus.REFUNDED, InvoiceStatus.CREDITED].includes(item.statusCode)"
               color="success"
               :style="{ 'margin-top': '-6px', 'margin-right': '2px' }"
             >
@@ -154,14 +154,17 @@ export default defineComponent({
     }
 
     const statusCodeDescs = [
-      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
-      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
-      { description: 'Transaction is pending', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
+      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
+      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
+      { description: 'Funds have been credited', value: invoiceStatusDisplay[InvoiceStatus.CREDITED].toUpperCase() },
+      { description: 'Transaction is waiting to be processed', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
       { description: 'Transaction is in progress', value: invoiceStatusDisplay[InvoiceStatus.APPROVED].toUpperCase() },
       { description: 'Refund has been requested', value: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED].toUpperCase() },
       { description: 'Refund process is completed', value: invoiceStatusDisplay[InvoiceStatus.REFUNDED].toUpperCase() }
     ]
-    const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => `${text}${statusCode.value} - ${statusCode.description}<br/>`, '')
+    const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => {
+      return `${text}<div class="mt-1">${statusCode.value} - ${statusCode.description}</div>`
+    }, '')
     const getRefundHelpText = (item: any) => {
       if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
         return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
