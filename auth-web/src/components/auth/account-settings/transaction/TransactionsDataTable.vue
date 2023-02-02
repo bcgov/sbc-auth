@@ -12,13 +12,13 @@
     <base-v-data-table
       class="transaction-list"
       :clearFiltersTrigger="clearFiltersTrigger"
-      :initialTableDataOptions="tableDataOptions"
       itemKey="id"
       :loading="transactions.loading"
       loadingText="loading text"
       noDataText="No Transaction Records"
       :setItems="transactions.results"
       :setHeaders="headers"
+      :setTableDataOptions="tableDataOptions"
       :totalItems="transactions.totalResults"
       @update-table-options="tableDataOptions = $event"
     >
@@ -177,6 +177,7 @@ export default defineComponent({
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
+    watch(() => transactions.filters.pageNumber, (val: number) => { tableDataOptions.value.page = val })
     watch(() => tableDataOptions.value, (val: DataOptions) => {
       const newPage = val?.page || DEFAULT_DATA_OPTIONS.page
       const newLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage

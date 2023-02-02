@@ -44,7 +44,11 @@ export const useTransactions = () => {
 
   const loadTransactionList = debounce(async (filterField?: string, value?: any) => {
     transactions.loading = true
-    if (filterField) transactions.filters.filterPayload[filterField] = value
+    if (filterField) {
+      // new filter so set page number back to 1
+      transactions.filters.pageNumber = 1
+      transactions.filters.filterPayload[filterField] = value
+    }
     let filtersActive = false
     for (const key in transactions.filters.filterPayload) {
       if (key === 'dateFilter') {
@@ -91,6 +95,7 @@ export const useTransactions = () => {
   const clearAllFilters = () => {
     transactions.filters.filterPayload = { dateFilter: { startDate: '', endDate: '' } }
     transactions.filters.isActive = false
+    transactions.filters.pageNumber = 1
     loadTransactionList()
   }
 
