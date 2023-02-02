@@ -175,8 +175,12 @@ class Product:
                     existing_sub.flush()
 
     @staticmethod
-    def get_products(include_hidden: bool = True):
+    @user_context
+    def get_products(include_hidden: bool = True, staff_check: bool = True, **kwargs):
         """Get a list of all products."""
+        user_from_context: UserContext = kwargs['user_context']
+        if staff_check:
+            include_hidden = user_from_context.is_staff() and include_hidden
         products = ProductCodeModel.get_all_products() if include_hidden \
             else ProductCodeModel.get_visible_products()
         return ProductCodeSchema().dump(products, many=True)
@@ -199,7 +203,7 @@ class Product:
         # Include hidden products only for staff and SBC staff
         include_hidden = user_from_context.is_staff() or org.type_code == OrgType.SBC_STAFF.value
 
-        products = Product.get_products(include_hidden=include_hidden)
+        products = Product.get_products(include_hidden=include_hidden, staff_check=False)
         for product in products:
             product['subscriptionStatus'] = subscriptions_dict.get(product.get('code'),
                                                                    ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
