@@ -73,6 +73,7 @@ import TermsOfServiceView from '@/views/auth/TermsOfServiceView.vue'
 import UnauthorizedView from '@/views/auth/UnauthorizedView.vue'
 import UpdateAccountView from '@/views/auth/create-account/UpdateAccountView.vue'
 import UserProfileView from '@/views/auth/UserProfileView.vue'
+import { ViewAllTransactions } from '@/views'
 
 function mapReturnPayVars (route: any) {
   let payResponseUrl = window.location.search
@@ -274,6 +275,7 @@ export function getRoutes (): RouteConfig[] {
           path: 'transactions',
           name: 'transactions',
           component: transaction,
+          props: { exportBtn: true, extended: false, title: 'Transactions' },
           meta: {
             isPremiumOnly: true
           }
@@ -762,6 +764,13 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true },
       name: 'duplicateaccountwarning',
       props: (route) => ({ redirectToUrl: route.query.redirectToUrl })
+    },
+    {
+      path: '/transactions',
+      name: 'transactions',
+      component: ViewAllTransactions,
+      props: true,
+      meta: { requiresAuth: true }
     },
     { path: '*', name: 'notfound', component: PageNotFound }
   ]

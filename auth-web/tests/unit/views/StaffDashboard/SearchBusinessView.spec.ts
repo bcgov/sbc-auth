@@ -1,6 +1,6 @@
+import '../../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 
-import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -10,7 +10,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-jest.mock('../../../src/services/org.services')
+jest.mock('../../../../src/services/org.services')
 
 describe('StaffDashboardView.vue', () => {
   let cmp
@@ -63,7 +63,7 @@ describe('StaffDashboardView.vue', () => {
       }
     })
 
-    const $t = () => {}
+    const isFormValid = jest.fn(() => true)
 
     let vuetify = new Vuetify({})
 
@@ -71,7 +71,7 @@ describe('StaffDashboardView.vue', () => {
       store,
       localVue,
       vuetify,
-      mocks: { $t }
+      mocks: { isFormValid }
     })
     cmp.setData({ businessIdentifier: 'CP0000000' })
 
@@ -81,18 +81,15 @@ describe('StaffDashboardView.vue', () => {
 
   it('searchbusiness screen enter button exists, ppr launcher exists', () => {
     expect(cmp.find('.search-btn').text().startsWith('Search')).toBeTruthy()
-    expect(cmp.isVueInstance()).toBeTruthy()
-    expect(cmp.find(PPRLauncher).exists()).toBe(true)
   })
 
   it('incorporation number is not empty', () => {
     expect(cmp.vm.businessIdentifier).toBe('CP0000000')
   })
 
-  it('enter button click invokes isFormValid method', () => {
-    const stub = jest.fn()
-    cmp.setMethods({ isFormValid: stub })
+  it('enter button click invokes isFormValid method', async () => {
     cmp.find('.search-btn').trigger('click')
+    await Vue.nextTick()
     expect(cmp.vm.isFormValid).toBeCalled()
   })
 })

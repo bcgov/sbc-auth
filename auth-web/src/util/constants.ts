@@ -41,7 +41,8 @@ export enum Role {
     StaffSuspendAccounts = 'suspend_accounts',
     GOVMAccountUser = 'gov_account_user',
     ManageGlCodes = 'manage_gl_codes',
-    FasSearch = 'fas_search'
+    FasSearch = 'fas_search',
+    ViewAllTransactions = 'view_all_transactions'
 }
 
 export enum Pages {
@@ -303,7 +304,8 @@ export enum LDFlags {
     ProductWillsStatus = 'product-VS-status',
     ProductSiteRegistryStatus = 'product-ESRA-status',
     ProductBCAStatus = 'product-BCA-status',
-    BusSearchLink = 'bus-search-staff-link'
+    BusSearchLink = 'bus-search-staff-link',
+    EnableDetailsFilter = 'enable-transactions-detail-filter'
 }
 
 export enum DateFilterCodes {
@@ -329,6 +331,7 @@ export enum PaymentTypes {
     DIRECT_PAY = 'DIRECT_PAY',
     EFT = 'EFT',
     INTERNAL = 'INTERNAL',
+    NO_FEE = 'NO_FEE',
     ONLINE_BANKING = 'ONLINE_BANKING',
     PAD = 'PAD',
     EJV = 'EJV',
@@ -434,4 +437,17 @@ export enum RequestTrackerType {
     ChangeName = 'CHANGE_NAME',
     ChangeStatus = 'CHANGE_STATUS',
     ChangeParty = 'CHANGE_PARTY',
+}
+
+export enum Product {
+    BCA = 'BCA',
+    BUSINESS = 'BUSINESS',
+    BUSINESS_SEARCH = 'BUSINESS_SEARCH',
+    CSO = 'CSO',
+    ESRA = 'ESRA',
+    MHR = 'MHR',
+    PPR = 'PPR',
+    RPPR = 'RPPR',
+    RPT = 'RPT',
+    VS = 'VS'
 }
