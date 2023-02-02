@@ -177,7 +177,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       value: ''
     },
     hasFilter: true,
-    itemFn: (val: Transaction) => (val.total === 0 && val.paymentMethod === PaymentTypes.INTERNAL) ? 'N/A' : paymentTypeDisplay[val.paymentMethod],
+    itemFn: (val: Transaction) => (val.total === 0 && val.paymentMethod === PaymentTypes.INTERNAL) ? 'No Fee' : paymentTypeDisplay[val.paymentMethod],
     minWidth: '185px',
     value: 'Payment Method'
   },
