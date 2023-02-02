@@ -26,7 +26,8 @@ def upgrade():
         sa.column('type_code', sa.String),
         sa.column('hidden', sa.Boolean),
         sa.column('need_review', sa.Boolean),
-        sa.column('premium_only', sa.Boolean)
+        sa.column('premium_only', sa.Boolean),
+        sa.column('url', sa.String)
     )
 
     op.bulk_insert(
@@ -34,7 +35,7 @@ def upgrade():
         [
             {
                 'code': 'ESRA', 'description': 'Site Registry', 'default': False, \
-                'type_code': 'PARTNER', 'hidden': True, 'need_review': False, 'premium_only': True
+                'type_code': 'PARTNER', 'hidden': True, 'need_review': False, 'premium_only': True, 'url': ''
             }
         ]
     )
