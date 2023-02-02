@@ -2,7 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 
 import EntityDetailsAlert from '@/components/auth/manage-business/EntityDetailsAlert.vue'
 import VueCompositionAPI from '@vue/composition-api'
-import { EntityDetailTypes } from '@/util/constants'
+import { EntityAlertTypes } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -28,13 +28,13 @@ describe('Entity Details Alert tests', () => {
             localVue,
             router,
             propsData: {
-                details: [EntityDetailTypes.FROZEN]
+                details: [EntityAlertTypes.FROZEN]
             }
         })
 
         expect(wrapper.isVueInstance()).toBeTruthy()
         expect(wrapper.find(EntityDetailsAlert).exists()).toBeTruthy()
-        expect(wrapper.props('details')).toEqual(expect.arrayContaining([EntityDetailTypes.FROZEN]))
+        expect(wrapper.props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.FROZEN]))
         expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
     })
 

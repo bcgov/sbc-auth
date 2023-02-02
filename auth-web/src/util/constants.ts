@@ -452,7 +452,7 @@ export enum Product {
     VS = 'VS'
 }
 
-export enum EntityDetailTypes {
+export enum EntityAlertTypes {
     FROZEN = 'FROZEN',
     BADSTANDING = 'BAD_STANDING',
     LIQUIDATION = 'LIQUIDATION',
