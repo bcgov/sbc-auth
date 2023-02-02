@@ -1,1 +1,1 @@
-export * from './transactions-table-headers'
+export * from './transactions-table'

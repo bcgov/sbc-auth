@@ -77,7 +77,7 @@ export default class PaymentService {
     })
   }
 
-  static getTransactions (accountId: number, filterParams: TransactionFilterParams): AxiosPromise<TransactionListResponse> {
+  static getTransactions (accountId: number, filterParams: TransactionFilterParams, viewAll = false): AxiosPromise<TransactionListResponse> {
     let params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
@@ -85,7 +85,9 @@ export default class PaymentService {
     if (filterParams.pageLimit) {
       params.append('limit', filterParams.pageLimit.toString())
     }
-    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
+    if (viewAll) params.append('viewAll', `${viewAll}`)
+
+    let url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
     return axios.post(url, filterParams.filterPayload, { params })
   }
 

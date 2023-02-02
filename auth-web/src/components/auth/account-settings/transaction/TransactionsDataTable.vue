@@ -1,6 +1,14 @@
 <template>
   <div>
     <date-picker v-show="showDatePicker" :reset="dateRangeReset" ref="datePicker" class="date-picker" @submit="updateDateRange($event)" />
+    <div v-if="extended" class="section-heading pa-4">
+      <h3>
+        <v-icon color="primary" style="margin-top: -2px;">mdi-format-list-bulleted</v-icon>
+        Transactions
+        <v-progress-circular v-if="transactions.loading" color="primary" indeterminate size="20" />
+        <span v-else>({{ transactions.totalResults }})</span>
+      </h3>
+    </div>
     <base-v-data-table
       class="transaction-list"
       :clearFiltersTrigger="clearFiltersTrigger"
@@ -47,14 +55,12 @@
         />
       </template>
       <!-- item slots -->
-      <template v-slot:item-slot-lineItems="{ item }">
+      <template v-slot:item-slot-lineItemsAndDetails="{ item }">
         <b v-for="lineItem, i in item.lineItems" :key="lineItem.description + i" class="dark-text">
           {{ lineItem.description }}
         </b><br/>
         <span v-for="detail, i in item.details" :key="detail.label + i">
-          <!-- ux requested to remove all number labels -->
-          <span v-if="detail.label && !detail.label.toLowerCase().includes('number')">{{ detail.label }}</span>
-          {{ detail.value }}
+          {{ detail.label }} {{ detail.value }}
         </span><br/>
       </template>
       <template v-slot:item-slot-total="{ item }">
@@ -105,13 +111,15 @@ export default defineComponent({
   name: 'TransactionsDataTable',
   components: { BaseVDataTable, DatePicker, IconTooltip },
   props: {
+    extended: { default: false },
     headers: { default: [] as BaseTableHeaderI[] }
   },
   setup (props) {
     // refs
     const datePicker = ref(null)
     // composables
-    const { transactions, loadTransactionList, clearAllFilters } = useTransactions()
+    const { transactions, loadTransactionList, clearAllFilters, setViewAll } = useTransactions()
+    setViewAll(props.extended)
 
     const getHeaders = computed(() => props.headers)
 
@@ -146,8 +154,8 @@ export default defineComponent({
     }
 
     const statusCodeDescs = [
-      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
-      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
+      { description: 'Transaction is cancelled', value: invoiceStatusDisplay[InvoiceStatus.CANCELLED].toUpperCase() },
+      { description: 'Funds received', value: invoiceStatusDisplay[InvoiceStatus.PAID].toUpperCase() },
       { description: 'Transaction is pending', value: invoiceStatusDisplay[InvoiceStatus.PENDING].toUpperCase() },
       { description: 'Transaction is in progress', value: invoiceStatusDisplay[InvoiceStatus.APPROVED].toUpperCase() },
       { description: 'Refund has been requested', value: invoiceStatusDisplay[InvoiceStatus.REFUND_REQUESTED].toUpperCase() },
@@ -206,6 +214,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
 .date-picker {
-  left: 52%
+  margin-top: 120px;
+}
+.section-heading {
+  background-color: $app-background-blue;
+  border-radius: 5px 5px 0 0;
 }
 </style>

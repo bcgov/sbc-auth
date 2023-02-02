@@ -3,7 +3,7 @@
     class="base-table"
     :disable-sort="true"
     :fixed-header="height ? true : false"
-    :footer-props="{ itemsPerPageOptions: INITIAL_ITEMS_PER_PAGE_OPTIONS }"
+    :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
     :headers="headers"
     hide-default-header
     :height="height ? height : ''"
@@ -134,10 +134,6 @@ export default defineComponent({
     totalItems: { type: Number }
   },
   setup (props, { emit }) {
-    // static vars (for initializing)
-    const ITEMS_PER_PAGE = 5
-    const PAGINATION_COUNTER_STEP = 4
-    const INITIAL_ITEMS_PER_PAGE_OPTIONS = [...Array(PAGINATION_COUNTER_STEP)].map((value, index) => ITEMS_PER_PAGE * (index + 1))
     // reactive vars
     const state = (reactive({
       filtering: false,
@@ -175,7 +171,6 @@ export default defineComponent({
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
-      INITIAL_ITEMS_PER_PAGE_OPTIONS,
       filter,
       ...toRefs(state)
     }
@@ -270,6 +265,10 @@ export default defineComponent({
 
   ::v-deep .v-text-field--enclosed.v-input--dense:not(.v-text-field--solo) .v-input__append-inner {
     margin-top: 10px;
+  }
+
+  ::v-deep .v-list-item .v-list-item--link .theme--light:hover {
+    background-color: $gray1;
   }
 }
 </style>
