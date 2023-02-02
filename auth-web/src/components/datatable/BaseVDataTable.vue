@@ -124,13 +124,13 @@ export default defineComponent({
     clearFiltersTrigger: { default: 1 },
     headerBg: { default: 'white' },
     height: { type: String },
-    initialTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     itemKey: { type: String },
     loading: { default: false },
     loadingText: { default: 'Loading...' },
     noDataText: { default: 'No results found.' },
     setItems: { default: [] as object[] },
     setHeaders: { default: [] as BaseTableHeaderI[] },
+    setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     totalItems: { type: Number }
   },
   setup (props, { emit }) {
@@ -139,7 +139,7 @@ export default defineComponent({
       filtering: false,
       headers: _.cloneDeep(props.setHeaders),
       sortedItems: [...props.setItems],
-      tableDataOptions: props.initialTableDataOptions
+      tableDataOptions: props.setTableDataOptions
     }) as unknown) as BaseTableStateI
 
     const filter = _.debounce(async (header: BaseTableHeaderI) => {
@@ -168,6 +168,7 @@ export default defineComponent({
         if (header.hasFilter) header.customFilter.value = ''
       })
     })
+    watch(() => props.setTableDataOptions, (val: DataOptions) => { state.tableDataOptions = val })
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
