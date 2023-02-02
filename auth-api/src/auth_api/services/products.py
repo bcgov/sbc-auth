@@ -30,8 +30,8 @@ from auth_api.schemas import ProductCodeSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType,
-    TaskStatus)
+    AccessType, ActivityAction, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
+    TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
@@ -175,17 +175,17 @@ class Product:
                     existing_sub.flush()
 
     @staticmethod
-    @user_context
-    def get_products(include_hidden: bool = True, **kwargs):
+    def get_products(include_hidden: bool = True):
         """Get a list of all products."""
-        user_from_context: UserContext = kwargs['user_context']
-        products = ProductCodeModel.get_all_products() if (user_from_context.is_staff() and include_hidden) \
+        products = ProductCodeModel.get_all_products() if include_hidden \
             else ProductCodeModel.get_visible_products()
         return ProductCodeSchema().dump(products, many=True)
 
     @staticmethod
-    def get_all_product_subscription(org_id, skip_auth=False):
+    @user_context
+    def get_all_product_subscription(org_id, skip_auth=False, **kwargs):
         """Get a list of all products with their subscription details."""
+        user_from_context: UserContext = kwargs['user_context']
         org = OrgModel.find_by_org_id(org_id)
         if not org:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -196,7 +196,10 @@ class Product:
         product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
-        products = Product.get_products(include_hidden=False)
+        # Include hidden products only for staff and SBC staff
+        include_hidden = user_from_context.is_staff() or org.type_code == OrgType.SBC_STAFF.value
+
+        products = Product.get_products(include_hidden=include_hidden)
         for product in products:
             product['subscriptionStatus'] = subscriptions_dict.get(product.get('code'),
                                                                    ProductSubscriptionStatus.NOT_SUBSCRIBED.value)
