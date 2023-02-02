@@ -125,7 +125,6 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
-import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import { useStore } from 'vuex-composition-helpers'
 
@@ -152,7 +151,6 @@ export default defineComponent({
     GLCodesListView,
     IncorporationSearchResultView,
     PPRLauncher,
-    SupportInfoCard,
     StaffAccountManagement,
     Transactions
   },
