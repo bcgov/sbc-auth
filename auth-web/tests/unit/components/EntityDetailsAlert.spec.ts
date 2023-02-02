@@ -32,8 +32,8 @@ describe('Entity Details Alert tests', () => {
       }
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
-    expect(wrapper.find(EntityDetailsAlert).exists()).toBeTruthy()
+    expect(wrapper.exists()).toBeTruthy()
+    expect(wrapper.findComponent(EntityDetailsAlert).exists()).toBeTruthy()
     expect(wrapper.props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.FROZEN]))
     expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
   })
