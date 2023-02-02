@@ -65,10 +65,10 @@ class ApiGateway:
             api_key_response = RestService.post(
                 f'{consumer_endpoint}/mc/v1/consumers/{email}/apikeys',
                 additional_headers={'x-apikey': gw_api_key},
-                data=dict(
-                    apiAccess=['ALL_API'],
-                    apiKeyName=name
-                ),
+                data={
+                    'apiAccess': ['ALL_API'],
+                    'apiKeyName': name
+                },
                 generate_token=False
             )
             response = api_key_response.json()
@@ -95,14 +95,16 @@ class ApiGateway:
                                           GROUP_API_GW_USERS if env == 'prod' else GROUP_API_GW_SANDBOX_USERS)
         KeycloakService.add_user_to_group(service_account.get('id'), GROUP_ACCOUNT_HOLDERS)
         # Create a consumer with the keycloak client id and secret
-        create_consumer_payload = dict(email=email,
-                                       firstName=org.name,
-                                       lastName=org.branch_name or 'BCR',
-                                       userName=org.name,
-                                       clientId=client_rep.get('clientId'),
-                                       clientSecret=client_rep.get('secret'),
-                                       apiAccess=['ALL_API'],
-                                       apiKeyName=name)
+        create_consumer_payload = {
+            'email': email,
+            'firstName': org.name,
+            'lastName': org.branch_name or 'BCR',
+            'userName': org.name,
+            'clientId': client_rep.get('clientId'),
+            'clientSecret': client_rep.get('secret'),
+            'apiAccess': ['ALL_API'],
+            'apiKeyName': name
+        }
         api_key_response = RestService.post(
             f'{consumer_endpoint}/mc/v1/consumers',
             additional_headers={'x-apikey': gw_api_key},
@@ -133,7 +135,7 @@ class ApiGateway:
         RestService.patch(
             f'{consumer_endpoint}/mc/v1/consumers/{email_id}/apikeys/{api_key}?action=revoke',
             additional_headers={'x-apikey': gw_api_key},
-            data=dict(apiAccess='ALL_API'),
+            data={'apiAccess': 'ALL_API'},
             generate_token=False
         )
 
