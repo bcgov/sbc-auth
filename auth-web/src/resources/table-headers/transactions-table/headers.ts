@@ -188,6 +188,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
       items: [
         { text: invoiceStatusDisplay[InvoiceStatus.CANCELLED], value: InvoiceStatus.CANCELLED },
         { text: invoiceStatusDisplay[InvoiceStatus.PAID], value: InvoiceStatus.PAID },
+        { text: invoiceStatusDisplay[InvoiceStatus.CREDITED], value: InvoiceStatus.CREDITED },
         { text: invoiceStatusDisplay[InvoiceStatus.PENDING], value: InvoiceStatus.PENDING },
         { text: invoiceStatusDisplay[InvoiceStatus.APPROVED], value: InvoiceStatus.APPROVED },
         { text: invoiceStatusDisplay[InvoiceStatus.REFUNDED], value: InvoiceStatus.REFUNDED },
