@@ -1,9 +1,13 @@
 <template >
-  <v-tooltip v-bind="location" color="grey darken-4" class="bottom-tooltip" >
+  <v-tooltip v-bind="location" color="grey darken-4"  >
     <template v-slot:activator="{ on }">
       <v-icon :color="colour" v-on="on" :style="iconStyling">{{ icon }}</v-icon>
     </template>
-    <div class="py-2" :style="{ 'max-width': maxWidth }">
+    <div
+      class="py-2"
+      :class="{'top-tooltip': location.top, 'bottom-tooltip': location.bot}"
+      :style="{ 'max-width': maxWidth }"
+    >
       <slot></slot>
     </div>
   </v-tooltip>
@@ -22,15 +26,19 @@ export default defineComponent({
       type: String,
       default: 'primary'
     },
-    location: Object
+    location: {
+      type: Object,
+      default (rawProps) {
+        return { bot: true }
+      }
+    }
   }
 })
 </script>
 
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
-  .bottom-tooltip {
-    .v-tooltip__content:before {
+    .bottom-tooltip:before {
       content: ' ';
       position: absolute;
       top: -20px;
@@ -42,9 +50,8 @@ export default defineComponent({
       border-style: solid;
       border-color: transparent transparent var(--v-grey-darken4) transparent;
     }
-  }
 
-  .top-tooltip .v-tooltip__content:after {
+  .top-tooltip:after {
     content: ' ';
     position: absolute;
     top: 100%;

@@ -1,5 +1,11 @@
 <template>
-  <IconTooltip icon="mdi-alert" :colour="iconColour" maxWidth="300px" :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}" :location="{top: true}" >
+  <IconTooltip
+    icon="mdi-alert"
+    maxWidth="300px"
+    :colour="iconColour"
+    :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
+    :location="{top: true}"
+  >
     <div class="alert-content">
       <span class="alert-header" :style="{ 'font-weight': 'bold' }">
         {{ alertHeader }}
@@ -29,10 +35,6 @@ export default defineComponent({
     }
   },
   setup (props) {
-    // testing for now
-    // const mockStatuses = ['FROZEN', 'BAD_STANDING', 'DISSOLUTION', 'LIQUIDATION'] as Array<EntityDetailTypes>
-
-    // actual stuff
     const generateMessage = (status: String): { message: String, colour: String, priority: Number } => {
       switch (status) {
         case EntityDetailTypes.FROZEN:

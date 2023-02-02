@@ -37,7 +37,9 @@
       <!-- header title slots -->
       <template v-slot:header-title-slot-statusCode="{ header }">
         {{ header.value }}
-        <icon-tooltip icon="mdi-information-outline" :text="getStatusCodeHelpText()" />
+        <icon-tooltip icon="mdi-information-outline" :location="{bot: true}">
+          {{ getStatusCodeHelpText()  }}
+        </icon-tooltip>
       </template>
       <!-- header filter slots -->
       <template v-slot:header-filter-slot-createdOn>

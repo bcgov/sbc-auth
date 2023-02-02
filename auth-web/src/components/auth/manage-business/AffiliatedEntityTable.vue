@@ -95,7 +95,7 @@
             <td v-if="showCol(headers[3].text)" class="text-capitalize ">
               {{ status(item) }}
               <!-- this is mocked here until the backend to get org details in auth is completed -->
-              <EntityDetailsAlert v-if="status(item) == 'Active'" :details="['FROZEN']"/>
+              <EntityDetailsAlert v-if="name(item) == 'RITVICK 26SEPT'" :details="['FROZEN']"/>
             </td>
 
             <!-- Actions -->
