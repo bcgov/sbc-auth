@@ -8,6 +8,7 @@
         class="product-card py-8 px-5 mb-4 elevation-1"
         :class="[ {'processing-card' : isSelected}]"
         :data-test="`div-product-${productDetails.code}`"
+        v-if="!productDetails.hidden"
       >
         <div>
           <header class="d-flex align-center">
