@@ -439,6 +439,11 @@ export enum RequestTrackerType {
     ChangeParty = 'CHANGE_PARTY',
 }
 
+export enum MhrProductCodeConstants {
+    MHR = 'MHR',
+    NOT_STAFF = 'NotStaff'
+}
+
 export enum Product {
     BCA = 'BCA',
     BUSINESS = 'BUSINESS',

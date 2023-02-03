@@ -136,7 +136,7 @@
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { DisplayModeValues, ProductStatus, Role } from '@/util/constants'
+import { DisplayModeValues, MhrProductCodeConstants, ProductStatus, Role } from '@/util/constants'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
@@ -193,9 +193,9 @@ export default class Product extends Vue {
     // eg: pprCodeSubtitle, pprCodeDescription
     // Also, returns check box icon and color if the product has been reviewed.
     const { code } = this.productDetails
-    let notStaff = !this.isStaff && code.toLowerCase() === 'mhr' ? 'NotStaff' : ''
-    let subTitle = `${code && code.toLowerCase()}${notStaff}CodeSubtitle` || ''
-    let details = `${code && code.toLowerCase()}${notStaff}CodeDescription` || ''
+    let mhrNotStaff = !this.isStaff && code.toLowerCase() === MhrProductCodeConstants.MHR.toLowerCase() ? MhrProductCodeConstants.NOT_STAFF : ''
+    let subTitle = `${code && code.toLowerCase()}${mhrNotStaff}CodeSubtitle` || ''
+    let details = `${code && code.toLowerCase()}${mhrNotStaff}CodeDescription` || ''
     let decisionMadeIcon = null
     let decisionMadeColorCode = null
 
@@ -203,7 +203,7 @@ export default class Product extends Vue {
       const status = this.productDetails.subscriptionStatus
       switch (status) {
         case ProductStatus.ACTIVE: {
-          subTitle = `${code && code.toLowerCase()}${notStaff}CodeActiveSubtitle` || ''
+          subTitle = `${code && code.toLowerCase()}${mhrNotStaff}CodeActiveSubtitle` || ''
           decisionMadeIcon = 'mdi-check-circle'
           decisionMadeColorCode = 'success'
           break
