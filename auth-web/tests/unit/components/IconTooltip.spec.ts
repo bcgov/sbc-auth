@@ -18,7 +18,9 @@ describe('Icon tooltip tests', () => {
   const props = {
     icon: 'mdi-information',
     maxWidth: '300px',
-    text: 'Test tooltip text'
+    location: {
+      top: true
+    }
   }
 
   beforeEach(async () => {
