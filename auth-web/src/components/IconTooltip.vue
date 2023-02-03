@@ -5,7 +5,7 @@
     </template>
     <div
       class="py-2"
-      :class="{'top-tooltip': location.top, 'bottom-tooltip': location.bot}"
+      :class="{'top-tooltip': location.top, 'bottom-tooltip': location.bottom}"
       :style="{ 'max-width': maxWidth }"
     >
       <slot></slot>
@@ -29,7 +29,7 @@ export default defineComponent({
     location: {
       type: Object,
       default (rawProps) {
-        return { bot: true }
+        return { bottom: true }
       }
     }
   }
@@ -38,31 +38,31 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
-    .bottom-tooltip:before {
-      content: ' ';
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      margin-left: -10px;
-      width: 20px;
-      height: 20px;
-      border-width: 10px 10px 10px 10px;
-      border-style: solid;
-      border-color: transparent transparent var(--v-grey-darken4) transparent;
-    }
+.bottom-tooltip:before {
+  content: ' ';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--v-grey-darken4) transparent;
+}
 
-  .top-tooltip:after {
-    content: ' ';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    margin-left: -10px;
-    width: 20px;
-    height: 20px;
-    border-width: 10px 10px 10px 10px;
-    border-style: solid;
-    border-color: transparent transparent var(--v-grey-darken4) transparent;
-    transform: rotate(180deg);
-  }
+.top-tooltip:after {
+  content: ' ';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -10px;
+  width: 20px;
+  height: 20px;
+  border-width: 10px 10px 10px 10px;
+  border-style: solid;
+  border-color: transparent transparent var(--v-grey-darken4) transparent;
+  transform: rotate(180deg);
+}
 
 </style>

@@ -37,8 +37,8 @@
       <!-- header title slots -->
       <template v-slot:header-title-slot-statusCode="{ header }">
         {{ header.value }}
-        <icon-tooltip icon="mdi-information-outline" :location="{bot: true}">
-          {{ getStatusCodeHelpText()  }}
+        <icon-tooltip icon="mdi-information-outline">
+          <div v-html="getStatusCodeHelpText()" />
         </icon-tooltip>
       </template>
       <!-- header filter slots -->
@@ -88,8 +88,9 @@
               v-if="[InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
               icon="mdi-information-outline"
               maxWidth="300px"
-              :text="getRefundHelpText(item)"
-            />
+            >
+              <div v-html="getRefundHelpText(item)" />
+            </icon-tooltip>
           </v-col>
         </v-row>
       </template>
@@ -105,6 +106,7 @@ import CommonUtils from '@/util/common-util'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import { DataOptions } from 'vuetify'
 import { InvoiceStatus } from '@/util/constants'
+import { Transaction } from '@/models'
 import _ from 'lodash'
 import { invoiceStatusDisplay } from '@/resources/display-mappers'
 import { useTransactions } from '@/composables'
@@ -167,7 +169,7 @@ export default defineComponent({
     const getStatusCodeHelpText = () => statusCodeDescs.reduce((text, statusCode) => {
       return `${text}<div class="mt-1">${statusCode.value} - ${statusCode.description}</div>`
     }, '')
-    const getRefundHelpText = (item: any) => {
+    const getRefundHelpText = (item: Transaction) => {
       if (item?.statusCode === InvoiceStatus.REFUND_REQUESTED) {
         return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
       }
