@@ -35,7 +35,7 @@ export default defineComponent({
     }
   },
   setup (props) {
-    const generateMessage = (status: String): { message: String, colour: String, priority: Number } => {
+    const generateMessage = (status: string): { message: string, colour: string, priority: number } => {
       switch (status) {
         case EntityAlertTypes.FROZEN:
           return { message: 'This business is frozen', colour: '#F8661A', priority: 4 }
