@@ -92,7 +92,11 @@
             </td>
 
             <!-- Status -->
-            <td v-if="showCol(headers[3].text)" class="text-capitalize">{{ status(item) }}</td>
+            <td v-if="showCol(headers[3].text)" class="text-capitalize ">
+              {{ status(item) }}
+              <!-- this is mocked here until the backend to get org details in auth is completed -->
+              <EntityDetailsAlert v-if="name(item) == 'RITVICK 26SEPT'" :details="['FROZEN']"/>
+            </td>
 
             <!-- Actions -->
             <td class="action-cell">
@@ -195,10 +199,12 @@ import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
+import EntityDetailsAlert from './EntityDetailsAlert.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
+  components: { EntityDetailsAlert },
   computed: {
     ...mapState('business', ['businesses']),
     ...mapState('org', ['currentOrganization'])
