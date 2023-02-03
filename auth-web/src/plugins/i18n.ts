@@ -1,5 +1,5 @@
 import VueI18n, { LocaleMessages } from 'vue-i18n'
-import { castToVueI18n, createI18n } from 'vue-i18n-bridge'
+import { castToVueI18n, createI18n } from 'vue-i18n-bridge/dist/vue-i18n-bridge.esm-bundler'
 import Vue from 'vue'
 
 Vue.use(VueI18n, { bridge: true })
@@ -19,6 +19,7 @@ function loadLocaleMessages (): LocaleMessages {
 
 const i18n = castToVueI18n(createI18n({
   legacy: false,
+  warnHtmlMessage: false,
   locale: process.env.VUE_APP_I18N_LOCALE || 'en',
   fallbackLocale: process.env.VUE_APP_I18N_FALLBACK_LOCALE || 'en',
   messages: loadLocaleMessages()

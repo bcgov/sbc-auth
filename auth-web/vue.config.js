@@ -21,6 +21,13 @@ module.exports = {
   chainWebpack (config) {
     // disable type check for build (composition api library fails)
     if (process.env.NODE_ENV === 'production') config.plugins.delete('fork-ts-checker')
+    config.module
+      .rule('i18n')
+      .resourceQuery(/blockType=i18n/)
+      .type('javascript/auto')
+      .use('i18n')
+      .loader('@intlify/vue-i18n-loader')
+      .end()
   },
   publicPath: process.env.VUE_APP_PATH,
   transpileDependencies: ['vuetify', 'vuex-persist', 'fas-ui', 'clickout-event', 'vue-plugin-helper-decorator'],
@@ -29,5 +36,6 @@ module.exports = {
       warnings: true,
       errors: true
     }
-  }
+  },
+  
 }

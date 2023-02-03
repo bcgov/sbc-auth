@@ -37,6 +37,7 @@
     "vue-hotjar": "^1.4.0",
     "vue-i18n": "^8.0.0",
     "vue-i18n-bridge": "^9.2.2",
+    "vue-loader": "^15.9.2",
     "vue-plugin-helper-decorator": "0.0.12",
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.0.3",
@@ -48,7 +49,7 @@
     "webpack-remove-serviceworker-plugin": "^1.0.0"
   },
   "devDependencies": {
-    "@kazupon/vue-i18n-loader": "^0.3.0",
+    "@intlify/vue-i18n-loader": "^1.1.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@types/jest": "^25.2.3",
     "@types/mime-types": "^2.1.0",
