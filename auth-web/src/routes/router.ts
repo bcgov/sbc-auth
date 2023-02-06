@@ -491,22 +491,15 @@ export function getRoutes (): RouteConfig[] {
       props: true,
       meta: { requiresAuth: false } },
     {
-      path: '/signin/:idpHint/:redirectUrl',
+      path: '/signin/:idpHint/:redirectUrl(.*)',
       name: 'signin-redirect',
-      component: SigninView,
-      props: true,
-      meta: { requiresAuth: false }
-    },
-    {
-      path: '/signin/:idpHint/:redirectUrl/:redirectUrlLoginFail',
-      name: 'signin-redirect-full',
       component: SigninView,
       props: true,
       meta: { requiresAuth: false }
     },
     { path: '/signout', name: 'signout', component: SignoutView, props: true, meta: { requiresAuth: true } },
     {
-      path: '/signout/:redirectUrl',
+      path: '/signout/:redirectUrl(.*)',
       name: 'signout-redirect',
       component: SignoutView,
       props: true,
@@ -519,14 +512,14 @@ export function getRoutes (): RouteConfig[] {
       meta: { requiresAuth: true, requiresProfile: true, requiresActiveAccount: true }
     },
     {
-      path: '/makepayment/:paymentId/:redirectUrl',
+      path: '/makepayment/:paymentId/:redirectUrl(.*)',
       name: 'makepayment',
       component: PaymentView,
       props: true,
       meta: { requiresAuth: false }
     },
     {
-      path: '/make-cc-payment/:paymentId/transactions/:redirectUrl',
+      path: '/make-cc-payment/:paymentId/transactions/:redirectUrl(.*)',
       name: 'make-cc-payment',
       component: CcPaymentView,
       props: true,
