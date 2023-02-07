@@ -32,11 +32,11 @@ export default class CcPaymentView extends Vue {
   returnUrl: string
 
   mounted () {
-    if (!this.paymentId || !this.redirectUrl) {
+    if (!this.paymentId || !this.redirectUrlFixed) {
       this.errorMessage = this.$t('payNoParams').toString()
       return
     }
-    PaymentServices.createTransactionForPadPayment(this.paymentId, this.redirectUrl)
+    PaymentServices.createTransactionForPadPayment(this.paymentId, this.redirectUrlFixed)
       .then(response => {
         this.returnUrl = response.data.paySystemUrl
         this.goToUrl(this.returnUrl)
@@ -44,15 +44,23 @@ export default class CcPaymentView extends Vue {
       .catch(error => {
         this.errorMessage = this.$t('payFailedMessage').toString()
         if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
-          this.goToUrl(this.redirectUrl)
+          this.goToUrl(this.redirectUrlFixed)
         } else {
           this.showErrorModal = true
         }
       })
   }
 
+  // We need this, otherwise we can get redirect Urls with just a single slash.
+  get redirectUrlFixed () {
+    if (!this.redirectUrl.includes('://')) {
+      return this.redirectUrl.replace(':/', '://')
+    }
+    return this.redirectUrl
+  }
+
   goToUrl (url: string) {
-    window.location.href = url || this.redirectUrl
+    window.location.href = url || this.redirectUrlFixed
   }
 }
 </script>
