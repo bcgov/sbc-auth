@@ -6,7 +6,6 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import MockI18n from '../test-utils/test-data/MockI18n'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
