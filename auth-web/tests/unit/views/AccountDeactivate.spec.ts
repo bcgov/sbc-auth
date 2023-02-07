@@ -5,12 +5,18 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import i18n from '@/plugins/i18n'
+import MockI18n from '../test-utils/test-data/MockI18n'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
+
+const en = {
+  test: 'Test'
+}
+
+const i18n = MockI18n.mock(en)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -43,9 +49,6 @@ describe('AccountDeactivate.vue', () => {
       localVue,
       router,
       vuetify,
-      mocks: {
-        $t: (mock) => mock
-      }
     })
   })
 
