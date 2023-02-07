@@ -168,7 +168,7 @@ export default class NextPageMixin extends Vue {
     if (CommonUtils.isUrl(target)) {
       // Solves where we get passed http:/www.google.ca for example.
       if (!target.includes('://')) {
-        target = target.replace('http:/', 'http://').replace('https:/', 'https://')
+        target = target.replace(':/', '://')
       }
       window.location.assign(target)
     } else {
