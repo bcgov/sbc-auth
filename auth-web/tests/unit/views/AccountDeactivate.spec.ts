@@ -1,11 +1,11 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
+import MockI18n from '../test-utils/test-data/MockI18n'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import MockI18n from '../test-utils/test-data/MockI18n'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -48,7 +48,7 @@ describe('AccountDeactivate.vue', () => {
       store,
       localVue,
       router,
-      vuetify,
+      vuetify
     })
   })
 
