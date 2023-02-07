@@ -167,7 +167,9 @@ export default class NextPageMixin extends Vue {
   protected redirectTo (target: string): void {
     if (CommonUtils.isUrl(target)) {
       // Solves where we get passed http:/www.google.ca for example.
-      target = target.replace('http:/', 'http://').replace('https:/', 'https://')
+      if (!target.includes('://')) {
+        target = target.replace('http:/', 'http://').replace('https:/', 'https://')
+      }
       window.location.assign(target)
     } else {
       if (this.$route.path !== target) {

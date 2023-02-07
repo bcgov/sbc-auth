@@ -144,7 +144,10 @@ export default class PaymentView extends Vue {
 
   // We need this, otherwise we can get redirect Urls with just a single slash.
   get redirectUrlFixed () {
-    return this.redirectUrl?.replace(':/', '://')
+    if (!this.redirectUrl.includes('://')) {
+      return this.redirectUrl.replace(':/', '://')
+    }
+    return this.redirectUrl
   }
 
   private isUserSignedIn (): boolean {
