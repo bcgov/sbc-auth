@@ -142,6 +142,11 @@ export default class PaymentView extends Vue {
     }
   }
 
+  // We need this, otherwise we can get redirect Urls with just a single slash.
+  get redirectUrlFixed () {
+    return this.redirectUrl?.replace(':/', '://')
+  }
+
   private isUserSignedIn (): boolean {
     return !!ConfigHelper.getFromSession('KEYCLOAK_TOKEN')
   }
@@ -151,7 +156,7 @@ export default class PaymentView extends Vue {
   }
 
   private goToUrl (url:string) {
-    window.location.href = url || this.redirectUrl
+    window.location.href = url || this.redirectUrlFixed
   }
 
   private completeOBPayment () {
@@ -196,7 +201,7 @@ export default class PaymentView extends Vue {
   private async doCreateTransaction () {
     const transactionDetails = await this.createTransaction({
       paymentId: this.paymentId,
-      redirectUrl: this.redirectUrl
+      redirectUrl: this.redirectUrlFixed
     })
     this.showLoading = false
     this.returnUrl = transactionDetails?.paySystemUrl
@@ -207,7 +212,7 @@ export default class PaymentView extends Vue {
     this.showLoading = false
     this.errorMessage = this.$t('payFailedMessage').toString()
     if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
-      this.goToUrl(this.redirectUrl)
+      this.goToUrl(this.redirectUrlFixed)
     } else {
       this.showErrorModal = true
     }
