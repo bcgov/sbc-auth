@@ -135,8 +135,9 @@
 
 <script lang="ts">
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, ProductStatus } from '@/util/constants'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
@@ -149,7 +150,7 @@ const TOS_NEEDED_PRODUCT = ['VS']
     ProductFee
   }
 })
-export default class Product extends Vue {
+export default class Product extends Mixins(AccountMixin) {
   @Prop({ default: undefined }) productDetails: OrgProduct
   @Prop({ default: undefined }) orgProduct: AccountFee // product available for orgs
   @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode // product
@@ -181,12 +182,16 @@ export default class Product extends Vue {
     return this.canManageProductFee && this.orgProduct && this.orgProduct.product
   }
 
+  private staffProductLabelPrefix (code:string) {
+    return this.isStaffAccount && code.includes('MHR') ? 'Staff' : ''
+  }
   get productLabel () {
     // this is mapping product code with lang file.
     // lang file have subtitle and description with product code prefix.
     // eg: pprCodeSubtitle, pprCodeDescription
     // Also, returns check box icon and color if the product has been reviewed.
-    const { code } = this.productDetails
+    let { code } = this.productDetails
+    code += this.staffProductLabelPrefix(code)
     let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
     let details = `${code && code.toLowerCase()}CodeDescription` || ''
     let decisionMadeIcon = null
