@@ -1,6 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
+import MockI18n from '../test-utils/test-data/MockI18n'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -10,6 +11,12 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
+
+const en = {
+  test: 'Test'
+}
+
+const i18n = MockI18n.mock(en)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -21,6 +28,7 @@ describe('AccountDeactivate.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(i18n)
 
     const orgModule = {
       namespaced: true,
@@ -40,10 +48,7 @@ describe('AccountDeactivate.vue', () => {
       store,
       localVue,
       router,
-      vuetify,
-      mocks: {
-        $t: (mock) => mock
-      }
+      vuetify
     })
   })
 
