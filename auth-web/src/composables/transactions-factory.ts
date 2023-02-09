@@ -89,6 +89,7 @@ export const useTransactions = () => {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to get transaction report.', error)
+      return { error: error }
     }
   }
 

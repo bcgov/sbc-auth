@@ -51,7 +51,6 @@
                   item-value="value"
                   :items="header.customFilter.items"
                   :label="!header.customFilter.value ? header.customFilter.label || '' : ''"
-                  :open-on-clear="true"
                   v-model="header.customFilter.value"
                   @reset="filter(header)"
                   @input="filter(header)"
@@ -173,6 +172,7 @@ export default defineComponent({
 
     return {
       filter,
+      console,
       ...toRefs(state)
     }
   }
@@ -239,7 +239,14 @@ export default defineComponent({
     background-color: lightgray;
   }
 
-  ::v-deep .v-label {
+  ::v-deep .v-label,
+  ::v-deep .v-label--active {
+    color: $gray7 !important;
+    font-size: .825rem;
+    transform: None !important;
+  }
+
+  ::v-deep .v-label--active {
     color: $gray7;
     font-size: .825rem;
   }
