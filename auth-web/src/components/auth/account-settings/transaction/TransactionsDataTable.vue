@@ -43,18 +43,19 @@
       </template>
       <!-- header filter slots -->
       <template v-slot:header-filter-slot-createdOn>
-        <v-text-field
-          class="base-table__header__filter__textbox date-filter"
-          :append-icon="'mdi-calendar'"
-          clearable
-          dense
-          filled
-          hide-details
-          :placeholder="'Date'"
-          :value="dateRangeSelected ? 'Custom' : ''"
-          @click:clear="dateRangeReset++"
-          @click="scrollToDatePicker()"
-        />
+        <div @click="scrollToDatePicker()">
+          <v-text-field
+            class="base-table__header__filter__textbox date-filter"
+            :append-icon="'mdi-calendar'"
+            clearable
+            dense
+            filled
+            hide-details
+            :placeholder="'Date'"
+            :value="dateRangeSelected ? 'Custom' : ''"
+            @click:clear="dateRangeReset++"
+          />
+        </div>
       </template>
       <!-- item slots -->
       <template v-slot:item-slot-lineItemsAndDetails="{ item }">
@@ -227,5 +228,9 @@ export default defineComponent({
 .section-heading {
   background-color: $app-background-blue;
   border-radius: 5px 5px 0 0;
+}
+::v-deep .date-filter .v-input__slot,
+::v-deep .date-filter .v-input__slot .v-text-field__slot input {
+  cursor: pointer !important;
 }
 </style>
