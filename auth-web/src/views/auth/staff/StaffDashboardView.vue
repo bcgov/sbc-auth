@@ -91,7 +91,7 @@
     </v-card>
 
     <!-- Transactions -->
-    <base-v-expansion-panel class="mb-4" title="Transaction Records">
+    <base-v-expansion-panel v-if="canViewAllTransactions" class="mb-4" title="Transaction Records">
       <template v-slot:content>
         <Transactions class="mt-5 pa-0 pr-2" :extended="true" :showCredit="false" :showExport="false" />
       </template>
@@ -182,6 +182,7 @@ export default defineComponent({
       affiliatedOrg: {},
       canSearchFAS: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       canViewAccounts: computed((): boolean => currentUser.value?.roles?.includes(Role.StaffViewAccounts)),
+      canViewAllTransactions: computed((): boolean => currentUser.value?.roles?.includes(Role.ViewAllTransactions)),
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       showBusSearchlink: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false),

@@ -14,7 +14,7 @@
       :clearFiltersTrigger="clearFiltersTrigger"
       itemKey="id"
       :loading="transactions.loading"
-      loadingText="loading text"
+      loadingText="Loading Transaction Records..."
       noDataText="No Transaction Records"
       :setItems="transactions.results"
       :setHeaders="headers"
@@ -174,7 +174,7 @@ export default defineComponent({
         return 'We are processing your refund request.<br/>It may take up to 7 business days to refund your total amount.'
       }
       if (item?.statusCode === InvoiceStatus.REFUNDED) {
-        return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this trasaction.'
+        return '$' + (item?.total?.toFixed(2) || '') + ' has been refunded to the account used for this transaction.'
       }
       return ''
     }
