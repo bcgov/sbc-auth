@@ -17,7 +17,7 @@
             color="primary"
             class="font-weight-bold ml-4"
             :loading="isLoading"
-            @click="exportCSV"
+            @click="exportCSV()"
             :disabled="isLoading"
             data-test="btn-export-csv"
           >Export CSV</v-btn>
@@ -49,6 +49,21 @@
       </v-row>
       <TransactionsDataTable class="mt-4" :extended="extended" :headers="sortedHeaders" />
     </section>
+    <!-- export csv error -->
+    <ModalDialog
+      ref="csvErrorDialog"
+      dialog-class="notify-dialog"
+      title="Unable to export CSV"
+      :text="csvErrorDialogText"
+      max-width="640"
+    >
+      <template v-slot:icon>
+        <v-icon large color="primary">mdi-alert-circle-outline</v-icon>
+      </template>
+      <template v-slot:actions>
+        <v-btn large color="primary" @click="csvErrorDialog.close()">OK</v-btn>
+      </template>
+    </ModalDialog>
   </v-container>
 </template>
 
@@ -59,6 +74,8 @@ import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch 
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import moment from 'moment'
@@ -66,7 +83,7 @@ import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   name: 'Transactions',
-  components: { TransactionsDataTable },
+  components: { ModalDialog, TransactionsDataTable },
   props: {
     extended: { default: false },
     showCredit: { default: true },
@@ -80,6 +97,11 @@ export default defineComponent({
     const getOrgPayments = (orgId?: number) => store.dispatch('org/getOrgPayments', orgId)
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
     const currentMembership = computed(() => store.state.org.currentMembership as Member)
+
+    const csvErrorDialog: Ref<ModalDialog> = ref(null)
+    const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'
+    const csvErrorTextMaxExceeded = 'You have exceeded the maximum of 60,000 records for your CSV export. Please refine your search and try again.'
+    const csvErrorDialogText = ref(csvErrorTextBasic)
 
     const { setAccountChangedHandler, beforeDestroy } = useAccountChangeHandler()
     const { clearAllFilters, getTransactionReport, loadTransactionList, setViewAll } = useTransactions()
@@ -155,11 +177,20 @@ export default defineComponent({
       isLoading.value = true
       // grab from composable**
       const downloadData = await getTransactionReport()
-      CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+      if (!downloadData || downloadData.error) {
+        if (downloadData?.error?.response?.status === StatusCodes.BAD_REQUEST) {
+          csvErrorDialogText.value = csvErrorTextMaxExceeded
+        }
+        csvErrorDialog.value.open()
+      } else {
+        CommonUtils.fileDownload(downloadData, `bcregistry-transactions-${moment().format('MM-DD-YYYY')}.csv`, 'text/csv')
+      }
       isLoading.value = false
     }
 
     return {
+      csvErrorDialog,
+      csvErrorDialogText,
       headers,
       headerSelections,
       headersSelected,
