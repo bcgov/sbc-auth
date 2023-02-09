@@ -172,7 +172,6 @@ export default defineComponent({
 
     return {
       filter,
-      console,
       ...toRefs(state)
     }
   }
