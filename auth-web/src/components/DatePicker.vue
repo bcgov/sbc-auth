@@ -77,7 +77,6 @@ interface DatePickerI {
   datePickerKey: number
   endDate: string,
   startDate: string,
-  defaultMonth: ComputedRef<string>
   today: ComputedRef<string>
 }
 
@@ -95,20 +94,18 @@ export default defineComponent({
       datePickerKey: 0,
       endDate: null,
       startDate: null,
-      defaultMonth: computed((): string => {
-        const todayDate = new Date()
-        return todayDate.toISOString().substring(0, 8)
-      }),
       today: computed((): string => {
         const todayDate = new Date()
-        return todayDate.toLocaleDateString('en-CA')
+        const localYear = todayDate.toLocaleDateString('en-CA', { year: 'numeric' })
+        const localMonth = todayDate.toLocaleDateString('en-CA', { month: '2-digit' })
+        const localDay = todayDate.toLocaleDateString('en-CA', { day: '2-digit' })
+        return [localYear, localMonth, localDay].join('-')
       })
     }) as unknown) as DatePickerI
 
     const emitDateRange = (): void => {
-      const datesAreDefault = state.startDate === state.defaultMonth.value || state.endDate === state.defaultMonth.value
-      const startDate = datesAreDefault ? null : state.startDate
-      const endDate = datesAreDefault ? null : state.endDate
+      const startDate = state.startDate
+      const endDate = state.endDate
       emit('submit', { endDate: endDate, startDate: startDate })
     }
     const resetDateRange = (): void => {
