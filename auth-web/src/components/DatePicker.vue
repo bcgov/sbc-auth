@@ -134,6 +134,7 @@ export default defineComponent({
     })
     watch(() => props.setStartDate, (val: string) => {
       if (!val) {
+        state.startDate = null
         // rerender to reset default date (so it opens at the default date again)
         state.datePickerKey++
       } else state.startDate = val
@@ -156,6 +157,7 @@ export default defineComponent({
   border-radius: 5px;
   z-index: 10;
   left: 50%;
+  margin-top: 120px;
   overflow: auto;
   padding: 24px 34px 24px 34px;
   position: absolute;

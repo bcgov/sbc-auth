@@ -222,9 +222,6 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import "$assets/scss/theme.scss";
-.date-picker {
-  margin-top: 120px;
-}
 .section-heading {
   background-color: $app-background-blue;
   border-radius: 5px 5px 0 0;
