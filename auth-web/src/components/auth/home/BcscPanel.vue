@@ -52,7 +52,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent } from '@vue/composition-api'
+import { PropType, defineComponent } from '@vue/composition-api'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { User } from '@/models/user'
 import Vue from 'vue'
@@ -67,6 +67,7 @@ export default defineComponent({
   },
   emits: ['login', 'account-dialog'],
   setup (props, { emit }) {
+    const userProfile = props.userProfile
     const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const secureBulletPoints = [
@@ -87,6 +88,7 @@ export default defineComponent({
     }
 
     return {
+      userProfile,
       cardSetUpUrl,
       learnMoreUrl,
       secureBulletPoints,
