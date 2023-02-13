@@ -101,10 +101,10 @@
         <AccountDetails
           :accountDetails="accountDetails"
           :isBusinessAccount="isBusinessAccount"
-          @update:updateAndSaveAccountDetails="updateAndSaveAccountDetails"
+          :nameChangeAllowed="!nameChangeNotAllowed"
           :viewOnlyMode="isAccountInfoViewOnly"
+          @update:updateAndSaveAccountDetails="updateAndSaveAccountDetails"
           @update:viewOnlyMode="viewOnlyMode"
-          :nameChangeNotAllowed="nameChangeNotAllowed"
         />
 
         <template v-if="baseAddress" v-can:VIEW_ADDRESS.hide>
@@ -521,7 +521,9 @@ export default class AccountInfo extends Mixins(
 
     try {
       await this.updateOrg(createRequestBody)
-      this.$store.commit('updateHeader')
+      // FUTURE: change 'staff view other account' flow so it doesn't need to fake load the other account globally
+      // if staff updating a user account don't reload header -- causes staff account to get loaded in
+      if (!(this.isStaff && !this.isStaffAccount)) this.$store.commit('updateHeader')
       this.addressChanged = false
       if (this.baseAddress) {
         this.isCompleteAccountInfo = true
