@@ -7,9 +7,8 @@ import moment from 'moment'
  */
 export default class CommonUtils {
   // checking url matches the regex
-  static isUrl (value:string):boolean {
-    const URL_MATCHER = new RegExp('^(?:\\w+:)?\\/([^\\s\\.]+\\.\\S{2}|[\\/]?localhost[\\:?\\d]*)\\S*$')
-    return URL_MATCHER.test(value)
+  static isUrl (value:string): boolean {
+    return value?.startsWith('http')
   }
 
   // formatting incorporation number according to the length of numbers
