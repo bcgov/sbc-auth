@@ -159,19 +159,18 @@ describe('Product.vue', () => {
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeFalsy()
   })
 
-  it('premium product should be disabled in basic account settings', async () => {
+  it('premium product should be visiable to basic account settings', async () => {
     pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
-    pprProduct.premiumOnly = true
-    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true, isBasicAccount: true })
+    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true, isBasicAccount: false })
 
-    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
-    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeFalsy()
+    expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeTruthy()
 
     const getDecisionMadeSettings = wrapper.vm.productLabel
-    expect(getDecisionMadeSettings.decisionMadeIcon).toBe('mdi-minus-box')
+    expect(getDecisionMadeSettings.decisionMadeIcon).toBeNull()
     expect(getDecisionMadeSettings.decisionMadeColorCode).toBeNull()
     expect(wrapper.vm.hasDecisionNotBeenMade).toBeTruthy()
-    expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeTruthy()
+    expect(wrapper.vm.isBasicAccountAndPremiumProduct).toBeFalsy()
   })
 
   it('creation flow should display check box', async () => {
