@@ -172,7 +172,6 @@
                 role="listitem"
                 :to="transactionUrl"
                 data-test="transactions-nav-item"
-                v-if="isPremiumAccount || isSbcStaffAccount || isStaffAccount || isBasicAccount"
                 v-can:MANAGE_STATEMENTS.hide
               >
                 <v-list-item-icon>
