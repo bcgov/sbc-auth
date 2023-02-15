@@ -141,7 +141,7 @@ class Org(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_jwt.has_one_of_roles(
-        [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value])
+        [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
     def put(org_id):
         """Update the org specified by the provided id with the request body."""
         request_json = request.get_json()
