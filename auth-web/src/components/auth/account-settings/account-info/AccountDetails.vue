@@ -22,16 +22,11 @@
                 </div>
                 <div
                   v-can:CHANGE_ORG_NAME.disable
-                  v-if="!nameChangeNotAllowed && viewOnlyMode"
+                  v-if="nameChangeAllowed && viewOnlyMode"
                 >
                   <span
                     class="primary--text cursor-pointer"
-                    @click="
-                      $emit('update:viewOnlyMode', {
-                        component: 'account',
-                        mode: false
-                      })
-                    "
+                    @click="emitViewOnly({ component: 'account', mode: false })"
                     data-test="btn-edit"
                   >
                     <v-icon color="primary" size="20"> mdi-pencil</v-icon>
@@ -39,17 +34,17 @@
                   </span>
                 </div>
               </div>
-              <div v-if="accountTypeBusiness">
+              <div v-if="isAccountTypeBusiness">
                 <span class="font-weight-bold">Branch/Division:</span>
                 {{ branchName != '' ? branchName : '-' }}
               </div>
 
-              <div v-if="accountTypeBusiness">
+              <div v-if="isAccountTypeBusiness">
                 <span class="font-weight-bold">Business Type:</span>
                 {{ getBusinessTypeLabel }}
               </div>
 
-              <div v-if="accountTypeBusiness">
+              <div v-if="isAccountTypeBusiness">
                 <span class="font-weight-bold">Business Size:</span>
                 {{ getBusinessSizeLabel }}
               </div>
@@ -58,7 +53,7 @@
               <account-business-type
                 :saving="false"
                 @update:org-business-type="updateOrgBusinessType"
-                @valid="checkOrgBusinessTypeValid"
+                @valid="updateIsOrgBusinessTypeValid($event)"
                 :isEditAccount="true"
               >
               </account-business-type>
@@ -71,7 +66,7 @@
                   color="primary"
                   :loading="false"
                   aria-label="Save Account Information"
-                  @click="updateDetails()"
+                  @click="emitUpdateAndSaveAccount()"
                 >
                   <span class="save-btn__label">Save</span>
                 </v-btn>
@@ -82,7 +77,7 @@
                   class="ml-2 px-9"
                   color="primary"
                   aria-label="Cancel Account Information"
-                  @click="cancelEdit()"
+                  @click="emitViewOnly()"
                   data-test="reset-button"
                   >Cancel</v-btn
                 >
@@ -94,128 +89,112 @@
     </v-form>
   </div>
 </template>
-
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-
 import { Code } from '@/models/Code'
 import { OrgBusinessType } from '@/models/Organization'
-import { namespace } from 'vuex-class'
+import { useStore } from 'vuex-composition-helpers'
 
-const CodesModule = namespace('codes')
+export interface AccountDetailsI {
+  orgName: string
+  branchName: string
+  isAccountTypeBusiness: boolean
+  isOrgBusinessTypeValid: boolean
+  isLoading: boolean
+  orgBusinessType: OrgBusinessType
+}
 
-@Component({
-  components: {
-    AccountBusinessType
+export default defineComponent({
+  name: 'AccountDetails',
+  components: { AccountBusinessType },
+  emits: ['update:updateAndSaveAccountDetails', 'update:viewOnlyMode'],
+  props: {
+    accountDetails: { default: null as OrgBusinessType },
+    isBusinessAccount: { default: true },
+    nameChangeAllowed: { default: true },
+    viewOnlyMode: { default: true }
+  },
+  setup (props, { emit }) {
+    // refs
+    const editAccountForm = ref(null as HTMLFormElement)
+    // store stuff
+    const store = useStore()
+    const businessSizeCodes = computed(() => store.state.codes.businessSizeCodes as Code[])
+    const businessTypeCodes = computed(() => store.state.codes.businessTypeCodes as Code[])
+    const getBusinessSizeCodes = (): Promise<Code[]> => store.dispatch('codes/getBusinessSizeCodes')
+    const getBusinessTypeCodes = (): Promise<Code[]> => store.dispatch('codes/getBusinessTypeCodes')
+
+    const localVars = (reactive({
+      orgName: '',
+      branchName: '',
+      isAccountTypeBusiness: false,
+      isOrgBusinessTypeValid: false,
+      isLoading: false,
+      orgBusinessType: { businessType: '', businessSize: '' }
+    }) as unknown) as AccountDetailsI
+    watch(() => props.isBusinessAccount, (val: boolean) => { localVars.isAccountTypeBusiness = val })
+
+    const updateIsOrgBusinessTypeValid = (isValid: boolean) => {
+      localVars.isOrgBusinessTypeValid = !!isValid
+    }
+    const updateOrgBusinessType = (orgBusinessType: OrgBusinessType) => {
+      localVars.orgBusinessType = orgBusinessType
+    }
+
+    const updateAccountDetails = () => {
+      localVars.orgName = props.accountDetails?.name
+      localVars.branchName = props.accountDetails?.branchName
+      localVars.orgBusinessType.businessType = props.accountDetails?.businessType
+      localVars.orgBusinessType.businessSize = props.accountDetails?.businessSize
+      localVars.isAccountTypeBusiness = props.isBusinessAccount
+    }
+    watch(() => props.accountDetails, () => updateAccountDetails(), { deep: true })
+
+    const getCodeLabel = (codeList: Code[], code: string) => {
+      const codeArray = codeList.filter(type => type.code === code)
+      return (codeArray && codeArray[0] && codeArray[0]?.desc) || ''
+    }
+    const getBusinessTypeLabel = computed(() => {
+      return getCodeLabel(businessTypeCodes.value, localVars.orgBusinessType.businessType)
+    })
+    const getBusinessSizeLabel = computed(() => {
+      return getCodeLabel(businessSizeCodes.value, localVars.orgBusinessType.businessSize)
+    })
+
+    const emitViewOnly = (val: { component: string, mode: boolean }) => {
+      updateAccountDetails()
+      emit('update:viewOnlyMode', val)
+    }
+
+    const emitUpdateAndSaveAccount = () => {
+      if (localVars.isOrgBusinessTypeValid) {
+        emit('update:updateAndSaveAccountDetails', localVars.orgBusinessType)
+      }
+    }
+
+    onMounted(async () => {
+      localVars.isLoading = true
+      // to show businsss type value need to get all code
+      await getBusinessTypeCodes()
+      await getBusinessSizeCodes()
+      updateAccountDetails()
+      localVars.isLoading = false
+    })
+
+    return {
+      editAccountForm,
+      getBusinessTypeLabel,
+      getBusinessSizeLabel,
+      updateIsOrgBusinessTypeValid,
+      updateOrgBusinessType,
+      emitViewOnly,
+      emitUpdateAndSaveAccount,
+      ...toRefs(localVars)
+    }
   }
 })
-export default class AccountDetails extends Mixins(AccountChangeMixin) {
-  @Prop({ default: null }) accountDetails: OrgBusinessType
-  @Prop({ default: true }) viewOnlyMode: boolean
-
-  @Prop({ default: false }) isBusinessAccount: boolean
-  @Prop({ default: false }) nameChangeNotAllowed: boolean
-
-  // @Prop({ default: null }) updateOrgBusinessType: any
-  @CodesModule.Action('getBusinessSizeCodes')
-  private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @CodesModule.Action('getBusinessTypeCodes')
-  private readonly getBusinessTypeCodes!: () => Promise<Code[]>
-  @CodesModule.State('businessSizeCodes')
-  private readonly businessSizeCodes!: Code[]
-  @CodesModule.State('businessTypeCodes')
-  private readonly businessTypeCodes!: Code[]
-
-  public orgName = ''
-  public branchName = ''
-  public accountTypeBusiness = false
-  private isOrgBusinessTypeValid = false
-  public isLoading =false
-
-  public orgBusinessType: OrgBusinessType = {
-    businessType: '',
-    businessSize: ''
-  }
-
-  $refs: {
-    editAccountForm: HTMLFormElement
-  }
-
-  @Watch('accountDetails', { deep: true })
-  onAccountDetailsChange () {
-    this.updateAccountDetails()
-  }
-  @Watch('isBusinessAccount')
-  onAccountTypeChange (businessType) {
-    this.accountTypeBusiness = businessType
-  }
-
-  updateAccountDetails () {
-    this.orgName = this.accountDetails?.name
-    this.branchName = this.accountDetails?.branchName
-    this.orgBusinessType.businessType = this.accountDetails?.businessType
-    this.orgBusinessType.businessSize = this.accountDetails?.businessSize
-    this.accountTypeBusiness = this.isBusinessAccount
-  }
-
-  get getBusinessTypeLabel () {
-    return this.getCodeLabel(
-      this.businessTypeCodes,
-      this.orgBusinessType.businessType
-    )
-  }
-
-  get getBusinessSizeLabel () {
-    return this.getCodeLabel(
-      this.businessSizeCodes,
-      this.orgBusinessType.businessSize
-    )
-  }
-
-  getCodeLabel (codeList, code) {
-    const codeArray = codeList.filter(type => type.code === code)
-    return (codeArray && codeArray[0] && codeArray[0]?.desc) || ''
-  }
-
-  @Emit('update:viewOnlyMode')
-  cancelEdit () {
-    this.updateAccountDetails()
-    return {
-      component: 'account',
-      mode: true
-    }
-  }
-
-  public updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
-    this.orgBusinessType = orgBusinessType
-  }
-  // emit to par3ent only on save click
-  // taking account name  an dbrqanch from this and business type details from child component
-  // arrange data and emit to parent on save click
-  @Emit('update:updateAndSaveAccountDetails')
-  public updateDetails () {
-    if (this.isOrgBusinessTypeValid) {
-      return this.orgBusinessType
-    }
-  }
-
-  private checkOrgBusinessTypeValid (isValid) {
-    this.isOrgBusinessTypeValid = !!isValid
-  }
-
-  private async mounted () {
-    this.isLoading = true
-    // to show businsss type valeu neeed to get all code
-    await this.getBusinessTypeCodes()
-    await this.getBusinessSizeCodes()
-    this.updateAccountDetails()
-    this.isLoading = false
-  }
-}
 </script>
-
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 .business-radio {
@@ -233,5 +212,4 @@ export default class AccountDetails extends Mixins(AccountChangeMixin) {
     background-color: $BCgovInputBG !important;
   }
 }
-
 </style>
