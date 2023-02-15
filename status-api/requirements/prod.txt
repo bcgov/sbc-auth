@@ -8,6 +8,6 @@ jsonschema
 requests
 sentry-sdk[flask]
 arrow
-Werkzeug<2
+Werkzeug<3
 Jinja2==3.0.3
 itsdangerous==2.0.1

@@ -1,7 +1,7 @@
 Flask==1.1.4
 Jinja2==2.11.3
 MarkupSafe==2.0.1
-Werkzeug==1.0.1
+Werkzeug==2.2.3
 aniso8601==9.0.1
 arrow==1.2.1
 attrs==21.2.0
