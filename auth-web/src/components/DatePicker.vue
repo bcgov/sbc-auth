@@ -96,9 +96,9 @@ export default defineComponent({
       startDate: null,
       today: computed((): string => {
         const todayDate = new Date()
-        const localYear = todayDate.toLocaleDateString('en-CA', { year: 'numeric' })
-        const localMonth = todayDate.toLocaleDateString('en-CA', { month: '2-digit' })
-        const localDay = todayDate.toLocaleDateString('en-CA', { day: '2-digit' })
+        const localYear = todayDate.toLocaleDateString('en-CA', { year: 'numeric', timeZone: 'America/Vancouver' })
+        const localMonth = todayDate.toLocaleDateString('en-CA', { month: '2-digit', timeZone: 'America/Vancouver' })
+        const localDay = todayDate.toLocaleDateString('en-CA', { day: '2-digit', timeZone: 'America/Vancouver' })
         return [localYear, localMonth, localDay].join('-')
       })
     }) as unknown) as DatePickerI
