@@ -52,9 +52,5 @@ export default class AccountMixin extends Vue {
   protected get isSbcStaffAccount (): boolean {
     return this.currentOrganization?.orgType === Account.SBC_STAFF
   }
-
-  protected get isBasicAccount (): boolean {
-    return this.currentOrganization?.orgType === Account.BASIC
-  }
 }
 </script>
