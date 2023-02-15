@@ -51,6 +51,7 @@ describe('Common Util Test', () => {
   it('is isUrl [negative]', () => {
     expect(CommonUtil.isUrl('abcd')).toBe(false)
     expect(CommonUtil.isUrl('localhost:8080')).toBe(false)
+    expect(CommonUtil.isUrl('/confirmtoken/xxxxx.Y-qrVg.jqfdfdfdfd')).toBe(false)
   })
 
   it('formatIncorporationNumber returns null', () => {
