@@ -106,7 +106,9 @@ export default class UserService {
 
   static async getAffidavitInfo (userGuid: string, status: string): Promise<AxiosResponse<AffidavitInformation>> {
     const params = new URLSearchParams()
-    params.append('status', status)
+    if (status) {
+      params.append('status', status)
+    }
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/users/${encodeURIComponent(userGuid)}/affidavits`, { params })
   }
 
