@@ -198,7 +198,7 @@ export default class StaffModule extends VuexModule {
 
     switch (task.relationshipStatus) {
       case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
-        status = AffidavitStatus.PENDING
+        status = null // This looks at pending and approved one or none.
         break
       case TaskRelationshipStatus.REJECTED:
         status = AffidavitStatus.REJECTED

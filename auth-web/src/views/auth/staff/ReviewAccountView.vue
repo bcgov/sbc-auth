@@ -87,7 +87,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -418,13 +418,17 @@ export default class ReviewAccountView extends Vue {
 
   // list of components
   compDownloadAffidavit (tabNumber:number = 1) {
+    let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.'
+    if (this.accountUnderReviewAffidavitInfo?.status === AffidavitStatus.APPROVED) {
+      subTitle = 'Download the notarized affidavit associated with this account that has been reviewed and approved.'
+    }
     return this.formattedComponent(
       tabNumber,
       `download-affidavit-${tabNumber}`,
       DownloadAffidavit,
       {
         title: 'Download Affidavit',
-        subTitle: 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.',
+        subTitle: subTitle,
         affidavitName: this.accountUnderReview.name
       },
       { 'emit-download-affidavit': this.downloadAffidavit }
