@@ -182,16 +182,12 @@ export default class Product extends Mixins(AccountMixin) {
     return this.canManageProductFee && this.orgProduct && this.orgProduct.product
   }
 
-  private staffProductLabelPrefix (code:string) {
-    return this.isStaffAccount && code.includes('MHR') ? 'Staff' : ''
-  }
   get productLabel () {
     // this is mapping product code with lang file.
     // lang file have subtitle and description with product code prefix.
     // eg: pprCodeSubtitle, pprCodeDescription
     // Also, returns check box icon and color if the product has been reviewed.
     let { code } = this.productDetails
-    code += this.staffProductLabelPrefix(code)
     let subTitle = `${code && code.toLowerCase()}CodeSubtitle` || ''
     let details = `${code && code.toLowerCase()}CodeDescription` || ''
     let decisionMadeIcon = null
