@@ -275,10 +275,7 @@ export function getRoutes (): RouteConfig[] {
           path: 'transactions',
           name: 'transactions',
           component: transaction,
-          props: { exportBtn: true, extended: false, title: 'Transactions' },
-          meta: {
-            isPremiumOnly: true
-          }
+          props: { exportBtn: true, extended: false, title: 'Transactions' }
         },
         {
           path: 'statements',
