@@ -21,7 +21,7 @@
                   {{ orgName }}
                 </div>
                 <div
-                  v-can:CHANGE_ORG_NAME.disable
+                  v-can:CHANGE_ORG_NAME.hide
                   v-if="nameChangeAllowed && viewOnlyMode"
                 >
                   <span
