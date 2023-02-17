@@ -18,7 +18,7 @@
                 :key="baseAddress.postalCode"
               />
             </div>
-            <div v-can:CHANGE_ADDRESS.disable v-if="viewOnlyMode">
+            <div v-can:CHANGE_ADDRESS.hide v-if="viewOnlyMode">
               <span
                 class="primary--text cursor-pointer"
                 @click="$emit('update:viewOnlyMode', {component:'address',mode:false })"
