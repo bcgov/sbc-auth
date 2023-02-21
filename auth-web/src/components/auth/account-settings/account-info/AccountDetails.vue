@@ -77,7 +77,7 @@
                   class="ml-2 px-9"
                   color="primary"
                   aria-label="Cancel Account Information"
-                  @click="emitViewOnly()"
+                  @click="emitViewOnly({ component: 'account', mode: true})"
                   data-test="reset-button"
                   >Cancel</v-btn
                 >
