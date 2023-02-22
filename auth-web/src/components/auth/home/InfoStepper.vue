@@ -32,60 +32,71 @@
 
 <script lang="ts">
 // Libraries
-import { Component, Vue } from 'vue-property-decorator'
+import Vue from 'vue'
+import { defineComponent } from '@vue/composition-api'
 
-@Component
-export default class InfoStepper extends Vue {
-  private steps: Array<any> = [
-    {
-      id: 'step-1-btn',
-      step: 1,
-      text: 'Decide on a Business Type',
-      to: '/home/decide-business'
-    },
-    {
-      id: 'step-2-btn',
-      step: 2,
-      text: 'Request a Name',
-      to: '/home/request-name'
-    },
-    {
-      id: 'step-3-btn',
-      step: 3,
-      text: 'Register or Incorporate',
-      to: '/home/incorporate-or-register'
-    },
-    {
-      id: 'step-4-btn',
-      step: 4,
-      text: 'Maintain Your Business',
-      to: '/home/maintain-business'
+export default defineComponent({
+  name: 'InfoStepper',
+  setup (props, { root }) {
+    const steps = [
+      {
+        id: 'step-1-btn',
+        step: 1,
+        text: 'Decide on a Business Type',
+        to: '/home/decide-business'
+      },
+      {
+        id: 'step-2-btn',
+        step: 2,
+        text: 'Request a Name',
+        to: '/home/request-name'
+      },
+      {
+        id: 'step-3-btn',
+        step: 3,
+        text: 'Register or Incorporate',
+        to: '/home/incorporate-or-register'
+      },
+      {
+        id: 'step-4-btn',
+        step: 4,
+        text: 'Maintain Your Business',
+        to: '/home/maintain-business'
+      }
+    ]
+
+    const isCurrentStep = (step: any): boolean => {
+      return root.$route.path === step.to
     }
-  ]
 
-  private goTo (step: any): void {
-    if (!this.isCurrentStep(step)) this.$router.push(step.to)
-  }
+    const goTo = (step: any): void => {
+      if (!isCurrentStep(step)) root.$router.push(step.to)
+    }
 
-  private nextStep (): void {
-    const currentStepIndex = this.getCurrentStep()
-    const nextStep = this.steps[currentStepIndex]
-    this.$router.push(nextStep.to)
-  }
-
-  private isCurrentStep (step: any): boolean {
-    return this.$route.path === step.to
-  }
-
-  private getCurrentStep (): number {
-    const route = this.$route.path
-    for (const path of this.steps) {
-      if (path.to === route) {
-        return path.step || 0
+    const getCurrentStep = (): number => {
+      const route = root.$route.path
+      for (const path of steps) {
+        if (path.to === route) {
+          return path.step || 0
+        }
       }
     }
+
+    const nextStep = (): void => {
+      const currentStepIndex = getCurrentStep()
+      const nextStep = steps[currentStepIndex]
+      root.$router.push(nextStep.to)
+    }
+
+    return {
+      steps,
+      isCurrentStep,
+      goTo,
+      nextStep,
+      getCurrentStep
+    }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
