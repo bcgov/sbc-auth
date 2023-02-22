@@ -33,7 +33,7 @@ export default defineComponent({
   },
   setup (props) {
     const { t } = useI18n()
-    const ingitfoArray = [
+    const infoArray = [
       { title: 'deactivateMemberRemovalTitle', description: 'deactivateMemberRemovalDesc' },
       { title: 'businessRemovalTitle', description: 'businessRemovalDesc' },
       { title: 'padRemovalTitle', type: Account.PREMIUM }
