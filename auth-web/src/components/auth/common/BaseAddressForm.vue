@@ -34,7 +34,7 @@ export default class BaseAddressForm extends Vue {
 
   @Watch('editing')
   private watchEditing (editing) {
-    if (editing) {
+    if (!editing) {
       this.loadAddressIntoInputAddress()
     }
   }
