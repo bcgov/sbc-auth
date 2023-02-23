@@ -13,7 +13,7 @@
                      @click="goToManageBusinesses()">
                 Manage my Business
               </v-btn>
-              <NameRequestButton isWide=true />
+              <NameRequestButton :isWide="true" />
             </div>
 
             <!-- Non-authenticated -->

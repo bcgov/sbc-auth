@@ -36,15 +36,4 @@ export default defineComponent({
     }
   }
 })
-
-// import { Component, Vue } from 'vue-property-decorator'
-// @Component({
-//   name: 'LoginBCSC'
-// })
-// export default class LoginBCSC extends Vue {
-//   private readonly bcscRedirectUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bc-services-card/log-in-with-card'
-//   private login () {
-//     this.$router.push('/signin/bcsc/createaccount')
-//   }
-// }
 </script>
