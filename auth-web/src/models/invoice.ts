@@ -27,6 +27,8 @@ export interface Invoice {
   statusCode: string
   total: number
   isOnlineBankingAllowed?: boolean
+  paymentDate: string
+  refundDate: string
 }
 
 export interface InvoiceListResponse {
