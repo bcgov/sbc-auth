@@ -15,7 +15,6 @@
                 :address="baseAddress"
                 @update:address="updateAddress"
                 @valid="checkBaseAddressValidity"
-                :key="baseAddress.postalCode"
               />
             </div>
             <div v-can:CHANGE_ADDRESS.hide v-if="viewOnlyMode">
@@ -48,7 +47,7 @@
               class="ml-2 px-9"
               color="primary"
               aria-label="Cancel"
-              @click="$emit('update:viewOnlyMode', {component:'address',mode:true })"
+              @click="$emit('update:viewOnlyMode', {component:'address',mode:true }); $emit('update:resetAddress')"
 
               data-test="cancel-button"
               >Cancel</v-btn

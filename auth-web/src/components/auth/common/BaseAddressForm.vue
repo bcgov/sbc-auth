@@ -11,7 +11,7 @@
 
 <script lang="ts">
 import { Address, BaseAddressModel } from '@/models/address'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
 import CommonUtils from '@/util/common-util'
 
@@ -28,9 +28,14 @@ export default class BaseAddressForm extends Vue {
 
   mounted () {
     if (this.address) {
-      // convert to address format to component
-      this.inputaddress = CommonUtils.convertAddressForComponent(this.address)
-      this.emitUpdateAddress(this.inputaddress)
+      this.loadAddressIntoInputAddress()
+    }
+  }
+
+  @Watch('editing')
+  private watchEditing (editing) {
+    if (!editing) {
+      this.loadAddressIntoInputAddress()
     }
   }
 
@@ -44,6 +49,12 @@ export default class BaseAddressForm extends Vue {
   @Emit('valid')
   emitAddressValidity (isValid) {
     return isValid
+  }
+
+  loadAddressIntoInputAddress () {
+    // convert to address format to component
+    this.inputaddress = CommonUtils.convertAddressForComponent(this.address)
+    this.emitUpdateAddress(this.inputaddress)
   }
 }
 </script>
