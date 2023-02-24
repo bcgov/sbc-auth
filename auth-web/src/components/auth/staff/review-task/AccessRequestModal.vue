@@ -77,6 +77,56 @@
           </v-select>
 
           </v-form>
+          <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isMoveToPendingModal">
+            <v-row justify="center">
+              <v-col cols="6" class="pa-0">
+                <v-row dense class="d-flex flex-column align-items-center">
+                    <v-checkbox>
+                      <template v-slot:label>
+                        Request was rejected in error
+                      </template>
+                    </v-checkbox>
+                </v-row>
+                <v-row>
+                    <v-checkbox>
+                      <template v-slot:label>
+                        Request was rejected in error
+                      </template>
+                    </v-checkbox>
+                </v-row>
+                  <!-- <v-row dense class="d-flex flex-column align-items-center"></v-row>
+                  <v-col>
+                    <v-checkbox></v-checkbox>
+                    Other Reason
+                  </v-col>
+                </v-row> -->
+              </v-col>
+            </v-row>
+            <v-select
+              filled
+              label="Reason(s) why account is on hold "
+              :items="onholdReasonCodes"
+              item-text="desc"
+              item-value="desc"
+              v-model="onholdReasons"
+              data-test="hold-reason-type"
+              class="my-0"
+              :rules="onholdReasonRules"
+              multiple
+              v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
+            >
+              <template v-slot:selection="{ item, index }">
+                <span v-if="index === 0">{{ item.desc }}</span>
+                <span
+                  v-if="index === 1"
+                  class="grey--text text-caption"
+                >
+                  (+{{ onholdReasons.length - 1 }} {{ onholdReasons.length > 2 ? 'others' : 'other' }})
+                </span>
+              </template>
+          </v-select>
+
+          </v-form>
         </div>
       </template>
       <template v-slot:actions>
@@ -123,6 +173,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { propsToAttrMap } from '@vue/shared'
 
 @Component({
   components: {
@@ -131,9 +182,11 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 })
 export default class AccessRequestModal extends Vue {
   @Prop({ default: false }) private isRejectModal: boolean
+  @Prop({ default: false }) private isTaskRejected: boolean
   @Prop({ default: false }) private isConfirmationModal: boolean
   @Prop({ default: false }) private isSaving: boolean
   @Prop({ default: false }) private isOnHoldModal: boolean // for BECID need hold or reject options
+  @Prop({ default: false }) private isMoveToPendingModal: boolean
   @Prop({ default: '' }) private orgName: string
   @Prop({ default: '' }) private accountType: string
   @Prop({ default: '' }) private taskName: string
@@ -141,6 +194,7 @@ export default class AccessRequestModal extends Vue {
 
   public onholdReasons: any[] = []
   public accountToBeOnholdOrRejected = ''
+  public moveToPendingReason = ''
 
   OnholdOrRejectCode = OnholdOrRejectCode
 
@@ -154,15 +208,20 @@ export default class AccessRequestModal extends Vue {
 
   get modalData () {
     const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
+
     let title = isProductApproval
-      ? 'Approve Access Request ?'
+      ? (this.isTaskRejected
+        ? 'Re-approve Access Request ?'
+        : 'Approve Access Request ?')
       : 'Approve Account Creation Request ?'
     let text = isProductApproval
-      ? `By approving the request, this account will access to  ${this.taskName}`
+      ? (this.isTaskRejected
+        ? `By re-approving the request, this account will have access to  ${this.taskName}`
+        : `By approving the request, this account will have access to  ${this.taskName}`)
       : `Approving the request will activate this account`
     let icon = 'mdi-help-circle-outline'
     let color = 'primary'
-    let btnLabel = 'Approve'
+    let btnLabel = this.isTaskRejected ? 'Re-approve' : 'Approve'
 
     if (this.isRejectModal) {
       title = isProductApproval
@@ -182,6 +241,9 @@ export default class AccessRequestModal extends Vue {
       text = this.$t('onHoldOrRejectModalText').toString()
 
       btnLabel = 'Confirm'
+    } else if (this.isMoveToPendingModal) {
+      title = 'Move to Pending'
+      text = 'To place a rejected access request on hold, please select a reason. An email will be sent to the user to notify the action.'
     }
     return { title, text, icon, color, btnLabel }
   }

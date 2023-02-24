@@ -44,11 +44,15 @@
 
                 <div v-display-mode="!canEdit ? viewOnly : false ">
                   <v-btn large color="primary" class="font-weight-bold mr-2 select-button" @click="openModal()" >
-                    <span>Approve</span>
+                    <span v-if="isTaskRejected">Re-Approve</span>
+                    <span v-else>Approve</span>
                   </v-btn>
-                  <v-btn large outlined color="primary" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
+                  <v-btn v-if="!isTaskRejected" large outlined color="primary" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
                     <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
                     <span v-else>Reject</span>
+                  </v-btn>
+                  <v-btn v-else large outlined color="primary" class="font-weight-bold white--text select-button" @click="openModal(false, false, false, true)"  >
+                    <span>Move to pending</span>
                   </v-btn>
                 </div>
               </div>
@@ -71,7 +75,9 @@
           ref="accessRequest"
           :isConfirmationModal="isConfirmationModal"
           :isRejectModal="isRejectModal"
+          :isTaskRejected="isTaskRejected"
           :isOnHoldModal="isOnHoldModal"
+          :isMoveToPendingModal="isMoveToPendingModal"
           :isSaving="isSaving"
           :orgName="accountUnderReview.name"
           @approve-reject-action="saveSelection"
@@ -113,6 +119,7 @@ import { User } from '@/models/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
+import { or } from 'vuelidate/lib/validators'
 
 const StaffModule = namespace('staff')
 const TaskModule = namespace('task')
@@ -168,6 +175,7 @@ export default class ReviewAccountView extends Vue {
   private isConfirmationModal:boolean = false
   private isRejectModal:boolean = false
   private isOnHoldModal:boolean = false
+  private isMoveToPendingModal:boolean = false
   public task :Task
   public taskRelationshipType:string = ''
   private productFeeFormValid: boolean = false
@@ -182,15 +190,22 @@ export default class ReviewAccountView extends Vue {
   }
 
   private get canEdit (): boolean {
-    return this.task.status === TaskStatus.OPEN || this.isTaskOnHold
+    return this.task.status === TaskStatus.OPEN || this.isTaskOnHold ||
+           (this.task.status === TaskStatus.COMPLETED && this.task.relationshipStatus === TaskRelationshipStatus.REJECTED)
   }
 
   private get isTaskOnHold (): boolean {
     return this.task.status === TaskStatus.HOLD
   }
 
+  private get isTaskRejected (): boolean {
+    return this.task.relationshipStatus === TaskRelationshipStatus.REJECTED
+  }
+
   private get canSelect (): boolean {
-    return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
+    return (this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ||
+            (this.task.relationshipType === TaskRelationshipType.PRODUCT &&
+            this.task.relationshipStatus === TaskRelationshipStatus.REJECTED))
   }
 
   private get isPendingReviewPage () {
@@ -228,6 +243,7 @@ export default class ReviewAccountView extends Vue {
   */
   get componentList () {
     const taskType = this.task.type
+    console.log('taskType', taskType)
     switch (taskType) {
       case TaskType.GOVM_REVIEW:
         return [{ ...this.componentAccountInformation(1) },
@@ -317,7 +333,8 @@ export default class ReviewAccountView extends Vue {
     await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
-  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false) {
+  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false, isMoveToPendingModal: boolean = false) {
+    console.log('isMoveToPendingModal', isMoveToPendingModal)
     if (!this.accountInfoValid) {
       this.showAccountInfoValidations = true
       window.scrollTo({ top: 200, behavior: 'smooth' })
@@ -335,9 +352,11 @@ export default class ReviewAccountView extends Vue {
     if (rejectConfirmationModal || (isRejectModal && this.isTaskOnHold)) {
       this.isRejectModal = true
       this.isOnHoldModal = false
-    } else {
+    } else if (!isMoveToPendingModal) {
       this.isRejectModal = this.isAffidavitReview ? false : isRejectModal
       this.isOnHoldModal = this.isAffidavitReview ? isRejectModal : false
+    } else {
+      this.isMoveToPendingModal = true
     }
 
     if (isConfirmationModal) {
