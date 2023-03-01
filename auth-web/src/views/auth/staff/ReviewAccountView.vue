@@ -119,7 +119,6 @@ import { User } from '@/models/user'
 import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
-import { or } from 'vuelidate/lib/validators'
 
 const StaffModule = namespace('staff')
 const TaskModule = namespace('task')
