@@ -179,7 +179,6 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { propsToAttrMap } from '@vue/shared'
 
 @Component({
   components: {
