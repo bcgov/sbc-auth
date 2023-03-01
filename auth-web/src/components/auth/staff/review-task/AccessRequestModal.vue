@@ -256,8 +256,6 @@ export default class AccessRequestModal extends Vue {
   }
 
   get confirmModalData () {
-    console.log('confirmationModalData')
-    console.log('this.isMoveToPendingModal', this.isMoveToPendingModal)
     const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
 
     let title = isProductApproval
