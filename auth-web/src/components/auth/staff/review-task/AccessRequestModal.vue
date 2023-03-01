@@ -17,7 +17,7 @@
       </template>
       <template v-slot:text>
         <div class="mx-8">
-          <p class="mb-4 text-color sub-text-size" v-html="modalData.text" data-test="p-modal-text"></p>
+          <p class="mb-4 text-color sub-text-size text-justify" v-html="modalData.text" data-test="p-modal-text"></p>
           <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isOnHoldModal">
             <v-row justify="center">
               <v-col cols="6" class="pa-0">
@@ -78,29 +78,36 @@
 
           </v-form>
           <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isMoveToPendingModal">
-            <v-row justify="center">
+            <v-row justify="start">
               <v-col cols="6" class="pa-0">
                 <v-row dense class="d-flex flex-column align-items-center">
-                    <v-checkbox>
+                    <v-checkbox class="mt-0 ml-4">
                       <template v-slot:label>
                         Request was rejected in error
                       </template>
                     </v-checkbox>
                 </v-row>
-                <v-row>
-                    <v-checkbox>
+                <v-row dense class="d-flex flex-column align-items-start">
+                    <v-checkbox class="mt-0 ml-4">
                       <template v-slot:label>
-                        Request was rejected in error
+                        Other reason
                       </template>
                     </v-checkbox>
                 </v-row>
-                  <!-- <v-row dense class="d-flex flex-column align-items-center"></v-row>
-                  <v-col>
-                    <v-checkbox></v-checkbox>
-                    Other Reason
-                  </v-col>
-                </v-row> -->
               </v-col>
+              </v-row>
+                <v-row dense class="d-flex" justify="end">
+                  <v-col cols="11" class="pa-0">
+                    <v-text-field
+                      filled
+                      label="Reason will be displayed in the email sent to user"
+                      req
+                      persistent-hint
+                      full-width
+                      :counter="50"
+                    >
+                    </v-text-field>
+                </v-col>
             </v-row>
             <v-select
               filled
@@ -125,7 +132,6 @@
                 </span>
               </template>
           </v-select>
-
           </v-form>
         </div>
       </template>
@@ -244,11 +250,14 @@ export default class AccessRequestModal extends Vue {
     } else if (this.isMoveToPendingModal) {
       title = 'Move to Pending'
       text = 'To place a rejected access request on hold, please select a reason. An email will be sent to the user to notify the action.'
+      btnLabel = 'Confirm'
     }
     return { title, text, icon, color, btnLabel }
   }
 
   get confirmModalData () {
+    console.log('confirmationModalData')
+    console.log('this.isMoveToPendingModal', this.isMoveToPendingModal)
     const isProductApproval = this.accountType === TaskRelationshipType.PRODUCT
 
     let title = isProductApproval
@@ -267,7 +276,7 @@ export default class AccessRequestModal extends Vue {
       text = isProductApproval
         ? `The account <strong>${this.orgName}</strong> has been rejected to access ${this.taskName}`
         : `Account creation request has been rejected`
-    } else if (this.isOnHoldModal) {
+    } else if (this.isOnHoldModal || this.isMoveToPendingModal) {
       title = 'Request is On Hold'
 
       text = 'An email has been sent to the user presenting the reason why the account is on hold, and a link to resolve the issue.'
@@ -307,6 +316,8 @@ export default class AccessRequestModal extends Vue {
     let isValidForm = true
     if (this.isOnHoldModal) {
       isValidForm = this.$refs.rejectForm.validate()
+    } else if (this.isMoveToPendingModal) {
+      this.accountToBeOnholdOrRejected = OnholdOrRejectCode.ONHOLD
     }
     // all other time passing form as valid since there is no values
     return { isValidForm, accountToBeOnholdOrRejected: this.accountToBeOnholdOrRejected, onholdReasons: this.onholdReasons }

@@ -334,6 +334,7 @@ export default class ReviewAccountView extends Vue {
   }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false, isMoveToPendingModal: boolean = false) {
+    console.log('openModal')
     console.log('isMoveToPendingModal', isMoveToPendingModal)
     if (!this.accountInfoValid) {
       this.showAccountInfoValidations = true
@@ -374,12 +375,14 @@ export default class ReviewAccountView extends Vue {
     if (isValidForm) {
       this.isSaving = true
       // if account approve
-      const isApprove = !this.isRejectModal && !this.isOnHoldModal
+      const isApprove = !this.isRejectModal && !this.isOnHoldModal && !this.isMoveToPendingModal
       // on rejecting there will be two scenarios
       // 1. by clicking reject for normal flow.
       // 2. by selecting remark as Reject account ,(check by using code)
       // both cases we need to call reject API than hold
       const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
+      const isMoveToPending = this.isMoveToPendingModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
+
       try {
         if (this.accountInfoAccessType && this.accountInfoAccessType !== this.accountUnderReview.accessType) {
           const success = await this.updateOrganizationAccessType({ accessType: this.accountInfoAccessType as string, orgId: this.accountUnderReview.id, syncOrg: false })
@@ -399,7 +402,7 @@ export default class ReviewAccountView extends Vue {
         ) {
           await this.createAccountFees(this.task.relationshipId)
         }
-        this.openModal(!isApprove, true, isRejecting)
+        this.openModal(!isApprove, true, isRejecting, isMoveToPending)
       // this.$router.push(Pages.STAFF_DASHBOARD)
       } catch (error) {
       // eslint-disable-next-line no-console
