@@ -243,7 +243,6 @@ export default class ReviewAccountView extends Vue {
   */
   get componentList () {
     const taskType = this.task.type
-    console.log('taskType', taskType)
     switch (taskType) {
       case TaskType.GOVM_REVIEW:
         return [{ ...this.componentAccountInformation(1) },
@@ -334,8 +333,6 @@ export default class ReviewAccountView extends Vue {
   }
 
   private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false, isMoveToPendingModal: boolean = false) {
-    console.log('openModal')
-    console.log('isMoveToPendingModal', isMoveToPendingModal)
     if (!this.accountInfoValid) {
       this.showAccountInfoValidations = true
       window.scrollTo({ top: 200, behavior: 'smooth' })
