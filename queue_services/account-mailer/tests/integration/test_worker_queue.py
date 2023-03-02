@@ -364,7 +364,7 @@ async def test_online_banking_emails(app, session, stan_server, event_loop, clie
         # add an event to queue
         mail_details = {
             'amount': '100.00',
-            'credit_amount': '10.00',
+            'creditAmount': '10.00',
             'accountId': id
         }
         await helper_add_event_to_queue(events_stan, events_subject, org_id=id,
