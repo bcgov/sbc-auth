@@ -81,7 +81,7 @@
             <v-row justify="start">
               <v-col cols="6" class="pa-0">
                 <v-row dense class="d-flex flex-column align-items-center">
-                    <v-checkbox class="mt-0 ml-4">
+                    <v-checkbox class="mt-0 ml-4" @change="toggleReason('Request was rejected in error')">
                       <template v-slot:label>
                         Request was rejected in error
                       </template>
@@ -105,6 +105,7 @@
                       persistent-hint
                       full-width
                       :counter="50"
+                      v-model="otherReasonText"
                     >
                     </v-text-field>
                 </v-col>
@@ -200,6 +201,7 @@ export default class AccessRequestModal extends Vue {
   public onholdReasons: any[] = []
   public accountToBeOnholdOrRejected = ''
   public moveToPendingReason = ''
+  public otherReasonText = ''
 
   OnholdOrRejectCode = OnholdOrRejectCode
 
@@ -302,6 +304,14 @@ export default class AccessRequestModal extends Vue {
     this.$refs.accessRequestConfirmationDialog.close()
   }
 
+  public toggleReason (reason: string) {
+    if (this.onholdReasons.includes(reason)) {
+      this.onholdReasons = this.onholdReasons.filter((r) => r !== reason)
+    } else {
+      this.onholdReasons.push(reason)
+    }
+  }
+
   @Emit('after-confirm-action')
   public onConfirmCloseClick () {
     this.closeConfirm()
@@ -315,6 +325,10 @@ export default class AccessRequestModal extends Vue {
       isValidForm = this.$refs.rejectForm.validate()
     } else if (this.isMoveToPendingModal) {
       this.accountToBeOnholdOrRejected = OnholdOrRejectCode.ONHOLD
+    }
+
+    if (this.isMoveToPendingModal && this.otherReasonText) {
+      this.onholdReasons.push(this.otherReasonText)
     }
     // all other time passing form as valid since there is no values
     return { isValidForm, accountToBeOnholdOrRejected: this.accountToBeOnholdOrRejected, onholdReasons: this.onholdReasons }
