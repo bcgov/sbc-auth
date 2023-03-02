@@ -268,4 +268,3 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
     except Exception:  # NOQA # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
-
