@@ -48,7 +48,7 @@ from account_mailer.email_processors import refund_requested  # pylint: disable=
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
-from account_mailer.utils import get_local_formatted_date  # pylint: disable=wrong-import-order
+from account_mailer.utils import format_currency, get_local_formatted_date  # pylint: disable=wrong-import-order
 
 
 qsm = QueueServiceManager()  # pylint: disable=invalid-name
@@ -131,8 +131,8 @@ async def process_event(event_message: dict, flask_app):
             subject = SubjectType.PAD_INVOICE_CREATED.value
             invoice_process_date = datetime.fromisoformat(email_msg.get('invoice_process_date'))
             args = {
-                'nsf_fee': email_msg.get('nsfFee'),
-                'invoice_total': email_msg.get('invoice_total'),
+                'nsf_fee': format_currency(email_msg.get('nsfFee')),
+                'invoice_total': format_currency(email_msg.get('invoice_total')),
                 'invoice_process_date': get_local_formatted_date(invoice_process_date, '%m-%d-%Y')
             }
             logo_url = email_msg.get('logo_url')
@@ -154,8 +154,8 @@ async def process_event(event_message: dict, flask_app):
             subject = SubjectType.ONLINE_BANKING_PAYMENT_SUBJECT.value
             args = {
                 'title': subject,
-                'paid_amount': email_msg.get('amount'),
-                'credit_amount': email_msg.get('creditAmount'),
+                'paid_amount': format_currency(email_msg.get(email_msg.get('amount'))),
+                'credit_amount': format_currency(email_msg.get('creditAmount')),
             }
             logo_url = email_msg.get('logo_url')
             email_dict = common_mailer.process(org_id, admin_emails, template_name,
@@ -181,7 +181,7 @@ async def process_event(event_message: dict, flask_app):
             args = {
                 'accountId': email_msg.get('accountId'),
                 'cfsAccountId': email_msg.get('cfsAccountId'),
-                'transactionAmount': email_msg.get('transactionAmount'),
+                'transactionAmount': format_currency(email_msg.get('transactionAmount')),
             }
             logo_url = email_msg.get('logo_url')
             email_dict = common_mailer.process(org_id, admin_coordinator_emails, template_name,
@@ -268,3 +268,4 @@ async def cb_subscription_handler(msg: nats.aio.client.Msg):
     except Exception:  # NOQA # pylint: disable=broad-except
         # Catch Exception so that any error is still caught and the message is removed from the queue
         logger.error('Queue Error: %s', json.dumps(event_message), exc_info=True)
+
