@@ -154,7 +154,7 @@ async def process_event(event_message: dict, flask_app):
             subject = SubjectType.ONLINE_BANKING_PAYMENT_SUBJECT.value
             args = {
                 'title': subject,
-                'paid_amount': format_currency(email_msg.get(email_msg.get('amount'))),
+                'paid_amount': format_currency(email_msg.get('amount')),
                 'credit_amount': format_currency(email_msg.get('creditAmount')),
             }
             logo_url = email_msg.get('logo_url')
