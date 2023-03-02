@@ -47,3 +47,8 @@ def get_local_time(date_val: datetime):
 def get_local_formatted_date(date_val: datetime, dt_format: str = '%Y-%m-%d'):
     """Return formatted local time."""
     return get_local_time(date_val).strftime(dt_format)
+
+
+def format_currency(amount: str):
+    """Format currency to two decimal places."""
+    return f'{float(amount):0,.2f}'
