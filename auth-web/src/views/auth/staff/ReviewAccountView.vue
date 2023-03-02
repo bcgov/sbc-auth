@@ -331,7 +331,7 @@ export default class ReviewAccountView extends Vue {
     await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
   }
 
-  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false, isMoveToPendingModal: boolean = false) {
+  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false, isMoveToPendingModal: boolean) {
     if (!this.accountInfoValid) {
       this.showAccountInfoValidations = true
       window.scrollTo({ top: 200, behavior: 'smooth' })
