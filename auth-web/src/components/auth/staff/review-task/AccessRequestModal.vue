@@ -110,29 +110,6 @@
                     </v-text-field>
                 </v-col>
             </v-row>
-            <v-select
-              filled
-              label="Reason(s) why account is on hold "
-              :items="onholdReasonCodes"
-              item-text="desc"
-              item-value="desc"
-              v-model="onholdReasons"
-              data-test="hold-reason-type"
-              class="my-0"
-              :rules="onholdReasonRules"
-              multiple
-              v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
-            >
-              <template v-slot:selection="{ item, index }">
-                <span v-if="index === 0">{{ item.desc }}</span>
-                <span
-                  v-if="index === 1"
-                  class="grey--text text-caption"
-                >
-                  (+{{ onholdReasons.length - 1 }} {{ onholdReasons.length > 2 ? 'others' : 'other' }})
-                </span>
-              </template>
-          </v-select>
           </v-form>
         </div>
       </template>
