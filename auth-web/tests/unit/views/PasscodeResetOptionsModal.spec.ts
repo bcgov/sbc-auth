@@ -67,7 +67,7 @@ describe('PasscodeResetOptionsModal.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('Donot reset passcode emits remove-business event', () => {

@@ -51,7 +51,7 @@ describe('FasSearchComponent.vue', () => {
   })
 
   it('is a Vue instance and has default text', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
     // It should display the receipt number, and the no data message at the very least.
     expect(wrapper.find('.header-receiptNumber')).toBeTruthy()
     expect(wrapper.find('.no-data')).toBeTruthy()

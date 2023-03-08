@@ -70,7 +70,7 @@ describe('AccessRequestModal.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('renders the components properly and address is being shown', () => {

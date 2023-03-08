@@ -48,7 +48,7 @@ describe('AccountAccessType.vue', () => {
       mocks: { $t
       }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('validate view mode with regular org', () => {

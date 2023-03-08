@@ -38,7 +38,7 @@ describe('RestrictedProductView.vue', () => {
   })
 
   it('RestrictedProductView is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
   it('RestrictedProductView contains the messages', () => {
     const requestBtn = wrapper.find('.btn-request-access')

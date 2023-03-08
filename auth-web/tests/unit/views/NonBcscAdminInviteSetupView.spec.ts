@@ -50,7 +50,7 @@ describe('NonBcscAdminInviteSetupView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('update current step properly', async () => {

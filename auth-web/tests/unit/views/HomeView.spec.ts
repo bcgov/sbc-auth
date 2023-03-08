@@ -81,7 +81,7 @@ describe('HomeView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('renders the sub-components properly', () => {

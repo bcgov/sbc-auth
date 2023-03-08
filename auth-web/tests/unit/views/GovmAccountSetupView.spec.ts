@@ -56,7 +56,7 @@ describe('GovmAccountSetupView.vue', () => {
   })
 
   it('GovmAccountSetupView is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('should render with h1', () => {

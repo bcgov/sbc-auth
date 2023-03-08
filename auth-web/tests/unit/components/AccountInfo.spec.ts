@@ -116,7 +116,7 @@ describe('AccountInfo.vue', () => {
         ModalDialog: true
       }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('suspend button click invokes showSuspendAccountDialog method', () => {

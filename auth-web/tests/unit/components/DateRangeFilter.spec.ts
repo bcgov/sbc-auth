@@ -43,7 +43,7 @@ describe('DateRangeFilter.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('is Date Range button exists', () => {

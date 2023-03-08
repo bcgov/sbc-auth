@@ -85,7 +85,7 @@ export default defineComponent({
       default: undefined
     },
     orgProductFeeCodes: {
-      type: Object as PropType<OrgProductFeeCode[]>,
+      type: Array as PropType<OrgProductFeeCode[]>,
       default: undefined
     },
     isProductActionLoading: {

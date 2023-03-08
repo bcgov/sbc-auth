@@ -96,7 +96,7 @@ describe('Statements.vue', () => {
       localVue,
       mocks: { $t }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
     wrapper.destroy()
   })
 

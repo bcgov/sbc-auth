@@ -53,7 +53,7 @@ describe('SetupGovmAccountForm.vue', () => {
       }
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
     expect(wrapper.find('h4').text()).toBe('Enter Ministry Information for this account')
     wrapper.destroy()
   })

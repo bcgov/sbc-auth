@@ -61,7 +61,7 @@ describe('PaymentMethodSelector.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('initial selection should be empty', () => {

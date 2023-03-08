@@ -73,7 +73,7 @@ describe('Product.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('Should have h3 with given description', () => {

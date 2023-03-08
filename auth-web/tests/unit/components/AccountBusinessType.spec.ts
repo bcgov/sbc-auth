@@ -72,7 +72,7 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('individual account type rendering', async () => {

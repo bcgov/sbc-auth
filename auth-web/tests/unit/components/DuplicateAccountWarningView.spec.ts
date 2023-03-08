@@ -96,7 +96,7 @@ describe('DuplicateAccountWarningView.vue', () => {
       mocks: { $t
       }
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
   })
 
   it('data displayed is valid', async () => {

@@ -81,7 +81,7 @@ describe('IncorporationSearchResultView.vue', () => {
 
     const searchResult = wrapper.vm.searchResult
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper).toBeTruthy()
     expect(searchResult[0].businessIdentifier).toBe('123123')
     expect(searchResult[0].businessNumber).toBe('1231231')
     expect(searchResult[0].statusCode).toBe('Active')
