@@ -139,7 +139,7 @@ export default defineComponent({
     }
 
     const saveProductFee = () => {
-      emit('save:saveProductFee', selectedFee)
+      emit('save:saveProductFee', selectedFee.value)
     }
 
     // Only allow $1.05 and $0 service fee code for ESRA aka Site Registry.
