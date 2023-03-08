@@ -121,7 +121,7 @@ export default defineComponent({
       } else {
         // Map account fees details to accountFeesDTO so as to display in v-select
         state.accountFeesDTO = JSON.parse(JSON.stringify(accountFees.value))
-        state.accountFeesDTO.map((accountFee:AccountFeeDTO) => {
+        state.accountFeesDTO.forEach((accountFee:AccountFeeDTO) => {
           accountFee.applyFilingFees = accountFee.applyFilingFees.toString()
         })
       }
