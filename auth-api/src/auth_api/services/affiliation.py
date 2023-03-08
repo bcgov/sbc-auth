@@ -12,9 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation data."""
+import asyncio
+from http import HTTPStatus
+from typing import Dict, List
 
-from typing import Dict
-
+import aiohttp
+from aiohttp.client_exceptions import ClientConnectorError
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -348,6 +351,76 @@ class Affiliation:
                 affiliation.save()
 
         current_app.logger.debug('>fix_stale_affiliations')
+
+    @staticmethod
+    async def get_affiliation_details(affiliations: List[AffiliationModel]) -> List:
+        """Return affiliation details by calling the source api."""
+        call_info = {}  # i.e. turns into { url: [identifiers...] }
+        for affiliation in affiliations:
+            url = affiliation.affiliation_details_url
+            call_info.setdefault(url, [affiliation.entity.business_identifier])\
+                .append(affiliation.entity.business_identifier)
+
+        token = RestService.get_service_account_token(
+            config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
+
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {token}'
+        }
+
+        responses = []
+
+        # call all urls in parallel
+        async with aiohttp.ClientSession() as session:
+            fetch_tasks = [asyncio.create_task(session.post(
+                url, json={'identifiers': call_info[url]}, headers=headers)) for url in call_info]
+            tasks = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+            for task in tasks:
+                if isinstance(task, ClientConnectorError):
+                    # if no response from task we will go in here (i.e. namex-api is down)
+                    current_app.logger.error(
+                        '---Error in get_affiliation_details: no response from %s---', task.os_error)
+                    raise ServiceUnavailableException(f'Failed to get affiliation details')
+                if task.status != HTTPStatus.OK:
+                    current_app.logger.debug('Affiliations attempted: %s', affiliations)
+                    current_app.logger.error('---Error in get_affiliation_details: error response from %s---', task.url)
+                    raise ServiceUnavailableException('Failed to get affiliation details')
+                json = await task.json()
+                responses.append(json)
+        return Affiliation._combine_affiliaition_details(responses)
+
+    @staticmethod
+    def _combine_affiliaition_details(details):
+        """Parse affiliation details responses and combine draft entities with NRs if applicable."""
+        nrs = {}
+        businesses = []
+        drafts = []
+        businesses_key = 'businessEntities'
+        drafts_key = 'draftEntities'
+        for data in details:
+            if isinstance(data, list):
+                # assume this is an NR list
+                for nr in data:
+                    # i.e. {'NR1234567': {...}}
+                    nrs[nr['nrNum']] = {'legalType': CorpType.NR.value, 'nameRequest': nr}
+                continue
+            if businesses_key in data:
+                businesses = [business for business in data[businesses_key]]
+            if drafts_key in data:
+                # set draft type so that UI knows its a draft entity
+                draft_reg_types = [CorpType.GP.value, CorpType.SP.value]
+                drafts = [{'draftType': CorpType.RTMP.value if draft['legalType'] in draft_reg_types else CorpType.TMP.value,
+                           **draft} for draft in data[drafts_key]]
+
+        # combine NRs
+        for business in drafts + businesses:
+            if 'nrNumber' in business and (nr := business['nrNumber']) and business['nrNumber'] in nrs:
+                business['nameRequest'] = nrs[nr]
+                del nrs[nr]
+
+        return [nrs[nr_num] for nr_num in nrs] + drafts + businesses
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):

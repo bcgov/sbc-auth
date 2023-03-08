@@ -48,6 +48,8 @@ class CorpType(Enum):
     CR = 'CR'  # corporation
     UL = 'UL'  # Unlimited Liability
     CC = 'CC'  # Community Contribution
+    GP = 'GP'  # General Partnership
+    SP = 'SP'  # Sole Proprietorship
 
 
 class ProductTypeCode(Enum):

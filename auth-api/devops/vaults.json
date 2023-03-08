@@ -47,7 +47,8 @@
         "vault": "API",
         "application": [
             "api_gw",
-            "legal-api"
+            "legal-api",
+            "namex-api"
         ]
     },
     {

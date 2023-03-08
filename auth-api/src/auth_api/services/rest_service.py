@@ -172,12 +172,11 @@ class RestService:
         return response
 
     @staticmethod
-    def get_service_account_token() -> str:
+    def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID', config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
-        kc_service_id = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID')
-        kc_secret = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+        kc_service_id = current_app.config.get(config_id)
+        kc_secret = current_app.config.get(config_secret)
         issuer_url = current_app.config.get('JWT_OIDC_ISSUER')
-        # https://sso-dev.pathfinder.gov.bc.ca/auth/realms/fcf0kpqr/protocol/openid-connect/token
         token_url = issuer_url + '/protocol/openid-connect/token'
         auth_response = requests.post(token_url, auth=(kc_service_id, kc_secret), headers={
             'Content-Type': ContentType.FORM_URL_ENCODED.value}, data='grant_type=client_credentials',
