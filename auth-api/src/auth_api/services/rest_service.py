@@ -72,7 +72,8 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(f"HTTPError on POST with status code {response.status_code if response else ''}")
+            current_app.logger.error(f'HTTPError on POST {endpoint} with status code'
+                                     f"{response.status_code if response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
@@ -160,7 +161,8 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(f"HTTPError on GET with status code {response.status_code if response else ''}")
+            current_app.logger.error(f'HTTPError on GET {endpoint}'
+                                     f"with status code {response.status_code if response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
