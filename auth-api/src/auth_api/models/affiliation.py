@@ -50,7 +50,6 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
         # only have LEAR and NAMEX affiliations
         return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
 
-
     @classmethod
     def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id) -> Affiliation:
         """Return an affiliation for the provided org and entity ids."""

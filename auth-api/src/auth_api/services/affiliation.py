@@ -12,12 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation data."""
-import asyncio
-from http import HTTPStatus
 from typing import Dict, List
 
-import aiohttp
-from aiohttp.client_exceptions import ClientConnectorError
 from flask import current_app
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
@@ -361,23 +357,23 @@ class Affiliation:
             url_identifiers.setdefault(url, [affiliation.entity.business_identifier])\
                 .append(affiliation.entity.business_identifier)
 
-        call_info = [{'url': url, 'payload': {'identifiers': url_identifiers[url]}} for url in url_identifiers]
-        print('here')
+        call_info = [{'url': url, 'payload': {'identifiers': identifiers}}
+                     for url, identifiers in url_identifiers.items()]
+
         token = RestService.get_service_account_token(
             config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
-        print('here')
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token)
             return Affiliation._combine_affiliaition_details(responses)
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug('Failed to get affiliations details: %s', affiliations)
-            raise ServiceUnavailableException('Failed to get affiliation details')
+            raise ServiceUnavailableException('Failed to get affiliation details') from err
 
     @staticmethod
     def _combine_affiliaition_details(details):
         """Parse affiliation details responses and combine draft entities with NRs if applicable."""
-        nrs = {}
+        name_requests = {}
         businesses = []
         drafts = []
         businesses_key = 'businessEntities'
@@ -385,25 +381,26 @@ class Affiliation:
         for data in details:
             if isinstance(data, list):
                 # assume this is an NR list
-                for nr in data:
+                for name_request in data:
                     # i.e. {'NR1234567': {...}}
-                    nrs[nr['nrNum']] = {'legalType': CorpType.NR.value, 'nameRequest': nr}
+                    name_requests[name_request['nrNum']] = {'legalType': CorpType.NR.value, 'nameRequest': name_request}
                 continue
             if businesses_key in data:
-                businesses = [business for business in data[businesses_key]]
+                businesses = list(data[businesses_key])
             if drafts_key in data:
                 # set draft type so that UI knows its a draft entity
                 draft_reg_types = [CorpType.GP.value, CorpType.SP.value]
-                drafts = [{'draftType': CorpType.RTMP.value if draft['legalType'] in draft_reg_types else CorpType.TMP.value,
-                           **draft} for draft in data[drafts_key]]
+                drafts = [
+                    {'draftType': CorpType.RTMP.value if draft['legalType'] in draft_reg_types
+                        else CorpType.TMP.value, **draft} for draft in data[drafts_key]]
 
         # combine NRs
         for business in drafts + businesses:
-            if 'nrNumber' in business and (nr := business['nrNumber']) and business['nrNumber'] in nrs:
-                business['nameRequest'] = nrs[nr]
-                del nrs[nr]
+            if 'nrNumber' in business and (nr_num := business['nrNumber']) and business['nrNumber'] in name_requests:
+                business['nameRequest'] = name_requests[nr_num]
+                del name_requests[nr_num]
 
-        return [nrs[nr_num] for nr_num in nrs] + drafts + businesses
+        return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):

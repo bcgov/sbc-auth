@@ -13,16 +13,15 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 import asyncio
-from typing import Dict, List
 
-from flask import current_app, g, jsonify, request
+from flask import g, jsonify, request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel, Org as OrgModel
-from auth_api.models.org import OrgSearch
+from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -31,7 +30,6 @@ from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
 from auth_api.services import User as UserService
-from auth_api.services.rest_service import RestService
 from auth_api.tracer import Tracer
 from auth_api.utils.enums import AccessType, NotificationType, PatchActions
 from auth_api.utils.enums import Status

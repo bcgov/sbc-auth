@@ -176,7 +176,8 @@ class RestService:
         return response
 
     @staticmethod
-    def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID', config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
+    def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID',
+                                  config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
         kc_service_id = current_app.config.get(config_id)
         kc_secret = current_app.config.get(config_secret)
@@ -204,12 +205,12 @@ class RestService:
                     # if no response from task we will go in here (i.e. namex-api is down)
                     current_app.logger.error(
                         '---Error in _call_urls_in_parallel: no response from %s---', task.os_error)
-                    raise ServiceUnavailableException('No response from %s', task.os_error)
+                    raise ServiceUnavailableException(f'No response from {task.os_error}')
                 if task.status != HTTPStatus.OK:
                     current_app.logger.error('---Error in _call_urls_in_parallel: error response from %s---', task.url)
-                    raise ServiceUnavailableException('Error response from %s', task.url)
-                json = await task.json()
-                responses.append(json)
+                    raise ServiceUnavailableException(f'Error response from {task.url}')
+                task_json = await task.json()
+                responses.append(task_json)
         return responses
 
 
