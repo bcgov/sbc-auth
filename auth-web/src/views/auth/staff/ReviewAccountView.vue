@@ -495,6 +495,7 @@ export default defineComponent({
           await getOnholdReasonCodes()
         }
       } catch (ex) {
+        // eslint-disable-next-line no-console
         console.error(ex)
       } finally {
         isLoading.value = false
@@ -573,6 +574,7 @@ export default defineComponent({
           }
           openModal(!isApprove, true, isRejecting, isMoveToPending)
         } catch (error) {
+          // eslint-disable-next-line no-console
           console.log(error)
         } finally {
           isSaving.value = false
