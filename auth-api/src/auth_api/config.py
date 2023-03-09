@@ -112,15 +112,15 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     # API Endpoints
     BCOL_API_URL = os.getenv('BCOL_API_URL')
-    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
-    NAMEX_API_URL = os.getenv('NAMEX_API_URL')
+    LEGAL_API_URL = os.getenv('LEGAL_API_URL', '')
+    NAMEX_API_URL = os.getenv('NAMEX_API_URL', '')
     NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     PAY_API_SANDBOX_URL = os.getenv('PAY_API_SANDBOX_URL')
     PAY_API_URL = os.getenv('PAY_API_URL')
 
     LEGAL_API_VERSION = os.getenv('LEGAL_API_VERSION')
-    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2')
-    NAMEX_API_VERSION = os.getenv('NAMEX_API_VERSION')
+    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2', '')
+    NAMEX_API_VERSION = os.getenv('NAMEX_API_VERSION', '')
 
     LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
     NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL + NAMEX_API_VERSION}/requests/search'
