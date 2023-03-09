@@ -79,7 +79,7 @@
       <TestimonialQuotes />
       <div class="bcsc-container py-6">
         <BcscPanel class="my-10"
-          :userProfile="userProfile"
+          :user="userProfile"
           @login="login()"
           @account-dialog="accountDialog = true"
         />

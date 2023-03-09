@@ -23,7 +23,7 @@
     </v-container>
     <!-- Next Step Button -->
     <div class="next-step-wrapper">
-      <span class="next-step-btn" :class="{ 'hide-next-btn': getCurrentStep() === steps.length }" @click="nextStep()">
+      <span class="next-step-btn" :class="{ 'hide-next-btn': hideBtn }" @click="nextStep()">
         <u>Next Step</u><v-icon color="#1A5A96">mdi-menu-right</v-icon>
       </span>
     </div>
@@ -32,8 +32,8 @@
 
 <script lang="ts">
 // Libraries
+import { computed, defineComponent } from '@vue/composition-api'
 import Vue from 'vue'
-import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
   name: 'InfoStepper',
@@ -63,15 +63,7 @@ export default defineComponent({
         text: 'Maintain Your Business',
         to: '/home/maintain-business'
       }
-    ]
-
-    const isCurrentStep = (step: any): boolean => {
-      return root.$route.path === step.to
-    }
-
-    const goTo = (step: any): void => {
-      if (!isCurrentStep(step)) root.$router.push(step.to)
-    }
+    ] as { id: string, step: number, text: string, to: string}[]
 
     const getCurrentStep = (): number => {
       const route = root.$route.path
@@ -82,6 +74,18 @@ export default defineComponent({
       }
     }
 
+    const hideBtn = computed(() => {
+      return getCurrentStep() === steps.length
+    })
+
+    const isCurrentStep = (step: any): boolean => {
+      return root.$route.path === step.to
+    }
+
+    const goTo = (step: any): void => {
+      if (!isCurrentStep(step)) root.$router.push(step.to)
+    }
+
     const nextStep = (): void => {
       const currentStepIndex = getCurrentStep()
       const nextStep = steps[currentStepIndex]
@@ -90,10 +94,10 @@ export default defineComponent({
 
     return {
       steps,
+      hideBtn,
       isCurrentStep,
       goTo,
-      nextStep,
-      getCurrentStep
+      nextStep
     }
   }
 })

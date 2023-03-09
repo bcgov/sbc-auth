@@ -41,7 +41,7 @@
     <!-- Panel Btns -->
     <div class="mt-10">
       <template v-if="!user">
-        <v-btn large color="bcgovblue" class="cta-btn font-weight-bold white--text mr-2 px-7"
+        <v-btn large color="bcgovblue" class="cta-btn font-weight-bold white--text mr-2 px-7 "
           to="/choose-authentication-method">
           Create a BC Registries Account
         </v-btn>
@@ -63,11 +63,10 @@ export default defineComponent({
     LearnMoreButton
   },
   props: {
-    userProfile: Object as PropType<User>
+    user: Object as PropType<User>
   },
   emits: ['login', 'account-dialog'],
   setup (props, { emit }) {
-    const user = props.userProfile
     const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const secureBulletPoints = [
@@ -88,7 +87,6 @@ export default defineComponent({
     }
 
     return {
-      user,
       cardSetUpUrl,
       learnMoreUrl,
       secureBulletPoints,

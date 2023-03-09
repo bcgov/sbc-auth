@@ -4,7 +4,7 @@
     outlined
     color="bcgovblue"
     class="btn-name-request white--text"
-    :class="{'btn-name-request-wide': isWideProp, 'btn-name-request-inverse': isInverseProp}"
+    :class="{'btn-name-request-wide': isWide, 'btn-name-request-inverse': isInverse}"
     @click="goToNameRequest()"
   >
     <span class="btn-text">Request a Name</span>
@@ -22,15 +22,16 @@ import vue from 'vue'
 export default defineComponent({
   name: 'NameRequestButton',
   props: {
-    isWide: Boolean,
+    isWide: {
+      type: Boolean,
+      default: false
+    },
     isInverse: {
       type: Boolean,
       default: false
     }
   },
   setup (props) {
-    const isWideProp = props.isWide
-    const isInverseProp = props.isInverse
     // open Name Request in current tab to retain current account and user
     const goToNameRequest = (): void => {
       if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
@@ -41,8 +42,6 @@ export default defineComponent({
     }
 
     return {
-      isWideProp,
-      isInverseProp,
       goToNameRequest
     }
   }
