@@ -95,6 +95,7 @@
 <script lang="ts">
 import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
+import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
@@ -116,421 +117,536 @@ import StaffModuleStore from '@/store/modules/staff'
 import { Task } from '@/models/Task'
 import { User } from '@/models/user'
 
-import Vue from 'vue'
 import { getModule } from 'vuex-module-decorators'
-import { namespace } from 'vuex-class'
+import { useStore } from 'vuex-composition-helpers'
 
-const StaffModule = namespace('staff')
-const TaskModule = namespace('task')
-const orgModule = namespace('org')
-const CodesModule = namespace('codes')
-
-@Component({
+export default defineComponent({
+  name: 'ReviewAccountView',
+  props: {
+    orgId: String
+  },
   components: {
-    DownloadAffidavit,
-    AccountInformation,
-    AccountAdministrator,
-    NotaryInformation,
-    AccountStatusTab,
-    AccessRequestModal
-  }
-})
-export default class ReviewAccountView extends Vue {
-  @Prop() orgId: number // chnage varible name to taskId
+    AccessRequestModal,
+    AccountStatusTab
+  },
+  setup (props) {
+    const store = useStore()
+    const instance = getCurrentInstance()
+    const staffStore = getModule(StaffModuleStore, store)
+    const isLoading: Ref<boolean> = ref(true)
+    const isSaving: Ref<boolean> = ref(false)
+    const pagesEnum = Pages
+    const TaskRelationshipStatusEnum = TaskRelationshipStatus
+    const isConfirmationModal: Ref<boolean> = ref(false)
+    const isRejectModal: Ref<boolean> = ref(false)
+    const isOnHoldModal: Ref<boolean> = ref(false)
+    const isMoveToPendingModal: Ref<boolean> = ref(false)
+    const task: Ref<Task> = ref(null)
+    const taskRelationshipType: Ref<string> = ref('')
+    const productFeeFormValid: Ref<boolean> = ref(false)
+    const viewOnly = DisplayModeValues.VIEW_ONLY
+    const accountInfoAccessType = ref(null)
+    const accountInfoValid: Ref<boolean> = ref(true)
+    const showAccountInfoValidations: Ref<boolean> = ref(false)
 
-  @TaskModule.Action('getTaskById') public getTaskById!:(orgId: number) =>Promise<Task>
+    const accessRequest: Ref<typeof AccessRequestModal> = ref(null)
+    const productFeeRef: Ref<HTMLFormElement> = ref(null)
 
-  @StaffModule.State('accountUnderReview') public accountUnderReview!: Organization
-  @StaffModule.State('accountUnderReviewAdmin') public accountUnderReviewAdmin!: User
-  @StaffModule.State('accountUnderReviewAddress') public accountUnderReviewAddress!: Address
-  @StaffModule.State('accountUnderReviewAdminContact') public accountUnderReviewAdminContact!: Contact
-  @StaffModule.State('accountUnderReviewAffidavitInfo') public accountUnderReviewAffidavitInfo!: AffidavitInformation
-
-  @StaffModule.Getter('accountNotaryName') public accountNotaryName!: string
-
-  @StaffModule.Action('syncTaskUnderReview') public syncTaskUnderReview!: (task:Task) => Promise<void>
-  @StaffModule.Action('approveAccountUnderReview') public approveAccountUnderReview!: (task:Task) => Promise<void>
-  @StaffModule.Action('rejectorOnHoldAccountUnderReview') public rejectorOnHoldAccountUnderReview!: (task:any) => Promise<void>
-
-  @orgModule.Action('fetchCurrentOrganizationGLInfo') public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
-  @orgModule.State('currentOrgGLInfo') public currentOrgGLInfo!: GLInfo
-  @orgModule.Action('fetchOrgProductFeeCodes') public fetchOrgProductFeeCodes!:() =>Promise<OrgProductFeeCode>
-  @orgModule.Action('getOrgProducts') public getOrgProducts!:(accountId: number) =>Promise<OrgProduct[]>
-  @orgModule.Action('createAccountFees') public createAccountFees!:(accoundId:number) =>Promise<any>
-  @orgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
-  @orgModule.Mutation('resetCurrentAccountFees') public resetCurrentAccountFees!:() =>void
-  @orgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!:({ accessType, orgId, syncOrg }) => Promise<boolean>
-
-  @CodesModule.Action('getOnholdReasonCodes') public getOnholdReasonCodes!: () => Promise<Code[]>
-  @CodesModule.State('onholdReasonCodes') private readonly onholdReasonCodes!: Code[]
-
-  private staffStore = getModule(StaffModuleStore, this.$store)
-  public isLoading = true
-  public isSaving = false
-
-  private readonly pagesEnum = Pages
-  private readonly TaskRelationshipStatusEnum = TaskRelationshipStatus
-
-  private isConfirmationModal:boolean = false
-  private isRejectModal:boolean = false
-  private isOnHoldModal:boolean = false
-  private isMoveToPendingModal:boolean = false
-  public task :Task
-  public taskRelationshipType:string = ''
-  private productFeeFormValid: boolean = false
-  private viewOnly = DisplayModeValues.VIEW_ONLY
-  accountInfoAccessType: AccessType = null
-  accountInfoValid = true
-  showAccountInfoValidations = false
-
-  $refs: {
-    accessRequest: AccessRequestModal,
-    productFeeRef: HTMLFormElement
-  }
-
-  private get canEdit (): boolean {
-    return this.task.status === TaskStatus.OPEN || this.isTaskOnHold ||
-           (this.task.status === TaskStatus.COMPLETED && this.task.relationshipStatus === TaskRelationshipStatus.REJECTED)
-  }
-
-  private get isTaskOnHold (): boolean {
-    return this.task.status === TaskStatus.HOLD
-  }
-
-  private get isTaskRejected (): boolean {
-    return this.task.relationshipStatus === TaskRelationshipStatus.REJECTED
-  }
-
-  private get canSelect (): boolean {
-    return (this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ||
-            (this.task.relationshipType === TaskRelationshipType.PRODUCT &&
-            this.task.relationshipStatus === TaskRelationshipStatus.REJECTED))
-  }
-
-  private get isPendingReviewPage () {
-    return this.task.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
-  }
-
-  // Tasks with Affidavit action can be put on hold
-  private get isAffidavitReview (): boolean {
-    return this.task.action === TaskAction.AFFIDAVIT_REVIEW
-  }
-
-  private get isGovNAccountReview (): boolean {
-    return this.task.type === TaskType.GOVN_REVIEW
-  }
-
-  get title () {
-    let title = 'Review Account'
-    if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
-      title = `Access Request (${this.task.type})`
-    } else if (this.taskRelationshipType === TaskRelationshipType.USER) {
-      // For now, Task with relationship type as user is for BCeID Admin request
-      title = 'Review BCeID Admin'
+    const getTaskById = async (orgId: number): Promise<Task> => {
+      return store.dispatch('task/getTaskById', orgId)
     }
-    return title
-  }
 
-  /*
-    5 types of Tasks:
-    1. New BCeId Account creation -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
-    2. Product request access -> TaskType.PRODUCT and taskRelationshipType === TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
-    3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
-    4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
-    5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
-                      2. Bceid flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
-  */
-  get componentList () {
-    const taskType = this.task.type
-    switch (taskType) {
-      case TaskType.GOVM_REVIEW:
-        return [{ ...this.componentAccountInformation(1) },
-          { ...this.componentAccountAdministrator(2) },
-          { ...this.componentPaymentInformation(3) },
-          { ...this.componentProductFee(4) }
-        ]
-      case TaskType.NEW_ACCOUNT_STAFF_REVIEW:
-        return [{ ...this.compDownloadAffidavit(1) },
-          { ...this.componentAccountInformation(2) },
-          { ...this.componentAccountAdministrator(3) },
-          { ...this.componentNotaryInformation(4) }
-        ]
-      case TaskType.BCEID_ADMIN_REVIEW:
-        return [{ ...this.compDownloadAffidavit(1) },
-          { ...this.componentAccountInformation(2) },
-          { ...this.componentAccountAdministrator(3) },
-          { ...this.componentNotaryInformation(4) }
-        ]
-      case TaskType.GOVN_REVIEW:
-        let list = []
-        if (this.task.action === TaskAction.ACCOUNT_REVIEW) {
-          list = [{ ...this.componentAccountInformation(1) },
-            { ...this.componentAccountAdministrator(2) },
-            { ...this.componentProductFee(3) }
-          ]
-        } else {
-          list = [{ ...this.compDownloadAffidavit(1) },
-            { ...this.componentAccountInformation(2) },
-            { ...this.componentAccountAdministrator(3) },
-            { ...this.componentNotaryInformation(4) },
-            { ...this.componentProductFee(5) }
-          ]
+    const accountUnderReview = computed(() => {
+      return store.state.staff.accountUnderReview
+    })
+
+    const accountUnderReviewAdmin = computed(() => {
+      return store.state.staff.accountUnderReviewAdmin
+    })
+
+    const accountUnderReviewAddress = computed(() => {
+      return store.state.staff.accountUnderReviewAddress
+    })
+
+    const accountUnderReviewAdminContact = computed(() => {
+      return store.state.staff.accountUnderReviewAdminContact
+    })
+
+    const accountUnderReviewAffidavitInfo = computed(() => {
+      return store.state.staff.accountUnderReviewAffidavitInfo
+    })
+
+    const accountNotaryName = computed(() => {
+      return store.getters['staff/accountNotaryName']
+    })
+
+    const syncTaskUnderReview = async (task: Task): Promise<void> => {
+      return store.dispatch('staff/syncTaskUnderReview', task)
+    }
+
+    const approveAccountUnderReview = async (task: Task): Promise<void> => {
+      return store.dispatch('staff/approveAccountUnderReview', task)
+    }
+
+    const rejectorOnHoldAccountUnderReview = async (task: any): Promise<void> => {
+      return store.dispatch('staff/rejectorOnHoldAccountUnderReview', task)
+    }
+
+    const fetchCurrentOrganizationGLInfo = async (accountId: number): Promise<any> => {
+      return store.dispatch('org/fetchCurrentOrganizationGLInfo', accountId)
+    }
+
+    const currentOrgGLInfo = computed(() => {
+      return store.state.org.currentOrgGLInfo
+    })
+
+    const fetchOrgProductFeeCodes = async (): Promise<OrgProductFeeCode> => {
+      return store.dispatch('org/fetchOrgProductFeeCodes')
+    }
+
+    const getOrgProducts = async (accountId: number): Promise<OrgProduct[]> => {
+      return store.dispatch('org/getOrgProducts', accountId)
+    }
+
+    const createAccountFees = async (accoundId: number): Promise<any> => {
+      return store.dispatch('org/createAccountFees', accoundId)
+    }
+
+    const syncCurrentAccountFees = async (accoundId: number): Promise<AccountFee[]> => {
+      return store.dispatch('org/syncCurrentAccountFees', accoundId)
+    }
+
+    const resetCurrentAccountFees = (): void => {
+      store.commit('org/resetCurrentAccountFees')
+    }
+
+    const updateOrganizationAccessType = async ({ accessType, orgId, syncOrg }): Promise<boolean> => {
+      return store.dispatch('org/updateOrganizationAccessType', { accessType, orgId, syncOrg })
+    }
+
+    const getOnholdReasonCodes = async (): Promise<Code[]> => {
+      return store.dispatch('codes/getOnholdReasonCodes')
+    }
+
+    const onholdReasonCodes = computed(() => {
+      return store.state.codes.onholdReasonCodes
+    })
+
+    const isTaskOnHold = computed(() => {
+      return task.value.status === 'HOLD'
+    })
+
+    const isTaskRejected = computed(() => {
+      return task.value.relationshipStatus === 'REJECTED'
+    })
+
+    const canSelect = computed(() => {
+      return (task.value.relationshipStatus === 'PENDING_STAFF_REVIEW' ||
+        (task.value.relationshipType === 'PRODUCT' &&
+        task.value.relationshipStatus === 'REJECTED'))
+    })
+
+    const isPendingReviewPage = computed(() => {
+      return task.value.relationshipStatus === 'PENDING_STAFF_REVIEW'
+    })
+
+    const isAffidavitReview = computed(() => {
+      return task.value.action === 'AFFIDAVIT_REVIEW'
+    })
+
+    const isGovNAccountReview = computed(() => {
+      return task.value.type === 'GOVN_REVIEW'
+    })
+
+    const title = computed(() => {
+      let title = 'Review Account'
+      if (taskRelationshipType.value === 'PRODUCT') {
+        title = `Access Request (${task.value.type})`
+      } else if (taskRelationshipType.value === 'USER') {
+        // For now, Task with relationship type as user is for BCeID Admin request
+        title = 'Review BCeID Admin'
+      }
+      return title
+    })
+
+    const accountNotaryContact = (): Contact => {
+      return accountUnderReviewAffidavitInfo.value?.contacts?.length > 0 && accountUnderReviewAffidavitInfo.value?.contacts[0]
+    }
+
+    const productFeeChange = (isFormValid): void => {
+      productFeeFormValid.value = isFormValid
+    }
+
+    const canEdit = () => {
+      return task.value.status === 'OPEN' || isTaskOnHold.value ||
+        (task.value.status === 'COMPLETED' && task.value.relationshipStatus === 'REJECTED')
+    }
+
+    const formattedComponent = (tabNumber, id, component, props, event = null, ref = null) => {
+      return {
+        id: id,
+        component: component,
+        props: {
+          tabNumber: tabNumber,
+          ...props
+        },
+        events: { ...event },
+        ref: ref
+      }
+    }
+
+    const downloadAffidavit = async (): Promise<void> => {
+      // Invoke document service to get affidavit for current organization
+      await DocumentService.getSignedAffidavit(
+        accountUnderReviewAffidavitInfo.value?.documentUrl,
+        `${accountUnderReview.value?.name}-affidavit`
+      )
+    }
+
+    const compDownloadAffidavit = (tabNumber = 1) => {
+      let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.'
+      if (accountUnderReviewAffidavitInfo.value?.status === AffidavitStatus.APPROVED) {
+        subTitle = 'Download the notarized affidavit associated with this account that has been reviewed and approved.'
+      }
+      return formattedComponent(
+        tabNumber,
+        `download-affidavit-${tabNumber}`,
+        DownloadAffidavit,
+        {
+          title: 'Download Affidavit',
+          subTitle: subTitle,
+          affidavitName: accountUnderReview.value?.name
+        },
+        { 'emit-download-affidavit': downloadAffidavit }
+      )
+    }
+
+    const componentAccountInformation = (tabNumber = 1) => {
+      return formattedComponent(
+        tabNumber,
+        `account-info-${tabNumber}`,
+        AccountInformation,
+        {
+          title: 'Account Information',
+          accountUnderReview: accountUnderReview.value,
+          accountUnderReviewAddress: accountUnderReviewAddress.value,
+          isGovnReview: isGovNAccountReview.value,
+          showValidations: showAccountInfoValidations.value
+        },
+        {
+          'emit-access-type': (event) => { accountInfoAccessType.value = event },
+          'emit-valid': (event) => { accountInfoValid.value = event }
         }
-        // if account access type was changed to regular remove the product fee comp
-        if (this.accountInfoAccessType === AccessType.REGULAR) list.pop()
-        return list
-      default:
-        // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
-        // Also, we double check by task relationship type
-        if (this.taskRelationshipType === TaskRelationshipType.PRODUCT) {
+      )
+    }
+
+    const componentAccountAdministrator = (tabNumber:number = 1) => {
+      return formattedComponent(
+        tabNumber,
+        `account-administration-${tabNumber}`,
+        AccountAdministrator,
+        {
+          title: 'Account Administrator',
+          accountUnderReviewAdmin: accountUnderReviewAdmin.value,
+          accountUnderReviewAdminContact: accountUnderReviewAdminContact.value
+        }
+      )
+    }
+
+    const componentNotaryInformation = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `notary-info-${tabNumber}`,
+        NotaryInformation,
+        {
+          title: 'Notary Information',
+          accountNotaryContact: accountNotaryContact(),
+          accountNotaryName: accountUnderReviewAffidavitInfo.value?.issuer || '-'
+        }
+      )
+    }
+
+    const componentAgreementInformation = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `agreement-info-${tabNumber}`,
+        AgreementInformation,
+        {
+          title: 'Agreement',
+          isTOSAlreadyAccepted: true,
+          orgName: accountUnderReview.value?.name,
+          userName: `${accountUnderReviewAdmin.value.firstname} ${accountUnderReviewAdmin.value.lastname}`
+        }
+      )
+    }
+
+    const componentPaymentInformation = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `payment-info-${tabNumber}`,
+        PaymentInformation,
+        {
+          title: 'Payment Information',
+          currentOrganizationGLInfo: currentOrgGLInfo.value
+        }
+      )
+    }
+
+    const componentProductFee = (tabNumber:number = 1) => {
+      return formattedComponent(tabNumber,
+        `product-fee-${tabNumber}`,
+        ProductFee,
+        {
+          title: 'Product Fee',
+          canSelect: canSelect.value
+        },
+        { 'emit-product-fee-change': productFeeChange },
+        'productFeeRef'
+      )
+    }
+
+    /*
+      5 types of Tasks:
+      1. New BCeId Account creation -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+      2. Product request access -> TaskType.PRODUCT and taskRelationshipType === TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
+      3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
+      4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
+      5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
+                        2. Bceid flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+    */
+
+    const componentList = computed(() => {
+      const taskType = task.value?.type
+      switch (taskType) {
+        case TaskType.GOVM_REVIEW:
           return [
-            { ...this.componentAccountInformation(1) },
-            { ...this.componentAccountAdministrator(2) },
-            { ...this.componentAgreementInformation(3) }
+            { ...componentAccountInformation(1) },
+            { ...componentAccountAdministrator(2) },
+            { ...componentPaymentInformation(3) },
+            { ...componentProductFee(4) }
           ]
-        }
-        break
-    }
-  }
-
-  private async mounted () {
-    // need to change call task api before
-
-    try {
-      this.task = await this.getTaskById(this.orgId)
-      this.taskRelationshipType = this.task.relationshipType
-      await this.syncTaskUnderReview(this.task)
-
-      // If the task type is GOVM or GOVN, then need to populate product fee codes
-      if (this.task.type === TaskType.GOVM_REVIEW || this.task.type === TaskType.GOVN_REVIEW) {
-        const accountId = this.task.relationshipId
-        await this.fetchCurrentOrganizationGLInfo(accountId)
-        await this.fetchOrgProductFeeCodes()
-        await this.getOrgProducts(accountId)
-        // For rejected accounts view
-        if (!this.canSelect) {
-          await this.syncCurrentAccountFees(accountId)
-        } else {
-          this.resetCurrentAccountFees()
-        }
+        case TaskType.NEW_ACCOUNT_STAFF_REVIEW:
+          return [
+            { ...compDownloadAffidavit(1) },
+            { ...componentAccountInformation(2) },
+            { ...componentAccountAdministrator(3) },
+            { ...componentNotaryInformation(4) }
+          ]
+        case TaskType.BCEID_ADMIN_REVIEW:
+          return [
+            { ...compDownloadAffidavit(1) },
+            { ...componentAccountInformation(2) },
+            { ...componentAccountAdministrator(3) },
+            { ...componentNotaryInformation(4) }
+          ]
+        case TaskType.GOVN_REVIEW:
+          let list = []
+          if (task.value?.action === TaskAction.ACCOUNT_REVIEW) {
+            list = [
+              { ...componentAccountInformation(1) },
+              { ...componentAccountAdministrator(2) },
+              { ...componentProductFee(3) }
+            ]
+          } else {
+            list = [
+              { ...compDownloadAffidavit(1) },
+              { ...componentAccountInformation(2) },
+              { ...componentAccountAdministrator(3) },
+              { ...componentNotaryInformation(4) },
+              { ...componentProductFee(5) }
+            ]
+          }
+          // if account access type was changed to regular remove the product fee comp
+          if (accountInfoAccessType.value === AccessType.REGULAR) list.pop()
+          return list
+        default:
+          // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
+          // Also, we double check by task relationship type
+          if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
+            return [
+              { ...componentAccountInformation(1) },
+              { ...componentAccountAdministrator(2) },
+              { ...componentAgreementInformation(3) }
+            ]
+          }
+          break
       }
-      // Tasks with Affidavit action can be put on hold. Therefore, populate on hold reasons
-      if (this.isAffidavitReview && (!this.onholdReasonCodes || this.onholdReasonCodes.length === 0)) {
-        await this.getOnholdReasonCodes()
+    })
+
+    onMounted(async () => {
+      try {
+        task.value = await getTaskById(props.orgId)
+        taskRelationshipType.value = task.value.relationshipType
+        await syncTaskUnderReview(task.value)
+
+        // If the task type is GOVM or GOVN, then need to populate product fee codes
+        if (task.value.type === TaskType.GOVM_REVIEW || task.value.type === TaskType.GOVN_REVIEW) {
+          const accountId = task.value.relationshipId
+          await fetchCurrentOrganizationGLInfo(accountId)
+          await fetchOrgProductFeeCodes()
+          await getOrgProducts(accountId)
+          // For rejected accounts view
+          if (!canSelect.value) {
+            await syncCurrentAccountFees(accountId)
+          } else {
+            resetCurrentAccountFees()
+          }
+        }
+
+        // Tasks with Affidavit action can be put on hold. Therefore, populate on hold reasons
+        if (isAffidavitReview.value && (!onholdReasonCodes.value || onholdReasonCodes.value?.length === 0)) {
+          await getOnholdReasonCodes()
+        }
+      } catch (ex) {
+        console.error(ex)
+      } finally {
+        isLoading.value = false
       }
-    } catch (ex) {
-      // eslint-disable-next-line no-console
-      console.error(ex)
-    } finally {
-      this.isLoading = false
-    }
-  }
+    })
 
-  private async downloadAffidavit (): Promise<void> {
-    // Invoke document service to get affidavit for current organization
-    await DocumentService.getSignedAffidavit(this.accountUnderReviewAffidavitInfo?.documentUrl, `${this.accountUnderReview.name}-affidavit`)
-  }
-
-  private openModal (isRejectModal:boolean = false, isConfirmationModal: boolean = false, rejectConfirmationModal:boolean = false, isMoveToPendingModal: boolean) {
-    if (!this.accountInfoValid) {
-      this.showAccountInfoValidations = true
-      window.scrollTo({ top: 200, behavior: 'smooth' })
-      return false
-    }
-    if (this.task.type === TaskType.GOVM_REVIEW && !this.productFeeFormValid) {
-      // validate form before showing pop-up
-      (this.$refs.productFeeRef[0] as any).validateNow()
-      if (!this.productFeeFormValid) {
+    const openModal = (
+      isRejectModalArg: boolean = false,
+      isConfirmationModalArg: boolean = false,
+      rejectConfirmationModalArg: boolean = false,
+      isMoveToPendingModalArg: boolean = false
+    ): boolean => {
+      if (!accountInfoValid.value) {
+        showAccountInfoValidations.value = true
+        window.scrollTo({ top: 200, behavior: 'smooth' })
         return false
       }
-    }
-    this.isConfirmationModal = isConfirmationModal
 
-    if (rejectConfirmationModal || (isRejectModal && this.isTaskOnHold)) {
-      this.isRejectModal = true
-      this.isOnHoldModal = false
-    } else if (!isMoveToPendingModal) {
-      this.isRejectModal = this.isAffidavitReview ? false : isRejectModal
-      this.isOnHoldModal = this.isAffidavitReview ? isRejectModal : false
-    } else {
-      this.isMoveToPendingModal = true
-    }
-
-    if (isConfirmationModal) {
-      this.$refs.accessRequest.close()
-      this.$refs.accessRequest.openConfirm()
-    } else {
-      this.$refs.accessRequest.open()
-      this.$refs.accessRequest.closeConfirm()
-    }
-  }
-
-  private async saveSelection (reason): Promise<void> {
-    const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
-
-    if (isValidForm) {
-      this.isSaving = true
-      // if account approve
-      const isApprove = !this.isRejectModal && !this.isOnHoldModal && !this.isMoveToPendingModal
-      // on rejecting there will be two scenarios
-      // 1. by clicking reject for normal flow.
-      // 2. by selecting remark as Reject account ,(check by using code)
-      // both cases we need to call reject API than hold
-      const isRejecting = this.isRejectModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
-      const isMoveToPending = this.isMoveToPendingModal || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
-
-      try {
-        if (this.accountInfoAccessType && this.accountInfoAccessType !== this.accountUnderReview.accessType) {
-          const success = await this.updateOrganizationAccessType({ accessType: this.accountInfoAccessType as string, orgId: this.accountUnderReview.id, syncOrg: false })
-          if (!success) throw new Error('Error updating account access type prevented review completion.')
+      if (task.value.type === TaskType.GOVM_REVIEW && !productFeeFormValid.value) {
+        // validate form before showing pop-up
+        (productFeeRef.value[0] as any).validateNow()
+        if (!productFeeFormValid.value) {
+          return false
         }
-        if (isApprove) {
-          await this.approveAccountUnderReview(this.task)
-        } else {
-        // both reject and hold will happen here passing second argument to determine which call need to make
-          await this.rejectorOnHoldAccountUnderReview({ task: this.task, isRejecting, remarks: onholdReasons })
-        }
-        const taskType: any = this.task.type
+      }
 
-        if (
-          [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
-          (!this.accountInfoAccessType || [AccessType.GOVN, AccessType.GOVM].includes(this.accountInfoAccessType))
-        ) {
-          await this.createAccountFees(this.task.relationshipId)
+      isConfirmationModal.value = isConfirmationModalArg
+
+      if (rejectConfirmationModalArg || (isRejectModalArg && isTaskOnHold.value)) {
+        isRejectModal.value = true
+        isOnHoldModal.value = false
+      } else if (!isMoveToPendingModalArg) {
+        isRejectModal.value = isAffidavitReview.value ? false : isRejectModalArg
+        isOnHoldModal.value = isAffidavitReview.value ? isRejectModalArg : false
+      } else {
+        isMoveToPendingModal.value = true
+      }
+
+      if (isConfirmationModal.value) {
+        accessRequest.value.close()
+        accessRequest.value.openConfirm()
+      } else {
+        accessRequest.value.open()
+        accessRequest.value.closeConfirm()
+      }
+
+      return true
+    }
+
+    const saveSelection = async (reason) => {
+      const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
+
+      if (isValidForm) {
+        isSaving.value = true
+        const isApprove = !isRejectModal.value && !isOnHoldModal.value && !isMoveToPendingModal.value
+        const isRejecting = isRejectModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
+        const isMoveToPending = isMoveToPendingModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
+
+        try {
+          if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
+            const success = await updateOrganizationAccessType({ accessType: accountInfoAccessType.value as string, orgId: accountUnderReview.value.id, syncOrg: false })
+            if (!success) throw new Error('Error updating account access type prevented review completion.')
+          }
+          if (isApprove) {
+            await approveAccountUnderReview(task.value)
+          } else {
+            await rejectorOnHoldAccountUnderReview({ task: task.value, isRejecting, remarks: onholdReasons })
+          }
+          const taskType: any = task.value.type
+
+          if (
+            [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
+            (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
+          ) {
+            await createAccountFees(task.value.relationshipId)
+          }
+          openModal(!isApprove, true, isRejecting, isMoveToPending)
+        } catch (error) {
+          console.log(error)
+        } finally {
+          isSaving.value = false
         }
-        this.openModal(!isApprove, true, isRejecting, isMoveToPending)
-      // this.$router.push(Pages.STAFF_DASHBOARD)
-      } catch (error) {
-      // eslint-disable-next-line no-console
-        console.log(error)
-      } finally {
-        this.isSaving = false
       }
     }
-  }
 
-  public get accountNotaryContact (): Contact {
-    return this.accountUnderReviewAffidavitInfo?.contacts?.length > 0 && this.accountUnderReviewAffidavitInfo?.contacts[0]
-  }
+    const goBack = () => {
+      instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
+    }
 
-  private goBack (): void {
-    this.$router.push(Pages.STAFF_DASHBOARD)
-  }
-
-  private productFeeChange (isFormValid): void {
-    this.productFeeFormValid = isFormValid
-  }
-
-  formattedComponent (tabNumber, id, component, props, event = null, ref = null) {
     return {
-      id: id,
-      component: component,
-      props: {
-        tabNumber: tabNumber,
-        ...props
-      },
-      events: { ...event },
-      ref: ref
+      isLoading,
+      isSaving,
+      pagesEnum,
+      TaskRelationshipStatusEnum,
+      isConfirmationModal,
+      isRejectModal,
+      isOnHoldModal,
+      isMoveToPendingModal,
+      task,
+      taskRelationshipType,
+      productFeeFormValid,
+      viewOnly,
+      accountInfoAccessType,
+      accountInfoValid,
+      showAccountInfoValidations,
+      accessRequest,
+      productFeeRef,
+      getTaskById,
+      accountUnderReview,
+      accountUnderReviewAdmin,
+      accountUnderReviewAddress,
+      accountUnderReviewAdminContact,
+      accountUnderReviewAffidavitInfo,
+      accountNotaryName,
+      syncTaskUnderReview,
+      rejectorOnHoldAccountUnderReview,
+      fetchCurrentOrganizationGLInfo,
+      currentOrgGLInfo,
+      fetchOrgProductFeeCodes,
+      getOrgProducts,
+      createAccountFees,
+      syncCurrentAccountFees,
+      resetCurrentAccountFees,
+      updateOrganizationAccessType,
+      getOnholdReasonCodes,
+      onholdReasonCodes,
+      isTaskOnHold,
+      isTaskRejected,
+      canSelect,
+      isPendingReviewPage,
+      isAffidavitReview,
+      isGovNAccountReview,
+      title,
+      accountNotaryContact,
+      productFeeChange,
+      canEdit,
+      formattedComponent,
+      downloadAffidavit,
+      compDownloadAffidavit,
+      componentAccountInformation,
+      componentAccountAdministrator,
+      componentNotaryInformation,
+      componentAgreementInformation,
+      componentPaymentInformation,
+      componentProductFee,
+      componentList,
+      openModal,
+      saveSelection,
+      goBack
     }
   }
-
-  // list of components
-  compDownloadAffidavit (tabNumber:number = 1) {
-    let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.'
-    if (this.accountUnderReviewAffidavitInfo?.status === AffidavitStatus.APPROVED) {
-      subTitle = 'Download the notarized affidavit associated with this account that has been reviewed and approved.'
-    }
-    return this.formattedComponent(
-      tabNumber,
-      `download-affidavit-${tabNumber}`,
-      DownloadAffidavit,
-      {
-        title: 'Download Affidavit',
-        subTitle: subTitle,
-        affidavitName: this.accountUnderReview.name
-      },
-      { 'emit-download-affidavit': this.downloadAffidavit }
-    )
-  }
-
-  componentAccountInformation (tabNumber:number = 1) {
-    return this.formattedComponent(
-      tabNumber,
-      `account-info-${tabNumber}`,
-      AccountInformation,
-      {
-        title: 'Account Information',
-        accountUnderReview: this.accountUnderReview,
-        accountUnderReviewAddress: this.accountUnderReviewAddress,
-        isGovnReview: this.isGovNAccountReview,
-        showValidations: this.showAccountInfoValidations
-      },
-      {
-        'emit-access-type': (event: AccessType) => { this.accountInfoAccessType = event },
-        'emit-valid': (event: boolean) => { this.accountInfoValid = event }
-      }
-    )
-  }
-  componentAccountAdministrator (tabNumber:number = 1) {
-    return this.formattedComponent(
-      tabNumber,
-      `account-administration-${tabNumber}`,
-      AccountAdministrator,
-      {
-        title: 'Account Administrator',
-        accountUnderReviewAdmin: this.accountUnderReviewAdmin,
-        accountUnderReviewAdminContact: this.accountUnderReviewAdminContact
-      }
-
-    )
-  }
-
-  componentNotaryInformation (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `notary-info-${tabNumber}`,
-      NotaryInformation,
-      {
-        title: 'Notary Information',
-        accountNotaryContact: this.accountNotaryContact,
-        accountNotaryName: this.accountUnderReviewAffidavitInfo?.issuer || '-'
-      }
-    )
-  }
-  componentAgreementInformation (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `agreement-info-${tabNumber}`,
-      AgreementInformation,
-      {
-        title: 'Agreement',
-        isTOSAlreadyAccepted: true,
-        orgName: this.accountUnderReview.name,
-        userName: `${this.accountUnderReviewAdmin.firstname} ${this.accountUnderReviewAdmin.lastname}`
-      }
-    )
-  }
-  componentPaymentInformation (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `payment-info-${tabNumber}`,
-      PaymentInformation,
-      {
-        title: 'Payment Information',
-        currentOrganizationGLInfo: this.currentOrgGLInfo
-      }
-    )
-  }
-  componentProductFee (tabNumber:number = 1) {
-    return this.formattedComponent(tabNumber,
-      `product-fee-${tabNumber}`,
-      ProductFee,
-      {
-        title: 'Product Fee',
-        canSelect: this.canSelect
-      },
-      { 'emit-product-fee-change': this.productFeeChange },
-      'productFeeRef'
-    )
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>
