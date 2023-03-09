@@ -355,41 +355,24 @@ class Affiliation:
     @staticmethod
     async def get_affiliation_details(affiliations: List[AffiliationModel]) -> List:
         """Return affiliation details by calling the source api."""
-        call_info = {}  # i.e. turns into { url: [identifiers...] }
+        url_identifiers = {}  # i.e. turns into { url: [identifiers...] }
         for affiliation in affiliations:
             url = affiliation.affiliation_details_url
-            call_info.setdefault(url, [affiliation.entity.business_identifier])\
+            url_identifiers.setdefault(url, [affiliation.entity.business_identifier])\
                 .append(affiliation.entity.business_identifier)
 
+        call_info = [{'url': url, 'payload': {'identifiers': url_identifiers[url]}} for url in url_identifiers]
+        print('here')
         token = RestService.get_service_account_token(
             config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
-
-        headers = {
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {token}'
-        }
-
-        responses = []
-
-        # call all urls in parallel
-        async with aiohttp.ClientSession() as session:
-            fetch_tasks = [asyncio.create_task(session.post(
-                url, json={'identifiers': call_info[url]}, headers=headers)) for url in call_info]
-            tasks = await asyncio.gather(*fetch_tasks, return_exceptions=True)
-
-            for task in tasks:
-                if isinstance(task, ClientConnectorError):
-                    # if no response from task we will go in here (i.e. namex-api is down)
-                    current_app.logger.error(
-                        '---Error in get_affiliation_details: no response from %s---', task.os_error)
-                    raise ServiceUnavailableException(f'Failed to get affiliation details')
-                if task.status != HTTPStatus.OK:
-                    current_app.logger.debug('Affiliations attempted: %s', affiliations)
-                    current_app.logger.error('---Error in get_affiliation_details: error response from %s---', task.url)
-                    raise ServiceUnavailableException('Failed to get affiliation details')
-                json = await task.json()
-                responses.append(json)
-        return Affiliation._combine_affiliaition_details(responses)
+        print('here')
+        try:
+            responses = await RestService.call_posts_in_parallel(call_info, token)
+            return Affiliation._combine_affiliaition_details(responses)
+        except ServiceUnavailableException as err:
+            current_app.logger.debug(err)
+            current_app.logger.debug('Failed to get affiliations details: %s', affiliations)
+            raise ServiceUnavailableException('Failed to get affiliation details')
 
     @staticmethod
     def _combine_affiliaition_details(details):
