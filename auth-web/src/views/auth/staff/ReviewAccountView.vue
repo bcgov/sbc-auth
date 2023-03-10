@@ -132,7 +132,6 @@ export default defineComponent({
   setup (props) {
     const store = useStore()
     const instance = getCurrentInstance()
-    const staffStore = getModule(StaffModuleStore, store)
     const isLoading: Ref<boolean> = ref(true)
     const isSaving: Ref<boolean> = ref(false)
     const pagesEnum = Pages
