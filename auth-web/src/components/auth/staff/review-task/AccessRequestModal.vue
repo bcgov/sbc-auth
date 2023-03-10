@@ -206,6 +206,7 @@ export default defineComponent({
     const { t } = useI18n()
     const onholdReasons: Ref<string[]> = ref([])
     const accountToBeOnholdOrRejected: Ref<string> = ref('')
+    const moveToPendingReason: Ref<string> = ref('')
     const accessRequest: Ref<ModalDialog> = ref(null)
     const accessRequestConfirmationDialog: Ref<ModalDialog> = ref(null)
     const rejectForm: Ref<HTMLFormElement> = ref(null)

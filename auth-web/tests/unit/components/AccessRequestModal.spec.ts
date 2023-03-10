@@ -49,7 +49,7 @@ describe('AccessRequestModal.vue', () => {
     const localVue = createLocalVue()
     localVue.use(i18n)
     localVue.use(Vuex)
-    localVue.use(CompositionApi)
+    localVue.use(CompositionApi as any)
 
     const store = new Vuex.Store({
       strict: false
