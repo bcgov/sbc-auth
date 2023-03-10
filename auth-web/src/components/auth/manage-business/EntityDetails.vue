@@ -48,7 +48,7 @@ export default defineComponent({
     const generateMessage = (status: string): { message: string, colour: string, priority: number } => {
       switch (status) {
         case EntityAlertTypes.PROCESSING:
-          return { message: 'This name request is still processing, it may take up to 5 minutes.', colour: '#1669BB', priority: 5 }
+          return { message: 'This name request is still processing, it may take up to 10 minutes.', colour: '#1669BB', priority: 5 }
         case EntityAlertTypes.FROZEN:
           return { message: 'This business is frozen', colour: '#F8661A', priority: 4 }
         case EntityAlertTypes.BADSTANDING:

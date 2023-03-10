@@ -97,7 +97,7 @@
               <!-- this is mocked here until the backend to get org details in auth is completed -->
               <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader="true" :details="['FROZEN']"/>
               <!-- this works currently -->
-              <EntityDetails v-if="status(item) == 'Processing'" icon="mdi-information-outline" :details="['PROCESSING']"/>
+              <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="['PROCESSING']"/>
             </td>
 
             <!-- Actions -->
@@ -528,6 +528,10 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   private textFilter (itemVal: string, filterVal: string): boolean {
     return !filterVal || itemVal.toUpperCase().includes(filterVal.toUpperCase())
+  }
+
+  private isProcessing (state: string): boolean {
+    return NrDisplayStates.PROCESSING === state
   }
 
   /** Emit business/nr information to be unaffiliated. */
