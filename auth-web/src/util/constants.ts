@@ -200,7 +200,8 @@ export enum NrDisplayStates {
     REFUND_REQUESTED = 'Cancelled, Refund Requested',
     CANCELLED = 'Cancelled',
     EXPIRED = 'Expired',
-    CONSUMED = 'Consumed'
+    CONSUMED = 'Consumed',
+    PROCESSING = 'Processing'
 }
 
 export enum NrConditionalStates {

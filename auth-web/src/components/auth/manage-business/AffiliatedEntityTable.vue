@@ -295,7 +295,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return (
       this.isNameRequest(business) && // Is this a Name Request
       business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
-      supportedEntityFlags.includes(business.nameRequest.legalType) // Feature flagged Nr types
+      supportedEntityFlags.includes(business.nameRequest.legalType) && // Feature flagged Nr types
+      !!business.nameRequest.expirationDate // Ensure NR isn't processing still
     )
   }
 
@@ -387,6 +388,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       // Format name request state value
       const state = NrState[business.nameRequest.state]
       if (!state) return 'Unknown'
+      if (state === NrState.APPROVED && !business.nameRequest.expirationDate) return NrDisplayStates.PROCESSING
       else return NrDisplayStates[state] || 'Unknown'
     }
     if (this.isTemporaryBusiness(business)) {
