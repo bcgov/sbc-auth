@@ -41,8 +41,8 @@ from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.services import User as UserService
 from auth_api.utils.enums import (
-    AccessType, AffidavitStatus, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod, ProductCode,
-    ProductSubscriptionStatus, Status,
+    AccessType, AffidavitStatus, CorpType, NRStatus, OrgStatus, OrgType, PatchActions, PaymentMethod,
+    ProductCode, ProductSubscriptionStatus, Status,
     SuspensionReasonCode, TaskStatus, TaskRelationshipStatus)
 from auth_api.utils.roles import ADMIN  # noqa: I005
 from tests.utilities.factory_scenarios import (
@@ -2080,3 +2080,96 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     assert schema_utils.validate(rv.json, 'paged_response')[0]
     orgs = json.loads(rv.data)
     assert orgs.get('orgs')[0].get('decisionMadeBy') == decision_made_by
+
+
+@pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs', [
+    ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], []),
+    ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], []),
+    ('nrs_only', [], [], [], ['NR 1234567', 'NR 1234566']),
+    ('drafts_with_nrs', [], [],
+     [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
+     ['NR 1234567', 'NR 1234566']),
+    ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
+     [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
+     [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
+     ['NR 1234567', 'NR 1234566', 'NR 1234565'])
+])
+def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
+                              test_name, businesses, drafts, drafts_with_nrs, nrs):
+    """Assert details of affiliations for an org are returned."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    # setup org
+    client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    # setup mocks
+    businesses_details = [{
+        'adminFreeze': False,
+        'goodStanding': True,
+        'identifier': data[0],
+        'legalName': 'KIALS BUSINESS NAME CORP.',
+        'legalType': data[1],
+        'state': 'ACTIVE',
+        'taxId': '123'
+    } for data in businesses]
+
+    drafts_details = [{
+        'identifier': data[0],
+        'legalType': data[1],
+    } for data in drafts]
+
+    drafts_with_nr_details = [{
+        'identifier': data[0],
+        'legalType': data[1],
+        'nrNumber': data[2]
+    } for data in drafts_with_nrs]
+
+    nrs_details = [{
+        'actions': [],
+        'applicants': {
+            'emailAddress': '1@1.com',
+            'phoneNumber': '1234567890',
+        },
+        'names': [{
+            'name': f'TEST INC. {nr}',
+            'state': 'APPROVED'
+        }],
+        'state': 'APPROVED',
+        'requestTypeCd': 'BC',
+        'nrNum': nr
+    } for nr in nrs]
+
+    entities_response = {
+        'businessEntities': businesses_details,
+        'draftEntities': drafts_details + drafts_with_nr_details
+    }
+
+    nrs_response = nrs_details
+
+    # mock function that calls namex / lear
+    mocker.patch('auth_api.services.rest_service.RestService.call_posts_in_parallel',
+                 return_value=[entities_response, nrs_response])
+    mocker.patch('auth_api.services.rest_service.RestService.get_service_account_token',
+                 return_value='token')
+
+    rv = client.get('/api/v1/orgs/{}/affiliations?new=true'.format(org_id),
+                    headers=headers,
+                    content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('entities', None) and isinstance(rv.json['entities'], list)
+    assert len(rv.json['entities']) == len(businesses) + len(drafts) + len(nrs)
+
+    drafts_nr_numbers = [data[2] for data in drafts_with_nrs]
+    for entity in rv.json['entities']:
+        if entity['legalType'] == CorpType.NR.value:
+            assert entity['nameRequest']['nrNum'] not in drafts_nr_numbers
+
+        if draft_type := entity.get('draftType', None):
+            expected = CorpType.RTMP.value if entity['legalType'] in [
+                CorpType.SP.value, CorpType.GP.value] else CorpType.TMP.value
+
+            assert draft_type == expected
