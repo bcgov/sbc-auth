@@ -23,6 +23,7 @@ document.body.setAttribute('data-app', 'true')
 describe('AccessRequestModal.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  let accessRequest: any
   const props = {
     isRejectModal: false,
     isConfirmationModal: false,
@@ -71,6 +72,7 @@ describe('AccessRequestModal.vue', () => {
     }
 
     wrapper = wrapperFactory(props)
+    accessRequest = wrapper.findComponent({ ref: 'accessRequest' });
   })
 
   afterEach(() => {
@@ -88,42 +90,41 @@ describe('AccessRequestModal.vue', () => {
   })
 
   it('show Approval modal on open', async () => {
-    await wrapper.vm.$nextTick()
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Account Creation Request ?`)
   })
 
   it('Should show reject modal on open when isRejectModal is true', async () => {
     await wrapper.setProps({ isRejectModal: true })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Account Creation Request ?`)
   })
 
   it('Should show on Hold modal on open when isOnHoldModal is true', async () => {
     await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject or Hold Account Creation Request`)
   })
 
   it('Should show Approval modal for product ', async () => {
     await wrapper.setProps({ isOnHoldModal: false, isRejectModal: false, accountType: 'PRODUCT' })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Access Request ?`)
   })
 
   it('Should show Reject modal for product ', async () => {
     await wrapper.setProps({ isOnHoldModal: false, isRejectModal: true, accountType: 'PRODUCT' })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Access Request ?`)
   })
 
   it('render on hold reasons properly ', async () => {
     await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.vm.accountToBeOnholdOrRejected).toBe('')
 
@@ -137,7 +138,7 @@ describe('AccessRequestModal.vue', () => {
 
   it('emit valid on hold reasons properly ', async () => {
     await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     await wrapper.find('[data-test="radio-on-hold"]').trigger('click')
     expect(wrapper.vm.accountToBeOnholdOrRejected).toBe(OnholdOrRejectCode.ONHOLD)
