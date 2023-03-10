@@ -177,7 +177,7 @@ class RestService:
         """Generate headers."""
         return {
             'Content-Type': content_type.value,
-            **(additional_headers if additional_headers else None),
+            **(additional_headers if additional_headers else {}),
             **({'Authorization': auth_header_type.value.format(token)} if token else {})
         }
 
