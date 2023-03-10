@@ -177,7 +177,6 @@ class RestService:
         return auth_response.json().get('access_token')
 
     @staticmethod
-
     def _generate_headers(content_type, additional_headers, token, auth_header_type):
         """Generate headers."""
         return {
@@ -186,6 +185,7 @@ class RestService:
             **({'Authorization': auth_header_type.value.format(token)} if token else {})
         }
 
+    @staticmethod
     async def call_posts_in_parallel(call_info: dict, token: str):
         """Call the services in parallel and return the responses."""
         headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
