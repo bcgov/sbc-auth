@@ -12,15 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """API endpoints for managing an Org resource."""
+import asyncio
 
 from flask import g, jsonify, request
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
-from auth_api.exceptions import BusinessException
-from auth_api.models import Org as OrgModel
-from auth_api.models.org import OrgSearch
+from auth_api.exceptions import BusinessException, ServiceUnavailableException
+from auth_api.models import Affiliation as AffiliationModel, Org as OrgModel
+from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
@@ -104,8 +105,9 @@ class Orgs(Resource):
                 response, status = OrgService.search_orgs(org_search), http_status.HTTP_200_OK
 
             roles = token.get('realm_access').get('roles')
-            # public user cant get the details in search. Gets only status of orgs.
-            if Role.PUBLIC_USER.value in roles and Role.STAFF.value not in roles:
+            # public user can only get status of orgs in search, unless they have special roles.
+            allowed_roles = [Role.STAFF.value, Role.SYSTEM.value, Role.ACCOUNT_IDENTITY]
+            if Role.PUBLIC_USER.value in roles and not set(roles).intersection(set(allowed_roles)):
                 if response and response.get('orgs'):
                     status = http_status.HTTP_200_OK
                 else:
@@ -365,11 +367,22 @@ class OrgAffiliations(Resource):
     def get(org_id):
         """Get all affiliated entities for the given org."""
         try:
-            response, status = jsonify({
-                'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id)}), http_status.HTTP_200_OK
+            # keep old response until UI is updated
+            if (request.args.get('new', 'false')).lower() != 'true':
+                return jsonify(
+                    {'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id)}
+                ), http_status.HTTP_200_OK
+
+            # get affiliation identifiers and the urls for the source data
+            affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+            affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
+
+            response, status = jsonify({'entities': affiliations_details_list}), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        except ServiceUnavailableException as exception:
+            response, status = {'message': exception.error}, exception.status_code
 
         return response, status
 

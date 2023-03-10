@@ -6,6 +6,8 @@ UserException - error, status_code - user rules error
 error - a description of the error {code / description: classname / full text}
 status_code - where possible use HTTP Error Codes
 """
+from http import HTTPStatus
+
 import traceback
 
 from sbc_common_components.tracing.exception_tracing import ExceptionTracing  # noqa: I001, I003
@@ -34,7 +36,7 @@ class ServiceUnavailableException(Exception):  # noqa: N818
     """Exception to be raised if third party service is unavailable."""
 
     def __init__(self, error, *args, **kwargs):
-        """Return a valid BusinessException."""
+        """Return a valid ServiceUnavailableException."""
         super().__init__(*args, **kwargs)
         self.error = error
         self.status_code = Error.SERVICE_UNAVAILABLE.name

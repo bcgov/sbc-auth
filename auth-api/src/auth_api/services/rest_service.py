@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to invoke Rest services."""
+import asyncio
 import json
 from collections.abc import Iterable
+from http import HTTPStatus
 from typing import Dict
 
+import aiohttp
 import requests
+from aiohttp.client_exceptions import ClientConnectorError  # pylint:disable=ungrouped-imports
 from flask import current_app, request
 from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
 # pylint:disable=ungrouped-imports
@@ -159,12 +163,12 @@ class RestService:
         return response
 
     @staticmethod
-    def get_service_account_token() -> str:
+    def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID',
+                                  config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
-        kc_service_id = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID')
-        kc_secret = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+        kc_service_id = current_app.config.get(config_id)
+        kc_secret = current_app.config.get(config_secret)
         issuer_url = current_app.config.get('JWT_OIDC_ISSUER')
-        # https://sso-dev.pathfinder.gov.bc.ca/auth/realms/fcf0kpqr/protocol/openid-connect/token
         token_url = issuer_url + '/protocol/openid-connect/token'
         auth_response = requests.post(token_url, auth=(kc_service_id, kc_secret), headers={
             'Content-Type': ContentType.FORM_URL_ENCODED.value}, data='grant_type=client_credentials',
@@ -173,6 +177,7 @@ class RestService:
         return auth_response.json().get('access_token')
 
     @staticmethod
+
     def _generate_headers(content_type, additional_headers, token, auth_header_type):
         """Generate headers."""
         return {
@@ -181,6 +186,28 @@ class RestService:
             **({'Authorization': auth_header_type.value.format(token)} if token else {})
         }
 
+    async def call_posts_in_parallel(call_info: dict, token: str):
+        """Call the services in parallel and return the responses."""
+        headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+        responses = []
+        # call all urls in parallel
+        async with aiohttp.ClientSession() as session:
+            fetch_tasks = [asyncio.create_task(session.post(
+                data['url'], json=data['payload'], headers=headers)) for data in call_info]
+            tasks = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+            for task in tasks:
+                if isinstance(task, ClientConnectorError):
+                    # if no response from task we will go in here (i.e. namex-api is down)
+                    current_app.logger.error(
+                        '---Error in _call_urls_in_parallel: no response from %s---', task.os_error)
+                    raise ServiceUnavailableException(f'No response from {task.os_error}')
+                if task.status != HTTPStatus.OK:
+                    current_app.logger.error('---Error in _call_urls_in_parallel: error response from %s---', task.url)
+                    raise ServiceUnavailableException(f'Error response from {task.url}')
+                task_json = await task.json()
+                responses.append(task_json)
+        return responses
 
 def _get_token() -> str:
     token: str = request.headers['Authorization'] if request and 'Authorization' in request.headers else None

@@ -85,6 +85,7 @@ class Error(Enum):
     PAY_ACCOUNT_DEACTIVATE_ERROR = 'An error occurred while attempting to deactivate your account.Please try again', \
                                    http_status.HTTP_400_BAD_REQUEST
     PATCH_INVALID_ACTION = 'PATCH_INVALID_ACTION', http_status.HTTP_400_BAD_REQUEST
+    SERVICE_UNAVAILABLE = '3rd party application unavailable', http_status.HTTP_503_SERVICE_UNAVAILABLE
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""

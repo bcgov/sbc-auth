@@ -26,6 +26,7 @@ class Role(Enum):
     ACCOUNT_HOLDER = 'account_holder'
     GOV_ACCOUNT_USER = 'gov_account_user'
     ANONYMOUS_USER = 'anonymous_user'
+    ACCOUNT_IDENTITY = 'account_identity'
 
     SYSTEM = 'system'
     TESTER = 'tester'
