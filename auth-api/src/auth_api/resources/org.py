@@ -335,15 +335,18 @@ class OrgAffiliations(Resource):
         if not valid_format:
             return {'message': schema_utils.serialize(errors)}, http_status.HTTP_400_BAD_REQUEST
 
+        business_identifier = request_json.get('businessIdentifier')
+        if not any(character.isdigit() for character in business_identifier):
+            return {'message': 'Business identifier requires at least 1 digit.'}, http_status.HTTP_400_BAD_REQUEST
         try:
             if is_new_business:
                 response, status = AffiliationService.create_new_business_affiliation(
-                    org_id, request_json.get('businessIdentifier'), request_json.get('email'),
+                    org_id, business_identifier, request_json.get('email'),
                     request_json.get('phone'), request_json.get('certifiedByName'),
                     bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
             else:
                 response, status = AffiliationService.create_affiliation(
-                    org_id, request_json.get('businessIdentifier'), request_json.get('passCode'),
+                    org_id, business_identifier, request_json.get('passCode'),
                     request_json.get('certifiedByName'), bearer_token).\
                                        as_dict(), http_status.HTTP_201_CREATED
 
