@@ -101,6 +101,9 @@ class _Config:  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_ID = os.getenv('SBC_AUTH_ADMIN_CLIENT_ID')
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('SBC_AUTH_ADMIN_CLIENT_SECRET')
 
+    ENTITY_SVC_CLIENT_ID = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_ID')
+    ENTITY_SVC_CLIENT_SECRET = os.getenv('ENTITY_SERVICE_ACCOUNT_CLIENT_SECRET')
+
     # Upstream Keycloak settings
     KEYCLOAK_BCROS_BASE_URL = os.getenv('KEYCLOAK_BCROS_BASE_URL')
     KEYCLOAK_BCROS_REALMNAME = os.getenv('KEYCLOAK_BCROS_REALMNAME')
@@ -108,13 +111,19 @@ class _Config:  # pylint: disable=too-few-public-methods
     KEYCLOAK_BCROS_ADMIN_SECRET = os.getenv('KEYCLOAK_BCROS_ADMIN_SECRET')
 
     # API Endpoints
-    PAY_API_URL = os.getenv('PAY_API_URL')
-    LEGAL_API_URL = os.getenv('LEGAL_API_URL')
-    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     BCOL_API_URL = os.getenv('BCOL_API_URL')
+    LEGAL_API_URL = os.getenv('LEGAL_API_URL', '')
+    NAMEX_API_URL = os.getenv('NAMEX_API_URL', '')
+    NOTIFY_API_URL = os.getenv('NOTIFY_API_URL')
     PAY_API_SANDBOX_URL = os.getenv('PAY_API_SANDBOX_URL')
+    PAY_API_URL = os.getenv('PAY_API_URL')
+
     LEGAL_API_VERSION = os.getenv('LEGAL_API_VERSION')
-    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2')
+    LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2', '')
+    NAMEX_API_VERSION = os.getenv('NAMEX_API_VERSION', '')
+
+    LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
+    NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL + NAMEX_API_VERSION}/requests/search'
 
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')
