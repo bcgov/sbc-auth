@@ -42,19 +42,10 @@ class RestService:
         # just to avoid the duplicate code for PUT and POSt
         current_app.logger.debug(f'<_invoke-{rest_method}')
 
-        headers = {
-            'Content-Type': content_type.value
-        }
-
         if not token and generate_token:
             token = _get_token()
 
-        if token:
-            headers.update({'Authorization': auth_header_type.value.format(token)})
-
-        if additional_headers:
-            headers.update(additional_headers)
-
+        headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
@@ -138,14 +129,7 @@ class RestService:
         """GET service."""
         current_app.logger.debug('<GET')
 
-        headers = {
-            'Content-Type': content_type.value
-        }
-        if additional_headers:
-            headers.update(additional_headers)
-
-        if token:
-            headers['Authorization'] = auth_header_type.value.format(token)
+        headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
 
         current_app.logger.debug(f'Endpoint : {endpoint}')
         current_app.logger.debug(f'headers : {headers}')
@@ -187,6 +171,15 @@ class RestService:
                 timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
         auth_response.raise_for_status()
         return auth_response.json().get('access_token')
+
+    @staticmethod
+    def _generate_headers(content_type, additional_headers, token, auth_header_type):
+        """Generate headers."""
+        return {
+            'Content-Type': content_type.value,
+            **(additional_headers if additional_headers else {}),
+            **({'Authorization': auth_header_type.value.format(token) if token else {}})
+        }
 
 
 def _get_token() -> str:
