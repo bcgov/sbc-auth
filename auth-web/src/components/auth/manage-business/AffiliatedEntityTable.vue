@@ -95,7 +95,9 @@
             <td v-if="showCol(headers[3].text)" class="text-capitalize ">
               {{ status(item) }}
               <!-- this is mocked here until the backend to get org details in auth is completed -->
-              <EntityDetailsAlert v-if="name(item) == 'RITVICK 26SEPT'" :details="['FROZEN']"/>
+              <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader="true" :details="['FROZEN']"/>
+              <!-- this works currently -->
+              <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="['PROCESSING']"/>
             </td>
 
             <!-- Actions -->
@@ -199,12 +201,12 @@ import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
-import EntityDetailsAlert from './EntityDetailsAlert.vue'
+import EntityDetails from './EntityDetails.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
-  components: { EntityDetailsAlert },
+  components: { EntityDetails },
   computed: {
     ...mapState('business', ['businesses']),
     ...mapState('org', ['currentOrganization'])
@@ -295,7 +297,8 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     return (
       this.isNameRequest(business) && // Is this a Name Request
       business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
-      supportedEntityFlags.includes(business.nameRequest.legalType) // Feature flagged Nr types
+      supportedEntityFlags.includes(business.nameRequest.legalType) && // Feature flagged Nr types
+      !!business.nameRequest.expirationDate // Ensure NR isn't processing still
     )
   }
 
@@ -387,6 +390,7 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
       // Format name request state value
       const state = NrState[business.nameRequest.state]
       if (!state) return 'Unknown'
+      if (state === NrState.APPROVED && !business.nameRequest.expirationDate) return NrDisplayStates.PROCESSING
       else return NrDisplayStates[state] || 'Unknown'
     }
     if (this.isTemporaryBusiness(business)) {
@@ -524,6 +528,10 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
 
   private textFilter (itemVal: string, filterVal: string): boolean {
     return !filterVal || itemVal.toUpperCase().includes(filterVal.toUpperCase())
+  }
+
+  private isProcessing (state: string): boolean {
+    return NrDisplayStates.PROCESSING === state
   }
 
   /** Emit business/nr information to be unaffiliated. */
@@ -727,4 +735,5 @@ export default class AffiliatedEntityTable extends Mixins(DateMixin) {
     background-color: lightgray;
   }
 }
+
 </style>
