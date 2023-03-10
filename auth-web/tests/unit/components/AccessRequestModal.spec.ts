@@ -1,3 +1,4 @@
+import CompositionApi, { computed, defineComponent } from '@vue/composition-api'
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -5,9 +6,16 @@ import { OnholdOrRejectCode } from '@/util/constants'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import MockI18n from '../test-utils/test-data/MockI18n'
 
+Vue.config.silent = true
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
+
+const en = {
+  onHoldOrRejectModalText: 'i8n onHoldOrRejectModalText',
+}
+const i18n = MockI18n.mock(en)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -38,7 +46,9 @@ describe('AccessRequestModal.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
+    localVue.use(i18n)
     localVue.use(Vuex)
+    localVue.use(CompositionApi)
 
     const store = new Vuex.Store({
       strict: false
@@ -47,7 +57,7 @@ describe('AccessRequestModal.vue', () => {
 
     const $t = (onHoldOrRejectModalText: string) =>
       'To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose "Reject Account"'
-
+    
     wrapperFactory = (propsData) => {
       return mount(AccessRequestModal, {
         localVue,
@@ -78,6 +88,7 @@ describe('AccessRequestModal.vue', () => {
   })
 
   it('show Approval modal on open', async () => {
+    await wrapper.vm.$nextTick()
     await wrapper.vm.open()
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Account Creation Request ?`)
   })
