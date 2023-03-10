@@ -1,7 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import { EntityAlertTypes } from '@/util/constants'
-import EntityDetailsAlert from '@/components/auth/manage-business/EntityDetailsAlert.vue'
+import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
@@ -23,17 +23,18 @@ describe('Entity Details Alert tests', () => {
   localVue.use(Vuex)
 
   it('Basic render test', () => {
-    wrapper = mount(EntityDetailsAlert, {
+    wrapper = mount(EntityDetails, {
       vuetify,
       localVue,
       router,
       propsData: {
-        details: [EntityAlertTypes.FROZEN]
+        details: [EntityAlertTypes.FROZEN],
+        icon: 'mdi-alert'
       }
     })
 
     expect(wrapper.exists()).toBeTruthy()
-    expect(wrapper.findComponent(EntityDetailsAlert).exists()).toBeTruthy()
+    expect(wrapper.findComponent(EntityDetails).exists()).toBeTruthy()
     expect(wrapper.props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.FROZEN]))
     expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
   })

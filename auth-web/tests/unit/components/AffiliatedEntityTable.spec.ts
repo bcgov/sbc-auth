@@ -14,6 +14,32 @@ Vue.use(Vuex)
 jest.mock('../../../src/services/user.services')
 
 const businesses = [
+  // BEN Name Request - Processing (expirationDate is empty)
+  {
+    affiliations: [9752],
+    businessIdentifier: 'NR 4045467',
+    contacts: [],
+    corpType: {
+      code: 'NR',
+      default: false,
+      desc: 'Name Request'
+    },
+    created: '2022-11-02T19:36:29+00:00',
+    lastModified: '2022-11-02T19:37:11+00:00',
+    modified: '2022-11-02T19:42:13+00:00',
+    modifiedBy: 'BCREGTEST Lucille TWENTY',
+    name: 'BEN NAME REQUEST LIMITED - PROCESSING',
+    // "nameRequest" is usually populated by syncBusinesses():
+    nameRequest: {
+      legalType: 'BEN',
+      names: [{ name: 'BEN NAME REQUEST LIMITED - PROCESSING' }],
+      nrNumber: 'NR 4045467',
+      state: 'APPROVED',
+      expirationDate: null
+    },
+    passCodeClaimed: true,
+    status: 'APPROVED'
+  },
   // BEN Name Request
   {
     affiliations: [9752],
@@ -34,7 +60,8 @@ const businesses = [
       legalType: 'BEN',
       names: [{ name: 'BEN NAME REQUEST LIMITED' }],
       nrNumber: 'NR 4045466',
-      state: 'APPROVED'
+      state: 'APPROVED',
+      expirationDate: '2022-11-02T19:42:13+00:00'
     },
     passCodeClaimed: true,
     status: 'APPROVED'
@@ -158,7 +185,7 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Renders affiliated entity table', () => {
     // verify table header
-    expect(wrapper.find('.table-header').text()).toBe('My List (4)')
+    expect(wrapper.find('.table-header').text()).toBe('My List (5)')
 
     // verify table
     expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
@@ -174,6 +201,15 @@ describe('AffiliatedEntityTable.vue', () => {
 
     // first item
     let columns = rows.at(0).findAll('td')
+    expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED - PROCESSING')
+    expect(columns.at(1).text()).toBe('NR 4045467')
+    expect(columns.at(2).text()).toContain('Name Request')
+    expect(columns.at(2).text()).toContain('BC Benefit Company')
+    expect(columns.at(3).text()).toBe('Processing')
+    expect(columns.at(4).text()).toBe('Open')
+
+    // second item
+    columns = rows.at(1).findAll('td')
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED')
     expect(columns.at(1).text()).toBe('NR 4045466')
     expect(columns.at(2).text()).toContain('Name Request')
@@ -181,8 +217,8 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Approved')
     expect(columns.at(4).text()).toBe('Open')
 
-    // second item
-    columns = rows.at(1).findAll('td')
+    // third item
+    columns = rows.at(2).findAll('td')
     expect(columns.at(0).text()).toBe('MY BENEFIT COMPANY CORP.')
     expect(columns.at(1).text()).toBe('NR 4045466')
     expect(columns.at(2).text()).toContain('Incorporation Application')
@@ -190,8 +226,8 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
-    // third item
-    columns = rows.at(2).findAll('td')
+    // fourth item
+    columns = rows.at(3).findAll('td')
     expect(columns.at(0).text()).toBe('Numbered Benefit Company')
     expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
@@ -199,8 +235,8 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
-    // fourth item
-    columns = rows.at(3).findAll('td')
+    // fifth item
+    columns = rows.at(4).findAll('td')
     expect(columns.at(0).text()).toBe('MY SOLE PROPRIETORSHIP')
     expect(columns.at(1).text()).toBe('NR 5938962')
     expect(columns.at(2).text()).toContain('Registration')

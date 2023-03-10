@@ -1,16 +1,19 @@
 <template>
   <IconTooltip
-    icon="mdi-alert"
+    :icon="icon"
     maxWidth="300px"
     :colour="iconColour"
     :iconStyling="{'font-size': '1.5em', 'margin-left': '4px'}"
     :location="{top: true}"
   >
     <div class="alert-content">
-      <span class="alert-header" :style="{ 'font-weight': 'bold' }">
+      <span v-if="showAlertHeader" class="alert-header" :style="{ 'font-weight': 'bold' }">
         {{ alertHeader }}
       </span>
-      <ul class="alert-content">
+      <div v-if="alertMessages && alertMessages.length == 1" class="alert-content">
+        {{ alertMessages[0].message }}
+      </div>
+      <ul v-else class="alert-content">
         <li v-for="message, i in alertMessages" :key="i">
           {{ message.message }}
         </li>
@@ -26,17 +29,26 @@ import { PropType } from 'vue'
 import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
-  name: 'EntityDetailsAlert',
+  name: 'EntityDetails',
   components: { IconTooltip },
   props: {
     details: {
       type: Array as PropType<Array<EntityAlertTypes>>,
+      required: true
+    },
+    showAlertHeader: {
+      type: Boolean
+    },
+    icon: {
+      type: String,
       required: true
     }
   },
   setup (props) {
     const generateMessage = (status: string): { message: string, colour: string, priority: number } => {
       switch (status) {
+        case EntityAlertTypes.PROCESSING:
+          return { message: 'This name request is still processing, it may take up to 10 minutes.', colour: '#1669BB', priority: 5 }
         case EntityAlertTypes.FROZEN:
           return { message: 'This business is frozen', colour: '#F8661A', priority: 4 }
         case EntityAlertTypes.BADSTANDING:
