@@ -408,7 +408,7 @@ class Affiliation:
         legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
         get_nr_url = f'{ legal_api_url }/nameRequests/{nr_number}'
         try:
-            get_nr_response = RestService.get(get_nr_url, token=token)
+            get_nr_response = RestService.get(get_nr_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
@@ -420,7 +420,7 @@ class Affiliation:
         legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
         parties_url = f'{ legal_api_url }/businesses/{business_identifier}/parties'
         try:
-            lear_response = RestService.get(parties_url, token=token)
+            lear_response = RestService.get(parties_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
