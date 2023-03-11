@@ -128,7 +128,8 @@ export default class AddNameRequestForm extends Vue {
 
   private isFormValid (): boolean {
     return !!this.nrNumber &&
-      (!!this.applicantPhoneNumber || !!this.applicantEmail)
+      (!!this.applicantPhoneNumber || !!this.applicantEmail) &&
+      CommonUtils.validateNameRequestNumber(this.nrNumber)
   }
 
   private isInputEntered (value: any, inputType: string): boolean {
