@@ -3,17 +3,16 @@ import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import { OnholdOrRejectCode } from '@/util/constants'
+import MockI18n from '../test-utils/test-data/MockI18n'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import MockI18n from '../test-utils/test-data/MockI18n'
 
-Vue.config.silent = true
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 const en = {
-  onHoldOrRejectModalText: 'i8n onHoldOrRejectModalText',
+  onHoldOrRejectModalText: 'i8n onHoldOrRejectModalText'
 }
 const i18n = MockI18n.mock(en)
 
@@ -58,7 +57,7 @@ describe('AccessRequestModal.vue', () => {
 
     const $t = (onHoldOrRejectModalText: string) =>
       'To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose "Reject Account"'
-    
+
     wrapperFactory = (propsData) => {
       return mount(AccessRequestModal, {
         localVue,
@@ -72,7 +71,7 @@ describe('AccessRequestModal.vue', () => {
     }
 
     wrapper = wrapperFactory(props)
-    accessRequest = wrapper.findComponent({ ref: 'accessRequest' });
+    accessRequest = wrapper.findComponent({ ref: 'accessRequest' })
   })
 
   afterEach(() => {
@@ -148,9 +147,12 @@ describe('AccessRequestModal.vue', () => {
     await select.setValue(remarks)
     expect(wrapper.vm.onholdReasons).toBe(remarks)
 
-    await wrapper.find('[data-test="btn-access-request"]').trigger('click')
-
+    const rejectFormMock = {
+      validate: () => true
+    }
+    await wrapper.setData({ rejectForm: rejectFormMock })
     await wrapper.vm.$nextTick()
+    await wrapper.find('[data-test="btn-access-request"]').trigger('click')
     expect(wrapper.emitted('approve-reject-action')).toBeTruthy()
   })
 })
