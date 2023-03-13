@@ -17,8 +17,12 @@ An Affiliation is between an Org and an Entity.
 """
 from __future__ import annotations
 from typing import List
+
+from flask import current_app
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+
+from auth_api.utils.enums import CorpType
 
 from .base_model import VersionedModel
 from .db import db
@@ -37,6 +41,14 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
 
     entity = relationship('Entity', foreign_keys=[entity_id], lazy='select')
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
+
+    @property
+    def affiliation_details_url(self) -> str:
+        """The url of the source service containing the affiliations full data."""
+        if self.entity.corp_type_code == CorpType.NR.value:
+            return current_app.config.get('NAMEX_AFFILIATION_DETAILS_URL')
+        # only have LEAR and NAMEX affiliations
+        return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
 
     @classmethod
     def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id) -> Affiliation:

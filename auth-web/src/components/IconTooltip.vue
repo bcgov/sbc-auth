@@ -1,5 +1,5 @@
 <template >
-  <v-tooltip v-bind="location" color="grey darken-4"  >
+  <v-tooltip v-bind="location">
     <template v-slot:activator="{ on }">
       <v-icon :color="colour" v-on="on" :style="iconStyling">{{ icon }}</v-icon>
     </template>
@@ -47,7 +47,7 @@ export default defineComponent({
   height: 20px;
   border-width: 10px 10px 10px 10px;
   border-style: solid;
-  border-color: transparent transparent var(--v-grey-darken4) transparent;
+  border-color: transparent transparent RGBA(73, 80, 87, .95) transparent;
 }
 
 .top-tooltip:after {
@@ -60,8 +60,11 @@ export default defineComponent({
   height: 20px;
   border-width: 10px 10px 10px 10px;
   border-style: solid;
-  border-color: transparent transparent var(--v-grey-darken4) transparent;
+  border-color: transparent transparent RGBA(73, 80, 87, .95) transparent;
   transform: rotate(180deg);
+}
+.v-tooltip__content {
+  background-color: RGBA(73, 80, 87, .95);
 }
 
 </style>

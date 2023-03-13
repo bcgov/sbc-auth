@@ -72,6 +72,7 @@ export interface NameRequest {
     target?: NrTargetTypes
     entityTypeCd?: string
     natureOfBusiness?: string
+    expirationDate?: Date
 }
 
 // Names interface to match external data provided from lear.

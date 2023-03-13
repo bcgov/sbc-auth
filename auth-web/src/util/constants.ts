@@ -200,7 +200,8 @@ export enum NrDisplayStates {
     REFUND_REQUESTED = 'Cancelled, Refund Requested',
     CANCELLED = 'Cancelled',
     EXPIRED = 'Expired',
-    CONSUMED = 'Consumed'
+    CONSUMED = 'Consumed',
+    PROCESSING = 'Processing'
 }
 
 export enum NrConditionalStates {
@@ -456,5 +457,6 @@ export enum EntityAlertTypes {
     FROZEN = 'FROZEN',
     BADSTANDING = 'BAD_STANDING',
     LIQUIDATION = 'LIQUIDATION',
-    DISSOLUTION = 'DISSOLUTION'
+    DISSOLUTION = 'DISSOLUTION',
+    PROCESSING = 'PROCESSING'
 }
