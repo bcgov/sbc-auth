@@ -253,22 +253,45 @@ export default defineComponent({
       })
     }
 
+    const getTitle = (isProductApproval: boolean) => {
+      if (isProductApproval) {
+        if (props.isTaskRejected) return 'Re-approve Access Request ?'
+        else return 'Approve Access Request ?'
+      } else {
+        return 'Approve Account Creation Request ?'
+      }
+    }
+
+    const getText = (isProductApproval: boolean) => {
+      if (isProductApproval) {
+        if (props.isTaskRejected) {
+          return `By re-approving the request, this account will have access to  ${props.taskName}`
+        } else {
+          return `By approving the request, this account will have access to  ${props.taskName}`
+        }
+      }
+      return `Approving the request will activate this account`
+    }
+
+    const getIcon = (isRejectModal: boolean) => {
+      if (isRejectModal) return 'mdi-alert-circle-outline'
+      return 'mdi-help-circle-outline'
+    }
+
+    const getColor = (isRejectedModal: boolean) => {
+      if (isRejectedModal) return 'error'
+      return 'primary'
+    }
+
     const getModalData = computed(() => {
       const isProductApproval =
         props.accountType === TaskRelationshipType.PRODUCT
 
-      let title = isProductApproval
-        ? props.isTaskRejected
-          ? 'Re-approve Access Request ?'
-          : 'Approve Access Request ?'
-        : 'Approve Account Creation Request ?'
-      let text = isProductApproval
-        ? props.isTaskRejected
-          ? `By re-approving the request, this account will have access to  ${props.taskName}`
-          : `By approving the request, this account will have access to  ${props.taskName}`
-        : `Approving the request will activate this account`
-      let icon = 'mdi-help-circle-outline'
-      let color = 'primary'
+      let title: string = getTitle(isProductApproval)
+      let text: string = getText(isProductApproval)
+
+      let icon = getIcon(props.isRejectModal)
+      let color = getColor(props.isRejectModal)
       let btnLabel = props.isTaskRejected ? 'Re-approve' : 'Approve'
 
       if (props.isRejectModal) {
@@ -279,8 +302,6 @@ export default defineComponent({
         text = isProductApproval // eslint-disable-next-line no-irregular-whitespace
           ? `By rejecting the request, this account won't have access to ${props.taskName}`
           : 'Rejecting the request will not activate this account'
-        icon = 'mdi-alert-circle-outline'
-        color = 'error'
         btnLabel = isProductApproval ? 'Reject' : 'Yes, Reject Account'
       } else if (props.isOnHoldModal) {
         // if we need to show on hold modal

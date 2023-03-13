@@ -548,37 +548,37 @@ export default defineComponent({
     const saveSelection = async (reason) => {
       const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
 
-      if (isValidForm) {
-        isSaving.value = true
-        const isApprove = !isRejectModal.value && !isOnHoldModal.value && !isMoveToPendingModal.value
-        const isRejecting = isRejectModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
-        const isMoveToPending = isMoveToPendingModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
+      if (!isValidForm) return
 
-        try {
-          if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
-            const success = await updateOrganizationAccessType({ accessType: accountInfoAccessType.value as string, orgId: accountUnderReview.value.id, syncOrg: false })
-            if (!success) throw new Error('Error updating account access type prevented review completion.')
-          }
-          if (isApprove) {
-            await approveAccountUnderReview(task.value)
-          } else {
-            await rejectorOnHoldAccountUnderReview({ task: task.value, isRejecting, remarks: onholdReasons })
-          }
-          const taskType: any = task.value.type
+      isSaving.value = true
+      const isApprove = !isRejectModal.value && !isOnHoldModal.value && !isMoveToPendingModal.value
+      const isRejecting = isRejectModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
+      const isMoveToPending = isMoveToPendingModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
 
-          if (
-            [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
-            (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
-          ) {
-            await createAccountFees(task.value.relationshipId)
-          }
-          openModal(!isApprove, true, isRejecting, isMoveToPending)
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.log(error)
-        } finally {
-          isSaving.value = false
+      try {
+        if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
+          const success = await updateOrganizationAccessType({ accessType: accountInfoAccessType.value as string, orgId: accountUnderReview.value.id, syncOrg: false })
+          if (!success) throw new Error('Error updating account access type prevented review completion.')
         }
+        if (isApprove) {
+          await approveAccountUnderReview(task.value)
+        } else {
+          await rejectorOnHoldAccountUnderReview({ task: task.value, isRejecting, remarks: onholdReasons })
+        }
+        const taskType: any = task.value.type
+
+        if (
+          [TaskType.GOVM_REVIEW, TaskType.GOVN_REVIEW].includes(taskType) &&
+          (!accountInfoAccessType.value || [AccessType.GOVN, AccessType.GOVM].includes(accountInfoAccessType.value))
+        ) {
+          await createAccountFees(task.value.relationshipId)
+        }
+        openModal(!isApprove, true, isRejecting, isMoveToPending)
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.log(error)
+      } finally {
+        isSaving.value = false
       }
     }
 
