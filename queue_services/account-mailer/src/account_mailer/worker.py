@@ -100,7 +100,7 @@ async def process_event(event_message: dict, flask_app):
         elif message_type == MessageType.ACCOUNT_CONFIRMATION_PERIOD_OVER.value:
             template_name = TemplateType.ACCOUNT_CONF_OVER_TEMPLATE_NAME.value
             org_id = email_msg.get('accountId')
-            nsf_fee = email_msg.get('nsfFee')
+            nsf_fee = format_currency(email_msg.get('nsfFee'))
             admin_coordinator_emails = get_member_emails(org_id, (ADMIN,))
             subject = SubjectType.ACCOUNT_CONF_OVER_SUBJECT.value
             logo_url = email_msg.get('logo_url')
