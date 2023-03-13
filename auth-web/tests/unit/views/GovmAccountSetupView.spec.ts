@@ -56,7 +56,7 @@ describe('GovmAccountSetupView.vue', () => {
   })
 
   it('GovmAccountSetupView is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should render with h1', () => {
@@ -64,7 +64,7 @@ describe('GovmAccountSetupView.vue', () => {
   })
 
   it('should render page title icon color correctly', () => {
-    expect(wrapper.find(ModalDialog).exists()).toBe(true)
+    expect(wrapper.findComponent(ModalDialog).exists()).toBe(true)
   })
 
   it('should call createAccount on emit', async () => {

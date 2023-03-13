@@ -99,7 +99,7 @@ describe('AccountTypeSelector.vue', () => {
         isAccountChange: false
       }
     })
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('disables basic type when premium products are selected', () => {

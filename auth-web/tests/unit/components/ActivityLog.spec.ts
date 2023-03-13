@@ -97,11 +97,11 @@ describe('Account settings ActivityLog.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(ActivityLog).exists()).toBe(true)
+    expect(wrapper.findComponent(ActivityLog).exists()).toBe(true)
   })
 
   it('renders proper header ', () => {

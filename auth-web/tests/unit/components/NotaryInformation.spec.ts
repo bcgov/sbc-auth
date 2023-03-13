@@ -63,11 +63,11 @@ describe('NotaryInformation.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the NotaryInformation properly ', () => {
-    expect(wrapper.find(NotaryInformation).exists()).toBe(true)
+    expect(wrapper.findComponent(NotaryInformation).exists()).toBe(true)
   })
 
   it('renders proper header content fro NotaryInformation', () => {

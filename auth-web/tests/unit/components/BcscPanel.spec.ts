@@ -47,12 +47,12 @@ describe('BcscPanel.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(BcscPanel).exists()).toBe(true)
-    expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
+    expect(wrapper.findComponent(BcscPanel).exists()).toBe(true)
+    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('doesn\'t render the login or create account link when authenticated', () => {

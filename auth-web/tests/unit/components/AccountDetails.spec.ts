@@ -75,11 +75,11 @@ describe('AccountDetails.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly ', () => {
-    expect(wrapper.find(AccountDetails).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountDetails).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

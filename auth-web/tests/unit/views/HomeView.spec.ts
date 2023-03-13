@@ -81,13 +81,13 @@ describe('HomeView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the sub-components properly', () => {
-    expect(wrapper.find(InfoStepper).exists()).toBe(true)
-    expect(wrapper.find(TestimonialQuotes).exists()).toBe(true)
-    expect(wrapper.find(BcscPanel).exists()).toBe(true)
+    expect(wrapper.findComponent(InfoStepper).exists()).toBe(true)
+    expect(wrapper.findComponent(TestimonialQuotes).exists()).toBe(true)
+    expect(wrapper.findComponent(BcscPanel).exists()).toBe(true)
   })
 
   it('renders the correct buttons when authenticated', () => {

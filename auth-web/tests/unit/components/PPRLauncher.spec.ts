@@ -72,7 +72,7 @@ describe('PPRLauncher.vue', () => {
   })
 
   it('is a Vue instance', async () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders img, title, text and button as PPR staff', async () => {

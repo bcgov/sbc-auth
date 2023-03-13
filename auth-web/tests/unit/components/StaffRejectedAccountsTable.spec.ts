@@ -64,7 +64,7 @@ describe('StaffRejectedAccountsTable.vue', () => {
   })
 
   it('is a Vue instance and has a data table', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(wrapper.find('.user-list')).toBeTruthy()
   })
 })

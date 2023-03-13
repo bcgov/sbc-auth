@@ -60,11 +60,11 @@ describe('GovmPaymentMethodSelector.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and DeveloperAccess should be  shown', () => {
-    expect(wrapper.find(ExistingAPIKeys).exists()).toBe(true)
+    expect(wrapper.findComponent(ExistingAPIKeys).exists()).toBe(true)
     expect(wrapper.find('h2').text()).toBe('Developer Access')
   })
 })

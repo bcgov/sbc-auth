@@ -151,7 +151,7 @@ describe('ReviewAccountView.vue', () => {
       }
     })
 
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     // expect(wrapper.find('h1').text()).toBe('Send Invite to Ministry Account')
     wrapper.destroy()
   })

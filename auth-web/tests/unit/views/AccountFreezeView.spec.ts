@@ -78,7 +78,7 @@ describe('AccountFreezeView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('should render page title', () => {

@@ -64,7 +64,7 @@ describe('BusinessContactForm.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('business contact form has save and skip buttons', () => {

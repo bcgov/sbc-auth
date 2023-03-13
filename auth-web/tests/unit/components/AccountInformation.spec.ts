@@ -58,11 +58,11 @@ describe('AccountInformation.vue basic tests', () => {
   afterEach(() => { wrapper.destroy() })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly ', () => {
-    expect(wrapper.find(AccountInformation).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountInformation).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

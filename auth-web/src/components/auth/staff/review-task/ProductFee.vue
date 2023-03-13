@@ -1,5 +1,5 @@
 <template>
-  <section v-if="accountFeesDTO.length">
+  <section v-if="accountFeesDTO && accountFeesDTO.length">
     <h2 class="mb-5">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''}${title}`}}</h2>
     <p class="mb-9">{{ $t('productFeeSubTitle') }}</p>
     <v-form ref="productFeeForm" id="productFeeForm">
@@ -62,7 +62,7 @@ import { useStore } from 'vuex-composition-helpers'
 
 // FUTURE: remove this in vue 3
 interface ProductFeeState {
-  accountFeesDTO: AccountFeeDTO[]
+  accountFeesDTO: Array<AccountFeeDTO>
 }
 
 export default defineComponent({
@@ -108,7 +108,7 @@ export default defineComponent({
     const productFeeForm = ref<HTMLFormElement>()
 
     onMounted(() => {
-      if (!accountFees.value.length) {
+      if (!accountFees.value?.length) {
         // prepopulate the array with the subscribed products
         orgProducts.value.forEach((orgProduct: OrgProduct) => {
           if (orgProduct.subscriptionStatus === ProductStatus.ACTIVE) {
@@ -168,11 +168,12 @@ export default defineComponent({
     }
 
     // Only allow $1.05 and $0 service fee code for ESRA aka Site Registry.
-    const getOrgProductFeeCodesForProduct = (productCode: string) => {
+    const getOrgProductFeeCodesForProduct = (productCode: string) : OrgProductFeeCode[] => {
       return orgProductFeeCodes.value?.filter((fee) => ['TRF03', 'TRF04'].includes(fee.code) || productCode !== 'ESRA')
     }
 
     return {
+      getOrgProductFeeCodesForProduct,
       applyFilingFeesValues,
       validateNow,
       displayProductName,
@@ -181,7 +182,6 @@ export default defineComponent({
       serviceFeeCodeRules,
       selectChange,
       getIndexedTag,
-      getOrgProductFeeCodesForProduct,
       productFeeForm,
       ...toRefs(state)
     }

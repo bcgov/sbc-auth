@@ -36,7 +36,7 @@ describe('Stepper.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('is default configurations are correct', () => {

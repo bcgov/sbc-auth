@@ -121,7 +121,7 @@ tests.forEach(test => {
       // verify components
       expect(wrapper.attributes('id')).toBe('add-business-dialog')
       expect(wrapper.find('#add-business-dialog').isVisible()).toBe(true)
-      expect(wrapper.find(HelpDialog).exists()).toBe(true)
+      expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
 
       // verify input fields
       expect(wrapper.find('.business-identifier').attributes('label'))

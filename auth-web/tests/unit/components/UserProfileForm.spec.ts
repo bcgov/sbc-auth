@@ -65,7 +65,7 @@ describe('UserProfileForm.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('user profile form has save and cancel buttons', () => {

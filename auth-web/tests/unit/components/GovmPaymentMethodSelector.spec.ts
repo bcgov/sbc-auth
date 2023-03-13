@@ -50,12 +50,12 @@ describe('GovmPaymentMethodSelector.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and GLPaymentForm should be  shown', () => {
-    expect(wrapper.find(GovmPaymentMethodSelector).exists()).toBe(true)
-    expect(wrapper.find(GLPaymentForm).exists()).toBe(true)
+    expect(wrapper.findComponent(GovmPaymentMethodSelector).exists()).toBe(true)
+    expect(wrapper.findComponent(GLPaymentForm).exists()).toBe(true)
     // expect(wrapper.find('.save-continue-button').is('[disabled]')).toBe(true)
   })
 })

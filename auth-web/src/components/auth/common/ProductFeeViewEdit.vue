@@ -12,7 +12,7 @@
         <div v-if="viewOnlyMode">
           <div>
             Statutory Fee:
-            <span class="font-weight-bold" data-test="apply-filing">{{ applyFilling }}</span>
+            <span class="font-weight-bold" data-test="apply-filing">{{ applyFilingText }}</span>
           </div>
           <div>
             Service Fee:
@@ -70,8 +70,8 @@
 </template>
 
 <script lang="ts">
+import { AccountFee, OrgProductFeeCode } from '@/models/Organization'
 import { PropType, computed, defineComponent, ref, watch } from '@vue/composition-api'
-import { OrgProductFeeCode } from '@/models/Organization'
 import ProductFeeSelector from '@/components/auth/common/ProductFeeSelector.vue'
 
 export default defineComponent({
@@ -82,6 +82,7 @@ export default defineComponent({
   },
   props: {
     orgProduct: {
+      type: Object as PropType<AccountFee>,
       default: undefined
     },
     orgProductFeeCodes: {
@@ -113,8 +114,8 @@ export default defineComponent({
       }
     })
 
-    const applyFiling = computed<string>(() => {
-      return props.orgProduct.value?.applyFilingFees === true ? 'Yes' : 'No'
+    const applyFilingText = computed<string>(() => {
+      return props?.orgProduct?.applyFilingFees === true ? 'Yes' : 'No'
     })
 
     const productFee = () => {
@@ -150,7 +151,7 @@ export default defineComponent({
     const existingFeeCodes = computed(() => {
       const existingApplyFilingFees = selectedFee.value?.applyFilingFees
         ? selectedFee.value?.applyFilingFees
-        : props.orgProduct.value?.applyFilingFees
+        : props.orgProduct.applyFilingFees
       const fee: any = productFee()
       const selectedFeeCode = fee && fee.code
       const existingserviceFeeCode = selectedFee.value?.serviceFeeCode
@@ -162,14 +163,14 @@ export default defineComponent({
     return {
       viewOnlyMode,
       selectedFee,
-      applyFiling,
-      getProductFee,
       updateViewOnlyMode,
       productFee,
       updatedProductFee,
       getOrgProductFeeCodesForProduct,
       existingFeeCodes,
-      saveProductFee
+      saveProductFee,
+      getProductFee,
+      applyFilingText
     }
   }
 })

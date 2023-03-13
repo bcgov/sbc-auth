@@ -55,13 +55,13 @@ describe('IncorpOrRegisterView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(IncorpOrRegisterView).exists()).toBe(true)
-    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(false)
-    expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
+    expect(wrapper.findComponent(IncorpOrRegisterView).exists()).toBe(true)
+    expect(wrapper.findComponent(NumberedCompanyTooltip).exists()).toBe(false)
+    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('renders the correct buttons when authenticated', () => {

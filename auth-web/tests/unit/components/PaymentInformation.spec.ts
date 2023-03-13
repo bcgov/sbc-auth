@@ -59,11 +59,11 @@ describe('PaymentInformation.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the AgreementInformation components properly ', () => {
-    expect(wrapper.find(PaymentInformation).exists()).toBe(true)
+    expect(wrapper.findComponent(PaymentInformation).exists()).toBe(true)
   })
 
   it('renders proper GLInfo content', () => {

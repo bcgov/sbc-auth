@@ -52,11 +52,11 @@ describe('ProductTOS.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the ProductTOS components properly ', () => {
-    expect(wrapper.find(ProductTOS).exists()).toBe(true)
+    expect(wrapper.findComponent(ProductTOS).exists()).toBe(true)
   })
   it('renders proper header content', () => {
     expect(wrapper.find('h4').text()).toBe('Terms of Service')
