@@ -32,6 +32,7 @@ def cors_preflight(methods):
             return {'Allow': 'GET'}, 200, \
                    {'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': methods,
+                    'Access-Control-Max-Age': 21600,
                     'Access-Control-Allow-Headers': 'Authorization, Content-Type, registries-trace-id, '
                                                     'invitation_token'}
 
