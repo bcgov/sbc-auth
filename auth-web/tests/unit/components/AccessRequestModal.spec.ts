@@ -1,4 +1,3 @@
-import CompositionApi, { computed, defineComponent } from '@vue/composition-api'
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -48,7 +47,6 @@ describe('AccessRequestModal.vue', () => {
     const localVue = createLocalVue()
     localVue.use(i18n)
     localVue.use(Vuex)
-    localVue.use(CompositionApi as any)
 
     const store = new Vuex.Store({
       strict: false

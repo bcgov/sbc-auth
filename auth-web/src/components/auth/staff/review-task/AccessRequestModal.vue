@@ -10,14 +10,14 @@
     >
 
       <template v-slot:icon>
-        <v-icon large :color="getModalData().color">{{getModalData().icon}}</v-icon>
+        <v-icon large :color="getModalData.color">{{getModalData.icon}}</v-icon>
       </template>
       <template v-slot:title>
-        <span class="font-weight-bold text-size mb-1" data-test="dialog-header"> {{ getModalData().title }} </span>
+        <span class="font-weight-bold text-size mb-1" data-test="dialog-header"> {{ getModalData.title }} </span>
       </template>
       <template v-slot:text>
         <div class="mx-8">
-          <p class="mb-4 text-color sub-text-size text-justify" v-html="getModalData().text" data-test="p-modal-text"></p>
+          <p class="mb-4 text-color sub-text-size text-justify" v-html="getModalData.text" data-test="p-modal-text"></p>
           <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isOnHoldModal">
             <v-row justify="center">
               <v-col cols="6" class="pa-0">
@@ -114,11 +114,11 @@
         </div>
       </template>
       <template v-slot:actions>
-        <v-btn large :color="getModalData().color" @click="callAction()"
+        <v-btn large :color="getModalData.color" @click="callAction()"
           class="font-weight-bold px-4"
           :loading="isSaving"
           data-test="btn-access-request"
-        >{{getModalData().btnLabel}}</v-btn>
+        >{{getModalData.btnLabel}}</v-btn>
         <v-btn large outlined color="primary" @click="close()" data-test="btn-close-access-request-dialog">Cancel</v-btn>
       </template>
     </ModalDialog>
@@ -127,8 +127,8 @@
     <ModalDialog
       ref="accessRequestConfirmationDialog"
       :isPersistent="true"
-      :title="getConfirmModalData().title"
-      :text="getConfirmModalData().text"
+      :title="getConfirmModalData.title"
+      :text="getConfirmModalData.text"
       dialog-class="notify-dialog"
       max-width="640"
     >
@@ -136,7 +136,7 @@
         <v-icon large color="primary">mdi-check</v-icon>
       </template>
       <template v-slot:text>
-        <p class="mx-5" v-html="getConfirmModalData().text"></p>
+        <p class="mx-5" v-html="getConfirmModalData.text"></p>
       </template>
       <template v-slot:actions>
         <v-btn
@@ -155,7 +155,7 @@
 
 <script lang="ts">
 import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
-import { Ref, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useI18n } from 'vue-i18n-bridge'
 
@@ -206,38 +206,11 @@ export default defineComponent({
     const { t } = useI18n()
     const onholdReasons: Ref<string[]> = ref([])
     const accountToBeOnholdOrRejected: Ref<string> = ref('')
-    const moveToPendingReason: Ref<string> = ref('')
     const accessRequest: Ref<ModalDialog> = ref(null)
     const accessRequestConfirmationDialog: Ref<ModalDialog> = ref(null)
     const rejectForm: Ref<HTMLFormElement> = ref(null)
     const onholdReasonCodes: Ref<string[]> = ref([])
     const otherReasonText: Ref<string> = ref('')
-
-    interface ModalData {
-      title: string
-      text: string
-      btnLabel: string
-      icon: string
-      color: string
-    }
-
-    interface ConfirmModalData {
-      title: string
-      text: string
-    }
-
-    const modalData: Ref<ModalData> = ref({
-      title: '',
-      text: '',
-      btnLabel: '',
-      icon: '',
-      color: ''
-    })
-
-    const confirmModalData: Ref<ConfirmModalData> = ref({
-      title: '',
-      text: ''
-    })
 
     const onholdReasonRules = [
       (v) => v.length > 0 || 'This field is required'
@@ -280,7 +253,7 @@ export default defineComponent({
       })
     }
 
-    const getModalData = () => {
+    const getModalData = computed(() => {
       const isProductApproval =
         props.accountType === TaskRelationshipType.PRODUCT
 
@@ -323,9 +296,9 @@ export default defineComponent({
         btnLabel = 'Confirm'
       }
       return { title, text, icon, color, btnLabel }
-    }
+    })
 
-    const getConfirmModalData = () => {
+    const getConfirmModalData = computed(() => {
       const isProductApproval =
         props.accountType === TaskRelationshipType.PRODUCT
 
@@ -352,7 +325,7 @@ export default defineComponent({
           'An email has been sent to the user presenting the reason why the account is on hold, and a link to resolve the issue.'
       }
       return { title, text }
-    }
+    })
 
     const open = () => {
       accessRequest.value.open()
@@ -383,11 +356,8 @@ export default defineComponent({
       callAction,
       close,
       closeConfirm,
-      confirmModalData,
       getConfirmModalData,
       getModalData,
-      isMoveToPendingModal: props.isMoveToPendingModal,
-      modalData,
       onholdReasonCodes,
       onholdReasonRules,
       onholdReasons,
