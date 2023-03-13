@@ -1,9 +1,11 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -13,7 +15,6 @@ describe('ProductFeeViewEdit.vue', () => {
   let wrapper: any
   const vuetify = new Vuetify({})
   const localVue = createLocalVue()
-  localVue.use(VueCompositionAPI)
 
   const orgProductFeeCodes =
     [ { 'amount': 1.5, 'code': 'TRF01' }, { 'amount': 1, 'code': 'TRF02' } ]

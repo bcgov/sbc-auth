@@ -131,7 +131,7 @@ export default defineComponent({
 
     const getProductFee = computed<string>(() => {
       const fee: any = productFee()
-      return fee && fee.amount ? `$ ${fee && fee?.amount.toFixed(2)}` : ''
+      return fee.amount != null ? `$ ${fee.amount.toFixed(2)}` : ''
     })
 
     const updatedProductFee = (data) => {
