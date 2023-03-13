@@ -35,15 +35,17 @@ describe('ProductFeeViewEdit.vue', () => {
     wrapper.destroy()
   })
 
-  it('is a Vue instance', () => {
-    expect(wrapper.vm).toBeTruthy()
-  })
-
   it('Should have Service Fee and Statutory Fee', async () => {
+    expect(wrapper.vm).toBeTruthy()
+    await wrapper.setProps({
+      orgProduct: { ...orgProduct },
+      orgProductFeeCodes: orgProductFeeCodes.slice(0)
+    })
     expect(wrapper.find("[data-test='apply-filing']").text()).toBe('Yes')
     expect(wrapper.find("[data-test='prod-filing']").text()).toBe('$ 1.50')
     await wrapper.setProps({
-      orgProduct: { 'applyFilingFees': false, 'id': 45, 'product': 'BUSINESS', 'serviceFeeCode': 'TRF04' }
+      orgProduct: { 'applyFilingFees': false, 'id': 45, 'product': 'BUSINESS', 'serviceFeeCode': 'TRF04' },
+      orgProductFeeCodes: orgProductFeeCodes.slice(0)
     })
     expect(wrapper.find("[data-test='apply-filing']").text()).toBe('No')
     expect(wrapper.find("[data-test='prod-filing']").text()).toBe('$ 0.00')
