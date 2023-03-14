@@ -85,8 +85,9 @@ export default defineComponent({
     const orgProductFeeCodes = computed<OrgProductFeeCode[]>(() => orgState.orgProductFeeCodes)
     const orgProducts = computed<OrgProduct[]>(() => orgState.productList)
     const accountFees = computed<AccountFee[]>(() => orgState.currentAccountFees)
-    const setCurrentAccountFees = (accountFees: AccountFee[]): Promise<void> =>
-      store.dispatch('org/setCurrentAccountFees', accountFees)
+    const setCurrentAccountFees = (accountFees: AccountFee[]) => {
+      store.commit('org/setCurrentAccountFees', accountFees)
+    }
 
     const state: ProductFeeState = reactive<ProductFeeState>({
       accountFeesDTO: []
@@ -121,7 +122,7 @@ export default defineComponent({
       } else {
         // Map account fees details to accountFeesDTO so as to display in v-select
         state.accountFeesDTO = JSON.parse(JSON.stringify(accountFees.value))
-        state.accountFeesDTO.forEach((accountFee:AccountFeeDTO) => {
+        state.accountFeesDTO.forEach((accountFee: AccountFeeDTO) => {
           accountFee.applyFilingFees = accountFee.applyFilingFees.toString()
         })
       }
@@ -148,7 +149,7 @@ export default defineComponent({
       v => !!v || 'A service fee is required'
     ]
 
-    const selectChange = () : void => {
+    const selectChange = (): void => {
       // Wait till next DOM render to emit event so that we capture form validation
       // Map back to AccountFees to store
       const accountFees: AccountFee[] = []
@@ -168,7 +169,7 @@ export default defineComponent({
     }
 
     // Only allow $1.05 and $0 service fee code for ESRA aka Site Registry.
-    const getOrgProductFeeCodesForProduct = (productCode: string) : OrgProductFeeCode[] => {
+    const getOrgProductFeeCodesForProduct = (productCode: string): OrgProductFeeCode[] => {
       return orgProductFeeCodes.value?.filter((fee) => ['TRF03', 'TRF04'].includes(fee.code) || productCode !== 'ESRA')
     }
 
