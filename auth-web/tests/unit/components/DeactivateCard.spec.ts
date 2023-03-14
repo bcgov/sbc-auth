@@ -44,7 +44,7 @@ describe('Deactivated card.vue', () => {
       router
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(wrapper.find("[data-test='title-deactivate']").text()).toBe('When this account is deactivated...')
     wrapper.destroy()
   })
@@ -59,7 +59,7 @@ describe('Deactivated card.vue', () => {
       }
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(wrapper.props('type')).toBe(Account.BASIC)
   })
 

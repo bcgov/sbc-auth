@@ -62,11 +62,11 @@ describe('GovmContactInfoForm.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and cancel button should be  shown', () => {
-    expect(wrapper.find(GovmContactInfoForm).exists()).toBe(true)
-    expect(wrapper.find(ConfirmCancelButton).exists()).toBe(true)
+    expect(wrapper.findComponent(GovmContactInfoForm).exists()).toBe(true)
+    expect(wrapper.findComponent(ConfirmCancelButton).exists()).toBe(true)
   })
 })

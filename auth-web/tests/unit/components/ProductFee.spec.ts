@@ -50,6 +50,6 @@ describe('PaymentInformation.vue', () => {
       store,
       vuetify
     })
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 })

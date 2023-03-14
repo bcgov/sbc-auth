@@ -91,19 +91,19 @@ describe('StaffDashboardView tests', () => {
   })
 
   it('renders view with child components', async () => {
-    expect(wrapper.find(StaffDashboardView).exists()).toBe(true)
+    expect(wrapper.findComponent(StaffDashboardView).exists()).toBe(true)
     expect(wrapper.find('.view-header__title').text()).toBe('Staff Dashboard')
-    expect(wrapper.find(PPRLauncher).exists()).toBe(true)
-    expect(wrapper.find(IncorporationSearchResultView).exists()).toBe(true)
-    expect(wrapper.find(StaffAccountManagement).exists()).toBe(true)
-    expect(wrapper.find(GLCodesListView).exists()).toBe(true)
+    expect(wrapper.findComponent(PPRLauncher).exists()).toBe(true)
+    expect(wrapper.findComponent(IncorporationSearchResultView).exists()).toBe(true)
+    expect(wrapper.findComponent(StaffAccountManagement).exists()).toBe(true)
+    expect(wrapper.findComponent(GLCodesListView).exists()).toBe(true)
     const expansionPanels = wrapper.findAll(BaseVExpansionPanel)
     expect(expansionPanels.length).toBe(2)
     // hidden by closed BaseVExpansionPanel
-    expect(wrapper.find(Transactions).exists()).toBe(false)
+    expect(wrapper.findComponent(Transactions).exists()).toBe(false)
     // expanding shows it
     expansionPanels.at(0).find('button').trigger('click')
     await Vue.nextTick()
-    expect(wrapper.find(Transactions).exists()).toBe(true)
+    expect(wrapper.findComponent(Transactions).exists()).toBe(true)
   })
 })

@@ -122,7 +122,7 @@ describe('Base datatable tests', () => {
   })
 
   it('renders and displays the base datatable', async () => {
-    expect(wrapper.find(BaseVDataTable).exists()).toBe(true)
+    expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
     // verify setup
     expect(wrapper.vm.setHeaders).toEqual(headersBasic)
     expect(wrapper.vm.setItems).toEqual(items)

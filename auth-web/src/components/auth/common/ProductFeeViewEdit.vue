@@ -12,7 +12,7 @@
         <div v-if="viewOnlyMode">
           <div>
             Statutory Fee:
-            <span class="font-weight-bold" data-test="apply-filing">{{ applyFilling }}</span>
+            <span class="font-weight-bold" data-test="apply-filing">{{ applyFilingText }}</span>
           </div>
           <div>
             Service Fee:
@@ -70,86 +70,110 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-
-import { OrgProductFeeCode } from '@/models/Organization'
+import { AccountFee, OrgProductFeeCode } from '@/models/Organization'
+import { PropType, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import ProductFeeSelector from '@/components/auth/common/ProductFeeSelector.vue'
 
-@Component({
+export default defineComponent({
+  name: 'ProductFeeViewEdit',
+  emits: ['save:saveProductFee'],
   components: {
     ProductFeeSelector
+  },
+  props: {
+    orgProduct: {
+      type: Object as PropType<AccountFee>,
+      default: undefined
+    },
+    orgProductFeeCodes: {
+      type: Array as PropType<OrgProductFeeCode[]>,
+      default: undefined
+    },
+    isProductActionLoading: {
+      type: Boolean
+    },
+    isProductActionCompleted: {
+      type: Boolean
+    }
+  },
+  setup (props, { emit }) {
+    const viewOnlyMode = ref(true)
+    const selectedFee = ref<any>({})
+
+    const updateViewOnlyMode = (mode = true) : void => {
+      viewOnlyMode.value = mode
+      if (mode === false) {
+        // reset on cancel
+        selectedFee.value = {}
+      }
+    }
+
+    watch(() => props.isProductActionCompleted, (val, oldVal) => {
+      if (val && val !== oldVal) {
+        updateViewOnlyMode(true)
+      }
+    })
+
+    const applyFilingText = computed<string>(() => {
+      return props?.orgProduct?.applyFilingFees === true ? 'Yes' : 'No'
+    })
+
+    const productFee = () => {
+      if (props.orgProductFeeCodes.length > 0) {
+        const fees = props.orgProductFeeCodes.filter(
+          (fee) => fee.code === props.orgProduct.serviceFeeCode
+        )
+
+        return fees && fees[0]
+      }
+      return {}
+    }
+
+    const getProductFee = computed<string>(() => {
+      const fee: any = productFee()
+      return fee.amount != null ? `$ ${fee.amount.toFixed(2)}` : ''
+    })
+
+    const updatedProductFee = (data) => {
+      selectedFee.value = data
+      return selectedFee.value
+    }
+
+    const saveProductFee = () => {
+      emit('save:saveProductFee', selectedFee.value)
+    }
+
+    // Only allow $1.05 and $0 service fee code for ESRA aka Site Registry.
+    const getOrgProductFeeCodesForProduct = (productCode: string) => {
+      return props.orgProductFeeCodes?.filter((fee) => ['TRF03', 'TRF04'].includes(fee.code) || productCode !== 'ESRA')
+    }
+
+    const existingFeeCodes = computed(() => {
+      const existingApplyFilingFees = selectedFee.value?.applyFilingFees
+        ? selectedFee.value?.applyFilingFees
+        : props.orgProduct.applyFilingFees
+      const fee: any = productFee()
+      const selectedFeeCode = fee && fee.code
+      const existingserviceFeeCode = selectedFee.value?.serviceFeeCode
+        ? selectedFee.value?.serviceFeeCode
+        : selectedFeeCode
+      return { existingApplyFilingFees, existingserviceFeeCode }
+    })
+
+    return {
+      viewOnlyMode,
+      selectedFee,
+      updateViewOnlyMode,
+      productFee,
+      updatedProductFee,
+      getOrgProductFeeCodesForProduct,
+      existingFeeCodes,
+      saveProductFee,
+      getProductFee,
+      applyFilingText
+    }
   }
 })
-export default class ProductFeeViewEdit extends Vue {
-  @Prop({ default: undefined }) orgProduct: any // product available for orgs
-  @Prop({ default: undefined }) orgProductFeeCodes: OrgProductFeeCode[] // product
-  @Prop({ default: false }) isProductActionLoading: boolean // loading
-  @Prop({ default: false }) isProductActionCompleted: boolean // close after saving
-
-  private viewOnlyMode = true
-  private selectedFee: any = {}
-
-  @Watch('isProductActionCompleted')
-  onProductActionCompleted (val, oldVal) {
-    if (val && val !== oldVal) {
-      this.updateViewOnlyMode(true)
-    }
-  }
-
-  get applyFilling () {
-    return this.orgProduct?.applyFilingFees === true ? 'Yes' : 'No'
-  }
-
-  get getProductFee () {
-    const fee: any = this.productFee()
-    return fee && fee.amount ? `$ ${fee && fee?.amount.toFixed(2)}` : ''
-  }
-
-  public updateViewOnlyMode (mode = true) {
-    this.viewOnlyMode = mode
-    if (mode === false) {
-      // reset on cancel
-      this.selectedFee = {}
-    }
-  }
-  private productFee () {
-    if (this.orgProductFeeCodes.length > 0) {
-      const fees = this.orgProductFeeCodes.filter(
-        (fee) => fee.code === this.orgProduct.serviceFeeCode
-      )
-
-      return fees && fees[0]
-    }
-    return {}
-  }
-
-  private updatedProductFee (data) {
-    this.selectedFee = data
-    return this.selectedFee
-  }
-
-  @Emit('save:saveProductFee')
-  private saveProductFee () {
-    return this.selectedFee
-  }
-
-  // Only allow $1.05 fee code for ESRA aka Site Registry.
-  public getOrgProductFeeCodesForProduct (productCode: string) {
-    return this.orgProductFeeCodes?.filter((fee) => fee.code === 'TRF03' || productCode !== 'ESRA')
-  }
-
-  get existingFeeCodes () {
-    const existingApplyFilingFees = this.selectedFee?.applyFilingFees
-      ? this.selectedFee?.applyFilingFees
-      : this.orgProduct?.applyFilingFees
-    const fee: any = this.productFee()
-    const selectedFeeCode = fee && fee.code
-    const existingserviceFeeCode = this.selectedFee?.serviceFeeCode
-      ? this.selectedFee?.serviceFeeCode
-      : selectedFeeCode
-    return { existingApplyFilingFees, existingserviceFeeCode }
-  }
-}
 </script>
 <style lang="scss" scoped>
 .w-100 {

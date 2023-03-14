@@ -42,13 +42,13 @@ describe('RequestNameView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(RequestNameView).exists()).toBe(true)
-    expect(wrapper.find(NumberedCompanyTooltip).exists()).toBe(true)
-    expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
+    expect(wrapper.findComponent(RequestNameView).exists()).toBe(true)
+    expect(wrapper.findComponent(NumberedCompanyTooltip).exists()).toBe(true)
+    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('renders the name request button', () => {

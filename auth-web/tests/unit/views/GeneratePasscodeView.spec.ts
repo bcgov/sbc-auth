@@ -49,7 +49,7 @@ describe('GeneratePasscodeView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('contains email address input to send', () => {
