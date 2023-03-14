@@ -88,7 +88,7 @@ describe('OrgNameAutoComplete.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
   it('does not display when inactive', async () => {
     wrapper.setProps({ setAutoCompleteIsActive: false })

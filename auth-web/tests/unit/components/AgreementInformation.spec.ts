@@ -54,11 +54,11 @@ describe('AgreementInformation.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the AgreementInformation components properly ', () => {
-    expect(wrapper.find(AgreementInformation).exists()).toBe(true)
+    expect(wrapper.findComponent(AgreementInformation).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

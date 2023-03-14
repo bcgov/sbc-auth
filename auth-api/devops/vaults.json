@@ -12,7 +12,8 @@
             "base",
             "jwt-base",
             "sbc-auth-admin",
-            "bcros-keycloak"
+            "bcros-keycloak",
+            "entity-service-account"
         ]
     },
     {

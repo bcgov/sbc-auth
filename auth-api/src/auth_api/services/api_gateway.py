@@ -153,7 +153,7 @@ class ApiGateway:
             try:
                 consumers_response = RestService.get(
                     f'{consumer_endpoint}/mc/v1/consumers/{email}',
-                    additional_headers={'x-apikey': gw_api_key}
+                    additional_headers={'x-apikey': gw_api_key}, skip_404_logging=True
                 )
                 keys = consumers_response.json()['consumer']['consumerKey']
                 cls._filter_and_add_keys(api_keys_response, keys, email)
@@ -195,7 +195,8 @@ class ApiGateway:
         try:
             RestService.get(
                 f'{consumer_endpoint}/mc/v1/consumers/{email}',
-                additional_headers={'x-apikey': gw_api_key}
+                additional_headers={'x-apikey': gw_api_key},
+                skip_404_logging=True
             )
         except HTTPError as exc:
             if exc.response.status_code == 404:  # If consumer doesn't exist

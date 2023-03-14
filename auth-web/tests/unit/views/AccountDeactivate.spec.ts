@@ -59,9 +59,9 @@ describe('AccountDeactivate.vue', () => {
   })
 
   it('AccountDeactivate is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
   it('AccountDeactivate contains the card', () => {
-    expect(wrapper.find(DeactivateCard).exists()).toBe(true)
+    expect(wrapper.findComponent(DeactivateCard).exists()).toBe(true)
   })
 })

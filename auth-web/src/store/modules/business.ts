@@ -139,7 +139,8 @@ export default class BusinessModule extends VuexModule {
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
           entityTypeCd: nr.entity_type_cd,
-          natureOfBusiness: nr.natureBusinessInfo
+          natureOfBusiness: nr.natureBusinessInfo,
+          expirationDate: nr.expirationDate
         }
       }
     })

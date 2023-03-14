@@ -66,11 +66,11 @@ describe('AccountStatus.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly ', () => {
-    expect(wrapper.find(AccountStatus).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountStatus).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

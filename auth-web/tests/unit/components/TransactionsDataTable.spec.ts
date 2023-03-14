@@ -68,13 +68,13 @@ describe('TransactionsDataTable tests', () => {
   it('renders transaction table with child components', async () => {
     // trigger load
     await wrapper.vm.loadTransactionList()
-    expect(wrapper.find(BaseVDataTable).exists()).toBe(true)
-    expect(wrapper.find(DatePicker).exists()).toBe(true)
-    expect(wrapper.find(DatePicker).isVisible()).toBe(false)
+    expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
+    expect(wrapper.findComponent(DatePicker).exists()).toBe(true)
+    expect(wrapper.findComponent(DatePicker).isVisible()).toBe(false)
     expect(wrapper.find(heading).exists()).toBe(false)
     // table headers
-    expect(wrapper.find(BaseVDataTable).find(header).exists()).toBe(true)
-    const titles = wrapper.find(BaseVDataTable).findAll(headerTitles)
+    expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
+    const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
     expect(titles.length).toBe(headers.length)
     expect(titles.at(0).text()).toBe('Transaction Type')
     expect(titles.at(1).text()).toBe('Folio #')
@@ -86,7 +86,7 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(7).text()).toBe('Payment Status')
     expect(titles.at(8).text()).toBe('')
     // table items
-    const itemRows = wrapper.find(BaseVDataTable).findAll(itemRow)
+    const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
     // test cell data
     const row1Cells = itemRows.at(0).findAll(itemCell)
@@ -111,8 +111,8 @@ describe('TransactionsDataTable tests', () => {
     expect(wrapper.find(heading).exists()).toBe(true)
     expect(wrapper.find(heading).text().replaceAll(' ', '').replaceAll('\n', '')).toBe('Transactions(2)')
     // table headers
-    expect(wrapper.find(BaseVDataTable).find(header).exists()).toBe(true)
-    const titles = wrapper.find(BaseVDataTable).findAll(headerTitles)
+    expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
+    const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
     expect(titles.length).toBe(headersExtended.length)
     expect(titles.at(0).text()).toBe('Account Name')
     expect(titles.at(1).text()).toBe('Application Type')
@@ -129,7 +129,7 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(12).text()).toBe('Payment Status')
     expect(titles.at(13).text()).toBe('')
     // table items
-    const itemRows = wrapper.find(BaseVDataTable).findAll(itemRow)
+    const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
     // test cell data
     const row1Cells = itemRows.at(0).findAll(itemCell)
@@ -151,11 +151,11 @@ describe('TransactionsDataTable tests', () => {
 
   it('shows date picker when date filter clicked', async () => {
     // verify setup
-    expect(wrapper.find(DatePicker).isVisible()).toBe(false)
+    expect(wrapper.findComponent(DatePicker).isVisible()).toBe(false)
     expect(wrapper.find('.date-filter').exists()).toBe(true)
     // simulate click (trigger click not working in this test)
     wrapper.vm.showDatePicker = true
     await Vue.nextTick()
-    expect(wrapper.find(DatePicker).isVisible()).toBe(true)
+    expect(wrapper.findComponent(DatePicker).isVisible()).toBe(true)
   })
 })

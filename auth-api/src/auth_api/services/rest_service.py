@@ -12,11 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to invoke Rest services."""
+import asyncio
 import json
 from collections.abc import Iterable
+from http import HTTPStatus
 from typing import Dict
 
+import aiohttp
 import requests
+from aiohttp.client_exceptions import ClientConnectorError  # pylint:disable=ungrouped-imports
 from flask import current_app, request
 from requests.adapters import HTTPAdapter  # pylint:disable=ungrouped-imports
 # pylint:disable=ungrouped-imports
@@ -42,19 +46,10 @@ class RestService:
         # just to avoid the duplicate code for PUT and POSt
         current_app.logger.debug(f'<_invoke-{rest_method}')
 
-        headers = {
-            'Content-Type': content_type.value
-        }
-
         if not token and generate_token:
             token = _get_token()
 
-        if token:
-            headers.update({'Authorization': auth_header_type.value.format(token)})
-
-        if additional_headers:
-            headers.update(additional_headers)
-
+        headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
@@ -72,7 +67,8 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(f"HTTPError on POST with status code {response.status_code if response else ''}")
+            current_app.logger.error(f'HTTPError on POST {endpoint} with status code '
+                                     f"{exc.response.status_code if exc.response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
@@ -133,18 +129,11 @@ class RestService:
     def get(endpoint, token=None,  # pylint: disable=too-many-arguments
             auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
             content_type: ContentType = ContentType.JSON, retry_on_failure: bool = False,
-            additional_headers: Dict = None):
+            additional_headers: Dict = None, skip_404_logging: bool = False):
         """GET service."""
         current_app.logger.debug('<GET')
 
-        headers = {
-            'Content-Type': content_type.value
-        }
-        if additional_headers:
-            headers.update(additional_headers)
-
-        if token:
-            headers['Authorization'] = auth_header_type.value.format(token)
+        headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
 
         current_app.logger.debug(f'Endpoint : {endpoint}')
         current_app.logger.debug(f'headers : {headers}')
@@ -160,7 +149,9 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(f"HTTPError on GET with status code {response.status_code if response else ''}")
+            if not (exc.response and exc.response.status_code == 404 and skip_404_logging):
+                current_app.logger.error(f'HTTPError on GET {endpoint} '
+                                         f"with status code {exc.response.status_code if exc.response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
@@ -172,18 +163,51 @@ class RestService:
         return response
 
     @staticmethod
-    def get_service_account_token() -> str:
+    def get_service_account_token(config_id='KEYCLOAK_SERVICE_ACCOUNT_ID',
+                                  config_secret='KEYCLOAK_SERVICE_ACCOUNT_SECRET') -> str:
         """Generate a service account token."""
-        kc_service_id = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_ID')
-        kc_secret = current_app.config.get('KEYCLOAK_SERVICE_ACCOUNT_SECRET')
+        kc_service_id = current_app.config.get(config_id)
+        kc_secret = current_app.config.get(config_secret)
         issuer_url = current_app.config.get('JWT_OIDC_ISSUER')
-        # https://sso-dev.pathfinder.gov.bc.ca/auth/realms/fcf0kpqr/protocol/openid-connect/token
         token_url = issuer_url + '/protocol/openid-connect/token'
         auth_response = requests.post(token_url, auth=(kc_service_id, kc_secret), headers={
             'Content-Type': ContentType.FORM_URL_ENCODED.value}, data='grant_type=client_credentials',
                 timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
         auth_response.raise_for_status()
         return auth_response.json().get('access_token')
+
+    @staticmethod
+    def _generate_headers(content_type, additional_headers, token, auth_header_type):
+        """Generate headers."""
+        return {
+            'Content-Type': content_type.value,
+            **(additional_headers if additional_headers else {}),
+            **({'Authorization': auth_header_type.value.format(token)} if token else {})
+        }
+
+    @staticmethod
+    async def call_posts_in_parallel(call_info: dict, token: str):
+        """Call the services in parallel and return the responses."""
+        headers = {'Content-Type': 'application/json', 'Authorization': f'Bearer {token}'}
+        responses = []
+        # call all urls in parallel
+        async with aiohttp.ClientSession() as session:
+            fetch_tasks = [asyncio.create_task(session.post(
+                data['url'], json=data['payload'], headers=headers)) for data in call_info]
+            tasks = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+            for task in tasks:
+                if isinstance(task, ClientConnectorError):
+                    # if no response from task we will go in here (i.e. namex-api is down)
+                    current_app.logger.error(
+                        '---Error in _call_urls_in_parallel: no response from %s---', task.os_error)
+                    raise ServiceUnavailableException(f'No response from {task.os_error}')
+                if task.status != HTTPStatus.OK:
+                    current_app.logger.error('---Error in _call_urls_in_parallel: error response from %s---', task.url)
+                    raise ServiceUnavailableException(f'Error response from {task.url}')
+                task_json = await task.json()
+                responses.append(task_json)
+        return responses
 
 
 def _get_token() -> str:
