@@ -132,7 +132,7 @@ export default defineComponent({
   setup (props) {
     const store = useStore()
     const instance = getCurrentInstance()
-    const staffStore = getModule(StaffModuleStore, store)
+    const _staffStore = getModule(StaffModuleStore, store)
     const isLoading: Ref<boolean> = ref(true)
     const isSaving: Ref<boolean> = ref(false)
     const pagesEnum = Pages
@@ -502,6 +502,16 @@ export default defineComponent({
       }
     })
 
+    const toggleAccessRequestModal = (hasConfirmationModal: boolean) => {
+      if (hasConfirmationModal) {
+        accessRequest.value.close()
+        accessRequest.value.openConfirm()
+      } else {
+        accessRequest.value.open()
+        accessRequest.value.closeConfirm()
+      }
+    }
+
     const openModal = (
       isRejectModalArg: boolean = false,
       isConfirmationModalArg: boolean = false,
@@ -524,7 +534,9 @@ export default defineComponent({
 
       isConfirmationModal.value = isConfirmationModalArg
 
-      if (rejectConfirmationModalArg || (isRejectModalArg && isTaskOnHold.value)) {
+      const isRejectModalWhileOnHold = isRejectModalArg && isTaskOnHold.value
+
+      if (rejectConfirmationModalArg || isRejectModalWhileOnHold) {
         isRejectModal.value = true
         isOnHoldModal.value = false
       } else if (!isMoveToPendingModalArg) {
@@ -534,13 +546,7 @@ export default defineComponent({
         isMoveToPendingModal.value = true
       }
 
-      if (isConfirmationModal.value) {
-        accessRequest.value.close()
-        accessRequest.value.openConfirm()
-      } else {
-        accessRequest.value.open()
-        accessRequest.value.closeConfirm()
-      }
+      toggleAccessRequestModal(isConfirmationModal.value)
 
       return true
     }
