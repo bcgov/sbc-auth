@@ -45,12 +45,12 @@ describe('DecideBusinessView.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(DecideBusinessView).exists()).toBe(true)
-    expect(wrapper.find(LearnMoreButton).exists()).toBe(true)
+    expect(wrapper.findComponent(DecideBusinessView).exists()).toBe(true)
+    expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
   it('renders the correct text and number of bullet points', async () => {

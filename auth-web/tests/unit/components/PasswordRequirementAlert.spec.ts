@@ -38,11 +38,11 @@ describe('PasswordRequirementAlert.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(PasswordRequirementAlert).exists()).toBe(true)
+    expect(wrapper.findComponent(PasswordRequirementAlert).exists()).toBe(true)
   })
 
   it('renders the v-alert properly', () => {

@@ -63,11 +63,11 @@ describe('AccountAdministrator.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(AccountAdministrator).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountAdministrator).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

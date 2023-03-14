@@ -94,11 +94,11 @@ describe('PADInfoForm.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
   it('renders with base values', () => {
-    expect(wrapper.find(PADInfoForm).exists()).toBe(true)
-    expect(wrapper.find(TermsOfUseDialog).exists()).toBe(true)
+    expect(wrapper.findComponent(PADInfoForm).exists()).toBe(true)
+    expect(wrapper.findComponent(TermsOfUseDialog).exists()).toBe(true)
     expect(wrapper.find('.v-form').exists()).toBe(true)
     expect(wrapper.find('.v-form').text()).toContain('Banking Information')
     expect(wrapper.find('.v-btn.help-btn').exists()).toBe(true)

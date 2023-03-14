@@ -37,7 +37,7 @@ describe('StaffCreateAccountModal.vue', () => {
       }
     })
 
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
     expect(wrapper.find('[data-test="create-account-modal"]')).toBeTruthy()
   })
 })

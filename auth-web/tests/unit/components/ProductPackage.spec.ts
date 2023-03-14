@@ -69,11 +69,11 @@ describe('Account settings ProductPackage.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(ProductPackage).exists()).toBe(true)
+    expect(wrapper.findComponent(ProductPackage).exists()).toBe(true)
   })
 
   it('renders proper header content', () => {

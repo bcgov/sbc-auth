@@ -70,11 +70,11 @@ describe('AccessRequestModal.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(AccessRequestModal).exists()).toBe(true)
+    expect(wrapper.findComponent(AccessRequestModal).exists()).toBe(true)
   })
 
   it('show Approval modal on open', async () => {
