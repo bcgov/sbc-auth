@@ -4,15 +4,16 @@ import HomeView from '@/views/auth/home/HomeView.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-import vueCompositionApi from '@vue/composition-api'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(vueCompositionApi)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -31,7 +32,6 @@ describe('HomeView.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
     localVue.use(VueRouter)
-    localVue.use(vueCompositionApi)
 
     const router = new VueRouter()
     const vuetify = new Vuetify({})

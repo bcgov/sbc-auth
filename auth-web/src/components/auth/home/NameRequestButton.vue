@@ -17,17 +17,14 @@ import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { defineComponent } from '@vue/composition-api'
-import vue from 'vue'
 
 export default defineComponent({
   name: 'NameRequestButton',
   props: {
     isWide: {
-      type: Boolean,
       default: false
     },
     isInverse: {
-      type: Boolean,
       default: false
     }
   },

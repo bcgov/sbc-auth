@@ -1,14 +1,16 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import vueCompositionApi from '@vue/composition-api'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(vueCompositionApi)
+
 document.body.setAttribute('data-app', 'true')
 
 describe('InfoStepper.vue', () => {
@@ -17,7 +19,6 @@ describe('InfoStepper.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
-    localVue.use(vueCompositionApi)
     localVue.use(VueRouter)
 
     const vuetify = new Vuetify({})
@@ -68,31 +69,4 @@ describe('InfoStepper.vue', () => {
   it('renders correct number of steps', () => {
     expect(wrapper.findAll('.step').length).toBe(4)
   })
-
-//     it('selects first step on render', async () => {
-//       await wrapper.vm.$nextTick()
-//       expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
-//     })
-
-//     it('steps forwards correctly', async () => {
-//       await wrapper.find('#step-1-btn').trigger('click')
-//       await wrapper.vm.$nextTick()
-//       expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
-//     })
-
-//     it('jumping to last step correctly', async () => {
-//       await wrapper.find('#step-4-btn').trigger('click')
-//       await wrapper.vm.$nextTick()
-//       expect(wrapper.find('.next-step-btn').classes()).toContain('hide-next-btn')
-//       expect(wrapper.findAll('.step__label').at(3).classes()).toContain('selected')
-
-//     })
-
-//   it('jumping backwards correctly', async () => {
-//     expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
-//     await wrapper.find('#step-4-btn').trigger('click')
-//     expect(wrapper.findAll('.step__label').at(3).classes()).toContain('selected')
-//     await wrapper.find('#step-1-btn').trigger('click')
-//     expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
-//   })
 })

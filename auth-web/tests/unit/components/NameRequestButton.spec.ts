@@ -1,12 +1,13 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import vueCompositionApi from '@vue/composition-api'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
-Vue.use(vueCompositionApi)
 document.body.setAttribute('data-app', 'true')
 
 describe('NameRequestButton.vue', () => {
@@ -16,7 +17,6 @@ describe('NameRequestButton.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
-    localVue.use(vueCompositionApi)
 
     const vuetify = new Vuetify({})
     const store = new Vuex.Store({})

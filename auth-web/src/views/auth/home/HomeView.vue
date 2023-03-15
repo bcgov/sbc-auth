@@ -50,14 +50,13 @@
               </div>
             </div>
           </div>
-
-          <LoginBCSC>
-            <template v-slot:actions>
-              <v-btn large color="primary" class="login-btn" @click="login()">Log in</v-btn>
-              <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
-            </template>
-          </LoginBCSC>
           <v-dialog v-model="accountDialog" max-width="640">
+            <LoginBCSC>
+              <template v-slot:actions>
+                <v-btn large color="primary" class="login-btn" @click="login()">Log in</v-btn>
+                <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
+              </template>
+            </LoginBCSC>
           </v-dialog>
         </v-container>
       </header>

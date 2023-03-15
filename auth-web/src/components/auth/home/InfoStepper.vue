@@ -33,7 +33,6 @@
 <script lang="ts">
 // Libraries
 import { computed, defineComponent } from '@vue/composition-api'
-import Vue from 'vue'
 
 export default defineComponent({
   name: 'InfoStepper',
@@ -72,17 +71,18 @@ export default defineComponent({
           return path.step || 0
         }
       }
+      return 0
     }
 
     const hideBtn = computed(() => {
       return getCurrentStep() === steps.length
     })
 
-    const isCurrentStep = (step: any): boolean => {
+    const isCurrentStep = (step: { id: string, step: number, text: string, to: string}): boolean => {
       return root.$route?.path === step.to
     }
 
-    const goTo = (step: any): void => {
+    const goTo = (step: { id: string, step: number, text: string, to: string}): void => {
       if (!isCurrentStep(step)) root.$router?.push(step.to)
     }
 

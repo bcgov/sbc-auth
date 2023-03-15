@@ -2,10 +2,13 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
@@ -51,6 +54,14 @@ describe('BcscPanel.vue', () => {
   it('renders the components properly', () => {
     expect(wrapper.findComponent(BcscPanel).exists()).toBe(true)
     expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
+  })
+
+  it('renders the correct text and number of bullet points', async () => {
+    expect(wrapper.findAll('.list-item').length).toStrictEqual(4)
+    expect(wrapper.findAll('.list-item').at(0).text()).toContain('A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.')
+    expect(wrapper.findAll('.list-item').at(1).text()).toContain('Only your name and a unique identifier is stored on the mobile device.')
+    expect(wrapper.findAll('.list-item').at(2).text()).toContain('It normally takes about 5 minutes to')
+    expect(wrapper.findAll('.list-item').at(3).text()).toContain('You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.')
   })
 
   it('doesn\'t render the login or create account link when authenticated', () => {

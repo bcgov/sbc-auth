@@ -1,14 +1,15 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import LoginBCSC from '@/components/auth/home/LoginBCSC.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import vueCompositionApi from '@vue/composition-api'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(VueRouter)
 Vue.use(Vuetify)
-Vue.use(vueCompositionApi)
 document.body.setAttribute('data-app', 'true')
 
 describe('LoginBCSC.vue', () => {
@@ -19,7 +20,6 @@ describe('LoginBCSC.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
     localVue.use(VueRouter)
-    localVue.use(vueCompositionApi)
 
     const router = new VueRouter()
     const store = new Vuex.Store({})
