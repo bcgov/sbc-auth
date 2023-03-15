@@ -1,56 +1,30 @@
-import { InvoiceStatus, PaymentTypes, Product } from '@/util/constants'
-import { invoiceStatusDisplay, paymentTypeDisplay, productDisplay } from '@/resources/display-mappers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
-import CommonUtils from '@/util/common-util'
+import { Business } from '@/models/business'
 
 export const AffiliationTableHeaders: BaseTableHeaderI[] = [
   {
-    col: 'Business Name',
-    hasFilter: true,
-    value: 'name',
+    col: 'name',
     customFilter: {
-      label: 'Name',
+      clearable: true,
+      label: 'Business Name',
       type: 'text',
-      value: 'name',
-      clearable: true
-    }
+      value: ''
+    },
+    hasFilter: true,
+    itemClass: 'business-name',
+    value: 'Business Name'
   },
   {
-    col: 'Number',
-    hasFilter: true,
-    value: 'number',
+    col: 'legalType',
     customFilter: {
-      label: 'Number',
+      clearable: true,
+      label: 'Legal Type',
       type: 'text',
-      value: 'number',
-      clearable: true
-    }
-  },
-  {
-    col: 'Type',
-    hasFilter: true,
-    value: 'type',
-    customFilter: {
-      label: 'Type',
-      type: 'select',
-      value: 'type',
-      clearable: true
-    }
-  },
-  {
-    col: 'Status',
-    hasFilter: true,
-    value: 'status',
-    customFilter: {
-      label: 'Status',
-      type: 'select',
-      value: 'status',
-      clearable: true
-    }
-  },
-  {
-    col: 'Actions',
-    hasFilter: true,
-    value: 'action'
+      value: ''
+    },
+    hasFilter: false,
+    itemFn: (val: Business) => val?.businessIdentifier || 'N/A',
+    minWidth: '200px',
+    value: 'Business Identifier'
   }
 ]

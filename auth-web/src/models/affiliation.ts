@@ -1,4 +1,5 @@
-import { Business } from '@/models/business'
+import { Business, CorpType, NameRequest } from '@/models/business'
+import { Contact } from './contact'
 import { Organization } from '@/models/Organization'
 
 export interface CreateRequestBody {
@@ -26,6 +27,22 @@ export interface AffiliationFilter {
   Actions?: string
 }
 
+export interface AffiliationResponse {
+  identifier: string
+  businessNumber?: string
+  name?: string
+  contacts?: Contact[]
+  corpType?: CorpType
+  corpSubType?: CorpType
+  folioNumber?: string
+  lastModified?: string
+  modified?: string
+  modifiedBy?: string
+  nameRequest?: NameRequest
+  nrNumber?: string
+  status?: string
+}
+
 export interface AffiliationFilterParams {
   isActive: boolean
   filterPayload: AffiliationFilter
@@ -34,7 +51,10 @@ export interface AffiliationFilterParams {
 }
 
 export interface AffiliationState {
-  filters: AffiliationFilterParams
+  filters: {
+    isActive: boolean
+    filterPayload: AffiliationFilterParams
+  }
   loading: boolean
   results: Business[]
   totalResults: number
