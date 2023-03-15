@@ -1,15 +1,14 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
-import vueCompositionApi from '@vue/composition-api'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import vueCompositionApi from '@vue/composition-api'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(vueCompositionApi)
-
 document.body.setAttribute('data-app', 'true')
 
 describe('InfoStepper.vue', () => {
@@ -19,6 +18,7 @@ describe('InfoStepper.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
     localVue.use(vueCompositionApi)
+    localVue.use(VueRouter)
 
     const vuetify = new Vuetify({})
     const router = new VueRouter()
@@ -32,6 +32,18 @@ describe('InfoStepper.vue', () => {
       router,
       localVue,
       vuetify,
+      mocks: {
+        $route: {
+          params: {
+            id: 'id'
+          }
+        },
+        $router: {
+          params: {
+            id: 'id'
+          }
+        }
+      }
     })
 
     jest.resetModules()
@@ -57,29 +69,30 @@ describe('InfoStepper.vue', () => {
     expect(wrapper.findAll('.step').length).toBe(4)
   })
 
-//   it('is selects the 1st step initially', () => {
-//     expect(wrapper.vm.currentStep).toBe(wrapper.vm.defaultSteps[0])
-//   })
+//     it('selects first step on render', async () => {
+//       await wrapper.vm.$nextTick()
+//       expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
+//     })
 
-//   it('is gets step index correctly', () => {
-//     const firstStep = wrapper.vm.defaultSteps[0]
-//     expect(wrapper.vm.getStepIndex(firstStep)).toBe(1)
-//   })
+//     it('steps forwards correctly', async () => {
+//       await wrapper.find('#step-1-btn').trigger('click')
+//       await wrapper.vm.$nextTick()
+//       expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
+//     })
 
-//   it('is step forwards correctly', () => {
-//     expect(wrapper.vm.currentStepNumber).toBe(1)
-//     wrapper.vm.stepForward()
-//     expect(wrapper.vm.currentStepNumber).toBe(2)
-//   })
+//     it('jumping to last step correctly', async () => {
+//       await wrapper.find('#step-4-btn').trigger('click')
+//       await wrapper.vm.$nextTick()
+//       expect(wrapper.find('.next-step-btn').classes()).toContain('hide-next-btn')
+//       expect(wrapper.findAll('.step__label').at(3).classes()).toContain('selected')
 
-//   it('is step backwards correctly', () => {
-//     wrapper.vm.currentStepNumber = 3
-//     wrapper.vm.stepBack()
-//     expect(wrapper.vm.currentStepNumber).toBe(2)
-//   })
+//     })
 
-//   it('is jumping to step correctly', () => {
-//     wrapper.vm.jumpToStep(2)
-//     expect(wrapper.vm.currentStepNumber).toBe(2)
+//   it('jumping backwards correctly', async () => {
+//     expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
+//     await wrapper.find('#step-4-btn').trigger('click')
+//     expect(wrapper.findAll('.step__label').at(3).classes()).toContain('selected')
+//     await wrapper.find('#step-1-btn').trigger('click')
+//     expect(wrapper.findAll('.step__label').at(0).classes()).toContain('selected')
 //   })
 })

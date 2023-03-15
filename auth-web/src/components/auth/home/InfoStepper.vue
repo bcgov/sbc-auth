@@ -63,10 +63,10 @@ export default defineComponent({
         text: 'Maintain Your Business',
         to: '/home/maintain-business'
       }
-    ] as { id: string, step: number, text: string, to: string}[]
+    ]
 
     const getCurrentStep = (): number => {
-      const route = root.$route.path
+      const route = root.$route?.path
       for (const path of steps) {
         if (path.to === route) {
           return path.step || 0
@@ -79,17 +79,17 @@ export default defineComponent({
     })
 
     const isCurrentStep = (step: any): boolean => {
-      return root.$route.path === step.to
+      return root.$route?.path === step.to
     }
 
     const goTo = (step: any): void => {
-      if (!isCurrentStep(step)) root.$router.push(step.to)
+      if (!isCurrentStep(step)) root.$router?.push(step.to)
     }
 
     const nextStep = (): void => {
       const currentStepIndex = getCurrentStep()
       const nextStep = steps[currentStepIndex]
-      root.$router.push(nextStep.to)
+      root.$router?.push(nextStep.to)
     }
 
     return {

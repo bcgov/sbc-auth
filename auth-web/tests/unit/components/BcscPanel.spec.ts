@@ -35,7 +35,7 @@ describe('BcscPanel.vue', () => {
       })
     }
 
-    wrapper = wrapperFactory({ user: {firstname: 'test', lastname: 'test'} })
+    wrapper = wrapperFactory({ user: { firstname: 'test', lastname: 'test' } })
   })
 
   afterEach(() => {
@@ -59,7 +59,6 @@ describe('BcscPanel.vue', () => {
     expect(wrapper.findAll('.v-btn').length).toBe(1)
     expect(wrapper.find('.learn-more-btn')).toBeDefined()
     expect(wrapper.find('.learn-more-btn').text()).toContain('Learn More')
-
   })
 
   it('renders the login button and create account link when NOT authenticated', () => {
@@ -67,17 +66,17 @@ describe('BcscPanel.vue', () => {
     const wrapper = wrapperFactory({ userProfile: null })
 
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const mobileCardLink = wrapper.vm.$el.querySelectorAll('a')
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
+    const mobileCardLink = wrapper.findAll('a').at(0)
+    const createAccountLink = wrapper.find('.cta-btn')
 
     expect(authenticatedBtns[0]).toBeDefined()
     expect(authenticatedBtns[0].textContent).toContain('Create a BC Registries Account')
 
-    expect(mobileCardLink[0]).toBeDefined()
-    expect(mobileCardLink[0].textContent).toContain('set up a mobile card')
+    expect(mobileCardLink.exists()).toBe(true)
+    expect(mobileCardLink.text()).toContain('set up a mobile card')
 
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
+    expect(createAccountLink.exists()).toBe(true)
+    expect(createAccountLink.text()).toContain('Create a BC Registries Account')
 
     expect(authenticatedBtns[1]).toBeDefined()
     expect(authenticatedBtns[1].textContent).toContain('Learn More')

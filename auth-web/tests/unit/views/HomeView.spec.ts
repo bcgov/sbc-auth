@@ -3,17 +3,16 @@ import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
-import vueCompositionApi from '@vue/composition-api'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import vueCompositionApi from '@vue/composition-api'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-const router = new VueRouter()
-const vuetify = new Vuetify({})
+Vue.use(vueCompositionApi)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -31,6 +30,11 @@ describe('HomeView.vue', () => {
     sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.use(VueRouter)
+    localVue.use(vueCompositionApi)
+
+    const router = new VueRouter()
+    const vuetify = new Vuetify({})
 
     userModule = {
       namespaced: true,
@@ -92,34 +96,32 @@ describe('HomeView.vue', () => {
   })
 
   it('renders the correct buttons when authenticated', () => {
-    const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn-auth')
-    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
-    const manageBusinessBtn = bannerBtns[0]
+    const nameRequestBtn = wrapper.find('.btn-name-request')
+    const manageBusinessBtn = wrapper.findAll('.cta-btn-auth').at(0)
 
-    expect(nameRequestBtn).toBeDefined()
-    expect(nameRequestBtn.textContent).toContain('Request a Name')
+    expect(nameRequestBtn.exists()).toBe(true)
+    expect(nameRequestBtn.text()).toContain('Request a Name')
 
-    expect(manageBusinessBtn).toBeDefined()
-    expect(manageBusinessBtn.textContent).toContain('Manage my Business')
+    expect(manageBusinessBtn.exists()).toBe(true)
+    expect(manageBusinessBtn.text()).toContain('Manage my Business')
   })
 
   it('renders the correct buttons when not authenticated', async () => {
     // Render Un-authenticated
     userModule.state.userProfile = null
     await flushPromises()
-    const bannerBtns = wrapper.vm.$el.querySelectorAll('.cta-btn')
-    const loginBtn = bannerBtns[0]
-    const nameRequestBtn = wrapper.vm.$el.querySelector('.btn-name-request')
+    const loginBtn = wrapper.findAll('.cta-btn').at(0)
+    const nameRequestBtn = wrapper.find('.btn-name-request')
 
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
+    const createAccountLink = wrapper.find('.cta-btn')
 
-    expect(loginBtn).toBeDefined()
-    expect(loginBtn.textContent).toContain('Create a BC Registries Account')
+    expect(loginBtn.exists()).toBe(true)
+    expect(loginBtn.text()).toContain('Create a BC Registries Account')
 
-    expect(nameRequestBtn).toBeDefined()
-    expect(nameRequestBtn.textContent).toContain('Request a Name')
+    expect(nameRequestBtn.exists()).toBe(true)
+    expect(nameRequestBtn.text()).toContain('Request a Name')
 
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
+    expect(createAccountLink.exists()).toBe(true)
+    expect(createAccountLink.text()).toContain('Create a BC Registries Account')
   })
 })

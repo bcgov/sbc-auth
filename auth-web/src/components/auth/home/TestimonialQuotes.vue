@@ -9,7 +9,6 @@
   </section>
 </template>
 <script lang="ts">
-// import { Component, Vue } from 'vue-property-decorator'
 import { defineComponent, onMounted, ref } from '@vue/composition-api'
 import vue from 'vue'
 
