@@ -1,7 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
+import MockI18n from '../test-utils/test-data/MockI18n'
 import { OnholdOrRejectCode } from '@/util/constants'
+
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -9,12 +11,18 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
+const en = {
+  onHoldOrRejectModalText: 'i8n onHoldOrRejectModalText'
+}
+const i18n = MockI18n.mock(en)
+
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
 describe('AccessRequestModal.vue', () => {
   let wrapper: any
   let wrapperFactory: any
+  let accessRequest: any
   const props = {
     isRejectModal: false,
     isConfirmationModal: false,
@@ -38,6 +46,7 @@ describe('AccessRequestModal.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
+    localVue.use(i18n)
     localVue.use(Vuex)
 
     const store = new Vuex.Store({
@@ -61,6 +70,7 @@ describe('AccessRequestModal.vue', () => {
     }
 
     wrapper = wrapperFactory(props)
+    accessRequest = wrapper.findComponent({ ref: 'accessRequest' })
   })
 
   afterEach(() => {
@@ -70,49 +80,49 @@ describe('AccessRequestModal.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(AccessRequestModal).exists()).toBe(true)
+    expect(wrapper.findComponent(AccessRequestModal).exists()).toBe(true)
   })
 
   it('show Approval modal on open', async () => {
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Account Creation Request ?`)
   })
 
   it('Should show reject modal on open when isRejectModal is true', async () => {
     await wrapper.setProps({ isRejectModal: true })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Account Creation Request ?`)
   })
 
   it('Should show on Hold modal on open when isOnHoldModal is true', async () => {
     await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject or Hold Account Creation Request`)
   })
 
   it('Should show Approval modal for product ', async () => {
     await wrapper.setProps({ isOnHoldModal: false, isRejectModal: false, accountType: 'PRODUCT' })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Access Request ?`)
   })
 
   it('Should show Reject modal for product ', async () => {
     await wrapper.setProps({ isOnHoldModal: false, isRejectModal: true, accountType: 'PRODUCT' })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Access Request ?`)
   })
 
   it('render on hold reasons properly ', async () => {
     await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     expect(wrapper.vm.accountToBeOnholdOrRejected).toBe('')
 
@@ -126,7 +136,7 @@ describe('AccessRequestModal.vue', () => {
 
   it('emit valid on hold reasons properly ', async () => {
     await wrapper.setProps({ isOnHoldModal: true, isRejectModal: false })
-    await wrapper.vm.open()
+    await accessRequest.vm.open()
 
     await wrapper.find('[data-test="radio-on-hold"]').trigger('click')
     expect(wrapper.vm.accountToBeOnholdOrRejected).toBe(OnholdOrRejectCode.ONHOLD)
@@ -136,9 +146,12 @@ describe('AccessRequestModal.vue', () => {
     await select.setValue(remarks)
     expect(wrapper.vm.onholdReasons).toBe(remarks)
 
-    await wrapper.find('[data-test="btn-access-request"]').trigger('click')
-
+    const rejectFormMock = {
+      validate: () => true
+    }
+    await wrapper.setData({ rejectForm: rejectFormMock })
     await wrapper.vm.$nextTick()
+    await wrapper.find('[data-test="btn-access-request"]').trigger('click')
     expect(wrapper.emitted('approve-reject-action')).toBeTruthy()
   })
 })

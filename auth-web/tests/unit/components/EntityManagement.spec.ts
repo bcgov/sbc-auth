@@ -102,7 +102,7 @@ describe('Entity Management Component', () => {
   })
 
   it('EntityManagement is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('EntityManagement contains removalConfirmDialog modal', () => {

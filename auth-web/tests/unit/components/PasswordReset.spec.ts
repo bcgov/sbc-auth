@@ -41,15 +41,15 @@ describe('PasswordReset.vue', () => {
   })
 
   it('is a Vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('renders the components properly', () => {
-    expect(wrapper.find(PasswordReset).exists()).toBe(true)
+    expect(wrapper.findComponent(PasswordReset).exists()).toBe(true)
   })
 
   it('renders the components properly', async () => {
-    expect(wrapper.find(PasswordReset).exists()).toBe(true)
+    expect(wrapper.findComponent(PasswordReset).exists()).toBe(true)
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
     const titleText = wrapper.vm.$el.querySelectorAll('p')
     expect(titleText.length).toStrictEqual(1)

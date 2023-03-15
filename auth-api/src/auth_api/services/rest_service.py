@@ -46,19 +46,10 @@ class RestService:
         # just to avoid the duplicate code for PUT and POSt
         current_app.logger.debug(f'<_invoke-{rest_method}')
 
-        headers = {
-            'Content-Type': content_type.value
-        }
-
         if not token and generate_token:
             token = _get_token()
 
-        if token:
-            headers.update({'Authorization': auth_header_type.value.format(token)})
-
-        if additional_headers:
-            headers.update(additional_headers)
-
+        headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
         if content_type == ContentType.JSON:
             data = json.dumps(data)
 
@@ -76,8 +67,8 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(f'HTTPError on POST {endpoint} with status code'
-                                     f"{response.status_code if response else ''}")
+            current_app.logger.error(f'HTTPError on POST {endpoint} with status code '
+                                     f"{exc.response.status_code if exc.response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
@@ -138,18 +129,11 @@ class RestService:
     def get(endpoint, token=None,  # pylint: disable=too-many-arguments
             auth_header_type: AuthHeaderType = AuthHeaderType.BEARER,
             content_type: ContentType = ContentType.JSON, retry_on_failure: bool = False,
-            additional_headers: Dict = None):
+            additional_headers: Dict = None, skip_404_logging: bool = False):
         """GET service."""
         current_app.logger.debug('<GET')
 
-        headers = {
-            'Content-Type': content_type.value
-        }
-        if additional_headers:
-            headers.update(additional_headers)
-
-        if token:
-            headers['Authorization'] = auth_header_type.value.format(token)
+        headers = RestService._generate_headers(content_type, additional_headers, token, auth_header_type)
 
         current_app.logger.debug(f'Endpoint : {endpoint}')
         current_app.logger.debug(f'headers : {headers}')
@@ -165,8 +149,9 @@ class RestService:
             current_app.logger.error(exc)
             raise ServiceUnavailableException(exc) from exc
         except HTTPError as exc:
-            current_app.logger.error(f'HTTPError on GET {endpoint}'
-                                     f"with status code {response.status_code if response else ''}")
+            if not (exc.response and exc.response.status_code == 404 and skip_404_logging):
+                current_app.logger.error(f'HTTPError on GET {endpoint} '
+                                         f"with status code {exc.response.status_code if exc.response else ''}")
             if response and response.status_code >= 500:
                 raise ServiceUnavailableException(exc) from exc
             raise exc
@@ -190,6 +175,15 @@ class RestService:
                 timeout=current_app.config.get('CONNECT_TIMEOUT', 60))
         auth_response.raise_for_status()
         return auth_response.json().get('access_token')
+
+    @staticmethod
+    def _generate_headers(content_type, additional_headers, token, auth_header_type):
+        """Generate headers."""
+        return {
+            'Content-Type': content_type.value,
+            **(additional_headers if additional_headers else {}),
+            **({'Authorization': auth_header_type.value.format(token)} if token else {})
+        }
 
     @staticmethod
     async def call_posts_in_parallel(call_info: dict, token: str):

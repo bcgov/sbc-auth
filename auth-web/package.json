@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "1.1.51",
+  "version": "1.1.52",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -65,7 +65,7 @@
     "@vue/cli-service": "^4.5.17",
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/eslint-config-typescript": "^4.0.0",
-    "@vue/test-utils": "1.0.0",
+    "@vue/test-utils": "1.0.3",
     "axios-mock-adapter": "^1.18.1",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",

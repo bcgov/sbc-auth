@@ -21,7 +21,7 @@ describe('Add Name Request Form', () => {
     // verify components
     expect(wrapper.attributes('class')).toBe('add-namerequest-form')
     expect(wrapper.find('.add-namerequest-form').isVisible()).toBe(true)
-    expect(wrapper.find(HelpDialog).exists()).toBe(true)
+    expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
 
     // verify input fields
     expect(wrapper.find('[data-test="nr-number"]').exists()).toBe(true)

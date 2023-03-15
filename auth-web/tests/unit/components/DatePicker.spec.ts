@@ -38,7 +38,7 @@ describe('Date Picker tests', () => {
   })
 
   it('renders and displays the date picker', async () => {
-    expect(wrapper.find(DatePicker).exists()).toBe(true)
+    expect(wrapper.findComponent(DatePicker).exists()).toBe(true)
     expect(wrapper.findAll(headers).length).toBe(2)
     expect(wrapper.findAll(headers).at(0).text()).toBe('Select Start Date:')
     expect(wrapper.findAll(headers).at(1).text()).toBe('Select End Date:')

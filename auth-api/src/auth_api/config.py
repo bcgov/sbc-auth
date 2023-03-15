@@ -120,10 +120,9 @@ class _Config:  # pylint: disable=too-few-public-methods
 
     LEGAL_API_VERSION = os.getenv('LEGAL_API_VERSION')
     LEGAL_API_VERSION_2 = os.getenv('LEGAL_API_VERSION_2', '')
-    NAMEX_API_VERSION = os.getenv('NAMEX_API_VERSION', '')
 
     LEAR_AFFILIATION_DETAILS_URL = f'{LEGAL_API_URL + LEGAL_API_VERSION_2}/businesses/search'
-    NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL + NAMEX_API_VERSION}/requests/search'
+    NAMEX_AFFILIATION_DETAILS_URL = f'{NAMEX_API_URL}/requests/search'
 
     # NATS Config
     NATS_SERVERS = os.getenv('NATS_SERVERS', 'nats://127.0.0.1:4222').split(',')

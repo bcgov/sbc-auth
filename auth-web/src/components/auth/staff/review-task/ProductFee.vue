@@ -1,5 +1,5 @@
 <template>
-  <section v-if="accountFeesDTO.length">
+  <section v-if="accountFeesDTO && accountFeesDTO.length">
     <h2 class="mb-5">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''}${title}`}}</h2>
     <p class="mb-9">{{ $t('productFeeSubTitle') }}</p>
     <v-form ref="productFeeForm" id="productFeeForm">
@@ -55,25 +55,46 @@
 
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
+import OrgModule from '@/store/modules/org'
 import { ProductStatus } from '@/util/constants'
-import { namespace } from 'vuex-class'
+import { useStore } from 'vuex-composition-helpers'
 
-const orgModule = namespace('org')
+// FUTURE: remove this in vue 3
+interface ProductFeeState {
+  accountFeesDTO: Array<AccountFeeDTO>
+}
 
-@Component({})
-export default class ProductFee extends Vue {
-    @Prop({ default: null }) private tabNumber: number
-    @orgModule.State('orgProductFeeCodes') public orgProductFeeCodes!: OrgProductFeeCode[]
-    @orgModule.State('productList') public orgProducts!: OrgProduct[]
-    @orgModule.State('currentAccountFees') public accountFees!: AccountFee[]
-    @orgModule.Mutation('setCurrentAccountFees') public setCurrentAccountFees!:(accountFees: AccountFee[]) =>void
-    @Prop({ default: 'Product Fee' }) private title: string
-    @Prop({ default: false }) private canSelect: boolean
+export default defineComponent({
+  name: 'ProductFee',
+  emits: ['emit-product-fee-change'],
+  props: {
+    tabNumber: {
+      type: Number,
+      default: null
+    },
+    title: {
+      type: String,
+      default: 'Product Fee'
+    },
+    canSelect: Boolean
+  },
+  setup (props, { emit }) {
+    const store = useStore()
+    const orgState = store.state.org as OrgModule
+    const orgProductFeeCodes = computed<OrgProductFeeCode[]>(() => orgState.orgProductFeeCodes)
+    const orgProducts = computed<OrgProduct[]>(() => orgState.productList)
+    const accountFees = computed<AccountFee[]>(() => orgState.currentAccountFees)
+    const setCurrentAccountFees = (accountFees: AccountFee[]) => {
+      store.commit('org/setCurrentAccountFees', accountFees)
+    }
+
+    const state: ProductFeeState = reactive<ProductFeeState>({
+      accountFeesDTO: []
+    }) as ProductFeeState
 
     // Create a DTO array so as to map applyFilingFees(boolean) value to string for v-select
-    private accountFeesDTO: AccountFeeDTO[] = []
-    private applyFilingFeesValues = [
+    const applyFilingFeesValues = [
       {
         text: 'Yes',
         value: 'true'
@@ -84,58 +105,55 @@ export default class ProductFee extends Vue {
       }
     ]
 
-    $refs: {
-    productFeeForm: HTMLFormElement
-    }
+    // Didn't include this in reactive, not sure if it will bind to the markup.
+    const productFeeForm = ref<HTMLFormElement>()
 
-    private mounted () {
-      if (!this.accountFees.length) {
+    onMounted(() => {
+      if (!accountFees.value?.length) {
         // prepopulate the array with the subscribed products
-        this.orgProducts.forEach((orgProduct: OrgProduct) => {
+        orgProducts.value.forEach((orgProduct: OrgProduct) => {
           if (orgProduct.subscriptionStatus === ProductStatus.ACTIVE) {
             const accountFeeDTO: AccountFeeDTO = {
               product: orgProduct.code
             }
-            this.accountFeesDTO.push(accountFeeDTO)
+            state.accountFeesDTO.push(accountFeeDTO)
           }
         })
       } else {
         // Map account fees details to accountFeesDTO so as to display in v-select
-        this.accountFeesDTO = JSON.parse(JSON.stringify(this.accountFees))
-        this.accountFeesDTO.map((accountFee:AccountFeeDTO) => {
+        state.accountFeesDTO = JSON.parse(JSON.stringify(accountFees.value))
+        state.accountFeesDTO.forEach((accountFee: AccountFeeDTO) => {
           accountFee.applyFilingFees = accountFee.applyFilingFees.toString()
         })
       }
+    })
+
+    const validateNow = () => {
+      const isFormValid = productFeeForm?.value.validate()
+      emit('emit-product-fee-change', isFormValid)
     }
 
-    public validateNow () {
-      const isFormValid = this.$refs.productFeeForm?.validate()
-
-      this.$emit('emit-product-fee-change', isFormValid)
+    const displayProductName = (productCode: string): string => {
+      return orgProducts.value.find(orgProduct => orgProduct.code === productCode)?.description
     }
 
-    private displayProductName (productCode: string): string {
-      return this.orgProducts?.find(orgProduct => orgProduct.code === productCode)?.description
-    }
-
-    private displayProductFee (feeAmount: number): string {
+    const displayProductFee = (feeAmount: number): string => {
       return `$ ${feeAmount.toFixed(2)} Service fee`
     }
 
-    private applyFilingFeesRules = [
+    const applyFilingFeesRules = [
       v => !!v || 'A statutory fee is required'
     ]
 
-    private serviceFeeCodeRules = [
+    const serviceFeeCodeRules = [
       v => !!v || 'A service fee is required'
     ]
 
-    private selectChange (): void {
+    const selectChange = (): void => {
       // Wait till next DOM render to emit event so that we capture form validation
-      // this.$nextTick(() => {
       // Map back to AccountFees to store
       const accountFees: AccountFee[] = []
-      this.accountFeesDTO.forEach((accountFeeDTO: AccountFeeDTO) => {
+      state.accountFeesDTO.forEach((accountFeeDTO: AccountFeeDTO) => {
         const accountFee: AccountFee = {
           product: accountFeeDTO.product,
           applyFilingFees: accountFeeDTO.applyFilingFees === 'true',
@@ -143,17 +161,31 @@ export default class ProductFee extends Vue {
         }
         accountFees.push(accountFee)
       })
-      this.setCurrentAccountFees(accountFees)
-      // })
+      setCurrentAccountFees(accountFees)
     }
 
-    private getIndexedTag (tag, index): string {
+    const getIndexedTag = (tag, index): string => {
       return `${tag}-${index}`
     }
 
-    // Only allow $1.05 fee code for ESRA aka Site Registry.
-    public getOrgProductFeeCodesForProduct (productCode: string) {
-      return this.orgProductFeeCodes?.filter((fee) => fee.code === 'TRF03' || productCode !== 'ESRA')
+    // Only allow $1.05 and $0 service fee code for ESRA aka Site Registry.
+    const getOrgProductFeeCodesForProduct = (productCode: string): OrgProductFeeCode[] => {
+      return orgProductFeeCodes.value?.filter((fee) => ['TRF03', 'TRF04'].includes(fee.code) || productCode !== 'ESRA')
     }
-}
+
+    return {
+      getOrgProductFeeCodesForProduct,
+      applyFilingFeesValues,
+      validateNow,
+      displayProductName,
+      displayProductFee,
+      applyFilingFeesRules,
+      serviceFeeCodeRules,
+      selectChange,
+      getIndexedTag,
+      productFeeForm,
+      ...toRefs(state)
+    }
+  }
+})
 </script>
