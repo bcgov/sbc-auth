@@ -265,14 +265,14 @@ export default defineComponent({
       return NrDisplayStates.PROCESSING === state
     }
 
-    /** Navigation handler for entities dashboard */
+    /** Navigation handler for entities dashboard. */
     const goToDashboard = (businessIdentifier: string): void => {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
       window.location.href = appendAccountId(decodeURIComponent(redirectURL))
     }
 
-    /** Navigation handler for Name Request application */
+    /** Navigation handler for Name Request application. */
     const goToNameRequest = (nameRequest: NameRequest): void => {
       ConfigHelper.setNrCredentials(nameRequest)
       window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`)
