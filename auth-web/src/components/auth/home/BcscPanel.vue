@@ -64,8 +64,7 @@ export default defineComponent({
   props: {
     user: Object as PropType<User>
   },
-  emits: ['login', 'account-dialog'],
-  setup (props, { emit }) {
+  setup (props) {
     const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const secureBulletPoints = [
@@ -77,21 +76,11 @@ export default defineComponent({
       { text: 'You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
     ]
 
-    const emitLogin = () => {
-      emit('login')
-    }
-
-    const emitAccountDialog = () => {
-      emit('account-dialog')
-    }
-
     return {
       cardSetUpUrl,
       learnMoreUrl,
       secureBulletPoints,
-      easeBulletPoints,
-      emitLogin,
-      emitAccountDialog
+      easeBulletPoints
     }
   }
 })
