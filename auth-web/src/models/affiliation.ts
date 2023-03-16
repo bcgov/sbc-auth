@@ -46,14 +46,14 @@ export interface AffiliationResponse {
 export interface AffiliationFilterParams {
   isActive: boolean
   filterPayload: AffiliationFilter
-  pageNumber?: number
-  pageLimit?: number
 }
 
 export interface AffiliationState {
+  [x: string]: any
+  affiliations: any
   filters: {
     isActive: boolean
-    filterPayload: AffiliationFilterParams
+    filterPayload: AffiliationFilter
   }
   loading: boolean
   results: Business[]

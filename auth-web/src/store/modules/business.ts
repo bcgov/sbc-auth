@@ -96,38 +96,141 @@ export default class BusinessModule extends VuexModule {
     }
 
     // get affiliated entities for this organization
-    const affiliatedEntities = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
-      .then(response => {
-        if (response?.data?.entities && response?.status === 200) {
-          return response.data.entities
+    // const entityResponse = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
+    //   .then(response => {
+    //     console.log(response.data.entities.length)
+    //     if (response?.data?.entities && response?.status === 200) {
+    //       return response.data.entities
+    //     }
+    //     throw Error(`Invalid response = ${response}`)
+    //   })
+    //   .catch(error => {
+    //     console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
+    //     return [] as []
+    //   })
+
+    const entityResponse: any[] = [
+      {
+        'legalType': 'NR',
+        'nameRequest': {
+          'actions': [
+            {
+              'URL': null,
+              'entitiesFilingName': null,
+              'filingName': 'Incorporation',
+              'learTemplate': null
+            },
+            {
+              'URL': null,
+              'entitiesFilingName': null,
+              'filingName': 'Amalgamation',
+              'learTemplate': null
+            }
+          ],
+          'applicants': [
+            {
+              'emailAddress': '1@1.com',
+              'phoneNumber': '1234567890'
+            }
+          ],
+          'entityTypeCd': 'CR',
+          'id': 2265637,
+          'legalType': 'BC',
+          'names': [
+            {
+              'name': 'KIALS NAME FOR PPR1 CORP.',
+              'state': 'NE'
+            }
+          ],
+          'natureBusinessInfo': 'test ppr 1',
+          'nrNum': 'NR 1929788',
+          'requestTypeCd': 'CR',
+          'stateCd': 'DRAFT',
+          'target': 'lear'
         }
-        throw Error(`Invalid response = ${response}`)
-      })
-      .catch(error => {
-        console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
-        return [] as Business[]
-      })
-
-    // update store with initial results
-    this.setBusinesses(affiliatedEntities)
-
-    // get data for NR entities (not async)
-    const getNrDataPromises = affiliatedEntities.map(entity => {
-      if (entity.corpType.code === CorpTypes.NAME_REQUEST) {
-        return BusinessService.getNrData(entity.businessIdentifier)
+      },
+      {
+        'draftType': 'TMP',
+        'identifier': 'Tb4x1IydqO',
+        'legalType': 'BC',
+        'nameRequest': {
+          'legalType': 'NR',
+          'nameRequest': {
+            'actions': [
+              {
+                'URL': null,
+                'entitiesFilingName': null,
+                'filingName': 'Incorporation',
+                'learTemplate': null
+              },
+              {
+                'URL': null,
+                'entitiesFilingName': null,
+                'filingName': 'Amalgamation',
+                'learTemplate': null
+              }
+            ],
+            'applicants': [
+              {
+                'emailAddress': '1@1.com',
+                'phoneNumber': '1234567890'
+              }
+            ],
+            'entityTypeCd': 'CR',
+            'id': 2265604,
+            'legalType': 'BC',
+            'names': [
+              {
+                'name': 'KIALS TEST NAMESSS CORP.',
+                'state': 'NE'
+              }
+            ],
+            'natureBusinessInfo': 'test',
+            'nrNum': 'NR 2090111',
+            'requestTypeCd': 'CR',
+            'stateCd': 'APPROVED',
+            'target': 'lear'
+          }
+        },
+        'nrNumber': 'NR 2090111'
+      },
+      {
+        'draftType': 'TMP',
+        'identifier': 'TJHyE2NaQN',
+        'legalType': 'BEN'
+      },
+      {
+        'adminFreeze': false,
+        'goodStanding': true,
+        'identifier': 'BC0871330',
+        'legalName': 'KIALS BUSINESS NAME CORP.',
+        'legalType': 'BC',
+        'state': 'ACTIVE',
+        'businessNumber': '1234'
       }
-      return null
-    })
+    ]
 
-    // wait for all calls to finish (async)
-    const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
+    let affiliatedEntities: Business[] = []
 
-    // attach NR data to affiliated entities
-    getNrDataResponses.forEach((resp, i) => {
-      const nr = resp['value']?.data
-
-      if (nr) {
-        affiliatedEntities[i].nameRequest = {
+    entityResponse.forEach((resp, i) => {
+      const entity: Business = {
+        businessIdentifier: resp.identifier,
+        ...(typeof resp.businessNumber !== 'undefined' && { businessNumber: resp.businessNumber }),
+        ...(resp.name && { name: resp.name }),
+        ...(resp.contacts && { contacts: resp.contacts }),
+        ...(resp.legalType && { corpType: resp.legalType }),
+        ...(resp.corpSubType && { corpSubType: resp.corpSubType }),
+        ...(resp.folioNumber && { folioNumber: resp.folioNumber }),
+        ...(resp.lastModified && { lastModified: resp.lastModified }),
+        ...(resp.modified && { modified: resp.modified }),
+        ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
+        ...(resp.nameRequest && { nameRequest: resp.nameRequest }),
+        ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
+        ...(resp.status && { status: resp.status })
+      }
+      if (resp.nameRequest) {
+        const nr = resp.nameRequest
+        entity.nameRequest = {
           names: nr.names,
           id: nr.id,
           legalType: nr.legalType,
@@ -143,21 +246,61 @@ export default class BusinessModule extends VuexModule {
           expirationDate: nr.expirationDate
         }
       }
+      affiliatedEntities.push(entity)
     })
-
-    // update store with final results
+    // update store with initial results
     this.setBusinesses(affiliatedEntities)
 
+    // get data for NR entities (not async)
+    // const getNrDataPromises = affiliatedEntities.map(entity => {
+    //   if (entity.corpType.code === CorpTypes.NAME_REQUEST) {
+    //     return BusinessService.getNrData(entity.businessIdentifier)
+    //   }
+    //   return null
+    // })
+
+    // wait for all calls to finish (async)
+    // const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
+
+    // console.log(getNrDataResponses)
+
+    // // attach NR data to affiliated entities
+    // getNrDataResponses.forEach((resp, i) => {
+    //   const nr = resp['value']?.data
+
+    //   if (nr) {
+    //     affiliatedEntities[i].nameRequest = {
+    //       names: nr.names,
+    //       id: nr.id,
+    //       legalType: nr.legalType,
+    //       nrNumber: nr.nrNum,
+    //       state: nr.state,
+    //       applicantEmail: nr.applicants?.emailAddress,
+    //       applicantPhone: nr.applicants?.phoneNumber,
+    //       enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
+    //       folioNumber: nr.folioNumber,
+    //       target: getTarget(nr),
+    //       entityTypeCd: nr.entity_type_cd,
+    //       natureOfBusiness: nr.natureBusinessInfo,
+    //       expirationDate: nr.expirationDate
+    //     }
+    //   }
+    // })
+
+    // update store with final results
+    // this.setBusinesses(affiliatedEntities)
+
+    // TODO
     // update business name for all NRs
     // NB: don't wait for all calls to finish
-    getNrDataResponses.forEach((resp, i) => {
-      const nr = resp['value']?.data
-      if (nr) {
-        const businessIdentifier = affiliatedEntities[i].businessIdentifier
-        const name = getApprovedName(nr) || ''
-        BusinessService.updateBusinessName({ businessIdentifier, name })
-      }
-    })
+    // getNrDataResponses.forEach((resp, i) => {
+    //   const nr = resp['value']?.data
+    //   if (nr) {
+    //     const businessIdentifier = affiliatedEntities[i].businessIdentifier
+    //     const name = getApprovedName(nr) || ''
+    //     BusinessService.updateBusinessName({ businessIdentifier, name })
+    //   }
+    // })
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

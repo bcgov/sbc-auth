@@ -3,10 +3,10 @@ import { Business } from '@/models/business'
 
 export const AffiliationTableHeaders: BaseTableHeaderI[] = [
   {
-    col: 'name',
+    col: 'Name',
     customFilter: {
       clearable: true,
-      label: 'Business Name',
+      label: 'Name',
       type: 'text',
       value: ''
     },
@@ -15,16 +15,45 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     value: 'Business Name'
   },
   {
-    col: 'legalType',
+    col: 'Number',
     customFilter: {
       clearable: true,
-      label: 'Legal Type',
+      label: 'Number',
       type: 'text',
       value: ''
     },
+    hasFilter: true,
+    itemClass: 'business-number',
+    value: ' Number'
+  },
+  {
+    col: 'Type',
+    customFilter: {
+      clearable: true,
+      label: 'Type',
+      type: 'select',
+      value: ''
+    },
+    hasFilter: true,
+    itemClass: 'business-type',
+    value: 'Type'
+  },
+  {
+    col: 'Status',
+    customFilter: {
+      clearable: true,
+      label: 'Status',
+      type: 'text',
+      value: ''
+    },
+    hasFilter: true,
+    itemClass: 'business-status',
+    value: 'Status'
+  },
+  {
+    col: 'Actions',
     hasFilter: false,
-    itemFn: (val: Business) => val?.businessIdentifier || 'N/A',
-    minWidth: '200px',
-    value: 'Business Identifier'
+    itemClass: 'actions',
+    value: 'Actions'
   }
 ]

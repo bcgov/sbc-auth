@@ -32,14 +32,31 @@ export const useAffiliations = () => {
   })
 
   // get affiliated entities for this organization
-  const loadAffiliations = (filterField?: string, value?: any) => {
+  const loadAffiliations = debounce(async (filterField?: string, value?: any) => {
+    affiliations.loading = true
+    if (filterField) {
+      affiliations.filters.filterPayload[filterField] = value
+    }
     affiliations.totalResults = businesses.value.length
     affiliations.results = businesses.value
+    affiliations.loading = false
+  })
+  let filtersActive = false
+  for (const key in affiliations.filters.filterPayload) {
+    if (affiliations.filters.filterPayload[key]) filtersActive = true
+    if (filtersActive) break
+  }
+  affiliations.filters.isActive = filtersActive
+  const clearAllFilters = () => {
+    affiliations.filters.filterPayload = {}
+    affiliations.filters.isActive = false
+    loadAffiliations()
   }
 
   return {
     entityCount,
     loadAffiliations,
-    affiliations
+    affiliations,
+    clearAllFilters
   }
 }
