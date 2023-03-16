@@ -5,7 +5,7 @@
         Getting your identity affidavit notarized
       </h1>
       <p class="mt-5 mb-3">
-        Download the identity affidavit template below and visit a Notary Public or laywer to have it notarized.
+        Download the identity affidavit template below and visit a Notary Public or lawyer to have it notarized.
       </p>
     </div>
     <v-card flat class="pa-sm-6 pa-lg-8">
@@ -18,7 +18,7 @@
           <li>Bring a printed copy of the BC Registries and Online Services affidavit template.
             You must use this template and fill out all fields.
             Failure to do so may result in a rejection of your account request.</li>
-          <li>Payment (most notaries and laywers charge a fee for this service. Fees will vary.)</li>
+          <li>Payment (most notaries and lawyers charge a fee for this service. Fees will vary.)</li>
         </ol>
       </div>
       <p class="mb-10">
