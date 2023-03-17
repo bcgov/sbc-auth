@@ -2,11 +2,13 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import flushPromises from 'flush-promises'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
@@ -22,7 +24,6 @@ describe('BcscPanel.vue', () => {
     localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-
     const store = new Vuex.Store({})
 
     wrapperFactory = (propsData) => {
@@ -37,7 +38,7 @@ describe('BcscPanel.vue', () => {
       })
     }
 
-    wrapper = wrapperFactory({ userProfile: {} })
+    wrapper = wrapperFactory({ user: { firstname: 'test', lastname: 'test' } })
   })
 
   afterEach(() => {
@@ -55,17 +56,20 @@ describe('BcscPanel.vue', () => {
     expect(wrapper.findComponent(LearnMoreButton).exists()).toBe(true)
   })
 
+  it('renders the correct text and number of bullet points', async () => {
+    expect(wrapper.findAll('.list-item').length).toStrictEqual(4)
+    expect(wrapper.findAll('.list-item').at(0).text()).toContain('A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.')
+    expect(wrapper.findAll('.list-item').at(1).text()).toContain('Only your name and a unique identifier is stored on the mobile device.')
+    expect(wrapper.findAll('.list-item').at(2).text()).toContain('It normally takes about 5 minutes to')
+    expect(wrapper.findAll('.list-item').at(3).text()).toContain('You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.')
+  })
+
   it('doesn\'t render the login or create account link when authenticated', () => {
-    const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
-
     // Verify only the Learn More Button is rendered
-    expect(authenticatedBtns.length).toStrictEqual(1)
-    expect(authenticatedBtns[0]).toBeDefined()
-    expect(authenticatedBtns[0].textContent).toContain('Learn More')
-
-    // Verify the account create link is not rendered
-    expect(createAccountLink).toBeNull()
+    expect(wrapper.find('.cta-btn').exists()).toBe(false)
+    expect(wrapper.findAll('.v-btn').length).toBe(1)
+    expect(wrapper.find('.learn-more-btn')).toBeDefined()
+    expect(wrapper.find('.learn-more-btn').text()).toContain('Learn More')
   })
 
   it('renders the login button and create account link when NOT authenticated', () => {
@@ -73,40 +77,19 @@ describe('BcscPanel.vue', () => {
     const wrapper = wrapperFactory({ userProfile: null })
 
     const authenticatedBtns = wrapper.vm.$el.querySelectorAll('.v-btn')
-    const mobileCardLink = wrapper.vm.$el.querySelectorAll('a')
-    const createAccountLink = wrapper.vm.$el.querySelector('.cta-btn')
+    const mobileCardLink = wrapper.findAll('a').at(0)
+    const createAccountLink = wrapper.find('.cta-btn')
 
     expect(authenticatedBtns[0]).toBeDefined()
     expect(authenticatedBtns[0].textContent).toContain('Create a BC Registries Account')
 
-    expect(mobileCardLink[0]).toBeDefined()
-    expect(mobileCardLink[0].textContent).toContain('set up a mobile card')
+    expect(mobileCardLink.exists()).toBe(true)
+    expect(mobileCardLink.text()).toContain('set up a mobile card')
 
-    expect(createAccountLink).toBeDefined()
-    expect(createAccountLink.textContent).toContain('Create a BC Registries Account')
+    expect(createAccountLink.exists()).toBe(true)
+    expect(createAccountLink.text()).toContain('Create a BC Registries Account')
 
     expect(authenticatedBtns[1]).toBeDefined()
     expect(authenticatedBtns[1].textContent).toContain('Learn More')
-  })
-
-  it('renders the correct text and number of bullet points', async () => {
-    wrapper.vm.secureBulletPoints = [
-      { text: 'Bullet 1' }, { text: 'Bullet 2' }
-    ]
-
-    wrapper.vm.easeBulletPoints = [
-      { text: 'Bullet 3' }, { text: 'Bullet 4' }
-    ]
-    await flushPromises()
-
-    const bulletListItems = wrapper.vm.$el.querySelectorAll('.list-item')
-
-    expect(bulletListItems[0].textContent).toContain('Bullet 1')
-    expect(bulletListItems[1].textContent).toContain('Bullet 2')
-
-    expect(bulletListItems[3].textContent).toContain('Bullet 3')
-    expect(bulletListItems[4].textContent).toContain('Bullet 4')
-
-    expect(bulletListItems.length).toStrictEqual(5)
   })
 })

@@ -40,7 +40,7 @@
     </v-row>
     <!-- Panel Btns -->
     <div class="mt-10">
-      <template v-if="!userProfile">
+      <template v-if="!user">
         <v-btn large color="bcgovblue" class="cta-btn font-weight-bold white--text mr-2 px-7"
           to="/choose-authentication-method">
           Create a BC Registries Account
@@ -52,36 +52,38 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { PropType, defineComponent } from '@vue/composition-api'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import { User } from '@/models/user'
 
-@Component({
+export default defineComponent({
+  name: 'BcscPanel',
   components: {
     LearnMoreButton
+  },
+  props: {
+    user: Object as PropType<User>
+  },
+  setup (props) {
+    const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
+    const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
+    const secureBulletPoints = [
+      { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
+      { text: 'Only your name and a unique identifier is stored on the mobile device.' }
+    ]
+
+    const easeBulletPoints = [
+      { text: 'You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
+    ]
+
+    return {
+      cardSetUpUrl,
+      learnMoreUrl,
+      secureBulletPoints,
+      easeBulletPoints
+    }
   }
 })
-export default class BcscPanel extends Vue {
-  private readonly cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
-  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
-  private secureBulletPoints: Array<any> = [
-    { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
-    { text: 'Only your name and a unique identifier is stored on the mobile device.' }
-  ]
-
-  private easeBulletPoints: Array<any> = [
-    { text: 'You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
-  ]
-
-  @Prop()
-  private userProfile: User
-
-  @Emit('login')
-  private emitLogin () {}
-
-  @Emit('account-dialog')
-  private emitAccountDialog () {}
-}
 </script>
 
 <style lang="scss" scoped>
