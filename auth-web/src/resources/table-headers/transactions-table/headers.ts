@@ -3,7 +3,6 @@ import { invoiceStatusDisplay, paymentTypeDisplay, productDisplay } from '@/reso
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import { Transaction } from '@/models/transaction'
-import moment from 'moment'
 
 export const TransactionTableHeaders: BaseTableHeaderI[] = [
   {

@@ -110,7 +110,6 @@ import { InvoiceStatus } from '@/util/constants'
 import { Transaction } from '@/models'
 import _ from 'lodash'
 import { invoiceStatusDisplay } from '@/resources/display-mappers'
-import moment from 'moment'
 import { useTransactions } from '@/composables'
 
 export default defineComponent({
