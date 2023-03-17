@@ -397,7 +397,7 @@ class Affiliation:
         # combine NRs
         for business in drafts + businesses:
             if 'nrNumber' in business and (nr_num := business['nrNumber']) and business['nrNumber'] in name_requests:
-                business['nameRequest'] = name_requests[nr_num]
+                business['nameRequest'] = name_requests[nr_num]['nameRequest']
                 del name_requests[nr_num]
 
         return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
