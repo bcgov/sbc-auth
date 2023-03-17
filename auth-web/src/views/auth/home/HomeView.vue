@@ -13,7 +13,7 @@
                      @click="goToManageBusinesses()">
                 Manage my Business
               </v-btn>
-              <NameRequestButton isWide=true />
+              <NameRequestButton :isWide="true" />
             </div>
 
             <!-- Non-authenticated -->
@@ -50,7 +50,6 @@
               </div>
             </div>
           </div>
-
           <v-dialog v-model="accountDialog" max-width="640">
             <LoginBCSC>
               <template v-slot:actions>
@@ -79,7 +78,7 @@
       <TestimonialQuotes />
       <div class="bcsc-container py-6">
         <BcscPanel class="my-10"
-          :userProfile="userProfile"
+          :user="userProfile"
           @login="login()"
           @account-dialog="accountDialog = true"
         />
