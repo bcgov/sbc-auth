@@ -110,6 +110,7 @@ import { InvoiceStatus } from '@/util/constants'
 import { Transaction } from '@/models'
 import _ from 'lodash'
 import { invoiceStatusDisplay } from '@/resources/display-mappers'
+import moment from 'moment'
 import { useTransactions } from '@/composables'
 
 export default defineComponent({
@@ -194,7 +195,10 @@ export default defineComponent({
       }
     })
 
-    const displayDate = (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY')
+    const displayDate = (val: Date) => {
+      const targetDate = val ? moment.utc(val).toDate() : val
+      return CommonUtils.formatDisplayDate(targetDate, 'MMMM DD, YYYY')
+    }
 
     return {
       InvoiceStatus,
