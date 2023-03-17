@@ -1,6 +1,6 @@
 import { Address, BaseAddressModel } from '@/models/address'
 import { Permission } from '@/util/constants'
-import moment from 'moment'
+import moment from 'moment-timezone'
 
 /**
  * A class to put all the common utility methods.
@@ -104,7 +104,7 @@ export default class CommonUtils {
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date, format?: string) {
     // not working in CI (getting UTC datetime)
-    return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' })).format(format || 'YYYY-MM-DD') : ''
+    return (date) ? moment(date).tz('America/Vancouver').format(format || 'YYYY-MM-DD') : ''
   }
 
   // Formatting date in the desired format for vue date pickers

@@ -30,6 +30,7 @@
     "keycloak-js": "^9.0.3",
     "mime-types": "^2.1.27",
     "moment": "^2.29.4",
+    "moment-timezone": "^0.5.41",
     "regenerator-runtime": "^0.13.3",
     "register-service-worker": "^1.6.2",
     "sbc-common-components": "3.0.7",

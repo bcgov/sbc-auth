@@ -195,10 +195,7 @@ export default defineComponent({
       }
     })
 
-    const displayDate = (val: Date) => {
-      const targetDate = val ? moment.utc(val).toDate() : val
-      return CommonUtils.formatDisplayDate(targetDate, 'MMMM DD, YYYY')
-    }
+    const displayDate = (val: Date) => CommonUtils.formatDisplayDate(val, 'MMMM DD, YYYY')
 
     return {
       InvoiceStatus,

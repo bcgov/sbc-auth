@@ -125,7 +125,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
   {
     col: 'createdOn',
     hasFilter: false,
-    itemFn: (val: Transaction) => CommonUtils.formatDisplayDate(moment.utc(val.createdOn).toDate(), 'MMMM DD, YYYY<br/>h:mm A'),
+    itemFn: (val: Transaction) => CommonUtils.formatDisplayDate(val.createdOn, 'MMMM DD, YYYY<br/>h:mm A'),
     minWidth: '165px',
     value: 'Date (Pacific Time)'
   },
