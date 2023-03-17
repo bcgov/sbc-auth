@@ -12,6 +12,7 @@
     :mobile-breakpoint="0"
     :options.sync="tableDataOptions"
     :server-items-length="totalItems"
+    :hide-default-footer="pageHide ? true : false"
   >
     <!-- Headers (two rows) -->
     <template v-slot:header>
@@ -130,7 +131,8 @@ export default defineComponent({
     setItems: { default: [] as object[] },
     setHeaders: { default: [] as BaseTableHeaderI[] },
     setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
-    totalItems: { type: Number }
+    totalItems: { type: Number },
+    pageHide: { default: false }
   },
   setup (props, { emit }) {
     // reactive vars

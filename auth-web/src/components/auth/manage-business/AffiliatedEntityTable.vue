@@ -16,6 +16,7 @@
         :totalItems="affiliations.totalResults"
         :setTableDataOptions="tableDataOptions"
         @update-table-options="tableDataOptions = $event"
+        :pageHide="true"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -152,8 +153,7 @@ export default defineComponent({
     /** Returns true if the affiliation is a numbered IA. */
     const isNumberedIncorporationApplication = (item: Business): boolean => {
       return (
-        (item.corpType.code || item.corpType) === CorpTypes.INCORPORATION_APPLICATION &&
-        item.name === item.businessIdentifier
+        (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION
       )
     }
 
@@ -175,8 +175,8 @@ export default defineComponent({
     /** Returns true if the affiliation is a temporary business. */
     const isTemporaryBusiness = (business: Business): boolean => {
       return (
-        (business.corpType.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
-        (business.corpType.code || business.corpType) === CorpTypes.REGISTRATION
+        (business.corpType?.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
+        (business.corpType?.code || business.corpType) === CorpTypes.REGISTRATION
       )
     }
 
@@ -206,7 +206,7 @@ export default defineComponent({
 
     /** Returns the temp business description. */
     const tempDescription = (business: Business): string => {
-      switch ((business.corpType.code || business.corpType) as CorpTypes) {
+      switch ((business.corpType?.code || business.corpType) as CorpTypes) {
         case CorpTypes.INCORPORATION_APPLICATION:
           return AffiliationTypes.INCORPORATION_APPLICATION
         case CorpTypes.REGISTRATION:
@@ -225,7 +225,7 @@ export default defineComponent({
       }
       // if this is an IA or registration then show legal type
       if (isTemporaryBusiness(business)) {
-        const legalType: unknown = business.corpSubType?.code
+        const legalType: unknown = (business.corpSubType?.code || business.corpSubType)
         return GetCorpFullDescription(legalType as CorpTypeCd) // may return ''
       }
       // else show nothing
@@ -251,7 +251,7 @@ export default defineComponent({
 
     /** Handler for open action */
     const open = (item: Business): void => {
-      if ((item.corpType.code || item.corpType) === CorpTypes.NAME_REQUEST) {
+      if ((item.corpType?.code || item.corpType) === CorpTypes.NAME_REQUEST) {
         goToNameRequest(item.nameRequest)
       } else {
         goToDashboard(item.businessIdentifier)

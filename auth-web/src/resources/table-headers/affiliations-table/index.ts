@@ -8,7 +8,7 @@ export const getAffiliationTableHeaders = (headersArray?: string[]): BaseTableHe
   if (headersArray) {
     headerTitles = headerTitles.concat(headersArray)
   } else {
-    headerTitles = headerTitles.concat(['Type', 'Status', 'Number'])
+    headerTitles = headerTitles.concat(['Number', 'Type', 'Status'])
   }
   headerTitles.push('Actions')
   for (const i in headerTitles) {

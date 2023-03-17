@@ -96,146 +96,44 @@ export default class BusinessModule extends VuexModule {
     }
 
     // get affiliated entities for this organization
-    // const entityResponse = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
-    //   .then(response => {
-    //     console.log(response.data.entities.length)
-    //     if (response?.data?.entities && response?.status === 200) {
-    //       return response.data.entities
-    //     }
-    //     throw Error(`Invalid response = ${response}`)
-    //   })
-    //   .catch(error => {
-    //     console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
-    //     return [] as []
-    //   })
-
-    const entityResponse: any[] = [
-      {
-        'legalType': 'NR',
-        'nameRequest': {
-          'actions': [
-            {
-              'URL': null,
-              'entitiesFilingName': null,
-              'filingName': 'Incorporation',
-              'learTemplate': null
-            },
-            {
-              'URL': null,
-              'entitiesFilingName': null,
-              'filingName': 'Amalgamation',
-              'learTemplate': null
-            }
-          ],
-          'applicants': [
-            {
-              'emailAddress': '1@1.com',
-              'phoneNumber': '1234567890'
-            }
-          ],
-          'entityTypeCd': 'CR',
-          'id': 2265637,
-          'legalType': 'BC',
-          'names': [
-            {
-              'name': 'KIALS NAME FOR PPR1 CORP.',
-              'state': 'NE'
-            }
-          ],
-          'natureBusinessInfo': 'test ppr 1',
-          'nrNum': 'NR 1929788',
-          'requestTypeCd': 'CR',
-          'stateCd': 'DRAFT',
-          'target': 'lear'
+    const entityResponse = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
+      .then(response => {
+        if (response?.data?.entities && response?.status === 200) {
+          return response.data.entities
         }
-      },
-      {
-        'draftType': 'TMP',
-        'identifier': 'Tb4x1IydqO',
-        'legalType': 'BC',
-        'nameRequest': {
-          'legalType': 'NR',
-          'nameRequest': {
-            'actions': [
-              {
-                'URL': null,
-                'entitiesFilingName': null,
-                'filingName': 'Incorporation',
-                'learTemplate': null
-              },
-              {
-                'URL': null,
-                'entitiesFilingName': null,
-                'filingName': 'Amalgamation',
-                'learTemplate': null
-              }
-            ],
-            'applicants': [
-              {
-                'emailAddress': '1@1.com',
-                'phoneNumber': '1234567890'
-              }
-            ],
-            'entityTypeCd': 'CR',
-            'id': 2265604,
-            'legalType': 'BC',
-            'names': [
-              {
-                'name': 'KIALS TEST NAMESSS CORP.',
-                'state': 'NE'
-              }
-            ],
-            'natureBusinessInfo': 'test',
-            'nrNum': 'NR 2090111',
-            'requestTypeCd': 'CR',
-            'stateCd': 'APPROVED',
-            'target': 'lear'
-          }
-        },
-        'nrNumber': 'NR 2090111'
-      },
-      {
-        'draftType': 'TMP',
-        'identifier': 'TJHyE2NaQN',
-        'legalType': 'BEN'
-      },
-      {
-        'adminFreeze': false,
-        'goodStanding': true,
-        'identifier': 'BC0871330',
-        'legalName': 'KIALS BUSINESS NAME CORP.',
-        'legalType': 'BC',
-        'state': 'ACTIVE',
-        'businessNumber': '1234'
-      }
-    ]
+        throw Error(`Invalid response = ${response}`)
+      })
+      .catch(error => {
+        console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
+        return [] as []
+      })
 
     let affiliatedEntities: Business[] = []
 
     entityResponse.forEach((resp, i) => {
       const entity: Business = {
         businessIdentifier: resp.identifier,
-        ...(typeof resp.businessNumber !== 'undefined' && { businessNumber: resp.businessNumber }),
-        ...(resp.name && { name: resp.name }),
+        ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
+        ...(resp.legalName && { name: resp.legalName }),
         ...(resp.contacts && { contacts: resp.contacts }),
-        ...(resp.legalType && { corpType: resp.legalType }),
-        ...(resp.corpSubType && { corpSubType: resp.corpSubType }),
+        ...(resp.legalType && { corpType: { code: resp.draftType || resp.legalType } }),
+        ...(resp.draftType && { corpSubType: { code: resp.legalType } }),
         ...(resp.folioNumber && { folioNumber: resp.folioNumber }),
         ...(resp.lastModified && { lastModified: resp.lastModified }),
         ...(resp.modified && { modified: resp.modified }),
         ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
-        ...(resp.nameRequest && { nameRequest: resp.nameRequest }),
         ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
-        ...(resp.status && { status: resp.status })
+        ...(resp.state && { status: resp.state })
       }
       if (resp.nameRequest) {
         const nr = resp.nameRequest
+        entity.businessIdentifier = nr.nrNum
         entity.nameRequest = {
           names: nr.names,
           id: nr.id,
           legalType: nr.legalType,
           nrNumber: nr.nrNum,
-          state: nr.state,
+          state: nr.stateCd,
           applicantEmail: nr.applicants?.emailAddress,
           applicantPhone: nr.applicants?.phoneNumber,
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),

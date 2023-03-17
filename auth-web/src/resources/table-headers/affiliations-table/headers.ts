@@ -11,7 +11,8 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemClass: 'business-name',
-    value: 'Business Name'
+    value: 'Business Name',
+    width: '30%'
   },
   {
     col: 'Number',
@@ -23,7 +24,8 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemClass: 'business-number',
-    value: ' Number'
+    value: ' Number',
+    width: '17%'
   },
   {
     col: 'Type',
@@ -35,7 +37,8 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemClass: 'business-type',
-    value: 'Type'
+    value: 'Type',
+    width: '25%'
   },
   {
     col: 'Status',
@@ -47,12 +50,14 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     },
     hasFilter: true,
     itemClass: 'business-status',
-    value: 'Status'
+    value: 'Status',
+    width: '25%'
   },
   {
     col: 'Actions',
     hasFilter: false,
     itemClass: 'actions',
-    value: 'Actions'
+    value: 'Actions',
+    width: '3%'
   }
 ]
