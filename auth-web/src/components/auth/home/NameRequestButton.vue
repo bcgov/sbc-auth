@@ -12,27 +12,37 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { defineComponent } from '@vue/composition-api'
 
-@Component({})
-export default class NameRequestButton extends Vue {
-  @Prop() isWide: boolean
+export default defineComponent({
+  name: 'NameRequestButton',
+  props: {
+    isWide: {
+      default: false
+    },
+    isInverse: {
+      default: false
+    }
+  },
+  setup (props) {
+    // open Name Request in current tab to retain current account and user
+    const goToNameRequest = (): void => {
+      if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
+        window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
+      } else {
+        window.location.href = appendAccountId(ConfigHelper.getNroUrl())
+      }
+    }
 
-  @Prop({ default: false }) isInverse: boolean
-
-  // open Name Request in current tab to retain current account and user
-  goToNameRequest (): void {
-    if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {
-      window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
-    } else {
-      window.location.href = appendAccountId(ConfigHelper.getNroUrl())
+    return {
+      goToNameRequest
     }
   }
-}
+})
 </script>
 
 <style lang="scss" scoped>
