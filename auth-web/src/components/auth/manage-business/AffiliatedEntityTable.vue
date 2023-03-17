@@ -139,9 +139,9 @@ export default defineComponent({
   setup (props) {
     const isloading = false
     const store = useStore()
-    const { loadAffiliations, affiliations, entityCount, clearAllFilters } = useAffiliations()
+    const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status } = useAffiliations()
     const getSelectedColumns = computed(() => props.selectedColumns)
-    const headers: Ref<BaseTableHeaderI[]> = ref([])
+
     /** V-model for dropdown menus. */
     const dropdown = ref([])
     // use reactive to make the dropdown array reactive
@@ -215,17 +215,6 @@ export default defineComponent({
           return '' // should never happen
       }
     }
-    /** Returns the type of the affiliation. */
-    const type = (business: Business): string => {
-      if (isNameRequest(business)) {
-        return AffiliationTypes.NAME_REQUEST
-      }
-      if (isTemporaryBusiness(business)) {
-        return tempDescription(business)
-      }
-      const code: unknown = business.corpType.code
-      return GetCorpFullDescription(code as CorpTypeCd)
-    }
 
     /** Returns the type description. */
     const typeDescription = (business: Business): string => {
@@ -241,24 +230,6 @@ export default defineComponent({
       }
       // else show nothing
       return ''
-    }
-
-    /** Returns the status of the affiliation. */
-    const status = (business: Business): string => {
-      if (isNameRequest(business)) {
-        // Format name request state value
-        const state = NrState[business.nameRequest.state]
-        if (!state) return 'Unknown'
-        if (state === NrState.APPROVED && !business.nameRequest.expirationDate) return NrDisplayStates.PROCESSING
-        else return NrDisplayStates[state] || 'Unknown'
-      }
-      if (isTemporaryBusiness(business)) {
-        return BusinessState.DRAFT
-      }
-      if (business.status) {
-        return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
-      }
-      return BusinessState.ACTIVE
     }
 
     const isProcessing = (state: string): boolean => {
@@ -299,8 +270,6 @@ export default defineComponent({
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
 
     watch(() => tableDataOptions.value, (val: DataOptions) => {
-      const newPage = val?.page || DEFAULT_DATA_OPTIONS.page
-      const newLimit = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
       // need this check or jest test continuously loops on initialization
       loadAffiliations()
     })
@@ -317,12 +286,12 @@ export default defineComponent({
     // }, { immediate: true })
 
     watch(() => props.selectedColumns, (newCol: string[], oldCol: string[]) => {
-      headers.value = getAffiliationTableHeaders(newCol)
+      getHeaders(newCol)
     })
 
     onBeforeMount(() => {
       loadAffiliations()
-      headers.value = getAffiliationTableHeaders(props.selectedColumns)
+      getHeaders(props.selectedColumns)
     })
 
     return {

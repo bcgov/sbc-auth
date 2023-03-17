@@ -1,5 +1,4 @@
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
-import { Business } from '@/models/business'
 
 export const AffiliationTableHeaders: BaseTableHeaderI[] = [
   {
@@ -43,7 +42,7 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     customFilter: {
       clearable: true,
       label: 'Status',
-      type: 'text',
+      type: 'select',
       value: ''
     },
     hasFilter: true,
