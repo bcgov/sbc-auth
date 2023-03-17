@@ -10,7 +10,7 @@ export const getTransactionTableHeaders = (extended = false): BaseTableHeaderI[]
       'createdName', 'createdOn', 'total', 'id', 'invoiceNumber', 'paymentMethod', 'statusCode', 'actions']
   } else {
     headerTitles = ['lineItemsAndDetails', 'folioNumber', 'createdName', 'createdOn',
-      'total', 'id', 'paymentMethod', 'statusCode', 'actions']
+      'total', 'id', 'invoiceNumber', 'paymentMethod', 'statusCode', 'actions']
   }
 
   for (const i in headerTitles) {
