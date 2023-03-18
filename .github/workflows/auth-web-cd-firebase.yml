@@ -1,0 +1,31 @@
+name: NAMEREQUEST UI CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment"
+        required: true
+        type: choice
+        options:
+        - dev
+        - test
+        - sandbox
+        - prod
+      tagname:
+        description: "Specify a previous version (git tag) to deploy"
+        required: false
+        default: ""
+
+jobs:
+  bcregistry-ui-cd:
+    uses: bcgov/bcregistry-sre/.github/workflows/ui-cd.yaml@main
+    with:
+      environment: ${{ inputs.environment }}
+      tagname: ${{ inputs.tagname }}
+    secrets:
+      OP_CONNECT_URL: ${{ secrets.OP_CONNECT_URL }}
+      OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}

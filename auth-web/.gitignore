@@ -17,3 +17,6 @@ __mock__
 *.ntvs*
 *.njsproj
 *.sln
+
+.env
+*.firebaserc

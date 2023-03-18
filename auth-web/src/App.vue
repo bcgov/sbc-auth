@@ -35,7 +35,15 @@
         </v-btn>
       </v-snackbar>
       <BreadCrumb v-if="showNavigationBar" :breadcrumbs="breadcrumbs" />
-      <pay-system-alert />
+
+      <!-- Alert banner -->
+      <v-alert
+        tile dense
+        type="warning"
+        class="mb-0 text-center colour-dk-text"
+        v-if="bannerText"
+        v-html="bannerText"
+      />
     </div>
     <div class="app-body">
       <router-view />
@@ -45,7 +53,7 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LDFlags, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
 import { MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
@@ -59,8 +67,8 @@ import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import PaySystemAlert from 'sbc-common-components/src/components/PaySystemAlert.vue'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
@@ -72,8 +80,7 @@ import { getModule } from 'vuex-module-decorators'
     BreadCrumb,
     SbcHeader,
     SbcFooter,
-    SbcLoader,
-    PaySystemAlert
+    SbcLoader
   },
   computed: {
     ...mapState('org', [
@@ -110,6 +117,12 @@ export default class App extends Mixins(NextPageMixin) {
   get showLoginMenu (): boolean {
     // Don't show the login menu if the user is on login page
     return this.$route.path !== `/${Pages.LOGIN}`
+  }
+
+  get bannerText (): string | null {
+    const bannerText: string = LaunchDarklyService.getFlag(LDFlags.BannerText)
+    // remove spaces so that " " becomes falsy
+    return bannerText?.trim()
   }
 
   /** The route breadcrumbs list. */
