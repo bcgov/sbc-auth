@@ -14,9 +14,10 @@
         :setHeaders="headers"
         :setItems="affiliations.results"
         :totalItems="affiliations.totalResults"
-        :setTableDataOptions="tableDataOptions"
         @update-table-options="tableDataOptions = $event"
         :pageHide="true"
+        :filters="affiliations.filters"
+        :updateFilter="updateFilter"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -140,7 +141,7 @@ export default defineComponent({
   setup (props) {
     const isloading = false
     const store = useStore()
-    const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status } = useAffiliations()
+    const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status, updateFilter } = useAffiliations()
     const getSelectedColumns = computed(() => props.selectedColumns)
 
     /** V-model for dropdown menus. */
@@ -267,13 +268,6 @@ export default defineComponent({
       clearAllFilters()
     }
 
-    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
-
-    watch(() => tableDataOptions.value, (val: DataOptions) => {
-      // need this check or jest test continuously loops on initialization
-      loadAffiliations()
-    })
-
     /** Apply data table headers dynamically to account for computed properties. */
     // watch(selectedColumns, () => {
     //   headers.value = [
@@ -295,7 +289,6 @@ export default defineComponent({
     })
 
     return {
-      tableDataOptions,
       clearFiltersTrigger,
       clearFilters,
       isloading,
@@ -313,7 +306,9 @@ export default defineComponent({
       status,
       isProcessing,
       typeDescription,
-      getSelectedColumns
+      loadAffiliations,
+      getSelectedColumns,
+      updateFilter
     }
   }
 })

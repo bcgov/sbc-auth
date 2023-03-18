@@ -61,3 +61,22 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     width: '3%'
   }
 ]
+
+export const headerTypes = {
+  'Name': {
+    index: 0,
+    type: 'text'
+  },
+  'Number': {
+    index: 1,
+    type: 'text'
+  },
+  'Type': {
+    index: 2,
+    type: 'select'
+  },
+  'Status': {
+    index: 3,
+    type: 'select'
+  }
+}

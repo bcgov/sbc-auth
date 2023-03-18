@@ -103,11 +103,13 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { BaseSelectFilter, BaseTextFilter } from './resources/base-filters'
+import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
 import _ from 'lodash'
+import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
 
 // FUTURE: remove this in vue 3 upgrade (typing will be inferred properly)
 interface BaseTableStateI {
@@ -132,7 +134,9 @@ export default defineComponent({
     setHeaders: { default: [] as BaseTableHeaderI[] },
     setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
     totalItems: { type: Number },
-    pageHide: { default: false }
+    pageHide: { default: false },
+    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
+    filters: { default: { isActive: false, filterPayload: {} }, required: false }
   },
   setup (props, { emit }) {
     // reactive vars
@@ -149,6 +153,25 @@ export default defineComponent({
         state.filtering = true
         await header.customFilter.filterApiFn(header.customFilter.value)
         state.filtering = false
+      } else {
+        // client side custom or base filter
+        props.updateFilter(header.col, header.customFilter.value)
+        state.sortedItems = props.setItems.filter((item, i) => {
+          let display = true
+          for (let col in props.filters.filterPayload) {
+            const colValue = state.headers[headerTypes[col].index].customFilter.items[i].text
+            const filterValue = props.filters.filterPayload[col]
+            if (headerTypes[col].type === 'select') {
+              display = BaseSelectFilter(colValue, filterValue)
+            } else {
+              display = BaseTextFilter(colValue, filterValue)
+            }
+            if (!display) {
+              return display
+            }
+          }
+          return display
+        })
       }
     }, 500)
 
@@ -168,6 +191,7 @@ export default defineComponent({
       state.headers.forEach((header) => {
         if (header.hasFilter) header.customFilter.value = ''
       })
+      state.sortedItems = props.setItems
     })
     watch(() => props.setTableDataOptions, (val: DataOptions) => { state.tableDataOptions = val })
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })

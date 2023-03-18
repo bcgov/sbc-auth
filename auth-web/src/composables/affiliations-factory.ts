@@ -9,7 +9,7 @@ import { Organization } from '@/models/Organization'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState } from '@/util/constants'
-import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
+import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
   filters: {
@@ -82,6 +82,37 @@ export const useAffiliations = () => {
     return BusinessState.ACTIVE
   }
 
+  /** Returns true if the affiliation is a numbered IA. */
+  const isNumberedIncorporationApplication = (item: Business): boolean => {
+    return (
+      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION
+    )
+  }
+
+  /** Returns the identifier of the affiliation. */
+  const number = (business: Business): string => {
+    if (isNumberedIncorporationApplication(business)) {
+      return 'Pending'
+    }
+    if (isTemporaryBusiness(business)) {
+      return business.nrNumber
+    }
+    if (isNameRequest(business)) {
+      return business.nameRequest.nrNumber
+    }
+    return business.businessIdentifier
+  }
+
+  /** Returns the name of the affiliation. */
+  const name = (item: Business): string => {
+    if (isNumberedIncorporationApplication(item)) {
+      const legalType: unknown = item.corpSubType?.code
+      // provide fallback for old numbered IAs without corpSubType
+      return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
+    }
+    return item.name
+  }
+
   /** Apply data table headers dynamically to account for computed properties. */
   const getHeaders = (columns?: string[]) => {
     headers.value = getAffiliationTableHeaders(columns)
@@ -92,6 +123,15 @@ export const useAffiliations = () => {
         return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
       } else if (header.col === 'Status') {
         const filterValue: { text: string, value: any }[] = businesses_.map(business => ({ text: status(business), value: status(business) }))
+        return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
+      } else if (header.col === 'Name') {
+        const filterValue: { text: string, value: any }[] = businesses_.map((business) => {
+          const businessName = isNameRequest(business) ? business.nameRequest.names.map(obj => obj.name).join(' ') : name(business)
+          return { text: businessName, value: businessName }
+        })
+        return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
+      } else if (header.col === 'Number') {
+        const filterValue: { text: string, value: any }[] = businesses_.map(business => ({ text: number(business), value: number(business) }))
         return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
       } else {
         return { ...header }
@@ -111,7 +151,7 @@ export const useAffiliations = () => {
   })
 
   // get affiliated entities for this organization
-  const loadAffiliations = debounce(async (filterField?: string, value?: any) => {
+  const loadAffiliations = (filterField?: string, value?: any) => {
     affiliations.loading = true
     if (filterField) {
       affiliations.filters.filterPayload[filterField] = value
@@ -119,17 +159,26 @@ export const useAffiliations = () => {
     affiliations.totalResults = businesses.value.length
     affiliations.results = businesses.value
     affiliations.loading = false
-  })
-  let filtersActive = false
-  for (const key in affiliations.filters.filterPayload) {
-    if (affiliations.filters.filterPayload[key]) filtersActive = true
-    if (filtersActive) break
   }
-  affiliations.filters.isActive = filtersActive
+
+  const updateFilter = (filterField?: string, value?: any) => {
+    if (filterField) {
+      if (value) {
+        affiliations.filters.filterPayload[filterField] = value
+      } else {
+        delete affiliations.filters.filterPayload[filterField]
+      }
+    }
+    if (Object.keys(affiliations.filters.filterPayload).length === 0) {
+      affiliations.filters.isActive = false
+    } else {
+      affiliations.filters.isActive = true
+    }
+  }
+
   const clearAllFilters = () => {
     affiliations.filters.filterPayload = {}
     affiliations.filters.isActive = false
-    loadAffiliations()
   }
 
   return {
@@ -140,6 +189,7 @@ export const useAffiliations = () => {
     getHeaders,
     type,
     status,
-    headers
+    headers,
+    updateFilter
   }
 }
