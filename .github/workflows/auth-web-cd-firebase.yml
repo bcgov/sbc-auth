@@ -1,4 +1,4 @@
-name: NAMEREQUEST UI CD
+name: ACCOUNT UI CD
 
 on:
   push:
@@ -21,7 +21,7 @@ on:
         default: ""
 
 jobs:
-  bcregistry-ui-cd:
+  account-ui-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/ui-cd.yaml@main
     with:
       environment: ${{ inputs.environment }}
