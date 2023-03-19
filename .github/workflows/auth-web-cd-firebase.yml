@@ -27,5 +27,6 @@ jobs:
       environment: ${{ inputs.environment }}
       tagname: ${{ inputs.tagname }}
     secrets:
+      APP_NAME: "account-ui"
       OP_CONNECT_URL: ${{ secrets.OP_CONNECT_URL }}
       OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
