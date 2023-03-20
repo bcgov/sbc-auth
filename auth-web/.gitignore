@@ -19,5 +19,6 @@ __mock__
 *.sln
 
 .env
+.env.bak
 *.firebaserc
 .firebase

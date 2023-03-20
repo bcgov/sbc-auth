@@ -12,12 +12,6 @@ DOCKER_NAME:=auth-web
 setup: ## Clean and Install npm dependencies
 	npm ci
 
-create-env: ## create the configration files from dev
-	@oc get configmap $(DOCKER_NAME)-dev-keycloak-config  -n "$(OPENSHIFT_REPOSITORY)-dev" \
-		-o json | jq -r '.data["keycloak.json"]' > ./public/config/kc/keycloak.json.dev
-	@oc get configmap $(DOCKER_NAME)-dev-ui-configuration  -n "$(OPENSHIFT_REPOSITORY)-dev" \
-		-o json | jq -r '.data["configuration.json"]' > ./public/config/configuration.json.dev
-
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
@@ -27,6 +21,8 @@ lint:  ## Run linting ofcode.
 	npm run lint
 
 test:  ## Unit testing
+	mv .env .env.bak
+	cp .env.example .env
 	npm run test:unit
 
 #################################################################################
@@ -37,7 +33,7 @@ test:  ## Unit testing
 # expects export OPENSHIFT_SA_TOKEN="$(oc whoami -t)"
 # expects export OPENSHIFT_REPOSITORY=""
 # expects export TAG_NAME="dev/test/prod"
-# expects export OPS_REPOSITORY=""                                                        #
+# expects export OPS_REPOSITORY=""
 #################################################################################
 cd: ## CD flow
 ifeq ($(TAG_NAME), test)
