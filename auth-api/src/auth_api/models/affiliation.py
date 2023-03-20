@@ -20,7 +20,7 @@ from typing import List
 
 from flask import current_app
 from sqlalchemy import Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import contains_eager, relationship
 
 from auth_api.utils.enums import CorpType
 
@@ -68,7 +68,9 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     @classmethod
     def find_affiliations_by_org_id(cls, org_id: int) -> List[Affiliation]:
         """Return the affiliations with the provided org id."""
-        return db.session.query(Affiliation).filter(Affiliation.org_id == org_id)\
+        return db.session.query(Affiliation).join(EntityModel) \
+            .options(contains_eager(Affiliation.entity).load_only(EntityModel.business_identifier)) \
+            .filter(Affiliation.org_id == org_id) \
             .order_by(Affiliation.created.desc()).all()
 
     @classmethod
