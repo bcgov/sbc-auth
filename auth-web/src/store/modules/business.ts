@@ -148,57 +148,6 @@ export default class BusinessModule extends VuexModule {
     })
     // update store with initial results
     this.setBusinesses(affiliatedEntities)
-
-    // get data for NR entities (not async)
-    // const getNrDataPromises = affiliatedEntities.map(entity => {
-    //   if (entity.corpType.code === CorpTypes.NAME_REQUEST) {
-    //     return BusinessService.getNrData(entity.businessIdentifier)
-    //   }
-    //   return null
-    // })
-
-    // wait for all calls to finish (async)
-    // const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
-
-    // console.log(getNrDataResponses)
-
-    // // attach NR data to affiliated entities
-    // getNrDataResponses.forEach((resp, i) => {
-    //   const nr = resp['value']?.data
-
-    //   if (nr) {
-    //     affiliatedEntities[i].nameRequest = {
-    //       names: nr.names,
-    //       id: nr.id,
-    //       legalType: nr.legalType,
-    //       nrNumber: nr.nrNum,
-    //       state: nr.state,
-    //       applicantEmail: nr.applicants?.emailAddress,
-    //       applicantPhone: nr.applicants?.phoneNumber,
-    //       enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
-    //       folioNumber: nr.folioNumber,
-    //       target: getTarget(nr),
-    //       entityTypeCd: nr.entity_type_cd,
-    //       natureOfBusiness: nr.natureBusinessInfo,
-    //       expirationDate: nr.expirationDate
-    //     }
-    //   }
-    // })
-
-    // update store with final results
-    // this.setBusinesses(affiliatedEntities)
-
-    // TODO
-    // update business name for all NRs
-    // NB: don't wait for all calls to finish
-    // getNrDataResponses.forEach((resp, i) => {
-    //   const nr = resp['value']?.data
-    //   if (nr) {
-    //     const businessIdentifier = affiliatedEntities[i].businessIdentifier
-    //     const name = getApprovedName(nr) || ''
-    //     BusinessService.updateBusinessName({ businessIdentifier, name })
-    //   }
-    // })
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

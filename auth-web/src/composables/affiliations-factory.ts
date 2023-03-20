@@ -1,16 +1,12 @@
 /* eslint-disable sort-imports */
 import { Business } from './../models/business'
-import { Affiliation, AffiliationState, AffiliationFilterParams } from './../models/affiliation'
-import { debounce } from 'lodash'
-import { Emit } from 'vue-property-decorator'
-import OrgService from '@/services/org.services'
+import { AffiliationState, AffiliationFilterParams } from './../models/affiliation'
 import { computed, reactive, ref, Ref, watch } from '@vue/composition-api'
 import { useStore } from 'vuex-composition-helpers'
-import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, NrTargetTypes, FilingTypes } from '@/util/constants'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({

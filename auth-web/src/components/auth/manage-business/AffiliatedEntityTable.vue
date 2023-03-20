@@ -143,14 +143,10 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { computed, defineComponent, onBeforeMount, reactive, ref, watch } from '@vue/composition-api'
-
+import { computed, defineComponent, onBeforeMount, ref, watch } from '@vue/composition-api'
 import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
-
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
-import { Dictionary } from 'vue-router/types/router'
-
 import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
 import { Organization } from '@/models/Organization'
