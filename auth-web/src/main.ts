@@ -7,7 +7,6 @@ import * as Sentry from '@sentry/browser'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import { LDFlags } from '@/util/constants'
 import Hotjar from 'vue-hotjar'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -26,6 +25,8 @@ import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
 import Search from 'fas-ui'
+// eslint-disable-next-line sort-imports
+import { LDFlags } from '@/util/constants'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
