@@ -20,7 +20,7 @@ describe('PPRLauncher.vue', () => {
   const mhrLauncherText = 'Register or search for legal claims on manufactured homes.'
   const mhrLauncherTitle = 'Staff Manufactured Home Registry'
 
-  const pprUrl = 'ppr-web'
+  const pprUrl = 'https://ppr-ui-dev.apps.silver.devops.gov.bc.ca/ppr/'
   const config = {
     'PPR_WEB_URL': pprUrl
   }
