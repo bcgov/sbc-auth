@@ -18,6 +18,7 @@
         :pageHide="true"
         :filters="affiliations.filters"
         :updateFilter="updateFilter"
+        :height="entityCount > 5 ? '32rem' : null"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -64,19 +65,68 @@
       </template>
 
       <!-- Actions -->
-      <template v-slot:item-slot-Actions="{ item }">
-        <span class="open-action">
-          <v-btn
-            small
-            color="primary"
-            min-width="5rem"
-            min-height="2rem"
-            class="open-action-btn"
-            @click="open(item)"
-          >
-            Open
-          </v-btn>
-        </span>
+      <template v-slot:item-slot-Actions="{ item, index }">
+        <div class="actions mx-auto" :id="`action-menu-${index}`">
+          <span class="open-action">
+            <v-btn
+              small
+              color="primary"
+              min-width="5rem"
+              min-height="2rem"
+              class="open-action-btn"
+              @click="open(item)"
+            >
+              Open
+            </v-btn>
+            <!-- More Actions Menu -->
+            <span class="more-actions">
+              <v-menu
+                :attach="`#action-menu-${index}`"
+                v-model="dropdown[index]"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    small
+                    color="primary"
+                    min-height="2rem"
+                    class="more-actions-btn"
+                    v-on="on"
+                  >
+                    <v-icon>{{dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-if="canUseNameRequest(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="use-name-request-button"
+                    @click="useNameRequest(item)"
+                  >
+                    <v-list-item-subtitle>
+                      <v-icon small>mdi-file-certificate-outline</v-icon>
+                      <span class="pl-1">Use this Name Request Now</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    class="actions-dropdown_item my-1"
+                    data-test="remove-button"
+                    v-can:REMOVE_BUSINESS.disable
+                    @click="removeBusiness(item)"
+                  >
+                    <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+                      <v-icon small>mdi-delete-forever</v-icon>
+                      <span class="pl-1">Delete {{tempDescription(item)}}</span>
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-else>
+                      <v-icon small>mdi-delete</v-icon>
+                      <span class="pl-1">Remove From Table</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </span>
+          </span>
+        </div>
       </template>
       </base-v-data-table>
     </v-card>
@@ -84,49 +134,28 @@
 </template>
 
 <script lang='ts'>
+import { Business, NameRequest, Names } from '@/models/business'
 import {
-  AffiliationTypes,
-  BusinessState,
   CorpTypes,
   FilingTypes,
-  LDFlags,
   NrDisplayStates,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { Business, NameRequest, Names } from '@/models/business'
-import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
-
-import {
-  CorpTypeCd,
-  GetCorpFullDescription,
-  GetCorpNumberedDescription
-} from '@bcrs-shared-components/corp-type-module'
-
-import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Ref, computed, defineComponent, onBeforeMount, onMounted, reactive, ref, watch } from '@vue/composition-api'
-
-import { BaseTableHeaderI } from '@/components/datatable/interfaces'
+import { computed, defineComponent, onBeforeMount, reactive, ref, watch } from '@vue/composition-api'
 
 import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
-
 import ConfigHelper from '@/util/config-helper'
 
-import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
-import { DataOptions } from 'vuetify'
-
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
+import { Dictionary } from 'vue-router/types/router'
 
+import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
-
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { Organization } from '@/models/Organization'
 import _ from 'lodash'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-
-import { getAffiliationTableHeaders } from '@/resources/table-headers'
-import setup from '@/util/interceptors'
-
 import { useAffiliations } from '@/composables'
 import { useStore } from 'vuex-composition-helpers'
 
@@ -138,62 +167,20 @@ export default defineComponent({
     selectedColumns: { default: [] as string[] },
     loading: { default: false }
   },
-  setup (props) {
+  emits: ['add-unknown-error'],
+  setup (props, { emit }) {
     const isloading = false
     const store = useStore()
-    const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status, updateFilter } = useAffiliations()
+    const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status, updateFilter, typeDescription, isNameRequest, number, name, canUseNameRequest, tempDescription, isTemporaryBusiness } = useAffiliations()
     const getSelectedColumns = computed(() => props.selectedColumns)
+    const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
+
+    const createNamedBusiness = async ({ filingType, business }) => {
+      await store.dispatch('createNamedBusiness', { filingType, business })
+    }
 
     /** V-model for dropdown menus. */
-    const dropdown = ref([])
-    // use reactive to make the dropdown array reactive
-    const state = reactive({
-      dropdown
-    })
-
-    /** Returns true if the affiliation is a numbered IA. */
-    const isNumberedIncorporationApplication = (item: Business): boolean => {
-      return (
-        (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION
-      )
-    }
-
-    /** Returns the name of the affiliation. */
-    const name = (item: Business): string => {
-      if (isNumberedIncorporationApplication(item)) {
-        const legalType: unknown = item.corpSubType?.code
-        // provide fallback for old numbered IAs without corpSubType
-        return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
-      }
-      return item.name
-    }
-
-    /** Returns true if the affiliation is a Name Request. */
-    const isNameRequest = (business: Business): boolean => {
-      return (!!business.nameRequest)
-    }
-
-    /** Returns true if the affiliation is a temporary business. */
-    const isTemporaryBusiness = (business: Business): boolean => {
-      return (
-        (business.corpType?.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
-        (business.corpType?.code || business.corpType) === CorpTypes.REGISTRATION
-      )
-    }
-
-    /** Returns the identifier of the affiliation. */
-    const number = (business: Business): string => {
-      if (isNumberedIncorporationApplication(business)) {
-        return 'Pending'
-      }
-      if (isTemporaryBusiness(business)) {
-        return business.nrNumber
-      }
-      if (isNameRequest(business)) {
-        return business.nameRequest.nrNumber
-      }
-      return business.businessIdentifier
-    }
+    const dropdown: Array<boolean> = []
 
     /** Returns true if the name is rejected. */
     const isRejectedName = (name: Names): boolean => {
@@ -205,36 +192,30 @@ export default defineComponent({
       return (name.state === NrState.APPROVED)
     }
 
-    /** Returns the temp business description. */
-    const tempDescription = (business: Business): string => {
-      switch ((business.corpType?.code || business.corpType) as CorpTypes) {
-        case CorpTypes.INCORPORATION_APPLICATION:
-          return AffiliationTypes.INCORPORATION_APPLICATION
-        case CorpTypes.REGISTRATION:
-          return AffiliationTypes.REGISTRATION
-        default:
-          return '' // should never happen
-      }
-    }
-
-    /** Returns the type description. */
-    const typeDescription = (business: Business): string => {
-      // if this is a name request then show legal type
-      if (isNameRequest(business)) {
-        const legalType: unknown = business.nameRequest.legalType
-        return GetCorpFullDescription(legalType as CorpTypeCd)
-      }
-      // if this is an IA or registration then show legal type
-      if (isTemporaryBusiness(business)) {
-        const legalType: unknown = (business.corpSubType?.code || business.corpSubType)
-        return GetCorpFullDescription(legalType as CorpTypeCd) // may return ''
-      }
-      // else show nothing
-      return ''
-    }
-
     const isProcessing = (state: string): boolean => {
       return NrDisplayStates.PROCESSING === state
+    }
+
+    /** Create a business record in LEAR. */
+    const createBusinessRecord = async (business: Business): Promise<string> => {
+      const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
+      const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
+        CorpTypes.BC_ULC_COMPANY]
+
+      let filingResponse = null
+
+      if (regTypes.includes(business.nameRequest?.legalType)) {
+        filingResponse = createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
+      } else if (iaTypes.includes(business.nameRequest?.legalType)) {
+        filingResponse = createNamedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
+      }
+
+      if (filingResponse?.errorMsg) {
+        emit('add-unknown-error')
+        return ''
+      }
+
+      return filingResponse.data.filing.business.identifier
     }
 
     /** Navigation handler for entities dashboard. */
@@ -259,25 +240,54 @@ export default defineComponent({
       }
     }
 
+    /** Navigation handler for OneStop application */
+    const goToOneStop = (): void => {
+      window.location.href = appendAccountId(ConfigHelper.getOneStopUrl())
+    }
+
+    /** Navigation handler for Corporate Online application */
+    const goToCorpOnline = (): void => {
+      window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
+    }
+
+    /** Handler for draft IA creation and navigation */
+    const useNameRequest = async (item: Business) => {
+      switch (item.nameRequest.target) {
+        case NrTargetTypes.LEAR:
+        // Create new IA if the selected item is Name Request
+          let businessIdentifier = item.businessIdentifier
+          if (item.corpType.code === CorpTypes.NAME_REQUEST) {
+            businessIdentifier = await createBusinessRecord(item)
+          }
+          goToDashboard(businessIdentifier)
+          break
+        case NrTargetTypes.ONESTOP:
+          goToOneStop()
+          break
+        case NrTargetTypes.COLIN:
+          goToCorpOnline()
+          break
+      }
+    }
+
+    /** Emit business/nr information to be unaffiliated. */
+    const removeBusiness = (business) => {
+      const payload = {
+        orgIdentifier: currentOrganization.value.id,
+        business
+      }
+      Emit('removeBusiness')
+      return payload
+    }
+
     // clear filters
     const clearFiltersTrigger = ref(0)
     const clearFilters = () => {
       // clear values in table
       clearFiltersTrigger.value++
-      // clear transactions state filters and trigger search
+      // clear affiliation state filters and trigger search
       clearAllFilters()
     }
-
-    /** Apply data table headers dynamically to account for computed properties. */
-    // watch(selectedColumns, () => {
-    //   headers.value = [
-    //     { text: 'Business Name', value: 'name', show: true, filterType: 'text', filterFn: this.parseName, filterLabel: 'Name', width: '30%' },
-    //     { text: 'Number', value: 'number', show: this.showCol('Number'), filterType: 'text', filterFn: this.number, filterLabel: 'Number', width: '17%' },
-    //     { text: 'Type', value: 'type', show: this.showCol('Type'), filterType: 'select', filterSelections: this.getSelections(this.type), filterFn: this.type, filterLabel: 'Type', width: '25%' },
-    //     { text: 'Status', value: 'status', show: this.showCol('Status'), filterType: 'select', filterSelections: this.getSelections(this.status), filterFn: this.status, filterLabel: 'Status', width: '25%' },
-    //     { text: 'Actions', value: 'action', show: true, width: '3%' }
-    //   ]
-    // }, { immediate: true })
 
     watch(() => props.selectedColumns, (newCol: string[], oldCol: string[]) => {
       getHeaders(newCol)
@@ -292,7 +302,6 @@ export default defineComponent({
       clearFiltersTrigger,
       clearFilters,
       isloading,
-      state,
       headers,
       affiliations,
       entityCount,
@@ -308,7 +317,13 @@ export default defineComponent({
       typeDescription,
       loadAffiliations,
       getSelectedColumns,
-      updateFilter
+      updateFilter,
+      dropdown,
+      canUseNameRequest,
+      useNameRequest,
+      removeBusiness,
+      isTemporaryBusiness,
+      tempDescription
     }
   }
 })
@@ -395,6 +410,7 @@ export default defineComponent({
       box-shadow: none;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
+      margin-right: 1px;
     }
 
     .more-actions-btn {

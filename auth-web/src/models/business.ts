@@ -17,7 +17,7 @@ export interface FolioNumberload {
 export interface CorpType {
     code: CorpTypes // may be actual corp type or overloaded value
     default?: boolean
-    desc: string
+    desc?: string
 }
 
 export interface Business {

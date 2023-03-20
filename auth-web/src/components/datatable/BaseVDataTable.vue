@@ -76,8 +76,8 @@
     </template>
 
     <!-- Items -->
-    <template v-slot:item="{ item }">
-      <tr class="base-table__item-row" :key="item[itemKey]">
+    <template v-slot:item="{ item, index }">
+      <tr class="base-table__item-row" :key="item[itemKey]" :id="index">
         <td
           v-for="header in headers" :key="'item-' + header.col"
           :class="[header.itemClass, 'base-table__item-cell']"

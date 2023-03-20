@@ -2,13 +2,15 @@
 import { Business } from './../models/business'
 import { Affiliation, AffiliationState, AffiliationFilterParams } from './../models/affiliation'
 import { debounce } from 'lodash'
+import { Emit } from 'vue-property-decorator'
 import OrgService from '@/services/org.services'
 import { computed, reactive, ref, Ref, watch } from '@vue/composition-api'
 import { useStore } from 'vuex-composition-helpers'
-import { Organization } from '@/models/Organization'
+import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, NrTargetTypes, FilingTypes } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
@@ -24,7 +26,6 @@ const affiliations = (reactive({
 export const useAffiliations = () => {
   const store = useStore()
   const businesses = computed(() => store.state.business.businesses)
-  const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
 
   /** Returns true if the affiliation is a Name Request. */
@@ -113,6 +114,35 @@ export const useAffiliations = () => {
     return item.name
   }
 
+  /** Returns the type description. */
+  const typeDescription = (business: Business): string => {
+    // if this is a name request then show legal type
+    if (isNameRequest(business)) {
+      const legalType: unknown = business.nameRequest.legalType
+      return GetCorpFullDescription(legalType as CorpTypeCd)
+    }
+    // if this is an IA or registration then show legal type
+    if (isTemporaryBusiness(business)) {
+      const legalType: unknown = (business.corpSubType?.code || business.corpSubType)
+      return GetCorpFullDescription(legalType as CorpTypeCd) // may return ''
+    }
+    // else show nothing
+    return ''
+  }
+
+  /** Returns true if the affiliation is approved to start an IA or Registration. */
+  const canUseNameRequest = (business: Business): boolean => {
+    // Split string tokens into an array to avoid false string matching
+    const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
+
+    return (
+      isNameRequest(business) && // Is this a Name Request
+      business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
+      supportedEntityFlags.includes(business.nameRequest.legalType) && // Feature flagged Nr types
+      !!business.nameRequest.expirationDate // Ensure NR isn't processing still
+    )
+  }
+
   /** Apply data table headers dynamically to account for computed properties. */
   const getHeaders = (columns?: string[]) => {
     headers.value = getAffiliationTableHeaders(columns)
@@ -190,6 +220,13 @@ export const useAffiliations = () => {
     type,
     status,
     headers,
-    updateFilter
+    updateFilter,
+    typeDescription,
+    isNameRequest,
+    number,
+    name,
+    canUseNameRequest,
+    tempDescription,
+    isTemporaryBusiness
   }
 }
