@@ -14,8 +14,9 @@
 """API endpoints for managing an Org resource."""
 import asyncio
 
-from flask import g, jsonify, request
+from flask import current_app, g, jsonify, request
 from flask_restx import Namespace, Resource, cors
+from orjson import dumps
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
@@ -377,7 +378,12 @@ class OrgAffiliations(Resource):
             affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
             affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
 
-            response, status = jsonify({'entities': affiliations_details_list}), http_status.HTTP_200_OK
+            # Use orjson serializer here, it's quite a bit faster.
+            response, status = current_app.response_class(
+                response=dumps({'entities': affiliations_details_list}),
+                status=200,
+                mimetype='application/json'
+            ), http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
