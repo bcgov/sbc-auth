@@ -1,5 +1,6 @@
 import { Address, BaseAddressModel } from '@/models/address'
 import { Permission } from '@/util/constants'
+import moment from 'moment'
 
 /**
  * A class to put all the common utility methods.

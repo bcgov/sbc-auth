@@ -49,7 +49,7 @@ describe('TransactionsDataTable tests', () => {
     // stub get transactions get call
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'post')
-    get.returns(new Promise(resolve => resolve({ data: transactionResponse })))
+    get.returns(Promise.resolve({ data: transactionResponse }))
 
     wrapper = mount(TransactionsDataTable, {
       localVue,
@@ -173,7 +173,7 @@ describe('TransactionsDataTable tests', () => {
     modifiedResponse.items[0].updatedOn = '2023-03-21T01:00:00'
     sandbox.restore()
     const get = sandbox.stub(axios, 'post')
-    get.returns(new Promise(resolve => resolve({ data: modifiedResponse })))
+    get.returns(Promise.resolve({ data: modifiedResponse }))
 
     wrapper.setProps({ extended: true, headers: headersExtended })
     // trigger load

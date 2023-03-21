@@ -6,7 +6,7 @@ export const transactionResponse: TransactionListResponse = {
     {
       businessIdentifier: '123',
       createdName: 'tester 123',
-      createdOn: new Date('2023-01-24T14:00:00'), // If we don't specify a timezone, it converts to PST.
+      createdOn: new Date('2023-01-24T14:00:00'), // The api does not provide the timezone information so the date display will set it to a UTC timezone
       details: [{ label: 'label1', value: 'value1' }],
       folioNumber: 'ab12',
       id: 25663,
