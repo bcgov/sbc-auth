@@ -69,7 +69,8 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     def find_affiliations_by_org_id(cls, org_id: int) -> List[Affiliation]:
         """Return the affiliations with the provided org id."""
         return db.session.query(Affiliation).join(EntityModel) \
-            .options(contains_eager(Affiliation.entity).load_only(EntityModel.business_identifier)) \
+            .options(contains_eager(Affiliation.entity).load_only(
+                EntityModel.business_identifier, EntityModel.corp_type_code)) \
             .filter(Affiliation.org_id == org_id) \
             .order_by(Affiliation.created.desc()).all()
 

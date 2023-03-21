@@ -30,3 +30,4 @@ markupsafe==2.0.1
 launchdarkly-server-sdk
 protobuf~=3.19.5
 aiohttp
+orjson
