@@ -375,10 +375,8 @@ class OrgAffiliations(Resource):
                 ), http_status.HTTP_200_OK
 
             # get affiliation identifiers and the urls for the source data
-            current_app.logger.debug('getting affiliations by org id')
             affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
             affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
-            current_app.logger.debug('serializing response')
             # Use orjson serializer here, it's quite a bit faster.
             response, status = current_app.response_class(
                 response=orjson.dumps({'entities': affiliations_details_list}),  # pylint: disable=maybe-no-member
