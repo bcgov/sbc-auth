@@ -95,7 +95,8 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(0).find('span').text()).toBe('label1 value1')
     expect(row1Cells.at(1).text()).toBe('ab12')
     expect(row1Cells.at(2).text()).toBe('tester 123')
-    expect(row1Cells.at(3).text()).toContain('January 24, 20237:00 PM')
+    // Input:createdOn: new Date('2023-01-24T14:00:00')
+    expect(row1Cells.at(3).text()).toContain('January 24, 20232:00 PM')
     expect(row1Cells.at(4).text()).toBe('$0.00')
     expect(row1Cells.at(5).text()).toBe('25663')
     expect(row1Cells.at(6).text()).toBe('REG000123442')
@@ -142,7 +143,8 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(4).text()).toBe('123')
     expect(row1Cells.at(5).text()).toBe('ab12')
     expect(row1Cells.at(6).text()).toBe('tester 123')
-    expect(row1Cells.at(7).text()).toContain('January 24, 20237:00 PM')
+    // Input:createdOn: new Date('2023-01-24T14:00:00')
+    expect(row1Cells.at(7).text()).toContain('January 24, 20232:00 PM')
     expect(row1Cells.at(8).text()).toBe('$0.00')
     expect(row1Cells.at(9).text()).toBe('25663')
     expect(row1Cells.at(10).text()).toBe('REG000123442')
@@ -159,5 +161,30 @@ describe('TransactionsDataTable tests', () => {
     wrapper.vm.showDatePicker = true
     await Vue.nextTick()
     expect(wrapper.findComponent(DatePicker).isVisible()).toBe(true)
+  })
+
+  // This is similar to production, where the timestamp isn't a date instance.
+  it('renders the correct time when a timestamp string (non Date) is passed in as created', async () => {
+    const modifiedResponse = transactionResponse
+    // These are what come back from the API.
+    // @ts-ignore
+    modifiedResponse.items[0].createdOn = '2023-03-21T10:00:00'
+    // @ts-ignore
+    modifiedResponse.items[0].updatedOn = '2023-03-21T01:00:00'
+    sandbox.restore()
+    const get = sandbox.stub(axios, 'post')
+    get.returns(new Promise(resolve => resolve({ data: modifiedResponse })))
+
+    wrapper.setProps({ extended: true, headers: headersExtended })
+    // trigger load
+    await wrapper.vm.loadTransactionList()
+    // table items
+    const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
+    expect(itemRows.length).toBe(transactionResponse.items.length)
+    // test cell data
+    const row1Cells = itemRows.at(0).findAll(itemCell)
+    // Input:createdOn: 2023-03-21T10:00:00 This is what comes back from the API.
+    expect(row1Cells.at(7).text()).toContain('March 21, 20233:00 AM')
+    expect(row1Cells.at(12).text()).toBe('Completed  March 20, 2023')
   })
 })
