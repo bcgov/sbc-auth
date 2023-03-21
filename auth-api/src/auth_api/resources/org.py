@@ -381,7 +381,7 @@ class OrgAffiliations(Resource):
             current_app.logger.debug('serializing response')
             # Use orjson serializer here, it's quite a bit faster.
             response, status = current_app.response_class(
-                response=orjson.dumps({'entities': affiliations_details_list}),
+                response=orjson.dumps({'entities': affiliations_details_list}),  # pylint: disable=maybe-no-member
                 status=200,
                 mimetype='application/json'
             ), http_status.HTTP_200_OK
