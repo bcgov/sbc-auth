@@ -127,8 +127,7 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
     hasFilter: false,
     itemFn: (val: Transaction) => {
       // Example format: 2023-03-11T00:55:05.909229 without timezone
-      // Unit tests bring the date with timezone.
-      const createdOn = val.createdOn instanceof Date ? val.createdOn : moment.utc(val.createdOn).toDate()
+      const createdOn = moment.utc(val.createdOn).toDate()
       return CommonUtils.formatDisplayDate(createdOn, 'MMMM DD, YYYY<br/>h:mm A')
     },
     minWidth: '165px',

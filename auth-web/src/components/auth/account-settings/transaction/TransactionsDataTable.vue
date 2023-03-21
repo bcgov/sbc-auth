@@ -195,8 +195,8 @@ export default defineComponent({
       }
     })
 
-    const displayDate = (val: Date) => {
-      const date = val instanceof Date ? val : moment.utc(val).toDate()
+    const displayDate = (val: string) => {
+      const date = moment.utc(val).toDate()
       return CommonUtils.formatDisplayDate(date, 'MMMM DD, YYYY')
     }
 
