@@ -359,6 +359,7 @@ class Affiliation:
 
         call_info = [{'url': url, 'payload': {'identifiers': identifiers}}
                      for url, identifiers in url_identifiers.items()]
+
         token = RestService.get_service_account_token(
             config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
         try:
