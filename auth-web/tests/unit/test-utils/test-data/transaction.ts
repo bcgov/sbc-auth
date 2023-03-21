@@ -6,7 +6,7 @@ export const transactionResponse: TransactionListResponse = {
     {
       businessIdentifier: '123',
       createdName: 'tester 123',
-      createdOn: new Date('2023-01-24T23:09:46+00:00'),
+      createdOn: '2023-01-24T14:00:00', // The api does not provide the timezone information so the date display will set it to a UTC timezone
       details: [{ label: 'label1', value: 'value1' }],
       folioNumber: 'ab12',
       id: 25663,
@@ -35,12 +35,12 @@ export const transactionResponse: TransactionListResponse = {
       refund: 0,
       statusCode: InvoiceStatus.COMPLETED,
       total: 0,
-      updatedOn: '2023-01-24T23:09:46+00:00'
+      updatedOn: '2023-01-24T14:00:00'
     },
     {
       businessIdentifier: '234',
       createdName: 'tester 234',
-      createdOn: new Date('2023-01-23T23:09:46+00:00'),
+      createdOn: '2023-01-23T14:00:00',
       details: [{ label: 'label2', value: 'value2' }, { label: 'label22', value: 'value22' }],
       folioNumber: 'ab12',
       id: 25664,
@@ -69,7 +69,7 @@ export const transactionResponse: TransactionListResponse = {
       refund: 0,
       statusCode: InvoiceStatus.PAID,
       total: 0,
-      updatedOn: '2023-01-23T23:09:46+00:00'
+      updatedOn: '2023-01-23T14:00:00'
     }
   ],
   limit: 5,
