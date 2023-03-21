@@ -383,7 +383,6 @@ class OrgAffiliations(Resource):
                 status=200,
                 mimetype='application/json'
             ), http_status.HTTP_200_OK
-            current_app.logger.debug('returning response')
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
