@@ -359,11 +359,13 @@ class Affiliation:
 
         call_info = [{'url': url, 'payload': {'identifiers': identifiers}}
                      for url, identifiers in url_identifiers.items()]
-
+        current_app.logger.debug('getting service account token')
         token = RestService.get_service_account_token(
             config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
         try:
+            current_app.logger.debug('calling lear and namex')
             responses = await RestService.call_posts_in_parallel(call_info, token)
+            current_app.logger.debug('combining data')
             return Affiliation._combine_affiliaition_details(responses)
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)

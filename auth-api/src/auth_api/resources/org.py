@@ -16,7 +16,7 @@ import asyncio
 
 from flask import current_app, g, jsonify, request
 from flask_restx import Namespace, Resource, cors
-from orjson import dumps
+import orjson
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
@@ -375,15 +375,17 @@ class OrgAffiliations(Resource):
                 ), http_status.HTTP_200_OK
 
             # get affiliation identifiers and the urls for the source data
+            current_app.logger.debug('getting affiliations by org id')
             affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
             affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
-
+            current_app.logger.debug('serializing response')
             # Use orjson serializer here, it's quite a bit faster.
             response, status = current_app.response_class(
-                response=dumps({'entities': affiliations_details_list}),
+                response=orjson.dumps({'entities': affiliations_details_list}),
                 status=200,
                 mimetype='application/json'
             ), http_status.HTTP_200_OK
+            current_app.logger.debug('returning response')
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
