@@ -38,6 +38,20 @@ jobs:
         run: |
           oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
 
+      # Get environment variables from 1password
+      - name: Setup .env file
+        env:
+          OP_CONNECT_HOST: ${{ secrets.OP_CONNECT_URL }}
+          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+          APP_ENV: ${{ env.TAG_NAME }}
+        run: |
+          curl -sSfo op.zip \
+              https://cache.agilebits.com/dist/1P/op2/pkg/v2.0.0/op_linux_amd64_v2.0.0.zip \
+              && unzip -od /usr/local/bin/ op.zip \
+              && rm op.zip ;\
+          op inject -i ./devops/vaults.env -o .env -f
+          sed -i~ '/^VUE_APP_PATH=/s/=.*/="\/busines/auth"/' .env
+
       - name: CD Flow
         shell: bash
         env:
@@ -83,6 +97,20 @@ jobs:
         shell: bash
         run: |
           oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}}
+
+      # Get environment variables from 1password
+      - name: Setup .env file
+        env:
+          OP_CONNECT_HOST: ${{ secrets.OP_CONNECT_URL }}
+          OP_CONNECT_TOKEN: ${{ secrets.OP_CONNECT_TOKEN }}
+          APP_ENV: ${{ env.TAG_NAME }}
+        run: |
+          curl -sSfo op.zip \
+              https://cache.agilebits.com/dist/1P/op2/pkg/v2.0.0/op_linux_amd64_v2.0.0.zip \
+              && unzip -od /usr/local/bin/ op.zip \
+              && rm op.zip ;\
+          op inject -i ./devops/vaults.env -o .env -f
+          sed -i~ '/^VUE_APP_PATH=/s/=.*/="\/busines/auth"/' .env
 
       - name: CD Flow
         shell: bash

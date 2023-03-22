@@ -141,7 +141,7 @@ interface StaffDashboardViewI {
   canViewGLCodes: ComputedRef<boolean>
   isFasDashboardEnabled: ComputedRef<boolean>
   showBusSearchlink: ComputedRef<boolean>
-  registrySearchUrl: ComputedRef<boolean>
+  registrySearchUrl: ComputedRef<string>
 }
 
 export default defineComponent({
@@ -186,7 +186,7 @@ export default defineComponent({
       canViewGLCodes: computed((): boolean => currentUser.value?.roles?.includes(Role.ManageGlCodes)),
       isFasDashboardEnabled: computed((): boolean => currentUser.value?.roles?.includes(Role.FasSearch)),
       showBusSearchlink: computed((): boolean => LaunchDarklyService.getFlag(LDFlags.EnableFasDashboard) || false),
-      registrySearchUrl: computed((): boolean => ConfigHelper.getRegistrySearchUrl())
+      registrySearchUrl: computed((): string => ConfigHelper.getRegistrySearchUrl())
     }) as unknown) as StaffDashboardViewI
 
     const isFormValid = () => localVars.businessIdentifier && searchBusinessForm.value?.validate()
