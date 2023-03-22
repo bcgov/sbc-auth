@@ -50,7 +50,7 @@ jobs:
               && unzip -od /usr/local/bin/ op.zip \
               && rm op.zip ;\
           op inject -i ./devops/vaults.env -o .env -f
-          sed -i~ '/^VUE_APP_PATH=/s/=.*/="\/busines\/auth"/' .env
+          sed -i~ '/^VUE_APP_PATH=/s/=.*/="\/business\/auth"/' .env
 
       - name: CD Flow
         shell: bash
@@ -110,7 +110,7 @@ jobs:
               && unzip -od /usr/local/bin/ op.zip \
               && rm op.zip ;\
           op inject -i ./devops/vaults.env -o .env -f
-          sed -i~ '/^VUE_APP_PATH=/s/=.*/="\/busines\/auth"/' .env
+          sed -i~ '/^VUE_APP_PATH=/s/=.*/="\/business\/auth"/' .env
 
       - name: CD Flow
         shell: bash
