@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "auth-web/**"
   workflow_dispatch:
     inputs:
       environment:
@@ -19,6 +21,11 @@ on:
         description: "Specify a previous version (git tag) to deploy"
         required: false
         default: ""
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./auth-web
 
 jobs:
   account-ui-cd:
