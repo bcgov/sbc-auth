@@ -1,0 +1,34 @@
+{
+  "hosting":
+    {
+      "site": "bcregistry-account-prod",
+      "public": "dist",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "headers" : [
+        {
+          "source": "**",
+          "headers" : [
+            { "key" : "Access-Control-Allow-Origin", "value" : "*" },
+            { "key" : "X-Frame-Options", "value" : "DENY" },
+            { "key" : "X-Content-Type-Options", "value" : "nosniff" },
+            { "key" : "X-XSS-Protection", "value" : "1; mode=block" },
+            {
+              "key": "Content-Security-Policy",
+              "value": "default-src 'self'; frame-src 'self' *.gov.bc.ca *.hotjar.com *.googleapis.com https://*.nr-data.net https://*.newrelic.com https://*.cac1.pure.cloud; script-src 'self' 'unsafe-eval' 'unsafe-inline' *.gov.bc.ca *.hotjar.com *.googleapis.com https://*.nr-data.net https://*.newrelic.com https://*.cac1.pure.cloud; style-src 'self' 'unsafe-inline' *.cloudflare.com *.googleapis.com; font-src 'self' *.gov.bc.ca *.hotjar.com *.cloudflare.com *.googleapis.com *.gstatic.com *.jsdelivr.net; img-src 'self' data: *.hotjar.com https://*.cac1.pure.cloud; connect-src 'self' *.gov.bc.ca *.launchdarkly.com *.hotjar.com *.postescanada-canadapost.ca *.sentry.io *.apigee.net wss://*.hotjar.com *.hotjar.io https://*.nr-data.net https://shyrka-prod-cac1.s3.ca-central-1.amazonaws.com https://*.newrelic.com https://*.cac1.pure.cloud wss://*.cac1.pure.cloud; manifest-src 'self'; media-src 'self' https://*.cac1.pure.cloud; object-src 'self' https://*.cac1.pure.cloud; child-src 'self' https://*.cac1.pure.cloud;"
+            },
+            { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate"},
+            { "key": "Pragma", "value": "no-cache"},
+            { "key": "Referrer-Policy", "value": "no-referrer" },
+            { "key": "Feature-Policy", "value": "microphone 'self'" },
+            { "key": "Strict-Transport-Security", "value": "max-age=31536000;" }
+          ]
+        }
+      ]
+    }
+}
