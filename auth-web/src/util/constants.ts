@@ -306,7 +306,9 @@ export enum LDFlags {
     ProductSiteRegistryStatus = 'product-ESRA-status',
     ProductBCAStatus = 'product-BCA-status',
     BusSearchLink = 'bus-search-staff-link',
-    EnableDetailsFilter = 'enable-transactions-detail-filter'
+    EnableDetailsFilter = 'enable-transactions-detail-filter',
+    SentryEnable = 'sentry-enable',
+    BannerText = 'banner-text'
 }
 
 export enum DateFilterCodes {

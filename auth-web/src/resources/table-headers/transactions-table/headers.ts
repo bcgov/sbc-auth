@@ -3,6 +3,7 @@ import { invoiceStatusDisplay, paymentTypeDisplay, productDisplay } from '@/reso
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import CommonUtils from '@/util/common-util'
 import { Transaction } from '@/models/transaction'
+import moment from 'moment'
 
 export const TransactionTableHeaders: BaseTableHeaderI[] = [
   {
@@ -124,7 +125,11 @@ export const TransactionTableHeaders: BaseTableHeaderI[] = [
   {
     col: 'createdOn',
     hasFilter: false,
-    itemFn: (val: Transaction) => CommonUtils.formatDisplayDate(val.createdOn, 'MMMM DD, YYYY<br/>h:mm A'),
+    itemFn: (val: Transaction) => {
+      // Example format: 2023-03-11T00:55:05.909229 without timezone
+      const createdOn = moment.utc(val.createdOn).toDate()
+      return CommonUtils.formatDisplayDate(createdOn, 'MMMM DD, YYYY<br/>h:mm A')
+    },
     minWidth: '165px',
     value: 'Date (Pacific Time)'
   },

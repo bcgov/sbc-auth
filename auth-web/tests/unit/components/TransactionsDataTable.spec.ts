@@ -49,7 +49,7 @@ describe('TransactionsDataTable tests', () => {
     // stub get transactions get call
     sandbox = sinon.createSandbox()
     const get = sandbox.stub(axios, 'post')
-    get.returns(new Promise(resolve => resolve({ data: transactionResponse })))
+    get.returns(Promise.resolve({ data: transactionResponse }))
 
     wrapper = mount(TransactionsDataTable, {
       localVue,
@@ -82,9 +82,10 @@ describe('TransactionsDataTable tests', () => {
     expect(titles.at(3).text()).toBe('Date (Pacific Time)')
     expect(titles.at(4).text()).toBe('Total Amount')
     expect(titles.at(5).text()).toBe('Transaction ID')
-    expect(titles.at(6).text()).toBe('Payment Method')
-    expect(titles.at(7).text()).toBe('Payment Status')
-    expect(titles.at(8).text()).toBe('')
+    expect(titles.at(6).text()).toBe('Invoice Reference Number')
+    expect(titles.at(7).text()).toBe('Payment Method')
+    expect(titles.at(8).text()).toBe('Payment Status')
+    expect(titles.at(9).text()).toBe('')
     // table items
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(transactionResponse.items.length)
@@ -94,12 +95,14 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(0).find('span').text()).toBe('label1 value1')
     expect(row1Cells.at(1).text()).toBe('ab12')
     expect(row1Cells.at(2).text()).toBe('tester 123')
-    expect(row1Cells.at(3).text()).toContain('January 24, 20233:09 PM')
+    // Input:createdOn: '2023-01-24T14:00:00'
+    expect(row1Cells.at(3).text()).toContain('January 24, 20236:00 AM')
     expect(row1Cells.at(4).text()).toBe('$0.00')
     expect(row1Cells.at(5).text()).toBe('25663')
-    expect(row1Cells.at(6).text()).toBe('No Fee')
-    expect(row1Cells.at(7).text()).toBe('Completed  January 24, 2023')
-    expect(row1Cells.at(8).text()).toBe('')
+    expect(row1Cells.at(6).text()).toBe('REG000123442')
+    expect(row1Cells.at(7).text()).toBe('No Fee')
+    expect(row1Cells.at(8).text()).toBe('Completed  January 24, 2023')
+    expect(row1Cells.at(9).text()).toBe('')
     // clear filters is hidden
     expect(wrapper.find('.clear-btn').exists()).toBe(false)
   })
@@ -140,7 +143,8 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(4).text()).toBe('123')
     expect(row1Cells.at(5).text()).toBe('ab12')
     expect(row1Cells.at(6).text()).toBe('tester 123')
-    expect(row1Cells.at(7).text()).toContain('January 24, 20233:09 PM')
+    // Input:createdOn: 2023-01-24T14:00:00
+    expect(row1Cells.at(7).text()).toContain('January 24, 20236:00 AM')
     expect(row1Cells.at(8).text()).toBe('$0.00')
     expect(row1Cells.at(9).text()).toBe('25663')
     expect(row1Cells.at(10).text()).toBe('REG000123442')

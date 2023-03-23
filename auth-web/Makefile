@@ -12,12 +12,6 @@ DOCKER_NAME:=auth-web
 setup: ## Clean and Install npm dependencies
 	npm ci
 
-create-env: ## create the configration files from dev
-	@oc get configmap $(DOCKER_NAME)-dev-keycloak-config  -n "$(OPENSHIFT_REPOSITORY)-dev" \
-		-o json | jq -r '.data["keycloak.json"]' > ./public/config/kc/keycloak.json.dev
-	@oc get configmap $(DOCKER_NAME)-dev-ui-configuration  -n "$(OPENSHIFT_REPOSITORY)-dev" \
-		-o json | jq -r '.data["configuration.json"]' > ./public/config/configuration.json.dev
-
 #################################################################################
 # COMMANDS - CI                                                                 #
 #################################################################################
@@ -27,6 +21,8 @@ lint:  ## Run linting ofcode.
 	npm run lint
 
 test:  ## Unit testing
+	mv .env .env.bak
+	cp .env.example .env
 	npm run test:unit
 
 #################################################################################
@@ -37,19 +33,19 @@ test:  ## Unit testing
 # expects export OPENSHIFT_SA_TOKEN="$(oc whoami -t)"
 # expects export OPENSHIFT_REPOSITORY=""
 # expects export TAG_NAME="dev/test/prod"
-# expects export OPS_REPOSITORY=""                                                        #
+# expects export OPS_REPOSITORY=""
 #################################################################################
 cd: ## CD flow
 ifeq ($(TAG_NAME), test)
-cd: vault-env
+cd:
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):dev $(DOCKER_NAME):$(TAG_NAME)
 else ifeq ($(TAG_NAME), prod)
-cd: vault-env
+cd:
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)-$(shell date +%F)
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):test $(DOCKER_NAME):$(TAG_NAME)
 else
 TAG_NAME=dev
-cd: build vault-env tag
+cd: build tag
 endif
 
 build: ## Build the docker container
@@ -65,17 +61,6 @@ push: #build ## Push the docker container to the registry & tag latest
 	@echo "$(OPENSHIFT_SA_TOKEN)" | docker login $(OPENSHIFT_DOCKER_REGISTRY) -u $(OPENSHIFT_SA_NAME) --password-stdin ;\
     docker tag $(DOCKER_NAME) $(REGISTRY_IMAGE):latest ;\
     docker push $(REGISTRY_IMAGE):latest
-
-VAULTS=`cat devops/vaults.json`
-vault-env: ## Update env from 1pass
-	oc -n "$(OPS_REPOSITORY)-$(TAG_NAME)" exec "dc/vault-service-$(TAG_NAME)" -- ./scripts/1pass.sh \
-		-m "secret" \
-		-e "$(TAG_NAME)" \
-		-a "$(DOCKER_NAME)-$(TAG_NAME)" \
-		-n "$(OPENSHIFT_REPOSITORY)-$(TAG_NAME)" \
-		-v "$(VAULTS)" \
-		-r "true" \
-		-f "true"
 
 tag: push ## tag image
 	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):latest $(DOCKER_NAME):$(TAG_NAME)

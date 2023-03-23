@@ -25,6 +25,8 @@ import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
 import Search from 'fas-ui'
+// eslint-disable-next-line sort-imports
+import { LDFlags } from '@/util/constants'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
@@ -37,21 +39,21 @@ Vue.use(i18n)
  */
 ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
   // Initializing Launch Darkly services
-  await LaunchDarklyService.init(ConfigHelper.getValue('AUTH_LD_CLIENT_ID'));
+  await LaunchDarklyService.init(ConfigHelper.getLdClientId());
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components
-  (<any>window).addressCompleteKey = ConfigHelper.getValue('ADDRESS_COMPLETE_KEY')
+  (<any>window).addressCompleteKey = ConfigHelper.getAddressCompleteKey()
 
-  if (ConfigHelper.getValue('SENTRY_ENABLE')?.toLowerCase() === 'true') {
+  if (LaunchDarklyService.getFlag(LDFlags.SentryEnable)) {
     // initialize Sentry
     console.info('Initializing Sentry...') // eslint-disable-line no-console
     Sentry.init({
-      dsn: ConfigHelper.getValue('SENTRY_DSN'),
+      dsn: ConfigHelper.getSentryDsn(),
       integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
     })
   }
 
   // initialize Hotjar
-  const hotjarId = ConfigHelper.getValue('HOTJAR_ID');
+  const hotjarId = ConfigHelper.getHotjarId();
   (<any>window).hotJarId = hotjarId
   if (hotjarId) {
     console.info('Initializing Hotjar...') // eslint-disable-line no-console
@@ -63,8 +65,13 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
 })
 
 async function syncSession () {
-  let random = new Date().toISOString().substring(0, 10)
-  await KeyCloakService.setKeycloakConfigUrl(`${process.env.VUE_APP_PATH}config/kc/keycloak.json?${random}`)
+  const keycloakConfig: any = {
+    url: `${ConfigHelper.getKeycloakAuthUrl()}`,
+    realm: `${ConfigHelper.getKeycloakRealm()}`,
+    clientId: `${ConfigHelper.getKeycloakClientId()}`
+  }
+
+  await KeyCloakService.setKeycloakConfigUrl(keycloakConfig)
 
   // Initialize token service which will do a check-sso to initiate session
   if (!CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
