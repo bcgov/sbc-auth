@@ -1,4 +1,4 @@
-name: ACCOUNT UI CD
+name: ACCOUNT UI CD - GCP
 
 on:
   push:
@@ -22,17 +22,13 @@ on:
         required: false
         default: ""
 
-defaults:
-  run:
-    shell: bash
-    working-directory: ./auth-web
-
 jobs:
   account-ui-cd:
     uses: bcgov/bcregistry-sre/.github/workflows/ui-cd.yaml@main
     with:
       environment: ${{ inputs.environment }}
       tagname: ${{ inputs.tagname }}
+      working_directory: "./auth-web"
     secrets:
       APP_NAME: "account-ui"
       OP_CONNECT_URL: ${{ secrets.OP_CONNECT_URL }}
