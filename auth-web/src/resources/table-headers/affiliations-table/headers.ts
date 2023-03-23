@@ -78,5 +78,9 @@ export const headerTypes = {
   'Status': {
     index: 3,
     type: 'select'
+  },
+  'Actions': {
+    index: 4,
+    type: ''
   }
 }

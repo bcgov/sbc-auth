@@ -70,8 +70,8 @@ export default class OrgService {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
-  static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<Businesses>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`)
+  static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<any>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
   }
 
   static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {

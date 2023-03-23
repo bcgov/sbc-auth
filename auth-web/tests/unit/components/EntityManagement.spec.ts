@@ -1,3 +1,4 @@
+import '../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, mount } from '@vue/test-utils'
 import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
@@ -56,9 +57,9 @@ describe('Entity Management Component', () => {
 
       },
       action: {
-        addBusiness: jest.fn(),
-        updateBusinessName: jest.fn(),
-        updateFolioNumber: jest.fn()
+        addBusiness: jest.fn()
+        // updateBusinessName: jest.fn(),
+        // updateFolioNumber: jest.fn()
       }
     }
 

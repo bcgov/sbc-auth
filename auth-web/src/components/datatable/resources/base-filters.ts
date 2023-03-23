@@ -1,4 +1,5 @@
 export const BaseTextFilter = (colVal: string, filterVal: string) => {
+  if (!colVal) { return false }
   return colVal.toUpperCase().includes(filterVal.toUpperCase())
 }
 

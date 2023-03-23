@@ -130,7 +130,6 @@ export const useAffiliations = () => {
   const canUseNameRequest = (business: Business): boolean => {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
-
     return (
       isNameRequest(business) && // Is this a Name Request
       business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
@@ -191,6 +190,7 @@ export const useAffiliations = () => {
     if (filterField) {
       if (value) {
         affiliations.filters.filterPayload[filterField] = value
+        affiliations.filters.isActive = true
       } else {
         delete affiliations.filters.filterPayload[filterField]
       }

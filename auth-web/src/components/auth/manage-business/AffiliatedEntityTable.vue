@@ -2,7 +2,7 @@
   <div id="affiliated-entity-section">
     <v-card flat>
       <div class="table-header">
-        <label><strong>My List </strong>{{ entityCount }}</label>
+        <label><strong>My List </strong>({{ entityCount }})</label>
       </div>
       <base-v-data-table
         id="affiliated-entity-table"
@@ -143,7 +143,7 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { computed, defineComponent, onBeforeMount, ref, watch } from '@vue/composition-api'
+import { computed, defineComponent, onBeforeMount, onMounted, ref, watch } from '@vue/composition-api'
 import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
@@ -168,7 +168,6 @@ export default defineComponent({
     const isloading = false
     const store = useStore()
     const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status, updateFilter, typeDescription, isNameRequest, number, name, canUseNameRequest, tempDescription, isTemporaryBusiness } = useAffiliations()
-    const getSelectedColumns = computed(() => props.selectedColumns)
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
     const createNamedBusiness = async ({ filingType, business }) => {
@@ -289,11 +288,6 @@ export default defineComponent({
       getHeaders(newCol)
     })
 
-    onBeforeMount(() => {
-      loadAffiliations()
-      getHeaders(props.selectedColumns)
-    })
-
     return {
       clearFiltersTrigger,
       clearFilters,
@@ -312,7 +306,6 @@ export default defineComponent({
       isProcessing,
       typeDescription,
       loadAffiliations,
-      getSelectedColumns,
       updateFilter,
       dropdown,
       canUseNameRequest,
