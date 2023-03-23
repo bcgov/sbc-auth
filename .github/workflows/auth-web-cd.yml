@@ -20,7 +20,7 @@ defaults:
 
 env:
   APP_NAME: "auth-web"
-  TAG_NAME:  ${{ github.event.inputs.environment }}
+  TAG_NAME:  ${{ github.event.inputs.environment || 'dev' }}
 
 jobs:
   auth-web-cd-by-push:
