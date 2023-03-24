@@ -3,7 +3,7 @@
     class="base-table"
     :disable-sort="true"
     :fixed-header="height ? true : false"
-    :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
+    :footer-props="itemsPerPageOptions ? itemsPerPageOptions : { itemsPerPageOptions: [5, 10, 15, 20] }"
     :items-per-page="5"
     :headers="headers"
     :items="visibleItems"
@@ -164,7 +164,8 @@ export default defineComponent({
     pageHide: { default: false },
     updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
-    customPagination: { default: false }
+    customPagination: { default: false },
+    itemsPerPageOptions: { default: { itemsPerPageOptions: [5, 10, 15, 20] } }
   },
   setup (props, { emit }) {
     // reactive vars
@@ -217,7 +218,7 @@ export default defineComponent({
     watch(() => state.sortedItems, () => {
       if (props.setItems) {
         const currentPage = state.tableDataOptions?.page || DEFAULT_DATA_OPTIONS.page
-        const perPage = state.tableDataOptions?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+        const perPage = state.tableDataOptions?.itemsPerPage || props.itemsPerPageOptions.itemsPerPageOptions[0]
         const start = (currentPage - 1) * perPage
         const end = start + perPage
         state.visibleItems = state.sortedItems.slice(start, end)
@@ -228,7 +229,7 @@ export default defineComponent({
       state.tableDataOptions = val
       if (props.customPagination) {
         const currentPage = val?.page || DEFAULT_DATA_OPTIONS.page
-        const perPage = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+        const perPage = val?.itemsPerPage || props.itemsPerPageOptions.itemsPerPageOptions[0] || DEFAULT_DATA_OPTIONS.itemsPerPage
         const start = (currentPage - 1) * perPage
         const end = start + perPage
         state.visibleItems = state.sortedItems.slice(start, end)

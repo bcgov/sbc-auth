@@ -21,6 +21,7 @@
         :updateFilter="updateFilter"
         :height="entityCount > 5 ? '32rem' : null"
         :customPagination = "true"
+        :itemsPerPageOptions ="{ itemsPerPageOptions: [50, 100, 150] }"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -293,6 +294,7 @@ export default defineComponent({
     })
 
     const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
+    tableDataOptions.value.itemsPerPage = 50
 
     return {
       clearFiltersTrigger,
