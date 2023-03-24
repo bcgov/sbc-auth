@@ -146,6 +146,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
         org.commit()
 
+        ProductService.update_org_product_keycloak_groups(org.id)
+
         current_app.logger.info(f'<created_org org_id:{org.id}')
 
         return Org(org)
@@ -185,6 +187,8 @@ class Org:  # pylint: disable=too-many-public-methods
 
             # Add the user to account_holders group
             KeycloakService.join_account_holders_group()
+            user = UserModel.find_by_id(user_id)
+            ProductService.update_users_products_keycloak_groups([user])
 
     @staticmethod
     @user_context
@@ -384,6 +388,7 @@ class Org:  # pylint: disable=too-many-public-methods
         Org._publish_activity_on_mailing_address_change(org_model.id, current_org_name, mailing_address)
         Org._publish_activity_on_name_change(org_model.id, org_name)
 
+        ProductService.update_org_product_keycloak_groups(org_model.id)
         current_app.logger.debug('>update_org ')
         return self
 
@@ -494,6 +499,8 @@ class Org:  # pylint: disable=too-many-public-methods
         # Set the account as INACTIVE
         org.status_code = OrgStatus.INACTIVE.value
         org.save()
+
+        ProductService.update_org_product_keycloak_groups(org.id)
 
         current_app.logger.debug('org Inactivated>')
 
@@ -688,9 +695,6 @@ class Org:  # pylint: disable=too-many-public-methods
                 return contact
         return None
 
-    def get_owner_count(self):
-        """Get the number of owners for the specified org."""
-        return len([x for x in self._model.members if x.membership_type_code == ADMIN])
 
     @staticmethod
     def get_orgs(user_id, valid_statuses=VALID_STATUSES):

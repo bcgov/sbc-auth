@@ -12,15 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Product and Product Subscription data."""
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List
 
 from flask import current_app
 from sqlalchemy.exc import SQLAlchemyError
 
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, KeycloakGroupSubscription
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.services.keycloak import KeycloakService
+from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
@@ -30,7 +33,8 @@ from auth_api.schemas import ProductCodeSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
+    AccessType, ActivityAction, KeycloakGroupActions, OrgType, ProductSubscriptionStatus,
+    Status, TaskAction, TaskRelationshipStatus,
     TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -157,8 +161,10 @@ class Product:
     @staticmethod
     def create_subscription_from_bcol_profile(org_id: int, bcol_profile_flags: List[str]):
         """Create product subscription from bcol profile flags."""
+        added_subscriptions = []
         if not bcol_profile_flags:
-            return
+            return added_subscriptions
+
         for profile_flag in bcol_profile_flags:
             product_code = BCOL_PROFILE_PRODUCT_MAP.get(profile_flag, None)
             if product_code:
@@ -169,10 +175,13 @@ class Product:
                 if not subscription:
                     ProductSubscriptionModel(org_id=org_id, product_code=product_code,
                                              status_code=ProductSubscriptionStatus.ACTIVE.value).flush()
+                    added_subscriptions.append(product_code)
                 elif subscription and \
                         (existing_sub := subscription[0]).status_code != ProductSubscriptionStatus.ACTIVE.value:
                     existing_sub.status_code = ProductSubscriptionStatus.ACTIVE.value
                     existing_sub.flush()
+                    added_subscriptions.append(product_code)
+        return added_subscriptions
 
     @staticmethod
     @user_context
@@ -197,7 +206,7 @@ class Product:
         if not skip_auth:
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
-        product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
+        product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
@@ -259,3 +268,44 @@ class Product:
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_prod_subscription_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
+
+    @staticmethod
+    def add_or_remove_product_keycloak_groups(kgs: KeycloakGroupSubscription):
+        """Calls keycloak service, with the KeycloakGroupSubscription."""
+        current_app.logger.debug('<add_and_remove_user_to_product_keycloak_roles ')
+        current_app.logger.debug(f'{kgs.keycloak_group_action} '
+                                 f'Product: {kgs.product_code} '
+                                 f'Keycloak Group: {kgs.keycloak_group} '
+                                 f'Keycloak Guid: {kgs.keycloak_guid}')
+        KeycloakService.add_or_remove_user_from_group(kgs.user_guid, kgs.group_name, kgs.group_action)
+        current_app.logger.debug('>add_and_remove_user_to_product_keycloak_roles ')
+    
+    @staticmethod
+    def get_users_product_subscriptions_kc_groups(users: List[UserModel]) -> List[KeycloakGroupSubscription]:
+        """Gets product subscriptions keycloak groups for user."""
+        # Iterate through all the products and get the keycloak groups for the active subscriptions
+        org_ids = [MembershipModel.find_memberships_by_user_ids([])]
+        product_subscriptions = ProductSubscriptionModel.find_by_org_ids([org_ids])
+        # WIP!
+        # Determine if they're ACTIVE or INACTIVE. 
+        # subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
+        # for product in Product.get_all_product_subscription
+        return {}
+
+    @staticmethod
+    def update_users_products_keycloak_groups(users: List[UserModel]):
+        """Updates a list of user's keycloak roles for product subscriptions."""
+        current_app.logger.debug('<add_and_remove_user_products_keycloak_roles ')
+        kc_groups = Product.get_users_product_subscriptions_kc_groups([users])
+        for subscription in kc_groups:
+            Product.add_or_remove_product_keycloak_groups(subscription.keycloak_guid, subscription.code,
+                                                          subscription.subscriptionStatus)
+        current_app.logger.debug('>add_and_remove_user_products_keycloak_roles ')
+
+    @staticmethod
+    def update_org_product_keycloak_groups(org_id: int):
+        """Handles org level product keycloak updates."""
+        current_app.logger.debug('<add_and_remove_org_product_keycloak_roles ')
+        users = [membership.user for membership in MembershipModel.find_members_by_org_id(org_id)]
+        Product.update_users_products_keycloak_groups(users)
+        current_app.logger.debug('>add_and_remove_org_product_keycloak_roles ')

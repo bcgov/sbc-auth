@@ -49,6 +49,7 @@ class OrgProducts(Resource):
 
         try:
             subscriptions = ProductService.create_product_subscription(org_id, request_json)
+            ProductService.update_org_product_keycloak_groups(org_id)
             response, status = {'subscriptions': subscriptions}, http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

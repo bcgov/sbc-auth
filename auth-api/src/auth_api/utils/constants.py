@@ -28,7 +28,8 @@ AFFIDAVIT_FOLDER_NAME = 'Affidavits'
 BCOL_PROFILE_PRODUCT_MAP = {
     'VS': 'VS',
     'PPR': 'RPPR',
-    'RURLPROP': 'RPT'
+    'RURLPROP': 'RPT',
+    'MHR': 'MHR'
           # 'COURT_SERVICES': 'CSO',
           # "OSBR":'',
           #     "ADS",

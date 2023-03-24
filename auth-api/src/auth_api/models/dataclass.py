@@ -16,6 +16,7 @@
 from typing import List, Optional
 from attr import dataclass, field
 
+from auth_api.utils.enums import KeycloakGroupActions
 
 @dataclass
 class Activity:
@@ -61,3 +62,13 @@ class TaskSearch:
     submitted_sort_order: str = 'asc'
     page: int = 1
     limit: int = 10
+
+@dataclass
+class KeycloakGroupSubscription:
+    """Used for entrying group subscriptions for keycloak."""
+    
+    user_guid: str
+    product_code: str
+    group_name: str
+    group_action: KeycloakGroupActions
+    

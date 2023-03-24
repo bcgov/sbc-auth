@@ -485,7 +485,6 @@ class OrgMember(Resource):
                     membership.send_notification_to_member(origin, NotificationType.MEMBERSHIP_APPROVED.value)
                 elif notify_user and updated_role and updated_role.code != USER and not is_own_membership:
                     membership.send_notification_to_member(origin, NotificationType.ROLE_CHANGED.value)
-
             return response, status
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

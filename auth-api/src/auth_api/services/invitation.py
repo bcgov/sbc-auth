@@ -48,6 +48,7 @@ from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
 from .membership import Membership as MembershipService
+from .products import Product as ProductService
 
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
@@ -428,6 +429,7 @@ class Invitation:
         if user:
             group_name: str = KeycloakService.join_users_group()
             KeycloakService.join_account_holders_group(user.keycloak_guid)
+            ProductService.update_users_products_keycloak_groups([user])
 
             if group_name == GROUP_GOV_ACCOUNT_USERS:
                 # Add contact to the user.
