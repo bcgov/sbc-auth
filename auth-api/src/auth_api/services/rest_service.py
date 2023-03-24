@@ -209,6 +209,7 @@ class RestService:
                 responses.append(task_json)
         return responses
 
+
 def _get_token() -> str:
     token: str = request.headers['Authorization'] if request and 'Authorization' in request.headers else None
     return token.replace('Bearer ', '') if token else None
