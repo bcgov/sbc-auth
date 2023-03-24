@@ -4,8 +4,9 @@
     :disable-sort="true"
     :fixed-header="height ? true : false"
     :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
+    :items-per-page="5"
     :headers="headers"
-    :items="sortedItems"
+    :items="visibleItems"
     hide-default-header
     :height="height ? height : ''"
     :loading="filtering || loading"
@@ -13,7 +14,6 @@
     :options.sync="tableDataOptions"
     :server-items-length="totalItems"
     :hide-default-footer="pageHide ? true : false"
-    v-scroll:#virtual-scroll-table="onScroll"
   >
     <!-- Headers (two rows) -->
     <template v-slot:header>
@@ -111,6 +111,15 @@
     <template v-slot:no-data>
       <div class="py-8 base-table__text" v-html="noDataText" />
     </template>
+
+    <!-- Pagination -->
+    <!-- <template v-if="customPagination" v-slot:footer>
+      <v-pagination
+        v-model="currentPage"
+        :total-visible="7"
+        :length="totalPages"
+      ></v-pagination>
+    </template> -->
   </v-data-table>
 <!-- </recycle-scroller> -->
 </template>
@@ -132,6 +141,7 @@ interface BaseTableStateI {
   filtering: boolean,
   headers: BaseTableHeaderI[],
   sortedItems: object[],
+  visibleItems: object[],
   tableDataOptions: DataOptions
 }
 
@@ -153,7 +163,8 @@ export default defineComponent({
     totalItems: { type: Number },
     pageHide: { default: false },
     updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
-    filters: { default: { isActive: false, filterPayload: {} }, required: false }
+    filters: { default: { isActive: false, filterPayload: {} }, required: false },
+    customPagination: { default: false }
   },
   setup (props, { emit }) {
     // reactive vars
@@ -161,6 +172,7 @@ export default defineComponent({
       filtering: false,
       headers: _.cloneDeep(props.setHeaders),
       sortedItems: [...props.setItems],
+      visibleItems: [],
       tableDataOptions: props.setTableDataOptions
     }) as unknown) as BaseTableStateI
 
@@ -183,10 +195,6 @@ export default defineComponent({
       state.sortedItems = [...items]
     }
 
-    const onScroll = (e) => {
-      console.log(e)
-    }
-
     watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] })
     watch(() => props.setHeaders, (val: BaseTableHeaderI[]) => {
       // maintain filters
@@ -205,7 +213,27 @@ export default defineComponent({
       })
       state.sortedItems = props.setItems
     })
-    watch(() => props.setTableDataOptions, (val: DataOptions) => { state.tableDataOptions = val })
+
+    watch(() => state.sortedItems, () => {
+      if (props.setItems) {
+        const currentPage = state.tableDataOptions?.page || DEFAULT_DATA_OPTIONS.page
+        const perPage = state.tableDataOptions?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+        const start = (currentPage - 1) * perPage
+        const end = start + perPage
+        state.visibleItems = state.sortedItems.slice(start, end)
+      }
+    })
+
+    watch(() => props.setTableDataOptions, (val: DataOptions) => {
+      state.tableDataOptions = val
+      if (props.customPagination) {
+        const currentPage = val?.page || DEFAULT_DATA_OPTIONS.page
+        const perPage = val?.itemsPerPage || DEFAULT_DATA_OPTIONS.itemsPerPage
+        const start = (currentPage - 1) * perPage
+        const end = start + perPage
+        state.visibleItems = state.sortedItems.slice(start, end)
+      }
+    })
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
@@ -213,8 +241,7 @@ export default defineComponent({
       setFiltering,
       ...toRefs(state),
       setSortedItems,
-      itemSize,
-      onScroll
+      itemSize
     }
   }
 })

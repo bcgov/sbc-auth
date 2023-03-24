@@ -14,11 +14,13 @@
         :setHeaders="headers"
         :setItems="affiliations.results"
         :totalItems="affiliations.totalResults"
+        :setTableDataOptions="tableDataOptions"
         @update-table-options="tableDataOptions = $event"
-        :pageHide="true"
+        :pageHide="false"
         :filters="affiliations.filters"
         :updateFilter="updateFilter"
         :height="entityCount > 5 ? '32rem' : null"
+        :customPagination = "true"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -143,9 +145,11 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { computed, defineComponent, onBeforeMount, onMounted, ref, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, onBeforeMount, onMounted, ref, watch } from '@vue/composition-api'
 import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
+import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
+import { DataOptions } from 'vuetify'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
@@ -288,6 +292,8 @@ export default defineComponent({
       getHeaders(newCol)
     })
 
+    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
+
     return {
       clearFiltersTrigger,
       clearFilters,
@@ -312,7 +318,8 @@ export default defineComponent({
       useNameRequest,
       removeBusiness,
       isTemporaryBusiness,
-      tempDescription
+      tempDescription,
+      tableDataOptions
     }
   }
 })
