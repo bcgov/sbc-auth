@@ -21,7 +21,9 @@ def upgrade():
     op.add_column('product_codes', sa.Column('keycloak_group', sa.String(length=100), nullable=True))
     op.execute("update product_codes set keycloak_group = 'ppr_user' where code = 'PPR';")
     op.execute("update product_codes set keycloak_group = 'mhr_search_user' where code = 'MHR';")
-    
+    # An alternative could be setting the transaction_per_migration option in run_migrations_online to True.
+    # Otherwise the next migration b8dc42f28583 hangs.
+    op.execute('COMMIT')
 
 def downgrade():
     op.drop_column('product_codes', 'keycloak_group')

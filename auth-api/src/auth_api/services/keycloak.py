@@ -251,6 +251,15 @@ class KeycloakService:
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
+
+        get_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}'
+        response = requests.get(get_user_url, headers=headers,
+                                timeout=timeout)
+        has_user = response.ok
+        if not has_user:
+            current_app.logger.error(f"User with guid: {keycloak_guid} - doesn't exist in keycloak.")
+            return
+
         add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}/groups/{group_id}'
         response = requests.get(add_to_group_url, headers=headers,
                                 timeout=timeout)

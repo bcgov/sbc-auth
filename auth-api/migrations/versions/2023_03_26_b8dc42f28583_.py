@@ -36,8 +36,10 @@ def upgrade():
             print('Getting bcol profile for ', org_id[0], org_id[1])
             bcol_response = RestService.get(endpoint=current_app.config.get('BCOL_API_URL') + f'/profiles/{org_id[1]}',
                                             token=token)
-            print('BCOL Response', bcol_response.json())
-            ProductService.create_subscription_from_bcol_profile(org_id[0], bcol_response.json().get('profileFlags'))
+            response = bcol_response.json()
+            print('BCOL Response', response)
+            ProductService.create_subscription_from_bcol_profile(org_id[0], response.get('profileFlags'))
+            print('Created subscription from bcol profile for ', org_id[0], org_id[1])
         except Exception as exc:
             print('Profile Error')
             print(exc)
@@ -47,6 +49,7 @@ def upgrade():
     org_res = conn.execute(
         "select distinct org_id from product_subscriptions where product_code in ('MHR','PPR');"
     )
+    print('Updating keycloak groups retroactively.')
     orgs = org_res.fetchall()
     for org_id in orgs:
         print('Updating keycloak groups for: ', org_id[0])
@@ -55,6 +58,7 @@ def upgrade():
         except Exception as exc:
             print('Error updating keycloak groups for org: ', org_id[0])
             print(exc)
+    print('Finished updating keycloak groups retroactively.')
 
 def downgrade():
     pass
