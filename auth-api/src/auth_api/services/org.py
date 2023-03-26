@@ -821,7 +821,7 @@ class Org:  # pylint: disable=too-many-public-methods
                                                                   origin_url)
         else:
             # continue but log error
-            current_app.logger.error('No admin email record for org id {}', org_id)
+            current_app.logger.error('No admin email record for org id %s', org_id)
 
         current_app.logger.debug('>find_affidavit_by_org_id ')
         return Org(org)
