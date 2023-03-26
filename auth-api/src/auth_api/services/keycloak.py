@@ -23,7 +23,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.utils.constants import (
     GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS)
-from auth_api.utils.enums import ContentType, LoginSource
+from auth_api.utils.enums import ContentType, KeycloakGroupActions, LoginSource
 from auth_api.utils.roles import Role
 from auth_api.utils.user_context import UserContext, user_context
 
@@ -236,6 +236,29 @@ class KeycloakService:
             keycloak_guid: Dict = user_from_context.sub
 
         KeycloakService._reset_otp(keycloak_guid)
+
+    @staticmethod
+    def add_or_remove_user_from_group(keycloak_guid: str, group_name: str, action: KeycloakGroupActions):
+        """Add or remove user from group, check  so an exception doesn't occur when adding or removing."""
+        config = current_app.config
+        base_url, realm, timeout = config.get('KEYCLOAK_BASE_URL'), config.get(
+            'KEYCLOAK_REALMNAME'), config.get('CONNECT_TIMEOUT', 60)
+
+        admin_token = KeycloakService._get_admin_token()
+        group_id = KeycloakService._get_group_id(admin_token, group_name)
+
+        headers = {
+            'Content-Type': ContentType.JSON.value,
+            'Authorization': f'Bearer {admin_token}'
+        }
+        add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}/groups/{group_id}'
+        response = requests.get(add_to_group_url, headers=headers,
+                                timeout=timeout)
+        has_group = response.ok
+        if action == KeycloakGroupActions.ADD_TO_GROUP.value and has_group is False:
+            KeycloakService.add_user_to_group(keycloak_guid, group_name)
+        elif action == KeycloakGroupActions.REMOVE_FROM_GROUP.value and has_group is True:
+            KeycloakService._remove_user_from_group(keycloak_guid, group_name)
 
     @staticmethod
     def add_user_to_group(user_id: str, group_name: str):

@@ -149,11 +149,21 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
 
     @classmethod
     def find_membership_by_userid(cls, user_id) -> Membership:
-        """Get the membership for the specified user and org."""
+        """Get the membership for the specified user."""
         records = cls.query \
             .filter(cls.user_id == user_id) \
             .order_by(desc(Membership.created)) \
             .first()
+
+        return records
+
+    @classmethod
+    def find_memberships_by_user_ids(cls, user_id) -> List[Membership]:
+        """Get the memberships for the specified user ids."""
+        records = cls.query \
+            .filter(cls.user_id == user_id) \
+            .order_by(desc(Membership.created)) \
+            .all()
 
         return records
 

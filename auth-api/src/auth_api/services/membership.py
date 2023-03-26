@@ -37,7 +37,7 @@ from auth_api.utils.user_context import UserContext, user_context
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .keycloak import KeycloakService
-from .org import Org as OrgService
+from .products import Product as ProductService
 from .user import User as UserService
 from ..utils.account_mailer import publish_to_mailer
 
@@ -66,6 +66,10 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         membership_schema = MembershipSchema()
         obj = membership_schema.dump(self._model, many=False)
         return obj
+
+    def get_owner_count(self, org):
+        """Return the number of owners in the org."""
+        return len([x for x in org.members if x.membership_type_code == ADMIN])
 
     @staticmethod
     def get_membership_type_by_code(type_code):
@@ -217,13 +221,13 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
                 and updated_membership_status.id == Status.INACTIVE.value \
                 and self._model.membership_type.code == ADMIN:
             admin_getting_removed = True
-            if OrgService(self._model.org).get_owner_count() == 1:
+            if self.get_owner_count(self._model.org) == 1:
                 raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
         # Ensure that if downgrading from owner that there is at least one other owner in org
         if self._model.membership_type.code == ADMIN and \
                 updated_fields.get('membership_type', None) != ADMIN and \
-                OrgService(self._model.org).get_owner_count() == 1:
+                self.get_owner_count(self._model.org) == 1:
             raise BusinessException(Error.CHANGE_ROLE_FAILED_ONLY_OWNER, None)
 
         for key, value in updated_fields.items():
@@ -289,13 +293,14 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
 
     @staticmethod
     def _add_or_remove_group(model: MembershipModel):
-        """Add or remove the user from/to account holders group."""
+        """Add or remove the user from/to account holders / product keycloak group."""
         if model.membership_status.id == Status.ACTIVE.value:
             KeycloakService.join_account_holders_group(model.user.keycloak_guid)
         elif model.membership_status.id == Status.INACTIVE.value and len(
                 MembershipModel.find_orgs_for_user(model.user.id)) == 0:
             # Check if the user has any other active org membership, if none remove from the group
             KeycloakService.remove_from_account_holders_group(model.user.keycloak_guid)
+        ProductService.update_users_products_keycloak_groups([model.user.id])
 
     @staticmethod
     def get_membership_for_org_and_user(org_id, user_id):

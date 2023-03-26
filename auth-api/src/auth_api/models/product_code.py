@@ -34,6 +34,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     hidden = Column(Boolean(), default=False, nullable=True)  # Flag to hide from the UI
     linked_product_code = Column(String(100),
                                  nullable=True)  # Product linked to to another product, like business and NR
+    keycloak_group = Column(String(100), nullable=True)
     url = Column(String(100), nullable=True)
 
     @classmethod

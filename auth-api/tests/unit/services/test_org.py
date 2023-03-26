@@ -677,7 +677,7 @@ def test_get_owner_count_one_owner(session, keycloak_mock, monkeypatch):  # pyli
     user = factory_user_model(user_info=user_with_token)
     patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user.id)
-    assert org.get_owner_count() == 1
+    assert MembershipService.get_owner_count(MembershipService, org._model) == 1
 
 
 @pytest.mark.parametrize(
@@ -707,7 +707,7 @@ def test_get_owner_count_two_owner_with_admins(session, keycloak_mock, monkeypat
     factory_membership_model(user2.id, org._model.id, member_type='COORDINATOR')
     user3 = factory_user_model(user_info=TestUserInfo.user3)
     factory_membership_model(user3.id, org._model.id, member_type='ADMIN')
-    assert org.get_owner_count() == 2
+    assert MembershipService.get_owner_count(MembershipService, org._model) == 2
 
 
 def test_delete_org_with_members(session, auth_mock, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
