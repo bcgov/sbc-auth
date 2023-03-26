@@ -157,7 +157,7 @@ class Membership:  # pylint: disable=too-many-instance-attributes,too-few-public
         org_name = self._model.org.name
         org_id = self._model.org.id
         if not self._model.user.contacts:
-            current_app.logger.error('No user contact record for user id {}', self._model.user_id)
+            current_app.logger.error('No user contact record for user id %s', self._model.user_id)
             current_app.logger.error('<send_notification_to_member failed')
         recipient = self._model.user.contacts[0].contact.email
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH

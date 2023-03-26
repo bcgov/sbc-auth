@@ -59,7 +59,7 @@ class Product:
             for product in product_list:
                 cache.set(product.code, product.type_code)
         except SQLAlchemyError as e:
-            current_app.logger.info('Error on building cache {}', e)
+            current_app.logger.info('Error on building cache %s', e)
 
     @staticmethod
     def find_product_type_by_code(code: str) -> str:
@@ -237,7 +237,7 @@ class Product:
                                                                     product_subscription.status_code)
         else:
             # continue but log error
-            current_app.logger.error('No admin email record for org id {}', org_id)
+            current_app.logger.error('No admin email record for org id %s', org_id)
         if is_approved:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                                            name=product_model.description))
