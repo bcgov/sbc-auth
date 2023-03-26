@@ -28,6 +28,30 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     """Product code table to store all the products supported by auth system."""
 
     __tablename__ = 'product_codes'
+    # this mapper is used so that new and old versions of the service can be run simultaneously,
+    # making rolling upgrades easier
+    # This is used by SQLAlchemy to explicitly define which fields we're interested
+    # so it doesn't freak out and say it can't map the structure if other fields are present.
+    # This could occur from a failed deploy or during an upgrade.
+    # The other option is to tell SQLAlchemy to ignore differences, but that is ambiguous
+    # and can interfere with Alembic upgrades.
+    #
+    # NOTE: please keep mapper names in alpha-order, easier to track that way
+    #       Exception, id is always first, _fields first
+    __mapper_args__ = {
+        'include_properties': [
+            'code'
+            'description',
+            'hidden',
+            'keycloak_group',
+            'linked_product_code',
+            'need_review',
+            'premium_only',
+            'type_code',
+            'url'
+        ]
+    }
+
     type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
     premium_only = Column(Boolean(), default=False, nullable=True)  # Available only for premium accounts
     need_review = Column(Boolean(), default=False, nullable=True)  # Need a review from staff for activating product
