@@ -40,7 +40,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     #       Exception, id is always first, _fields first
     __mapper_args__ = {
         'include_properties': [
-            'code'
+            'code',
             'description',
             'hidden',
             'keycloak_group',
