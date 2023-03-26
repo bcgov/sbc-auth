@@ -1,7 +1,7 @@
 """Add in keycloak_group into product codes.
 
-Revision ID: b8dc42f28583
-Revises: 501d1179b2f0
+Revision ID: 501d1179b2f0
+Revises: 7e3f009cb4ae
 Create Date: 2023-03-25 01:20:37.334504
 
 """
@@ -10,8 +10,9 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'b8dc42f28583'
-down_revision = '501d1179b2f0'
+revision = '501d1179b2f0'
+down_revision = '7e3f009cb4ae'
+
 branch_labels = None
 depends_on = None
 
