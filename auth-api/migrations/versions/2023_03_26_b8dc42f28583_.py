@@ -22,7 +22,7 @@ depends_on = None
 
 
 def upgrade():
-        # Add in products for MHR / PPR.
+    # Add in products for MHR / PPR.
     conn = op.get_bind()
     org_res = conn.execute(
         "select o.id, o.bcol_user_id from orgs o where bcol_user_id is not null and bcol_account_id is not null and status_code in ('ACTIVE', 'PENDING_STAFF_REVIEW');"
@@ -37,13 +37,7 @@ def upgrade():
             bcol_response = RestService.get(endpoint=current_app.config.get('BCOL_API_URL') + f'/profiles/{org_id[1]}',
                                             token=token)
             print('BCOL Response', bcol_response.json())
-            added_subscriptions = ProductService.create_subscription_from_bcol_profile(org_id[0], bcol_response.json().get('profileFlags'))
-            if added_subscriptions:
-                try: 
-                    ProductService.update_org_product_keycloak_groups(org_id[0])
-                except Exception as exc:
-                    print('Error adding user to group')
-                    print(exc)
+            ProductService.create_subscription_from_bcol_profile(org_id[0], bcol_response.json().get('profileFlags'))
         except Exception as exc:
             print('Profile Error')
             print(exc)
@@ -57,7 +51,11 @@ def upgrade():
     orgs = org_res.fetchall()
     for org_id in orgs:
         print('Updating keycloak groups for: ', org_id[0])
-        ProductService.update_org_product_keycloak_groups(org_id[0])
+        try: 
+            ProductService.update_org_product_keycloak_groups(org_id[0])
+        except Exception as exc:
+            print('Error updating keycloak groups for org: ', org_id[0])
+            print(exc)
 
 def downgrade():
     pass

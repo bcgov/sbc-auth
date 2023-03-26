@@ -160,9 +160,8 @@ class Product:
     @staticmethod
     def create_subscription_from_bcol_profile(org_id: int, bcol_profile_flags: List[str]):
         """Create product subscription from bcol profile flags."""
-        added_subscriptions = []
         if not bcol_profile_flags:
-            return added_subscriptions
+            return
 
         for profile_flag in bcol_profile_flags:
             product_code = BCOL_PROFILE_PRODUCT_MAP.get(profile_flag, None)
@@ -174,13 +173,10 @@ class Product:
                 if not subscription:
                     ProductSubscriptionModel(org_id=org_id, product_code=product_code,
                                              status_code=ProductSubscriptionStatus.ACTIVE.value).flush()
-                    added_subscriptions.append(product_code)
                 elif subscription and \
                         (existing_sub := subscription[0]).status_code != ProductSubscriptionStatus.ACTIVE.value:
                     existing_sub.status_code = ProductSubscriptionStatus.ACTIVE.value
                     existing_sub.flush()
-                    added_subscriptions.append(product_code)
-        return added_subscriptions
 
     @staticmethod
     @user_context
