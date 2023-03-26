@@ -18,7 +18,9 @@ depends_on = None
 
 def upgrade():
     op.add_column('product_codes', sa.Column('keycloak_group', sa.String(length=100), nullable=True))
-
+    op.execute("update product_codes set keycloak_group = 'ppr_user' where code = 'PPR';")
+    op.execute("update product_codes set keycloak_group = 'mhr_search_user' where code = 'MHR';")
+    
 
 def downgrade():
     op.drop_column('product_codes', 'keycloak_group')
