@@ -41,6 +41,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     __mapper_args__ = {
         'include_properties': [
             'code',
+            'default',
             'description',
             'hidden',
             'keycloak_group',
