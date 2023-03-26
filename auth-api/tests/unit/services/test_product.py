@@ -91,7 +91,9 @@ def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monke
     ppr_code = ProductCodeModel.find_by_code('PPR')
     ppr_code.keycloak_group = 'ppr'
     ppr_code.save()
-
+    mhr_code = ProductCodeModel.find_by_code('MHR')
+    mhr_code.keycloak_group = None
+    mhr_code.save()
     vs_code = ProductCodeModel.find_by_code('VS')
     vs_code.keycloak_group = 'vs'
     vs_code.save()
