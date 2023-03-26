@@ -41,7 +41,6 @@ def upgrade():
         except Exception as exc:
             print('Profile Error')
             print(exc)
-            raise exc
     db.session.commit()
     
     conn = op.get_bind()
