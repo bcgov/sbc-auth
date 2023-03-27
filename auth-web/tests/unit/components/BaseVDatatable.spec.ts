@@ -112,7 +112,8 @@ describe('Base datatable tests', () => {
         setItems: items,
         setHeaders: headersBasic,
         totalItems: items.length,
-        height: '100%'
+        height: '100%',
+        customPagination: false
       }
     })
   })

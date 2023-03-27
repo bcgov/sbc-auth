@@ -24,7 +24,7 @@ export interface AffiliationFilter {
   businessNumber?: string,
   type?: string,
   status?: string,
-  Actions?: string
+  actions?: string
 }
 
 export interface AffiliationResponse {

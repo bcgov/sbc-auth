@@ -188,13 +188,14 @@ export enum NrState {
     REFUND_REQUESTED = 'REFUND_REQUESTED',
     CANCELLED = 'CANCELLED',
     EXPIRED = 'EXPIRED',
-    CONSUMED = 'CONSUMED'
+    CONSUMED = 'CONSUMED',
+    PROCESSING = 'PROCESSING'
 }
 
 export enum NrDisplayStates {
     APPROVED = 'Approved',
     HOLD = 'Pending Staff Review',
-    DRAFT = 'Pending Staff Review',
+    DRAFT = 'Draft',
     REJECTED = 'Rejected',
     CONDITIONAL = 'Conditional Approval',
     REFUND_REQUESTED = 'Cancelled, Refund Requested',
@@ -460,5 +461,6 @@ export enum EntityAlertTypes {
     BADSTANDING = 'BAD_STANDING',
     LIQUIDATION = 'LIQUIDATION',
     DISSOLUTION = 'DISSOLUTION',
-    PROCESSING = 'PROCESSING'
+    PROCESSING = 'PROCESSING',
+    EXPIRED = 'EXPIRED'
 }

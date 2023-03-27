@@ -6,7 +6,7 @@
     :footer-props="itemsPerPageOptions ? itemsPerPageOptions : { itemsPerPageOptions: [5, 10, 15, 20] }"
     :items-per-page="5"
     :headers="headers"
-    :items="visibleItems"
+    :items="customPagination ? visibleItems : sortedItems"
     hide-default-header
     :height="height ? height : ''"
     :loading="filtering || loading"
@@ -216,7 +216,7 @@ export default defineComponent({
     })
 
     watch(() => state.sortedItems, () => {
-      if (props.setItems) {
+      if (props.setItems && props.customPagination) {
         const currentPage = state.tableDataOptions?.page || DEFAULT_DATA_OPTIONS.page
         const perPage = state.tableDataOptions?.itemsPerPage || props.itemsPerPageOptions.itemsPerPageOptions[0]
         const start = (currentPage - 1) * perPage

@@ -62,9 +62,11 @@
       <template v-slot:item-slot-Status="{ item }">
         <span>{{ status(item) }}</span>
         <!-- this is mocked here until the backend to get org details in auth is completed -->
-        <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/>
+        <!-- <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/> -->
         <!-- this works currently -->
-        <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="['PROCESSING']"/>
+        <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
+        <!-- Draft IA with Expired NR -->
+        <EntityDetails v-if="isDraft(status(item)) && (item.nameRequest && item.nameRequest.expirationDate)" icon="mdi-alert" :showAlertHeader="true" :details="[EntityAlertTypes.EXPIRED]"/>
       </template>
 
       <!-- Actions -->
@@ -140,12 +142,14 @@
 import { Business, NameRequest, Names } from '@/models/business'
 import {
   CorpTypes,
+  EntityAlertTypes,
   FilingTypes,
   NrDisplayStates,
   NrState,
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
+import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { Ref, computed, defineComponent, onBeforeMount, onMounted, ref, watch } from '@vue/composition-api'
 import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
@@ -154,7 +158,6 @@ import { DataOptions } from 'vuetify'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
-import { Organization } from '@/models/Organization'
 import _ from 'lodash'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
@@ -194,6 +197,10 @@ export default defineComponent({
 
     const isProcessing = (state: string): boolean => {
       return NrDisplayStates.PROCESSING === state
+    }
+
+    const isDraft = (state: string): boolean => {
+      return NrDisplayStates.DRAFT === state
     }
 
     /** Create a business record in LEAR. */
@@ -271,7 +278,7 @@ export default defineComponent({
     }
 
     /** Emit business/nr information to be unaffiliated. */
-    const removeBusiness = (business) => {
+    const removeBusiness = (business): RemoveBusinessPayload => {
       const payload = {
         orgIdentifier: currentOrganization.value.id,
         business
@@ -312,6 +319,7 @@ export default defineComponent({
       type,
       status,
       isProcessing,
+      isDraft,
       typeDescription,
       loadAffiliations,
       updateFilter,
@@ -321,7 +329,8 @@ export default defineComponent({
       removeBusiness,
       isTemporaryBusiness,
       tempDescription,
-      tableDataOptions
+      tableDataOptions,
+      EntityAlertTypes
     }
   }
 })

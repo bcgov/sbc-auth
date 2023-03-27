@@ -65,9 +65,9 @@ export const useAffiliations = () => {
   const status = (business: Business): string => {
     if (isNameRequest(business)) {
       // Format name request state value
-      const state = NrState[business.nameRequest.state]
+      const state = NrState[(business.nameRequest.state)?.toUpperCase()]
       if (!state) return 'Unknown'
-      if (state === NrState.APPROVED && !business.nameRequest.expirationDate) return NrDisplayStates.PROCESSING
+      if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
       else return NrDisplayStates[state] || 'Unknown'
     }
     if (isTemporaryBusiness(business)) {
