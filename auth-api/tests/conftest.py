@@ -247,6 +247,8 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.remove_from_account_holders_group',
                         lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.add_or_remove_user_from_group',
+                        lambda *args, **kwargs: None)
 
 
 @pytest.fixture()

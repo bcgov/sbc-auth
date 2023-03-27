@@ -105,11 +105,9 @@ class Task:  # pylint: disable=too-many-instance-attributes
         task_model.relationship_status = task_relationship_status
         task_model.flush()
 
-        # Update its relationship
-
         self._update_relationship(origin_url=origin_url)
-        current_app.logger.debug('>update_task ')
         db.session.commit()
+        current_app.logger.debug('>update_task ')
         return Task(task_model)
 
     def _update_relationship(self, origin_url: str = None):
@@ -181,7 +179,7 @@ class Task:  # pylint: disable=too-many-instance-attributes
             mailer_type = 'resubmitBceidOrg'
 
         if admin_emails == '':
-            current_app.logger.error('No admin email record for org id {}', org.id)
+            current_app.logger.error('No admin email record for org id %s', org.id)
             current_app.logger.error('<send_approval_notification_to_member failed')
             return
 

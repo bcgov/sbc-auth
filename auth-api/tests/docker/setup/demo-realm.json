@@ -368,6 +368,36 @@
       ],
       "clientRoles": {},
       "subGroups": []
+    },
+    {
+      "name": "ppr",
+      "path": "/ppr",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    },
+	{
+      "name": "bca",
+      "path": "/bca",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    },
+	{
+      "name": "vs",
+      "path": "/vs",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
     }
   ],
   "defaultRoles": [

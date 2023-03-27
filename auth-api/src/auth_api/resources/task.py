@@ -20,12 +20,15 @@ from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.models import Task as TaskModel
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
+from auth_api.services import Product as ProductService
 from auth_api.services import Task as TaskService
 from auth_api.tracer import Tracer
+from auth_api.utils.enums import TaskRelationshipType
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
-from auth_api.models.dataclass import TaskSearch
+
 
 API = Namespace('tasks', description='Endpoints for tasks management')
 TRACER = Tracer.get_instance()
@@ -87,9 +90,13 @@ class TaskUpdate(Resource):
             if task:
                 # Update task and its relationships
                 origin = request.environ.get('HTTP_ORIGIN', 'localhost')
-                response, status = task.update_task(task_info=request_json,
-                                                    origin_url=origin).as_dict(), http_status.HTTP_200_OK
-
+                task_dict = task.update_task(task_info=request_json,
+                                             origin_url=origin).as_dict()
+                # ProductService uses TaskService already. So, we need to avoid circular import.
+                if request_json.get('relationshipStatus') == TaskRelationshipType.PRODUCT.value:
+                    ProductService.update_org_product_keycloak_groups(task_dict['account_id'])
+                response = task_dict
+                status = http_status.HTTP_200_OK
             else:
                 response, status = {'message': 'The requested task could not be found.'}, \
                                    http_status.HTTP_404_NOT_FOUND

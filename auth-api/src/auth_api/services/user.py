@@ -139,11 +139,11 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                 else:
                     kc_user = KeycloakService.add_user(create_user_request, throw_error_if_exists=True)
             except BusinessException as err:
-                current_app.logger.error('create_user in keycloak failed :duplicate user {}', err)
+                current_app.logger.error('create_user in keycloak failed :duplicate user %s', err)
                 users.append(User._get_error_dict(username, Error.USER_ALREADY_EXISTS))
                 continue
             except HTTPError as err:
-                current_app.logger.error('create_user in keycloak failed {}', err)
+                current_app.logger.error('create_user in keycloak failed %s', err)
                 users.append(User._get_error_dict(username, Error.FAILED_ADDING_USER_ERROR))
                 continue
             try:
@@ -163,7 +163,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
                 user_dict.update({'http_status': http_status.HTTP_201_CREATED, 'error': ''})
                 users.append(user_dict)
             except Exception as e:  # NOQA # pylint: disable=broad-except
-                current_app.logger.error('Error on  create_user_and_add_membership: {}', e)
+                current_app.logger.error('Error on  create_user_and_add_membership: %s', e)
                 db.session.rollback()
                 if re_enable_user:
                     User._update_user_in_kc(create_user_request)
@@ -226,7 +226,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
             KeycloakService.reset_otp(str(user.keycloak_guid))
             User.send_otp_authenticator_reset_notification(user.email, origin_url, org_id)
         except HTTPError as err:
-            current_app.logger.error('update_user in keycloak failed {}', err)
+            current_app.logger.error('update_user in keycloak failed %s', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
 
     @staticmethod
@@ -269,7 +269,7 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         try:
             kc_user = KeycloakService.update_user(update_user_request)
         except HTTPError as err:
-            current_app.logger.error('update_user in keycloak failed {}', err)
+            current_app.logger.error('update_user in keycloak failed %s', err)
             raise BusinessException(Error.UNDEFINED_ERROR, err) from err
         return kc_user
 
