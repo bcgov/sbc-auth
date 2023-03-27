@@ -252,21 +252,21 @@ class KeycloakService:
             'Authorization': f'Bearer {admin_token}'
         }
 
-        get_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}'
-        response = requests.get(get_user_url, headers=headers,
-                                timeout=timeout)
-        has_user = response.ok
-        if not has_user:
-            current_app.logger.error(f"User with guid: {keycloak_guid} - doesn't exist in keycloak.")
-            return
-
-        add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}/groups/{group_id}'
+        add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}/groups'
         response = requests.get(add_to_group_url, headers=headers,
                                 timeout=timeout)
-        has_group = response.ok
-        if action == KeycloakGroupActions.ADD_TO_GROUP.value and has_group is False:
+
+        has_group = False
+        if not response.ok:
+            current_app.logger.error(f'Failed getting groups for user with guid: {keycloak_guid}, user may not exist.')
+            return
+
+        groups = response.json()
+        has_group = [group for group in groups if group['id'] == group_id]
+
+        if action == KeycloakGroupActions.ADD_TO_GROUP.value and not has_group:
             KeycloakService.add_user_to_group(keycloak_guid, group_name)
-        elif action == KeycloakGroupActions.REMOVE_FROM_GROUP.value and has_group is True:
+        elif action == KeycloakGroupActions.REMOVE_FROM_GROUP.value and has_group:
             KeycloakService._remove_user_from_group(keycloak_guid, group_name)
 
     @staticmethod
