@@ -21,30 +21,7 @@ branch_labels = None
 depends_on = None
 
 
-def upgrade():
-    # Add in products for MHR / PPR.
-    conn = op.get_bind()
-    org_res = conn.execute(
-        "select o.id, o.bcol_user_id from orgs o where bcol_user_id is not null and bcol_account_id is not null and status_code in ('ACTIVE', 'PENDING_STAFF_REVIEW');"
-    )
-    orgs = org_res.fetchall()
-    print('starting migration for BCOL products')
-    if len(orgs) > 0:
-        token = RestService.get_service_account_token()
-    for org_id in orgs:
-        try:
-            print('Getting bcol profile for ', org_id[0], org_id[1])
-            bcol_response = RestService.get(endpoint=current_app.config.get('BCOL_API_URL') + f'/profiles/{org_id[1]}',
-                                            token=token)
-            response = bcol_response.json()
-            print('BCOL Response', response)
-            ProductService.create_subscription_from_bcol_profile(org_id[0], response.get('profileFlags'))
-            print('Created subscription from bcol profile for ', org_id[0], org_id[1])
-        except Exception as exc:
-            print('Profile Error')
-            print(exc)
-    db.session.commit()
-    
+def upgrade():   
     conn = op.get_bind()
     org_res = conn.execute(
         "select distinct org_id from product_subscriptions where product_code in ('MHR','PPR');"
