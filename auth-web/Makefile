@@ -21,9 +21,10 @@ lint:  ## Run linting ofcode.
 	npm run lint
 
 test:  ## Unit testing
-	mv .env .env.bak
+	mv -n .env .env.bak
 	cp .env.example .env
 	npm run test:unit
+	mv -n .env.bak .env
 
 #################################################################################
 # COMMANDS - CD
