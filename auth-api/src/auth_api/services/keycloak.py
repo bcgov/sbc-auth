@@ -263,20 +263,20 @@ class KeycloakService:
             'KEYCLOAK_REALMNAME'), config.get('CONNECT_TIMEOUT', 60)
 
         admin_token = KeycloakService._get_admin_token()
-        group_id = KeycloakService._get_group_id(admin_token, kgs[0].group_name)
-
+        group_names = {kg.group_name for kg in kgs}
+        group_ids = {group_name: KeycloakService._get_group_id(admin_token, group_name) for group_name in group_names}
         headers = {
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
 
         method = 'PUT' if kgs[0].group_action == KeycloakGroupActions.ADD_TO_GROUP.value else 'DELETE'
-        user_guids = [kg.user_guid for kg in kgs]
         async with aiohttp.ClientSession() as session:
             tasks = [asyncio.create_task(
-                session.request(method, f'{base_url}/auth/admin/realms/{realm}/users/{user_guid}/groups/{group_id}',
+                session.request(method, f'{base_url}/auth/admin/realms/{realm}/users/'
+                                        f'{kg.user_guid}/groups/{group_ids[kg.group_name]}',
                                 headers=headers, timeout=timeout))
-                     for user_guid in user_guids]
+                     for kg in kgs]
             tasks = await asyncio.gather(*tasks, return_exceptions=True)
             for task in tasks:
                 if isinstance(task, aiohttp.ClientConnectionError):
