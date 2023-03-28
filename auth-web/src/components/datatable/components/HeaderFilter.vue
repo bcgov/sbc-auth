@@ -74,32 +74,43 @@ export default defineComponent({
         await header.customFilter.filterApiFn(header.customFilter.value)
         props.setFiltering(false)
       } else {
-        props.updateFilter(header.col, header.customFilter.value)
-        if (!props.filters.isActive) {
-          props.setSortedItems(props.sortedItems, true)
-          // return
-        }
-        state.sortedItems = props.sortedItems.filter((item, i) => {
-          let display = true
-          for (let col in props.filters.filterPayload) {
-            const colValue = props.headers[headerTypes[col].index].customFilter.items[i].text
-            const filterValue = props.filters.filterPayload[col]
-            if (headerTypes[col].type === 'select') {
-              display = BaseSelectFilter(colValue, filterValue)
-            } else {
-              display = BaseTextFilter(colValue, filterValue)
-            }
-            if (!display) {
-              return display
-            }
-          }
-          return display
-        })
-        if (props.setSortedItems) {
-          props.setSortedItems(state.sortedItems, true)
-        }
+        applyFilters(props, state, header)
       }
     }, 500)
+
+    function applyFilters (props, state, header) {
+      props.updateFilter(header.col, header.customFilter.value)
+
+      if (!props.filters.isActive) {
+        props.setSortedItems(props.sortedItems, true)
+        return
+      }
+
+      state.sortedItems = props.sortedItems.filter((item, i) => {
+        let display = true
+
+        for (let col in props.filters.filterPayload) {
+          const colValue = props.headers[headerTypes[col].index].customFilter.items[i].text
+          const filterValue = props.filters.filterPayload[col]
+
+          if (headerTypes[col].type === 'select') {
+            display = BaseSelectFilter(colValue, filterValue)
+          } else {
+            display = BaseTextFilter(colValue, filterValue)
+          }
+
+          if (!display) {
+            return display
+          }
+        }
+
+        return display
+      })
+
+      if (props.setSortedItems) {
+        props.setSortedItems(state.sortedItems, true)
+      }
+    }
 
     return {
       filter

@@ -42,46 +42,16 @@
               :class="[header.class, 'base-table__header__filter pb-5']"
             >
             <slot :name="'header-filter-slot-' + header.col" :header="header"></slot>
-            <!-- TODO: move it to a seperate component helps improve performance -->
-              <!-- <slot :name="'header-filter-slot-' + header.col" :header="header">
-                <v-select
-                  v-if="header.hasFilter && header.customFilter.type === 'select'"
-                  :class="['base-table__header__filter__select']"
-                  :clearable="header.customFilter.clearable"
-                  dense
-                  filled
-                  hide-details
-                  item-text="text"
-                  item-value="value"
-                  :items="header.customFilter.items"
-                  :label="!header.customFilter.value ? header.customFilter.label || '' : ''"
-                  v-model="header.customFilter.value"
-                  @reset="{ filterWithoutApi ? filterNormal(header) : filter(header) }"
-                  @input="{ filterWithoutApi ? filterNormal(header) : filter(header) }"
-                />
-                <v-text-field
-                  v-else-if="header.hasFilter && header.customFilter.type === 'text'"
-                  :class="['base-table__header__filter__textbox', header.customFilter.value ? 'active' : '']"
-                  :clearable="header.customFilter.clearable"
-                  dense
-                  filled
-                  hide-details
-                  :placeholder="!header.customFilter.value ? header.customFilter.label || '' : ''"
-                  v-model.lazy="header.customFilter.value"
-                  @reset="{ filterWithoutApi ? filterNormal(header) : filter(header) }"
-                  @input="{ filterWithoutApi ? filterNormal(header) : filter(header) }"
-                />
-              </slot> -->
-              <header-filter
-                :filtering="filtering"
-                :filters="filters"
-                :header="header"
-                :setFiltering="setFiltering"
-                :sortedItems="setItems"
-                :updateFilter="updateFilter"
-                :headers="headers"
-                :setSortedItems="setSortedItems"
-              ></header-filter>
+            <header-filter
+              :filtering="filtering"
+              :filters="filters"
+              :header="header"
+              :setFiltering="setFiltering"
+              :sortedItems="setItems"
+              :updateFilter="updateFilter"
+              :headers="headers"
+              :setSortedItems="setSortedItems"
+            ></header-filter>
             </th>
           </tr>
         </slot>
@@ -111,22 +81,12 @@
     <template v-slot:no-data>
       <div class="py-8 base-table__text" v-html="noDataText" />
     </template>
-
-    <!-- Pagination -->
-    <!-- <template v-if="customPagination" v-slot:footer>
-      <v-pagination
-        v-model="currentPage"
-        :total-visible="7"
-        :length="totalPages"
-      ></v-pagination>
-    </template> -->
   </v-data-table>
 <!-- </recycle-scroller> -->
 </template>
 
 <script lang="ts">
-import { BaseSelectFilter, BaseTextFilter } from './resources/base-filters'
-import { PropType, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
@@ -134,7 +94,6 @@ import { DataOptions } from 'vuetify'
 import HeaderFilter from './components/HeaderFilter.vue'
 // import { RecycleScroller } from 'vue-virtual-scroller'
 import _ from 'lodash'
-import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
 
 // FUTURE: remove this in vue 3 upgrade (typing will be inferred properly)
 interface BaseTableStateI {

@@ -61,8 +61,7 @@
       <!-- Status -->
       <template v-slot:item-slot-Status="{ item }">
         <span>{{ status(item) }}</span>
-        <!-- this is mocked here until the backend to get org details in auth is completed -->
-        <!-- <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/> -->
+        <!-- this is mocked here until the backend to get org details in auth is completed <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/>-->
         <!-- this works currently -->
         <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
         <!-- Draft IA with Expired NR -->
@@ -150,7 +149,7 @@ import {
   SessionStorageKeys
 } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Ref, computed, defineComponent, onBeforeMount, onMounted, ref, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
