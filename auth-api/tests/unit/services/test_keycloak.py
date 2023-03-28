@@ -252,4 +252,4 @@ def test_add_remove_group_bulk(session):
     user1_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user1.id)
     user2_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user2.id)
     assert 'ppr' in ['ppr' for user_group in user1_groups if user_group.get('name') == 'ppr']
-    assert 'bca' not in ['ppr' for user_group in user2_groups if user_group.get('name') == 'bca']
+    assert 'bca' not in ['bca' for user_group in user2_groups if user_group.get('name') == 'bca']
