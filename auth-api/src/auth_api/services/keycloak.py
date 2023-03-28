@@ -13,14 +13,17 @@
 # limitations under the License.
 """Utils for keycloak administration."""
 
+import asyncio
 import json
-from typing import Dict
+from typing import Dict, List
+import aiohttp
 
 import requests
 from flask import current_app
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models.dataclass import KeycloakGroupSubscription
 from auth_api.utils.constants import (
     GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_GOV_ACCOUNT_USERS, GROUP_PUBLIC_USERS)
 from auth_api.utils.enums import ContentType, KeycloakGroupActions, LoginSource
@@ -238,36 +241,52 @@ class KeycloakService:
         KeycloakService._reset_otp(keycloak_guid)
 
     @staticmethod
-    def add_or_remove_user_from_group(keycloak_guid: str, group_name: str, action: KeycloakGroupActions):
-        """Add or remove user from group, check  so an exception doesn't occur when adding or removing."""
+    def add_or_remove_product_keycloak_groups(kgs: List[KeycloakGroupSubscription]):
+        """Call add_or_remove_users_from_group, by add to group then remove from group."""
+        add_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.ADD_TO_GROUP.value]
+        remove_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value]
+        for keycloak_group_subscription in add_groups + remove_groups:
+            current_app.logger.debug(f'Action: {keycloak_group_subscription.group_action} '
+                                     f'Product: {keycloak_group_subscription.product_code} '
+                                     f'Keycloak Group: {keycloak_group_subscription.group_name} '
+                                     f'User guid: {keycloak_group_subscription.user_guid}')
+        asyncio.run(KeycloakService.add_or_remove_users_from_group(add_groups))
+        asyncio.run(KeycloakService.add_or_remove_users_from_group(remove_groups))
+
+    @staticmethod
+    async def add_or_remove_users_from_group(kgs: List[KeycloakGroupSubscription]):
+        """Asynchronously add/remove users from group - there can be upwards of 700+ users at once."""
+        if not kgs:
+            return
         config = current_app.config
         base_url, realm, timeout = config.get('KEYCLOAK_BASE_URL'), config.get(
             'KEYCLOAK_REALMNAME'), config.get('CONNECT_TIMEOUT', 60)
 
         admin_token = KeycloakService._get_admin_token()
-        group_id = KeycloakService._get_group_id(admin_token, group_name)
+        group_id = KeycloakService._get_group_id(admin_token, kgs[0].group_name)
 
         headers = {
             'Content-Type': ContentType.JSON.value,
             'Authorization': f'Bearer {admin_token}'
         }
 
-        get_user_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}'
-        response = requests.get(get_user_url, headers=headers,
-                                timeout=timeout)
-        has_user = response.ok
-        if not has_user:
-            current_app.logger.error(f"User with guid: {keycloak_guid} - doesn't exist in keycloak.")
-            return
-
-        add_to_group_url = f'{base_url}/auth/admin/realms/{realm}/users/{keycloak_guid}/groups/{group_id}'
-        response = requests.get(add_to_group_url, headers=headers,
-                                timeout=timeout)
-        has_group = response.ok
-        if action == KeycloakGroupActions.ADD_TO_GROUP.value and has_group is False:
-            KeycloakService.add_user_to_group(keycloak_guid, group_name)
-        elif action == KeycloakGroupActions.REMOVE_FROM_GROUP.value and has_group is True:
-            KeycloakService._remove_user_from_group(keycloak_guid, group_name)
+        method = 'PUT' if kgs[0].group_action == KeycloakGroupActions.ADD_TO_GROUP.value else 'DELETE'
+        user_guids = [kg.user_guid for kg in kgs]
+        async with aiohttp.ClientSession() as session:
+            tasks = [asyncio.create_task(
+                session.request(method, f'{base_url}/auth/admin/realms/{realm}/users/{user_guid}/groups/{group_id}',
+                                headers=headers, timeout=timeout))
+                     for user_guid in user_guids]
+            tasks = await asyncio.gather(*tasks, return_exceptions=True)
+            for task in tasks:
+                if isinstance(task, aiohttp.ClientConnectionError):
+                    current_app.logger.error('Connection error')
+                elif isinstance(task, asyncio.TimeoutError):
+                    current_app.logger.error('Timeout error')
+                elif isinstance(task, Exception):
+                    current_app.logger.error(f'Exception: {task}')
+                elif task.status != 204:
+                    current_app.logger.error(f'Returned non 204: {task.method} - {task.url} - {task.status}')
 
     @staticmethod
     def add_user_to_group(user_id: str, group_name: str):

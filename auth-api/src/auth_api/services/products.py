@@ -265,17 +265,6 @@ class Product:
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod
-    def add_or_remove_product_keycloak_groups(kgs: KeycloakGroupSubscription):
-        """Call keycloak service, with the KeycloakGroupSubscription."""
-        current_app.logger.debug('<add_and_remove_user_to_product_keycloak_roles ')
-        current_app.logger.debug(f'{kgs.group_action} '
-                                 f'Product: {kgs.product_code} '
-                                 f'Keycloak Group: {kgs.group_name} '
-                                 f'Keycloak Guid: {kgs.user_guid}')
-        KeycloakService.add_or_remove_user_from_group(kgs.user_guid, kgs.group_name, kgs.group_action)
-        current_app.logger.debug('>add_and_remove_user_to_product_keycloak_roles ')
-
-    @staticmethod
     def get_users_product_subscriptions_kc_groups(user_ids: List[int]) -> List[KeycloakGroupSubscription]:
         """Generate Keycloak Group Subscriptions."""
         ps_max_subquery = db.session.query(
@@ -340,13 +329,11 @@ class Product:
         """Update list of user's keycloak roles for product subscriptions."""
         current_app.logger.debug('<add_and_remove_user_products_keycloak_roles ')
         kc_groups = Product.get_users_product_subscriptions_kc_groups(user_ids)
-        _ = [Product.add_or_remove_product_keycloak_groups(subscription) for subscription in kc_groups]
+        KeycloakService.add_or_remove_product_keycloak_groups(kc_groups)
         current_app.logger.debug('>add_and_remove_user_products_keycloak_roles ')
 
     @staticmethod
     def update_org_product_keycloak_groups(org_id: int):
         """Handle org level product keycloak updates."""
-        current_app.logger.debug('<add_and_remove_org_product_keycloak_roles ')
         user_ids = [membership.user_id for membership in MembershipModel.find_members_by_org_id(org_id)]
         Product.update_users_products_keycloak_groups(user_ids)
-        current_app.logger.debug('>add_and_remove_org_product_keycloak_roles ')
