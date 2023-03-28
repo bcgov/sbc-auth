@@ -241,7 +241,7 @@ class KeycloakService:
         KeycloakService._reset_otp(keycloak_guid)
 
     @staticmethod
-    def add_or_remove_product_keycloak_groups(kgs: KeycloakGroupSubscription):
+    def add_or_remove_product_keycloak_groups(kgs: List[KeycloakGroupSubscription]):
         """Call add_or_remove_users_from_group, by add to group then remove from group."""
         current_app.logger.debug('<add_and_remove_user_to_product_keycloak_roles ')
         add_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.ADD_TO_GROUP.value]
