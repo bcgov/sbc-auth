@@ -327,10 +327,10 @@ class Product:
     @staticmethod
     def update_users_products_keycloak_groups(user_ids: List[int]):
         """Update list of user's keycloak roles for product subscriptions."""
-        current_app.logger.debug('<add_and_remove_user_products_keycloak_roles ')
+        current_app.logger.debug('<update_users_products_keycloak_group ')
         kc_groups = Product.get_users_product_subscriptions_kc_groups(user_ids)
         KeycloakService.add_or_remove_product_keycloak_groups(kc_groups)
-        current_app.logger.debug('>add_and_remove_user_products_keycloak_roles ')
+        current_app.logger.debug('>update_users_products_keycloak_group ')
 
     @staticmethod
     def update_org_product_keycloak_groups(org_id: int):

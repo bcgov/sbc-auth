@@ -243,13 +243,13 @@ def test_add_remove_group_bulk(session):
     user2 = KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
     kgs = [KeycloakGroupSubscription(user_guid=user1.id, product_code='ppr', group_name='ppr',
                                      group_action=KeycloakGroupActions.ADD_TO_GROUP.value),
-           KeycloakGroupSubscription(user_guid=user2.id, product_code='ppr', group_name='ppr',
+           KeycloakGroupSubscription(user_guid=user2.id, product_code='bca', group_name='bca',
                                      group_action=KeycloakGroupActions.ADD_TO_GROUP.value),
-           KeycloakGroupSubscription(user_guid=user2.id, product_code='ppr', group_name='ppr',
+           KeycloakGroupSubscription(user_guid=user2.id, product_code='bca', group_name='bca',
                                      group_action=KeycloakGroupActions.REMOVE_FROM_GROUP.value),
            ]
     KeycloakService.add_or_remove_product_keycloak_groups(kgs)
     user1_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user1.id)
     user2_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user2.id)
     assert 'ppr' in ['ppr' for user_group in user1_groups if user_group.get('name') == 'ppr']
-    assert 'ppr' not in ['ppr' for user_group in user2_groups if user_group.get('name') == 'ppr']
+    assert 'bca' not in ['bca' for user_group in user2_groups if user_group.get('name') == 'bca']
