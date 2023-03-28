@@ -335,7 +335,5 @@ class Product:
     @staticmethod
     def update_org_product_keycloak_groups(org_id: int):
         """Handle org level product keycloak updates."""
-        current_app.logger.debug('<add_and_remove_org_product_keycloak_roles ')
         user_ids = [membership.user_id for membership in MembershipModel.find_members_by_org_id(org_id)]
         Product.update_users_products_keycloak_groups(user_ids)
-        current_app.logger.debug('>add_and_remove_org_product_keycloak_roles ')

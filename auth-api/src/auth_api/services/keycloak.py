@@ -243,7 +243,6 @@ class KeycloakService:
     @staticmethod
     def add_or_remove_product_keycloak_groups(kgs: List[KeycloakGroupSubscription]):
         """Call add_or_remove_users_from_group, by add to group then remove from group."""
-        current_app.logger.debug('<add_and_remove_user_to_product_keycloak_roles ')
         add_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.ADD_TO_GROUP.value]
         remove_groups = [kg for kg in kgs if kg.group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value]
         for keycloak_group_subscription in add_groups + remove_groups:
@@ -253,7 +252,6 @@ class KeycloakService:
                                      f'User guid: {keycloak_group_subscription.user_guid}')
         asyncio.run(KeycloakService.add_or_remove_users_from_group(add_groups))
         asyncio.run(KeycloakService.add_or_remove_users_from_group(remove_groups))
-        current_app.logger.debug('>add_and_remove_user_to_product_keycloak_roles ')
 
     @staticmethod
     async def add_or_remove_users_from_group(kgs: List[KeycloakGroupSubscription]):
