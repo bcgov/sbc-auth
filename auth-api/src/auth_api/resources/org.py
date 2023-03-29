@@ -350,7 +350,7 @@ class OrgAffiliations(Resource):
             else:
                 response, status = AffiliationService.create_affiliation(
                     org_id, business_identifier, request_json.get('passCode'),
-                    request_json.get('certifiedByName'), bearer_token).\
+                    request_json.get('certifiedByName')).\
                                        as_dict(), http_status.HTTP_201_CREATED
 
             entity_details = request_json.get('entityDetails', None)
