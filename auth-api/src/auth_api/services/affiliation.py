@@ -136,7 +136,7 @@ class Affiliation:
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
-    def create_affiliation(org_id, business_identifier, pass_code=None, certified_by_name=None, bearer_token=None):
+    def create_affiliation(org_id, business_identifier, pass_code=None, certified_by_name=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
@@ -158,7 +158,7 @@ class Affiliation:
             if not pass_code:
                 authorized = False
             else:
-                token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID', 
+                token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
                                                               config_secret='ENTITY_SVC_CLIENT_SECRET')
                 authorized = Affiliation._validate_firms_party(token, business_identifier, pass_code)
         else:
