@@ -1,0 +1,56 @@
+steps:
+  # install / setup ci
+  - name: node:16.14.2
+    entrypoint: npm
+    args: ['install']
+
+  # setup .env
+  - name: 'bash'
+    script: |
+      #!/usr/bin/env bash
+      cp .env.example .env
+
+  #
+  # Generate the static site
+  #
+  - name: node:16.14.2
+    entrypoint: npm
+    env:
+      - 'VUE_APP_ADDRESS_COMPLETE_KEY=$_VUE_APP_ADDRESS_COMPLETE_KEY'
+      - 'VUE_APP_AUTH_LD_CLIENT_ID=$_VUE_APP_AUTH_LD_CLIENT_ID'
+    args: ['--openssl-legacy-provider', 'run', 'build']
+
+  #
+  # Deploy to firebase channel, using the PR #
+  # store log to /workspace to get the channel URL
+  #
+  - name: gcr.io/yfthig-dev/firebase
+    entrypoint: bash
+    args: ['-c', 'firebase hosting:channel:deploy --project=yfthig-dev PR-$_PR_NUMBER > /workspace/firebase-deploy.txt']
+
+  #
+  # Update the PR with the temporary URL
+  #
+  - id: "Update the PR"
+    name: gcr.io/cloud-builders/curl
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        # Read from "/workspace"
+        cat /workspace/firebase-deploy.txt
+        url=`cat /workspace/firebase-deploy.txt| grep 'Channel URL' | grep -Eo "https://[a-zA-Z0-9./?=_%:-]*"`
+        echo "this is the body:"
+        echo '{"body": "Temporary Url for review:'"$url"'"}'
+        curl -X POST \
+        https://api.github.com/repos/bcgov/sbc-auth/issues/$_PR_NUMBER/comments \
+        --header "Authorization: Token $$TOKEN" \
+        --header "Accept: application/vnd.github.v3+json" \
+        --data-binary '{"body": "Temporary Url for review: '"$url"'"}'
+    secretEnv: ['TOKEN']
+availableSecrets:
+  secretManager:
+  - versionName: projects/$PROJECT_ID/secrets/token-pr-review/versions/latest
+    env: 'TOKEN'
+options:
+    dynamic_substitutions: true
