@@ -158,7 +158,9 @@ class Affiliation:
             if not pass_code:
                 authorized = False
             else:
-                authorized = Affiliation._validate_firms_party(bearer_token, business_identifier, pass_code)
+                token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID', 
+                                                              config_secret='ENTITY_SVC_CLIENT_SECRET')
+                authorized = Affiliation._validate_firms_party(token, business_identifier, pass_code)
         else:
             if pass_code:
                 authorized = validate_passcode(pass_code, entity.pass_code)
