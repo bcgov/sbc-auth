@@ -286,6 +286,9 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     KEYCLOAK_SERVICE_ACCOUNT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
 
     # Legal-API URL
+    ENTITY_SVC_CLIENT_ID = os.getenv('KEYCLOAK_TEST_ADMIN_CLIENTID')
+    ENTITY_SVC_CLIENT_SECRET = os.getenv('KEYCLOAK_TEST_ADMIN_SECRET')
+
     LEGAL_API_URL = 'https://mock-auth-tools.pathfinder.gov.bc.ca/rest/legal-api/2.7'
     LEGAL_API_VERSION_2 = '/api/v1'
 
