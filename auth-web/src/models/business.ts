@@ -73,6 +73,15 @@ export interface NameRequest {
     entityTypeCd?: string
     natureOfBusiness?: string
     expirationDate?: Date
+    nrNum?: string
+    stateCd?: string
+    // eslint-disable-next-line camelcase
+    entity_type_cd?: string
+    natureBusinessInfo?: string
+    applicants?: {
+        emailAddress?: string
+        phoneNumber?: string
+    }
 }
 
 // Names interface to match external data provided from lear.

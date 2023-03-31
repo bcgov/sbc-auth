@@ -1,5 +1,6 @@
 import { Business, CorpType, NameRequest } from '@/models/business'
 import { Contact } from './contact'
+import { CorpTypes } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 
 export interface CreateRequestBody {
@@ -29,8 +30,12 @@ export interface AffiliationFilter {
 
 export interface AffiliationResponse {
   identifier: string
+  draftType?: CorpTypes
+  legalType?: CorpTypes
+  state?: string
   businessNumber?: string
   name?: string
+  legalName?: string
   contacts?: Contact[]
   corpType?: CorpType
   corpSubType?: CorpType
@@ -41,6 +46,10 @@ export interface AffiliationResponse {
   nameRequest?: NameRequest
   nrNumber?: string
   status?: string
+}
+
+export interface AffiliationsResponse {
+  entities: AffiliationResponse[]
 }
 
 export interface AffiliationFilterParams {

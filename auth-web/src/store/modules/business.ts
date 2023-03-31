@@ -1,4 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import {
@@ -12,7 +13,6 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
@@ -96,7 +96,7 @@ export default class BusinessModule extends VuexModule {
     }
 
     // get affiliated entities for this organization
-    const entityResponse = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
+    const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
       .then(response => {
         if (response?.data?.entities && response?.status === 200) {
           return response.data.entities
