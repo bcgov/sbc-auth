@@ -57,9 +57,6 @@
       <!-- Status -->
       <template v-slot:item-slot-Status="{ item }">
         <span>{{ status(item) }}</span>
-        <!-- this is mocked here until the backend to get org details in auth is completed-->
-        <!-- <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/> -->
-        <!-- this works currently -->
         <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
         <!-- Draft IA with Expired NR -->
         <EntityDetails v-if="isDraft(status(item)) && (item.nameRequest && item.nameRequest.expirationDate)" icon="mdi-alert" :showAlertHeader="true" :details="[EntityAlertTypes.EXPIRED]"/>
