@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "appName": "Auth Web",
   "sbcName": "SBC Common Components",
   "private": true,
@@ -27,7 +27,7 @@
     "axios": "^0.21.1",
     "babel-plugin-transform-require-context": "^0.1.1",
     "core-js": "^3.3.3",
-    "fas-ui": "github:bcgov/fas-ui#v1.0.6",
+    "fas-ui": "github:bcgov/fas-ui#v1.1.2",
     "http-status-codes": "^2.1.4",
     "keycloak-js": "^9.0.3",
     "mime-types": "^2.1.27",
