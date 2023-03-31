@@ -27,13 +27,8 @@ describe('FasSearchComponent.vue', () => {
 
     const vuetify = new Vuetify({})
 
-    const config = {
-      'FAS_WEB_URL': 'https://fas-dev.apps.silver.devops.gov.bc.ca/',
-      'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca',
-      'PAY_API_VERSION': '/api/v1'
-    }
-
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+    sessionStorage.__STORE__['FAS_WEB_URL'] = 'https://fas-dev.apps.silver.devops.gov.bc.ca/'
+    sessionStorage.__STORE__['PAY_API_URL'] = 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 
     wrapper = mount({ template: `<fas-search-component :isLibraryMode='true'/>` }, {
       store,
