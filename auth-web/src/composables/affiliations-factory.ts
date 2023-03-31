@@ -169,7 +169,7 @@ export const useAffiliations = () => {
     affiliations.results = businesses.value
     affiliations.totalResults = businesses.value.length
     getHeaders()
-  })
+  }, { immediate: true })
 
   const entityCount = computed(() => {
     return businesses.value.length

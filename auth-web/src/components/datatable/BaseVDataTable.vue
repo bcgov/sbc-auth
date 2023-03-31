@@ -153,7 +153,6 @@ export default defineComponent({
       timeout && clearTimeout(timeout)
       timeout.value = setTimeout(() => {
         const scrollTop = e.target.scrollTop
-        const scrollBottom = scrollTop + e.target.clientHeight
         const rowsInView = Math.ceil(e.target.clientHeight / rowHeight.value)
         let startRow = Math.floor(scrollTop / rowHeight.value)
         const endRow = startRow + rowsInView

@@ -40,6 +40,7 @@
             <div class="names-text font-weight-bold">{{ name.name }}</div>
           </b>
         </b>
+        <b v-else class="col-wide gray-9 font-weight-bold">{{ name(item) }}</b>
       </template>
 
       <!-- Number -->
@@ -151,7 +152,6 @@ import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
-import _ from 'lodash'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
 import { useStore } from 'vuex-composition-helpers'

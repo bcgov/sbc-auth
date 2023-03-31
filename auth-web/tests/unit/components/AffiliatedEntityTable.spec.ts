@@ -7,6 +7,8 @@ import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { baseVdataTable } from './../test-utils/test-data/baseVdata'
+import { businesses } from './../test-utils/test-data/affiliations'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 
 Vue.use(Vuetify)
@@ -19,111 +21,11 @@ document.body.setAttribute('data-app', 'true')
 
 jest.mock('../../../src/services/user.services')
 
-const businesses = [
-  // BEN Name Request - Processing
-  {
-    identifier: 'NR 4045467',
-    legalType: 'NR',
-    name: 'BEN NAME REQUEST LIMITED - PROCESSING',
-    nameRequest: {
-      legalType: 'BEN',
-      names: [{ 'name': 'BEN NAME REQUEST LIMITED - PROCESSING' }],
-      nrNumber: 'NR 4045467',
-      state: 'Processing',
-      expirationDate: null
-    },
-    status: 'Processing'
-  },
-  // BEN Name Request
-  {
-    identifier: 'NR 4045466',
-    legalType: 'NR',
-    created: '2022-11-02T19:36:29+00:00',
-    lastModified: '2022-11-02T19:37:11+00:00',
-    modified: '2022-11-02T19:42:13+00:00',
-    modifiedBy: 'BCREGTEST Lucille TWENTY',
-    name: 'BEN NAME REQUEST LIMITED',
-    nameRequest: {
-      legalType: 'BEN',
-      names: [{ 'name': 'BEN NAME REQUEST LIMITED' }],
-      nrNumber: 'NR 4045466',
-      state: 'APPROVED',
-      expirationDate: '2022-11-02T19:42:13+00:00'
-    },
-    passCodeClaimed: true,
-    status: 'APPROVED'
-  },
-  // BEN Name Request DRAFT with expiration date
-  {
-    identifier: 'NR 4045467',
-    legalType: 'NR',
-    created: '2022-11-02T19:36:29+00:00',
-    lastModified: '2022-11-02T19:37:11+00:00',
-    modified: '2022-11-02T19:42:13+00:00',
-    modifiedBy: 'BCREGTEST Lucille TWENTY',
-    name: 'BEN NAME REQUEST LIMITED',
-    nameRequest: {
-      legalType: 'BEN',
-      names: [{ 'name': 'BEN NAME REQUEST LIMITED' }],
-      nrNumber: 'NR 4045467',
-      state: 'DRAFT',
-      expirationDate: '2022-11-02T19:42:13+00:00'
-    },
-    passCodeClaimed: true,
-    status: 'DRAFT'
-  },
-  // BEN Incorporation Application (numbered)
-  {
-    draftType: 'TMP',
-    identifier: 'TIQcIs5qvA',
-    legalType: 'BEN'
-  },
-  // SP Registration
-  {
-    draftType: 'TMP',
-    identifier: 'TKmp4A16B1',
-    legalType: null,
-    nameRequest: {
-      actions: [
-        {
-          URL: null,
-          entitiesFilingName: null,
-          filingName: 'Registration',
-          learTemplate: null
-        }
-      ],
-      applicants: [
-        {
-          emailAddress: 'argus@highwaythreesolutions.com',
-          phoneNumber: '250-111-2222'
-        }
-      ],
-      entityTypeCd: 'FR',
-      expirationDate: '2022-07-21T06:59:00+00:00',
-      id: 2264498,
-      legalType: 'SP',
-      names: [
-        {
-          name: 'AC SP 2022.MAY.25 15.38 TEST',
-          state: 'APPROVED'
-        }
-      ],
-      natureBusinessInfo: 'asdf',
-      nrNum: 'NR 2821990',
-      requestTypeCd: 'FR',
-      stateCd: 'CONSUMED',
-      target: 'lear'
-    },
-    nrNumber: 'NR 2821990'
-  }
-]
-
 // selectors
-const heading = '.section-heading'
-const header = '.base-table__header'
-const headerTitles = `${header}__title`
-const itemRow = '.base-table__item-row'
-const itemCell = '.base-table__item-cell'
+const header = baseVdataTable.header
+const headerTitles = baseVdataTable.headerTitles
+const itemRow = baseVdataTable.itemRow
+const itemCell = baseVdataTable.itemCell
 
 const businessModule = {
   namespaced: true,
@@ -205,7 +107,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Processing')
     expect(columns.at(4).text()).toBe('Open')
 
-    // // second item
+    // second item
     columns = itemRows.at(1).findAll(itemCell)
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED')
     expect(columns.at(1).text()).toBe('NR 4045466')
@@ -214,8 +116,8 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Approved')
     expect(columns.at(4).text()).toBe('Open')
 
-    // // third item
-    columns = itemRows.at(3).findAll(itemCell)
+    // third item
+    columns = itemRows.at(2).findAll(itemCell)
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED')
     expect(columns.at(1).text()).toBe('NR 4045467')
     expect(columns.at(2).text()).toContain('Name Request')
@@ -223,8 +125,8 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
-    // // fourth item
-    columns = itemRows.at(2).findAll(itemCell)
+    // fourth item
+    columns = itemRows.at(3).findAll(itemCell)
     expect(columns.at(0).text()).toBe('Numbered Benefit Company')
     expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
@@ -233,9 +135,9 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(4).text()).toBe('Open')
 
     // fifth item
-    columns = itemRows.at(3).findAll(itemCell)
+    columns = itemRows.at(4).findAll(itemCell)
     expect(columns.at(0).text()).toBe('AC SP 2022.MAY.25 15.38 TEST')
-    expect(columns.at(1).text()).toBe('NR 2821990')
+    expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Sole Proprietorship')
     expect(columns.at(3).text()).toBe('Consumed')
