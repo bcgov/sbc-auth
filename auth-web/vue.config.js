@@ -9,6 +9,17 @@ const sbcName = JSON.parse(packageJson).sbcName
 const sbcVersion = JSON.parse(packageJson).dependencies['sbc-common-components']
 const aboutText1 = (appName && appVersion) ? `${appName} v${appVersion}` : ''
 const aboutText2 = (sbcName && sbcVersion) ? `${sbcName} v${sbcVersion}` : ''
+const generateAboutText = (aboutText1, aboutText2) => {
+  if (aboutText1 && aboutText2) {
+    return `"${aboutText1}<br>${aboutText2}"`
+  } else if (aboutText1) {
+    return `"${aboutText1}"`
+  } else if (aboutText2) {
+    return `"${aboutText2}"`
+  } else {
+    return ''
+  }
+}
 module.exports = {
   configureWebpack: {
     devtool: 'source-map',
@@ -18,10 +29,7 @@ module.exports = {
       // ref: https://github.com/NekR/self-destroying-sw/tree/master/packages/webpack-remove-serviceworker-plugin
       new RemoveServiceWorkerPlugin({ filename: 'service-worker.js' }),
       new webpack.DefinePlugin({
-        'process.env.ABOUT_TEXT': (aboutText1 && aboutText2) ? `"${aboutText1}<br>${aboutText2}"`
-          : aboutText1 ? `"${aboutText1}"`
-            : aboutText2 ? `"${aboutText2}"`
-              : ''
+        'process.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2)
       })
     ],
     resolve: {
