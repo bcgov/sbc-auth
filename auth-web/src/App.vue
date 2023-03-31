@@ -48,7 +48,7 @@
     <div class="app-body">
       <router-view />
     </div>
-    <sbc-footer></sbc-footer>
+    <sbc-footer :aboutText='aboutText'></sbc-footer>
   </v-app>
 </template>
 
@@ -139,6 +139,11 @@ export default class App extends Mixins(NextPageMixin) {
     })
 
     return [...(breadcrumbwithAccountId || [])]
+  }
+
+  /** The About text. */
+  get aboutText (): string {
+    return process.env.ABOUT_TEXT
   }
 
   private startAccountSwitch () {
