@@ -22,145 +22,150 @@ jest.mock('../../../src/services/user.services')
 const businesses = [
   // BEN Name Request - Processing
   {
-    'identifier': 'NR 4045467',
-    'legalType': 'NR',
-    'name': 'BEN NAME REQUEST LIMITED - PROCESSING',
-    'nameRequest': {
-      'legalType': 'BEN',
-      'names': [{ 'name': 'BEN NAME REQUEST LIMITED - PROCESSING' }],
-      'nrNumber': 'NR 4045467',
-      'state': 'Processing',
-      'expirationDate': null
+    identifier: 'NR 4045467',
+    legalType: 'NR',
+    name: 'BEN NAME REQUEST LIMITED - PROCESSING',
+    nameRequest: {
+      legalType: 'BEN',
+      names: [{ 'name': 'BEN NAME REQUEST LIMITED - PROCESSING' }],
+      nrNumber: 'NR 4045467',
+      state: 'Processing',
+      expirationDate: null
     },
-    'status': 'Processing'
+    status: 'Processing'
   },
   // BEN Name Request
   {
-    'identifier': 'NR 4045466',
-    'legalType': 'NR',
-    'created': '2022-11-02T19:36:29+00:00',
-    'lastModified': '2022-11-02T19:37:11+00:00',
-    'modified': '2022-11-02T19:42:13+00:00',
-    'modifiedBy': 'BCREGTEST Lucille TWENTY',
-    'name': 'BEN NAME REQUEST LIMITED',
-    'nameRequest': {
-      'legalType': 'BEN',
-      'names': [{ 'name': 'BEN NAME REQUEST LIMITED' }],
-      'nrNumber': 'NR 4045466',
-      'state': 'APPROVED',
-      'expirationDate': '2022-11-02T19:42:13+00:00'
+    identifier: 'NR 4045466',
+    legalType: 'NR',
+    created: '2022-11-02T19:36:29+00:00',
+    lastModified: '2022-11-02T19:37:11+00:00',
+    modified: '2022-11-02T19:42:13+00:00',
+    modifiedBy: 'BCREGTEST Lucille TWENTY',
+    name: 'BEN NAME REQUEST LIMITED',
+    nameRequest: {
+      legalType: 'BEN',
+      names: [{ 'name': 'BEN NAME REQUEST LIMITED' }],
+      nrNumber: 'NR 4045466',
+      state: 'APPROVED',
+      expirationDate: '2022-11-02T19:42:13+00:00'
     },
-    'passCodeClaimed': true,
-    'status': 'APPROVED'
+    passCodeClaimed: true,
+    status: 'APPROVED'
   },
   // BEN Name Request DRAFT with expiration date
   {
-    'identifier': 'NR 4045467',
-    'legalType': 'NR',
-    'created': '2022-11-02T19:36:29+00:00',
-    'lastModified': '2022-11-02T19:37:11+00:00',
-    'modified': '2022-11-02T19:42:13+00:00',
-    'modifiedBy': 'BCREGTEST Lucille TWENTY',
-    'name': 'BEN NAME REQUEST LIMITED',
-    'nameRequest': {
-      'legalType': 'BEN',
-      'names': [{ 'name': 'BEN NAME REQUEST LIMITED' }],
-      'nrNumber': 'NR 4045467',
-      'state': 'DRAFT',
-      'expirationDate': '2022-11-02T19:42:13+00:00'
+    identifier: 'NR 4045467',
+    legalType: 'NR',
+    created: '2022-11-02T19:36:29+00:00',
+    lastModified: '2022-11-02T19:37:11+00:00',
+    modified: '2022-11-02T19:42:13+00:00',
+    modifiedBy: 'BCREGTEST Lucille TWENTY',
+    name: 'BEN NAME REQUEST LIMITED',
+    nameRequest: {
+      legalType: 'BEN',
+      names: [{ 'name': 'BEN NAME REQUEST LIMITED' }],
+      nrNumber: 'NR 4045467',
+      state: 'DRAFT',
+      expirationDate: '2022-11-02T19:42:13+00:00'
     },
-    'passCodeClaimed': true,
-    'status': 'DRAFT'
+    passCodeClaimed: true,
+    status: 'DRAFT'
   },
   // BEN Incorporation Application (numbered)
   {
-    'draftType': 'TMP',
-    'identifier': 'TIQcIs5qvA',
-    'legalType': 'BEN'
+    draftType: 'TMP',
+    identifier: 'TIQcIs5qvA',
+    legalType: 'BEN'
   },
   // SP Registration
   {
-    'draftType': 'TMP',
-    'identifier': 'TKmp4A16B1',
-    'legalType': null,
-    'nameRequest': {
-      'actions': [
+    draftType: 'TMP',
+    identifier: 'TKmp4A16B1',
+    legalType: null,
+    nameRequest: {
+      actions: [
         {
-          'URL': null,
-          'entitiesFilingName': null,
-          'filingName': 'Registration',
-          'learTemplate': null
+          URL: null,
+          entitiesFilingName: null,
+          filingName: 'Registration',
+          learTemplate: null
         }
       ],
-      'applicants': [
+      applicants: [
         {
-          'emailAddress': 'argus@highwaythreesolutions.com',
-          'phoneNumber': '250-111-2222'
+          emailAddress: 'argus@highwaythreesolutions.com',
+          phoneNumber: '250-111-2222'
         }
       ],
-      'entityTypeCd': 'FR',
-      'expirationDate': '2022-07-21T06:59:00+00:00',
-      'id': 2264498,
-      'legalType': 'SP',
-      'names': [
+      entityTypeCd: 'FR',
+      expirationDate: '2022-07-21T06:59:00+00:00',
+      id: 2264498,
+      legalType: 'SP',
+      names: [
         {
-          'name': 'AC SP 2022.MAY.25 15.38 TEST',
-          'state': 'APPROVED'
+          name: 'AC SP 2022.MAY.25 15.38 TEST',
+          state: 'APPROVED'
         }
       ],
-      'natureBusinessInfo': 'asdf',
-      'nrNum': 'NR 2821990',
-      'requestTypeCd': 'FR',
-      'stateCd': 'CONSUMED',
-      'target': 'lear'
+      natureBusinessInfo: 'asdf',
+      nrNum: 'NR 2821990',
+      requestTypeCd: 'FR',
+      stateCd: 'CONSUMED',
+      target: 'lear'
     },
-    'nrNumber': 'NR 2821990'
+    nrNumber: 'NR 2821990'
   }
 ]
 
 // selectors
+const heading = '.section-heading'
 const header = '.base-table__header'
 const headerTitles = `${header}__title`
 const itemRow = '.base-table__item-row'
 const itemCell = '.base-table__item-cell'
 
-const vuetify = new Vuetify()
-
-describe('AffiliatedEntityTable tests', () => {
-  let wrapper: Wrapper<any>
-
-  const config = {
-    AUTH_API_URL: 'https://localhost:8080/api/v1/app',
-    PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
+const businessModule = {
+  namespaced: true,
+  state: { businesses },
+  action: {
+    addBusiness: jest.fn(),
+    updateBusinessName: jest.fn(),
+    updateFolioNumber: jest.fn()
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+}
+
+sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
+  AUTH_API_URL: 'https://localhost:8080/api/v1/11',
+  PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
+}))
+
+const store = new Vuex.Store({
+  strict: false,
+  modules: {
+    business: businessModule
+  }
+})
+
+const vuetify = new Vuetify({})
+
+describe('AffiliatedEntityTable.vue', () => {
+  let wrapper: Wrapper<any>
 
   const headers = getAffiliationTableHeaders(['Number', 'Type', 'Status'])
 
   beforeEach(async () => {
     const localVue = createLocalVue()
-    const businessModule = {
-      namespaced: true,
-      state: { businesses: businesses },
-      action: {
-        addBusiness: jest.fn(),
-        updateBusinessName: jest.fn(),
-        updateFolioNumber: jest.fn()
-      }
-    }
-    const store = new Vuex.Store({ strict: false, modules: { business: businessModule } })
-
     wrapper = mount(AffiliatedEntityTable, {
+      store,
       localVue,
       vuetify,
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
-      store,
       mocks: { $t: () => '' }
     })
-    await Vue.nextTick()
   })
 
-  afterEach(async () => {
+  afterEach(() => {
     wrapper.destroy()
 
     jest.resetModules()
@@ -171,12 +176,14 @@ describe('AffiliatedEntityTable tests', () => {
     // verify table header
     expect(wrapper.find('.table-header').text()).toBe('My List (5)')
 
-    await wrapper.vm.loadAffiliations()
+    // Wait for the component to render after any state changes
+    await wrapper.vm.$nextTick()
 
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
     expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
+    expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
     expect(titles.length).toBe(headers.length)
     expect(titles.at(0).text()).toBe('Business Name')

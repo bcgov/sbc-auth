@@ -1,12 +1,13 @@
 <template>
   <v-data-table
+    id="virtual-scroll-table"
     class="base-table"
     :disable-sort="true"
     :fixed-header="height ? true : false"
-    :footer-props="itemsPerPageOptions ? itemsPerPageOptions : { itemsPerPageOptions: [5, 10, 15, 20] }"
+    :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
     :items-per-page="5"
     :headers="headers"
-    :items="customPagination ? visibleItems : sortedItems"
+    :items="sortedItemsLimited"
     hide-default-header
     :height="height ? height : ''"
     :loading="filtering || loading"
@@ -14,6 +15,8 @@
     :options.sync="tableDataOptions"
     :server-items-length="totalItems"
     :hide-default-footer="pageHide ? true : false"
+    ref="regTable"
+    v-on:@scroll="onScroll"
   >
     <!-- Headers (two rows) -->
     <template v-slot:header>
@@ -72,6 +75,13 @@
         </td>
       </tr>
     </template>
+    <template v-if="start > 0" v-slot:[`body.prepend`]>
+      <tr><td :colspan="headers.length" :style="'padding-top:'+startHeight+'px'"></td></tr>
+    </template>
+    <template v-if="start + perPage < sortedItems.length" v-slot:[`body.append`]>
+      <tr><td :colspan="headers.length" :style="'padding-top:'+endHeight+'px'"></td></tr>
+    </template>
+
     <!-- Loading -->
     <template v-slot:loading>
       <div class="py-8 base-table__text" v-html="loadingText" />
@@ -82,17 +92,14 @@
       <div class="py-8 base-table__text" v-html="noDataText" />
     </template>
   </v-data-table>
-<!-- </recycle-scroller> -->
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { PropType, computed, defineComponent, getCurrentInstance, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
-
 import HeaderFilter from './components/HeaderFilter.vue'
-// import { RecycleScroller } from 'vue-virtual-scroller'
 import _ from 'lodash'
 
 // FUTURE: remove this in vue 3 upgrade (typing will be inferred properly)
@@ -123,8 +130,7 @@ export default defineComponent({
     pageHide: { default: false },
     updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
-    customPagination: { default: false },
-    itemsPerPageOptions: { default: { itemsPerPageOptions: [5, 10, 15, 20] } }
+    customPagination: { default: false }
   },
   setup (props, { emit }) {
     // reactive vars
@@ -136,7 +142,60 @@ export default defineComponent({
       tableDataOptions: props.setTableDataOptions
     }) as unknown) as BaseTableStateI
 
-    const itemSize: number = 10
+    const start = ref(0)
+    const rowHeight = ref(75)
+    const perPage = 10
+    const timeout = ref(null)
+    const vm = getCurrentInstance().proxy
+    const regTable = ref(null)
+
+    const onScroll = (e) => {
+      timeout && clearTimeout(timeout)
+      timeout.value = setTimeout(() => {
+        const scrollTop = e.target.scrollTop
+        const scrollBottom = scrollTop + e.target.clientHeight
+        const rowsInView = Math.ceil(e.target.clientHeight / rowHeight.value)
+        let startRow = Math.floor(scrollTop / rowHeight.value)
+        const endRow = startRow + rowsInView
+
+        // Handle scrolling up
+        if (startRow < start.value) {
+          start.value = startRow
+        }
+
+        // Handle scrolling down
+        if (endRow > start.value + perPage) {
+          start.value = endRow - perPage
+        }
+
+        // Update the scrollTop value to match the new start row
+        vm.$nextTick(() => {
+          e.target.scrollTop = scrollTop
+        })
+      }, 20)
+    }
+
+    onMounted(() => {
+      const tableWrapper = document.querySelector('.v-data-table__wrapper')
+      if (tableWrapper) tableWrapper.addEventListener('scroll', onScroll)
+    })
+
+    const sortedItemsLimited = computed(() => {
+      const tableWrapper = document.querySelector('.v-data-table__wrapper')
+      if (tableWrapper) {
+        const rows = tableWrapper.getElementsByClassName('base-table__item-row')
+        if (rows.length > 0) rowHeight.value = Array.from(rows).reduce((acc, row) => acc + row.clientHeight, 0) / rows.length
+      }
+      return state.sortedItems.slice(start.value, perPage + start.value)
+    })
+
+    const startHeight = computed(() => {
+      return start.value * rowHeight.value - 80
+    })
+
+    const endHeight = computed(() => {
+      return rowHeight.value * (state.sortedItems.length - start.value)
+    })
 
     const filter = _.debounce(async (header: BaseTableHeaderI) => {
       // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
@@ -174,26 +233,6 @@ export default defineComponent({
       state.sortedItems = props.setItems
     })
 
-    watch(() => state.sortedItems, () => {
-      if (props.setItems && props.customPagination) {
-        const currentPage = state.tableDataOptions?.page || DEFAULT_DATA_OPTIONS.page
-        const perPage = state.tableDataOptions?.itemsPerPage || props.itemsPerPageOptions.itemsPerPageOptions[0]
-        const start = (currentPage - 1) * perPage
-        const end = start + perPage
-        state.visibleItems = state.sortedItems.slice(start, end)
-      }
-    })
-
-    watch(() => props.setTableDataOptions, (val: DataOptions) => {
-      state.tableDataOptions = val
-      if (props.customPagination) {
-        const currentPage = val?.page || DEFAULT_DATA_OPTIONS.page
-        const perPage = val?.itemsPerPage || props.itemsPerPageOptions.itemsPerPageOptions[0] || DEFAULT_DATA_OPTIONS.itemsPerPage
-        const start = (currentPage - 1) * perPage
-        const end = start + perPage
-        state.visibleItems = state.sortedItems.slice(start, end)
-      }
-    })
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
@@ -201,7 +240,13 @@ export default defineComponent({
       setFiltering,
       ...toRefs(state),
       setSortedItems,
-      itemSize
+      onScroll,
+      sortedItemsLimited,
+      startHeight,
+      endHeight,
+      start,
+      perPage,
+      regTable
     }
   }
 })

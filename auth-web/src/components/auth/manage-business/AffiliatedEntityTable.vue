@@ -7,21 +7,17 @@
       <base-v-data-table
         id="affiliated-entity-table"
         :clearFiltersTrigger="clearFiltersTrigger"
-        itemKey="id"
+        itemKey="businessIdentifier"
         loadingText="Loading Affiliation Records..."
         noDataText="No Affiliation Records"
         :loading="affiliations.loading"
         :setHeaders="headers"
         :setItems="affiliations.results"
         :totalItems="affiliations.totalResults"
-        :setTableDataOptions="tableDataOptions"
-        @update-table-options="tableDataOptions = $event"
-        :pageHide="false"
         :filters="affiliations.filters"
         :updateFilter="updateFilter"
         :height="entityCount > 5 ? '32rem' : null"
-        :customPagination = "true"
-        :itemsPerPageOptions ="{ itemsPerPageOptions: [50, 100, 150] }"
+        :pageHide="true"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -44,7 +40,6 @@
             <div class="names-text font-weight-bold">{{ name.name }}</div>
           </b>
         </b>
-        <b v-else>{{ name(item) }}</b>
       </template>
 
       <!-- Number -->
@@ -61,7 +56,8 @@
       <!-- Status -->
       <template v-slot:item-slot-Status="{ item }">
         <span>{{ status(item) }}</span>
-        <!-- this is mocked here until the backend to get org details in auth is completed <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/>-->
+        <!-- this is mocked here until the backend to get org details in auth is completed-->
+        <!-- <EntityDetails v-if="name(item) == 'RITVICK 26SEPT'" icon="mdi-alert" showAlertHeader='true' :details="['FROZEN']"/> -->
         <!-- this works currently -->
         <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
         <!-- Draft IA with Expired NR -->
@@ -149,11 +145,9 @@ import {
   SessionStorageKeys
 } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
-import BaseVDataTable from '@/components/datatable/BaseVDataTable.vue'
+import { computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
-import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
-import { DataOptions } from 'vuetify'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
@@ -164,13 +158,13 @@ import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
-  mixins: [DateMixin],
   components: { EntityDetails, BaseVDataTable },
   props: {
     selectedColumns: { default: [] as string[] },
     loading: { default: false }
   },
   emits: ['add-unknown-error'],
+  mixins: [DateMixin],
   setup (props, { emit }) {
     const isloading = false
     const store = useStore()
@@ -295,12 +289,9 @@ export default defineComponent({
       clearAllFilters()
     }
 
-    watch(() => props.selectedColumns, (newCol: string[], oldCol: string[]) => {
+    watch(() => props.selectedColumns, (newCol: string[]) => {
       getHeaders(newCol)
     })
-
-    const tableDataOptions: Ref<DataOptions> = ref(_.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions)
-    tableDataOptions.value.itemsPerPage = 50
 
     return {
       clearFiltersTrigger,
@@ -328,7 +319,6 @@ export default defineComponent({
       removeBusiness,
       isTemporaryBusiness,
       tempDescription,
-      tableDataOptions,
       EntityAlertTypes
     }
   }
