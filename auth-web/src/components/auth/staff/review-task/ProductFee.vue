@@ -170,7 +170,10 @@ export default defineComponent({
 
     // Only allow $1.05 and $0 service fee code for ESRA aka Site Registry.
     const getOrgProductFeeCodesForProduct = (productCode: string): OrgProductFeeCode[] => {
-      return orgProductFeeCodes.value?.filter((fee) => ['TRF03', 'TRF04'].includes(fee.code) || productCode !== 'ESRA')
+      if (productCode === 'ESRA') {
+        return orgProductFeeCodes.value?.filter((fee) => ['TRF03', 'TRF04'].includes(fee.code))
+      }
+      return orgProductFeeCodes.value?.filter((fee) => fee.code !== 'TRF03')
     }
 
     return {

@@ -16,11 +16,14 @@ from datetime import datetime
 from typing import Any, Dict, List
 
 from flask import current_app
+from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
 
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, KeycloakGroupSubscription
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.services.keycloak import KeycloakService
+from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
@@ -30,8 +33,8 @@ from auth_api.schemas import ProductCodeSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, OrgType, ProductSubscriptionStatus, TaskAction, TaskRelationshipStatus,
-    TaskRelationshipType, TaskStatus)
+    AccessType, ActivityAction, KeycloakGroupActions, OrgType, ProductSubscriptionStatus, Status, TaskAction,
+    TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
@@ -56,7 +59,7 @@ class Product:
             for product in product_list:
                 cache.set(product.code, product.type_code)
         except SQLAlchemyError as e:
-            current_app.logger.info('Error on building cache {}', e)
+            current_app.logger.info('Error on building cache %s', e)
 
     @staticmethod
     def find_product_type_by_code(code: str) -> str:
@@ -159,6 +162,7 @@ class Product:
         """Create product subscription from bcol profile flags."""
         if not bcol_profile_flags:
             return
+
         for profile_flag in bcol_profile_flags:
             product_code = BCOL_PROFILE_PRODUCT_MAP.get(profile_flag, None)
             if product_code:
@@ -197,7 +201,7 @@ class Product:
         if not skip_auth:
             check_auth(one_of_roles=(*CLIENT_AUTH_ROLES, STAFF), org_id=org_id)
 
-        product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_id(org_id)
+        product_subscriptions: List[ProductSubscriptionModel] = ProductSubscriptionModel.find_by_org_ids([org_id])
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
@@ -233,7 +237,7 @@ class Product:
                                                                     product_subscription.status_code)
         else:
             # continue but log error
-            current_app.logger.error('No admin email record for org id {}', org_id)
+            current_app.logger.error('No admin email record for org id %s', org_id)
         if is_approved:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                                            name=product_model.description))
@@ -259,3 +263,77 @@ class Product:
         except Exception as e:  # noqa=B901
             current_app.logger.error('<send_approved_prod_subscription_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
+
+    @staticmethod
+    def get_users_product_subscriptions_kc_groups(user_ids: List[int]) -> List[KeycloakGroupSubscription]:
+        """Generate Keycloak Group Subscriptions."""
+        ps_max_subquery = db.session.query(
+            func.max(ProductSubscriptionModel.id).label('id'),
+            ProductSubscriptionModel.product_code,
+            ProductSubscriptionModel.org_id
+        ) \
+            .group_by(ProductSubscriptionModel.product_code, ProductSubscriptionModel.org_id) \
+            .subquery()
+
+        m_max_subquery = db.session.query(
+            func.max(MembershipModel.id).label('id'),
+            MembershipModel.org_id,
+            MembershipModel.user_id
+        ) \
+            .group_by(MembershipModel.org_id, MembershipModel.user_id) \
+            .subquery()
+
+        active_subscription_case = case(
+            [
+                 (and_(MembershipModel.status == Status.ACTIVE.value, ProductSubscriptionModel.status_code ==
+                       ProductSubscriptionStatus.ACTIVE.value), 1),
+            ],
+            else_=0
+        )
+
+        user_subscriptions = db.session.query(UserModel, ProductCodeModel) \
+            .join(ProductCodeModel, literal(True)) \
+            .outerjoin(m_max_subquery, m_max_subquery.c.user_id == UserModel.id) \
+            .outerjoin(MembershipModel, MembershipModel.id == m_max_subquery.c.id) \
+            .outerjoin(
+            # pylint: disable=comparison-with-callable
+            ps_max_subquery, ps_max_subquery.c.product_code == ProductCodeModel.code) \
+            .outerjoin(ProductSubscriptionModel, ProductSubscriptionModel.id == ps_max_subquery.c.id) \
+            .filter(or_(
+                    ProductSubscriptionModel.org_id == MembershipModel.org_id,
+                    ProductSubscriptionModel.org_id.is_(None),
+                    MembershipModel.org_id.is_(None)))\
+            .filter(UserModel.id.in_(user_ids)) \
+            .filter(ProductCodeModel.keycloak_group.isnot(None))\
+            .group_by(UserModel.id, UserModel.keycloak_guid, ProductCodeModel.code, ProductCodeModel.keycloak_group)\
+            .order_by(UserModel.id, ProductCodeModel.code)\
+            .with_entities(
+                UserModel.id,
+                UserModel.keycloak_guid,
+                ProductCodeModel.code,
+                ProductCodeModel.keycloak_group,
+                func.sum(active_subscription_case).label('active_subscription_count')
+        ).all()  # pylint: disable=comparison-with-callable
+
+        keycloak_group_subscriptions = []
+        for ups in user_subscriptions:
+            action = KeycloakGroupActions.ADD_TO_GROUP.value \
+                if ups.active_subscription_count > 0 else KeycloakGroupActions.REMOVE_FROM_GROUP.value
+            kgs = KeycloakGroupSubscription(ups.keycloak_guid, ups.code, ups.keycloak_group, action)
+            keycloak_group_subscriptions.append(kgs)
+
+        return keycloak_group_subscriptions
+
+    @staticmethod
+    def update_users_products_keycloak_groups(user_ids: List[int]):
+        """Update list of user's keycloak roles for product subscriptions."""
+        current_app.logger.debug('<update_users_products_keycloak_group ')
+        kc_groups = Product.get_users_product_subscriptions_kc_groups(user_ids)
+        KeycloakService.add_or_remove_product_keycloak_groups(kc_groups)
+        current_app.logger.debug('>update_users_products_keycloak_group ')
+
+    @staticmethod
+    def update_org_product_keycloak_groups(org_id: int):
+        """Handle org level product keycloak updates."""
+        user_ids = [membership.user_id for membership in MembershipModel.find_members_by_org_id(org_id)]
+        Product.update_users_products_keycloak_groups(user_ids)

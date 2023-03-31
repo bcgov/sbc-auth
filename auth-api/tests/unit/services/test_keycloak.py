@@ -17,11 +17,13 @@
 Test-Suite to ensure that the Business Service is working as expected.
 """
 
+import pytest
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
+from auth_api.models.dataclass import KeycloakGroupSubscription
 from auth_api.services.keycloak import KeycloakService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS, GROUP_ANONYMOUS_USERS, GROUP_PUBLIC_USERS
-from auth_api.utils.enums import LoginSource
+from auth_api.utils.enums import KeycloakGroupActions, LoginSource
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import KeycloakScenario, TestJwtClaims
 from tests.utilities.factory_utils import patch_token_info
@@ -232,3 +234,22 @@ def test_reset_otp(session):
     user_id = user.id
     KEYCLOAK_SERVICE.reset_otp(user_id)
     assert True
+
+
+@pytest.mark.asyncio
+def test_add_remove_group_bulk(session):
+    """Assert that the users' groups can be updated in bulk."""
+    user1 = KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    user2 = KEYCLOAK_SERVICE.add_user(KeycloakScenario.create_user_request(), return_if_exists=True)
+    kgs = [KeycloakGroupSubscription(user_guid=user1.id, product_code='ppr', group_name='ppr',
+                                     group_action=KeycloakGroupActions.ADD_TO_GROUP.value),
+           KeycloakGroupSubscription(user_guid=user2.id, product_code='bca', group_name='bca',
+                                     group_action=KeycloakGroupActions.ADD_TO_GROUP.value),
+           KeycloakGroupSubscription(user_guid=user2.id, product_code='bca', group_name='bca',
+                                     group_action=KeycloakGroupActions.REMOVE_FROM_GROUP.value),
+           ]
+    KeycloakService.add_or_remove_product_keycloak_groups(kgs)
+    user1_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user1.id)
+    user2_groups = KEYCLOAK_SERVICE.get_user_groups(user_id=user2.id)
+    assert 'ppr' in ['ppr' for user_group in user1_groups if user_group.get('name') == 'ppr']
+    assert 'bca' not in ['bca' for user_group in user2_groups if user_group.get('name') == 'bca']

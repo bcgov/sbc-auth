@@ -21,9 +21,15 @@ lint:  ## Run linting ofcode.
 	npm run lint
 
 test:  ## Unit testing
-	mv .env .env.bak
+ifeq ($(shell test -s .env && echo -n yes),yes)
+	mv .env .env.bak; 
+endif
 	cp .env.example .env
 	npm run test:unit
+ifeq ($(shell test -s .env.bak && echo -n yes),yes)
+	mv .env.bak .env;
+endif
+
 
 #################################################################################
 # COMMANDS - CD
@@ -33,17 +39,16 @@ test:  ## Unit testing
 # expects export OPENSHIFT_SA_TOKEN="$(oc whoami -t)"
 # expects export OPENSHIFT_REPOSITORY=""
 # expects export TAG_NAME="dev/test/prod"
-# expects export OPS_REPOSITORY=""
 #################################################################################
 cd: ## CD flow
 ifeq ($(TAG_NAME), test)
-cd:
-	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):dev $(DOCKER_NAME):$(TAG_NAME)
+BUILD_TAG_NAME=test-latest
+cd: build tag
 else ifeq ($(TAG_NAME), prod)
-cd:
-	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)-$(shell date +%F)
-	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):test $(DOCKER_NAME):$(TAG_NAME)
+BUILD_TAG_NAME=prod-latest
+cd: build tag-production
 else
+BUILD_TAG_NAME=dev-latest
 TAG_NAME=dev
 cd: build tag
 endif
@@ -59,11 +64,15 @@ build-nc: ## Build the docker container without caching
 REGISTRY_IMAGE=$(OPENSHIFT_DOCKER_REGISTRY)/$(OPENSHIFT_REPOSITORY)-tools/$(DOCKER_NAME)
 push: #build ## Push the docker container to the registry & tag latest
 	@echo "$(OPENSHIFT_SA_TOKEN)" | docker login $(OPENSHIFT_DOCKER_REGISTRY) -u $(OPENSHIFT_SA_NAME) --password-stdin ;\
-    docker tag $(DOCKER_NAME) $(REGISTRY_IMAGE):latest ;\
-    docker push $(REGISTRY_IMAGE):latest
+    docker tag $(DOCKER_NAME) $(REGISTRY_IMAGE):$(BUILD_TAG_NAME) ;\
+    docker push $(REGISTRY_IMAGE):$(BUILD_TAG_NAME)
 
 tag: push ## tag image
-	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):latest $(DOCKER_NAME):$(TAG_NAME)
+	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(BUILD_TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)
+
+tag-production: push ## tag image
+	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)-$(shell date +%F) ;\
+	oc -n "$(OPENSHIFT_REPOSITORY)-tools" tag $(DOCKER_NAME):$(BUILD_TAG_NAME) $(DOCKER_NAME):$(TAG_NAME)
 
 #################################################################################
 # Self Documenting Commands                                                     #

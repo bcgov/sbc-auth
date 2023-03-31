@@ -5,6 +5,8 @@ import { NameRequest } from '@/models/business'
 
 export default class ConfigHelper {
   static async fetchConfig () {
+    // fas-ui needs the following keys
+    sessionStorage.setItem(SessionStorageKeys.PayApiUrl, ConfigHelper.getPayAPIURL())
     // sbc common components need the following keys
     sessionStorage.setItem(SessionStorageKeys.AuthApiUrl, ConfigHelper.getAuthAPIUrl())
     sessionStorage.setItem(SessionStorageKeys.StatusApiUrl, ConfigHelper.getStatusAPIUrl())

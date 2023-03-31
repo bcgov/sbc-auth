@@ -233,36 +233,36 @@ export default defineComponent({
     })
 
     const isTaskOnHold = computed(() => {
-      return task.value.status === 'HOLD'
+      return task.value.status === TaskStatus.HOLD
     })
 
     const isTaskRejected = computed(() => {
-      return task.value.relationshipStatus === 'REJECTED'
+      return task.value.relationshipStatus === TaskRelationshipStatus.REJECTED
     })
 
     const canSelect = computed(() => {
-      return (task.value.relationshipStatus === 'PENDING_STAFF_REVIEW' ||
-        (task.value.relationshipType === 'PRODUCT' &&
-        task.value.relationshipStatus === 'REJECTED'))
+      return (task.value.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW ||
+        (task.value.relationshipType === TaskRelationshipType.PRODUCT &&
+        task.value.relationshipStatus === TaskRelationshipStatus.REJECTED))
     })
 
     const isPendingReviewPage = computed(() => {
-      return task.value.relationshipStatus === 'PENDING_STAFF_REVIEW'
+      return task.value.relationshipStatus === TaskRelationshipStatus.PENDING_STAFF_REVIEW
     })
 
     const isAffidavitReview = computed(() => {
-      return task.value.action === 'AFFIDAVIT_REVIEW'
+      return task.value.action === TaskAction.AFFIDAVIT_REVIEW
     })
 
     const isGovNAccountReview = computed(() => {
-      return task.value.type === 'GOVN_REVIEW'
+      return task.value.type === TaskType.GOVN_REVIEW
     })
 
     const title = computed(() => {
       let title = 'Review Account'
-      if (taskRelationshipType.value === 'PRODUCT') {
+      if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
         title = `Access Request (${task.value.type})`
-      } else if (taskRelationshipType.value === 'USER') {
+      } else if (taskRelationshipType.value === TaskRelationshipType.USER) {
         // For now, Task with relationship type as user is for BCeID Admin request
         title = 'Review BCeID Admin'
       }
@@ -278,8 +278,8 @@ export default defineComponent({
     }
 
     const canEdit = () => {
-      return task.value.status === 'OPEN' || isTaskOnHold.value ||
-        (task.value.status === 'COMPLETED' && task.value.relationshipStatus === 'REJECTED')
+      return task.value.status === TaskStatus.OPEN || isTaskOnHold.value ||
+        (task.value.status === TaskStatus.COMPLETED && task.value.relationshipStatus === TaskRelationshipStatus.REJECTED)
     }
 
     const formattedComponent = (tabNumber, id, component, props, event = null, ref = null) => {

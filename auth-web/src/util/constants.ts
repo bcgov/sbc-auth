@@ -21,7 +21,8 @@ export enum SessionStorageKeys {
     GOVN_USER='AUTH_GOVN_USER',
     NameRequestUrl = 'NAME_REQUEST_URL',
     PprWebUrl = 'PPR_WEB_URL',
-    SiteminderLogoutUrl = 'SITEMINDER_LOGOUT_URL'
+    SiteminderLogoutUrl = 'SITEMINDER_LOGOUT_URL',
+    PayApiUrl = 'PAY_API_URL'
 }
 
 export enum Role {
