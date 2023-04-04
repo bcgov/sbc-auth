@@ -67,16 +67,20 @@ export default defineComponent({
     const state = (reactive({
       sortedItems: [...props.sortedItems]
     }) as unknown) as BaseTableStateI
-    const filter = _.debounce(async (header: BaseTableHeaderI) => {
-      // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
+
+    const serverSideFilter = async (header: BaseTableHeaderI) => {
+      props.setFiltering(true)
+      await header.customFilter.filterApiFn(header.customFilter.value)
+      props.setFiltering(false)
+    }
+
+    const filter = async (header: BaseTableHeaderI) => {
       if (header.customFilter.filterApiFn) {
-        props.setFiltering(true)
-        await header.customFilter.filterApiFn(header.customFilter.value)
-        props.setFiltering(false)
+        _.debounce(serverSideFilter(header), 500)
       } else {
         applyFilters(props, state, header)
       }
-    }, 500)
+    }
 
     function applyFilters (props, state, header) {
       props.updateFilter(header.col, header.customFilter.value)

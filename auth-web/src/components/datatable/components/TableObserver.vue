@@ -17,8 +17,14 @@ export default {
     }, options)
         this.observer?.observe(this.$el) // eslint-disable-line no-unused-expressions
   },
-  destroyed () {
+  beforeDestroy () {
         this.observer?.disconnect() // eslint-disable-line no-unused-expressions
   }
 }
 </script>
+
+<style scoped>
+.observer {
+  min-height: 1px;
+}
+</style>

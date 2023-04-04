@@ -75,9 +75,8 @@
     </template>
     <template v-slot:[`body.append`]>
       <tr v-if="pageHide && !reachedEnd">
-        <td>
+        <td :colspan="headers.length">
           <table-observer @intersect="getNext()" />
-          <v-skeleton-loader class="ma-0" type="list-item" />
         </td>
       </tr>
     </template>
@@ -95,7 +94,7 @@
 </template>
 
 <script lang="ts">
-import { PropType, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { PropType, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
@@ -148,21 +147,24 @@ export default defineComponent({
     const firstItem = ref(null) // first item in table
     const reachedEnd = ref(false)
 
-    const getNext = _.throttle(() => {
-      // if not loading and reg history exists
+    const getNext = _.debounce(async () => {
       if (!props.loading && !reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
         currentPage.value++
         const start = (currentPage.value - 1) * perPage.value
         const end = start + perPage.value
-        state.visibleItems.push(...state.sortedItems.slice(start, end))
+        const newItems = state.sortedItems.slice(start, end)
+
+        await nextTick()
+        state.visibleItems.push(...newItems)
+
         if (state.sortedItems.length <= state.visibleItems.length) {
           reachedEnd.value = true
         }
       }
-    }, 50, { trailing: false })
+    }, 100) // Adjust the wait time as needed
 
     const scrollToTop = () => {
-      const table = document.querySelector('.v-data-table')
+      const table = document.querySelector('.v-data-table__wrapper')
       if (table) table.scrollTop = 0
     }
 
@@ -175,15 +177,6 @@ export default defineComponent({
         scrollToTop()
       }
     }, { immediate: true })
-
-    const filter = _.debounce(async (header: BaseTableHeaderI) => {
-      // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
-      if (header.customFilter.filterApiFn) {
-        state.filtering = true
-        await header.customFilter.filterApiFn(header.customFilter.value)
-        state.filtering = false
-      }
-    }, 500)
 
     const setFiltering = (filter: boolean) => {
       state.filtering = filter
@@ -215,7 +208,6 @@ export default defineComponent({
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
-      filter,
       setFiltering,
       ...toRefs(state),
       setSortedItems,
