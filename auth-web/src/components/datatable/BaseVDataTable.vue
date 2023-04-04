@@ -7,7 +7,7 @@
     :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
     :items-per-page="5"
     :headers="headers"
-    :items="sortedItemsLimited"
+    :items="pageHide ? visibleItems : sortedItems"
     hide-default-header
     :height="height ? height : ''"
     :loading="filtering || loading"
@@ -15,8 +15,6 @@
     :options.sync="tableDataOptions"
     :server-items-length="totalItems"
     :hide-default-footer="pageHide ? true : false"
-    ref="regTable"
-    v-on:@scroll="onScroll"
   >
     <!-- Headers (two rows) -->
     <template v-slot:header>
@@ -28,7 +26,7 @@
               v-for="header, i in headers"
               :key="header.col + i"
               :class="[header.class, 'base-table__header__title']"
-              :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : ''"
+              :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : {'width': header.width}"
             >
               <slot :name="'header-title-slot-' + header.col" :header="header">
                 <span v-html="header.value" />
@@ -75,11 +73,13 @@
         </td>
       </tr>
     </template>
-    <template v-if="start > 0" v-slot:[`body.prepend`]>
-      <tr><td :colspan="headers.length" :style="'padding-top:'+startHeight+'px'"></td></tr>
-    </template>
-    <template v-if="start + perPage < sortedItems.length" v-slot:[`body.append`]>
-      <tr><td :colspan="headers.length" :style="'padding-top:'+endHeight+'px'"></td></tr>
+    <template v-slot:[`body.append`]>
+      <tr v-if="pageHide && !reachedEnd">
+        <td>
+          <table-observer @intersect="getNext()" />
+          <v-skeleton-loader class="ma-0" type="list-item" />
+        </td>
+      </tr>
     </template>
 
     <!-- Loading -->
@@ -95,11 +95,12 @@
 </template>
 
 <script lang="ts">
-import { PropType, computed, defineComponent, getCurrentInstance, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { PropType, defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
 import HeaderFilter from './components/HeaderFilter.vue'
+import TableObserver from './components/TableObserver.vue'
 import _ from 'lodash'
 
 // FUTURE: remove this in vue 3 upgrade (typing will be inferred properly)
@@ -107,12 +108,12 @@ interface BaseTableStateI {
   filtering: boolean,
   headers: BaseTableHeaderI[],
   sortedItems: object[],
-  visibleItems: object[],
-  tableDataOptions: DataOptions
+  tableDataOptions: DataOptions,
+  visibleItems: Object[]
 }
 
 export default defineComponent({
-  components: { HeaderFilter },
+  components: { HeaderFilter, TableObserver },
   name: 'BaseVDataTable',
   emits: ['update-table-options'],
   props: {
@@ -138,63 +139,42 @@ export default defineComponent({
       filtering: false,
       headers: _.cloneDeep(props.setHeaders),
       sortedItems: [...props.setItems],
-      visibleItems: [],
-      tableDataOptions: props.setTableDataOptions
+      tableDataOptions: props.setTableDataOptions,
+      visibleItems: []
     }) as unknown) as BaseTableStateI
 
-    const start = ref(0)
-    const rowHeight = ref(75)
-    const perPage = 10
-    const timeout = ref(null)
-    const vm = getCurrentInstance().proxy
-    const regTable = ref(null)
+    const currentPage = ref(1)
+    const perPage = ref(50)
+    const firstItem = ref(null) // first item in table
+    const reachedEnd = ref(false)
 
-    const onScroll = (e) => {
-      timeout && clearTimeout(timeout)
-      timeout.value = setTimeout(() => {
-        const scrollTop = e.target.scrollTop
-        const rowsInView = Math.ceil(e.target.clientHeight / rowHeight.value)
-        let startRow = Math.floor(scrollTop / rowHeight.value)
-        const endRow = startRow + rowsInView
-
-        // Handle scrolling up
-        if (startRow < start.value) {
-          start.value = startRow
+    const getNext = _.throttle(() => {
+      // if not loading and reg history exists
+      if (!props.loading && !reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
+        currentPage.value++
+        const start = (currentPage.value - 1) * perPage.value
+        const end = start + perPage.value
+        state.visibleItems.push(...state.sortedItems.slice(start, end))
+        if (state.sortedItems.length <= state.visibleItems.length) {
+          reachedEnd.value = true
         }
+      }
+    }, 50, { trailing: false })
 
-        // Handle scrolling down
-        if (endRow > start.value + perPage) {
-          start.value = endRow - perPage
-        }
-
-        // Update the scrollTop value to match the new start row
-        vm.$nextTick(() => {
-          e.target.scrollTop = scrollTop
-        })
-      }, 20)
+    const scrollToTop = () => {
+      const table = document.querySelector('.v-data-table')
+      if (table) table.scrollTop = 0
     }
 
-    onMounted(() => {
-      const tableWrapper = document.querySelector('.v-data-table__wrapper')
-      if (tableWrapper) tableWrapper.addEventListener('scroll', onScroll)
-    })
-
-    const sortedItemsLimited = computed(() => {
-      const tableWrapper = document.querySelector('.v-data-table__wrapper')
-      if (tableWrapper) {
-        const rows = tableWrapper.getElementsByClassName('base-table__item-row')
-        if (rows.length > 0) rowHeight.value = Array.from(rows).reduce((acc, row) => acc + row.clientHeight, 0) / rows.length
+    watch(() => state.sortedItems, () => {
+      if (props.setItems && props.pageHide) {
+        state.visibleItems = state.sortedItems.slice(0, perPage.value)
+        firstItem.value = state.visibleItems[0]
+        currentPage.value = 1
+        reachedEnd.value = false
+        scrollToTop()
       }
-      return state.sortedItems.slice(start.value, perPage + start.value)
-    })
-
-    const startHeight = computed(() => {
-      return start.value * rowHeight.value - 80
-    })
-
-    const endHeight = computed(() => {
-      return rowHeight.value * (state.sortedItems.length - start.value)
-    })
+    }, { immediate: true })
 
     const filter = _.debounce(async (header: BaseTableHeaderI) => {
       // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
@@ -213,7 +193,7 @@ export default defineComponent({
       state.sortedItems = [...items]
     }
 
-    watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] })
+    watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] }, { immediate: true })
     watch(() => props.setHeaders, (val: BaseTableHeaderI[]) => {
       // maintain filters
       const filters = {}
@@ -239,13 +219,8 @@ export default defineComponent({
       setFiltering,
       ...toRefs(state),
       setSortedItems,
-      onScroll,
-      sortedItemsLimited,
-      startHeight,
-      endHeight,
-      start,
-      perPage,
-      regTable
+      getNext,
+      reachedEnd
     }
   }
 })

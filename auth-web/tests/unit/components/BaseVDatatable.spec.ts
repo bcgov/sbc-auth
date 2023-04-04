@@ -6,6 +6,7 @@ import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import { baseVdataTable } from '../test-utils/test-data/baseVdata'
+import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -101,6 +102,7 @@ const validateItems = async (wrapper: Wrapper<any>) => {
 }
 
 describe('Base datatable tests', () => {
+  setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
 
   beforeEach(async () => {

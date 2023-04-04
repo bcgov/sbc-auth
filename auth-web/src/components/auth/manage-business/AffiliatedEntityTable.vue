@@ -18,6 +18,7 @@
         :updateFilter="updateFilter"
         :height="entityCount > 5 ? '32rem' : null"
         :pageHide="true"
+        :fixedHeader="true"
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -165,7 +166,10 @@ export default defineComponent({
   setup (props, { emit }) {
     const isloading = false
     const store = useStore()
-    const { loadAffiliations, affiliations, entityCount, clearAllFilters, getHeaders, headers, type, status, updateFilter, typeDescription, isNameRequest, number, name, canUseNameRequest, tempDescription, isTemporaryBusiness } = useAffiliations()
+    const { loadAffiliations, affiliations, entityCount, clearAllFilters,
+      getHeaders, headers, type, status, updateFilter, typeDescription,
+      isNameRequest, number, name, canUseNameRequest, tempDescription,
+      isTemporaryBusiness } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
     const createNamedBusiness = async ({ filingType, business }) => {

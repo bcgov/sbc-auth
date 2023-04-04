@@ -12,7 +12,7 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     hasFilter: true,
     itemClass: 'business-name',
     value: 'Business Name',
-    width: '30%'
+    width: '35%'
   },
   {
     col: 'Number',
@@ -51,7 +51,7 @@ export const AffiliationTableHeaders: BaseTableHeaderI[] = [
     hasFilter: true,
     itemClass: 'business-status',
     value: 'Status',
-    width: '25%'
+    width: '20%'
   },
   {
     col: 'Actions',

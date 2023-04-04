@@ -10,6 +10,7 @@ import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { businesses } from './../test-utils/test-data/affiliations'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
+import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -52,6 +53,7 @@ const store = new Vuex.Store({
 const vuetify = new Vuetify({})
 
 describe('AffiliatedEntityTable.vue', () => {
+  setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
 
   const headers = getAffiliationTableHeaders(['Number', 'Type', 'Status'])
