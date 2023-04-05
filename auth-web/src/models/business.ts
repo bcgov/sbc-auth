@@ -17,7 +17,7 @@ export interface FolioNumberload {
 export interface CorpType {
     code: CorpTypes // may be actual corp type or overloaded value
     default?: boolean
-    desc: string
+    desc?: string
 }
 
 export interface Business {
@@ -34,6 +34,9 @@ export interface Business {
     nameRequest?: NameRequest
     nrNumber?: string
     status?: string
+    goodStanding?: boolean
+    adminFreeze?: boolean
+    dissolved?: boolean
 }
 
 export interface BusinessSearchResultDto {
@@ -73,6 +76,15 @@ export interface NameRequest {
     entityTypeCd?: string
     natureOfBusiness?: string
     expirationDate?: Date
+    nrNum?: string
+    stateCd?: string
+    // eslint-disable-next-line camelcase
+    entity_type_cd?: string
+    natureBusinessInfo?: string
+    applicants?: {
+        emailAddress?: string
+        phoneNumber?: string
+    }
 }
 
 // Names interface to match external data provided from lear.

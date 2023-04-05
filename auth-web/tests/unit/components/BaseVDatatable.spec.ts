@@ -5,6 +5,8 @@ import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
+import { baseVdataTable } from '../test-utils/test-data/baseVdata'
+import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -16,13 +18,13 @@ const vuetify = new Vuetify({})
 document.body.setAttribute('data-app', 'true')
 
 // selectors
-const header = '.base-table__header'
-const headerTitles = `${header}__title`
-const headerFilters = `${header}__filter`
-const headerFilterSelects = `${headerFilters}__select`
-const headerFilterTextbox = `${headerFilters}__textbox`
-const itemRow = '.base-table__item-row'
-const itemCell = '.base-table__item-cell'
+const headerFilters = baseVdataTable.headerFilters
+const headerFilterSelects = baseVdataTable.headerFilterSelects
+const headerFilterTextbox = baseVdataTable.headerFilterTextbox
+const header = baseVdataTable.header
+const headerTitles = baseVdataTable.headerTitles
+const itemRow = baseVdataTable.itemRow
+const itemCell = baseVdataTable.itemCell
 
 // test setup values
 const items = [{ id: '0', desc1: 'lala 1', desc2: 'lala 2' }, { id: '1', desc1: 'weewaa 1', desc2: 'weewaa 1' }]
@@ -100,6 +102,7 @@ const validateItems = async (wrapper: Wrapper<any>) => {
 }
 
 describe('Base datatable tests', () => {
+  setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
 
   beforeEach(async () => {
@@ -112,7 +115,8 @@ describe('Base datatable tests', () => {
         setItems: items,
         setHeaders: headersBasic,
         totalItems: items.length,
-        height: '100%'
+        height: '100%',
+        customPagination: false
       }
     })
   })

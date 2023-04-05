@@ -1,3 +1,4 @@
+import '../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, mount } from '@vue/test-utils'
 import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
@@ -7,6 +8,7 @@ import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -33,6 +35,7 @@ function getPayLoad (type: any) {
 }
 
 describe('Entity Management Component', () => {
+  setupIntersectionObserverMock()
   let wrapper: any
   let mockedNrMethod: any
 
@@ -56,9 +59,7 @@ describe('Entity Management Component', () => {
 
       },
       action: {
-        addBusiness: jest.fn(),
-        updateBusinessName: jest.fn(),
-        updateFolioNumber: jest.fn()
+        addBusiness: jest.fn()
       }
     }
 
