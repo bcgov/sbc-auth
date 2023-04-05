@@ -46,6 +46,9 @@ export interface AffiliationResponse {
   nameRequest?: NameRequest
   nrNumber?: string
   status?: string
+  goodStanding?: boolean
+  adminFreeze?: boolean
+  dissolved?: boolean
 }
 
 export interface AffiliationsResponse {

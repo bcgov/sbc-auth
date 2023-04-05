@@ -79,5 +79,17 @@ export const businesses = [
       target: 'lear'
     },
     nrNumber: 'NR 2821990'
+  },
+  // alert icons
+  {
+    adminFreeze: true,
+    goodStanding: false,
+    businessIdentifier: 'TIQcIs5sss',
+    corpType: {
+      code: 'TMP'
+    },
+    corpSubType: {
+      code: 'BEN'
+    }
   }
 ]

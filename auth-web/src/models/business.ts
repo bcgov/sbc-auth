@@ -34,6 +34,9 @@ export interface Business {
     nameRequest?: NameRequest
     nrNumber?: string
     status?: string
+    goodStanding?: boolean
+    adminFreeze?: boolean
+    dissolved?: boolean
 }
 
 export interface BusinessSearchResultDto {

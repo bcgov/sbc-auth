@@ -123,7 +123,9 @@ export default class BusinessModule extends VuexModule {
         ...(resp.modified && { modified: resp.modified }),
         ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
         ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
-        ...(resp.state && { status: resp.state })
+        ...(resp.state && { status: resp.state }),
+        ...(resp.adminFreeze !== undefined ? { adminFreeze: resp.adminFreeze } : { adminFreeze: false }),
+        ...(resp.goodStanding !== undefined ? { goodStanding: resp.goodStanding } : { goodStanding: true })
       }
       if (resp.nameRequest) {
         const nr = resp.nameRequest

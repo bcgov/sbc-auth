@@ -58,9 +58,14 @@
       <!-- Status -->
       <template v-slot:item-slot-Status="{ item }">
         <span>{{ status(item) }}</span>
+        <EntityDetails v-if="isExpired(item) ||
+                      isFrozed(item) ||
+                      isBadstanding(item) ||
+                      isDissolution(item) "
+                      icon="mdi-alert"
+                      :showAlertHeader="true"
+                      :details="getDetails(item)"/>
         <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
-        <!-- Draft IA with Expired NR -->
-        <EntityDetails v-if="isDraft(status(item)) && (item.nameRequest && item.nameRequest.expirationDate)" icon="mdi-alert" :showAlertHeader="true" :details="[EntityAlertTypes.EXPIRED]"/>
       </template>
 
       <!-- Actions -->
@@ -189,12 +194,46 @@ export default defineComponent({
       return (name.state === NrState.APPROVED)
     }
 
+    const isDraft = (state: string): boolean => {
+      return NrDisplayStates.DRAFT === state
+    }
+
     const isProcessing = (state: string): boolean => {
       return NrDisplayStates.PROCESSING === state
     }
 
-    const isDraft = (state: string): boolean => {
-      return NrDisplayStates.DRAFT === state
+    /** Draft IA with Expired NR */
+    const isExpired = (item: Business): boolean => {
+      return isDraft(status(item)) && (item.nameRequest && item.nameRequest.expirationDate !== null)
+    }
+
+    const isFrozed = (item: Business): boolean => {
+      return item.adminFreeze
+    }
+    const isBadstanding = (item: Business) => {
+      return !item.goodStanding
+    }
+
+    /** Returns true if the business is dissolved. */
+    const isDissolution = (item: Business) => {
+      return false
+    }
+
+    const getDetails = (item: Business): EntityAlertTypes[] => {
+      const details = []
+      if (isExpired(item)) {
+        details.push(EntityAlertTypes.EXPIRED)
+      }
+      if (isFrozed(item)) {
+        details.push(EntityAlertTypes.FROZEN)
+      }
+      if (isBadstanding(item)) {
+        details.push(EntityAlertTypes.BADSTANDING)
+      }
+      if (isDissolution(item)) {
+        details.push(EntityAlertTypes.DISSOLUTION)
+      }
+      return details
     }
 
     /** Create a business record in LEAR. */
@@ -320,7 +359,12 @@ export default defineComponent({
       removeBusiness,
       isTemporaryBusiness,
       tempDescription,
-      EntityAlertTypes
+      EntityAlertTypes,
+      isExpired,
+      getDetails,
+      isFrozed,
+      isBadstanding,
+      isDissolution
     }
   }
 })

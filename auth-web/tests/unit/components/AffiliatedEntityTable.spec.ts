@@ -2,6 +2,8 @@ import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BaseVDataTable } from '@/components/datatable'
+import { EntityAlertTypes } from '@/util/constants'
+import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
@@ -78,7 +80,7 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Renders affiliated entity table', async () => {
     // verify table header
-    expect(wrapper.find('.table-header').text()).toBe('My List (5)')
+    expect(wrapper.find('.table-header').text()).toBe('My List (6)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
@@ -132,7 +134,6 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(0).text()).toBe('Numbered Benefit Company')
     expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
-    expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
@@ -144,5 +145,16 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('BC Sole Proprietorship')
     expect(columns.at(3).text()).toBe('Consumed')
     expect(columns.at(4).text()).toBe('Open')
+
+    // sixth item
+    columns = itemRows.at(5).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('Numbered Benefit Company')
+    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(2).text()).toContain('Incorporation Application')
+    expect(columns.at(3).text()).toBe('Draft')
+    expect(columns.at(4).text()).toBe('Open')
+    expect(wrapper.findComponent(EntityDetails).exists()).toBeTruthy()
+    expect(wrapper.findComponent(EntityDetails).props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.BADSTANDING, EntityAlertTypes.FROZEN]))
+    expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
   })
 })
