@@ -57,6 +57,8 @@ export default defineComponent({
           return { message: 'This business is in liquidation', colour: '#D3272C', priority: 2 }
         case EntityAlertTypes.DISSOLUTION:
           return { message: 'This business is in the process of being dissolved', colour: '#D3272C', priority: 1 }
+        case EntityAlertTypes.EXPIRED:
+          return { message: 'This incorporation application is no longer valid; the name request is expired.', colour: '#D3272C', priority: 5 }
         default:
           return null
       }

@@ -1,3 +1,4 @@
+import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import BusinessModule from '@/store/modules/business'

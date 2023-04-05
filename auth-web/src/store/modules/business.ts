@@ -1,4 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, PasscodeResetLoad } from '@/models/business'
 import {
@@ -12,7 +13,6 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
@@ -96,7 +96,7 @@ export default class BusinessModule extends VuexModule {
     }
 
     // get affiliated entities for this organization
-    const affiliatedEntities = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
+    const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
       .then(response => {
         if (response?.data?.entities && response?.status === 200) {
           return response.data.entities
@@ -105,34 +105,37 @@ export default class BusinessModule extends VuexModule {
       })
       .catch(error => {
         console.log('Error getting affiliated entities:', error) // eslint-disable-line no-console
-        return [] as Business[]
+        return [] as []
       })
 
-    // update store with initial results
-    this.setBusinesses(affiliatedEntities)
+    let affiliatedEntities: Business[] = []
 
-    // get data for NR entities (not async)
-    const getNrDataPromises = affiliatedEntities.map(entity => {
-      if (entity.corpType.code === CorpTypes.NAME_REQUEST) {
-        return BusinessService.getNrData(entity.businessIdentifier)
+    entityResponse.forEach((resp, i) => {
+      const entity: Business = {
+        businessIdentifier: resp.identifier,
+        ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
+        ...(resp.legalName && { name: resp.legalName }),
+        ...(resp.contacts && { contacts: resp.contacts }),
+        ...((resp.draftType || resp.legalType) && { corpType: { code: resp.draftType || resp.legalType } }),
+        ...(resp.legalType && { corpSubType: { code: resp.legalType } }),
+        ...(resp.folioNumber && { folioNumber: resp.folioNumber }),
+        ...(resp.lastModified && { lastModified: resp.lastModified }),
+        ...(resp.modified && { modified: resp.modified }),
+        ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
+        ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
+        ...(resp.state && { status: resp.state }),
+        ...(resp.adminFreeze !== undefined ? { adminFreeze: resp.adminFreeze } : { adminFreeze: false }),
+        ...(resp.goodStanding !== undefined ? { goodStanding: resp.goodStanding } : { goodStanding: true })
       }
-      return null
-    })
-
-    // wait for all calls to finish (async)
-    const getNrDataResponses = await Promise.allSettled(getNrDataPromises)
-
-    // attach NR data to affiliated entities
-    getNrDataResponses.forEach((resp, i) => {
-      const nr = resp['value']?.data
-
-      if (nr) {
-        affiliatedEntities[i].nameRequest = {
+      if (resp.nameRequest) {
+        const nr = resp.nameRequest
+        entity.businessIdentifier = nr.nrNum
+        entity.nameRequest = {
           names: nr.names,
           id: nr.id,
           legalType: nr.legalType,
-          nrNumber: nr.nrNum,
-          state: nr.state,
+          nrNumber: (nr.nrNum || nr.nrNumber),
+          state: (nr.stateCd || nr.state),
           applicantEmail: nr.applicants?.emailAddress,
           applicantPhone: nr.applicants?.phoneNumber,
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
@@ -143,21 +146,10 @@ export default class BusinessModule extends VuexModule {
           expirationDate: nr.expirationDate
         }
       }
+      affiliatedEntities.push(entity)
     })
-
-    // update store with final results
+    // update store with initial results
     this.setBusinesses(affiliatedEntities)
-
-    // update business name for all NRs
-    // NB: don't wait for all calls to finish
-    getNrDataResponses.forEach((resp, i) => {
-      const nr = resp['value']?.data
-      if (nr) {
-        const businessIdentifier = affiliatedEntities[i].businessIdentifier
-        const name = getApprovedName(nr) || ''
-        BusinessService.updateBusinessName({ businessIdentifier, name })
-      }
-    })
   }
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })

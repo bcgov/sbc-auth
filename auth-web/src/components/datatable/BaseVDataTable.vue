@@ -1,17 +1,20 @@
 <template>
   <v-data-table
+    id="virtual-scroll-table"
     class="base-table"
     :disable-sort="true"
     :fixed-header="height ? true : false"
     :footer-props="{ itemsPerPageOptions: [5, 10, 15, 20] }"
+    :items-per-page="5"
     :headers="headers"
+    :items="pageHide ? visibleItems : sortedItems"
     hide-default-header
     :height="height ? height : ''"
-    :items="sortedItems"
     :loading="filtering || loading"
     :mobile-breakpoint="0"
     :options.sync="tableDataOptions"
     :server-items-length="totalItems"
+    :hide-default-footer="pageHide ? true : false"
   >
     <!-- Headers (two rows) -->
     <template v-slot:header>
@@ -23,7 +26,7 @@
               v-for="header, i in headers"
               :key="header.col + i"
               :class="[header.class, 'base-table__header__title']"
-              :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : ''"
+              :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : {'width': header.width}"
             >
               <slot :name="'header-title-slot-' + header.col" :header="header">
                 <span v-html="header.value" />
@@ -39,35 +42,17 @@
               :key="header.col"
               :class="[header.class, 'base-table__header__filter pb-5']"
             >
-              <slot :name="'header-filter-slot-' + header.col" :header="header">
-                <v-select
-                  v-if="header.hasFilter && header.customFilter.type === 'select'"
-                  :class="['base-table__header__filter__select']"
-                  :clearable="header.customFilter.clearable"
-                  dense
-                  filled
-                  hide-details
-                  item-text="text"
-                  item-value="value"
-                  :items="header.customFilter.items"
-                  :label="!header.customFilter.value ? header.customFilter.label || '' : ''"
-                  v-model="header.customFilter.value"
-                  @reset="filter(header)"
-                  @input="filter(header)"
-                />
-                <v-text-field
-                  v-else-if="header.hasFilter && header.customFilter.type === 'text'"
-                  :class="['base-table__header__filter__textbox', header.customFilter.value ? 'active' : '']"
-                  :clearable="header.customFilter.clearable"
-                  dense
-                  filled
-                  hide-details
-                  :placeholder="!header.customFilter.value ? header.customFilter.label || '' : ''"
-                  v-model="header.customFilter.value"
-                  @reset="filter(header)"
-                  @input="filter(header)"
-                />
-              </slot>
+            <slot :name="'header-filter-slot-' + header.col" :header="header"></slot>
+            <header-filter
+              :filtering="filtering"
+              :filters="filters"
+              :header="header"
+              :setFiltering="setFiltering"
+              :sortedItems="setItems"
+              :updateFilter="updateFilter"
+              :headers="headers"
+              :setSortedItems="setSortedItems"
+            ></header-filter>
             </th>
           </tr>
         </slot>
@@ -75,16 +60,23 @@
     </template>
 
     <!-- Items -->
-    <template v-slot:item="{ item }">
+    <template v-slot:item="{ item, index }">
       <tr class="base-table__item-row" :key="item[itemKey]">
         <td
           v-for="header in headers" :key="'item-' + header.col"
           :class="[header.itemClass, 'base-table__item-cell']"
         >
-          <slot :header="header" :item="item" :name="'item-slot-' + header.col">
+          <slot :header="header" :item="item" :index="index" :name="'item-slot-' + header.col">
             <span v-if="header.itemFn" v-html="header.itemFn(item)" />
             <span v-else>{{ item[header.col] }}</span>
           </slot>
+        </td>
+      </tr>
+    </template>
+    <template v-slot:[`body.append`]>
+      <tr v-if="pageHide && !reachedEnd">
+        <td :colspan="headers.length">
+          <table-observer @intersect="getNext()" />
         </td>
       </tr>
     </template>
@@ -102,10 +94,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { PropType, defineComponent, nextTick, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from './interfaces'
 import { DEFAULT_DATA_OPTIONS } from './resources'
 import { DataOptions } from 'vuetify'
+import HeaderFilter from './components/HeaderFilter.vue'
+import TableObserver from './components/TableObserver.vue'
 import _ from 'lodash'
 
 // FUTURE: remove this in vue 3 upgrade (typing will be inferred properly)
@@ -113,10 +107,12 @@ interface BaseTableStateI {
   filtering: boolean,
   headers: BaseTableHeaderI[],
   sortedItems: object[],
-  tableDataOptions: DataOptions
+  tableDataOptions: DataOptions,
+  visibleItems: Object[]
 }
 
 export default defineComponent({
+  components: { HeaderFilter, TableObserver },
   name: 'BaseVDataTable',
   emits: ['update-table-options'],
   props: {
@@ -130,7 +126,11 @@ export default defineComponent({
     setItems: { default: [] as object[] },
     setHeaders: { default: [] as BaseTableHeaderI[] },
     setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
-    totalItems: { type: Number }
+    totalItems: { type: Number },
+    pageHide: { default: false },
+    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
+    filters: { default: { isActive: false, filterPayload: {} }, required: false },
+    customPagination: { default: false }
   },
   setup (props, { emit }) {
     // reactive vars
@@ -138,19 +138,55 @@ export default defineComponent({
       filtering: false,
       headers: _.cloneDeep(props.setHeaders),
       sortedItems: [...props.setItems],
-      tableDataOptions: props.setTableDataOptions
+      tableDataOptions: props.setTableDataOptions,
+      visibleItems: []
     }) as unknown) as BaseTableStateI
 
-    const filter = _.debounce(async (header: BaseTableHeaderI) => {
-      // rely on custom filterApiFn to alter result set if given (meant for server side filtering)
-      if (header.customFilter.filterApiFn) {
-        state.filtering = true
-        await header.customFilter.filterApiFn(header.customFilter.value)
-        state.filtering = false
-      }
-    }, 500)
+    const currentPage = ref(1)
+    const perPage = ref(50)
+    const firstItem = ref(null) // first item in table
+    const reachedEnd = ref(false)
 
-    watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] })
+    const getNext = _.debounce(async () => {
+      if (!props.loading && !reachedEnd.value && state.sortedItems.length > state.visibleItems.length) {
+        currentPage.value++
+        const start = (currentPage.value - 1) * perPage.value
+        const end = start + perPage.value
+        const newItems = state.sortedItems.slice(start, end)
+
+        await nextTick()
+        state.visibleItems.push(...newItems)
+
+        if (state.sortedItems.length <= state.visibleItems.length) {
+          reachedEnd.value = true
+        }
+      }
+    }, 100) // Adjust the wait time as needed
+
+    const scrollToTop = () => {
+      const table = document.querySelector('.v-data-table__wrapper')
+      if (table) table.scrollTop = 0
+    }
+
+    watch(() => state.sortedItems, () => {
+      if (props.setItems && props.pageHide) {
+        state.visibleItems = state.sortedItems.slice(0, perPage.value)
+        firstItem.value = state.visibleItems[0]
+        currentPage.value = 1
+        reachedEnd.value = false
+        scrollToTop()
+      }
+    }, { immediate: true })
+
+    const setFiltering = (filter: boolean) => {
+      state.filtering = filter
+    }
+
+    const setSortedItems = (items: object[]) => {
+      state.sortedItems = [...items]
+    }
+
+    watch(() => props.setItems, (val: object[]) => { state.sortedItems = [...val] }, { immediate: true })
     watch(() => props.setHeaders, (val: BaseTableHeaderI[]) => {
       // maintain filters
       const filters = {}
@@ -166,13 +202,17 @@ export default defineComponent({
       state.headers.forEach((header) => {
         if (header.hasFilter) header.customFilter.value = ''
       })
+      state.sortedItems = props.setItems
     })
-    watch(() => props.setTableDataOptions, (val: DataOptions) => { state.tableDataOptions = val })
+
     watch(() => state.tableDataOptions, (val: DataOptions) => { emit('update-table-options', val) })
 
     return {
-      filter,
-      ...toRefs(state)
+      setFiltering,
+      ...toRefs(state),
+      setSortedItems,
+      getNext,
+      reachedEnd
     }
   }
 })

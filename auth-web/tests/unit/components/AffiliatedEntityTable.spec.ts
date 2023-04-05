@@ -1,140 +1,34 @@
-import { createLocalVue, mount } from '@vue/test-utils'
+import '../test-utils/composition-api-setup' // important to import this first
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
+import { BaseVDataTable } from '@/components/datatable'
+import { EntityAlertTypes } from '@/util/constants'
+import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { baseVdataTable } from './../test-utils/test-data/baseVdata'
+import { businesses } from './../test-utils/test-data/affiliations'
+import { getAffiliationTableHeaders } from '@/resources/table-headers'
+import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
 Vue.use(Vuex)
 
+// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
+document.body.setAttribute('data-app', 'true')
+
 jest.mock('../../../src/services/user.services')
 
-const businesses = [
-  // BEN Name Request - Processing (expirationDate is empty)
-  {
-    affiliations: [9752],
-    businessIdentifier: 'NR 4045467',
-    contacts: [],
-    corpType: {
-      code: 'NR',
-      default: false,
-      desc: 'Name Request'
-    },
-    created: '2022-11-02T19:36:29+00:00',
-    lastModified: '2022-11-02T19:37:11+00:00',
-    modified: '2022-11-02T19:42:13+00:00',
-    modifiedBy: 'BCREGTEST Lucille TWENTY',
-    name: 'BEN NAME REQUEST LIMITED - PROCESSING',
-    // "nameRequest" is usually populated by syncBusinesses():
-    nameRequest: {
-      legalType: 'BEN',
-      names: [{ name: 'BEN NAME REQUEST LIMITED - PROCESSING' }],
-      nrNumber: 'NR 4045467',
-      state: 'APPROVED',
-      expirationDate: null
-    },
-    passCodeClaimed: true,
-    status: 'APPROVED'
-  },
-  // BEN Name Request
-  {
-    affiliations: [9752],
-    businessIdentifier: 'NR 4045466',
-    contacts: [],
-    corpType: {
-      code: 'NR',
-      default: false,
-      desc: 'Name Request'
-    },
-    created: '2022-11-02T19:36:29+00:00',
-    lastModified: '2022-11-02T19:37:11+00:00',
-    modified: '2022-11-02T19:42:13+00:00',
-    modifiedBy: 'BCREGTEST Lucille TWENTY',
-    name: 'BEN NAME REQUEST LIMITED',
-    // "nameRequest" is usually populated by syncBusinesses():
-    nameRequest: {
-      legalType: 'BEN',
-      names: [{ name: 'BEN NAME REQUEST LIMITED' }],
-      nrNumber: 'NR 4045466',
-      state: 'APPROVED',
-      expirationDate: '2022-11-02T19:42:13+00:00'
-    },
-    passCodeClaimed: true,
-    status: 'APPROVED'
-  },
-  // BEN Incorporation Application (named)
-  {
-    affiliations: [10073],
-    businessIdentifier: 'TrHrdmggWI',
-    contacts: [],
-    corpSubType: {
-      code: 'BEN',
-      default: false,
-      desc: 'Benefit Company'
-    },
-    corpType: {
-      code: 'TMP',
-      default: false,
-      desc: 'New Business'
-    },
-    created: '2022-11-16T23:24:09+00:00',
-    createdBy: 'None None',
-    modified: '2022-11-16T23:24:09+00:00',
-    modifiedBy: 'None None',
-    name: 'MY BENEFIT COMPANY CORP.',
-    nrNumber: 'NR 4045466',
-    passCodeClaimed: true
-  },
-  // BEN Incorporation Application (numbered)
-  {
-    affiliations: [10075],
-    businessIdentifier: 'TMiQaT1iMe',
-    contacts: [],
-    corpSubType: {
-      code: 'BEN',
-      default: false,
-      desc: 'Benefit Company'
-    },
-    corpType: {
-      code: 'TMP',
-      default: false,
-      desc: 'New Business'
-    },
-    created: '2022-11-16T23:27:51+00:00',
-    createdBy: 'None None',
-    modified: '2022-11-16T23:27:51+00:00',
-    modifiedBy: 'None None',
-    name: 'TMiQaT1iMe',
-    passCodeClaimed: true
-  },
-  // SP Registration
-  {
-    affiliations: [10069],
-    businessIdentifier: 'TMcftP9uSH',
-    contacts: [],
-    corpSubType: {
-      code: 'SP',
-      default: false,
-      desc: 'Sole Proprietorship'
-    },
-    corpType: {
-      code: 'RTMP',
-      default: false,
-      desc: null
-    },
-    created: '2022-11-16T21:18:41+00:00',
-    createdBy: 'None None',
-    modified: '2022-11-16T21:18:42+00:00',
-    modifiedBy: 'None None',
-    name: 'MY SOLE PROPRIETORSHIP',
-    nrNumber: 'NR 5938962',
-    passCodeClaimed: true
-  }
-]
+// selectors
+const header = baseVdataTable.header
+const headerTitles = baseVdataTable.headerTitles
+const itemRow = baseVdataTable.itemRow
+const itemCell = baseVdataTable.itemCell
 
 const businessModule = {
   namespaced: true,
@@ -151,9 +45,6 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
   PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }))
 
-const localVue = createLocalVue()
-localVue.use(Vuex)
-
 const store = new Vuex.Store({
   strict: false,
   modules: {
@@ -161,12 +52,16 @@ const store = new Vuex.Store({
   }
 })
 
-const vuetify = new Vuetify()
+const vuetify = new Vuetify({})
 
 describe('AffiliatedEntityTable.vue', () => {
-  let wrapper
+  setupIntersectionObserverMock()
+  let wrapper: Wrapper<any>
 
-  beforeEach(() => {
+  const headers = getAffiliationTableHeaders(['Number', 'Type', 'Status'])
+
+  beforeEach(async () => {
+    const localVue = createLocalVue()
     wrapper = mount(AffiliatedEntityTable, {
       store,
       localVue,
@@ -183,13 +78,20 @@ describe('AffiliatedEntityTable.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('Renders affiliated entity table', () => {
+  it('Renders affiliated entity table', async () => {
     // verify table header
-    expect(wrapper.find('.table-header').text()).toBe('My List (5)')
+    expect(wrapper.find('.table-header').text()).toBe('My List (6)')
+
+    // Wait for the component to render after any state changes
+    await wrapper.vm.$nextTick()
 
     // verify table
+    expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
+    expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
     expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
-    const titles = wrapper.findAll('.v-data-table__wrapper thead span')
+    expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
+    const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
+    expect(titles.length).toBe(headers.length)
     expect(titles.at(0).text()).toBe('Business Name')
     expect(titles.at(1).text()).toBe('Number')
     expect(titles.at(2).text()).toBe('Type')
@@ -197,10 +99,11 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(titles.at(4).text()).toBe('Actions')
 
     // verify table data
-    const rows = wrapper.findAll('.v-data-table__wrapper tbody tr')
+    const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
+    expect(itemRows.length).toBe(businesses.length)
 
     // first item
-    let columns = rows.at(0).findAll('td')
+    let columns = itemRows.at(0).findAll(itemCell)
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED - PROCESSING')
     expect(columns.at(1).text()).toBe('NR 4045467')
     expect(columns.at(2).text()).toContain('Name Request')
@@ -209,7 +112,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(4).text()).toBe('Open')
 
     // second item
-    columns = rows.at(1).findAll('td')
+    columns = itemRows.at(1).findAll(itemCell)
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED')
     expect(columns.at(1).text()).toBe('NR 4045466')
     expect(columns.at(2).text()).toContain('Name Request')
@@ -218,30 +121,45 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(4).text()).toBe('Open')
 
     // third item
-    columns = rows.at(2).findAll('td')
-    expect(columns.at(0).text()).toBe('MY BENEFIT COMPANY CORP.')
-    expect(columns.at(1).text()).toBe('NR 4045466')
-    expect(columns.at(2).text()).toContain('Incorporation Application')
+    columns = itemRows.at(2).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED')
+    expect(columns.at(1).text()).toBe('NR 4045467')
+    expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
     // fourth item
-    columns = rows.at(3).findAll('td')
+    columns = itemRows.at(3).findAll(itemCell)
     expect(columns.at(0).text()).toBe('Numbered Benefit Company')
     expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
-    expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
     // fifth item
-    columns = rows.at(4).findAll('td')
-    expect(columns.at(0).text()).toBe('MY SOLE PROPRIETORSHIP')
-    expect(columns.at(1).text()).toBe('NR 5938962')
-    expect(columns.at(2).text()).toContain('Registration')
+    columns = itemRows.at(4).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('AC SP 2022.MAY.25 15.38 TEST')
+    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Sole Proprietorship')
+    expect(columns.at(3).text()).toBe('Consumed')
+    expect(columns.at(4).text()).toBe('Open')
+
+    // sixth item
+    columns = itemRows.at(5).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('Numbered Benefit Company')
+    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
+    // Find all EntityDetails components and filter the one with the desired parent element
+    expect(wrapper.findComponent(EntityDetails).exists()).toBeTruthy()
+    const entityDetails = wrapper.findComponent(EntityDetails)
+    expect(entityDetails.exists()).toBeTruthy()
+    if (entityDetails.element.parentElement === itemRows.at(5).element) {
+      expect(entityDetails.props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.FROZEN, EntityAlertTypes.BADSTANDING]))
+    }
+    expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
   })
 })

@@ -7,6 +7,7 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
+import { baseVdataTable } from '../test-utils/test-data/baseVdata'
 import flushPromises from 'flush-promises'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import sinon from 'sinon'
@@ -22,10 +23,10 @@ document.body.setAttribute('data-app', 'true')
 
 // selectors
 const heading = '.section-heading'
-const header = '.base-table__header'
-const headerTitles = `${header}__title`
-const itemRow = '.base-table__item-row'
-const itemCell = '.base-table__item-cell'
+const header = baseVdataTable.header
+const headerTitles = baseVdataTable.headerTitles
+const itemRow = baseVdataTable.itemRow
+const itemCell = baseVdataTable.itemCell
 
 describe('TransactionsDataTable tests', () => {
   let wrapper: Wrapper<any>
