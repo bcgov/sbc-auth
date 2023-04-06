@@ -76,7 +76,7 @@ export default class ConfigHelper {
   }
 
   static getBceIdOsdLink () {
-    return `${process.env.VUE_APP_BCEID_URL}`
+    return `${process.env.VUE_APP_BCEID_OSD_LINK}`
   }
 
   static getAffidavitSize () {
