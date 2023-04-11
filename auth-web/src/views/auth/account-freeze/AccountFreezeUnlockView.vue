@@ -49,19 +49,19 @@
 </template>
 
 <script lang="ts">
-import { AccountStatus, Pages } from '@/util/constants'
-import { Component, Vue } from 'vue-property-decorator'
-import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
-import AccountSuspendedView from './AccountSuspendedView.vue'
-import ConfigHelper from 'sbc-common-components/src/util/config-helper'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { Organization } from '@/models/Organization'
-import { Payment } from '@/models/Payment'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
+import { Organization } from '@/models/Organization'
+import { Payment } from '@/models/Payment'
+import { AccountStatus, Pages } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import ConfigHelper from 'sbc-common-components/src/util/config-helper'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
+import AccountSuspendedView from './AccountSuspendedView.vue'
 
 @Component({
   components: {
@@ -75,7 +75,6 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
   methods: {
     ...mapActions('org', [
       'createAccountPayment'
-
     ])
   },
   computed: {

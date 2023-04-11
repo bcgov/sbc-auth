@@ -26,11 +26,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
-import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { User } from '@/models/user'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const UserModule = namespace('user')

@@ -122,15 +122,14 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Pages } from '@/util/constants'
-import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
-import { Component, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import { CreateRequestBody as InvitationRequestBody } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
+import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import OrgModule from '@/store/modules/org'
 import StaffModule from '@/store/modules/staff'
+import { AccessType, Pages } from '@/util/constants'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({

@@ -237,15 +237,15 @@
 
 <script lang="ts">
 
-import { AccountStatus, LDFlags, LoginSource, Pages, Permission, Role } from '@/util/constants'
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { Member, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
+import { AccountStatus, LDFlags, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
   @Component({
     components: {
@@ -324,7 +324,7 @@ export default class AccountSettings extends Mixins(AccountMixin) {
   }
 
   private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    return true
   }
   private get hideProductPackage (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.HideProductPackage) || false

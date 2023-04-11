@@ -37,13 +37,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import ConfigHelper from '@/util/config-helper'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { User } from '@/models/user'
+import ConfigHelper from '@/util/config-helper'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { mapState } from 'vuex'
 
 @Component({
   components: {

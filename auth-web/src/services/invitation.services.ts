@@ -1,8 +1,8 @@
 import { CreateRequestBody, Invitation } from '@/models/Invitation'
-import { AxiosResponse } from 'axios'
-import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
-import { axios } from '@/util/http-util.ts'
+import ConfigHelper from '@/util/config-helper'
+import { axios } from '@/util/http-util'
+import { AxiosResponse } from 'axios'
 
 export default class InvitationService {
   public static async createInvitation (invitation: CreateRequestBody): Promise<AxiosResponse<Invitation>> {

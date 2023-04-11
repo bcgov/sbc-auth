@@ -7,16 +7,15 @@
 
 <script lang="ts">
 
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import { Account } from '@/util/constants'
+import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import OrgModule from '@/store/modules/org'
-import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { Account } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component, Mixins } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({

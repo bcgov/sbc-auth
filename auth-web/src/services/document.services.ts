@@ -1,9 +1,9 @@
-import Axios, { AxiosResponse } from 'axios'
+import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
+import { DocumentUpload } from '@/models/user'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
-import { DocumentUpload } from '@/models/user'
-import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { axios } from '@/util/http-util.ts'
+import { axios } from '@/util/http-util'
+import Axios, { AxiosResponse } from 'axios'
 import mime from 'mime-types'
 
 export default class DocumentService {
@@ -36,7 +36,7 @@ export default class DocumentService {
   }
 
   static async uplpoadToUrl (url: string, file:File, key:String, userId: string): Promise<AxiosResponse> {
-    var options = {
+    const options = {
       headers: {
         'Content-Type': file.type,
         'x-amz-meta-userid': `${userId}`,
@@ -44,7 +44,7 @@ export default class DocumentService {
         'Content-Disposition': `attachment; filename=${file.name}`
       }
     }
-    let response = await axios.put(
+    const response = await axios.put(
       url, file, options
     )
     return response

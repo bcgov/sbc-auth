@@ -22,16 +22,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
-import {
-  Member,
-  MembershipStatus,
-  MembershipType,
-  Organization,
-  RoleInfo
-} from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { Member, MembershipType, Organization } from '@/models/Organization'
 import { AccessType } from '@/util/constants'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   computed: {

@@ -1,3 +1,5 @@
+<!-- eslint-disable vue/no-mutating-props -->
+<!-- this should be fixed by using a computed instead in the future. -->
 <!-- header filter in a seperate component helps improve performance -->
 <template>
     <span>
@@ -34,11 +36,11 @@
 </template>
 
 <script lang="ts">
-import { BaseSelectFilter, BaseTextFilter } from '../resources/base-filters'
-import { PropType, defineComponent, reactive } from '@vue/composition-api'
-import { BaseTableHeaderI } from '../interfaces'
-import _ from 'lodash'
 import { headerTypes } from '@/resources/table-headers/affiliations-table/headers'
+import { PropType, defineComponent, reactive } from '@vue/composition-api'
+import _ from 'lodash'
+import { BaseTableHeaderI } from '../interfaces'
+import { BaseSelectFilter, BaseTextFilter } from '../resources/base-filters'
 
 const tempHeader = {
   col: '',

@@ -1,7 +1,11 @@
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
+import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
-import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, PasscodeResetLoad } from '@/models/business'
+import { Contact } from '@/models/contact'
+import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
+import BusinessService from '@/services/business.services'
+import OrgService from '@/services/org.services'
+import ConfigHelper from '@/util/config-helper'
 import {
   CorpTypes,
   FilingTypes,
@@ -13,12 +17,8 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
-import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import BusinessService from '@/services/business.services'
-import ConfigHelper from '@/util/config-helper'
-import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import OrgService from '@/services/org.services'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 
 @Module({
   name: 'business',
@@ -108,7 +108,7 @@ export default class BusinessModule extends VuexModule {
         return [] as []
       })
 
-    let affiliatedEntities: Business[] = []
+    const affiliatedEntities: Business[] = []
 
     entityResponse.forEach((resp, i) => {
       const entity: Business = {
@@ -358,9 +358,9 @@ export default class BusinessModule extends VuexModule {
   public async removeBusiness (payload: RemoveBusinessPayload) {
     // If the business is a new registration then remove the business filing from legal-db
     if (payload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
-      let filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
+      const filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
       if (filingResponse && filingResponse.data && filingResponse.status === 200) {
-        let filingId = filingResponse?.data?.filing?.header?.filingId
+        const filingId = filingResponse?.data?.filing?.header?.filingId
         // If there is a filing delete it which will delete the affiliation, else delete the affiliation
         if (filingId) {
           await BusinessService.deleteBusinessFiling(payload.business.businessIdentifier, filingId)
@@ -376,7 +376,7 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
   public async saveContact (contact: Contact) {
-    let currentBusiness: Business = this.context.state['currentBusiness']
+    const currentBusiness: Business = this.context.state['currentBusiness']
     let response = null
     if (!currentBusiness.contacts || currentBusiness.contacts.length === 0) {
       response = await BusinessService.addContact(currentBusiness, contact)

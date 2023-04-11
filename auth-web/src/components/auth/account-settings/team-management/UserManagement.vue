@@ -190,22 +190,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { LoginSource, Pages, SearchFilterCodes } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Invitation } from '@/models/Invitation'
 import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
 import InviteUsersForm from '@/components/auth/account-settings/team-management/InviteUsersForm.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import { SearchFilterParam } from '@/models/searchfilter'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
+import { Invitation } from '@/models/Invitation'
+import { Member, MembershipStatus } from '@/models/Organization'
+import { SearchFilterParam } from '@/models/searchfilter'
+import { LoginSource, Pages, SearchFilterCodes } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -254,7 +253,6 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly syncPendingOrgMembers!: () => Member[]
   private readonly syncPendingOrgInvitations!: () => Invitation[]
   private readonly syncActiveOrgMembers!: () => Member[]
-  readonly currentUser!: KCUserProfile
   private appliedFilterValue: string = ''
   private teamMembersCount = 0
   private pendingMembersCount = 0

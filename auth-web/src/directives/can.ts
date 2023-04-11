@@ -1,9 +1,9 @@
-import ConfigHelper from 'sbc-common-components/src/util/config-helper'
-import { DirectiveBinding } from 'vue/types/options'
-import { DirectiveOptions } from 'vue'
-import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
-import { VNode } from 'vue/types'
 import store from '@/store'
+import ConfigHelper from 'sbc-common-components/src/util/config-helper'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
+import { DirectiveOptions } from 'vue'
+import { VNode } from 'vue/types'
+import { DirectiveBinding } from 'vue/types/options'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean
@@ -26,9 +26,9 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   if (!accountId) {
     return
   }
-  let behaviour = binding.modifiers.disable ? 'disable' : 'hide'
+  const behaviour = binding.modifiers.disable ? 'disable' : 'hide'
   // to handle special elements like v-card etc
-  let isCard = !!binding.modifiers.card
+  const isCard = !!binding.modifiers.card
   const requestedAction = binding.arg
   const permissions:string[] = (store.state as any)?.org?.permissions
   const customeEl = el as CustomHTMLElement
@@ -43,8 +43,6 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
       // TODO tab still works.. can tab to the text field and make it work
       customeEl.classList.add('v-card--disabled')
       customeEl.style.pointerEvents = 'none'
-    } else if (behaviour === 'readonly') {
-      customeEl.readOnly = true
     }
   }
 }

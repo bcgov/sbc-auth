@@ -1,11 +1,11 @@
-import { createLocalVue, mount } from '@vue/test-utils'
-import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
+import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
+import { createLocalVue, mount } from '@vue/test-utils'
+import flushPromises from 'flush-promises'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -17,7 +17,7 @@ document.body.setAttribute('data-app', 'true')
 
 describe('DecideBusinessView.vue', () => {
   let wrapper: any
-  var ob = {
+  const ob = {
     'ENTITY_SELECTOR_URL': 'https://entity-selection-dev.apps.silver.devops.gov.bc.ca/'
   }
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)

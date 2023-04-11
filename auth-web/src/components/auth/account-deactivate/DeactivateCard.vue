@@ -23,7 +23,6 @@
 <script lang="ts">
 import { PropType, computed, defineComponent } from '@vue/composition-api'
 import { Account } from '@/util/constants'
-import Vue from 'vue'
 import { useI18n } from 'vue-i18n-bridge'
 
 export default defineComponent({

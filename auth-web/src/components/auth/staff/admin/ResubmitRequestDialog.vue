@@ -52,7 +52,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
-const BusinessModule = namespace('business')
+namespace('business')
 
 @Component({})
 export default class ResubmitRequest extends Vue {

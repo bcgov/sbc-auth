@@ -77,11 +77,11 @@
 
 <script lang="ts">
 
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { User } from '@/models/user'
+import { Component, Emit, Mixins } from 'vue-property-decorator'
 
 import { namespace } from 'vuex-class'
 const userModule = namespace('user')

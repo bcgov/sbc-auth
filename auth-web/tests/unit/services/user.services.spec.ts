@@ -1,11 +1,10 @@
-import Axios from 'axios'
 import { Contact } from '../../../src/models/contact'
 import { User } from '../../../src/models/user'
 import UserService from '../../../src/services/user.services'
 
 jest.mock('../../../src/services/user.services')
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }

@@ -58,18 +58,17 @@
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
-import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
+import { Address } from '@/models/address'
 import { addressSchema } from '@/schemas'
+import { Account, LoginSource } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
+import OrgModule from '@/store/modules/org'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -136,7 +135,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    return true
   }
 
   private get address () {

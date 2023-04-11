@@ -9,6 +9,7 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
 import flushPromises from 'flush-promises'
+import displayMode from '@/directives/displayMode'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -23,6 +24,7 @@ describe('AccountBusinessType.vue', () => {
   const localVue = createLocalVue()
   localVue.directive('can', can)
   localVue.use(Vuex)
+  localVue.directive('displayMode', displayMode)
   const vuetify = new Vuetify({})
 
   beforeEach(() => {
@@ -30,7 +32,11 @@ describe('AccountBusinessType.vue', () => {
       namespaced: true,
       state: {
       },
-      actions: CodesModule.actions,
+      actions: {
+        ...CodesModule.actions,
+        getBusinessSizeCodes: jest.fn(),
+        getBusinessTypeCodes: jest.fn()
+      },
       mutations: CodesModule.mutations,
       getters: CodesModule.getters
     }
@@ -106,7 +112,8 @@ describe('AccountBusinessType.vue', () => {
       }
     })
     await wrapper.setData({ isLoading: false })
-    wrapper.find("[data-test='radio-business-account-type']").trigger('click')
+    await flushPromises()
+    wrapper.find("[data-test='radio-business-account-type']").setChecked()
     await flushPromises()
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()
     expect(wrapper.find("[data-test='business-account-type-details']").exists()).toBeTruthy()

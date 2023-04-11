@@ -249,23 +249,20 @@
 
 <script lang="ts">
 
-import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
-import { User, UserProfileData } from '@/models/user'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import { Contact } from '@/models/contact'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { Contact } from '@/models/contact'
+import { User, UserProfileData } from '@/models/user'
 import UserService from '@/services/user.services'
-import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import CommonUtils from '@/util/common-util'
 import configHelper from '@/util/config-helper'
+import { AccessType, Account, LoginSource, Pages, Role } from '@/util/constants'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import { mask } from 'vue-the-mask'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -315,14 +312,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private deactivateProfileDialog = false
     private isDeactivating = false
     @Prop() token: string
-    readonly currentOrganization!: Organization
     readonly userProfileData!: UserProfileData
-    readonly syncMembership!: (orgId: number) => Promise<Member>
-    readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly ACCOUNT_TYPE = Account
     private isTester: boolean = false
     private isReseting = false
-    readonly currentUser!: KCUserProfile
 
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
@@ -373,7 +366,7 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     }
 
     private get enablePaymentMethodSelectorStep (): boolean {
-      return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+      return true
     }
 
     private emailMustMatch (): string {

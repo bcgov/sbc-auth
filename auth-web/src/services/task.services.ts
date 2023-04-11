@@ -1,9 +1,9 @@
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 
-import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { TaskRelationshipStatus } from '@/util/constants'
 import { axios } from '@/util/http-util'
+import { AxiosResponse } from 'axios'
 
 export default class TaskService {
   public static async getTaskById (taskId: number): Promise<AxiosResponse<Task>> {
@@ -11,7 +11,7 @@ export default class TaskService {
   }
 
   public static async fetchTasks (taskFilter?: TaskFilterParams): Promise<AxiosResponse<TaskList>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     if (taskFilter.relationshipStatus) {
       params.append('relationshipStatus', taskFilter.relationshipStatus)
     }

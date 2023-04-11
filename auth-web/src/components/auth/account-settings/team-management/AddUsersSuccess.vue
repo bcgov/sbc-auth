@@ -96,13 +96,12 @@
 </template>
 
 <script lang="ts">
-import { AddUserBody, BulkUsersFailed, BulkUsersSuccess } from '@/models/Organization'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { IdpHint, Pages } from '@/util/constants'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import ConfigHelper from '@/util/config-helper'
+import { BulkUsersFailed, BulkUsersSuccess } from '@/models/Organization'
 import OrgModule from '@/store/modules/org'
-import { User } from '@/models/user'
+import ConfigHelper from '@/util/config-helper'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapState } from 'vuex'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
@@ -118,6 +117,7 @@ import { User } from '@/models/user'
   }
 })
 export default class AddUsersSuccess extends Vue {
+  private readonly _orgStore = getModule(OrgModule, this.$store)
   private readonly createdUsers!: BulkUsersSuccess[]
   private readonly failedUsers!: BulkUsersFailed[]
   private loginUrl: string = ConfigHelper.getDirectorSearchURL()

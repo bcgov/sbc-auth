@@ -1,14 +1,11 @@
-import '../test-utils/composition-api-setup' // important to import this first
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import BusinessModule from '@/store/modules/business'
-import DashboardView from '@/views/auth/DashboardView.vue'
-import SupportInfoCard from '@/components/SupportInfoCard.vue'
-
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import '../test-utils/composition-api-setup' // important to import this first
+
+import DashboardView from '@/views/auth/DashboardView.vue'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 
 jest.mock('../../../src/plugins/i18n', () => {})
 
@@ -18,7 +15,7 @@ const router = new VueRouter()
 
 describe('DashboardView.vue', () => {
   let wrapper: Wrapper<DashboardView>
-  var ob = {
+  const ob = {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',

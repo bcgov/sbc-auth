@@ -22,7 +22,7 @@ describe('AccountCreateBasic.vue', () => {
     localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'payment-type-in-account-creation': true, 'auth-options-learn-more': true, 'enable-ltd-and-ulc-affiliate': true })
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'auth-options-learn-more': true, 'enable-ltd-and-ulc-affiliate': true })
     const orgModule = {
       namespaced: true,
       state: {

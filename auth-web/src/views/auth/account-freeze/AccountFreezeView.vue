@@ -16,14 +16,12 @@
 
 <script lang="ts">
 
-import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { AccountStatus } from '@/util/constants'
-import AccountSuspendedView from './AccountSuspendedView.vue'
 import CommonUtils from '@/util/common-util'
-import { Organization } from '@/models/Organization'
-import Vue from 'vue'
+import { AccountStatus } from '@/util/constants'
+import { Component, Mixins } from 'vue-property-decorator'
 import { mapState } from 'vuex'
+import AccountSuspendedView from './AccountSuspendedView.vue'
 
 @Component({
   components: {
@@ -34,7 +32,6 @@ import { mapState } from 'vuex'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
   private formatDate = CommonUtils.formatDisplayDate
 
   private get isAccountStatusNsfSuspended () : boolean {

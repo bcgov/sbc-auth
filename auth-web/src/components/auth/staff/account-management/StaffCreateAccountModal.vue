@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-useless-template-attributes -->
 <template>
   <v-container class="pa-0 create-account-modal" data-test="create-account-modal">
     <ModalDialog
@@ -48,9 +49,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
-import { Pages, StaffCreateAccountsTypes } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { Pages, StaffCreateAccountsTypes } from '@/util/constants'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
   components: {

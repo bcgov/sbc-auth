@@ -51,8 +51,8 @@
 
 <script lang="ts">
 
-import { Component, Emit, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
+import { Component, Prop, Watch } from 'vue-property-decorator'
 
 @Component
 export default class PayWithOnlineBanking extends Vue {

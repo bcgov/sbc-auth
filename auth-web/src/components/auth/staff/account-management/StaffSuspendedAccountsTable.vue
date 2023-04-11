@@ -45,15 +45,14 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
-import { Code } from '@/models/Code'
-import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
-import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { Code } from '@/models/Code'
+import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
+import CommonUtils from '@/util/common-util'
+import { AccessType, Account, AccountStatus } from '@/util/constants'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { DataOptions } from 'vuetify'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -138,7 +137,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
     // set this variable so that the chip is shown
-    const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
         statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED],

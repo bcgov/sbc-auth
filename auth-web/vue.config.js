@@ -1,5 +1,4 @@
-const RemoveServiceWorkerPlugin = require('webpack-remove-serviceworker-plugin')
-var path = require('path')
+const path = require('path')
 const webpack = require('webpack')
 const fs = require('fs')
 const packageJson = fs.readFileSync('./package.json')
@@ -24,10 +23,6 @@ module.exports = {
   configureWebpack: {
     devtool: 'source-map',
     plugins: [
-      // this is needed to remove existing service workers on users' systems
-      // ref: https://www.npmjs.com/package/webpack-remove-serviceworker-plugin
-      // ref: https://github.com/NekR/self-destroying-sw/tree/master/packages/webpack-remove-serviceworker-plugin
-      new RemoveServiceWorkerPlugin({ filename: 'service-worker.js' }),
       new webpack.DefinePlugin({
         'process.env.ABOUT_TEXT': generateAboutText(aboutText1, aboutText2)
       })
@@ -38,6 +33,9 @@ module.exports = {
         '@vue/composition-api': path.resolve('./node_modules/@vue/composition-api'),
         'vue': path.resolve('./node_modules/vue'),
         '$assets': path.resolve('./src/assets/')
+      },
+      fallback: {
+        'path': require.resolve('path-browserify')
       }
     }
   },
@@ -53,12 +51,5 @@ module.exports = {
       .end()
   },
   publicPath: process.env.VUE_APP_PATH,
-  transpileDependencies: ['vuetify', 'vuex-persist', 'fas-ui', 'clickout-event', 'vue-plugin-helper-decorator'],
-  devServer: {
-    overlay: {
-      warnings: true,
-      errors: true
-    }
-  }
-
+  transpileDependencies: ['vuetify', 'vuex-persist', 'fas-ui', 'clickout-event', 'vue-plugin-helper-decorator']
 }

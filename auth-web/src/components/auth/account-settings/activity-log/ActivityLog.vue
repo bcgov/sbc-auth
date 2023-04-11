@@ -37,13 +37,12 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
 
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { Member, MembershipType, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { Member, Organization } from '@/models/Organization'
 import CommonUtils from '@/util/common-util'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 
 import { namespace } from 'vuex-class'
 

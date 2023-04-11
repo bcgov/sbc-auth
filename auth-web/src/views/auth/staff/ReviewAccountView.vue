@@ -93,37 +93,32 @@
 </template>
 
 <script lang="ts">
+import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
-import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode, Organization } from '@/models/Organization'
 import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 // import { mapActions, mapGetters, mapState } from 'vuex'
+import { AccountInformation } from '@/components/auth/staff/review-task'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
-import { AccountInformation } from '@/components/auth/staff/review-task'
 import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.vue'
-import { Address } from '@/models/address'
-import { AffidavitInformation } from '@/models/affidavit'
 import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
-import { Code } from '@/models/Code'
-import Component from 'vue-class-component'
-import { Contact } from '@/models/contact'
-import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
-import { Prop } from 'vue-property-decorator'
-import StaffModuleStore from '@/store/modules/staff'
+import { Code } from '@/models/Code'
 import { Task } from '@/models/Task'
-import { User } from '@/models/user'
+import { Contact } from '@/models/contact'
+import DocumentService from '@/services/document.services'
+import StaffModuleStore from '@/store/modules/staff'
 
-import { getModule } from 'vuex-module-decorators'
 import { useStore } from 'vuex-composition-helpers'
+import { getModule } from 'vuex-module-decorators'
 
 export default defineComponent({
   name: 'ReviewAccountView',
   props: {
-    orgId: String
+    orgId: Number
   },
   components: {
     AccessRequestModal,
@@ -132,7 +127,7 @@ export default defineComponent({
   setup (props) {
     const store = useStore()
     const instance = getCurrentInstance()
-    const _staffStore = getModule(StaffModuleStore, store)
+    getModule(StaffModuleStore, store)
     const isLoading: Ref<boolean> = ref(true)
     const isSaving: Ref<boolean> = ref(false)
     const pagesEnum = Pages
@@ -149,7 +144,7 @@ export default defineComponent({
     const accountInfoValid: Ref<boolean> = ref(true)
     const showAccountInfoValidations: Ref<boolean> = ref(false)
 
-    const accessRequest: Ref<typeof AccessRequestModal> = ref(null)
+    const accessRequest = ref<InstanceType<typeof AccessRequestModal>>()
     const productFeeRef: Ref<HTMLFormElement> = ref(null)
 
     const getTaskById = async (orgId: number): Promise<Task> => {
@@ -466,7 +461,7 @@ export default defineComponent({
               { ...componentAgreementInformation(3) }
             ]
           }
-          break
+          return []
       }
     })
 

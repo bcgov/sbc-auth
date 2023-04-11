@@ -208,11 +208,11 @@ export default class AccountBusinessType extends Vue {
 
   async mounted () {
     try {
-    // load business type and size codes
+      // load business type and size codes
       this.isLoading = true
       await this.getBusinessSizeCodes()
       await this.getBusinessTypeCodes()
-      if (this.currentOrganization.name) {
+      if (this.currentOrganization?.name) {
         this.name = this.currentOrganization.name
         // incase if the new account is a premium account, default business type to business account
         this.isBusinessAccount = this.currentOrganization.isBusinessAccount

@@ -23,15 +23,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop } from 'vue-property-decorator'
+import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
-import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAccountCreationSuccessView.vue'
-import InterimLanding from '@/components/auth/common/InterimLanding.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
+import GovmAccountCreationSuccessView from '@/views/auth/create-account/GovmAccountCreationSuccessView.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { Component, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

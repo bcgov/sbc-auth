@@ -1,6 +1,6 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import { SearchFilterCodes } from '@/util/constants'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
+import { SearchFilterCodes } from '@/util/constants'
+import { createLocalVue, mount } from '@vue/test-utils'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -31,7 +31,7 @@ describe('SearchFilterInput.vue', () => {
       filterInput: ''
     }
   ]
-  let filteredRecordsCount = 0
+  const filteredRecordsCount = 0
 
   const app = document.createElement('div')
   app.setAttribute('data-app', 'true')

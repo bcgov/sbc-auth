@@ -69,19 +69,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { OrgProduct, Organization } from '@/models/Organization'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Product from '@/components/auth/common/Product.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { OrgProduct } from '@/models/Organization'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
-const userModule = namespace('user')
 
 @Component({
   components: {
@@ -95,8 +93,6 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   @Prop({ default: false }) readOnly: boolean
   @Prop({ default: undefined }) orgId: number
 
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
   @OrgModule.State('productList') public productList!: OrgProduct[]
   @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
 

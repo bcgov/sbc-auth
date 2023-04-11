@@ -39,10 +39,10 @@
 
 <script lang="ts">
 
-import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { Component, Mixins } from 'vue-property-decorator'
 
 @Component({
   components: {

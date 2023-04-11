@@ -83,16 +83,16 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Address } from '@/models/address'
 import { BcolProfile } from '@/models/bcol'
+import { CreateRequestBody, Member, Organization, OrgPaymentDetails, PADInfo, PADInfoValidation } from '@/models/Organization'
+import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { Component, Emit, Mixins } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -212,7 +212,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
         // sync and try again
         await this.syncAddress()
         if (!this.currentOrgAddress || Object.keys(this.currentOrgAddress).length === 0) {
-          await this.$router.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
+          await this.$router?.push(`/${Pages.MAIN}/${this.currentOrganization.id}/settings/account-info`)
           return
         }
       }

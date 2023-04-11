@@ -15,13 +15,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
-import { User } from '@/models/user'
+import OrgModule from '@/store/modules/org'
 import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { mapState } from 'vuex'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   name: 'ManagementMenu',

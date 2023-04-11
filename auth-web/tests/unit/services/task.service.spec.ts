@@ -1,7 +1,7 @@
 import { Task } from '@/models/Task'
 import TaskService from '../../../src/services/task.services'
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.silver.devops.gov.bc.ca/api/v1'
 }

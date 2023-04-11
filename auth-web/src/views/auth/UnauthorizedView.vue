@@ -16,10 +16,10 @@
 </template>
 
 <script lang="ts">
-import { IdpHint, LoginSource, Role } from '@/util/constants'
-import { Component } from 'vue-property-decorator'
+import { Role } from '@/util/constants'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import Vue from 'vue'
+import { Component } from 'vue-property-decorator'
 import { mapState } from 'vuex'
 
 @Component({

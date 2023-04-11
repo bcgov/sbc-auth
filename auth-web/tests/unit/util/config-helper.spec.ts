@@ -1,7 +1,7 @@
-import Axios from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import Axios from 'axios'
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'NRO_URL': 'https://dev.bcregistrynames.gov.bc.ca/nro/',

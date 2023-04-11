@@ -46,24 +46,23 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
-import { Member, Organization, PADInfoValidation } from '@/models/Organization'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
-import ConfigHelper from '@/util/config-helper'
-import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import PremiumChooser from '@/components/auth/create-account/PremiumChooser.vue'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { Member, Organization, PADInfoValidation } from '@/models/Organization'
+import { Contact } from '@/models/contact'
+import { User } from '@/models/user'
+import ConfigHelper from '@/util/config-helper'
+import { PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import { namespace } from 'vuex-class'
 
 const UserModule = namespace('user')
@@ -186,7 +185,7 @@ export default class AccountSetupView extends Vue {
   }
 
   private get enablePaymentMethodSelectorStep (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.PaymentTypeAccountCreation) || false
+    return true
   }
 
   private async verifyAndCreateAccount () {

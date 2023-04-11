@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-useless-template-attributes -->
 <template>
   <v-container>
     <header class="view-header mb-9">
@@ -221,34 +222,24 @@
 </template>
 
 <script lang="ts">
-import {
-  AccountStatus,
-  Pages,
-  Permission,
-  Role,
-  SessionStorageKeys
-} from '@/util/constants'
+import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
+import { AccountStatus, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import {
-  CreateRequestBody,
-  OrgBusinessType,
-  Organization
-} from '@/models/Organization'
 
 import AccountAccessType from '@/components/auth/account-settings/account-info/AccountAccessType.vue'
-import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
+import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
+import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
+import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { Code } from '@/models/Code'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
-import { Code } from '@/models/Code'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
-import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
 
 import { namespace } from 'vuex-class'
 

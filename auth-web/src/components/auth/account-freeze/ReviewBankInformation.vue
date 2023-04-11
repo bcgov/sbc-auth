@@ -61,12 +61,12 @@ import { AccessType } from '@/util/constants'
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CreateRequestBody, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
-import { PaymentTypes } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { CreateRequestBody, Organization, OrgPaymentDetails, PADInfo, PADInfoValidation } from '@/models/Organization'
+import { PaymentTypes } from '@/util/constants'
+import { Component, Mixins } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {

@@ -87,13 +87,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, ProductStatus, Role } from '@/util/constants'
-import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
-import { Component, Mixins, Vue } from 'vue-property-decorator'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Product from '@/components/auth/common/Product.vue'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import { AccountFee, Organization, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody } from '@/models/Organization'
+import { AccessType, Account, ProductStatus, Role } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component, Mixins } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

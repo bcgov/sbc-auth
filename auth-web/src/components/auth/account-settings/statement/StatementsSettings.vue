@@ -180,12 +180,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
-import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import moment from 'moment'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   methods: {

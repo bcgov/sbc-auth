@@ -1,10 +1,10 @@
 
-import { mount, shallowMount } from '@vue/test-utils'
 import PaymentReturnView from '@/views/pay/PaymentReturnView.vue'
-import PaymentServices from '../../../src/services/payment.services'
+import { mount, shallowMount } from '@vue/test-utils'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
+import PaymentServices from '../../../src/services/payment.services'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -12,7 +12,7 @@ Vue.use(VueRouter)
 jest.mock('../../../src/services/payment.services')
 
 describe('PaymentReturnView.vue', () => {
-  var ob = {
+  const ob = {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',

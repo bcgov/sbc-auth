@@ -56,8 +56,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import GLCodesDataTable from '@/components/auth/staff/gl-code/GLCodesDataTable.vue'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
   components: {

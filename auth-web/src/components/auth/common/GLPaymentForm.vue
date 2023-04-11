@@ -91,8 +91,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { GLInfo } from '@/models/Organization'
+import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { mask } from 'vue-the-mask'
 import { namespace } from 'vuex-class'
 const OrgModule = namespace('org')

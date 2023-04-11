@@ -14,8 +14,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { Component, Mixins } from 'vue-property-decorator'
 
 @Component({
   name: 'StepperStub'

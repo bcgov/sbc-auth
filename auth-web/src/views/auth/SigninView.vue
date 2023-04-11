@@ -7,20 +7,12 @@
   ></sbc-signin>
 </template>
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { AccountSettings } from '@/models/account-settings'
-import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from '@/store/modules/org'
+import CommonUtils from '@/util/common-util'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
-import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { mapActions, mapMutations } from 'vuex'
 
 @Component({
   methods: {

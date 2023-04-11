@@ -50,8 +50,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Pages } from '@/util/constants'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component
 export default class AccountInstructions extends Vue {

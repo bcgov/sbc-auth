@@ -1,4 +1,3 @@
-import Axios from 'axios'
 import { ProductsRequestBody } from '@/models/Staff'
 import StaffService from '../../../src/services/staff.services'
 
@@ -15,12 +14,12 @@ jest.mock('axios', () => ({
   virtual: true
 })
 */
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }
 
-var mockProducts : ProductsRequestBody = {
+const mockProducts : ProductsRequestBody = {
   subscriptions: [
     {
       productCode: 'ppr',

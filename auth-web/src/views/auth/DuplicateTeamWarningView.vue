@@ -17,11 +17,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { Organization } from '@/models/Organization'
-import { getModule } from 'vuex-module-decorators'
+import { Component, Vue } from 'vue-property-decorator'
 
 @Component({
   components: {

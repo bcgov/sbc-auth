@@ -1,6 +1,6 @@
+import { PADInfo, PADInfoValidation } from '@/models/Organization'
 import { FilingTypeResponse, GLCode, GLCodeResponse } from '@/models/Staff'
 import { Invoice, InvoiceListResponse } from '@/models/invoice'
-import { PADInfo, PADInfoValidation } from '@/models/Organization'
 import {
   StatementFilterParams,
   StatementListItem,
@@ -10,11 +10,11 @@ import {
 } from '@/models/statement'
 import { TransactionFilter, TransactionFilterParams, TransactionListResponse } from '@/models/transaction'
 
-import { AxiosPromise } from 'axios'
-import ConfigHelper from '@/util/config-helper'
 import { Payment } from '@/models/Payment'
+import ConfigHelper from '@/util/config-helper'
 import { PaymentTypes } from '@/util/constants'
 import { axios } from '@/util/http-util'
+import { AxiosPromise } from 'axios'
 
 export default class PaymentService {
   static createTransaction (paymentId: string, redirectUrl: string): AxiosPromise<any> {
@@ -78,7 +78,7 @@ export default class PaymentService {
   }
 
   static getTransactions (accountId: number, filterParams: TransactionFilterParams, viewAll = false): AxiosPromise<TransactionListResponse> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }
@@ -87,7 +87,7 @@ export default class PaymentService {
     }
     if (viewAll) params.append('viewAll', `${viewAll}`)
 
-    let url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
+    const url = `${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments/queries`
     return axios.post(url, filterParams.filterPayload, { params })
   }
 
@@ -100,7 +100,7 @@ export default class PaymentService {
   }
 
   static getStatementsList (accountId: string, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
     }

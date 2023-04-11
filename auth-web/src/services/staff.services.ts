@@ -1,8 +1,8 @@
-import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
-import { AxiosResponse } from 'axios'
+import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import ConfigHelper from '@/util/config-helper'
-import { axios } from '@/util/http-util.ts'
+import { axios } from '@/util/http-util'
+import { AxiosResponse } from 'axios'
 
 export default class StaffService {
   static async getProducts (): Promise<AxiosResponse<ProductCode[]>> {
@@ -14,7 +14,7 @@ export default class StaffService {
   }
 
   static async getStaffOrgs (status?: string): Promise<AxiosResponse<Organizations>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     // params.append('access_type', 'REGULAR_BCEID,EXTRA_PROVINCIAL')
     if (status) {
       params.append('status', status)
@@ -27,7 +27,7 @@ export default class StaffService {
   }
 
   static async searchOrgs (orgFilter?: OrgFilterParams): Promise<AxiosResponse<OrgList>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     for (const key in orgFilter) {
       if (!orgFilter[key]) {
         continue

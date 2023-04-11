@@ -1,7 +1,11 @@
 /* eslint-disable no-console */
+import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { AccountSettings } from '@/models/account-settings'
+import { Contact } from '@/models/contact'
+import { User } from '@/models/user'
+import store from '@/store'
 import {
   ALLOWED_URIS_FOR_PENDING_ORGS,
-  AccessType,
   Account,
   AccountStatus,
   LoginSource,
@@ -9,16 +13,11 @@ import {
   Permission,
   Role, SessionStorageKeys
 } from '@/util/constants'
-import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
-import Router, { Route } from 'vue-router'
-import { AccountSettings } from '@/models/account-settings'
-import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
-import { User } from '@/models/user'
 import Vue from 'vue'
+import Router from 'vue-router'
 import { getRoutes } from './router'
-import store from '@/store'
 
 Vue.use(Router)
 
@@ -147,7 +146,7 @@ router.beforeEach(async (to, from, next) => {
         }
       } else if (currentOrganization?.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
         const substringCheck = (element:string) => to.path.indexOf(element) > -1
-        let isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
+        const isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
         if (!isAllowedUrl) {
           console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
           return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common

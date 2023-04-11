@@ -56,14 +56,14 @@
 </template>
 
 <script lang="ts">
-import { Account, PaymentTypes } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+import { PaymentTypes } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { Organization } from '@/models/Organization'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

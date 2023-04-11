@@ -15,8 +15,8 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({
   components: {

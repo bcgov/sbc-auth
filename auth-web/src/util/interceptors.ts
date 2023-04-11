@@ -1,5 +1,5 @@
-import TokenService from 'sbc-common-components/src/services/token.services'
 import axios from 'axios'
+import TokenService from 'sbc-common-components/src/services/token.services'
 
 export default function setup () {
   axios.interceptors.request.use(function (config) {
@@ -34,7 +34,7 @@ function createAxiosResponseInterceptor () {
       axios.interceptors.response.eject(interceptor)
       if (error.response.status === 401) {
         originalRequest._retry = true
-        let tokenservice = new TokenService()
+        const tokenservice = new TokenService()
         tokenservice.init().then(function (token) {
           originalRequest.headers['Authorization'] = `Bearer ${token}`
           return axios(originalRequest)

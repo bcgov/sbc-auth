@@ -92,10 +92,10 @@
 
 <script lang="ts">
 
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import PayWithCreditCard from '@/components/pay/PayWithCreditCard.vue'
 import PayWithOnlineBanking from '@/components/pay/PayWithOnlineBanking.vue'
 import PaymentServices from '@/services/payment.services'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({
   components: {

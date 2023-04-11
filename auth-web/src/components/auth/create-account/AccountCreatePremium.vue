@@ -95,23 +95,21 @@
 </template>
 
 <script lang="ts">
-import { Account, LoginSource, PaymentTypes } from '@/util/constants'
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
-import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
-import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
-import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import BcolLogin from '@/components/auth/create-account/BcolLogin.vue'
+import { Address } from '@/models/address'
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
+import { CreateRequestBody, Member, Organization, OrgBusinessType } from '@/models/Organization'
 import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
+import { Account, LoginSource, PaymentTypes } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
 const OrgModule = namespace('org')
 const UserModule = namespace('user')
 
@@ -232,7 +230,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     // sync local tracking object and update child AccountBusinessType with new org name
     const orgName = details.bcolAccountDetails.orgName
     this.orgBusinessTypeLocal.name = orgName
-    var org: Organization = {
+    const org: Organization = {
       id: this.currentOrganization.id,
       name: details.bcolAccountDetails.orgName,
       accessType: this.currentOrganization.accessType,

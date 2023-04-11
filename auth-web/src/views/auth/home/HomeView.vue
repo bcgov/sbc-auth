@@ -129,19 +129,19 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { IdpHint, LoginSource, Pages } from '@/util/constants'
-import { Member, MembershipStatus } from '@/models/Organization'
-import { mapMutations, mapState } from 'vuex'
-import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LoginBCSC from '@/components/auth/home/LoginBCSC.vue'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
-import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
+import { Member, MembershipStatus } from '@/models/Organization'
+import { AccountSettings } from '@/models/account-settings'
 import { User } from '@/models/user'
+import { LoginSource, Pages } from '@/util/constants'
+import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapMutations, mapState } from 'vuex'
 
 @Component({
   name: 'Home',

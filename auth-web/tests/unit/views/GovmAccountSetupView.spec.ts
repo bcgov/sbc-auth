@@ -8,9 +8,12 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import displayMode from '@/directives/displayMode'
+import Vuelidate from 'vuelidate'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
+Vue.use(Vuelidate)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
@@ -19,15 +22,41 @@ document.body.setAttribute('data-app', 'true')
 
 describe('GovmAccountSetupView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(async () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.directive('displayMode', displayMode)
 
     const orgModule = {
       namespaced: true,
       state: {
+        currentOrganization: {
+          name: 'test org'
+        },
+        currentOrgAddress: {
+          city: 'city',
+          street: 'street'
+        },
+        currentMembership: [{
+          membershipTypeCode: 'OWNER',
+          membershipStatus: 'ACTIVE',
+          user: { username: 'test' } }],
+        pendingOrgMembers: []
+      },
+      actions: {
+      },
+      mutations: {
+        setCurrentOrganizationAddress: jest.fn(),
+        resetInvitations: jest.fn()
+      }
+    }
+
+    const codeModule = {
+      namespaced: true,
+      state: {},
+      actions: { getBusinessTypeCodes: jest.fn(() => []),
+        getBusinessSizeCodes: jest.fn(() => [])
       }
     }
 
@@ -35,7 +64,8 @@ describe('GovmAccountSetupView.vue', () => {
       state: {},
       strict: false,
       modules: {
-        org: orgModule
+        org: orgModule,
+        codes: codeModule
       }
     })
 

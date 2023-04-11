@@ -1,5 +1,5 @@
-import '../../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import '../../test-utils/composition-api-setup' // important to import this first
 
 import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
@@ -14,7 +14,7 @@ jest.mock('../../../../src/services/org.services')
 
 describe('StaffDashboardView.vue', () => {
   let cmp
-  var ob = {
+  const ob = {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',
@@ -65,7 +65,7 @@ describe('StaffDashboardView.vue', () => {
 
     const isFormValid = jest.fn(() => true)
 
-    let vuetify = new Vuetify({})
+    const vuetify = new Vuetify({})
 
     cmp = shallowMount(StaffDashboardView, {
       store,

@@ -44,13 +44,13 @@
 </template>
 
 <script lang="ts">
-import { AddUserBody, Member, Organization } from '@/models/Organization'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
+import { AddUserBody } from '@/models/Organization'
 import { User } from '@/models/user'
+import CommonUtils from '@/util/common-util'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {

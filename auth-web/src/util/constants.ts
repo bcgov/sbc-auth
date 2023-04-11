@@ -291,7 +291,6 @@ export enum Permission {
 
 export enum LDFlags {
     AuthLearnMore = 'auth-options-learn-more',
-    PaymentTypeAccountCreation = 'payment-type-in-account-creation',
     LinkToNewNameRequestApp ='link-to-new-name-request-app',
     EnableMandatoryAddress = 'enable-mandatory-address',
     EnableGovmInvite = 'enable-govm-account-invite',

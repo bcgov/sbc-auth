@@ -23,12 +23,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
-import { AccountStatus } from '@/util/constants'
 import { Code } from '@/models/Code'
-import CommonUtils from '@/util/common-util'
+import { Organization } from '@/models/Organization'
 import { FailedInvoice } from '@/models/invoice'
+import CommonUtils from '@/util/common-util'
+import { AccountStatus } from '@/util/constants'
+import { Component, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

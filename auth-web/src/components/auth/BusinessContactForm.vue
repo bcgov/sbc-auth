@@ -87,15 +87,12 @@
 
 <script lang="ts">
 import { Business, FolioNumberload } from '@/models/business'
-import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import BusinessModule from '@/store/modules/business'
-import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
-import { SessionStorageKeys } from '@/util/constants'
-import { getModule } from 'vuex-module-decorators'
+import ConfigHelper from '@/util/config-helper'
+import { Component, Vue } from 'vue-property-decorator'
 import { mask } from 'vue-the-mask'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   directives: {

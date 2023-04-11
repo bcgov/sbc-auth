@@ -90,14 +90,11 @@
 </template>
 
 <script lang="ts">
-import { AddUserBody, AddUsersToOrgBody, Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
-import { Invitation } from '@/models/Invitation'
-import OrgModule from '@/store/modules/org'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
-import { getModule } from 'vuex-module-decorators'
+import { AddUserBody, Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
+import CommonUtils from '@/util/common-util'
+import { Component, Emit, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {

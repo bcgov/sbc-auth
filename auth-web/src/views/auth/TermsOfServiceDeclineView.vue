@@ -28,12 +28,11 @@
 </template>
 
 <script lang="ts">
-import { IdpHint, LoginSource, Pages, Role } from '@/util/constants'
-import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
+import { LoginSource, Pages } from '@/util/constants'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
+import { Component } from 'vue-property-decorator'
 import { mapState } from 'vuex'
 
 @Component({

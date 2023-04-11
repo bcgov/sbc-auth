@@ -1,21 +1,17 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
-import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import MemberDataTable, { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
-import { mapActions, mapState } from 'vuex'
-import { Business } from '@/models/business'
-import ConfigHelper from '@/util/config-helper'
-import { Event } from '@/models/event'
-import { EventBus } from '@/event-bus'
-import { Invitation } from '@/models/Invitation'
-import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { EventBus } from '@/event-bus'
+import { Event } from '@/models/event'
+import { Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
 import OrgModule from '@/store/modules/org'
-import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
 import UserModule from '@/store/modules/user'
+import ConfigHelper from '@/util/config-helper'
+import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({
@@ -41,7 +37,8 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class TeamManagementMixin extends Vue {
-  private userStore = getModule(UserModule, this.$store)
+  private _userStore = getModule(UserModule, this.$store)
+  private _orgStore = getModule(OrgModule, this.$store)
   protected successTitle: string = ''
   protected successText: string = ''
   protected errorTitle: string = ''

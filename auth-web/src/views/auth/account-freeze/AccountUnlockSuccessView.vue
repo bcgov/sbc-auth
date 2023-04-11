@@ -46,13 +46,11 @@
 
 <script lang="ts">
 
+import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { Organization } from '@/models/Organization'
 import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
-import Vue from 'vue'
-import { flush } from '@sentry/browser'
 
 @Component({
   computed: {
@@ -63,7 +61,6 @@ import { flush } from '@sentry/browser'
   }
 })
 export default class AccountUnlockSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
   protected readonly syncOrganization!: (orgId: number) => Promise<Organization>
   private isLoading: boolean = false
   private isFailed: boolean = false

@@ -1,5 +1,5 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
@@ -26,7 +26,7 @@ describe('PPRLauncher.vue', () => {
   }
   sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-  let userModule = {
+  const userModule = {
     namespaced: true,
     state: {
       currentUser: {

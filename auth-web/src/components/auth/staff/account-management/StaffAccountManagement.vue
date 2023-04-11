@@ -78,28 +78,34 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, Pages, Role, StaffCreateAccountsTypes } from '@/util/constants'
-import { mapActions, mapGetters, mapState } from 'vuex'
-import { Code } from '@/models/Code'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
-import StaffModule from '@/store/modules/staff'
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
+import { Code } from '@/models/Code'
+import { Organization } from '@/models/Organization'
+import StaffModule from '@/store/modules/staff'
+import { LDFlags, Pages, Role } from '@/util/constants'
+import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { Component, Vue } from 'vue-property-decorator'
+import { mapActions, mapGetters, mapState } from 'vuex'
 
-import { getModule } from 'vuex-module-decorators'
 import { namespace } from 'vuex-class'
+import { getModule } from 'vuex-module-decorators'
 
+// eslint-disable-next-line no-unused-vars
 enum TAB_CODE {
+    // eslint-disable-next-line no-unused-vars
     Active = 'active-tab',
+    // eslint-disable-next-line no-unused-vars
     PendingReview = 'pending-review-tab',
+    // eslint-disable-next-line no-unused-vars
     Rejected = 'rejected-tab',
+    // eslint-disable-next-line no-unused-vars
     Invitations = 'invitations-tab',
+    // eslint-disable-next-line no-unused-vars
     Suspended = 'suspended-tab'
 }
 

@@ -37,12 +37,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
-import { GLCode } from '@/models/Staff'
 import GLCodeDetailsModal from '@/components/auth/staff/gl-code/GLCodeDetailsModal.vue'
+import { GLCode } from '@/models/Staff'
 import StaffModule from '@/store/modules/staff'
+import CommonUtils from '@/util/common-util'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions } from 'vuex'
 import { getModule } from 'vuex-module-decorators'
 
 @Component({

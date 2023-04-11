@@ -1,6 +1,6 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import Signin from '@/views/auth/SigninView.vue'
 import UserModule from '@/store/modules/user'
+import Signin from '@/views/auth/SigninView.vue'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -30,7 +30,7 @@ describe('Signin.vue', () => {
       }
     })
 
-    let vuetify = new Vuetify({})
+    const vuetify = new Vuetify({})
 
     wrapper = mount(Signin, {
       store,

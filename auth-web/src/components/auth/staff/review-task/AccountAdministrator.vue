@@ -22,9 +22,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Contact } from '@/models/contact'
 import { User } from '@/models/user'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class AccountAdministrator extends Vue {

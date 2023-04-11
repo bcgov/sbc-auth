@@ -72,17 +72,16 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
-import { DataOptions } from 'vuetify'
-import { Event } from '@/models/event'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { EventBus } from '@/event-bus'
 import { Invitation } from '@/models/Invitation'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
-import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { Event } from '@/models/event'
+import CommonUtils from '@/util/common-util'
+import { Component, Mixins } from 'vue-property-decorator'
+import { DataOptions } from 'vuetify'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {

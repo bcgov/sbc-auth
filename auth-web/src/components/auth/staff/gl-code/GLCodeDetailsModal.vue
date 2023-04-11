@@ -237,12 +237,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { FilingType, GLCode } from '@/models/Staff'
-import { mapActions, mapState } from 'vuex'
 import StaffModule from '@/store/modules/staff'
-import { getModule } from 'vuex-module-decorators'
 import moment from 'moment'
+import { Component, Emit, Vue } from 'vue-property-decorator'
+import { mapActions } from 'vuex'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   methods: {

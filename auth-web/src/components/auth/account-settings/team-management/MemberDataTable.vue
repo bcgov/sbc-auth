@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-useless-template-attributes -->
 <template>
   <div>
   <v-data-table
@@ -217,13 +218,13 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource, Permission } from '@/util/constants'
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { AccessType, LoginSource, Permission } from '@/util/constants'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 export interface ChangeRolePayload {
   member: Member

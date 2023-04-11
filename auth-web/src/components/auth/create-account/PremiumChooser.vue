@@ -127,16 +127,14 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import { Account } from '@/util/constants'
+import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
+import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
-import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
-import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import Vue from 'vue'
+import { Account } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
 
 @Component({
   components: {

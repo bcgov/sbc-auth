@@ -167,20 +167,20 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Watch } from 'vue-property-decorator'
+import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
+import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { Member, OrgAccountTypes, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
-import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
-import { DataOptions } from 'vuetify'
 import { EnumDictionary } from '@/models/util'
 import OrgModule from '@/store/modules/org'
-import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
+import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
 import debounce from '@/util/debounce'
-import { getModule } from 'vuex-module-decorators'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { DataOptions } from 'vuetify'
 import { namespace } from 'vuex-class'
+import { getModule } from 'vuex-module-decorators'
 
 const StaffBinding = namespace('staff')
 const OrgBinding = namespace('org')
@@ -372,18 +372,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   protected getAccountTypeFromOrgAndAccessType (org:Organization): any {
     const entries = Object.entries(this.accountTypeMap)
     const byAccessTypeAndOrgType = entries.find(([key, value]) =>
-                                                  value?.accessType?.includes(org.accessType) &&
-                                                  value?.orgType === org.orgType)
+      value?.accessType?.includes(org.accessType) &&
+      value?.orgType === org.orgType)
     if (byAccessTypeAndOrgType) {
       return byAccessTypeAndOrgType[0]
     }
     const byAccessType = entries.find(([key, value]) =>
-                                      value?.accessType?.includes(org.accessType))
+      value?.accessType?.includes(org.accessType))
     if (byAccessType) {
       return byAccessType[0]
     }
     const byOrgType = entries.find(([key, value]) =>
-                                    value?.orgType === org.orgType)
+      value?.orgType === org.orgType)
     if (byOrgType) {
       return byOrgType[0]
     }

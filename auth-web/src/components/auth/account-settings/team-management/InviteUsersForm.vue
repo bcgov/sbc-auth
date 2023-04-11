@@ -76,16 +76,14 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource } from '@/util/constants'
-import { Component, Emit, Vue } from 'vue-property-decorator'
-import { Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { MembershipType, RoleInfo } from '@/models/Organization'
 import OrgModule from '@/store/modules/org'
-import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
+import CommonUtils from '@/util/common-util'
+import { Component, Emit } from 'vue-property-decorator'
+import { mapActions, mapMutations, mapState } from 'vuex'
 import { getModule } from 'vuex-module-decorators'
+import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
 
 interface InvitationInfo {
   emailAddress: string

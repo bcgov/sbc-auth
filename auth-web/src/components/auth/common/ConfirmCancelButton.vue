@@ -34,10 +34,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
-import { mapActions } from 'vuex'
+import { Component, Emit, Prop } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

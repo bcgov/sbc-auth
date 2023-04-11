@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Component, Prop } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'

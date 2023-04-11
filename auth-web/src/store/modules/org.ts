@@ -1,15 +1,4 @@
-import {
-  AccessType,
-  Account,
-  AccountStatus,
-  FeeCodes,
-  PatchActions,
-  PaymentTypes,
-  Permission,
-  ProductStatus,
-  Role,
-  SessionStorageKeys
-} from '@/util/constants'
+import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import {
   AccountFee,
   AddUserBody,
@@ -33,29 +22,40 @@ import {
   PatchOrgPayload,
   UpdateMemberPayload
 } from '@/models/Organization'
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
+import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { StatementFilterParams, StatementNotificationSettings, StatementSettings } from '@/models/statement'
+import {
+  AccessType,
+  Account,
+  AccountStatus,
+  FeeCodes,
+  PatchActions,
+  PaymentTypes,
+  Permission,
+  ProductStatus,
+  Role,
+  SessionStorageKeys
+} from '@/util/constants'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 
+import { AutoCompleteResponse } from '@/models/AutoComplete'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
-import { AutoCompleteResponse } from '@/models/AutoComplete'
-import BcolService from '@/services/bcol.services'
-import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { EmptyResponse } from '@/models/global'
-import InvitationService from '@/services/invitation.services'
 import { InvoiceList } from '@/models/invoice'
-import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import BcolService from '@/services/bcol.services'
+import InvitationService from '@/services/invitation.services'
 import OrgService from '@/services/org.services'
 import PaymentService from '@/services/payment.services'
 import PermissionService from '@/services/permission.services'
 import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
-import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import VonService from '@/services/von.services'
+import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 
 @Module({
   name: 'org',
@@ -750,9 +750,9 @@ export default class OrgModule extends VuexModule {
       if (!response || !response.data || ![200, 201, 207].includes(response.status) || !response.data?.users) {
         throw new Error('Unable to create users')
       } else {
-        let users = response.data.users
-        let successUsers: BulkUsersSuccess[] = []
-        let failedUsers: BulkUsersFailed[] = []
+        const users = response.data.users
+        const successUsers: BulkUsersSuccess[] = []
+        const failedUsers: BulkUsersFailed[] = []
         users.forEach((user) => {
           if (user.httpStatus === 201) {
             const password = (addUserBody.users.find(({ username }) => username === user.firstname))?.password

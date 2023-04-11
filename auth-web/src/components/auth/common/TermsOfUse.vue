@@ -15,12 +15,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
-import CommonUtils from '@/util/common-util'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
-import documentService from '@/services/document.services.ts'
+import CommonUtils from '@/util/common-util'
+import { Component, Prop, Vue } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   computed: {

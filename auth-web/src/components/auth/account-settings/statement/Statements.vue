@@ -77,15 +77,15 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem, StatementListResponse } from '@/models/statement'
-import { mapActions, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
+import { Account, Pages } from '@/util/constants'
 import moment from 'moment'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {
@@ -164,7 +164,6 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   formatDateRange (date1, date2) {
-    let displayDate = ''
     let dateObj1 = this.getMomentDateObj(date1)
     let dateObj2 = this.getMomentDateObj(date2)
     let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''

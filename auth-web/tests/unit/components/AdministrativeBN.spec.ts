@@ -3,6 +3,7 @@ import AdministrativeBN from '@/components/auth/staff/admin/AdministrativeBN.vue
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
+import { VTextField } from 'vuetify/lib'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -27,6 +28,9 @@ describe('Search Business Form: Initial', () => {
 describe('Search Business Form: Result', () => {
   const wrapper: Wrapper<any> = shallowMount(AdministrativeBN, {
     vuetify,
+    stubs: {
+      'v-text-field': VTextField
+    },
     propsData: {}
   })
 

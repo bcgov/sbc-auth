@@ -55,18 +55,10 @@
 </template>
 
 <script lang="ts">
-import {
-  Component,
-  Emit,
-  Mixins,
-  Prop,
-  Vue,
-  Watch
-} from 'vue-property-decorator'
-import { OrgBusinessType, Organization } from '@/models/Organization'
-import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Code } from '@/models/Code'
+import { OrgBusinessType, Organization } from '@/models/Organization'
+import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

@@ -1,6 +1,6 @@
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
 import ActivityService from '@/services/activityLog.services'
+import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 
 @Module({ namespaced: true })
 export default class ActvityLogModule extends VuexModule {

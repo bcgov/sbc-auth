@@ -48,16 +48,13 @@
 </template>
 
 <script lang="ts">
+import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
+import { User } from '@/models/user'
 import { ALLOWED_URIS_FOR_PENDING_ORGS, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
-import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
 
 @Component({
   components: {
@@ -83,7 +80,6 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   private atBottom = false
   @Prop() token: string
 
-  protected readonly currentUser!: KCUserProfile
   private showTosBanner = false
   private isGovmUser: boolean = false
 

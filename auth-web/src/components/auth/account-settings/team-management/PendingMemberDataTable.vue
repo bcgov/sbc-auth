@@ -51,10 +51,9 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import { Member } from '@/models/Organization'
-import moment from 'moment'
+import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { mapState } from 'vuex'
 
 @Component({
   computed: {

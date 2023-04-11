@@ -39,11 +39,10 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
+import CreateUserProfileForm from '@/components/auth/CreateUserProfileForm.vue'
 import Vue from 'vue'
+import { Component, Prop } from 'vue-property-decorator'
 
 @Component({
   components: {

@@ -39,19 +39,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
-import { Business } from '@/models/business'
-import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import BusinessModule from '@/store/modules/business'
-import ConfigHelper from '@/util/config-helper'
-import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import { Organization } from '@/models/Organization'
-import { Pages } from '@/util/constants'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
+import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
+import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
+import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+import { Business } from '@/models/business'
+import ConfigHelper from '@/util/config-helper'
+import { Component, Mixins } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 
 @Component({
   components: {

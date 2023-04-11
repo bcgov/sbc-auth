@@ -43,11 +43,9 @@
 
 <script lang="ts">
 
-import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
-import Vue from 'vue'
+import { Component, Mixins } from 'vue-property-decorator'
 import { mapState } from 'vuex'
 
 @Component({
@@ -56,8 +54,6 @@ import { mapState } from 'vuex'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
-
   private goTo (page) {
     switch (page) {
       case 'home': this.$router.push('/')

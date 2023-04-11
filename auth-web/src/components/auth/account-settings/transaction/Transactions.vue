@@ -68,20 +68,22 @@
 </template>
 
 <script lang="ts">
-import { Account, Pages } from '@/util/constants'
-import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
-import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from '@vue/composition-api'
-import { useAccountChangeHandler, useTransactions } from '@/composables'
-import { BaseTableHeaderI } from '@/components/datatable/interfaces'
-import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { StatusCodes } from 'http-status-codes'
-import TransactionsDataTable from './TransactionsDataTable.vue'
+import { BaseTableHeaderI } from '@/components/datatable/interfaces'
+import { useAccountChangeHandler, useTransactions } from '@/composables'
+import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
+import CommonUtils from '@/util/common-util'
+import { Account, Pages } from '@/util/constants'
+import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from '@vue/composition-api'
+import { StatusCodes } from 'http-status-codes'
 import moment from 'moment'
 import { useStore } from 'vuex-composition-helpers'
+import TransactionsDataTable from './TransactionsDataTable.vue'
 
+// Rename to OrgTransactions
 export default defineComponent({
+  // eslint-disable-next-line vue/multi-word-component-names
   name: 'Transactions',
   components: { ModalDialog, TransactionsDataTable },
   props: {
