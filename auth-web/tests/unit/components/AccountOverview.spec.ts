@@ -31,7 +31,15 @@ describe('AccountOverview.vue', () => {
       state: {
         currentOrganization: {}
       },
-      actions: OrgModule.actions,
+      actions: {
+        ...OrgModule.actions,
+        calculateFailedInvoices: jest.fn(() => {
+          return {
+            totalTransactionAmount: 10,
+            totalAmountToPay: 20
+          }
+        })
+      },
       mutations: OrgModule.mutations,
       getters: OrgModule.getters
     }
