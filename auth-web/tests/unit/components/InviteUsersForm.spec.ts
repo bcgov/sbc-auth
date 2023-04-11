@@ -15,6 +15,10 @@ document.body.setAttribute('data-app', 'true')
 
 jest.mock('../../../src/services/bcol.services')
 
+const divStub = {
+  template: '<div/>'
+}
+
 describe('InviteUsersForm.vue', () => {
   let store
   let wrapper: any
@@ -122,7 +126,7 @@ describe('InviteUsersForm.vue', () => {
       localVue,
       mocks: { $t },
       stubs: {
-        'v-overflow-btn': `<div/>`
+        'v-overflow-btn': divStub
       }
     })
 
@@ -152,7 +156,7 @@ describe('InviteUsersForm.vue', () => {
       localVue,
       mocks: { $t },
       stubs: {
-        'v-overflow-btn': `<div/>`
+        'v-overflow-btn': divStub
       }
     })
     store.commit('org/setCurrentOrganization')

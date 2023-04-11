@@ -5,8 +5,10 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import displayMode from '@/directives/displayMode'
 
 Vue.use(Vuetify)
+Vue.directive('displayMode', displayMode)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -92,6 +94,6 @@ describe('SelectProductService.vue', () => {
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(SelectProductService).exists()).toBe(true)
+    expect(wrapper.findComponent(SelectProductService).exists()).toBe(true)
   })
 })

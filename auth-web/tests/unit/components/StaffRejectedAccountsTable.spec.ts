@@ -33,7 +33,8 @@ describe('StaffRejectedAccountsTable.vue', () => {
         ]
       },
       actions: {
-        rejectedStaffOrgs: jest.fn()
+        rejectedStaffOrgs: jest.fn(),
+        getProducts: jest.fn()
       }
     }
 

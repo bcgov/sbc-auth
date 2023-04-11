@@ -10,6 +10,7 @@ import Search from 'fas-ui'
 
 Vue.use(Vuetify)
 Vue.use(VueI18n)
+Vue.use(Vuex)
 
 describe('FasSearchComponent.vue', () => {
   let wrapper: any
@@ -23,8 +24,8 @@ describe('FasSearchComponent.vue', () => {
       strict: false,
       modules: {}
     })
-    localVue.use(Search, { store, i18n })
 
+    Vue.use(Search, { store, i18n })
     const vuetify = new Vuetify({})
 
     sessionStorage.__STORE__['FAS_WEB_URL'] = 'https://fas-dev.apps.silver.devops.gov.bc.ca/'
@@ -33,7 +34,6 @@ describe('FasSearchComponent.vue', () => {
     wrapper = mount({ template: `<fas-search-component :isLibraryMode='true'/>` }, {
       store,
       i18n,
-      localVue,
       vuetify
     })
 

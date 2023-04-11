@@ -33,7 +33,7 @@ describe('Icon tooltip tests', () => {
   })
 
   it('renders and displays properly', async () => {
-    expect(wrapper.find(IconTooltip).exists()).toBe(true)
+    expect(wrapper.findComponent(IconTooltip).exists()).toBe(true)
     expect(wrapper.find(`.${props.icon}`).exists()).toBe(true)
     // can't test the tooltip renders on mouse over because it is renderred outside the wrapper
   })

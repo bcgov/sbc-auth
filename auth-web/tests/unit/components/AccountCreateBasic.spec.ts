@@ -6,8 +6,10 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import displayMode from '@/directives/displayMode'
 
 Vue.use(Vuetify)
+Vue.directive('displayMode', displayMode)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
