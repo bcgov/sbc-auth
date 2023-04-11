@@ -60,8 +60,8 @@ describe('Transactions tests', () => {
   })
 
   it('renders transaction with child components', () => {
-    expect(wrapper.find(Transactions).exists()).toBe(true)
-    expect(wrapper.find(TransactionsDataTable).exists()).toBe(true)
+    expect(wrapper.findComponent(Transactions).exists()).toBe(true)
+    expect(wrapper.findComponent(TransactionsDataTable).exists()).toBe(true)
     expect(wrapper.find('.view-header__title').exists()).toBe(false)
     expect(wrapper.find('.cad-credit').exists()).toBe(false)
     expect(wrapper.find('.credit-details').exists()).toBe(false)

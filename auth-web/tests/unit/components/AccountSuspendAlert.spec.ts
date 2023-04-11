@@ -4,6 +4,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import CodesModule from '@/store/modules/codes'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -33,7 +34,8 @@ describe('AccountSuspendAlert.vue', () => {
       state: {},
       strict: false,
       modules: {
-        org: orgModule
+        org: orgModule,
+        codes: CodesModule
       }
     })
 

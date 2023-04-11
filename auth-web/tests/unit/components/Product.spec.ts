@@ -5,6 +5,7 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import displayMode from '@/directives/displayMode'
 
 Vue.use(Vuetify)
 
@@ -39,6 +40,7 @@ describe('Product.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
+    localVue.directive('displayMode', displayMode)
 
     const vuetify = new Vuetify({})
 

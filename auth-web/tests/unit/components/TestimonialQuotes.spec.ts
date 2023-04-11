@@ -32,7 +32,7 @@ describe('TestimonialQuotes.vue', () => {
   })
 
   it('is a vue instance', () => {
-    expect(wrapper.isVueInstance()).toBeTruthy()
+    expect(wrapper.vm).toBeTruthy()
   })
 
   it('it renders quotes correctly', () => {

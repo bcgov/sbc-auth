@@ -78,8 +78,8 @@ describe('AccountCreateBasic.vue', () => {
   })
 
   it('renders the components properly and address is being shown', () => {
-    expect(wrapper.find(AccountCreateBasic).exists()).toBe(true)
-    expect(wrapper.find(BaseAddressForm).exists()).toBe(true)
+    expect(wrapper.findComponent(AccountCreateBasic).exists()).toBe(true)
+    expect(wrapper.findComponent(BaseAddressForm).exists()).toBe(true)
     expect(wrapper.find('.save-btn').is('[disabled]')).toBe(true)
   })
 })
