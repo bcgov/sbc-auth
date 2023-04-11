@@ -153,7 +153,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
-    // Find all EntityDetails components and filter the one with the desired parent element
+
     expect(wrapper.findComponent(EntityDetails).exists()).toBeTruthy()
     const entityDetails = wrapper.findComponent(EntityDetails)
     expect(entityDetails.exists()).toBeTruthy()
