@@ -155,7 +155,8 @@
 
 <script lang="ts">
 import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
-import { Ref, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { PropType, Ref, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { Code } from '@/models/Code'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useI18n } from 'vue-i18n-bridge'
 
@@ -197,6 +198,9 @@ export default defineComponent({
     taskName: {
       type: String,
       default: ''
+    },
+    onholdReasonCodes: {
+      type: Array as PropType<Code[]>
     }
   },
   components: {
@@ -209,7 +213,7 @@ export default defineComponent({
     const accessRequest: Ref<ModalDialog> = ref(null)
     const accessRequestConfirmationDialog: Ref<ModalDialog> = ref(null)
     const rejectForm: Ref<HTMLFormElement> = ref(null)
-    const onholdReasonCodes: Ref<string[]> = ref([])
+    const onholdReasonCodes: Ref<Code[]> = ref(props.onholdReasonCodes)
     const otherReasonText: Ref<string> = ref('')
 
     const onholdReasonRules = [
