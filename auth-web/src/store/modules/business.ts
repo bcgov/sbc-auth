@@ -136,14 +136,15 @@ export default class BusinessModule extends VuexModule {
           legalType: nr.legalType,
           nrNumber: (nr.nrNum || nr.nrNumber),
           state: (nr.stateCd || nr.state),
-          applicantEmail: nr.applicants?.emailAddress,
-          applicantPhone: nr.applicants?.phoneNumber,
+          applicantEmail: nr.applicants ? nr.applicants[0].emailAddress : null,
+          applicantPhone: nr.applicants ? nr.applicants[0].phoneNumber : null,
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
           entityTypeCd: nr.entity_type_cd,
           natureOfBusiness: nr.natureBusinessInfo,
-          expirationDate: nr.expirationDate
+          expirationDate: nr.expirationDate,
+          applicants: nr.applicants
         }
       }
       affiliatedEntities.push(entity)
