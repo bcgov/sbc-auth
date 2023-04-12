@@ -1,7 +1,7 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, PasscodeResetLoad } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, NameRequest, PasscodeResetLoad } from '@/models/business'
 import {
   CorpTypes,
   FilingTypes,
@@ -76,6 +76,11 @@ export default class BusinessModule extends VuexModule {
       nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION)
     )
 
+    /** Returns True if NR has applicants for registration. */
+    const isApplicantsExist = (nr: NameRequest): boolean => {
+      return nr.applicants && nr.applicants.length > 0
+    }
+
     /** Returns target conditionally. */
     const getTarget = (nr): NrTargetTypes => {
       const bcCorpTypes = [CorpTypes.BC_CCC, CorpTypes.BC_COMPANY, CorpTypes.BC_ULC_COMPANY]
@@ -137,8 +142,8 @@ export default class BusinessModule extends VuexModule {
           legalType: nr.legalType,
           nrNumber: (nr.nrNum || nr.nrNumber),
           state: (nr.stateCd || nr.state),
-          applicantEmail: nr.applicants.length > 0 ? nr.applicants[0].emailAddress : null,
-          applicantPhone: nr.applicants.length > 0 ? nr.applicants[0].phoneNumber : null,
+          applicantEmail: isApplicantsExist(nr) ? nr.applicants[0].emailAddress : null,
+          applicantPhone: isApplicantsExist(nr) ? nr.applicants[0].phoneNumber : null,
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
