@@ -53,11 +53,11 @@ export default class BusinessModule extends VuexModule {
       nr.names.find(name => [NrState.APPROVED, NrState.CONDITION].includes(name.state))?.name
 
     /** Returns True if NR is approved. */
-    const isApproved = (nr): boolean => (nr.state === NrState.APPROVED)
+    const isApproved = (nr): boolean => ((nr.state || nr.stateCd) === NrState.APPROVED)
 
     /** Returns True if NR is conditionally approved. NB: consent flag=null means "not required". */
     const isConditionallyApproved = (nr): boolean => (
-      nr.state === NrState.CONDITIONAL && (
+      (nr.state || nr.stateCd) === NrState.CONDITIONAL && (
         nr.consentFlag === null ||
         nr.consentFlag === NrConditionalStates.RECEIVED ||
         nr.consentFlag === NrConditionalStates.WAIVED
@@ -65,13 +65,13 @@ export default class BusinessModule extends VuexModule {
     )
 
     /** Returns True if NR is approved for incorporation. */
-    const isApprovedForIa = (nr): boolean => (
+    const isApprovedForIa = (nr: NameRequest): boolean => (
       (isApproved(nr) || isConditionallyApproved(nr)) &&
       nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION)
     )
 
     /** Returns True if NR is approved for registration. */
-    const isApprovedForRegistration = (nr): boolean => (
+    const isApprovedForRegistration = (nr: NameRequest): boolean => (
       (isApproved(nr) || isConditionallyApproved(nr)) &&
       nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION)
     )
@@ -134,7 +134,6 @@ export default class BusinessModule extends VuexModule {
       }
       if (resp.nameRequest) {
         const nr = resp.nameRequest
-        entity.businessIdentifier = nr.nrNum
         entity.nameRequest = {
           actions: nr.actions,
           names: nr.names,
