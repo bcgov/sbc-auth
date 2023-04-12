@@ -81,10 +81,12 @@ export interface NameRequest {
     // eslint-disable-next-line camelcase
     entity_type_cd?: string
     natureBusinessInfo?: string
-    applicants?: {
-        emailAddress?: string
-        phoneNumber?: string
-    }
+    applicants?: Array<Applicant>
+}
+
+interface Applicant {
+    emailAddress?: string
+    phoneNumber?: string
 }
 
 // Names interface to match external data provided from lear.
