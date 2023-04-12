@@ -131,6 +131,7 @@ export default class BusinessModule extends VuexModule {
         const nr = resp.nameRequest
         entity.businessIdentifier = nr.nrNum
         entity.nameRequest = {
+          actions: nr.actions,
           names: nr.names,
           id: nr.id,
           legalType: nr.legalType,
