@@ -216,7 +216,7 @@ export default defineComponent({
 
     /** Returns true if the business is dissolved. */
     const isDissolution = (item: Business) => {
-      return false
+      return item.dissolved
     }
 
     const getDetails = (item: Business): EntityAlertTypes[] => {

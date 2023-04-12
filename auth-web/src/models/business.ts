@@ -61,7 +61,7 @@ export interface UpdateBusinessNamePayload {
 
 // see https://github.com/bcgov/business-schemas/blob/master/src/registry_schemas/schemas/name_request.json
 export interface NameRequest {
-    actions?: Array<Actions>
+    actions?: Array<Action>
     consentFlag?: string
     names?: Array<Names>
     id?: number
@@ -81,10 +81,12 @@ export interface NameRequest {
     // eslint-disable-next-line camelcase
     entity_type_cd?: string
     natureBusinessInfo?: string
-    applicants?: {
-        emailAddress?: string
-        phoneNumber?: string
-    }
+    applicants?: Array<Applicant>
+}
+
+export interface Applicant {
+    emailAddress?: string
+    phoneNumber?: string
 }
 
 // Names interface to match external data provided from lear.
@@ -99,7 +101,7 @@ export interface Names {
 }
 
 // Actions interface to match external data provided from lear.
-export interface Actions {
+export interface Action {
     URL: string,
     entitiesFilingName: string,
     filingName: LearFilingTypes,

@@ -196,7 +196,7 @@ export enum NrState {
 export enum NrDisplayStates {
     APPROVED = 'Approved',
     HOLD = 'Pending Staff Review',
-    DRAFT = 'Draft',
+    DRAFT = 'Pending Staff Review',
     REJECTED = 'Rejected',
     CONDITIONAL = 'Conditional Approval',
     REFUND_REQUESTED = 'Cancelled, Refund Requested',
