@@ -51,6 +51,10 @@ export const useAffiliations = () => {
 
   /** Returns the type of the affiliation. */
   const type = (business: Business): string => {
+    if (isTemporaryBusiness(business) && isNameRequest(business)) {
+      // This is a temporary business that was created from a name request
+      return tempDescription(business)
+    }
     if (isNameRequest(business)) {
       return AffiliationTypes.NAME_REQUEST
     }
@@ -88,14 +92,14 @@ export const useAffiliations = () => {
 
   /** Returns the identifier of the affiliation. */
   const number = (business: Business): string => {
-    if (isNumberedIncorporationApplication(business)) {
-      return 'Pending'
-    }
-    if (isTemporaryBusiness(business)) {
+    if (isTemporaryBusiness(business) && isNameRequest(business)) {
       return business.nrNumber
     }
     if (isNameRequest(business)) {
       return business.nameRequest.nrNumber
+    }
+    if (isNumberedIncorporationApplication(business)) {
+      return 'Pending'
     }
     return business.businessIdentifier
   }
