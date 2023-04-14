@@ -126,7 +126,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(1).text()).toBe('NR 4045467')
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
-    expect(columns.at(3).text()).toBe('Pending Staff Review')
+    expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
     // fourth item
@@ -140,8 +140,8 @@ describe('AffiliatedEntityTable.vue', () => {
     // fifth item
     columns = itemRows.at(4).findAll(itemCell)
     expect(columns.at(0).text()).toBe('AC SP 2022.MAY.25 15.38 TEST')
-    expect(columns.at(1).text()).toBe('Pending')
-    expect(columns.at(2).text()).toContain('Name Request')
+    expect(columns.at(1).text()).toBe('NR 2821990')
+    expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(2).text()).toContain('BC Sole Proprietorship')
     expect(columns.at(3).text()).toBe('Consumed')
     expect(columns.at(4).text()).toBe('Open')
