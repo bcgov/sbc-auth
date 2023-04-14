@@ -177,8 +177,8 @@ export default defineComponent({
       isTemporaryBusiness } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
-    const createNamedBusiness = async ({ filingType, business }) => {
-      await store.dispatch('createNamedBusiness', { filingType, business })
+    const createNamedBusiness = ({ filingType, business }) => {
+      return store.dispatch('business/createNamedBusiness', { filingType, business })
     }
 
     /** V-model for dropdown menus. */
@@ -204,7 +204,8 @@ export default defineComponent({
 
     /** Draft IA with Expired NR */
     const isExpired = (item: Business): boolean => {
-      return isDraft(status(item)) && (item.nameRequest && item.nameRequest.expirationDate !== null)
+      return isDraft(status(item)) && (item.nameRequest && (item.nameRequest.expirationDate !== null) &&
+        (new Date(item.nameRequest.expirationDate) < new Date()))
     }
 
     const isFrozed = (item: Business): boolean => {
@@ -245,16 +246,15 @@ export default defineComponent({
       let filingResponse = null
 
       if (regTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
+        filingResponse = await createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
       } else if (iaTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = createNamedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
+        filingResponse = await createNamedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
       }
 
       if (filingResponse?.errorMsg) {
         emit('add-unknown-error')
         return ''
       }
-
       return filingResponse.data.filing.business.identifier
     }
 

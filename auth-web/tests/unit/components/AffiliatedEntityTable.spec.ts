@@ -126,7 +126,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(1).text()).toBe('NR 4045467')
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
-    expect(columns.at(3).text()).toBe('Pending Staff Review')
+    expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
     // fourth item
