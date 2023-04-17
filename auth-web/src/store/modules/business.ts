@@ -210,7 +210,7 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
-  public async createNamedBusiness ({ filingType, business }) {
+  public async createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
     let filingBody: BusinessRequest = null
 
     switch (filingType) {
@@ -248,7 +248,7 @@ export default class BusinessModule extends VuexModule {
               },
               nameRequest: {
                 legalType: business.nameRequest.legalType,
-                nrNumber: business.businessIdentifier
+                nrNumber: business.nameRequest.nrNumber
               }
             }
           }

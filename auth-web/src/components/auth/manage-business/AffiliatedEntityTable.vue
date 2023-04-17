@@ -177,7 +177,7 @@ export default defineComponent({
       isTemporaryBusiness } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
-    const createNamedBusiness = ({ filingType, business }) => {
+    const createNamedBusiness = ({ filingType, business }: { filingType: FilingTypes, business: Business}) => {
       return store.dispatch('business/createNamedBusiness', { filingType, business })
     }
 
@@ -259,8 +259,8 @@ export default defineComponent({
     }
 
     /** Navigation handler for entities dashboard. */
-    const goToDashboard = (businessIdentifier: string): void => {
-      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
+    const goToDashboard = (businessIdentifier: string, nrNumber?: string): void => {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, nrNumber || businessIdentifier)
       let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
       window.location.href = appendAccountId(decodeURIComponent(redirectURL))
     }
@@ -299,7 +299,8 @@ export default defineComponent({
           if (item.corpType.code === CorpTypes.NAME_REQUEST) {
             businessIdentifier = await createBusinessRecord(item)
           }
-          goToDashboard(businessIdentifier)
+          let nrNumber = item.nameRequest.nrNumber
+          goToDashboard(businessIdentifier, nrNumber)
           break
         case NrTargetTypes.ONESTOP:
           goToOneStop()
