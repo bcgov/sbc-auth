@@ -259,8 +259,8 @@ export default defineComponent({
     }
 
     /** Navigation handler for entities dashboard. */
-    const goToDashboard = (businessIdentifier: string, nrNumber?: string): void => {
-      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, nrNumber || businessIdentifier)
+    const goToDashboard = (businessIdentifier: string): void => {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
       let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
       window.location.href = appendAccountId(decodeURIComponent(redirectURL))
     }
@@ -299,8 +299,7 @@ export default defineComponent({
           if (item.corpType.code === CorpTypes.NAME_REQUEST) {
             businessIdentifier = await createBusinessRecord(item)
           }
-          let nrNumber = item.nameRequest.nrNumber
-          goToDashboard(businessIdentifier, nrNumber)
+          goToDashboard(businessIdentifier)
           break
         case NrTargetTypes.ONESTOP:
           goToOneStop()
