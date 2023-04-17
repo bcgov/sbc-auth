@@ -177,7 +177,7 @@ export default defineComponent({
       isTemporaryBusiness } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
-    const createNamedBusiness = ({ filingType, business }) => {
+    const createNamedBusiness = ({ filingType, business }: { filingType: FilingTypes, business: Business}) => {
       return store.dispatch('business/createNamedBusiness', { filingType, business })
     }
 
