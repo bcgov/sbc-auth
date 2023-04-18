@@ -2,10 +2,12 @@ steps:
   # install / setup ci
   - name: node:16.14.2
     entrypoint: npm
+    dir: "auth-web"
     args: ['install']
 
   # setup .env
   - name: 'bash'
+    dir: "auth-web"
     script: |
       #!/usr/bin/env bash
       cp .env.example .env
@@ -14,6 +16,7 @@ steps:
   # Generate the static site
   #
   - name: node:16.14.2
+    dir: "auth-web"
     entrypoint: npm
     env:
       - 'VUE_APP_ADDRESS_COMPLETE_KEY=$_VUE_APP_ADDRESS_COMPLETE_KEY'
@@ -25,6 +28,7 @@ steps:
   # store log to /workspace to get the channel URL
   #
   - name: gcr.io/yfthig-dev/firebase
+    dir: "auth-web"
     entrypoint: bash
     args: ['-c', 'firebase hosting:channel:deploy --project=yfthig-dev PR-$_PR_NUMBER > /workspace/firebase-deploy.txt']
 
@@ -33,6 +37,7 @@ steps:
   #
   - id: "Update the PR"
     name: gcr.io/cloud-builders/curl
+    dir: "auth-web"
     entrypoint: bash
     args:
       - -c
