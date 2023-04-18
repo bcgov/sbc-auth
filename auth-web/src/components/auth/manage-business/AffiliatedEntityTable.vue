@@ -149,7 +149,7 @@ import {
   SessionStorageKeys
 } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
@@ -168,7 +168,7 @@ export default defineComponent({
   },
   emits: ['add-unknown-error'],
   mixins: [DateMixin],
-  setup (props, { emit }) {
+  setup (props, context: SetupContext) {
     const isloading = false
     const store = useStore()
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
@@ -252,7 +252,7 @@ export default defineComponent({
       }
 
       if (filingResponse?.errorMsg) {
-        emit('add-unknown-error')
+        context.emit('add-unknown-error')
         return ''
       }
       return filingResponse.data.filing.business.identifier
@@ -311,12 +311,13 @@ export default defineComponent({
     }
 
     /** Emit business/nr information to be unaffiliated. */
-    const removeBusiness = (business): RemoveBusinessPayload => {
+    const removeBusiness = (business: Business): RemoveBusinessPayload => {
       const payload = {
         orgIdentifier: currentOrganization.value.id,
         business
       }
-      Emit('removeBusiness')
+
+      context.emit('remove-business', payload)
       return payload
     }
 
