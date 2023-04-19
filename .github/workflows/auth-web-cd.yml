@@ -1,4 +1,4 @@
-name: ACCOUNT UI CD - GCP
+name: ACCOUNT UI CD - OCP
 
 on:
   push:
