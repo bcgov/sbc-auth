@@ -82,12 +82,17 @@ export const useAffiliations = () => {
   /** Returns true if the affiliation is a numbered IA. */
   const isNumberedIncorporationApplication = (item: Business): boolean => {
     return (
-      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION || !item.nrNumber
+      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION &&
+      item.name === item.businessIdentifier
     )
   }
 
   /** Returns the identifier of the affiliation. */
   const number = (business: Business): string => {
+    if (business.businessIdentifier === 'BC0814225') {
+      console.log('business', business)
+      console.log('isNumberedIncorporationApplication(business):', isNumberedIncorporationApplication(business))
+    }
     if (isNumberedIncorporationApplication(business)) {
       return 'Pending'
     }
@@ -102,6 +107,13 @@ export const useAffiliations = () => {
 
   /** Returns the name of the affiliation. */
   const name = (item: Business): string => {
+    if (item.businessIdentifier === 'BC0814225') {
+      console.log('business', item)
+      console.log('isNumberedIncorporationApplication(business):', isNumberedIncorporationApplication(item))
+      const legalType: unknown = item.corpSubType?.code
+      // provide fallback for old numbered IAs without corpSubType
+      console.log(GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company')
+    }
     if (isNumberedIncorporationApplication(item)) {
       const legalType: unknown = item.corpSubType?.code
       // provide fallback for old numbered IAs without corpSubType
