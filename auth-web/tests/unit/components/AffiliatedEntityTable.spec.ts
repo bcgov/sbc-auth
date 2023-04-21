@@ -105,7 +105,7 @@ describe('AffiliatedEntityTable.vue', () => {
     // first item
     let columns = itemRows.at(0).findAll(itemCell)
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED - PROCESSING')
-    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(1).text()).toBe('NR 4045467')
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Processing')
@@ -123,7 +123,7 @@ describe('AffiliatedEntityTable.vue', () => {
     // third item
     columns = itemRows.at(2).findAll(itemCell)
     expect(columns.at(0).text()).toBe('BEN NAME REQUEST LIMITED')
-    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(1).text()).toBe('NR 4045468')
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Pending Staff Review')
@@ -131,9 +131,9 @@ describe('AffiliatedEntityTable.vue', () => {
 
     // fourth item
     columns = itemRows.at(3).findAll(itemCell)
-    expect(columns.at(0).text()).toBe('Numbered Benefit Company')
-    expect(columns.at(1).text()).toBe('Pending')
-    expect(columns.at(2).text()).toContain('Incorporation Application')
+    expect(columns.at(0).text()).toBe('')
+    expect(columns.at(1).text()).toBe('')
+    expect(columns.at(2).text()).toContain('Registration BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')
 
@@ -148,8 +148,8 @@ describe('AffiliatedEntityTable.vue', () => {
 
     // sixth item
     columns = itemRows.at(5).findAll(itemCell)
-    expect(columns.at(0).text()).toBe('Numbered Benefit Company')
-    expect(columns.at(1).text()).toBe('Pending')
+    expect(columns.at(0).text()).toBe('')
+    expect(columns.at(1).text()).toBe('')
     expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')

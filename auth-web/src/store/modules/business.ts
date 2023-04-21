@@ -236,9 +236,9 @@ export default class BusinessModule extends VuexModule {
         // add in Business Type for SP
         if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
           if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
-            filingBody.filing.registration.businessType = 'SP'
+            filingBody.filing.registration.businessType = CorpTypes.SOLE_PROP
           } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
-            filingBody.filing.registration.businessType = 'DBA'
+            filingBody.filing.registration.businessType = NrEntityType.DBA
           }
         }
         break
@@ -266,9 +266,9 @@ export default class BusinessModule extends VuexModule {
         // add in Business Type for SP
         if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
           if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
-            filingBody.filing.registration.businessType = 'SP'
+            filingBody.filing.registration.businessType = CorpTypes.SOLE_PROP
           } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
-            filingBody.filing.registration.businessType = 'DBA'
+            filingBody.filing.registration.businessType = NrEntityType.DBA
           }
         }
         break
