@@ -1,4 +1,4 @@
-name: Auth Web CD
+name: ACCOUNT UI CD - OCP
 
 on:
   push:
