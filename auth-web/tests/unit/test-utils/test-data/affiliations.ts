@@ -40,7 +40,7 @@ export const businesses: Business[] = [
       }],
       nrNumber: 'NR 4045466',
       state: 'APPROVED',
-      expirationDate: new Date('2022-11-02T19:42:13+00:00')
+      expirationDate: toDateUTC('2022-11-02T19:42:13+00:00')
     },
     status: 'APPROVED'
   },
@@ -68,7 +68,7 @@ export const businesses: Business[] = [
   {
     businessIdentifier: 'TIQcIs5qvA',
     corpType: {
-      code: CorpTypes.INCORPORATION_APPLICATION
+      code: CorpTypes.REGISTRATION
     },
     corpSubType: {
       code: CorpTypes.BENEFIT_COMPANY
@@ -112,3 +112,11 @@ export const businesses: Business[] = [
     }
   }
 ]
+
+function toDateUTC (dateString) {
+  const date = new Date(dateString)
+  const utcDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
+    date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds())
+
+  return utcDate
+}
