@@ -65,6 +65,8 @@ objects:
         role: ${ROLE}
     stringData:
       webhook-url: ""
+      pgduty-api-url: ""
+      pgduty-service-key: ""
     type: Opaque
 
   - apiVersion: v1
@@ -147,6 +149,16 @@ objects:
                     secretKeyRef:
                       key: webhook-url
                       name: ${NAME}-${TAG}-secret
+                - name: PGDUTY_SVC_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${TAG}-secret
+                      key: pgduty-service-key
+                - name: PGDUTY_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: ${NAME}-${TAG}-secret
+                      key: pgduty-api-url
                 - name: ENVIRONMENT_FRIENDLY_NAME
                   value: ""
                 - name: ENVIRONMENT_NAME
