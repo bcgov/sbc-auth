@@ -18,6 +18,7 @@ import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { NameRequestResponse } from './../../models/affiliation'
 import OrgService from '@/services/org.services'
 
 @Module({
@@ -48,16 +49,12 @@ export default class BusinessModule extends VuexModule {
   public async syncBusinesses (): Promise<void> {
     const enableBcCccUlc = LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
 
-    /** Returns NR's approved name. */
-    const getApprovedName = (nr): string =>
-      nr.names.find(name => [NrState.APPROVED, NrState.CONDITION].includes(name.state))?.name
-
     /** Returns True if NR is approved. */
-    const isApproved = (nr): boolean => ((nr.state || nr.stateCd) === NrState.APPROVED)
+    const isApproved = (nr: NameRequestResponse): boolean => (nr.stateCd === NrState.APPROVED)
 
     /** Returns True if NR is conditionally approved. NB: consent flag=null means "not required". */
-    const isConditionallyApproved = (nr): boolean => (
-      (nr.state || nr.stateCd) === NrState.CONDITIONAL && (
+    const isConditionallyApproved = (nr: NameRequestResponse): boolean => (
+      nr.stateCd === NrState.CONDITIONAL && (
         nr.consentFlag === null ||
         nr.consentFlag === NrConditionalStates.RECEIVED ||
         nr.consentFlag === NrConditionalStates.WAIVED
@@ -65,24 +62,24 @@ export default class BusinessModule extends VuexModule {
     )
 
     /** Returns True if NR is approved for incorporation. */
-    const isApprovedForIa = (nr: NameRequest): boolean => (
+    const isApprovedForIa = (nr: NameRequestResponse): boolean => (
       (isApproved(nr) || isConditionallyApproved(nr)) &&
       nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION)
     )
 
     /** Returns True if NR is approved for registration. */
-    const isApprovedForRegistration = (nr: NameRequest): boolean => (
+    const isApprovedForRegistration = (nr: NameRequestResponse): boolean => (
       (isApproved(nr) || isConditionallyApproved(nr)) &&
       nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION)
     )
 
     /** Returns True if NR has applicants for registration. */
-    const isApplicantsExist = (nr: NameRequest): boolean => {
+    const isApplicantsExist = (nr: NameRequestResponse): boolean => {
       return nr.applicants && nr.applicants.length > 0
     }
 
     /** Returns target conditionally. */
-    const getTarget = (nr): NrTargetTypes => {
+    const getTarget = (nr: NameRequestResponse): NrTargetTypes => {
       const bcCorpTypes = [CorpTypes.BC_CCC, CorpTypes.BC_COMPANY, CorpTypes.BC_ULC_COMPANY]
       if (bcCorpTypes.includes(nr.legalType)) {
         // if FF is enabled then route to LEAR, else route to COLIN
@@ -134,13 +131,16 @@ export default class BusinessModule extends VuexModule {
       }
       if (resp.nameRequest) {
         const nr = resp.nameRequest
+        if (!entity.nrNumber && nr.nrNum) {
+          entity.nrNumber = nr.nrNum
+        }
         entity.nameRequest = {
           actions: nr.actions,
           names: nr.names,
           id: nr.id,
           legalType: nr.legalType,
-          nrNumber: (nr.nrNum || nr.nrNumber),
-          state: (nr.stateCd || nr.state),
+          nrNumber: nr.nrNum,
+          state: nr.stateCd,
           applicantEmail: isApplicantsExist(nr) ? nr.applicants[0].emailAddress : null,
           applicantPhone: isApplicantsExist(nr) ? nr.applicants[0].phoneNumber : null,
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
@@ -230,6 +230,15 @@ export default class BusinessModule extends VuexModule {
                 nrNumber: business.businessIdentifier
               }
             }
+          }
+        }
+
+        // add in Business Type for SP
+        if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
+          if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
+            filingBody.filing.registration.businessType = 'SP'
+          } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
+            filingBody.filing.registration.businessType = 'DBA'
           }
         }
         break

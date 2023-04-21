@@ -1,6 +1,6 @@
-import { Business, CorpType, NameRequest } from '@/models/business'
+import { Action, Applicant, Business, CorpType, NameRequest, Names } from '@/models/business'
+import { CorpTypes, NrTargetTypes } from '@/util/constants'
 import { Contact } from './contact'
-import { CorpTypes } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 
 export interface CreateRequestBody {
@@ -29,7 +29,7 @@ export interface AffiliationFilter {
 }
 
 export interface AffiliationResponse {
-  identifier: string
+  identifier?: string
   draftType?: CorpTypes
   legalType?: CorpTypes
   state?: string
@@ -43,12 +43,35 @@ export interface AffiliationResponse {
   lastModified?: string
   modified?: string
   modifiedBy?: string
-  nameRequest?: NameRequest
+  nameRequest?: NameRequestResponse
   nrNumber?: string
   status?: string
   goodStanding?: boolean
   adminFreeze?: boolean
   dissolved?: boolean
+}
+
+export interface NameRequestResponse {
+  actions?: Array<Action>
+  consentFlag?: string
+  names?: Array<Names>
+  id?: number
+  legalType: CorpTypes
+  state?: string
+  applicantEmail?: string
+  applicantPhone?: string
+  enableIncorporation?: boolean
+  folioNumber?: string
+  target?: NrTargetTypes
+  entityTypeCd?: string
+  natureOfBusiness?: string
+  expirationDate?: Date
+  nrNum?: string
+  stateCd?: string
+  // eslint-disable-next-line camelcase
+  entity_type_cd?: string
+  natureBusinessInfo?: string
+  applicants?: Array<Applicant>
 }
 
 export interface AffiliationsResponse {

@@ -51,31 +51,27 @@ export const useAffiliations = () => {
 
   /** Returns the type of the affiliation. */
   const type = (business: Business): string => {
-    if (isTemporaryBusiness(business) && isNameRequest(business)) {
-      // This is a temporary business that was created from a name request
+    if (isTemporaryBusiness(business)) {
       return tempDescription(business)
     }
     if (isNameRequest(business)) {
       return AffiliationTypes.NAME_REQUEST
     }
-    if (isTemporaryBusiness(business)) {
-      return tempDescription(business)
-    }
-    const code: unknown = business.corpType?.code
+    const code: unknown = business.corpType.code
     return GetCorpFullDescription(code as CorpTypeCd)
   }
 
   /** Returns the status of the affiliation. */
   const status = (business: Business): string => {
+    if (isTemporaryBusiness(business)) {
+      return BusinessState.DRAFT
+    }
     if (isNameRequest(business)) {
       // Format name request state value
-      const state = NrState[(business.nameRequest.state || business.nameRequest.stateCd)?.toUpperCase()]
+      const state = NrState[(business.nameRequest.state)?.toUpperCase()]
       if (!state) return 'Unknown'
       if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
       else return NrDisplayStates[state] || 'Unknown'
-    }
-    if (isTemporaryBusiness(business)) {
-      return BusinessState.DRAFT
     }
     if (business.status) {
       return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
@@ -86,20 +82,20 @@ export const useAffiliations = () => {
   /** Returns true if the affiliation is a numbered IA. */
   const isNumberedIncorporationApplication = (item: Business): boolean => {
     return (
-      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION
+      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION || !item.nrNumber
     )
   }
 
   /** Returns the identifier of the affiliation. */
   const number = (business: Business): string => {
-    if (isTemporaryBusiness(business) && isNameRequest(business)) {
+    if (isNumberedIncorporationApplication(business)) {
+      return 'Pending'
+    }
+    if (isTemporaryBusiness(business)) {
       return business.nrNumber
     }
     if (isNameRequest(business)) {
       return business.nameRequest.nrNumber
-    }
-    if (isNumberedIncorporationApplication(business)) {
-      return 'Pending'
     }
     return business.businessIdentifier
   }
