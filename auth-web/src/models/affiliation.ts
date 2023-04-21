@@ -1,4 +1,4 @@
-import { Action, Applicant, Business, CorpType, NameRequest, Names } from '@/models/business'
+import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
 import { CorpTypes, NrTargetTypes } from '@/util/constants'
 import { Contact } from './contact'
 import { Organization } from '@/models/Organization'
