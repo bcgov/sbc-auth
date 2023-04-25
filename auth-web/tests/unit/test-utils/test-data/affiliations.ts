@@ -48,7 +48,9 @@ export const businesses: Business[] = [
   // BEN Name Request DRAFT with expiration date
   {
     businessIdentifier: undefined,
-    corpType: { code: CorpTypes.NAME_REQUEST },
+    corpType: {
+      code: CorpTypes.INCORPORATION_APPLICATION
+    },
     nameRequest: {
       legalType: CorpTypes.BENEFIT_COMPANY,
       names:
