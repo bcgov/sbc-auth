@@ -49,7 +49,7 @@ export const businesses: Business[] = [
   {
     businessIdentifier: undefined,
     corpType: {
-      code: CorpTypes.INCORPORATION_APPLICATION
+      code: CorpTypes.NAME_REQUEST
     },
     nameRequest: {
       legalType: CorpTypes.BENEFIT_COMPANY,

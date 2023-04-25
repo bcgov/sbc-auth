@@ -71,7 +71,9 @@ export const useAffiliations = () => {
       const state = NrState[(business.nameRequest.state)?.toUpperCase()]
       if (!state) return 'Unknown'
       if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
-      else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION || business.corpType.code === CorpTypes.REGISTRATION) {
+      else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION ||
+              business.corpType.code === CorpTypes.REGISTRATION ||
+              state === NrState.DRAFT) {
         return NrDisplayStates[NrState.HOLD]
       } else return NrDisplayStates[state] || 'Unknown'
     }
@@ -85,6 +87,7 @@ export const useAffiliations = () => {
   const isNumberedIncorporationApplication = (item: Business): boolean => {
     return (
       (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION &&
+      item.businessIdentifier !== undefined &&
       item.name === item.businessIdentifier
     )
   }
@@ -94,11 +97,8 @@ export const useAffiliations = () => {
     if (isNumberedIncorporationApplication(business)) {
       return AffidavitNumberStatus.PENDING
     }
-    if (isTemporaryBusiness(business)) {
-      return business.nrNumber
-    }
-    if (isNameRequest(business)) {
-      return business.nameRequest.nrNumber
+    if (isTemporaryBusiness(business) || isNameRequest(business)) {
+      return business.nameRequest?.nrNumber || business.nrNumber
     }
     return business.businessIdentifier
   }
