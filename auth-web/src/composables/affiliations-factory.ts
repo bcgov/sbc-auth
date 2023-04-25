@@ -6,7 +6,7 @@ import { useStore } from 'vuex-composition-helpers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags } from '@/util/constants'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
@@ -71,7 +71,9 @@ export const useAffiliations = () => {
       const state = NrState[(business.nameRequest.state)?.toUpperCase()]
       if (!state) return 'Unknown'
       if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
-      else return NrDisplayStates[state] || 'Unknown'
+      else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION || business.corpType.code === CorpTypes.REGISTRATION) {
+        return NrDisplayStates[NrState.HOLD]
+      } else return NrDisplayStates[state] || 'Unknown'
     }
     if (business.status) {
       return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
@@ -90,7 +92,7 @@ export const useAffiliations = () => {
   /** Returns the identifier of the affiliation. */
   const number = (business: Business): string => {
     if (isNumberedIncorporationApplication(business)) {
-      return 'Pending'
+      return AffidavitNumberStatus.PENDING
     }
     if (isTemporaryBusiness(business)) {
       return business.nrNumber

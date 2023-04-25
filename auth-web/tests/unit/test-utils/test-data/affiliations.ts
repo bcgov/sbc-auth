@@ -1,5 +1,6 @@
 import { CorpTypes, NrTargetTypes } from '@/util/constants'
 import { Business } from '@/models/business'
+import moment from 'moment'
 
 export const businesses: Business[] = [
   // BEN Name Request - Processing
@@ -40,7 +41,7 @@ export const businesses: Business[] = [
       }],
       nrNumber: 'NR 4045466',
       state: 'APPROVED',
-      expirationDate: toDateUTC('2022-11-02T19:42:13+00:00')
+      expirationDate: moment.utc('2022-11-02T19:42:13+00:00').toDate()
     },
     status: 'APPROVED'
   },
@@ -112,11 +113,3 @@ export const businesses: Business[] = [
     }
   }
 ]
-
-function toDateUTC (dateString) {
-  const date = new Date(dateString)
-  const utcDate = new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
-    date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds(), date.getUTCMilliseconds())
-
-  return utcDate
-}

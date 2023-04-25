@@ -196,7 +196,7 @@ export enum NrState {
 export enum NrDisplayStates {
     APPROVED = 'Approved',
     HOLD = 'Pending Staff Review',
-    DRAFT = 'Pending Staff Review',
+    DRAFT = 'Draft',
     REJECTED = 'Rejected',
     CONDITIONAL = 'Conditional Approval',
     REFUND_REQUESTED = 'Cancelled, Refund Requested',
@@ -428,6 +428,10 @@ export enum AffidavitStatus {
     APPROVED = 'APPROVED',
     REJECTED = 'REJECTED',
     INACTIVE = 'INACTIVE'
+}
+
+export enum AffidavitNumberStatus {
+    PENDING = 'Pending'
 }
 
 export enum PatchActions {
