@@ -32,7 +32,6 @@ export interface AffiliationResponse {
   identifier?: string
   draftType?: CorpTypes
   legalType?: CorpTypes
-  state?: string
   businessNumber?: string
   name?: string
   legalName?: string
