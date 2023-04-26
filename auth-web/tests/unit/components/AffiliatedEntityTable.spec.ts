@@ -148,8 +148,8 @@ describe('AffiliatedEntityTable.vue', () => {
 
     // sixth item
     columns = itemRows.at(5).findAll(itemCell)
-    expect(columns.at(0).text()).toBe('')
-    expect(columns.at(1).text()).toBe('')
+    expect(columns.at(0).text()).toBe('Numbered Benefit Company')
+    expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(3).text()).toBe('Draft')
     expect(columns.at(4).text()).toBe('Open')

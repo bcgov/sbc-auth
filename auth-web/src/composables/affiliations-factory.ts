@@ -87,8 +87,12 @@ export const useAffiliations = () => {
   const isNumberedIncorporationApplication = (item: Business): boolean => {
     return (
       (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION &&
-      item.businessIdentifier !== undefined &&
-      item.name === item.businessIdentifier
+      !item.nrNumber &&
+      [CorpTypes.BENEFIT_COMPANY,
+        CorpTypes.BC_ULC_COMPANY,
+        CorpTypes.BC_COMPANY,
+        CorpTypes.BC_CCC
+      ].includes(item.corpSubType?.code)
     )
   }
 
