@@ -430,6 +430,10 @@ export enum AffidavitStatus {
     INACTIVE = 'INACTIVE'
 }
 
+export enum AffidavitNumberStatus {
+    PENDING = 'Pending'
+}
+
 export enum PatchActions {
     UPDATE_STATUS = 'updateStatus',
     UPDATE_ACCESS_TYPE = 'updateAccessType'

@@ -138,8 +138,8 @@
 </template>
 
 <script lang='ts'>
-import { Business, NameRequest, Names } from '@/models/business'
 import {
+  AffiliationTypes,
   CorpTypes,
   EntityAlertTypes,
   FilingTypes,
@@ -148,6 +148,7 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
+import { Business, NameRequest, Names } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
@@ -195,7 +196,11 @@ export default defineComponent({
     }
 
     const isDraft = (state: string): boolean => {
-      return NrDisplayStates.DRAFT === state
+      return NrState.DRAFT === state.toUpperCase()
+    }
+
+    const isIA = (type: string): boolean => {
+      return (type === AffiliationTypes.INCORPORATION_APPLICATION || type === AffiliationTypes.REGISTRATION)
     }
 
     const isProcessing = (state: string): boolean => {
@@ -205,7 +210,7 @@ export default defineComponent({
     /** Draft IA with Expired NR */
     const isExpired = (item: Business): boolean => {
       return isDraft(status(item)) && (item.nameRequest && (item.nameRequest.expirationDate !== null) &&
-        (new Date(item.nameRequest.expirationDate) < new Date()))
+        (new Date(item.nameRequest.expirationDate) < new Date())) && isIA(type(item))
     }
 
     const isFrozed = (item: Business): boolean => {
