@@ -136,6 +136,14 @@ class Affiliation:
         return [EntityService(entity).as_dict() for entity in entities]
 
     @staticmethod
+    def find_affiliation(org_id, business_identifier):
+        """Return business affiliation by the org id and business identifier."""
+        affiliation = AffiliationModel.find_affiliation_by_org_id_and_business_identifier(org_id,
+                                                                                          business_identifier)
+
+        return Affiliation(affiliation).as_dict()
+
+    @staticmethod
     def create_affiliation(org_id, business_identifier, pass_code=None, certified_by_name=None):
         """Create an Affiliation."""
         # Validate if org_id is valid by calling Org Service.

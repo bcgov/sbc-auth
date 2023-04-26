@@ -97,3 +97,14 @@ def test_find_affiliation_by_org_and_entity_ids(session):  # pylint:disable=unus
 
     result_affiliations = affiliation.find_affiliation_by_org_and_entity_ids(org_id=org.id, entity_id=entity.id)
     assert result_affiliations is not None
+
+
+def test_find_affiliation_by_org_id_and_business_identifier(session):  # pylint:disable=unused-argument
+    """Assert that affiliations can be retrieved via the org id and business identifier."""
+    entity = factory_entity_model()
+    org = factory_org_model(name='My Test Org')
+    affiliation = factory_affiliation_model(entity.id, org.id)
+
+    result_affiliations = affiliation.find_affiliation_by_org_id_and_business_identifier(org.id,
+                                                                                         entity.business_identifier)
+    assert result_affiliations is not None

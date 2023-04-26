@@ -27,6 +27,7 @@ from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services import Invitation as InvitationService
 from auth_api.services import Membership as MembershipService
 from auth_api.services import Org as OrgService
@@ -392,10 +393,31 @@ class OrgAffiliations(Resource):
         return response, status
 
 
-@cors_preflight('DELETE,OPTIONS')
-@API.route('/<int:org_id>/affiliations/<string:business_identifier>', methods=['DELETE', 'OPTIONS'])
+@cors_preflight('GET,DELETE,OPTIONS')
+@API.route('/<int:org_id>/affiliations/<string:business_identifier>', methods=['GET', 'DELETE', 'OPTIONS'])
 class OrgAffiliation(Resource):
     """Resource for managing a single affiliation between an org and an entity."""
+
+    @staticmethod
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    def get(org_id, business_identifier):
+        """Get the affiliation by org id and business identifier with authorized user."""
+        try:
+            if AuthorizationService.get_user_authorizations_for_entity(business_identifier):
+                # get affiliation
+                response, status = AffiliationService.find_affiliation(
+                    org_id, business_identifier), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': 'Not authorized to perform this action'}, \
+                                   http_status.HTTP_401_UNAUTHORIZED
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        except ServiceUnavailableException as exception:
+            response, status = {'message': exception.error}, exception.status_code
+        return response, status
 
     @staticmethod
     @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])

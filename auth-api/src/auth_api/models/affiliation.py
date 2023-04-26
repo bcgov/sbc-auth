@@ -78,3 +78,14 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     def find_affiliations_by_business_identifier(cls, business_identifier: str):
         """Return the affiliations with the provided business identifier."""
         return cls.query.join(EntityModel).filter(EntityModel.business_identifier == business_identifier).all()
+
+    @classmethod
+    def find_affiliation_by_org_id_and_business_identifier(cls,
+                                                           org_id: int,
+                                                           business_identifier: str) -> Affiliation:
+        """Return the affiliations with the provided org id and business identifier."""
+        return db.session.query(Affiliation).join(EntityModel) \
+            .options(contains_eager(Affiliation.entity).load_only(
+                EntityModel.business_identifier, EntityModel.corp_type_code)) \
+            .filter(Affiliation.org_id == org_id) \
+            .filter(EntityModel.business_identifier == business_identifier).one_or_none()

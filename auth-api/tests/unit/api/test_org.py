@@ -1326,6 +1326,60 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     assert affiliations['entities'][0]['affiliations'][0]['certifiedByName'] == certified_by_name
 
 
+def test_get_affiliation(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a list of affiliation for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.name_request),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.nr_affiliation),
+                     headers=headers,
+                     content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    business_identifier = TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+    rv = client.get(f'/api/v1/orgs/{org_id}/affiliations/{business_identifier}', headers=headers)
+    assert rv.status_code == http_status.HTTP_200_OK
+
+    dictionary = json.loads(rv.data)
+    assert dictionary['business']['businessIdentifier'] == business_identifier
+
+
+def test_get_affiliation_without_authrized(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert that a list of affiliation for an org can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+    rv = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.name_request),
+                     headers=headers, content_type='application/json')
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org1),
+                     headers=headers, content_type='application/json')
+    dictionary = json.loads(rv.data)
+    org_id = dictionary['id']
+
+    rv = client.post('/api/v1/orgs/{}/affiliations'.format(org_id),
+                     data=json.dumps(TestAffliationInfo.nr_affiliation),
+                     headers=headers,
+                     content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_201_CREATED
+
+    business_identifier = TestAffliationInfo.nr_affiliation['businessIdentifier']
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
+    rv = client.get(f'/api/v1/orgs/{org_id}/affiliations/{business_identifier}', headers=headers)
+    assert rv.status_code == http_status.HTTP_401_UNAUTHORIZED
+
+
 def test_get_affiliations(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
     """Assert that a list of affiliation for an org can be retrieved."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
