@@ -6,7 +6,7 @@ import { useStore } from 'vuex-composition-helpers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags } from '@/util/constants'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
@@ -26,7 +26,7 @@ export const useAffiliations = () => {
 
   /** Returns true if the affiliation is a Name Request. */
   const isNameRequest = (business: Business): boolean => {
-    return (!!business.nameRequest)
+    return (business.corpType?.code === CorpTypes.NAME_REQUEST && !!business.nameRequest)
   }
 
   /** Returns true if the affiliation is a temporary business. */
@@ -51,31 +51,31 @@ export const useAffiliations = () => {
 
   /** Returns the type of the affiliation. */
   const type = (business: Business): string => {
-    if (isTemporaryBusiness(business) && isNameRequest(business)) {
-      // This is a temporary business that was created from a name request
+    if (isTemporaryBusiness(business)) {
       return tempDescription(business)
     }
     if (isNameRequest(business)) {
       return AffiliationTypes.NAME_REQUEST
     }
-    if (isTemporaryBusiness(business)) {
-      return tempDescription(business)
-    }
-    const code: unknown = business.corpType?.code
+    const code: unknown = business.corpType.code
     return GetCorpFullDescription(code as CorpTypeCd)
   }
 
   /** Returns the status of the affiliation. */
   const status = (business: Business): string => {
-    if (isNameRequest(business)) {
-      // Format name request state value
-      const state = NrState[(business.nameRequest.state || business.nameRequest.stateCd)?.toUpperCase()]
-      if (!state) return 'Unknown'
-      if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
-      else return NrDisplayStates[state] || 'Unknown'
-    }
     if (isTemporaryBusiness(business)) {
       return BusinessState.DRAFT
+    }
+    if (isNameRequest(business)) {
+      // Format name request state value
+      const state = NrState[(business.nameRequest.state)?.toUpperCase()]
+      if (!state) return 'Unknown'
+      if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
+      else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION ||
+              business.corpType.code === CorpTypes.REGISTRATION ||
+              state === NrState.DRAFT) {
+        return NrDisplayStates[NrState.HOLD]
+      } else return NrDisplayStates[state] || 'Unknown'
     }
     if (business.status) {
       return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
@@ -86,22 +86,31 @@ export const useAffiliations = () => {
   /** Returns true if the affiliation is a numbered IA. */
   const isNumberedIncorporationApplication = (item: Business): boolean => {
     return (
-      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION
+      (item.corpType?.code) === CorpTypes.INCORPORATION_APPLICATION &&
+      !item.nrNumber &&
+      [CorpTypes.BENEFIT_COMPANY,
+        CorpTypes.BC_ULC_COMPANY,
+        CorpTypes.BC_COMPANY,
+        CorpTypes.BC_CCC
+      ].includes(item.corpSubType?.code)
     )
   }
 
   /** Returns the identifier of the affiliation. */
   const number = (business: Business): string => {
-    if (isTemporaryBusiness(business) && isNameRequest(business)) {
-      return business.nrNumber
-    }
-    if (isNameRequest(business)) {
-      return business.nameRequest.nrNumber
-    }
     if (isNumberedIncorporationApplication(business)) {
-      return 'Pending'
+      return AffidavitNumberStatus.PENDING
+    }
+    if (isTemporaryBusiness(business) || isNameRequest(business)) {
+      return business.nameRequest?.nrNumber || business.nrNumber
     }
     return business.businessIdentifier
+  }
+
+  const getApprovedName = (business: Business): string => {
+    const approvedNameObj = business.nameRequest.names?.find(each => each.state === NrState.APPROVED)
+    const approvedName = approvedNameObj?.name
+    return approvedName || ''
   }
 
   /** Returns the name of the affiliation. */
@@ -110,6 +119,9 @@ export const useAffiliations = () => {
       const legalType: unknown = item.corpSubType?.code
       // provide fallback for old numbered IAs without corpSubType
       return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
+    }
+    if (item.nameRequest) {
+      return getApprovedName(item)
     }
     return item.name
   }
