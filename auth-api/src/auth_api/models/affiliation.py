@@ -88,4 +88,4 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
             .options(contains_eager(Affiliation.entity).load_only(
                 EntityModel.business_identifier, EntityModel.corp_type_code)) \
             .filter(Affiliation.org_id == org_id) \
-            .filter(EntityModel.business_identifier == business_identifier).one_or_none()
+            .filter(EntityModel.business_identifier == business_identifier).first()
