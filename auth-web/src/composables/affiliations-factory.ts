@@ -146,11 +146,6 @@ export const useAffiliations = () => {
   const canUseNameRequest = (business: Business): boolean => {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
-    if (business.businessIdentifier === 'TRRTsP8SNx') {
-      console.log(business)
-      console.log(business.corpType.code === CorpTypes.NAME_REQUEST)
-      console.log('isNameRequest>>', isNameRequest(business))
-    }
     return (
       isNameRequest(business) && // Is this a Name Request
       business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
