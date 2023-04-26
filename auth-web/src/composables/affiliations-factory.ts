@@ -26,7 +26,7 @@ export const useAffiliations = () => {
 
   /** Returns true if the affiliation is a Name Request. */
   const isNameRequest = (business: Business): boolean => {
-    return (!!business.nameRequest)
+    return (business.corpType?.code === CorpTypes.NAME_REQUEST && !!business.nameRequest)
   }
 
   /** Returns true if the affiliation is a temporary business. */
@@ -107,12 +107,21 @@ export const useAffiliations = () => {
     return business.businessIdentifier
   }
 
+  const getApprovedName = (business: Business): string => {
+    const approvedNameObj = business.nameRequest.names?.find(each => each.state === NrState.APPROVED)
+    const approvedName = approvedNameObj?.name
+    return approvedName || ''
+  }
+
   /** Returns the name of the affiliation. */
   const name = (item: Business): string => {
     if (isNumberedIncorporationApplication(item)) {
       const legalType: unknown = item.corpSubType?.code
       // provide fallback for old numbered IAs without corpSubType
       return GetCorpNumberedDescription(legalType as CorpTypeCd) || 'Numbered Company'
+    }
+    if (item.nameRequest) {
+      return getApprovedName(item)
     }
     return item.name
   }
@@ -137,6 +146,11 @@ export const useAffiliations = () => {
   const canUseNameRequest = (business: Business): boolean => {
     // Split string tokens into an array to avoid false string matching
     const supportedEntityFlags = LaunchDarklyService.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
+    if (business.businessIdentifier === 'TRRTsP8SNx') {
+      console.log(business)
+      console.log(business.corpType.code === CorpTypes.NAME_REQUEST)
+      console.log('isNameRequest>>', isNameRequest(business))
+    }
     return (
       isNameRequest(business) && // Is this a Name Request
       business.nameRequest.enableIncorporation && // Is the Nr state approved (conditionally) or registration
