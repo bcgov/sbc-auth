@@ -600,5 +600,5 @@ def test_find_affiliation(session, auth_mock):  # pylint:disable=unused-argument
     affiliation = AffiliationService.find_affiliation(org_id, business_identifier)
 
     assert affiliation
-    assert affiliation.entity.identifier == entity_service.identifier
-    assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
+    assert affiliation['business']['business_identifier'] == business_identifier
+    assert affiliation['organization']['id'] == org_dictionary['id']
