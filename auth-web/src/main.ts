@@ -3,7 +3,7 @@ import 'core-js/stable' // to polyfill ECMAScript features
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import 'regenerator-runtime/runtime' // to use transpiled generator functions
 import './registerServiceWorker'
-import * as Sentry from '@sentry/browser'
+import * as Sentry from "@sentry/vue"
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
@@ -14,7 +14,6 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import './routes/componentHooks'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
-import { Vue as VueIntegration } from '@sentry/integrations'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
@@ -47,8 +46,8 @@ ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
     // initialize Sentry
     console.info('Initializing Sentry...') // eslint-disable-line no-console
     Sentry.init({
-      dsn: ConfigHelper.getSentryDsn(),
-      integrations: [new VueIntegration({ Vue, attachProps: true, logErrors: true })]
+      Vue,
+      dsn: ConfigHelper.getSentryDsn()
     })
   }
 
