@@ -580,3 +580,25 @@ def test_fix_stale_affiliations(session, auth_mock, nr_mock, system_user_mock):
     })
 
     assert affiliation1.entity.identifier == affiliation2.entity.identifier
+
+
+def test_find_affiliation(session, auth_mock):  # pylint:disable=unused-argument
+    """Assert that an Affiliation can be retrieve by org id and business identifier."""
+    entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock)
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['business_identifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    # create first row in affiliation table
+    AffiliationService.create_affiliation(org_id,
+                                          business_identifier,
+                                          TestEntityInfo.entity_lear_mock['passCode'])
+
+    affiliation = AffiliationService.find_affiliation(org_id, business_identifier)
+
+    assert affiliation
+    assert affiliation['business']['business_identifier'] == business_identifier
+    assert affiliation['organization']['id'] == org_dictionary['id']
