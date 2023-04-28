@@ -67,8 +67,6 @@ export interface NameRequestResponse {
   expirationDate?: Date
   nrNum?: string
   stateCd?: string
-  // eslint-disable-next-line camelcase
-  entity_type_cd?: string
   natureBusinessInfo?: string
   applicants?: Array<Applicant>
 }
