@@ -145,7 +145,7 @@ export default class BusinessModule extends VuexModule {
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
-          entityTypeCd: nr.entity_type_cd,
+          entityTypeCd: nr.entityTypeCd,
           natureOfBusiness: nr.natureBusinessInfo,
           expirationDate: nr.expirationDate,
           applicants: nr.applicants
@@ -208,6 +208,17 @@ export default class BusinessModule extends VuexModule {
     return OrgService.createNRAffiliation(this.currentOrganization.id, requestBody)
   }
 
+  private addBusinessTypeforSP (filingBody: BusinessRequest, business: Business) {
+    // add in Business Type for SP
+    if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
+      if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
+        filingBody.filing.registration.businessType = CorpTypes.SOLE_PROP
+      } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
+        filingBody.filing.registration.businessType = NrEntityType.DBA
+      }
+    }
+  }
+
   @Action({ rawError: true })
   public async createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
     let filingBody: BusinessRequest = null
@@ -226,20 +237,14 @@ export default class BusinessModule extends VuexModule {
             incorporationApplication: {
               nameRequest: {
                 legalType: business.nameRequest.legalType,
-                nrNumber: business.businessIdentifier
+                nrNumber: business.businessIdentifier || business.nameRequest.nrNumber
               }
             }
           }
         }
 
         // add in Business Type for SP
-        if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
-          if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
-            filingBody.filing.registration.businessType = CorpTypes.SOLE_PROP
-          } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
-            filingBody.filing.registration.businessType = NrEntityType.DBA
-          }
-        }
+        this.addBusinessTypeforSP(filingBody, business)
         break
       }
 
@@ -263,13 +268,7 @@ export default class BusinessModule extends VuexModule {
         }
 
         // add in Business Type for SP
-        if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
-          if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
-            filingBody.filing.registration.businessType = CorpTypes.SOLE_PROP
-          } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
-            filingBody.filing.registration.businessType = NrEntityType.DBA
-          }
-        }
+        this.addBusinessTypeforSP(filingBody, business)
         break
       }
     }
