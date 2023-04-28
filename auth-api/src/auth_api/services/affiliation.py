@@ -411,7 +411,7 @@ class Affiliation:
                 del name_requests[nr_num]
 
         results = [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
-        return results.sort(key=lambda x: x.get('created'), reverse=True)
+        return results.sort(key=lambda x: x.get('created', ''), reverse=True)
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
