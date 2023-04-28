@@ -145,7 +145,7 @@ export default class BusinessModule extends VuexModule {
           enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
-          entityTypeCd: nr.entity_type_cd,
+          entityTypeCd: nr.entityTypeCd,
           natureOfBusiness: nr.natureBusinessInfo,
           expirationDate: nr.expirationDate,
           applicants: nr.applicants
@@ -226,7 +226,7 @@ export default class BusinessModule extends VuexModule {
             incorporationApplication: {
               nameRequest: {
                 legalType: business.nameRequest.legalType,
-                nrNumber: business.businessIdentifier
+                nrNumber: business.businessIdentifier || business.nameRequest.nrNumber
               }
             }
           }
