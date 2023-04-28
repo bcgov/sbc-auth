@@ -208,20 +208,19 @@ export default class BusinessModule extends VuexModule {
     return OrgService.createNRAffiliation(this.currentOrganization.id, requestBody)
   }
 
-  private addBusinessTypeforSP (filingBody: BusinessRequest, business: Business) {
+  @Action({ rawError: true })
+  public async createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
+    let filingBody: BusinessRequest = null
+
     // add in Business Type for SP
-    if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
+    const addBusinessTypeforSP = (filingBody: BusinessRequest, business: Business): BusinessRequest => {
       if (business.nameRequest.entityTypeCd === NrEntityType.FR) {
         filingBody.filing.registration.businessType = CorpTypes.SOLE_PROP
       } else if (business.nameRequest.entityTypeCd === NrEntityType.DBA) {
         filingBody.filing.registration.businessType = NrEntityType.DBA
       }
+      return filingBody
     }
-  }
-
-  @Action({ rawError: true })
-  public async createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
-    let filingBody: BusinessRequest = null
 
     switch (filingType) {
       case FilingTypes.INCORPORATION_APPLICATION: {
@@ -244,7 +243,9 @@ export default class BusinessModule extends VuexModule {
         }
 
         // add in Business Type for SP
-        this.addBusinessTypeforSP(filingBody, business)
+        if (business.nameRequest.legalType === CorpTypes.SOLE_PROP) {
+          addBusinessTypeforSP(filingBody, business)
+        }
         break
       }
 
@@ -268,7 +269,7 @@ export default class BusinessModule extends VuexModule {
         }
 
         // add in Business Type for SP
-        this.addBusinessTypeforSP(filingBody, business)
+        addBusinessTypeforSP(filingBody, business)
         break
       }
     }
