@@ -7,6 +7,11 @@ const axios = Axios.create()
 
 axios.interceptors.request.use(
   config => {
+    // Bypass adding auth header for minio, which may otherwise break requests
+    if (config.url?.includes('minio')) {
+      return config
+    }
+
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
