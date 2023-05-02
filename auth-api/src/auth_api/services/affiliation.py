@@ -374,7 +374,13 @@ class Affiliation:
             config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token)
-            return Affiliation._combine_affiliation_details(responses)
+            combined = Affiliation._combine_affiliation_details(responses)
+            # Should provide us with ascending order
+            affiliations.reverse()
+            # Provide us with a dict with the max created date.
+            ordered = {affiliation.entity.business_identifier: affiliation.created for affiliation in affiliations}
+            combined.sort(key=lambda x: ordered.get(x.get('identifier', ''), x.get('nrNum', '')), reverse=True)
+            return combined
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug('Failed to get affiliations details: %s', affiliations)
@@ -410,8 +416,7 @@ class Affiliation:
                 business['nameRequest'] = name_requests[nr_num]['nameRequest']
                 del name_requests[nr_num]
 
-        results = [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
-        return results.sort(key=lambda x: x.get('created', ''), reverse=True)
+        return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
 
     @staticmethod
     def _get_nr_details(nr_number: str, token: str):
