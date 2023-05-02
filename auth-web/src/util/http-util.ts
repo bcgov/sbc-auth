@@ -7,7 +7,7 @@ const axios = Axios.create()
 
 axios.interceptors.request.use(
   config => {
-    // Bypass adding auth header for minio, which may otherwise break requests
+    // Bypass adding auth header for minio
     if (config.url?.includes('minio')) {
       return config
     }
