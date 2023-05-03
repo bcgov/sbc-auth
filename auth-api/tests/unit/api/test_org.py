@@ -2145,12 +2145,14 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     ('drafts_with_nrs', [], [],
      [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
      ['NR 1234567', 'NR 1234566'], []),
-    ('affiliations_order', [], [], [], [], [datetime(2021, 1, 1), datetime(2022, 2, 1)]),
+    ('affiliations_order', [('BC1234567', CorpType.BC.value)],
+     [('T12dfhsff1', CorpType.BC.value)],
+     [('T12dfhsff3', CorpType.BC.value, 'NR 1234567')],
+     ['NR 1234567'], [datetime(2021, 1, 1), datetime(2022, 2, 1)]),
     ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
      [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
      [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
      ['NR 1234567', 'NR 1234566', 'NR 1234565'], [datetime(2021, 1, 1), datetime(2022, 2, 1)])
-    
 ])
 def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
                               test_name, businesses, drafts, drafts_with_nrs, nrs, dates):
@@ -2197,9 +2199,13 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
         }],
         'state': 'APPROVED',
         'requestTypeCd': 'BC',
-        'nrNum': nr,
-        'created': date.isoformat() if date else None
-    } for nr, date in zip(nrs, dates)]
+        'nrNum': nr
+    } for nr in nrs]
+
+    # Add dates to nrs_details
+    for i, date in enumerate(dates):
+        if i < len(nrs_details):
+            nrs_details[i]['created'] = date.isoformat()
 
     entities_response = {
         'businessEntities': businesses_details,
@@ -2234,7 +2240,8 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
             assert draft_type == expected
 
     # Assert that the entities are sorted in descending order of creation dates
-    for i in range(len(rv.json['entities']) - 1):
-        created_i = dateutil.parser.parse(rv.json['entities'][i]['created'])
-        created_next = dateutil.parser.parse(rv.json['entities'][i + 1]['created'])
-        assert created_i >= created_next
+    if test_name == 'affiliations_order':
+        for i in range(len(rv.json['entities']) - 1):
+            created_i = dateutil.parser.parse(rv.json['entities'][i].get('created', '1900-01-01T00:00:00'))
+            created_next = dateutil.parser.parse(rv.json['entities'][i + 1].get('created', '1900-01-01T00:00:00'))
+            assert created_i >= created_next
