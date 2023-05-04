@@ -388,6 +388,7 @@ class Affiliation:
 
             combined.sort(key=sort_key, reverse=True)
 
+            return combined
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug('Failed to get affiliations details: %s', affiliations)
