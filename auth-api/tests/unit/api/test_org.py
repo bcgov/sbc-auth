@@ -21,6 +21,7 @@ import uuid
 from unittest.mock import patch
 
 import pytest
+from datetime import datetime
 from faker import Faker
 from sqlalchemy import event
 
@@ -2136,20 +2137,26 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     assert orgs.get('orgs')[0].get('decisionMadeBy') == decision_made_by
 
 
-@pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs', [
-    ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], []),
-    ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], []),
-    ('nrs_only', [], [], [], ['NR 1234567', 'NR 1234566']),
+@pytest.mark.parametrize('test_name, businesses, drafts, drafts_with_nrs, nrs, dates', [
+    ('businesses_only', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)], [], [], [], []),
+    ('drafts_only', [], [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)], [], [], []),
+    ('nrs_only', [], [], [], ['NR 1234567', 'NR 1234566'], []),
     ('drafts_with_nrs', [], [],
      [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
-     ['NR 1234567', 'NR 1234566']),
+     ['NR 1234567', 'NR 1234566'], []),
+    ('affiliations_order', [], [],
+        [], [('abcde1', CorpType.BC.value, 'NR 123456'),
+             ('abcde2', CorpType.BC.value, 'NR 123457'),
+             ('abcde3', CorpType.BC.value, 'NR 123458'),
+             ('abcde4', CorpType.BC.value, 'NR 123459')],
+        [datetime(2021, 1, 1), datetime(2022, 2, 1), datetime(2022, 3, 1), datetime(2023, 2, 1)]),
     ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
      [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
      [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
-     ['NR 1234567', 'NR 1234566', 'NR 1234565'])
+     ['NR 1234567', 'NR 1234566', 'NR 1234565'], [datetime(2021, 1, 1), datetime(2022, 2, 1)])
 ])
 def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
-                              test_name, businesses, drafts, drafts_with_nrs, nrs):
+                              test_name, businesses, drafts, drafts_with_nrs, nrs, dates):
     """Assert details of affiliations for an org are returned."""
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     # setup org
@@ -2196,6 +2203,11 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
         'nrNum': nr
     } for nr in nrs]
 
+    # Add dates to nrs_details
+    for i, date in enumerate(dates):
+        if i < len(nrs_details):
+            nrs_details[i]['created'] = date.isoformat()
+
     entities_response = {
         'businessEntities': businesses_details,
         'draftEntities': drafts_details + drafts_with_nr_details
@@ -2227,3 +2239,10 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
                 CorpType.SP.value, CorpType.GP.value] else CorpType.TMP.value
 
             assert draft_type == expected
+
+    # Assert that the entities are sorted in descending order of creation dates
+    if test_name == 'affiliations_order' and len(dates) > 0:
+        created_order = [affiliation['nameRequest'].get('created') for affiliation in rv.json['entities']]
+        dates.sort()
+        date_iso = [date.isoformat() for date in dates]
+        assert date_iso == created_order
