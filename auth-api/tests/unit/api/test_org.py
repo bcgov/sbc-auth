@@ -22,7 +22,6 @@ from unittest.mock import patch
 
 import pytest
 from datetime import datetime
-import dateutil.parser
 from faker import Faker
 from sqlalchemy import event
 
@@ -2145,10 +2144,12 @@ def test_new_active_search(client, jwt, session, keycloak_mock):
     ('drafts_with_nrs', [], [],
      [('T12dfhsff1', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff2', CorpType.GP.value, 'NR 1234566')],
      ['NR 1234567', 'NR 1234566'], []),
-    ('affiliations_order', [('BC1234567', CorpType.BC.value)],
-     [('T12dfhsff1', CorpType.BC.value)],
-     [('T12dfhsff3', CorpType.BC.value, 'NR 1234567')],
-     ['NR 1234567'], [datetime(2021, 1, 1), datetime(2022, 2, 1)]),
+    ('affiliations_order', [], [],
+        [], [('abcde1', CorpType.BC.value, 'NR 123456'),
+         ('abcde2', CorpType.BC.value, 'NR 123457'),
+         ('abcde3', CorpType.BC.value, 'NR 123458'),
+         ('abcde4', CorpType.BC.value, 'NR 123459')],
+        [datetime(2021, 1, 1), datetime(2022, 2, 1), datetime(2022, 3, 1), datetime(2023, 2, 1)]),
     ('all', [('BC1234567', CorpType.BC.value), ('BC1234566', CorpType.BC.value)],
      [('T12dfhsff1', CorpType.BC.value), ('T12dfhsff2', CorpType.GP.value)],
      [('T12dfhsff3', CorpType.BC.value, 'NR 1234567'), ('T12dfhsff4', CorpType.GP.value, 'NR 1234566')],
@@ -2240,8 +2241,8 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
             assert draft_type == expected
 
     # Assert that the entities are sorted in descending order of creation dates
-    if test_name == 'affiliations_order':
-        for i in range(len(rv.json['entities']) - 1):
-            created_i = dateutil.parser.parse(rv.json['entities'][i].get('created', '1900-01-01T00:00:00'))
-            created_next = dateutil.parser.parse(rv.json['entities'][i + 1].get('created', '1900-01-01T00:00:00'))
-            assert created_i >= created_next
+    if test_name == 'affiliations_order' and len(dates) > 0:
+        created_order = [affiliation['nameRequest'].get('created') for affiliation in rv.json['entities']]
+        dates.sort()
+        date_iso = [date.isoformat() for date in dates]
+        assert date_iso == created_order
