@@ -381,9 +381,13 @@ class Affiliation:
             # Provide us with a dict with the max created date.
             ordered = {affiliation.entity.business_identifier:
                        affiliation.created for affiliation in affiliations_sorted}
-            combined.sort(key=lambda x: ordered.get(x.get('identifier', x.get('nameRequest', {}).get('nrNum', '')),
-                                                    datetime.datetime.min),
-                          reverse=True)
+
+            def sort_key(x):
+                identifier = x.get('identifier', x.get('nameRequest', {}).get('nrNum', ''))
+                return ordered.get(identifier, datetime.datetime.min)
+
+            combined.sort(key=sort_key, reverse=True)
+
             return combined
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
