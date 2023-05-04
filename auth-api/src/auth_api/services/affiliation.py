@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation data."""
+import datetime
 from typing import Dict, List
 
 from flask import current_app
@@ -374,14 +375,27 @@ class Affiliation:
             config_id='ENTITY_SVC_CLIENT_ID', config_secret='ENTITY_SVC_CLIENT_SECRET')
         try:
             responses = await RestService.call_posts_in_parallel(call_info, token)
-            return Affiliation._combine_affiliaition_details(responses)
+            combined = Affiliation._combine_affiliation_details(responses)
+            # Should provide us with ascending order
+            affiliations_sorted = sorted(affiliations, key=lambda x: x.created, reverse=True)
+            # Provide us with a dict with the max created date.
+            ordered = {affiliation.entity.business_identifier:
+                       affiliation.created for affiliation in affiliations_sorted}
+
+            def sort_key(item):
+                identifier = item.get('identifier', item.get('nameRequest', {}).get('nrNum', ''))
+                return ordered.get(identifier, datetime.datetime.min)
+
+            combined.sort(key=sort_key, reverse=True)
+
+            return combined
         except ServiceUnavailableException as err:
             current_app.logger.debug(err)
             current_app.logger.debug('Failed to get affiliations details: %s', affiliations)
             raise ServiceUnavailableException('Failed to get affiliation details') from err
 
     @staticmethod
-    def _combine_affiliaition_details(details):
+    def _combine_affiliation_details(details):
         """Parse affiliation details responses and combine draft entities with NRs if applicable."""
         name_requests = {}
         businesses = []
