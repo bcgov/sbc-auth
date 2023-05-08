@@ -10,7 +10,6 @@
           hint="Example: NR 1234567"
           :rules="nrNumberRules"
           v-model="nrNumber"
-          @keyup="uppercase('nrNumber')"
           data-test="nr-number"
           autofocus
         />
@@ -72,7 +71,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
@@ -115,10 +114,20 @@ export default class AddNameRequestForm extends Vue {
     v => this.isValidateEmail(v) || 'Email is Invalid'
   ]
 
+  private VALID_NR_FORMAT = new RegExp(/^(NR)?\s*(\d{7})$/)
+
   private nrNumber = ''
   private applicantPhoneNumber = ''
   private applicantEmail = ''
   private isLoading = false
+
+  @Watch('nrNumber', { immediate: true })
+  private updateNrNumber (): void {
+    this.nrNumber = this.nrNumber?.toUpperCase()
+    if (this.VALID_NR_FORMAT.test(this.nrNumber)) {
+      this.nrNumber = 'NR ' + this.nrNumber.match(this.VALID_NR_FORMAT)[2]
+    }
+  }
 
   $refs: {
     addNRForm: HTMLFormElement,
@@ -143,17 +152,8 @@ export default class AddNameRequestForm extends Vue {
       !!CommonUtils.validateEmailFormat(value))
   }
 
-  private uppercase (prop: string): void {
-    this[prop] = this[prop]?.toUpperCase()
-  }
-
   private isValidNrNumber (value: any): boolean {
-    const VALID_FORMAT = new RegExp(/^(NR)?\s*(\d{7})$/)
-    if (VALID_FORMAT.test(value)) {
-      this.nrNumber = 'NR ' + value.match(VALID_FORMAT)[2]
-      return true
-    }
-    return false
+    return this.VALID_NR_FORMAT.test(value)
   }
 
   private async add (): Promise<void> {
