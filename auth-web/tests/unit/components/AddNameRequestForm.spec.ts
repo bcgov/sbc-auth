@@ -87,6 +87,17 @@ describe('Add Name Request Form', () => {
     expect(wrapper.vm.isFormValid()).toBe(true)
   })
 
+  it('verifies nr input valid', async () => {
+    const wrapper = wrapperFactory()
+    wrapper.vm.applicantPhoneNumber = '250-123-4567'
+    wrapper.vm.applicantEmail = '123@test.com'
+    wrapper.vm.nrNumber = 'NR1234567'
+    await flushPromises()
+
+    expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
+    expect(wrapper.vm.isFormValid()).toBe(true)
+  })
+
   it('verifies nr input invalid', async () => {
     const wrapper = wrapperFactory()
     wrapper.vm.applicantPhoneNumber = '250-123-4567'
