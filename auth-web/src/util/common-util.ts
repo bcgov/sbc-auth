@@ -12,7 +12,7 @@ export default class CommonUtils {
   }
 
   // formatting incorporation number according to the length of numbers
-  static formatIncorporationNumber (incorpNum: string, isNR = false, numLength = 7):string {
+  static formatIncorporationNumber (incorpNum: string, numLength = 7):string {
     if (!incorpNum) return null
     const numberFirstIndex = incorpNum.search(/[0-9]/i)
     if (numberFirstIndex > -1) {
@@ -28,11 +28,7 @@ export default class CommonUtils {
         businessIdentifierNumbers = businessIdentifierNumbers.substring(0, numLength)
       }
       // join both first part and second part
-      if (isNR) {
-        incorpNum = `${businessIdentifierStr || 'NR'} ${businessIdentifierNumbers}`
-      } else {
-        incorpNum = `${businessIdentifierStr}${businessIdentifierNumbers}`
-      }
+      incorpNum = `${businessIdentifierStr}${businessIdentifierNumbers}`
     }
     return incorpNum.toUpperCase()
   }
@@ -48,16 +44,6 @@ export default class CommonUtils {
 
   static isFirmNumber (value: string):boolean {
     return value?.toUpperCase().startsWith('FM') || false
-  }
-
-  /**
-   * Validates a NR number.
-   * @param value the NR to validate
-   * @returns True if the NR is valid, else False
-   */
-  static validateNameRequestNumber (value: string):boolean {
-    const VALID_FORMAT = new RegExp(/^NR \d{7}$/)
-    return VALID_FORMAT.test(value)
   }
 
   static validateEmailFormat (value: string):boolean {

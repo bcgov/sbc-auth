@@ -5,12 +5,12 @@
         <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
         <v-text-field
           ref="nrNumber"
-          filled persistent-hint validate-on-blur
+          filled persistent-hint
           label="Enter a Name Request Number"
           hint="Example: NR 1234567"
           :rules="nrNumberRules"
           v-model="nrNumber"
-          @blur="formatNrNumber()"
+          @keyup="uppercase('nrNumber')"
           data-test="nr-number"
           autofocus
         />
@@ -102,7 +102,7 @@ export default class AddNameRequestForm extends Vue {
 
   readonly nrNumberRules = [
     v => !!v || 'Name Request Number is required',
-    v => CommonUtils.validateNameRequestNumber(v) || 'Name Request Number is invalid'
+    v => this.isValidNrNumber(v) || 'Name Request Number is invalid'
   ]
 
   readonly applicantPhoneNumberRules = [
@@ -129,7 +129,7 @@ export default class AddNameRequestForm extends Vue {
   private isFormValid (): boolean {
     return !!this.nrNumber &&
       (!!this.applicantPhoneNumber || !!this.applicantEmail) &&
-      CommonUtils.validateNameRequestNumber(this.nrNumber)
+      this.isValidNrNumber(this.nrNumber)
   }
 
   private isInputEntered (value: any, inputType: string): boolean {
@@ -141,6 +141,19 @@ export default class AddNameRequestForm extends Vue {
   private isValidateEmail (value: any): boolean {
     return ((!!this.applicantPhoneNumber && !!value) ||
       !!CommonUtils.validateEmailFormat(value))
+  }
+
+  private uppercase (prop: string): void {
+    this[prop] = this[prop]?.toUpperCase()
+  }
+
+  private isValidNrNumber (value: any): boolean {
+    const VALID_FORMAT = new RegExp(/^(NR)?\s*(\d{7})$/)
+    if (VALID_FORMAT.test(value)) {
+      this.nrNumber = 'NR ' + value.match(VALID_FORMAT)[2]
+      return true
+    }
+    return false
   }
 
   private async add (): Promise<void> {
@@ -182,12 +195,6 @@ export default class AddNameRequestForm extends Vue {
     if (event) {
       this.$emit('on-cancel')
     }
-  }
-
-  protected async formatNrNumber (): Promise<void> {
-    this.nrNumber = CommonUtils.formatIncorporationNumber(this.nrNumber, true)
-    await Vue.nextTick() // wait for component to update
-    this.$refs.nrNumber.validate()
   }
 
   private openHelp (): void {
