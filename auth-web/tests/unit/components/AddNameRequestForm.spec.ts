@@ -12,6 +12,7 @@ const vuetify = new Vuetify({})
 document.body.setAttribute('data-app', 'true')
 
 describe('Add Name Request Form', () => {
+  let wrapper: any
   let wrapperFactory: any
 
   beforeEach(() => {
@@ -26,6 +27,11 @@ describe('Add Name Request Form', () => {
         vuetify
       })
     }
+
+    wrapper = wrapperFactory()
+    wrapper.vm.applicantPhoneNumber = '250-123-4567'
+    wrapper.vm.applicantEmail = '123@test.com'
+    wrapper.vm.nrNumber = 'NR 1234567'
   })
 
   it('renders the component properly', () => {
@@ -55,9 +61,6 @@ describe('Add Name Request Form', () => {
 
   // Name Request number validation
   it('verifies nr input valid', async () => {
-    const wrapper = wrapperFactory()
-    wrapper.vm.applicantPhoneNumber = '250-123-4567'
-    wrapper.vm.applicantEmail = '123@test.com'
     wrapper.vm.nrNumber = 'NR 1234567'
     await flushPromises()
 
@@ -66,9 +69,6 @@ describe('Add Name Request Form', () => {
   })
 
   it('verifies nr input valid', async () => {
-    const wrapper = wrapperFactory()
-    wrapper.vm.applicantPhoneNumber = '250-123-4567'
-    wrapper.vm.applicantEmail = '123@test.com'
     wrapper.vm.nrNumber = '1234567'
     await flushPromises()
 
@@ -77,9 +77,6 @@ describe('Add Name Request Form', () => {
   })
 
   it('verifies nr input valid', async () => {
-    const wrapper = wrapperFactory()
-    wrapper.vm.applicantPhoneNumber = '250-123-4567'
-    wrapper.vm.applicantEmail = '123@test.com'
     wrapper.vm.nrNumber = 'NR    1234567'
     await flushPromises()
 
@@ -88,9 +85,6 @@ describe('Add Name Request Form', () => {
   })
 
   it('verifies nr input valid', async () => {
-    const wrapper = wrapperFactory()
-    wrapper.vm.applicantPhoneNumber = '250-123-4567'
-    wrapper.vm.applicantEmail = '123@test.com'
     wrapper.vm.nrNumber = 'NR1234567'
     await flushPromises()
 
@@ -99,9 +93,6 @@ describe('Add Name Request Form', () => {
   })
 
   it('verifies nr input invalid', async () => {
-    const wrapper = wrapperFactory()
-    wrapper.vm.applicantPhoneNumber = '250-123-4567'
-    wrapper.vm.applicantEmail = '123@test.com'
     wrapper.vm.nrNumber = 'NR 123456'
     await flushPromises()
 
@@ -109,9 +100,6 @@ describe('Add Name Request Form', () => {
   })
 
   it('verifies nr input invalid', async () => {
-    const wrapper = wrapperFactory()
-    wrapper.vm.applicantPhoneNumber = '250-123-4567'
-    wrapper.vm.applicantEmail = '123@test.com'
     wrapper.vm.nrNumber = '   NR 1234567'
     await flushPromises()
 
