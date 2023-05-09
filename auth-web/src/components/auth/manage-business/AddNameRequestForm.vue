@@ -10,7 +10,7 @@
           hint="Example: NR 1234567"
           :rules="nrNumberRules"
           :value="nrNumber"
-          @input="nrNumber = updateNrNumber($event)"
+          @input="nrNumber = formatNrNumber($event)"
           data-test="nr-number"
           autofocus
         />
@@ -122,7 +122,7 @@ export default class AddNameRequestForm extends Vue {
   applicantEmail = ''
   isLoading = false
 
-  updateNrNumber (value): string {
+  formatNrNumber (value): string {
     let nrNumber = value?.toUpperCase()
     if (this.VALID_NR_FORMAT.test(value)) {
       nrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(value)[2]
