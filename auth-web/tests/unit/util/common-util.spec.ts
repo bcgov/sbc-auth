@@ -64,12 +64,6 @@ describe('Common Util Test', () => {
     expect(CommonUtil.formatIncorporationNumber('CP1234567')).toBe('CP1234567')
   })
 
-  it('formatIncorporationNumber returns correct NR number', () => {
-    expect(CommonUtil.formatIncorporationNumber('123', true)).toBe('NR 0000123')
-    expect(CommonUtil.formatIncorporationNumber('nr1234567', true)).toBe('NR 1234567')
-    expect(CommonUtil.formatIncorporationNumber('NR 1234567', true)).toBe('NR 1234567')
-  })
-
   it('validateIncorporationNumber returns True with valid incorp number', () => {
     expect(CommonUtil.validateIncorporationNumber('BC0000033')).toBe(true)
   })
@@ -87,20 +81,6 @@ describe('Common Util Test', () => {
     expect(CommonUtil.isCooperativeNumber(null)).toBe(false)
     expect(CommonUtil.isCooperativeNumber('')).toBe(false)
     expect(CommonUtil.isCooperativeNumber('XX000033')).toBe(false)
-  })
-
-  it('is validating NameRequestNumber [positive]', () => {
-    expect(CommonUtil.validateNameRequestNumber('NR 1234567')).toBe(true)
-  })
-
-  it('is validating NameRequestNumber [negative]', () => {
-    expect(CommonUtil.validateNameRequestNumber('')).toBe(false)
-    expect(CommonUtil.validateNameRequestNumber('NR')).toBe(false)
-    expect(CommonUtil.validateNameRequestNumber('NR XYZ')).toBe(false)
-    expect(CommonUtil.validateNameRequestNumber('NR1234567')).toBe(false)
-    expect(CommonUtil.validateNameRequestNumber('nr 1234567')).toBe(false)
-    expect(CommonUtil.validateNameRequestNumber('NR 123456')).toBe(false)
-    expect(CommonUtil.validateNameRequestNumber('NR 12345678')).toBe(false)
   })
 
   it('is validating email format [positive]', () => {

@@ -1,17 +1,39 @@
+import { mount, shallowMount } from '@vue/test-utils'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import { shallowMount } from '@vue/test-utils'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
-
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
 describe('Add Name Request Form', () => {
+  let wrapper: any
+  let wrapperFactory: any
+
+  beforeEach(() => {
+    wrapperFactory = (props: any) => {
+      return mount(AddNameRequestForm, {
+        mocks: {
+          $t: (msg) => msg
+        },
+        propsData: {
+          props
+        },
+        vuetify
+      })
+    }
+
+    wrapper = wrapperFactory()
+    wrapper.vm.applicantPhoneNumber = '250-123-4567'
+    wrapper.vm.applicantEmail = '123@test.com'
+    wrapper.vm.nrNumber = 'NR 1234567'
+  })
+
   it('renders the component properly', () => {
     const wrapper = shallowMount(AddNameRequestForm, {
       vuetify,
@@ -35,5 +57,58 @@ describe('Add Name Request Form', () => {
     expect(wrapper.find('[data-test="cancel-button"]').exists()).toBe(true)
 
     wrapper.destroy()
+  })
+
+  // Name Request number validation
+  it('verifies nr input valid', async () => {
+    wrapper.vm.nrNumber = 'NR 1234567'
+    await flushPromises()
+
+    expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
+    expect(wrapper.vm.isFormValid()).toBe(true)
+  })
+
+  it('verifies nr input valid', async () => {
+    wrapper.vm.nrNumber = '1234567'
+    await flushPromises()
+
+    wrapper.find('[data-test="nr-number"]').trigger('input')
+
+    expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
+    expect(wrapper.vm.isFormValid()).toBe(true)
+  })
+
+  it('verifies nr input valid', async () => {
+    wrapper.vm.nrNumber = 'NR    1234567'
+    await flushPromises()
+
+    wrapper.find('[data-test="nr-number"]').trigger('input')
+
+    expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
+    expect(wrapper.vm.isFormValid()).toBe(true)
+  })
+
+  it('verifies nr input valid', async () => {
+    wrapper.vm.nrNumber = 'NR1234567'
+    await flushPromises()
+
+    wrapper.find('[data-test="nr-number"]').trigger('input')
+
+    expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
+    expect(wrapper.vm.isFormValid()).toBe(true)
+  })
+
+  it('verifies nr input invalid', async () => {
+    wrapper.vm.nrNumber = 'NR 123456'
+    await flushPromises()
+
+    expect(wrapper.vm.isFormValid()).toBe(false)
+  })
+
+  it('verifies nr input invalid', async () => {
+    wrapper.vm.nrNumber = '   NR 1234567'
+    await flushPromises()
+
+    expect(wrapper.vm.isFormValid()).toBe(false)
   })
 })

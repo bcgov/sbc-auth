@@ -5,12 +5,12 @@
         <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
         <v-text-field
           ref="nrNumber"
-          filled persistent-hint validate-on-blur
+          filled persistent-hint
           label="Enter a Name Request Number"
           hint="Example: NR 1234567"
           :rules="nrNumberRules"
-          v-model="nrNumber"
-          @blur="formatNrNumber()"
+          :value="nrNumber"
+          @input="nrNumber = formatNrNumber($event)"
           data-test="nr-number"
           autofocus
         />
@@ -94,15 +94,15 @@ import { StatusCodes } from 'http-status-codes'
   }
 })
 export default class AddNameRequestForm extends Vue {
-  private readonly currentOrganization!: Organization
-  private readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
+  readonly currentOrganization!: Organization
+  readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
 
   readonly helpDialogBlurb = 'If you have lost your receipt and name results email and ' +
     'need assistance finding your Name Request (NR) Number, please contact use at:'
 
   readonly nrNumberRules = [
     v => !!v || 'Name Request Number is required',
-    v => CommonUtils.validateNameRequestNumber(v) || 'Name Request Number is invalid'
+    v => this.isValidNrNumber(v) || 'Name Request Number is invalid'
   ]
 
   readonly applicantPhoneNumberRules = [
@@ -115,10 +115,20 @@ export default class AddNameRequestForm extends Vue {
     v => this.isValidateEmail(v) || 'Email is Invalid'
   ]
 
-  private nrNumber = ''
-  private applicantPhoneNumber = ''
-  private applicantEmail = ''
-  private isLoading = false
+  VALID_NR_FORMAT = new RegExp(/^(NR)?\s*(\d{7})$/)
+
+  nrNumber = ''
+  applicantPhoneNumber = ''
+  applicantEmail = ''
+  isLoading = false
+
+  formatNrNumber (value): string {
+    let nrNumber = value?.toUpperCase()
+    if (this.VALID_NR_FORMAT.test(value)) {
+      nrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(value)[2]
+    }
+    return nrNumber
+  }
 
   $refs: {
     addNRForm: HTMLFormElement,
@@ -126,24 +136,28 @@ export default class AddNameRequestForm extends Vue {
     helpDialog: HelpDialog
   }
 
-  private isFormValid (): boolean {
+  isFormValid (): boolean {
     return !!this.nrNumber &&
       (!!this.applicantPhoneNumber || !!this.applicantEmail) &&
-      CommonUtils.validateNameRequestNumber(this.nrNumber)
+      this.isValidNrNumber(this.nrNumber)
   }
 
-  private isInputEntered (value: any, inputType: string): boolean {
+  isInputEntered (value: any, inputType: string): boolean {
     return (!!((inputType === 'email')
       ? this.applicantPhoneNumber
       : this.applicantEmail) || !!value)
   }
 
-  private isValidateEmail (value: any): boolean {
+  isValidateEmail (value: any): boolean {
     return ((!!this.applicantPhoneNumber && !!value) ||
       !!CommonUtils.validateEmailFormat(value))
   }
 
-  private async add (): Promise<void> {
+  isValidNrNumber (value: any): boolean {
+    return this.VALID_NR_FORMAT.test(value)
+  }
+
+  async add (): Promise<void> {
     if (this.isFormValid()) {
       this.isLoading = true
       try {
@@ -173,7 +187,7 @@ export default class AddNameRequestForm extends Vue {
     }
   }
 
-  private resetForm (event: string): void {
+  resetForm (event: string): void {
     this.nrNumber = ''
     this.applicantEmail = ''
     this.applicantPhoneNumber = ''
@@ -184,13 +198,7 @@ export default class AddNameRequestForm extends Vue {
     }
   }
 
-  protected async formatNrNumber (): Promise<void> {
-    this.nrNumber = CommonUtils.formatIncorporationNumber(this.nrNumber, true)
-    await Vue.nextTick() // wait for component to update
-    this.$refs.nrNumber.validate()
-  }
-
-  private openHelp (): void {
+  openHelp (): void {
     this.$refs.helpDialog.open()
   }
 }
