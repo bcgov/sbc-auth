@@ -72,6 +72,8 @@ describe('Add Name Request Form', () => {
     wrapper.vm.nrNumber = '1234567'
     await flushPromises()
 
+    wrapper.find('[data-test="nr-number"]').trigger('input')
+
     expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
     expect(wrapper.vm.isFormValid()).toBe(true)
   })
@@ -80,6 +82,8 @@ describe('Add Name Request Form', () => {
     wrapper.vm.nrNumber = 'NR    1234567'
     await flushPromises()
 
+    wrapper.find('[data-test="nr-number"]').trigger('input')
+
     expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
     expect(wrapper.vm.isFormValid()).toBe(true)
   })
@@ -87,6 +91,8 @@ describe('Add Name Request Form', () => {
   it('verifies nr input valid', async () => {
     wrapper.vm.nrNumber = 'NR1234567'
     await flushPromises()
+
+    wrapper.find('[data-test="nr-number"]').trigger('input')
 
     expect(wrapper.vm.nrNumber).toEqual('NR 1234567')
     expect(wrapper.vm.isFormValid()).toBe(true)
