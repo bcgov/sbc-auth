@@ -126,8 +126,8 @@ export default class AddNameRequestForm extends Vue {
 
   formatNrNumber (value): string {
     let formattedNrNumber = value?.toUpperCase()
-    if (this.VALID_NR_FORMAT.test(value)) {
-      formattedNrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(value)[2]
+    if (this.VALID_NR_FORMAT.test(formattedNrNumber)) {
+      formattedNrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(formattedNrNumber)[2]
     }
     // Force a re-render when the content is the same (reactivity issue)
     if (formattedNrNumber === this.nrNumber) {
