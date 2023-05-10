@@ -11,6 +11,7 @@
           :rules="nrNumberRules"
           :value="nrNumber"
           @input="nrNumber = formatNrNumber($event)"
+          :key="nrNumberKey"
           data-test="nr-number"
           autofocus
         />
@@ -118,16 +119,21 @@ export default class AddNameRequestForm extends Vue {
   VALID_NR_FORMAT = new RegExp(/^(NR)?\s*(\d{7})$/)
 
   nrNumber = ''
+  nrNumberKey = 0
   applicantPhoneNumber = ''
   applicantEmail = ''
   isLoading = false
 
   formatNrNumber (value): string {
-    let nrNumber = value?.toUpperCase()
-    if (this.VALID_NR_FORMAT.test(value)) {
-      nrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(value)[2]
+    let formattedNrNumber = value?.toUpperCase()
+    if (this.VALID_NR_FORMAT.test(formattedNrNumber)) {
+      formattedNrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(formattedNrNumber)[2]
     }
-    return nrNumber
+    // Force a re-render when the content is the same (reactivity issue)
+    if (formattedNrNumber === this.nrNumber) {
+      this.nrNumberKey++
+    }
+    return formattedNrNumber
   }
 
   $refs: {
