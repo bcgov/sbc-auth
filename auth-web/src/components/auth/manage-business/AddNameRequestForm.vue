@@ -129,8 +129,7 @@ export default class AddNameRequestForm extends Vue {
     if (this.VALID_NR_FORMAT.test(value)) {
       formattedNrNumber = 'NR ' + this.VALID_NR_FORMAT.exec(value)[2]
     }
-    // Rerender, when same results are entered. Example entering 1234567 when NR 1234567 is already in the field.
-    // This causes the code to run, but the text wont re-rerender.
+    // Force a re-render when the content is the same (reactivity issue)
     if (formattedNrNumber === this.nrNumber) {
       this.nrNumberKey++
     }
