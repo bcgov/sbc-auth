@@ -113,5 +113,13 @@ export const businesses: Business[] = [
     corpSubType: {
       code: CorpTypes.BENEFIT_COMPANY
     }
+  },
+  {
+    adminFreeze: false,
+    goodStanding: true,
+    businessIdentifier: 'BC0871095',
+    name: '0871095 B.C. LTD.',
+    corpType: { code: CorpTypes.BENEFIT_COMPANY },
+    status: 'HISTORICAL'
   }
 ]
