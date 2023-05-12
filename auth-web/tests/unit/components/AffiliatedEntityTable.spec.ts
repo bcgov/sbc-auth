@@ -80,7 +80,7 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Renders affiliated entity table', async () => {
     // verify table header
-    expect(wrapper.find('.table-header').text()).toBe('My List (6)')
+    expect(wrapper.find('.table-header').text()).toBe('My List (7)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
@@ -161,5 +161,13 @@ describe('AffiliatedEntityTable.vue', () => {
       expect(entityDetails.props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.FROZEN, EntityAlertTypes.BADSTANDING]))
     }
     expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
+
+    // seventh item
+    columns = itemRows.at(6).findAll(itemCell)
+    expect(columns.at(0).text()).toBe('0871095 B.C. LTD.')
+    expect(columns.at(1).text()).toBe('BC0871095')
+    expect(columns.at(2).text()).toContain('BC Benefit Company')
+    expect(columns.at(3).text()).toBe('Historical')
+    expect(columns.at(4).text()).toBe('Open')
   })
 })
