@@ -86,7 +86,7 @@ class Users(Resource):
 
     @staticmethod
     @TRACER.trace()
-    @cors.crossdomain(origin='*')
+    # @cors.crossdomain(origin='*')
     @_jwt.requires_auth
     def post():
         """Post a new user using the request body (which will contain a JWT).

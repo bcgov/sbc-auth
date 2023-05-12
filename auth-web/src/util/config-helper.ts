@@ -18,6 +18,11 @@ export default class ConfigHelper {
     if (ConfigHelper.getSiteminderLogoutUrl()) {
       sessionStorage.setItem(SessionStorageKeys.SiteminderLogoutUrl, ConfigHelper.getSiteminderLogoutUrl())
     }
+    const searchApiUrl: string = process.env.VUE_APP_REGISTRIES_SEARCH_API_URL +
+    process.env.VUE_APP_REGISTRIES_SEARCH_API_VERSION + '/'
+    const searchApiKey: string = process.env.VUE_APP_REGISTRIES_SEARCH_API_KEY
+    sessionStorage.setItem('REGISTRIES_SEARCH_API_URL', searchApiUrl)
+    sessionStorage.setItem('REGISTRIES_SEARCH_API_KEY', searchApiKey)
   }
 
   /**
