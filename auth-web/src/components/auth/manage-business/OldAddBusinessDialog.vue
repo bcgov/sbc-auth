@@ -16,17 +16,28 @@
     >
       <v-card>
         <v-card-title data-test="dialog-header">
-          <span>Manage a B.C Business</span>
+          <span>Add an Existing Business</span>
         </v-card-title>
 
         <v-card-text class="py-2">
           <p>
-           <strong>Business name:</strong> Dunder Mifflin Paper Company Inc.<br>
-           <strong>Incorporation Number:</strong> BC0871349
+            Add an existing business to your list by providing the following required pieces of information:
           </p>
-          <p>
-            You must be authorised to manage this business. You can be authorised in one of the following ways:
-          </p>
+          <v-tooltip top nudge-bottom="80" content-class="top-tooltip">
+            <template v-slot:activator="{ on, attrs }">
+              <ul class="add-business-unordered-list">
+                <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
+                <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
+                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
+                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
+                  of the proprietor or a partner</span>.</li>
+              </ul>
+            </template>
+            <span>
+              For individuals, it should be "Last Name, First Name Middlename".<br>
+              E.g. Watson, John Hamish
+            </span>
+          </v-tooltip>
 
           <v-form ref="addBusinessForm" lazy-validation class="mt-6">
             <!-- Business Identifier -->
