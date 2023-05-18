@@ -2198,7 +2198,7 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
             'name': f'TEST INC. {nr}',
             'state': 'APPROVED'
         }],
-        'state': 'APPROVED',
+        'stateCd': 'APPROVED',
         'requestTypeCd': 'BC',
         'nrNum': nr
     } for nr in nrs]
