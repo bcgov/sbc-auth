@@ -420,13 +420,17 @@ class Affiliation:
 
         # combine NRs
         for business in drafts + businesses:
-            if 'nrNumber' in business and (nr_num := business['nrNumber']) and business['nrNumber'] in name_requests:
-                business['nameRequest'] = name_requests[nr_num]['nameRequest']
-                # Only drafts have nrNumber coming back from legal-api.
-                # Remove the business if the draft associated to the NR is consumed.
-                if business['nameRequest']['stateCd'] == NRStatus.CONSUMED.value:
+            # Only drafts have nrNumber coming back from legal-api.
+            if 'nrNumber' in business and (nr_num := business['nrNumber']):
+                if business['nrNumber'] in name_requests:
+                    business['nameRequest'] = name_requests[nr_num]['nameRequest']
+                    # Remove the business if the draft associated to the NR is consumed.
+                    if business['nameRequest']['stateCd'] == NRStatus.CONSUMED.value:
+                        drafts.remove(business)
+                    del name_requests[nr_num]
+                else:
+                    # If not in name_requests then it's a stale draft.
                     drafts.remove(business)
-                del name_requests[nr_num]
 
         return [name_request for nr_num, name_request in name_requests.items()] + drafts + businesses
 
