@@ -45,11 +45,10 @@ export default defineComponent({
   },
   setup (props) {
     const localState = reactive({
-  isHelpContentOpen: false,
-  title: props.toggleButtonTitle,
-  showBottomToggle: props.hasBottomHideToggle
-}) as { isHelpContentOpen: boolean, title: string, showBottomToggle: boolean };
-
+      isHelpContentOpen: false,
+      title: props.toggleButtonTitle,
+      showBottomToggle: props.hasBottomHideToggle
+    }) as { isHelpContentOpen: boolean, title: string, showBottomToggle: boolean }
 
     return {
       ...toRefs(localState)
