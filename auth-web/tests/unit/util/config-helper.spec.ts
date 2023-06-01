@@ -5,7 +5,7 @@ var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'NRO_URL': 'https://dev.bcregistrynames.gov.bc.ca/nro/',
-  'NAME_REQUEST_URL': 'https://dev.bcregistry.ca/namerequest/'
+  'NAME_REQUEST_URL': 'https://dev.names.bcregistry.gov.bc.ca/'
 }
 
 jest.mock('axios', () => ({
