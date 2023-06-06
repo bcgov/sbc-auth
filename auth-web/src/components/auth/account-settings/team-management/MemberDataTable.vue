@@ -423,12 +423,12 @@ export default class MemberDataTable extends Vue {
       return false
     }
 
-    // Can't remove Coordinator unless Admin
+    // Coordinators can remove other coordinators.
     if (
       this.currentMembership.membershipTypeCode === MembershipType.Coordinator &&
       memberToRemove.membershipTypeCode === MembershipType.Coordinator
     ) {
-      return false
+      return true
     }
 
     // Admin can be removed by other admin. #4909
