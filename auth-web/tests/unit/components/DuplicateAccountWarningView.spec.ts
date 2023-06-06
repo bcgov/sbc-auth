@@ -36,7 +36,7 @@ describe('DuplicateAccountWarningView.vue', () => {
             label: 'DEV SK OB1',
             productSettings: '/account/2446/settings/product-settings',
             type: 'ACCOUNT',
-            urlorigin: 'https://dev.bcregistry.ca/business/auth',
+            urlorigin: 'https://dev.account.bcregistry.gov.bc.ca/',
             urlpath: '/account/2446/settings'
           }
         ]
