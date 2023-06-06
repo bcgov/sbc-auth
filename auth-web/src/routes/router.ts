@@ -134,13 +134,13 @@ export function getRoutes (): RouteConfig[] {
   const developerAccess = () => import(/* webpackChunkName: "developer-access" */ '../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
 
   const routes = [
-    { path: '/', name: 'root', redirect: 'home' },
+    { path: '/', name: 'root', redirect: 'decide-business' },
     {
-      path: '/home',
+      path: '/',
       component: HomeView,
       children: [
         {
-          path: '',
+          path: '/home',
           name: 'home',
           redirect: 'decide-business'
         },
