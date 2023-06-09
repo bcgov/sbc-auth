@@ -16,101 +16,110 @@
     >
       <v-card>
         <v-card-title data-test="dialog-header">
-          <span>Manage a B.C Business</span>
+          <span>Add an Existing Business</span>
         </v-card-title>
 
         <v-card-text class="py-2">
           <p>
-           <strong>Business name:</strong> Dunder Mifflin Paper Company Inc.<br>
-           <strong>Incorporation Number:</strong> BC0871349
+            Add an existing business to your list by providing the following required pieces of information:
           </p>
-          <p>
-            You must be authorised to manage this business. You can be authorised in one of the following ways:
-          </p>
-
-          <v-expansion-panels
-      v-model="panel"
-      class="bottom-border"
-      accordion
-    >
-      <v-expansion-panels
-  v-model="panel"
-  class="bottom-border"
-  accordion
->
-  <v-expansion-panel
-    id="x-panel-1"
-    class="mb-4"
-    :disabled="isOneOption"
-    @click="identifyForm(1)"
-  >
-    <v-expansion-panel-header :class="{'name-options-header': isOneOption}">
-      <span class="names-option-title" color="primary">Request authorization from the business</span>
-      <template #actions>
-        <v-icon color="primary">
-          mdi-menu-down
-        </v-icon>
-      </template>
-    </v-expansion-panel-header>
-
-    <v-expansion-panel-content class="name-options-content pt-4">
-      <p>
-            Select the account you want to authorise you to perform Registries activities for  <strong>DUNDER MIFFLIN PAPER COMPANY INC. </strong>:
-          </p>
-      <div class="w-full">
-          <v-select
-            class="column-selections w-full"
-            dense
-            filled
-            hide-details
-            item-text="value"
-            :items="headerSelections"
-            :menu-props="{
-              bottom: true,
-              minWidth: '200px',
-              maxHeight: 'none',
-              offsetY: true,
-              width: '100%'
-            }"
-            multiple
-            return-object
-            v-model="headersSelected"
-          >
-            <template v-slot:selection="{ index }">
-              <span v-if="index === 0">Authorising Account</span>
+          <v-tooltip top nudge-bottom="80" content-class="top-tooltip">
+            <template v-slot:activator="{ on, attrs }">
+              <ul class="add-business-unordered-list">
+                <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
+                <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
+                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
+                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
+                  of the proprietor or a partner</span>.</li>
+              </ul>
             </template>
-          </v-select>
+            <span>
+              For individuals, it should be "Last Name, First Name Middlename".<br>
+              E.g. Watson, John Hamish
+            </span>
+          </v-tooltip>
 
-            <p class="pt-8">
-              You can add a message that will be included as part of your authorisation request.
-            </p>
+          <v-form ref="addBusinessForm" lazy-validation class="mt-6">
+            <!-- Business Identifier -->
+            <v-text-field
+              filled req persistent-hint validate-on-blur
+              label="Incorporation Number or Registration Number"
+              hint="Example: BC1234567, CP1234567 or FM1234567"
+              :rules="businessIdentifierRules"
+              v-model="businessIdentifier"
+              @blur="formatBusinessIdentifier()"
+              class="business-identifier mb-n2"
+              aria-label="Incorporation Number and Password or Passcode"
+              autofocus
+            />
 
-           <v-card-text class="pt-1 pb-1">
-            <div class="relative">
-              <v-textarea
-                ref="textarea"
-                hide-details
-                dense
+            <!-- Passcode -->
+            <v-expand-transition>
+              <v-text-field
+                v-if="isBusinessIdentifierValid"
                 filled
-                placeholder="Enter an optional message"
-                full-width
-                v-model="message"
-                :disabled="characterCount >= 4000 && message.length !== 4000"
-                @input="updateCharacterCount"
+                :label="passcodeLabel"
+                :hint="passcodeHint"
+                persistent-hint
+                :rules="passcodeRules"
+                :maxlength="passcodeMaxLength"
+                v-model="passcode"
+                autocomplete="off"
+                class="passcode mt-6 mb-n2"
+                :aria-label="passcodeLabel"
               />
-              <div class="character-counter absolute top-0 right-0 text-right pr-2 pt-2">
-                <span :class="{'text-red-500': characterCount > 4000}">{{ characterCount }}/4000 characters</span>
-              </div>
-            </div>
-          </v-card-text>
+            </v-expand-transition>
 
-        </div>
-    </v-expansion-panel-content>
-  </v-expansion-panel>
-</v-expansion-panels>
+            <!-- Authorization Name -->
+            <v-expand-transition>
+              <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
+                <header class="font-weight-bold">Authorization</header>
+                <v-text-field
+                  filled
+                  persistent-hint
+                  :label="authorizationLabel"
+                  :rules="authorizationRules"
+                  :maxlength="authorizationMaxLength"
+                  :aria-label="authorizationLabel"
+                  v-model="authorizationName"
+                  autocomplete="off"
+                  class="authorization mt-4 pb-1"
+                  hide-details="auto"
+                />
+              </section>
+            </v-expand-transition>
 
-    </v-expansion-panels>
+            <!-- Certify (firms only) -->
+            <v-expand-transition>
+              <Certify
+                v-if="isBusinessIdentifierValid && isFirm"
+                :certifiedBy="certifiedBy"
+                entity="registered entity"
+                @update:isCertified="isCertified = $event"
+                class="certify"
+                :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
+              />
+            </v-expand-transition>
 
+            <!-- Folio Number -->
+            <v-expand-transition>
+              <section v-if="isBusinessIdentifierValid" class="mt-6">
+                <header class="font-weight-bold">Folio / Reference Number</header>
+                <p class="mt-4 mb-0">
+                  If you file forms for a number of companies, you may want to enter a
+                  folio or reference number to help you keep track of your transactions.
+                </p>
+                <v-text-field
+                  filled hide-details
+                  label="Folio or Reference Number (Optional)"
+                  :maxlength="50"
+                  v-model="folioNumber"
+                  class="folio-number mt-6"
+                  aria-label="Folio or Reference Number (Optional)"
+                />
+              </section>
+            </v-expand-transition>
+          </v-form>
         </v-card-text>
 
         <v-card-actions class="form__btns">
@@ -131,16 +140,14 @@
           >
             <span>Cancel</span>
           </v-btn>
-         <v-btn
-  large
-  color="primary"
-  id="add-button"
-  :loading="isLoading"
-  style="width: auto; display: inline-block; white-space: nowrap"
-  @click="add()"
->
-  <span>Mange this business</span>
-</v-btn>
+          <v-btn
+            large color="primary"
+            id="add-button"
+            :loading="isLoading"
+            @click="add()"
+          >
+            <span>Add</span>
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -169,7 +176,6 @@ import { mapActions } from 'vuex'
     ])
   }
 })
-
 export default class AddBusinessDialog extends Vue {
   $refs: {
     addBusinessForm: HTMLFormElement,
@@ -197,16 +203,6 @@ export default class AddBusinessDialog extends Vue {
   readonly authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
 
   readonly authorizationMaxLength = 100
-
-  characterCount = 0;
-  message = '';
-
-  updateCharacterCount () {
-    if (this.message.length > 4000) {
-      this.message = this.message.substring(0, 4000)
-    }
-    this.characterCount = this.message.length
-  }
 
   get isBusinessIdentifierValid (): boolean {
     return CommonUtils.validateIncorporationNumber(this.businessIdentifier)
