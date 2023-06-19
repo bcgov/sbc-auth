@@ -2,10 +2,10 @@
     <v-simple-table>
     <thead>
       <tr>
-        <th class="text-left">
+        <th scope="col" class="text-left">
           Id
         </th>
-        <th class="text-left">
+        <th scope="col" class="text-left">
           Email
         </th>
       </tr>
@@ -31,7 +31,7 @@ export default defineComponent({
   setup () {
     const getSafeEmails = async () => {
       const response = await StaffService.getSafeEmails()
-      if (response && response.data && response.status === 200) {
+      if (response?.data && response.status === 200) {
         return response.data
       }
     }
