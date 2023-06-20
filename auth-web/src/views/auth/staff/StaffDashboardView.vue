@@ -111,7 +111,11 @@
     </base-v-expansion-panel>
 
     <!-- Email Safe List -->
-    <base-v-expansion-panel title="Safe Email List (DEV/TEST)" v-if="isDevOrTest">
+    <base-v-expansion-panel
+      v-if="isDevOrTest"
+      info="Please contact #registries-ops to add or remove email addresses from the safe list."
+      title="Safe Email List (DEV/TEST)"
+    >
       <template v-slot:content>
         <SafeEmailView />
       </template>
