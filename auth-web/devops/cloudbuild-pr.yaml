@@ -21,6 +21,7 @@ steps:
     env:
       - 'VUE_APP_ADDRESS_COMPLETE_KEY=$_VUE_APP_ADDRESS_COMPLETE_KEY'
       - 'VUE_APP_AUTH_LD_CLIENT_ID=$_VUE_APP_AUTH_LD_CLIENT_ID'
+      - 'VUE_APP_REGISTRIES_SEARCH_API_KEY=$_VUE_APP_REGISTRIES_SEARCH_API_KEY'
     args: ['--openssl-legacy-provider', 'run', 'build']
 
   #
