@@ -98,7 +98,7 @@ describe('StaffDashboardView tests', () => {
     expect(wrapper.findComponent(StaffAccountManagement).exists()).toBe(true)
     expect(wrapper.findComponent(GLCodesListView).exists()).toBe(true)
     const expansionPanels = wrapper.findAll(BaseVExpansionPanel)
-    expect(expansionPanels.length).toBe(2)
+    expect(expansionPanels.length).toBe(3)
     // hidden by closed BaseVExpansionPanel
     expect(wrapper.findComponent(Transactions).exists()).toBe(false)
     // expanding shows it
