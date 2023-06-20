@@ -2,14 +2,14 @@
   <v-card id="administrative-bn" class="pa-8" flat>
     <div class="view-header flex-column">
       <v-row no-gutters>
-          <v-col col="6">
-            <h2 class="view-header__title">Administrative BN</h2>
-          </v-col>
-          <v-col col="6" class="pr-0" align="right">
-            <v-btn link color="primary" v-if="businessDetails" @click="resetSearch()">Search another Business</v-btn>
-            <v-btn link class="ml-2" v-if="businessDetails" @click="reload()">Reload</v-btn>
-          </v-col>
-        </v-row>
+        <v-col col="6">
+          <h2 class="view-header__title">Administrative BN</h2>
+        </v-col>
+        <v-col col="6" class="pr-0" align="right">
+          <v-btn link color="primary" v-if="businessDetails" @click="resetSearch()">Search another Business</v-btn>
+          <v-btn link class="ml-2" v-if="businessDetails" @click="reload()">Reload</v-btn>
+        </v-col>
+      </v-row>
     </div>
 
     <div v-if="!businessDetails">
@@ -52,8 +52,18 @@
           <v-col cols="4" class="pr-4">
             <strong>Business Name</strong>
           </v-col>
-          <v-col cols="8">
+          <v-col cols="5">
             {{ businessDetails.legalName }}
+          </v-col>
+          <v-col cols="3" align="right">
+            <v-btn
+              small text color="primary"
+              @click="downloadBusinessSummary(businessDetails.identifier)"
+              v-on="on"
+            >
+              <img src="@/assets/img/business_summary_icon.svg" alt="" class="pa-1">
+              <span class="font-13 ml-1">Business Summary</span>
+            </v-btn>
           </v-col>
         </v-row>
         <v-row no-gutters>
@@ -161,6 +171,9 @@ export default class AdministrativeBN extends Vue {
 
   @BusinessModule.Action('createBNRequest')
   private readonly createBNRequest!: (request: BNRequest) => Promise<any>
+
+  @BusinessModule.Action('downloadBusinessSummary')
+  private readonly downloadBusinessSummary!: (businessIdentifier: string) => Promise<void>
 
   // local variables
   protected businessIdentifier = ''

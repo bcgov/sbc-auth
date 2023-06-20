@@ -1,6 +1,7 @@
 import { BNRequest, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, PasscodeResetLoad, UpdateBusinessNamePayload } from '@/models/business'
 import { AxiosResponse } from 'axios'
+import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { axios } from '@/util/http-util'
@@ -75,5 +76,16 @@ export default class BusinessService {
   static async getRequestTracker (requestTrackerId: number): Promise<AxiosResponse<any>> {
     const url = `${ConfigHelper.getLegalAPIV2Url()}/requestTracker/${requestTrackerId}`
     return axios.get(url)
+  }
+
+  static async fetchBusinessSummary (businessIdentifier: string): Promise<void> {
+    const config = {
+      headers: { 'Accept': 'application/pdf' },
+      responseType: 'blob' as 'json'
+    }
+
+    const data = await axios.get(
+      `${ConfigHelper.getLegalAPIV2Url()}/businesses/${businessIdentifier}/documents/summary`, config)
+    CommonUtils.fileDownload(data?.data, `${businessIdentifier} Summary.pdf`, data?.headers['content-type'])
   }
 }
