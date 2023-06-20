@@ -179,6 +179,10 @@ export default class ConfigHelper {
     return `${process.env.VUE_APP_KEYCLOAK_CLIENTID}`
   }
 
+  static getNotifiyAPIUrl () {
+    return `${process.env.VUE_APP_NOTIFY_API_URL}` + `${process.env.VUE_APP_NOTIFY_API_VERSION}`
+  }
+
   static addToSession (key:string, value:any) {
     sessionStorage.setItem(key, value)
   }

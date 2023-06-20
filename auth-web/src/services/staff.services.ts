@@ -2,6 +2,7 @@ import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/model
 import { OrgFilterParams, OrgList, Organizations } from '@/models/Organization'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
+import { SafeEmail } from '@/models/safe-email'
 import { axios } from '@/util/http-util.ts'
 
 export default class StaffService {
@@ -41,5 +42,9 @@ export default class StaffService {
       }
     }
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs`, { params })
+  }
+
+  static async getSafeEmails (): Promise<AxiosResponse<SafeEmail[]>> {
+    return axios.get(`${ConfigHelper.getNotifiyAPIUrl()}/safe_list`)
   }
 }

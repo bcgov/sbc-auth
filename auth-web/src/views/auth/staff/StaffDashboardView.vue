@@ -103,9 +103,21 @@
       info="Search and manage routing slips"
       title="Fee Accounting System"
       style="z-index: 0;"
+      class="mb-4"
     >
       <template v-slot:content>
         <fas-search-component :isLibraryMode="true"/>
+      </template>
+    </base-v-expansion-panel>
+
+    <!-- Email Safe List -->
+    <base-v-expansion-panel
+      v-if="isDevOrTest"
+      info="Please contact #registries-ops to add or remove email addresses from the safe list."
+      title="Safe Email List (DEV/TEST)"
+    >
+      <template v-slot:content>
+        <SafeEmailView />
       </template>
     </base-v-expansion-panel>
   </v-container>
@@ -124,6 +136,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
+import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import { useStore } from 'vuex-composition-helpers'
@@ -148,6 +161,7 @@ export default defineComponent({
   name: 'StaffDashboardView',
   components: {
     BaseVExpansionPanel,
+    SafeEmailView,
     GLCodesListView,
     IncorporationSearchResultView,
     PPRLauncher,
@@ -229,6 +243,12 @@ export default defineComponent({
       }
     }
 
+    const isDevOrTest = computed(() =>
+      window.location.href.includes('localhost') ||
+      window.location.href.includes('dev.account') ||
+      window.location.href.includes('test.account')
+    )
+
     const formatBusinessIdentifier = () => {
       localVars.businessIdentifier =
         CommonUtils.formatIncorporationNumber(localVars.businessIdentifier)
@@ -241,6 +261,7 @@ export default defineComponent({
       goToManageBusiness,
       search,
       formatBusinessIdentifier,
+      isDevOrTest,
       ...toRefs(localVars)
     }
   }
