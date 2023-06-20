@@ -20,6 +20,7 @@
       persistent-hint
       return-object
       @input="onItemSelected($event)"
+      @keydown.enter.native.prevent
     >
       <template v-slot:prepend-item>
         <p class="pt-2 pl-5 font-size-12">
