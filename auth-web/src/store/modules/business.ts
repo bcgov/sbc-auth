@@ -317,6 +317,11 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async downloadBusinessSummary (businessIdentifier: string): Promise<void> {
+    await BusinessService.fetchBusinessSummary(businessIdentifier).catch(() => null)
+  }
+
+  @Action({ rawError: true })
   public async resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<any> {
     const response = await BusinessService.resubmitBNRequest(resubmitRequest).catch(() => null)
     return response?.status === 200
