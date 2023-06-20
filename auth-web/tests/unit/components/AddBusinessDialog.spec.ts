@@ -121,8 +121,6 @@ tests.forEach(test => {
       })
       await flushPromises()
 
-      // console.log(wrapper.html())
-
       // verify components
       expect(wrapper.attributes('id')).toBe('add-business-dialog')
       expect(wrapper.find('#add-business-dialog').isVisible()).toBe(true)
