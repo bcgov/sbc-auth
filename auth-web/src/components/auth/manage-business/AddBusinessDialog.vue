@@ -40,21 +40,38 @@
           </v-tooltip>
 
           <v-form ref="addBusinessForm" lazy-validation class="mt-6">
-            <!-- Business Identifier and Name -->
-            <!-- NB: use v-if to re-mount component between instances -->
-            <BusinessLookup
-              v-if="dialog"
-              @business="businessName = $event.name; businessIdentifier = $event.identifier"
-            />
+            <template v-if="enableBusinessNrSearch">
+              <!-- Search for business identifier or name -->
+              <!-- NB: use v-if to re-mount component between instances -->
+              <BusinessLookup
+                v-if="dialog"
+                @business="businessName = $event.name; businessIdentifier = $event.identifier"
+              />
 
-            <template v-if="businessIdentifier">
-              <dl>
-                <dt class="font-weight-bold mr-2">Business Name:</dt>
-                <dd>{{businessName}}</dd>
+              <template v-if="businessIdentifier">
+                <dl>
+                  <dt class="font-weight-bold mr-2">Business Name:</dt>
+                  <dd>{{businessName}}</dd>
 
-                <dt class="font-weight-bold mr-2">Incorporation Number:</dt>
-                <dd>{{businessIdentifier}}</dd>
-              </dl>
+                  <dt class="font-weight-bold mr-2">Incorporation Number:</dt>
+                  <dd>{{businessIdentifier}}</dd>
+                </dl>
+              </template>
+            </template>
+
+            <template v-else>
+              <!-- Business Identifier -->
+              <v-text-field
+                filled req persistent-hint validate-on-blur
+                label="Incorporation Number or Registration Number"
+                hint="Example: BC1234567, CP1234567 or FM1234567"
+                :rules="businessIdentifierRules"
+                v-model="businessIdentifier"
+                @blur="formatBusinessIdentifier()"
+                class="business-identifier mb-n2"
+                aria-label="Incorporation Number and Password or Passcode"
+                autofocus
+              />
             </template>
 
             <!-- Passcode -->
@@ -165,6 +182,8 @@ import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { StatusCodes } from 'http-status-codes'
 import { mapActions } from 'vuex'
 
@@ -200,6 +219,7 @@ export default class AddBusinessDialog extends Vue {
   // local variables
   businessName = ''
   businessIdentifier = '' // aka incorporation number of registration number
+  businessIdentifierRules = []
   passcode = '' // aka password or proprietor/partner
   folioNumber = ''
   isLoading = false
@@ -209,6 +229,10 @@ export default class AddBusinessDialog extends Vue {
   readonly authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
 
   readonly authorizationMaxLength = 100
+
+  get enableBusinessNrSearch (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
+  }
 
   get isBusinessIdentifierValid (): boolean {
     return CommonUtils.validateIncorporationNumber(this.businessIdentifier)
@@ -359,6 +383,15 @@ export default class AddBusinessDialog extends Vue {
     if (emitCancel) {
       this.$emit('on-cancel')
     }
+  }
+
+  formatBusinessIdentifier (): void {
+    this.businessIdentifierRules = [
+      v => !!v || 'Incorporation Number or Registration Number is required',
+      v => CommonUtils.validateIncorporationNumber(v) ||
+        'Incorporation Number or Registration Number is not valid'
+    ]
+    this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 
   openHelp (): void {
