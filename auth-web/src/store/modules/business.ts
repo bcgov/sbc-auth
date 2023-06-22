@@ -337,6 +337,11 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async isAffiliated (identifier: string): Promise<boolean> {
+    return this.businesses.some(business => business.businessIdentifier === identifier)
+  }
+
+  @Action({ rawError: true })
   public async createNumberedBusiness ({ filingType, business }): Promise<void> {
     const filingBody: BusinessRequest = {
       filing: {
