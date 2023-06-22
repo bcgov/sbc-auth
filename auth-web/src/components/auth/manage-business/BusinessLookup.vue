@@ -7,7 +7,7 @@
       :loading="state === States.SEARCHING"
       :name="Math.random()"
       :search-input.sync="searchField"
-      :append-icon="(state === States.SEARCHING) ? 'mdi-timer-sand' : 'mdi-magnify'"
+      append-icon="mdi-magnify"
       autocomplete="chrome-off"
       autofocus
       class="mt-5 mb-n2"
@@ -22,6 +22,16 @@
       @input="onItemSelected($event)"
       @keydown.enter.native.prevent
     >
+      <template v-slot:append>
+        <v-progress-circular
+          v-if="state === States.SEARCHING"
+          color="primary"
+          indeterminate
+          :size="24"
+          :width="2"
+        />
+      </template>
+
       <template v-slot:prepend-item>
         <p class="pt-2 pl-5 font-size-12">
           Active B.C. Businesses
