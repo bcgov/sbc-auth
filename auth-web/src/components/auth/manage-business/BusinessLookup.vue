@@ -4,10 +4,10 @@
     <v-autocomplete
       :hide-no-data="state != States.NO_RESULTS"
       :items="searchResults"
-      :loading="state == States.SEARCHING"
+      :loading="state === States.SEARCHING"
       :name="Math.random()"
       :search-input.sync="searchField"
-      append-icon="mdi-magnify"
+      :append-icon="(state === States.SEARCHING) ? 'mdi-timer-sand' : 'mdi-magnify'"
       autocomplete="chrome-off"
       autofocus
       class="mt-5 mb-n2"
