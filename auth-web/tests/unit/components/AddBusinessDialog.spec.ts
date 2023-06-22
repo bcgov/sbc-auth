@@ -124,19 +124,22 @@ tests.forEach(test => {
       // verify components
       expect(wrapper.attributes('id')).toBe('add-business-dialog')
       expect(wrapper.find('#add-business-dialog').isVisible()).toBe(true)
-      expect(wrapper.find('businesslookup-stub').exists()).toBe(true)
+      // expect(wrapper.find('businesslookup-stub').exists()).toBe(true) // UN-COMMENT (see below)
       expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
 
-      // verify data list
-      const dl = wrapper.find('dl')
-      const dt = dl.findAll('dt')
-      const dd = dl.findAll('dd')
-      expect(dt.at(0).text()).toBe('Business Name:')
-      expect(dd.at(0).text()).toBe('My Business Inc')
-      expect(dt.at(1).text()).toBe('Incorporation Number:')
-      expect(dd.at(1).text()).toBe(test.businessIdentifier)
+      // *** UN-COMMENT THIS WHEN BUSINESS LOOKUP IS ENABLED ***
+      // // verify data list
+      // const dl = wrapper.find('dl')
+      // const dt = dl.findAll('dt')
+      // const dd = dl.findAll('dd')
+      // expect(dt.at(0).text()).toBe('Business Name:')
+      // expect(dd.at(0).text()).toBe('My Business Inc')
+      // expect(dt.at(1).text()).toBe('Incorporation Number:')
+      // expect(dd.at(1).text()).toBe(test.businessIdentifier)
 
       // verify input fields
+      expect(wrapper.find('.business-identifier').attributes('label'))
+        .toBe('Incorporation Number or Registration Number') // DELETE THIS (see above)
       expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
       expect(wrapper.find('.certify').exists()).toBe(test.certifyExists)
       expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
