@@ -17,7 +17,7 @@ describe('Business Lookup Services', () => {
 
     // mock successsful search
     const args = `${BUSINESS_SEARCH_URL}businesses/search/facets?start=0&rows=20&categories=legalType:` +
-      `BC,A,ULC,C,S,XP,GP,LP,CUL,XS,LLC,LL,BEN,CP,CC,XL,FI,XCP,PA&query=value:FM1000002`
+      `A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS&query=value:FM1000002`
     sinon.stub(axios, 'get').withArgs(args).returns(
       Promise.resolve({ data: { searchResults: { results: [result] } } })
     )
@@ -32,8 +32,8 @@ describe('Business Lookup Services', () => {
 
   it('does not return a result when the business is not found', async () => {
     // mock unsuccesssful search
-    const args = `${BUSINESS_SEARCH_URL}businesses/search/facets?start=0&rows=20&categories=legalType` +
-      `:BC,A,ULC,C,S,XP,GP,LP,CUL,XS,LLC,LL,BEN,CP,CC,XL,FI,XCP,PA&query=value:FM1000003`
+    const args = `${BUSINESS_SEARCH_URL}businesses/search/facets?start=0&rows=20&categories=legalType:` +
+      `A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS&query=value:FM1000003`
     sinon.stub(axios, 'get').withArgs(args).returns(
       Promise.resolve({ data: { searchResults: { results: [] } } })
     )
