@@ -32,12 +32,6 @@
         />
       </template>
 
-      <template v-slot:prepend-item>
-        <p class="pt-2 pl-5 font-size-12">
-          Active B.C. Businesses
-        </p>
-      </template>
-
       <template v-slot:no-data>
         <p class="pl-5 font-weight-bold">
           No active B.C. business found
