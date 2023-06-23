@@ -35,7 +35,7 @@ export default class BusinessLookupServices {
    * @returns a promise to return the search results
    */
   static async search (query: string, status = ''): Promise<BusinessLookupResultIF[]> {
-    const legalType = 'BC,A,ULC,C,S,XP,GP,LP,CUL,XS,LLC,LL,BEN,CP,CC,XL,FI,XCP,PA'
+    const legalType = 'A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS'
 
     let url = this.registriesSearchApiUrl + 'businesses/search/facets?start=0&rows=20'
     url += `&categories=legalType:${legalType}${status ? '::status:' + status : ''}`
