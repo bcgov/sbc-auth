@@ -7,16 +7,15 @@
       :loading="state === States.SEARCHING"
       :name="Math.random()"
       :search-input.sync="searchField"
-      :clearable="state !== States.INITIAL && state !== States.SEARCHING"
-      :append-icon="state === States.INITIAL ? 'mdi-magnify':''"
+      append-icon="mdi-magnify"
       autocomplete="chrome-off"
       autofocus
       class="mt-5 mb-n2"
       filled
-      hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
+      hint="For example: &quot;NR 1234567&quot;"
       item-text="name"
       item-value="identifier"
-      label="Business Name or Incorporation/Registration Number"
+      label="Name Request Number"
       no-filter
       persistent-hint
       return-object
@@ -35,10 +34,10 @@
 
       <template v-slot:no-data>
         <p class="pl-5 font-weight-bold">
-          No active B.C. business found
+          No Name Request found
         </p>
         <p class="pl-5">
-          Ensure you have entered the correct business name or number.
+          Ensure you have entered the correct Name Request.
         </p>
       </template>
 
@@ -68,7 +67,6 @@ const BusinessModule = namespace('business')
 
 enum States {
   INITIAL = 'initial',
-  TYPING = 'typing',
   SEARCHING = 'searching',
   SHOW_RESULTS = 'show results',
   NO_RESULTS = 'no results',
@@ -79,7 +77,7 @@ enum States {
  * See PPR's BusinessSearchAutocomplete.vue for a Composition API example.
  */
 @Component({})
-export default class BusinessLookup extends Vue {
+export default class NameRequestLookup extends Vue {
   // enum for template
   readonly States = States
 
@@ -101,9 +99,7 @@ export default class BusinessLookup extends Vue {
   @Debounce(600)
   private async onSearchFieldChanged (): Promise<void> {
     // safety check
-    if (this.searchField && this.searchField.length < 3) {
-      this.state = States.TYPING
-    } else if (this.searchField && this.searchField.length > 2) {
+    if (this.searchField && this.searchField.length > 2) {
       this.state = States.SEARCHING
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
       this.searchResults = await BusinessLookupServices.search(this.searchField, searchStatus).catch(() => [])
@@ -128,7 +124,7 @@ export default class BusinessLookup extends Vue {
     // safety check
     if (input) {
       // change to summary state
-      // this.state = States.SUMMARY
+      this.state = States.SUMMARY
     }
     // event data is automatically returned
   }

@@ -12,71 +12,21 @@
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
-          <v-btn
-            id="add-name-request-btn"
-            class="font-weight-regular"
-            color="primary"
-            outlined dark large
-            @click="goToNameRequest()"
-          >
-            <span>Request a BC Business Name</span>
-            <v-icon small class="ml-2">mdi-open-in-new</v-icon>
-          </v-btn>
-        </div>
-      </div>
-
-      <v-row no-gutters id="dashboard-actions" class="mb-n3">
-        <v-col cols="auto">
-          <!-- Add Existing Name Request or Business -->
-          <v-menu
-            v-model="addAffiliationDropdown"
-          >
-            <template v-slot:activator="{ on: onExistingMenu }">
-              <v-tooltip top content-class="top-tooltip">
-                <template v-slot:activator="{ on: onExistingTooltip }">
-                  <v-btn
-                    id="add-existing-btn"
-                    class="mt-2 mr-4"
-                    color="primary"
-                    dark large
-                    v-on="{ ...onExistingMenu, ...onExistingTooltip }"
-                    @click="addAffiliationDropdown = !addAffiliationDropdown"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                    <span><strong>Add an Existing Business or Name Request</strong></span>
-                    <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                  </v-btn>
-                </template>
-                <span>To view and manage existing businesses and Name Requests, you can manually add them to your table.</span>
-              </v-tooltip>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title class="d-inline-flex">
-                  <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
-            </v-list>
-          </v-menu>
-
-          <!-- Incorporate a Numbered BC Company or Business -->
+           <!-- Incorporate a Numbered BC Company or Business -->
           <v-menu v-model="incorporateNumberedDropdown">
             <template v-slot:activator="{ on: onNumberedMenu }">
               <v-tooltip top content-class="top-tooltip">
                 <template v-slot:activator="{ on: onNumberedTooltip }">
                   <v-btn
                     id="incorporate-numbered-btn"
-                    class="mt-2 mr-4"
+                    class="mt-0 mr-4 font-weight-regular"
                     color="primary"
                     outlined dark large
                     v-on="{ ...onNumberedMenu, ...onNumberedTooltip }"
                     @click="incorporateNumberedDropdown = !incorporateNumberedDropdown"
                   >
-                    <v-icon>mdi-plus</v-icon>
-                    <span><strong>Incorporate a Numbered BC Company</strong></span>
+                    <!-- <v-icon>mdi-plus</v-icon> -->
+                    <span>Incorporate a Numbered BC Company</span>
                     <v-icon class="ml-2 mr-n2">{{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
                   </v-btn>
                 </template>
@@ -178,10 +128,75 @@
               </div>
             </v-list>
           </v-menu>
+          <v-btn
+            id="add-name-request-btn"
+            class="font-weight-regular"
+            color="primary"
+            outlined dark large
+            @click="goToNameRequest()"
+          >
+            <span>Request a BC Business Name</span>
+            <v-icon small class="ml-2">mdi-open-in-new</v-icon>
+          </v-btn>
+        </div>
+      </div>
+
+      <search-business-name-request
+        :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
+        :userFirstName="currentUser.firstName"
+        :userLastName="currentUser.lastName"
+        @add-success="showAddSuccessModal()"
+        @add-failed-invalid-code="showInvalidCodeModal($event)"
+        @add-failed-no-entity="showEntityNotFoundModal()"
+        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+        @add-unknown-error="showUnknownErrorModal('business')"
+        @business-already-added="showBusinessAlreadyAdded($event)"
+        @on-cancel="cancelAddBusiness()"
+        @on-business-identifier="businessIdentifier = $event"
+      />
+
+      <v-row  no-gutters class="mb-n8">
+        <v-col cols="auto">
+          <!-- Add Existing Name Request or Business -->
+          <v-menu v-if="false"
+            v-model="addAffiliationDropdown"
+          >
+            <template v-slot:activator="{ on: onExistingMenu }">
+              <v-tooltip top content-class="top-tooltip">
+                <template v-slot:activator="{ on: onExistingTooltip }">
+                  <v-btn
+                    id="add-existing-btn"
+                    class="mt-2 mr-4"
+                    color="primary"
+                    dark large
+                    v-on="{ ...onExistingMenu, ...onExistingTooltip }"
+                    @click="addAffiliationDropdown = !addAffiliationDropdown"
+                  >
+                    <v-icon>mdi-plus</v-icon>
+                    <span><strong>Add an Existing Business or Name Request</strong></span>
+                    <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                  </v-btn>
+                </template>
+                <span>To view and manage existing businesses and Name Requests, you can manually add them to your table.</span>
+              </v-tooltip>
+            </template>
+            <v-list>
+              <v-list-item>
+                <v-list-item-title class="d-inline-flex">
+                  <v-icon>mdi-plus</v-icon>
+                  <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
+                </v-list-item-title>
+              </v-list-item>
+              <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
+              <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
+            </v-list>
+          </v-menu>
         </v-col>
+      </v-row>
+      <v-row  no-gutters id="dashboard-actions" class="mb-n3">
         <v-col>
           <v-select
-            dense filled multiple
+            dense filled multiple hide-details
             class="column-selector"
             label="Columns to Show"
             v-model="selectedColumns"
@@ -192,7 +207,6 @@
           </v-select>
         </v-col>
       </v-row>
-
       <AffiliatedEntityTable
         :selectedColumns="selectedColumns"
         :loading="isLoading"
@@ -326,6 +340,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
+import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
@@ -334,7 +349,8 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     AddNameRequestForm,
     AffiliatedEntityTable,
     ModalDialog,
-    PasscodeResetOptionsModal
+    PasscodeResetOptionsModal,
+    SearchBusinessNameRequest
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
@@ -519,6 +535,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       this.dialogTitle = 'Error Adding Existing Name Request'
       this.dialogText = 'An error occurred adding your name request. Please try again.'
     }
+    this.$refs.errorDialog.open()
+  }
+
+  showBusinessAlreadyAdded (event) {
+    this.dialogTitle = 'Business Already Added'
+    this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
@@ -737,10 +759,17 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 .column-selector {
   float: right;
   width: 200px;
+  height: 10% !important;
+  transform: translate(-10px,42px);
+  z-index: 1;
 }
 
 // Vuetify Overrides
 ::v-deep {
+  .column-selector.v-text-field .v-input__control {
+    background: white;
+  }
+
   #dashboard-actions {
     .v-input .v-label {
       transform: translateY(-10px) scale(1);

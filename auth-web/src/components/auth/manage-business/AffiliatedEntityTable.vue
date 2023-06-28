@@ -2,7 +2,7 @@
   <div id="affiliated-entity-section">
     <v-card flat>
       <div class="table-header">
-        <label><strong>My List </strong>({{ entityCount }})</label>
+        <label class="my-auto"><strong>My List </strong>({{ entityCount }})</label>
       </div>
       <base-v-data-table
         id="affiliated-entity-table"
@@ -385,6 +385,7 @@ export default defineComponent({
     display: flex;
     background-color: $app-lt-blue;
     padding: .875rem;
+    height: 3.5rem;
   }
 
   .table-filter {
