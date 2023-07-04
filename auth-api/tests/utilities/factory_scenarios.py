@@ -514,6 +514,7 @@ class TestOrgInfo(dict, Enum):
     """Test scenarios of org."""
 
     org1 = {'name': 'My Test Org'}
+    org_details = {'name': 'My test Org details'}
     org_branch_name = {'name': 'Foo', 'branchName': 'Bar', }
 
     org_onlinebanking = {'name': 'My Test Org', 'paymentInfo': {'paymentMethod': 'ONLINE_BANKING'}}

@@ -393,6 +393,40 @@ class OrgAffiliations(Resource):
         return response, status
 
 
+@cors_preflight('GET,OPTIONS')
+@API.route('/affiliation/<string:business_identifier>', methods=['GET', 'OPTIONS'])
+class OrgInfoByAffiliation(Resource):
+    @staticmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.has_one_of_roles(
+        [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    def get(business_identifier):
+        """Search orgs by BusinessIdentifier and return org Name and UUID."""
+        org_search = OrgSearch(
+            "",
+            "",
+            business_identifier,
+            [],
+            [],
+            "",
+            "",
+            "",
+            "",
+            int(request.args.get('page', 1)),
+            int(request.args.get('limit', 10))
+        )
+
+        try:
+            data = OrgService.search_orgs(org_search)
+            org_details = [{'name': org['name'], 'uuid': org['uuid']} for org in data['orgs']]
+            response, status = {'orgs_details': org_details}, http_status.HTTP_200_OK
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
 @cors_preflight('GET,DELETE,OPTIONS')
 @API.route('/<int:org_id>/affiliations/<string:business_identifier>', methods=['GET', 'DELETE', 'OPTIONS'])
 class OrgAffiliation(Resource):

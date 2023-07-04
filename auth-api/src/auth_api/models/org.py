@@ -16,8 +16,9 @@
 Basic users will have an internal Org that is not created explicitly, but implicitly upon User account creation.
 """
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, event, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_, cast, event, func, text
 from sqlalchemy.orm import contains_eager, relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -43,6 +44,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     __tablename__ = 'orgs'
 
     id = Column(Integer, primary_key=True)
+    uuid = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"), unique=True)
     type_code = Column(ForeignKey('org_types.code'), nullable=False)
     status_code = Column(ForeignKey('org_statuses.code'), nullable=False)
     name = Column(String(250), index=True)
@@ -94,6 +96,11 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
             return org
         return None
+
+    @classmethod
+    def find_by_org_uuid(cls, org_uuid):
+        """Find an Org instance that matches the provided uuid."""
+        return cls.query.filter_by(uuid=org_uuid).first()
 
     @classmethod
     def find_by_org_id(cls, org_id):
