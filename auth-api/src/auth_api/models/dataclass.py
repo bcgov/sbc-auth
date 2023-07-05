@@ -33,6 +33,14 @@ class Activity:
 
 
 @dataclass
+class PaginationInfo:
+    """Used for providing pagination info"""
+
+    page: int
+    limit: int
+
+
+@dataclass
 class OrgSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching organizations."""
 

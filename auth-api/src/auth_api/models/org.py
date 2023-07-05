@@ -23,7 +23,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models.affiliation import Affiliation
-from auth_api.models.dataclass import OrgSearch
+from auth_api.models.dataclass import OrgSearch, PaginationInfo
 from auth_api.utils.enums import AccessType, InvitationStatus, InvitationType
 from auth_api.utils.enums import OrgStatus as OrgStatusEnum
 from auth_api.utils.enums import OrgType as OrgTypeEnum
@@ -154,6 +154,19 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
         pagination = query.order_by(Org.created.desc()) \
                           .paginate(per_page=search.limit, page=search.page)
+
+        return pagination.items, pagination.total
+
+    @classmethod
+    def search_orgs_by_business_identifier(cls, business_identifier, pagination_info: PaginationInfo):
+        """Find all orgs affiliated with provided business identifier"""
+        query = db.session.query(Org)
+
+        query = cls._search_for_statuses(query, [])
+        query = cls._search_by_business_identifier(query, business_identifier)
+
+        pagination = query.order_by(Org.name.desc()) \
+            .paginate(per_page=pagination_info.limit, page=pagination_info.page)
 
         return pagination.items, pagination.total
 
