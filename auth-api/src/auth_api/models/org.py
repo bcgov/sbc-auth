@@ -44,7 +44,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
     __tablename__ = 'orgs'
 
     id = Column(Integer, primary_key=True)
-    uuid = Column(UUID, nullable=False, server_default=text("uuid_generate_v4()"), unique=True)
+    uuid = Column(UUID, nullable=False, server_default=text('uuid_generate_v4()'), unique=True)
     type_code = Column(ForeignKey('org_types.code'), nullable=False)
     status_code = Column(ForeignKey('org_statuses.code'), nullable=False)
     name = Column(String(250), index=True)
@@ -159,7 +159,7 @@ class Org(VersionedModel):  # pylint: disable=too-few-public-methods,too-many-in
 
     @classmethod
     def search_orgs_by_business_identifier(cls, business_identifier, pagination_info: PaginationInfo):
-        """Find all orgs affiliated with provided business identifier"""
+        """Find all orgs affiliated with provided business identifier."""
         query = db.session.query(Org)
 
         query = cls._search_for_statuses(query, [])

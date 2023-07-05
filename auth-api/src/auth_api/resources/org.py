@@ -22,7 +22,7 @@ from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.models import Affiliation as AffiliationModel, Org as OrgModel
-from auth_api.models.dataclass import PaginationInfo
+from auth_api.models.dataclass import PaginationInfo  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
@@ -397,7 +397,7 @@ class OrgAffiliations(Resource):
 @cors_preflight('GET,OPTIONS')
 @API.route('/affiliation/<string:business_identifier>', methods=['GET', 'OPTIONS'])
 class OrgInfoByAffiliation(Resource):
-    """Get all orgs affiliated with entity identified with given business identifier"""
+    """Get all orgs affiliated with entity identified with given business identifier."""
 
     @staticmethod
     @TRACER.trace()
@@ -406,7 +406,6 @@ class OrgInfoByAffiliation(Resource):
         [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get(business_identifier):
         """Search orgs by BusinessIdentifier and return org Name and UUID."""
-
         pagination_info = PaginationInfo(
             limit=int(request.args.get('limit', 10)),
             page=int(request.args.get('page', 1))

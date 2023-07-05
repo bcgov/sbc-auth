@@ -2248,7 +2248,7 @@ def test_get_org_affiliations(client, jwt, session, keycloak_mock, mocker,
         assert date_iso == created_order
 
 
-def create_orgs_entities_and_affiliations(client, jwt, count):
+def _create_orgs_entities_and_affiliations(client, jwt, count):
     created_orgs = []
     for i in range(0, count):
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
@@ -2258,7 +2258,7 @@ def create_orgs_entities_and_affiliations(client, jwt, count):
         headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
         client.post('/api/v1/users', headers=headers, content_type='application/json')
         new_org = TestOrgInfo.org_details
-        new_org['name'] = new_org['name'] + ' ' + str(i) #str(uuid.uuid4())
+        new_org['name'] = new_org['name'] + ' ' + str(i)
         rv = client.post('/api/v1/orgs', data=json.dumps(new_org),
                          headers=headers, content_type='application/json')
         dictionary = json.loads(rv.data)
@@ -2270,21 +2270,22 @@ def create_orgs_entities_and_affiliations(client, jwt, count):
     return created_orgs
 
 
-@pytest.mark.parametrize("expected_http_status, entries_count",
+@pytest.mark.parametrize('expected_http_status, entries_count',
                          [
                              (http_status.HTTP_200_OK, 1),
                              (http_status.HTTP_200_OK, 3),
                              (http_status.HTTP_200_OK, 0),
                          ],
                          ids=[
-                             "Assert that fetching orgs filtered by business identifier works, single entry.",
-                             "Assert that fetching orgs filtered by business identifier works, multiple entries.",
-                             "Assert that fetching orgs filtered by business identifier works, no entry",
+                             'Assert that fetching orgs filtered by business identifier works, single entry.',
+                             'Assert that fetching orgs filtered by business identifier works, multiple entries.',
+                             'Assert that fetching orgs filtered by business identifier works, no entry',
                          ]
                          )
 def test_get_orgs_by_affiliation(client, jwt, session, keycloak_mock,
                                  expected_http_status, entries_count):
-    created_orgs = create_orgs_entities_and_affiliations(client, jwt, entries_count)
+    """Assert that api call returns affiliated orgs."""
+    created_orgs = _create_orgs_entities_and_affiliations(client, jwt, entries_count)
 
     # Create a system token
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)

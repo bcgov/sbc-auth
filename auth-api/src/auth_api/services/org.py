@@ -734,7 +734,6 @@ class Org:  # pylint: disable=too-many-public-methods
     def search_orgs_by_affiliation(business_identifier,
                                    pagination_info: PaginationInfo):
         """Search for orgs based on input parameters."""
-
         orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info)
 
         return {
@@ -743,7 +742,6 @@ class Org:  # pylint: disable=too-many-public-methods
             'limit': pagination_info.limit,
             'total': total
         }
-
 
     @staticmethod
     @user_context

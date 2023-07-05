@@ -34,7 +34,7 @@ class Activity:
 
 @dataclass
 class PaginationInfo:
-    """Used for providing pagination info"""
+    """Used for providing pagination info."""
 
     page: int
     limit: int
