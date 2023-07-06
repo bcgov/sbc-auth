@@ -22,7 +22,7 @@ from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
 
 from auth_api import status as http_status
-from auth_api.models.dataclass import Activity
+from auth_api.models.dataclass import Activity, PaginationInfo
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AccountLoginOptions as AccountLoginOptionsModel
@@ -729,6 +729,19 @@ class Org:  # pylint: disable=too-many-public-methods
                 if include_invitations and org.invitations else [],
             })
         return orgs_result
+
+    @staticmethod
+    def search_orgs_by_affiliation(business_identifier,
+                                   pagination_info: PaginationInfo):
+        """Search for orgs based on input parameters."""
+        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info)
+
+        return {
+            'orgs': orgs,
+            'page': pagination_info.page,
+            'limit': pagination_info.limit,
+            'total': total
+        }
 
     @staticmethod
     @user_context

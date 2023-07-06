@@ -112,6 +112,14 @@
       "type": "boolean",
       "title": "Is business account",
       "pattern": "^(.*)$"
+    },
+    "uuid": {
+      "$id": "#/properties/uuid",
+      "type": "string",
+      "title": "Unique identifier for Org",
+      "examples": [
+        "550e8400-e29b-41d4-a716-446655440000"
+      ]
     }
   }
 }
