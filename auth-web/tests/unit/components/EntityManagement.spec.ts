@@ -8,8 +8,8 @@ import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import { setupIntersectionObserverMock } from '../util/helper-functions'
 import flushPromises from 'flush-promises'
+import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -175,7 +175,7 @@ describe('Entity Management Component', () => {
     expect(wrapper.find('#incorporate-numbered-ccc-btn').exists()).toBe(true)
   })
 
-  it('calls the nr success modal',async () => {
+  it('calls the nr success modal', async () => {
     const mockedSyncBusinesses = jest.fn()
     wrapper.vm.syncBusinesses = mockedSyncBusinesses
     const mockedSearchNRIndex = jest.fn().mockReturnValue(0)
@@ -188,7 +188,7 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.snackbarText).toBe('NR 1111111 was sucessfully added to your table.')
   })
 
-  it('calls the nr error modal',async () => {
+  it('calls the nr error modal', async () => {
     const mockedNrErrorMethod = jest.fn()
     wrapper.vm.$refs.errorDialog.open = mockedNrErrorMethod
     wrapper.vm.showNRErrorModal()
@@ -199,7 +199,7 @@ describe('Entity Management Component', () => {
     expect(mockedNrErrorMethod).toHaveBeenCalled()
   })
 
-  it('renders snackbar visible 1 second after toggled',async () => {
+  it('renders snackbar visible 1 second after toggled', async () => {
     wrapper.vm.showNRErrorModal()
     await flushPromises()
 
@@ -209,7 +209,7 @@ describe('Entity Management Component', () => {
     }, 1000)
   })
 
-  it('renders snackbar invisible 5 seconds after toggled',async () => {
+  it('renders snackbar invisible 5 seconds after toggled', async () => {
     wrapper.vm.showNRErrorModal()
     await flushPromises()
 
