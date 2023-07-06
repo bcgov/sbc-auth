@@ -19,6 +19,8 @@
         :height="entityCount > 5 ? '32rem' : null"
         :pageHide="true"
         :fixedHeader="true"
+        :highlight-index="highlightIndex"
+        highlight-class='base-table__item-row-green'
       >
       <template v-slot:header-filter-slot-Actions>
         <v-btn
@@ -165,7 +167,8 @@ export default defineComponent({
   components: { EntityDetails, BaseVDataTable },
   props: {
     selectedColumns: { default: [] as string[] },
-    loading: { default: false }
+    loading: { default: false },
+    highlightIndex: { type: Number }
   },
   emits: ['add-unknown-error'],
   mixins: [DateMixin],
@@ -337,6 +340,11 @@ export default defineComponent({
 
     watch(() => props.selectedColumns, (newCol: string[]) => {
       getHeaders(newCol)
+    })
+
+    watch(() => affiliations.results, () => {
+      clearFilters()
+      getHeaders(props.selectedColumns)
     })
 
     return {

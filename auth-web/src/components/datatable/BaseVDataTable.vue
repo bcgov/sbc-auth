@@ -61,7 +61,10 @@
 
     <!-- Items -->
     <template v-slot:item="{ item, index }">
-      <tr class="base-table__item-row" :key="item[itemKey]">
+      <tr
+        :key="index*(highlightIndex+2)"
+        :class="index==highlightIndex ? highlightClass :'base-table__item-row'"
+      >
         <td
           v-for="header in headers" :key="'item-' + header.col"
           :class="[header.itemClass, 'base-table__item-cell']"
@@ -130,7 +133,9 @@ export default defineComponent({
     pageHide: { default: false },
     updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
-    customPagination: { default: false }
+    customPagination: { default: false },
+    highlightIndex: { type: Number },
+    highlightClass: { type: String }
   },
   setup (props, { emit }) {
     // reactive vars
@@ -249,6 +254,10 @@ export default defineComponent({
     font-size: 0.875rem;
     padding: 8px 0 8px 16px;
     vertical-align: top;
+  }
+
+  &__item-row-green {
+    background-color: $table-green !important;
   }
 
   &__text {
