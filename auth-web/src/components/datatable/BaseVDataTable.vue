@@ -134,7 +134,7 @@ export default defineComponent({
     updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
     customPagination: { default: false },
-    highlightIndex: { type: Number },
+    highlightIndex: { default: -1 },
     highlightClass: { type: String }
   },
   setup (props, { emit }) {
