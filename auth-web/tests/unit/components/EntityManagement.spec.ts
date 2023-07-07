@@ -200,22 +200,28 @@ describe('Entity Management Component', () => {
   })
 
   it('renders snackbar visible 1 second after toggled', async () => {
-    wrapper.vm.showNRErrorModal()
-    await flushPromises()
+    jest.useFakeTimers()
 
-    setTimeout(async () => {
-      expect(wrapper.find('#success-nr-snackbar').exist()).toBe(true)
-      expect(wrapper.find('#success-nr-snackbar').isVisible()).toBe(true)
-    }, 1000)
+    await wrapper.vm.showAddSuccessModalNR()
+    jest.advanceTimersByTime(1000)
+    await Vue.nextTick()
+
+    expect(wrapper.find('#success-nr-snackbar').exists()).toBe(true)
+    expect(wrapper.vm.showSnackbar).toBe(true)
+
+    jest.clearAllTimers()
   })
 
   it('renders snackbar invisible 5 seconds after toggled', async () => {
-    wrapper.vm.showNRErrorModal()
-    await flushPromises()
+    jest.useFakeTimers()
 
-    setTimeout(async () => {
-      expect(wrapper.find('#success-nr-snackbar').exist()).toBe(true)
-      expect(wrapper.find('#success-nr-snackbar').isVisible()).toBe(false)
-    }, 5000)
+    await wrapper.vm.showAddSuccessModalNR()
+    jest.advanceTimersByTime(5000)
+    await Vue.nextTick()
+
+    expect(wrapper.find('#success-nr-snackbar').exists()).toBe(true)
+    expect(wrapper.vm.showSnackbar).toBe(false)
+
+    jest.clearAllTimers()
   })
 })
