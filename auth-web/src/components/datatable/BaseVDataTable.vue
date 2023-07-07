@@ -62,7 +62,7 @@
     <!-- Items -->
     <template v-slot:item="{ item, index }">
       <tr
-        :key="index*(highlightIndex+2)"
+        :key="index"
         :class="index==highlightIndex ? highlightClass :'base-table__item-row'"
       >
         <td
