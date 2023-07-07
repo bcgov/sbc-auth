@@ -36,7 +36,8 @@
             :canManageProductFee="canManageAccounts"
             :isProductActionLoading="isProductActionLoading"
             :isProductActionCompleted="isProductActionCompleted"
-          ></Product>
+            @set-sub-product="setSubProduct"
+          />
         </div>
         <div class="align-right-container">
           <p data-test="text-submit-request-error-message" class="text-submit-request-error-message" v-show="submitRequestValidationError"> {{ submitRequestValidationError }} </p>
@@ -145,6 +146,10 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     if (productCode) {
       this.addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
     }
+  }
+
+  public setSubProduct (subProduct: string) {
+    // Handle Sub product application flow here
   }
 
   private async setup () {

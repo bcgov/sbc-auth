@@ -100,7 +100,16 @@
           <div class="product-card-contents ml-9">
             <v-expand-transition>
               <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
-                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
+
+                <!-- Mhr Sub Product Selector -->
+                <SubProductSelector
+                  v-if="productDetails.code === 'MHR'"
+                  :subProductConfig="MhrSubProducts"
+                  @updateSubProduct="onSubProductChange"
+                />
+
+                <p v-else-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
+
                 <component
                   v-if="isTOSNeeded"
                   :key="productFooter.id"
@@ -139,15 +148,17 @@ import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, ProductStatus } from '@/util/constants'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { MhrSubProducts } from '@/resources/MhrSubProducts'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
-
+import SubProductSelector from '@/components/auth/common/SubProductSelector.vue'
 const TOS_NEEDED_PRODUCT = ['VS']
 
 @Component({
   components: {
     ProductTos,
-    ProductFee
+    ProductFee,
+    SubProductSelector
   }
 })
 export default class Product extends Mixins(AccountMixin) {
@@ -168,6 +179,7 @@ export default class Product extends Mixins(AccountMixin) {
   private termsAccepted: boolean = false
   public productSelected:boolean = false
   private viewOnly = DisplayModeValues.VIEW_ONLY
+  private MhrSubProducts = MhrSubProducts
 
   $refs: {
     tosForm: HTMLFormElement
@@ -312,6 +324,9 @@ export default class Product extends Mixins(AccountMixin) {
   public productPremTooltipText (code: string) {
     return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
   }
+
+  @Emit('set-sub-product')
+  onSubProductChange (subProduct: string) { }
 }
 </script>
 
