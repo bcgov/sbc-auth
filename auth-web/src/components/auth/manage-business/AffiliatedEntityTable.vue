@@ -470,6 +470,11 @@ export default defineComponent({
       return LaunchDarklyService.getFlag(LDFlags.EnableNameRequestType) || false
     }
 
+    watch(() => affiliations.results, () => {
+      clearFilters()
+      getHeaders(props.selectedColumns)
+    })
+
     return {
       actionHandler,
       actionButtonText,
