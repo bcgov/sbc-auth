@@ -49,26 +49,40 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
+import { defineComponent, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { SubProductConfigIF } from '@/models/SubProductConfigIF'
 
-@Component({})
-export default class SubProductSelector extends Vue {
-  @Prop({ default: () => [] }) subProductConfig: Array<SubProductConfigIF>
-  public selectedProduct = ''
+export default defineComponent({
+  name: 'SubProductSelector',
+  emits: ['updateSubProduct'],
+  props: {
+    subProductConfig: {
+      type: Array as () => Array<SubProductConfigIF>,
+      default: []
+    }
+  },
+  setup (props, { emit }) {
+    const productSelectorRef = ref(null)
+    const localState: any = reactive({
+      selectedProduct: ''
+    })
 
-  $refs: {
-    productSelectorRef: any
+    const isImportantBullet = (subProduct: SubProductConfigIF, index: string|number) => {
+      return subProduct.hasImportantBullet && index === subProduct.productBullets.length - 1
+    }
+
+    /** Emit the sub-product as it updates **/
+    watch(() => localState.selectedProduct, (subProduct: string) => {
+      emit('updateSubProduct', subProduct)
+    })
+
+    return {
+      productSelectorRef,
+      isImportantBullet,
+      ...toRefs(localState)
+    }
   }
-
-  private isImportantBullet (subProduct: SubProductConfigIF, index: string|number) {
-    return subProduct.hasImportantBullet && index === subProduct.productBullets.length - 1
-  }
-
-  @Watch('selectedProduct')
-  @Emit('updateSubProduct')
-  onSubProductChange (subProduct: string) {}
-}
+})
 </script>
 
 <style lang="scss" scoped>
