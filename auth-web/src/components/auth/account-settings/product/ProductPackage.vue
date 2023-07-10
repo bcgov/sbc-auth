@@ -36,7 +36,6 @@
             :canManageProductFee="canManageAccounts"
             :isProductActionLoading="isProductActionLoading"
             :isProductActionCompleted="isProductActionCompleted"
-            @set-sub-product="setSubProduct"
           />
         </div>
         <div class="align-right-container">
@@ -146,10 +145,6 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
     if (productCode) {
       this.addToCurrentSelectedProducts({ productCode: productCode, forceRemove })
     }
-  }
-
-  public setSubProduct (subProduct: string) {
-    // Handle Sub product application flow here
   }
 
   private async setup () {

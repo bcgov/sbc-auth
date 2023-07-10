@@ -91,7 +91,6 @@
               text
               @click="expand()"
             >
-
               <span v-if="isexpandedView" :data-test="`span-readless-${productDetails.code}`">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
               <span :data-test="`span-readmore-${productDetails.code}`" v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
             </v-btn>
@@ -100,15 +99,7 @@
           <div class="product-card-contents ml-9">
             <v-expand-transition>
               <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
-
-                <!-- Mhr Sub Product Selector -->
-                <SubProductSelector
-                  v-if="productDetails.code === 'MHR'"
-                  :subProductConfig="MhrSubProducts"
-                  @updateSubProduct="onSubProductChange"
-                />
-
-                <p v-else-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
+                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
 
                 <component
                   v-if="isTOSNeeded"
@@ -148,7 +139,6 @@ import { Component, Emit, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { DisplayModeValues, ProductStatus } from '@/util/constants'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { MhrSubProducts } from '@/resources/MhrSubProducts'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
 import SubProductSelector from '@/components/auth/common/SubProductSelector.vue'
@@ -179,7 +169,6 @@ export default class Product extends Mixins(AccountMixin) {
   private termsAccepted: boolean = false
   public productSelected:boolean = false
   private viewOnly = DisplayModeValues.VIEW_ONLY
-  private MhrSubProducts = MhrSubProducts
 
   $refs: {
     tosForm: HTMLFormElement
@@ -324,9 +313,6 @@ export default class Product extends Mixins(AccountMixin) {
   public productPremTooltipText (code: string) {
     return LaunchDarklyService.getFlag(`product-${code}-prem-tooltip`)
   }
-
-  @Emit('set-sub-product')
-  onSubProductChange (subProduct: string) { }
 }
 </script>
 
