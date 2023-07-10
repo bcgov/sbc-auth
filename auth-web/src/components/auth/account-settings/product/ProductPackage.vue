@@ -36,7 +36,7 @@
             :canManageProductFee="canManageAccounts"
             :isProductActionLoading="isProductActionLoading"
             :isProductActionCompleted="isProductActionCompleted"
-          />
+          ></Product>
         </div>
         <div class="align-right-container">
           <p data-test="text-submit-request-error-message" class="text-submit-request-error-message" v-show="submitRequestValidationError"> {{ submitRequestValidationError }} </p>

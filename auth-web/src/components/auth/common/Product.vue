@@ -91,6 +91,7 @@
               text
               @click="expand()"
             >
+
               <span v-if="isexpandedView" :data-test="`span-readless-${productDetails.code}`">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
               <span :data-test="`span-readmore-${productDetails.code}`" v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
             </v-btn>
@@ -100,7 +101,6 @@
             <v-expand-transition>
               <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
                 <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
-
                 <component
                   v-if="isTOSNeeded"
                   :key="productFooter.id"
@@ -141,14 +141,12 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import ProductTos from '@/components/auth/common/ProductTOS.vue'
-import SubProductSelector from '@/components/auth/common/SubProductSelector.vue'
 const TOS_NEEDED_PRODUCT = ['VS']
 
 @Component({
   components: {
     ProductTos,
-    ProductFee,
-    SubProductSelector
+    ProductFee
   }
 })
 export default class Product extends Mixins(AccountMixin) {
