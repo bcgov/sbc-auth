@@ -168,7 +168,7 @@ export default defineComponent({
   props: {
     selectedColumns: { default: [] as string[] },
     loading: { default: false },
-    highlightIndex: { type: Number }
+    highlightIndex: { default: -1 }
   },
   emits: ['add-unknown-error'],
   mixins: [DateMixin],
