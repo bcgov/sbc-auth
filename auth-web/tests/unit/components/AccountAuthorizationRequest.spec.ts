@@ -1,17 +1,19 @@
-import AccountAuthorizationRequest from '@/components/auth/manage-business/AccountAuthorizationRequest.vue'
-import { axios } from '@/util/http-util'
-import { createLocalVue, mount, Wrapper } from '@vue/test-utils'
-import flushPromises from 'flush-promises'
-import sinon from 'sinon'
+import '../test-utils/composition-api-setup' // important to import this first
+
 import Vue, { VueConstructor } from 'vue'
-import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import {
   orgsDetailsByAffiliationEmptyResponse,
   orgsDetailsByAffiliationMultipleItemsResponse,
   orgsDetailsByAffiliationSingleItemResponse
 } from '../test-utils'
-import '../test-utils/composition-api-setup' // important to import this first
+
+import AccountAuthorizationRequest from '@/components/auth/manage-business/AccountAuthorizationRequest.vue'
+import Vuetify from 'vuetify'
+import Vuex from 'vuex'
+import { axios } from '@/util/http-util'
+import flushPromises from 'flush-promises'
+import sinon from 'sinon'
 
 Vue.use(Vuetify)
 Vue.use(Vuex)
@@ -21,22 +23,21 @@ const vuetify = new Vuetify({})
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-
 describe('AccountAuthorizationRequest tests', () => {
   let wrapper: Wrapper<any>
   let sandbox: any = sinon.createSandbox()
   let localVue: VueConstructor<Vue> = createLocalVue()
 
-  function _get_wrapper (business_identifier: string, business_name: string, orgs_details_example) {
+  function _getWrapper (businessIdentifier: string, businessName: string, orgsDetailsExample) {
     const get = sandbox.stub(axios, 'get')
-    get.returns(Promise.resolve({ data: orgs_details_example }))
+    get.returns(Promise.resolve({ data: orgsDetailsExample }))
 
     return mount(AccountAuthorizationRequest, {
       localVue,
       vuetify,
       propsData: {
-        businessName: business_name,
-        businessIdentifier: business_identifier
+        businessName: businessName,
+        businessIdentifier: businessIdentifier
       }
     })
   }
@@ -53,7 +54,7 @@ describe('AccountAuthorizationRequest tests', () => {
   })
 
   it('awaits loading of the search to be completed', () => {
-    wrapper = _get_wrapper('BC111111111', 'No affiliation business  BC Ltd.', [])
+    wrapper = _getWrapper('BC111111111', 'No affiliation business  BC Ltd.', [])
 
     expect(wrapper.findComponent(AccountAuthorizationRequest).exists()).toBe(true)
 
@@ -64,7 +65,7 @@ describe('AccountAuthorizationRequest tests', () => {
   })
 
   it('renders not found message when no affiliated accounts', async () => {
-    wrapper = _get_wrapper('BC111111111', 'No affiliation business  BC Ltd.', orgsDetailsByAffiliationEmptyResponse)
+    wrapper = _getWrapper('BC111111111', 'No affiliation business  BC Ltd.', orgsDetailsByAffiliationEmptyResponse)
 
     await flushPromises()
 
@@ -77,7 +78,7 @@ describe('AccountAuthorizationRequest tests', () => {
   })
 
   it('renders disabled select with preselected item, when single affiliated account found', async () => {
-    wrapper = _get_wrapper('BC1219246', 'One affiliation business  BC Ltd.', orgsDetailsByAffiliationSingleItemResponse)
+    wrapper = _getWrapper('BC1219246', 'One affiliation business  BC Ltd.', orgsDetailsByAffiliationSingleItemResponse)
 
     await flushPromises()
 
@@ -93,7 +94,7 @@ describe('AccountAuthorizationRequest tests', () => {
   })
 
   it('renders enabled select with no preselected item, when multiple affiliated accounts found', async () => {
-    wrapper = _get_wrapper('CP0001847', 'Multiple affiliations business  BC Ltd.', orgsDetailsByAffiliationMultipleItemsResponse)
+    wrapper = _getWrapper('CP0001847', 'Multiple affiliations business  BC Ltd.', orgsDetailsByAffiliationMultipleItemsResponse)
 
     await flushPromises()
 
