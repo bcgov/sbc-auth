@@ -88,6 +88,8 @@ describe('AccountAuthorizationRequest tests', () => {
 
     // verify that account is selected and selector disabled
     expect(wrapper.find('#account-authorization-request-request-account-select').attributes().disabled).toBeDefined()
+    expect(wrapper.find('.v-select__selection--comma').text()).toBe(orgsDetailsByAffiliationSingleItemResponse.orgsDetails[0].name)
+    expect(wrapper.findAll('.v-list-item__title').length === orgsDetailsByAffiliationSingleItemResponse.orgsDetails.length)
   })
 
   it('renders enabled select with no preselected item, when multiple affiliated accounts found', async () => {
@@ -102,5 +104,6 @@ describe('AccountAuthorizationRequest tests', () => {
 
     // verify that account is selected and selector disabled
     expect(wrapper.find('#account-authorization-request-request-account-select').attributes().disabled).toBeUndefined()
+    expect(wrapper.findAll('.v-list-item__title').length === orgsDetailsByAffiliationMultipleItemsResponse.orgsDetails.length)
   })
 })
