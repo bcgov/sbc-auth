@@ -7,41 +7,41 @@
       </div>
     </v-fade-transition>
     <template v-if="!isCurrentUserSettingLoading">
-    <div class="view-header flex-column">
-      <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
-    </div>
-    <v-card flat>
-      <Stepper
-        :stepper-configuration="stepperConfig"
-        :isLoading="isLoading"
-        @final-step-action="verifyAndCreateAccount"
-      ></Stepper>
-    </v-card>
-    <!-- Alert Dialog (Error) -->
-    <ModalDialog
-      ref="errorDialog"
-      :title="errorTitle"
-      :text="errorText"
-      dialog-class="notify-dialog"
-      max-width="640"
-      data-test="modal-account-setup-error"
-    >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-      </template>
-      <template v-slot:actions>
-        <v-btn
-          large
-          color="error"
-          class="font-weight-bold"
-          @click="closeError"
-        >
-          OK
-        </v-btn>
-      </template>
-    </ModalDialog>
-  </template>
+      <div class="view-header flex-column">
+        <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
+        <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
+      </div>
+      <v-card flat>
+        <Stepper
+          :stepper-configuration="stepperConfig"
+          :isLoading="isLoading"
+          @final-step-action="verifyAndCreateAccount"
+        ></Stepper>
+      </v-card>
+      <!-- Alert Dialog (Error) -->
+      <ModalDialog
+        ref="errorDialog"
+        :title="errorTitle"
+        :text="errorText"
+        dialog-class="notify-dialog"
+        max-width="640"
+        data-test="modal-account-setup-error"
+      >
+        <template v-slot:icon>
+          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        </template>
+        <template v-slot:actions>
+          <v-btn
+            large
+            color="error"
+            class="font-weight-bold"
+            @click="closeError"
+          >
+            OK
+          </v-btn>
+        </template>
+      </ModalDialog>
+    </template>
   </v-container>
 </template>
 
