@@ -58,7 +58,7 @@ export default defineComponent({
   setup (props, { emit }) {
     const componentState = reactive({
       accounts: [],
-      selectedAccount: { },
+      selectedAccount: {},
       requestAccessMessage: '',
       isLoading: true
     })
@@ -76,7 +76,9 @@ export default defineComponent({
     onMounted(async () => {
       const response = await OrgService.getOrganizationsNameAndUuidByAffiliation(props.businessIdentifier)
       if (response.data && response.data.orgsDetails) {
-        componentState.accounts = response.data.orgsDetails
+        const orgsDetails = response.data.orgsDetails
+        orgsDetails.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
+        componentState.accounts = orgsDetails
 
         if (componentState.accounts.length === 1) {
           Object.assign(componentState.selectedAccount, componentState.accounts[0])
@@ -90,7 +92,6 @@ export default defineComponent({
 
     return {
       emitSelected,
-
       componentState
     }
   }
