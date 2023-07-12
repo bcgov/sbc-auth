@@ -25,6 +25,10 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
 
+  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: number): Promise<AxiosResponse> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
+  }
+
   public static async getContactForOrg (orgId: number): Promise<Address> {
     const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/contacts`)
     // for now it returns only address , can return the all the contacts as well
