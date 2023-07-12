@@ -175,7 +175,7 @@ export default class AddNameRequestForm extends Vue {
         })
         if (nrResponse?.status === 201) {
           // emit event to let parent know business added
-          this.$emit('add-success')
+          this.$emit('add-success', this.nrNumber)
         } else {
           this.$emit('add-unknown-error')
         }
