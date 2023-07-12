@@ -83,7 +83,7 @@
     "stylus-loader": "^3.0.2",
     "ts-jest": "24.0.2",
     "typescript": "^3.9.7",
-    "unplugin-vue2-script-setup": "^0.11.3",
+    "unplugin-vue2-script-setup": "^0.11.4",
     "vue-class-component": "^7.1.0",
     "vue-cli-plugin-vuetify": "^2.0.3",
     "vue-template-compiler": "2.6.12",
