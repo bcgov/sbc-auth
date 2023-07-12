@@ -78,6 +78,18 @@ def test_org_find_by_id(session):  # pylint:disable=unused-argument
     assert found_org.name == org.name
 
 
+def test_org_find_by_uuid(session):
+    """Assert that an Org can be retrieved by its uuid."""
+    org = factory_org_model(name='My Test Org', session=session)
+    session.add(org)
+    session.commit()
+
+    found_org = OrgModel.find_by_org_uuid(org.uuid)
+    assert found_org
+    assert found_org.name == org.name
+    assert found_org.uuid == org.uuid
+
+
 def test_org_find_by_name(session):  # pylint:disable=unused-argument
     """Assert that an Org can retrieved by its name."""
     org = factory_org_model(name='My Test Org', session=session)
