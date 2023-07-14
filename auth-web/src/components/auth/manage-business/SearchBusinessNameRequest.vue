@@ -26,10 +26,8 @@
         </v-form>
         <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
           <template>
-            <!-- Search for business identifier or name -->
-            <!-- NB: use v-if to re-mount component between instances -->
+            <!-- TODO: Search for name request -->
             <NameRequestLookup
-              @business="businessName = $event.name; businessIdentifier = $event.identifier"
             />
           </template>
         </v-form>
@@ -87,19 +85,9 @@ import { mapActions } from 'vuex'
   }
 })
 export default class SearchBusinessNameRequest extends Vue {
-  // $refs: {
-  //   addBusinessForm: HTMLFormElement,
-  //   helpDialog: HelpDialog
-  // }
-
-  // @Prop({ default: false }) readonly dialog: boolean
   @Prop({ default: false }) readonly isGovStaffAccount: boolean
   @Prop({ default: '' }) readonly userFirstName: string
   @Prop({ default: '' }) readonly userLastName: string
-
-  // private readonly addBusiness!: (loginPayload: LoginPayload) => any
-  // private readonly updateBusinessName!: (businessNumber: string) => any
-  // private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
 
   // local variables
   manageBusinessDialog = { show: false }

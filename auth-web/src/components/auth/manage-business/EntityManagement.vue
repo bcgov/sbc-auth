@@ -155,44 +155,6 @@
         @on-business-identifier="businessIdentifier = $event"
       />
 
-      <v-row  no-gutters class="mb-n8">
-        <v-col cols="auto">
-          <!-- Add Existing Name Request or Business -->
-          <v-menu v-if="false"
-            v-model="addAffiliationDropdown"
-          >
-            <template v-slot:activator="{ on: onExistingMenu }">
-              <v-tooltip top content-class="top-tooltip">
-                <template v-slot:activator="{ on: onExistingTooltip }">
-                  <v-btn
-                    id="add-existing-btn"
-                    class="mt-2 mr-4"
-                    color="primary"
-                    dark large
-                    v-on="{ ...onExistingMenu, ...onExistingTooltip }"
-                    @click="addAffiliationDropdown = !addAffiliationDropdown"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                    <span><strong>Add an Existing Business or Name Request</strong></span>
-                    <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                  </v-btn>
-                </template>
-                <span>To view and manage existing businesses and Name Requests, you can manually add them to your table.</span>
-              </v-tooltip>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title class="d-inline-flex">
-                  <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
-            </v-list>
-          </v-menu>
-        </v-col>
-      </v-row>
       <v-row  no-gutters id="dashboard-actions" class="mb-n3">
         <v-col>
           <v-select
