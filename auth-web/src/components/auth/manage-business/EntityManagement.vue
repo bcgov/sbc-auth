@@ -173,6 +173,7 @@
         :selectedColumns="selectedColumns"
         :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
+        :highlight-index="highlightIndex"
       />
 
       <PasscodeResetOptionsModal
@@ -214,7 +215,7 @@
           <AddNameRequestForm
             class="mt-6"
             @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success="showAddSuccessModalNR()"
+            @add-success="showAddSuccessModalNR"
             @add-failed-show-msg="showNRErrorModal()"
             @add-failed-no-entity="showNRNotFoundModal()"
             @add-unknown-error="showUnknownErrorModal('nr')"
@@ -282,6 +283,16 @@
           <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
       </ModalDialog>
+
+      <!-- Message for successfully adding name request -->
+      <v-snackbar
+        id="success-nr-snackbar"
+        v-model="showSnackbar"
+        :timeout="4000"
+        transition="fade"
+      >
+        {{ snackbarText }}
+      </v-snackbar>
     </v-container>
   </div>
 </template>
@@ -319,7 +330,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions('business', ['syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions('business', ['searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
     ...mapActions('org', ['syncAddress'])
   }
 })
@@ -345,6 +356,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private addAffiliationDropdown: boolean = false
   private incorporateNumberedDropdown: boolean = false
 
+  private readonly searchNRIndex!: (identifier: string) => Promise<number>
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
@@ -352,6 +364,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private readonly syncAddress!: () => Address
   private selectedColumns = ['Number', 'Type', 'Status']
   private columns = ['Number', 'Type', 'Status']
+
+  private snackbarText: string = null
+  private showSnackbar = false
+
+  private highlightIndex = -1
 
   $refs: {
     successDialog: ModalDialog
@@ -443,12 +460,20 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.successDialog.open()
   }
 
-  async showAddSuccessModalNR () {
+  async showAddSuccessModalNR (nrNumber) {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
+
     await this.syncBusinesses()
-    this.$refs.successDialog.open()
+    const res = await this.searchNRIndex(nrNumber)
+
+    this.snackbarText = nrNumber + ' was sucessfully added to your table.'
+    this.showSnackbar = true
+    this.highlightIndex = res
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
   }
 
   showInvalidCodeModal (label: string) {
@@ -475,7 +500,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showNRErrorModal () {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Error Adding Name Request'
-    this.dialogText = ''
+    this.dialogText =
+    'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
     this.$refs.errorDialog.open()
   }
 

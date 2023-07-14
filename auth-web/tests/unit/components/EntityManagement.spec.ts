@@ -8,6 +8,7 @@ import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import flushPromises from 'flush-promises'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
@@ -172,5 +173,55 @@ describe('Entity Management Component', () => {
     expect(wrapper.find('#incorporate-numbered-limited-btn').exists()).toBe(true)
     expect(wrapper.find('#incorporate-numbered-unlimited-btn').exists()).toBe(true)
     expect(wrapper.find('#incorporate-numbered-ccc-btn').exists()).toBe(true)
+  })
+
+  it('calls the nr success modal', async () => {
+    const mockedSyncBusinesses = jest.fn()
+    wrapper.vm.syncBusinesses = mockedSyncBusinesses
+    const mockedSearchNRIndex = jest.fn().mockReturnValue(0)
+    wrapper.vm.searchNRIndex = mockedSearchNRIndex
+    wrapper.vm.showAddSuccessModalNR('NR 1111111')
+    await flushPromises()
+
+    expect(mockedSyncBusinesses).toHaveBeenCalled()
+    expect(mockedSearchNRIndex).toHaveBeenCalled()
+    expect(wrapper.vm.snackbarText).toBe('NR 1111111 was sucessfully added to your table.')
+  })
+
+  it('calls the nr error modal', async () => {
+    const mockedNrErrorMethod = jest.fn()
+    wrapper.vm.$refs.errorDialog.open = mockedNrErrorMethod
+    wrapper.vm.showNRErrorModal()
+    expect(wrapper.vm.dialogTitle).toBe('Error Adding Name Request')
+    expect(wrapper.vm.dialogText).toBe(
+      'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    )
+    expect(mockedNrErrorMethod).toHaveBeenCalled()
+  })
+
+  it('renders snackbar visible 1 second after toggled', async () => {
+    jest.useFakeTimers()
+
+    await wrapper.vm.showAddSuccessModalNR()
+    jest.advanceTimersByTime(1000)
+    await Vue.nextTick()
+
+    expect(wrapper.find('#success-nr-snackbar').exists()).toBe(true)
+    expect(wrapper.vm.showSnackbar).toBe(true)
+
+    jest.clearAllTimers()
+  })
+
+  it('renders snackbar invisible 5 seconds after toggled', async () => {
+    jest.useFakeTimers()
+
+    await wrapper.vm.showAddSuccessModalNR()
+    jest.advanceTimersByTime(5000)
+    await Vue.nextTick()
+
+    expect(wrapper.find('#success-nr-snackbar').exists()).toBe(true)
+    expect(wrapper.vm.showSnackbar).toBe(false)
+
+    jest.clearAllTimers()
   })
 })
