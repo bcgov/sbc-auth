@@ -161,15 +161,12 @@ export default class BusinessModule extends VuexModule {
 
       affiliationInviteInfos.forEach(aii => {
         const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === aii.business.businessIdentifier)
+        const aiiArr = [aii]
+
         if (business) {
-          if (business.affiliationInvites) {
-            business.affiliationInvites.push(aii)
-          } else {
-            business.affiliationInvites = [aii]
-          }
+          business.affiliationInvites = (business.affiliationInvites || []).concat(aiiArr)
         } else {
-          const b: Business = aii.business
-          b.affiliationInvites = [aii]
+          const b = { ...aii.business, affiliationInvites: aiiArr }
           affiliatedEntities.push(b)
         }
       })

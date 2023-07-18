@@ -35,18 +35,18 @@
       <!-- Name Request Name(s) / Business Name -->
       <template v-slot:item-slot-Name="{ item }">
         <span>
-        <b v-if="isNameRequest(item)" class="col-wide gray-9">
-          <b v-for="(name, i) in item.nameRequest.names" :key="`nrName: ${i}`" class="pb-1 names-block">
-            <v-icon v-if="isRejectedName(name)" color="red" class="names-text pr-1" small>mdi-close</v-icon>
-            <v-icon v-if="isApprovedName(name)" color="green" class="names-text pr-1" small>mdi-check</v-icon>
-            <div class="names-text font-weight-bold">{{ name.name }}</div>
+          <b v-if='isNameRequest(item)' class='col-wide gray-9'>
+            <b v-for='(name, i) in item.nameRequest.names' :key='`nrName: ${i}`' class='pb-1 names-block'>
+              <v-icon v-if='isRejectedName(name)' color='red' class='names-text pr-1' small>mdi-close</v-icon>
+              <v-icon v-if='isApprovedName(name)' color='green' class='names-text pr-1' small>mdi-check</v-icon>
+              <div class='names-text font-weight-bold'>{{ name.name }}</div>
+            </b>
           </b>
-        </b>
-        <b v-else class='col-wide gray-9 font-weight-bold'>{{ name(item) }}</b>
+          <b v-else class='col-wide gray-9 font-weight-bold'>{{ name(item) }}</b>
         </span>
 
-        <span v-if="!!item.affiliationInvites">
-          <p style="font-family:Serif; font-size: 12px " id="affiliationInvitesStatus">
+        <span v-if="!!item.affiliationInvites" id="affiliationInvitesStatus">
+          <p style="font-size: 12px" >
             <v-icon x-small color='primary'>mdi-account-cog</v-icon>
             <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
           </p>
@@ -396,26 +396,25 @@ export default defineComponent({
 
     const actionHandler = (business: Business) => {
       const aii = business.affiliationInvites[0]
-      const status1 = aii.status
-      if (status1 === AffiliationInvitationStatus.Pending) {
+      const invitationStatus = aii.status
+      if (invitationStatus === AffiliationInvitationStatus.Pending) {
         OrgService.cancelAffiliationInvitation(aii.fromOrg.id, aii.id)
-      } else if (status1 === AffiliationInvitationStatus.Failed) {
+      } else if (invitationStatus === AffiliationInvitationStatus.Failed) {
         // remove from list action
         OrgService.removeAffiliationInvitation(aii.fromOrg.id, aii.id)
-      } else if (status1 === AffiliationInvitationStatus.Accepted) {
+      } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
         open(business)
       } else {
-        return () => {
-        } // do nothing
+        // do nothing
       }
     }
     const actionButtonText = (business: Business) => {
-      const status1 = business.affiliationInvites[0].status
-      if (status1 === AffiliationInvitationStatus.Pending) {
+      const invitationStatus = business.affiliationInvites[0].status
+      if (invitationStatus === AffiliationInvitationStatus.Pending) {
         return 'Cancel<br>Request'
-      } else if (status1 === AffiliationInvitationStatus.Failed) {
+      } else if (invitationStatus === AffiliationInvitationStatus.Failed) {
         return 'Remove<br>from list'
-      } else if (status1 === AffiliationInvitationStatus.Accepted) {
+      } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
         return 'Open'
       } else {
         return ''
