@@ -155,8 +155,13 @@ export default class BusinessModule extends VuexModule {
       affiliatedEntities.push(entity)
     })
 
-    const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id).catch(err => console.log(err))
-    if (resp && resp?.data?.affiliationInvites) {
+    const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
+      .catch(err => {
+        console.log(err) // eslint-disable-line no-console
+        return null
+      })
+
+    if (resp?.data?.affiliationInvites) {
       const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
 
       affiliationInviteInfos.forEach(affiliationInviteInfo => {
