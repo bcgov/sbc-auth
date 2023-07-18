@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import { AffiliationInviteInfo, AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, NameRequest, PasscodeResetLoad } from '@/models/business'
 import {
@@ -154,6 +154,38 @@ export default class BusinessModule extends VuexModule {
       }
       affiliatedEntities.push(entity)
     })
+
+    const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
+    if (resp?.data?.affiliationInvites) {
+      const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
+
+      affiliationInviteInfos.forEach(aii => {
+        const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === aii.business.businessIdentifier)
+        if (business) {
+          if (business.affiliationInvites) {
+            business.affiliationInvites.push(aii)
+          } else {
+            business.affiliationInvites = [aii]
+          }
+        } else {
+          const b: Business = aii.business
+          b.affiliationInvites = [aii]
+          affiliatedEntities.push(b)
+        }
+      })
+
+      // bubble the ones with the invitations to the top
+      affiliatedEntities.sort((a, b) => {
+        if (a.affiliationInvites && !b.affiliationInvites) {
+          return -1
+        }
+        if (!a.affiliationInvites && b.affiliationInvites) {
+          return 1
+        }
+        return 0
+      })
+    }
+
     // update store with initial results
     this.setBusinesses(affiliatedEntities)
   }

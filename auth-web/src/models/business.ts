@@ -1,4 +1,5 @@
 import { CorpTypes, FilingTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { Contact } from './contact'
 
 export interface LoginPayload {
@@ -37,6 +38,7 @@ export interface Business {
     goodStanding?: boolean
     adminFreeze?: boolean
     dissolved?: boolean
+    affiliationInvites?: AffiliationInviteInfo[]
 }
 
 export interface BusinessSearchResultDto {
