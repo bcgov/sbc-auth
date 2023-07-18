@@ -6,7 +6,7 @@ import { useStore } from 'vuex-composition-helpers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrRequestType, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
@@ -154,6 +154,16 @@ export const useAffiliations = () => {
     )
   }
 
+  const nameRequestType = (business: Business): string => {
+    if (isNameRequest(business)) {
+      const nrType: string = NrRequestType[business.nameRequest?.entityTypeCd]
+      if (nrType) {
+        return '\u2014 ' + nrType
+      }
+    }
+    return ''
+  }
+
   /** Apply data table headers dynamically to account for computed properties. */
   const getHeaders = (columns?: string[]) => {
     headers.value = getAffiliationTableHeaders(columns)
@@ -235,6 +245,7 @@ export const useAffiliations = () => {
     updateFilter,
     typeDescription,
     isNameRequest,
+    nameRequestType,
     number,
     name,
     canUseNameRequest,

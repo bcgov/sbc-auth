@@ -247,6 +247,48 @@ export enum NrEntityType {
     INFO = 'INFO', // special value for sub-menu
 }
 
+export enum NrRequestType {
+  // Name Change
+  BEC = 'Name Change',
+  CCC = 'Name Change',
+  CCP = 'Name Change',
+  CCR = 'Name Change',
+  CFR = 'Name Change',
+  CUL = 'Name Change',
+
+  // Continuation in
+  BECT = 'Continuation In',
+  CCCT = 'Continuation In',
+  CTC = 'Continuation In',
+  CT = 'Continuation In',
+  ULCT = 'Continuation In',
+
+  // Alteration
+  BECV = 'Alteration',
+  CCV = 'Alteration',
+  BECR = 'Alteration',
+  UC = 'Alteration',
+
+  // Incorporation
+  BC = 'Incorporation', // BC Benefit Company Incorporation
+  CC = 'Incorporation', // CCC - Incorporation/Amalgamation
+  CP = 'Incorporation', // Cooperative - Incorporation/Amalgamation
+  CR = 'Incorporation', // BC Company - Incorporation/Amalgamation
+
+  // Registration
+  FR = 'Registration', // Sole Proprietorship/General Partnership/DBA - Registration
+  UL = 'Registration', // Unlimited Liability Company
+  XCR = 'Registration', // Corporation (Foreign) - Extrapro Registration/Amalgamation
+
+  // Restoration
+  RCC = 'Restoration',
+  RCP = 'Restoration',
+  RCR = 'Restoration',
+  RSO = 'Restoration',
+  BERE = 'Restoration',
+  RUL = 'Restoration',
+}
+
 export enum BusinessState {
     ACTIVE = 'Active',
     DRAFT = 'Draft'
@@ -301,6 +343,7 @@ export enum LDFlags {
     EnableFasDashboard = 'enable-fas-dashboard',
     EnableGovmInvite = 'enable-govm-account-invite',
     EnableMandatoryAddress = 'enable-mandatory-address',
+    EnableNameRequestType = 'enable-name-request-type',
     EnableOrgNameAutoComplete = 'enable-org-name-auto-complete',
     HideProductPackage = 'hide-product-packages',
     IaSupportedEntities = 'ia-supported-entities',

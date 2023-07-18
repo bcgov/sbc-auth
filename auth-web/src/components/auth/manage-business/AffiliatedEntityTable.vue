@@ -61,7 +61,8 @@
 
       <!-- Type -->
       <template v-slot:item-slot-Type="{ item }">
-        <div class="gray-9 font-weight-bold">{{ type(item) }}</div>
+        <div class="gray-9 font-weight-bold type-text">{{ type(item) }}</div>
+        <div v-if="enableNameRequestType && isNameRequest(item)" class="gray-9 font-weight-bold type-text ml-1">{{ nameRequestType(item) }}</div>
         <div>{{ typeDescription(item) }}</div>
       </template>
 
@@ -199,6 +200,7 @@ import {
   CorpTypes,
   EntityAlertTypes,
   FilingTypes,
+  LDFlags,
   NrDisplayStates,
   NrState,
   NrTargetTypes,
@@ -212,6 +214,7 @@ import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import EntityDetails from './EntityDetails.vue'
 import OrgService from '@/services/org.services'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
 import { useStore } from 'vuex-composition-helpers'
@@ -230,7 +233,7 @@ export default defineComponent({
     const store = useStore()
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
       getHeaders, headers, type, status, updateFilter, typeDescription,
-      isNameRequest, number, name, canUseNameRequest, tempDescription,
+      isNameRequest, nameRequestType, number, name, canUseNameRequest, tempDescription,
       isTemporaryBusiness } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
@@ -458,6 +461,11 @@ export default defineComponent({
       getHeaders(newCol)
     })
 
+    // feature flags
+    const enableNameRequestType = (): boolean => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableNameRequestType) || false
+    }
+
     return {
       actionHandler,
       actionButtonText,
@@ -470,9 +478,11 @@ export default defineComponent({
       headers,
       affiliations,
       entityCount,
+      enableNameRequestType,
       isNameRequest,
       isRejectedName,
       isApprovedName,
+      nameRequestType,
       name,
       open,
       number,
@@ -558,6 +568,10 @@ export default defineComponent({
 
       .type-column {
         min-width: 12rem;
+      }
+
+      .type-text {
+        display: inline-block;
       }
     }
   }
