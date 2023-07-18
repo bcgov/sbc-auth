@@ -155,19 +155,21 @@ export default class BusinessModule extends VuexModule {
       affiliatedEntities.push(entity)
     })
 
-    const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
-    if (resp?.data?.affiliationInvites) {
+    const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id).catch(err => console.log(err))
+    if (resp && resp?.data?.affiliationInvites) {
       const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
 
-      affiliationInviteInfos.forEach(aii => {
-        const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === aii.business.businessIdentifier)
-        const aiiArr = [aii]
+      affiliationInviteInfos.forEach(affiliationInviteInfo => {
+        const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === affiliationInviteInfo.business.businessIdentifier)
+        const affiliationInviteInfosArray = [affiliationInviteInfo]
 
         if (business) {
-          business.affiliationInvites = (business.affiliationInvites || []).concat(aiiArr)
-        } else {
-          const b = { ...aii.business, affiliationInvites: aiiArr }
+          business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
+        } else if (affiliationInviteInfo.fromOrg.id === this.currentOrganization.id) {
+          const b = { ...affiliationInviteInfo.business, affiliationInvites: affiliationInviteInfosArray }
           affiliatedEntities.push(b)
+        } else {
+          // do nothing, no row to add it, and not a request from this org.
         }
       })
 

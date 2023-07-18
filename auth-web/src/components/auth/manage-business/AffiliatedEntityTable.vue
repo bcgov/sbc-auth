@@ -81,6 +81,7 @@
       <!-- Actions -->
       <template v-slot:item-slot-Actions="{ item, index }">
         <div class='actions mx-auto' :id='`action-menu-${index}`'>
+          <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
           <span class="open-action"  v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
             <v-btn
               small
@@ -395,13 +396,13 @@ export default defineComponent({
     }
 
     const actionHandler = (business: Business) => {
-      const aii = business.affiliationInvites[0]
-      const invitationStatus = aii.status
+      const affiliationInviteInfo = business.affiliationInvites[0]
+      const invitationStatus = affiliationInviteInfo.status
       if (invitationStatus === AffiliationInvitationStatus.Pending) {
-        OrgService.cancelAffiliationInvitation(aii.fromOrg.id, aii.id)
+        OrgService.cancelAffiliationInvitation(affiliationInviteInfo.fromOrg.id, affiliationInviteInfo.id)
       } else if (invitationStatus === AffiliationInvitationStatus.Failed) {
         // remove from list action
-        OrgService.removeAffiliationInvitation(aii.fromOrg.id, aii.id)
+        OrgService.removeAffiliationInvitation(affiliationInviteInfo.fromOrg.id, affiliationInviteInfo.id)
       } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
         open(business)
       } else {
@@ -422,6 +423,7 @@ export default defineComponent({
     }
     const openNewAffiliationInvite = (business: Business) => {
       // todo: open modal when modal is created
+      // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
       alert('not implemented')
     }
 
