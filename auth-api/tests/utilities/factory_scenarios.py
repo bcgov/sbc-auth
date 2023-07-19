@@ -513,6 +513,8 @@ class TestOrgStatusInfo(dict, Enum):
 class TestOrgInfo(dict, Enum):
     """Test scenarios of org."""
 
+    affiliation_from_org = {'name': 'Test Affiliation Invitation From Org'}
+    affiliation_to_org = {'name': 'Test Affiliation Invitation To Org'}
     org1 = {'name': 'My Test Org'}
     org_details = {'name': 'My test Org details'}
     org_branch_name = {'name': 'Foo', 'branchName': 'Bar', }

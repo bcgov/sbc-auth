@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation_invitation",
+  "type": "object",
+  "title": "Affiliation Invitation",
+  "definitions": {},
+  "properties": {
+    "fromOrgId": {
+      "type": "number"
+    },
+    "toOrgId": {
+      "type": "number"
+    },
+    "businessIdentifier": {
+      "$id": "#/properties/businessIdentifier",
+      "type": "string",
+      "title": "Business Identifier",
+      "default": "",
+      "examples": [
+        "CP1234567"
+      ],
+      "pattern": "^(.*)$"
+    },
+    "recipientEmail": {
+      "type": "string",
+      "title": "The recipient email."
+    },
+    "sentDate": {
+      "type": "string",
+      "format": "datetime",
+      "title": "The date invitation is sent."
+    },
+    "type": {
+      "type": "string",
+      "title": "Type of Affiliation Invitation.",
+      "examples": [
+        "EMAIL",
+        "PASSCODE"
+      ]
+    }
+  },
+  "required": [
+    "recipientEmail",
+    "fromOrgId",
+    "toOrgId",
+    "businessIdentifier"
+  ]
+}

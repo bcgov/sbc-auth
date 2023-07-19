@@ -224,6 +224,7 @@ def auth_mock(monkeypatch):
     monkeypatch.setattr('auth_api.services.entity.check_auth', lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.org.check_auth', lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.invitation.check_auth', lambda *args, **kwargs: None)
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.check_auth', lambda *args, **kwargs: None)
 
 
 @pytest.fixture()
@@ -249,6 +250,23 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups',
                         lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def business_mock(monkeypatch):
+    """Mock get business call."""
+
+    def get_business(business_identifier, bearer_token):
+        return {
+            'business': {
+                'identifier': 'CP0002103',
+                'legalName': 'BarFoo, Inc.',
+                'legalType': 'CP'
+            }
+        }
+
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
+                        get_business)
 
 
 @pytest.fixture()

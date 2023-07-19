@@ -36,6 +36,7 @@ class MessageType(Enum):
     EJV_FAILED = 'bc.registry.payment.ejvFailed'
     RESET_PASSCODE = 'bc.registry.auth.resetPasscode'
     ADMIN_NOTIFICATION = 'bc.registry.auth.adminNotification'
+    AFFILIATION_INVITATION = 'bc.registry.auth.affiliationInvitation'
     BUSINESS_INVITATION = 'bc.registry.auth.businessInvitation'
     BUSINESS_INVITATION_FOR_BCEID = 'bc.registry.auth.businessInvitationForBceid'
     DIRSEARCH_BUSINESS_INVITATION = 'bc.registry.auth.dirsearchBusinessInvitation'
@@ -72,6 +73,7 @@ class SubjectType(Enum):
     RESET_PASSCODE = 'BC Registries Account Passcode Reset'
     ADMIN_NOTIFICATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
                          'has responded for the invitation to join the account {account_name}'
+    AFFILIATION_INVITATION = '[BC Registries and Online Services] Authorise Access to Manage Your Business'
     BUSINESS_INVITATION = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
                           'has invited you to join an account'
     BUSINESS_INVITATION_FOR_BCEID = '[BC Registries and Online Services] {user_first_name} {user_last_name} ' \
@@ -143,6 +145,7 @@ class TemplateType(Enum):
     EJV_FAILED_TEMPLATE_NAME = 'ejv_failed_email'
     RESET_PASSCODE_TEMPLATE_NAME = 'reset_passcode'
     ADMIN_NOTIFICATION_TEMPLATE_NAME = 'admin_notification_email'
+    AFFILIATION_INVITATION_TEMPLATE_NAME = 'affiliation_invitation_email'
     BUSINESS_INVITATION_TEMPLATE_NAME = 'business_invitation_email'
     BUSINESS_INVITATION_FOR_BCEID_TEMPLATE_NAME = 'business_invitation_email_for_bceid'
     DIRSEARCH_BUSINESS_INVITATION_TEMPLATE_NAME = 'dirsearch_business_invitation_email'
