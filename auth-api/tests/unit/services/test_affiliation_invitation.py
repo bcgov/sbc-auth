@@ -36,7 +36,7 @@ from tests.utilities.factory_utils import factory_affiliation_invitation, factor
 
 
 def create_test_entity():
-    """Create test entity data."""
+    """Creating test entity data."""
     return EntityService.save_entity({
         'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
         'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
@@ -47,7 +47,7 @@ def create_test_entity():
 
 
 def setup_org_and_entity(user):
-    """Create test org and entity data."""
+    """Creating test org and entity data."""
     from_org = OrgService.create_org(TestOrgInfo.affiliation_from_org, user_id=user.id)
     to_org = OrgService.create_org(TestOrgInfo.affiliation_to_org, user_id=user.id)
     entity = create_test_entity()

@@ -43,7 +43,6 @@ class AffiliationInvitations(Resource):
         [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Get affiliation invitations."""
-
         try:
             org_id = request.args.get('orgId', None)
             status = request.args.get('status', None)

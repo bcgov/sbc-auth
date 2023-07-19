@@ -34,7 +34,6 @@ from auth_api.models.entity import Entity as EntityModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
-from auth_api.services.user import User
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
@@ -70,7 +69,8 @@ class AffiliationInvitation:
 
     @staticmethod
     @user_context
-    def create_affiliation_invitation(affiliation_invitation_info: Dict, user, invitation_origin, **kwargs):
+    def create_affiliation_invitation(affiliation_invitation_info: Dict,  # pylint:disable=unused-argument,too-many-locals
+                                      user, invitation_origin, **kwargs):
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
@@ -133,10 +133,7 @@ class AffiliationInvitation:
                                                                RestService.get_service_account_token())
 
         AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
-                                                          to_org.name,
-                                                          to_org_id,
                                                           business['business']['legalName'],
-                                                          user.as_dict(),
                                                           f'{invitation_origin}/{context_path}')
 
         return AffiliationInvitation(affiliation_invitation)
@@ -165,18 +162,14 @@ class AffiliationInvitation:
                                                                                self._model.to_org_id,
                                                                                self._model.entity.business_identifier)
         self._model.token = confirmation_token
-        updated_invitation: AffiliationInvitationModel = self._model.update_invitation_as_retried()
-        to_org: OrgModel = updated_invitation.to_org
+        updated_invitation: AffiliationInvitationModel = self._model.update_invitation_as_retried(user.identifier)
         entity: EntityModel = updated_invitation.entity
 
         business = AffiliationInvitation._get_business_details(entity.business_identifier,
                                                                RestService.get_service_account_token())
 
         AffiliationInvitation.send_affiliation_invitation(updated_invitation,
-                                                          to_org.name,
-                                                          to_org.id,
                                                           business['business']['legalName'],
-                                                          user.as_dict(),
                                                           f'{invitation_origin}/{context_path}')
         return AffiliationInvitation(updated_invitation)
 
@@ -276,10 +269,12 @@ class AffiliationInvitation:
         return AffiliationInvitation(invitation)
 
     @staticmethod
-    def send_affiliation_invitation(affiliation_invitation: AffiliationInvitationModel, org_name, org_id, business_name,
-                                    user, app_url, query_params: Dict[str, any] = None):
+    def send_affiliation_invitation(affiliation_invitation: AffiliationInvitationModel, business_name, app_url,
+                                    query_params: Dict[str, any] = None):
         """Send the email notification."""
         current_app.logger.debug('<send_affiliation_invitation')
+        org_name = affiliation_invitation.to_org.name
+        org_id = affiliation_invitation.to_org_id
         mail_configs = AffiliationInvitation._get_affiliation_invitation_configs(org_name)
         recipient = affiliation_invitation.recipient_email
         token_confirm_url = f"{app_url}/{mail_configs.get('token_confirm_path')}/{affiliation_invitation.token}"
@@ -360,7 +355,7 @@ class AffiliationInvitation:
 
     @staticmethod
     @user_context
-    def accept_affiliation_invitation(affiliation_invitation_id, user: User, origin, **kwargs):
+    def accept_affiliation_invitation(affiliation_invitation_id, user: UserService, origin, **kwargs):  # pylint:disable=unused-argument
         """Add an affiliation from the affilation invitation."""
         current_app.logger.debug('>accept_affiliation_invitation')
         affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.\

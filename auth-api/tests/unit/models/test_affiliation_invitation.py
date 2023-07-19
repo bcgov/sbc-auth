@@ -112,10 +112,11 @@ def test_find_invitations_by_sender(session):  # pylint:disable=unused-argument
 
 def test_update_invitation_as_retried(session):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be updated."""
+
     invitation = factory_affiliation_invitation_model(session=session, status='FAILED')
     session.add(invitation)
     session.commit()
-    invitation.update_invitation_as_retried()
+    invitation.update_invitation_as_retried(invitation.sender.id)
     assert invitation
     assert invitation.invitation_status_code == 'PENDING'
 

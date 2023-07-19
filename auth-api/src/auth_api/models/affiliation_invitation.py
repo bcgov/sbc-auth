@@ -27,7 +27,7 @@ from .db import db
 from .invite_status import InvitationStatus
 
 
-class AffiliationInvitation(BaseModel):
+class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-attributes
     """Model for an Affiliation Invitation record."""
 
     __tablename__ = 'affiliation_invitations'
@@ -179,8 +179,9 @@ class AffiliationInvitation(BaseModel):
             filter(AffiliationInvitation.sender_id == user_id). \
             filter(AffiliationInvitation.invitation_status_code == status).all()
 
-    def update_invitation_as_retried(self):
+    def update_invitation_as_retried(self, sender_id):
         """Update this affiliation invitation with the new data."""
+        self.sender_id = sender_id
         self.sent_date = datetime.now()
         self.invitation_status = InvitationStatus.get_default_status()
         self.save()
