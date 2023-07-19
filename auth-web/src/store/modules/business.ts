@@ -155,39 +155,41 @@ export default class BusinessModule extends VuexModule {
       affiliatedEntities.push(entity)
     })
 
-    const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
-      .catch(err => {
-        console.log(err) // eslint-disable-line no-console
-        return null
-      })
+    if (LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) { // featureFlagIt
+      const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
+        .catch(err => {
+          console.log(err) // eslint-disable-line no-console
+          return null
+        })
 
-    if (resp?.data?.affiliationInvites) {
-      const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
+      if (resp?.data?.affiliationInvites) {
+        const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
 
-      affiliationInviteInfos.forEach(affiliationInviteInfo => {
-        const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === affiliationInviteInfo.business.businessIdentifier)
-        const affiliationInviteInfosArray = [affiliationInviteInfo]
+        affiliationInviteInfos.forEach(affiliationInviteInfo => {
+          const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === affiliationInviteInfo.business.businessIdentifier)
+          const affiliationInviteInfosArray = [affiliationInviteInfo]
 
-        if (business) {
-          business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
-        } else if (affiliationInviteInfo.fromOrg.id === this.currentOrganization.id) {
-          const b = { ...affiliationInviteInfo.business, affiliationInvites: affiliationInviteInfosArray }
-          affiliatedEntities.push(b)
-        } else {
-          // do nothing, no row to add it, and not a request from this org.
-        }
-      })
+          if (business) {
+            business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
+          } else if (affiliationInviteInfo.fromOrg.id === this.currentOrganization.id) {
+            const b = { ...affiliationInviteInfo.business, affiliationInvites: affiliationInviteInfosArray }
+            affiliatedEntities.push(b)
+          } else {
+            // do nothing, no row to add it, and not a request from this org.
+          }
+        })
 
-      // bubble the ones with the invitations to the top
-      affiliatedEntities.sort((a, b) => {
-        if (a.affiliationInvites && !b.affiliationInvites) {
-          return -1
-        }
-        if (!a.affiliationInvites && b.affiliationInvites) {
-          return 1
-        }
-        return 0
-      })
+        // bubble the ones with the invitations to the top
+        affiliatedEntities.sort((a, b) => {
+          if (a.affiliationInvites && !b.affiliationInvites) {
+            return -1
+          }
+          if (!a.affiliationInvites && b.affiliationInvites) {
+            return 1
+          }
+          return 0
+        })
+      }
     }
 
     // update store with initial results
