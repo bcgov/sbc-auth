@@ -45,7 +45,7 @@ KEYCLOAK_SERVICE = KeycloakService()
     (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
      TestJwtClaims.public_bceid_user)
 ])
-def test_add_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock,
+def test_add_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server,
                                     from_org_info, to_org_info, entity_info, role,
                                     claims):  # pylint:disable=unused-argument
     """Assert that an affiliation invitation can be POSTed."""
@@ -79,7 +79,7 @@ def test_add_affiliation_invitation(client, jwt, session, keycloak_mock, busines
     assert result_json['type'] == 'EMAIL'
 
 
-def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mock, business_mock):
+def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that POSTing an already existing affiliation invitation returns a 400."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
                                                                                              jwt,
@@ -104,7 +104,7 @@ def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mo
     assert dictionary['message'] == 'The data you want to insert already exists.'
 
 
-def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
+def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be deleted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
                                                                                              jwt,
@@ -144,7 +144,7 @@ def test_add_affiliation_invitation_invalid(client, jwt, session, business_mock)
     assert rv.status_code == http_status.HTTP_400_BAD_REQUEST
 
 
-def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, business_mock):
+def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an invitation can be retrieved."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
                                                                                              jwt,
@@ -170,7 +170,7 @@ def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, b
     assert result_json['id'] == affiliation_invitation_id
 
 
-def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
+def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be updated."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
                                                                                              jwt,
@@ -201,7 +201,7 @@ def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert dictionary['status'] == 'PENDING'
 
 
-def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock):
+def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be accepted."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
                                                                                              jwt,
@@ -243,7 +243,7 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert affiliations['entities'][0]['businessIdentifier'] == business_identifier
 
 
-def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock):
+def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that affiliation invitations can be retrieved."""
     headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
                                                                                              jwt,
