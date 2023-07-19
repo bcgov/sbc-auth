@@ -36,7 +36,7 @@ from tests.utilities.factory_utils import factory_affiliation_invitation, factor
 
 
 def create_test_entity():
-    """Creating test entity data."""
+    """Create test entity data."""
     return EntityService.save_entity({
         'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
         'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
@@ -47,7 +47,7 @@ def create_test_entity():
 
 
 def setup_org_and_entity(user):
-    """Creating test org and entity data."""
+    """Create test org and entity data."""
     from_org = OrgService.create_org(TestOrgInfo.affiliation_from_org, user_id=user.id)
     to_org = OrgService.create_org(TestOrgInfo.affiliation_to_org, user_id=user.id)
     entity = create_test_entity()
@@ -326,7 +326,7 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, busines
 
 
 def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, business_mock,
-                                   monkeypatch):  # pylint:disable=unused-argument
+                                        monkeypatch):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided from org id."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
@@ -346,13 +346,15 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
         AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '')
 
         invitations: list = AffiliationInvitationService\
-            .get_invitations_for_from_org(org_id=from_org_id, status='PENDING', token_info=TestJwtClaims.public_user_role)
+            .get_invitations_for_from_org(org_id=from_org_id,
+                                          status='PENDING',
+                                          token_info=TestJwtClaims.public_user_role)
         assert invitations
         assert len(invitations) == 1
 
 
 def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, business_mock,
-                                   monkeypatch):  # pylint:disable=unused-argument
+                                      monkeypatch):  # pylint:disable=unused-argument
     """Find an existing invitation with the provided to org id."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)

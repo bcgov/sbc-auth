@@ -87,7 +87,7 @@ def test_create_affiliation_invitation(session):
     assert invitation.id is not None
 
 
-def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
+def test_find_invitation_by_id(session):
     """Assert that an Affiliation Invitation can be retrieved by its id."""
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)
@@ -98,7 +98,7 @@ def test_find_invitation_by_id(session):  # pylint:disable=unused-argument
     assert retrieved_invitation.id == invitation.id
 
 
-def test_find_invitations_by_sender(session):  # pylint:disable=unused-argument
+def test_find_invitations_by_sender(session):
     """Assert that an Affiliation Invitation sender can be retrieved by the user id."""
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)
@@ -110,9 +110,8 @@ def test_find_invitations_by_sender(session):  # pylint:disable=unused-argument
     assert retrieved_invitation[0].token == invitation.token
 
 
-def test_update_invitation_as_retried(session):  # pylint:disable=unused-argument
+def test_update_invitation_as_retried(session):
     """Assert that an Affiliation Invitation can be updated."""
-
     invitation = factory_affiliation_invitation_model(session=session, status='FAILED')
     session.add(invitation)
     session.commit()
@@ -121,7 +120,7 @@ def test_update_invitation_as_retried(session):  # pylint:disable=unused-argumen
     assert invitation.invitation_status_code == 'PENDING'
 
 
-def test_find_invitations_from_org(session):  # pylint:disable=unused-argument
+def test_find_invitations_from_org(session):
     """Assert that Affiliation Invitations from a specified org can be retrieved."""
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)

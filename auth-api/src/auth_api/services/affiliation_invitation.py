@@ -69,7 +69,8 @@ class AffiliationInvitation:
 
     @staticmethod
     @user_context
-    def create_affiliation_invitation(affiliation_invitation_info: Dict,  # pylint:disable=unused-argument,too-many-locals
+    def create_affiliation_invitation(affiliation_invitation_info: Dict,
+                                      # pylint:disable=unused-argument,too-many-locals
                                       user, invitation_origin, **kwargs):
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
@@ -355,7 +356,9 @@ class AffiliationInvitation:
 
     @staticmethod
     @user_context
-    def accept_affiliation_invitation(affiliation_invitation_id, user: UserService, origin, **kwargs):  # pylint:disable=unused-argument
+    def accept_affiliation_invitation(affiliation_invitation_id,
+                                      # pylint:disable=unused-argument
+                                      user: UserService, origin, **kwargs):
         """Add an affiliation from the affilation invitation."""
         current_app.logger.debug('>accept_affiliation_invitation')
         affiliation_invitation: AffiliationInvitationModel = AffiliationInvitationModel.\

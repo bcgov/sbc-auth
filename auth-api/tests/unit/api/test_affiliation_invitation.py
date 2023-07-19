@@ -250,14 +250,12 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
                                                                                              session,
                                                                                              keycloak_mock)
 
-    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+    client.post('/api/v1/affiliationInvitations', data=json.dumps(
         factory_affiliation_invitation(
             from_org_id=from_org_id,
             to_org_id=to_org_id,
             business_identifier=business_identifier)),
                                 headers=headers, content_type='application/json')
-
-    invitation_dictionary = json.loads(rv_invitation.data)
 
     rv_invitations = client.get('/api/v1/affiliationInvitations?orgId={}'.format(from_org_id),
                                 headers=headers,
