@@ -290,6 +290,7 @@ export enum Permission {
 }
 
 export enum LDFlags {
+    AffiliationInvitationRequestAccess = 'enable-affiliation-invitation-request-access',
     AuthLearnMore = 'auth-options-learn-more',
     BannerText = 'banner-text',
     BusSearchLink = 'bus-search-staff-link',

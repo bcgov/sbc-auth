@@ -32,6 +32,11 @@ export interface Organizations
   orgs : Organization[]
 }
 
+export interface OrgNameAndId {
+  name: string
+  id: number
+}
+
 export interface Organization {
   id?: number;
   name: string;

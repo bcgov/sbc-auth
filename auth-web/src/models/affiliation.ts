@@ -1,7 +1,7 @@
-import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
+import { Action, Applicant, Business, Businesses, CorpType, Names } from '@/models/business'
 import { CorpTypes, NrTargetTypes } from '@/util/constants'
+import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
-import { Organization } from '@/models/Organization'
 
 export interface CreateRequestBody {
   businessIdentifier: string
@@ -18,6 +18,22 @@ export interface CreateNRAffiliationRequestBody {
 export interface Affiliation {
   organization: Organization
   business: Business
+}
+
+export const AffiliationInvitationStatus = {
+  Pending: 'PENDING',
+  Accepted: 'ACCEPTED',
+  Expired: 'EXPIRED',
+  Failed: 'FAILED'
+}
+
+export interface AffiliationInviteInfo {
+  id: number
+  type: string
+  status: string
+  business: Business
+  fromOrg: OrgNameAndId
+  toOrg: OrgNameAndId
 }
 
 export interface AffiliationFilter {
@@ -82,6 +98,7 @@ export interface AffiliationFilterParams {
 
 export interface AffiliationState {
   [x: string]: any
+
   affiliations: any
   filters: {
     isActive: boolean
