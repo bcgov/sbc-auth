@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -35,11 +35,12 @@ from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.user import User as UserService
-from auth_api.utils.enums import AccessType, InvitationStatus, LoginSource, Status
+from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
 from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
+from ..utils.passcode import validate_passcode
 from ..utils.util import escape_wam_friendly_url
 from .authorization import check_auth
 from .rest_service import RestService
@@ -81,31 +82,24 @@ class AffiliationInvitation:
         check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         # Validate from/to organizations exists
-        from_org: OrgModel = OrgModel.find_by_org_id(from_org_id)
-        if not from_org:
+        if not (from_org := OrgModel.find_by_org_id(from_org_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        to_org: OrgModel = OrgModel.find_by_org_id(to_org_id)
-        if not to_org:
+        if not OrgModel.find_by_org_id(to_org_id):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         # Validate that entity exists
-        entity = EntityService.find_by_business_identifier(business_identifier, skip_auth=True)
-
-        if not entity:
+        if not (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         # Check if affiliation already exists
-        affiliation_model = AffiliationModel.find_affiliation_by_org_and_entity_ids(to_org_id, entity.identifier)
-
-        if affiliation_model:
+        if AffiliationModel.find_affiliation_by_org_and_entity_ids(to_org_id, entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         # Check if an affiliation invitation already exists
-        check_invitation = AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
-                                                                                         to_org_id=to_org_id,
-                                                                                         entity_id=entity.identifier)
-        if check_invitation:
+        if AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
+                                                                         to_org_id=to_org_id,
+                                                                         entity_id=entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         affiliation_invitation_info['entityId'] = entity.identifier
@@ -121,6 +115,13 @@ class AffiliationInvitation:
             mandatory_login_source = getattr(account_login_options, 'login_source',
                                              default_login_option_based_on_accesstype)
 
+        # If a pass code is provided check if it is correct
+        if pass_code := affiliation_invitation_info.get('passCode'):
+            if not validate_passcode(pass_code, entity.pass_code):
+                raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
+
+            affiliation_invitation_info['type'] = AffiliationInvitationType.PASSCODE.value
+
         affiliation_invitation = AffiliationInvitationModel.create_from_dict(affiliation_invitation_info,
                                                                              user.identifier)
         confirmation_token = AffiliationInvitation.generate_confirmation_token(affiliation_invitation.id,
@@ -130,13 +131,17 @@ class AffiliationInvitation:
         affiliation_invitation.login_source = mandatory_login_source
         affiliation_invitation.save()
 
-        business = AffiliationInvitation._get_business_details(business_identifier,
-                                                               RestService.get_service_account_token())
-
-        AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
-                                                          business['business']['legalName'],
-                                                          f'{invitation_origin}/{context_path}')
-
+        if affiliation_invitation.type != AffiliationInvitationType.PASSCODE.value:
+            # Fetch the up-to-date business details from legal API
+            business = AffiliationInvitation._get_business_details(business_identifier,
+                                                                   RestService.get_service_account_token())
+            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
+                                                              business['business']['legalName'],
+                                                              f'{invitation_origin}/{context_path}')
+        else:
+            return AffiliationInvitation.accept_affiliation_invitation(affiliation_invitation.id,
+                                                                       user, invitation_origin,
+                                                                       **kwargs)
         return AffiliationInvitation(affiliation_invitation)
 
     @staticmethod
@@ -152,36 +157,49 @@ class AffiliationInvitation:
 
         return get_business_response.json()
 
-    def update_affiliation_invitation(self, user, invitation_origin):
+    def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
         """Update the specified affiliation invitation with new data."""
         check_auth(org_id=self._model.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
+        invitation: AffiliationInvitationModel = self._model
 
-        confirmation_token = AffiliationInvitation.generate_confirmation_token(self._model.id,
-                                                                               self._model.from_org_id,
-                                                                               self._model.to_org_id,
-                                                                               self._model.entity.business_identifier)
-        self._model.token = confirmation_token
-        updated_invitation: AffiliationInvitationModel = self._model.update_invitation_as_retried(user.identifier)
-        entity: EntityModel = updated_invitation.entity
+        # Don't do any updates if the invitation is not in PENDING state
+        if invitation.invitation_status_code != InvitationStatus.PENDING.value:
+            return AffiliationInvitation(invitation)
 
-        business = AffiliationInvitation._get_business_details(entity.business_identifier,
-                                                               RestService.get_service_account_token())
+        # Check for status to patch
+        new_status = affiliation_invitation_info.get('status')
+        if not new_status or new_status == InvitationStatus.PENDING.value:
+            # Resend invitation
+            confirmation_token = AffiliationInvitation\
+                .generate_confirmation_token(self._model.id,
+                                             self._model.from_org_id,
+                                             self._model.to_org_id,
+                                             self._model.entity.business_identifier)
+            self._model.token = confirmation_token
+            invitation = self._model.update_invitation_as_retried(user.identifier)
+            entity: EntityModel = invitation.entity
 
-        AffiliationInvitation.send_affiliation_invitation(updated_invitation,
-                                                          business['business']['legalName'],
-                                                          f'{invitation_origin}/{context_path}')
-        return AffiliationInvitation(updated_invitation)
+            business = AffiliationInvitation._get_business_details(entity.business_identifier,
+                                                                   RestService.get_service_account_token())
+
+            AffiliationInvitation.send_affiliation_invitation(invitation,
+                                                              business['business']['legalName'],
+                                                              f'{invitation_origin}/{context_path}')
+        # Expire invitation
+        elif new_status == InvitationStatus.EXPIRED.value:
+            invitation = self._model.expire_invitation()
+
+        return AffiliationInvitation(invitation)
 
     @staticmethod
     def delete_affiliation_invitation(invitation_id):
         """Delete the specified affiliation invitation."""
-        invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
-        if invitation is None:
+        if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
-        if invitation.status == 'ACCEPTED':
+        if invitation.status == InvitationStatus.ACCEPTED.value:
             raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
 
         check_auth(org_id=invitation.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
@@ -193,8 +211,8 @@ class AffiliationInvitation:
     def get_invitations_for_from_org(org_id, status=None, **kwargs):
         """Get affiliation invitations for from org."""
         user_from_context: UserContext = kwargs['user_context']
-        org_model = OrgModel.find_by_org_id(org_id)
-        if not org_model:
+
+        if not OrgModel.find_by_org_id(org_id):
             return None
 
         if status:
@@ -219,14 +237,11 @@ class AffiliationInvitation:
     @user_context
     def search_invitations_for_from_org(org_id, status=None, **kwargs):
         """Search affiliation invitations for from org."""
-        invitation_models = AffiliationInvitation.get_invitations_for_from_org(org_id, status, **kwargs)
+        invitation_models = AffiliationInvitation.get_invitations_for_from_org(org_id, status, **kwargs) or []
         invitations_result = {
-            'affiliationInvitations': []
+            'affiliationInvitations': [AffiliationInvitation(invitation).as_dict()
+                                       for invitation in invitation_models]
         }
-        for invitation in invitation_models:
-            invitations_result['affiliationInvitations'].append({
-                **AffiliationInvitation(invitation).as_dict()
-            })
 
         return invitations_result
 
@@ -235,8 +250,8 @@ class AffiliationInvitation:
     def get_invitations_for_to_org(org_id, status=None, **kwargs):
         """Get affiliation invitations for to org."""
         user_from_context: UserContext = kwargs['user_context']
-        org_model = OrgModel.find_by_org_id(org_id)
-        if not org_model:
+
+        if not OrgModel.find_by_org_id(org_id):
             return None
 
         if status:
@@ -263,8 +278,7 @@ class AffiliationInvitation:
         if invitation_id is None:
             return None
 
-        invitation = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
-        if not invitation:
+        if not (invitation := AffiliationInvitationModel.find_invitation_by_id(invitation_id)):
             return None
 
         return AffiliationInvitation(invitation)
@@ -293,7 +307,7 @@ class AffiliationInvitation:
         try:
             publish_to_mailer(notification_type=mail_configs.get('notification_type'), org_id=org_id, data=data)
         except BusinessException as exception:
-            affiliation_invitation.invitation_status_code = 'FAILED'
+            affiliation_invitation.invitation_status_code = InvitationStatus.FAILED.value
             affiliation_invitation.save()
             current_app.logger.debug('>send_affiliation_invitation failed')
             current_app.logger.debug(exception)
@@ -347,9 +361,9 @@ class AffiliationInvitation:
 
         if affiliation_invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        if affiliation_invitation.invitation_status_code == 'ACCEPTED':
+        if affiliation_invitation.invitation_status_code == InvitationStatus.ACCEPTED.value:
             raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
-        if affiliation_invitation.invitation_status_code == 'EXPIRED':
+        if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
             raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None)
 
         return AffiliationInvitation(affiliation_invitation)
@@ -366,17 +380,15 @@ class AffiliationInvitation:
 
         if affiliation_invitation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
-        if affiliation_invitation.invitation_status_code == 'ACCEPTED':
+        if affiliation_invitation.invitation_status_code == InvitationStatus.ACCEPTED.value:
             raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
-        if affiliation_invitation.invitation_status_code == 'EXPIRED':
+        if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
             raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None)
 
         org_id = affiliation_invitation.to_org_id
         entity_id = affiliation_invitation.entity_id
 
-        affiliation_model = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)
-
-        if not affiliation_model:
+        if not (affiliation_model := AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id, entity_id)):
             # Create an affiliation with to_org_id
             affiliation_model = AffiliationModel(org_id=org_id, entity_id=entity_id, certified_by_name=None)
             affiliation_model.save()
@@ -384,7 +396,8 @@ class AffiliationInvitation:
         affiliation_invitation.affiliation_id = affiliation_model.id
         affiliation_invitation.approver_id = user.identifier
         affiliation_invitation.accepted_date = datetime.now()
-        affiliation_invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
+        affiliation_invitation.invitation_status = InvitationStatusModel\
+            .get_status_by_code(InvitationStatus.ACCEPTED.value)
         affiliation_invitation.save()
 
         current_app.logger.debug('<accept_affiliation_invitation')

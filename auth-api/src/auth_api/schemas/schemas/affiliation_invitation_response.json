@@ -10,8 +10,16 @@
             "acceptedDate": "2020-11-08T12:03:50.863200+00:00",
             "expiresOn": "2020-11-13T19:25:02.704139+00:00",
             "id": 1580,
-            "fromOrgId": 10,
-            "toOrgId": 10,
+            "fromOrg": {
+                "id": 1,
+                "name": "My Test Org",
+                "orgType": "BASIC"
+            },
+            "toOrg": {
+                "id": 1,
+                "name": "My Test Org 2",
+                "orgType": "BASIC"
+            },
             "businessIdentifier": "CP1234567",
             "recipientEmail": "test@gmai.com",
             "sentDate": "2020-11-06T19:25:02.704139+00:00",
@@ -22,8 +30,9 @@
     ],
     "required": [
         "id",
-        "fromOrgId",
-        "toOrgId",
+        "fromOrg",
+        "toOrg",
+        "businessIdentifier",
         "recipientEmail",
         "sentDate",
         "status"
@@ -56,22 +65,34 @@
                 1580
             ]
         },
-        "fromOrgId": {
-            "$id": "#/properties/fromOrgId",
-            "type": "number",
-            "title": "From Org Identifier",
-            "default": "",
-            "examples": [
-                10
+        "fromOrg": {
+            "$id": "#/properties/fromOrg",
+            "type": "object",
+            "title": "From Org",
+            "required":[
+                "id",
+                "name",
+                "orgType"
+            ]
+
+        },
+        "toOrg": {
+            "$id": "#/properties/toOrg",
+            "type": "object",
+            "title": "To Org ",
+            "required":[
+                "id",
+                "name",
+                "orgType"
             ]
         },
-        "toOrgId": {
-            "$id": "#/properties/toOrgId",
-            "type": "number",
-            "title": "To Org Identifier",
+        "businessIdentifier": {
+            "$id": "#/properties/businessIdentifier",
+            "type": "string",
+            "title": "Business Identifier",
             "default": "",
             "examples": [
-                10
+                "CP0002103"
             ]
         },
         "recipientEmail": {

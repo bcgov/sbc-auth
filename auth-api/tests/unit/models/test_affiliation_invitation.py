@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -195,20 +195,33 @@ def test_find_pending_invitations_by_to_org(session):  # pylint:disable=unused-a
     assert invitation.invitation_status_code == 'PENDING'
 
 
-def test_invitations_by_status(session):  # pylint:disable=unused-argument
+def test_invitations_by_status(session):
     """Assert that an Affiliation Invitation can be retrieved by the status."""
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)
     session.commit()
 
     retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'PENDING')
-    assert len(retrieved_invitation) >= 0
+    assert len(retrieved_invitation) == 1
 
     retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
     assert len(retrieved_invitation) == 0
 
 
-def test_invitations_by_invalid_status(session):  # pylint:disable=unused-argument
+def test_invitations_by_expired_status(session):
+    """Assert that an Affiliation Invitation can be retrieved when explicitly set EXPIRED."""
+    invitation = factory_affiliation_invitation_model(session=session, status='EXPIRED')
+    session.add(invitation)
+    session.commit()
+
+    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'EXPIRED')
+    assert len(retrieved_invitation) == 1
+
+    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    assert len(retrieved_invitation) == 0
+
+
+def test_invitations_by_invalid_status(session):
     """Assert that an Affiliation Invitations are not returned with an invalid status."""
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)
@@ -218,7 +231,7 @@ def test_invitations_by_invalid_status(session):  # pylint:disable=unused-argume
     assert len(retrieved_invitation) == 0
 
 
-def test_find_invitations_by_org_entity_ids(session):  # pylint:disable=unused-argument
+def test_find_invitations_by_org_entity_ids(session):
     """Assert that an Affiliation Invitation can be retrieved by the org and entity ids."""
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)
@@ -232,7 +245,7 @@ def test_find_invitations_by_org_entity_ids(session):  # pylint:disable=unused-a
     assert invitation.invitation_status_code == 'PENDING'
 
 
-def test_create_from_dict(session):  # pylint:disable=unused-argument
+def test_create_from_dict(session):
     """Assert that an Entity can be created from schema."""
     user = User(username='CP1234567',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -295,9 +308,9 @@ def test_create_from_dict_no_schema(session):  # pylint:disable=unused-argument
     assert result_invitation is None
 
 
-def test_invitations_status_expiry(session):  # pylint:disable=unused-argument
+def test_invitations_status_expiry(session):
     """Assert can set the status from PENDING to EXPIRED."""
-    sent_date = datetime.now() - timedelta(days=int(get_named_config().TOKEN_EXPIRY_PERIOD) + 1)
+    sent_date = datetime.now() - timedelta(minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING', sent_date=sent_date)
     session.add(invitation)
     session.commit()

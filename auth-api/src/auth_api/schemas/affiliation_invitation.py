@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,8 @@
 # limitations under the License.
 """Manager for affiliation invitation schema and export."""
 
+from marshmallow import fields
+
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 
 from .base_schema import BaseSchema
@@ -26,5 +28,9 @@ class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ances
 
         model = AffiliationInvitationModel
         fields = (
-            'id', 'from_org_id', 'to_org_id', 'recipient_email', 'sent_date', 'expires_on',
+            'id', 'from_org', 'to_org', 'business_identifier', 'recipient_email', 'sent_date', 'expires_on',
             'accepted_date', 'status', 'token', 'type', 'affiliation_id')
+
+    from_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
+    to_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
+    business_identifier = fields.String(attribute='entity.business_identifier', data_key='businessIdentifier')

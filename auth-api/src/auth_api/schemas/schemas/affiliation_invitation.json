@@ -25,11 +25,6 @@
       "type": "string",
       "title": "The recipient email."
     },
-    "sentDate": {
-      "type": "string",
-      "format": "datetime",
-      "title": "The date invitation is sent."
-    },
     "type": {
       "type": "string",
       "title": "Type of Affiliation Invitation.",
@@ -37,6 +32,14 @@
         "EMAIL",
         "PASSCODE"
       ]
+    },
+    "passCode": {
+      "type": "string",
+      "title": "Passcode",
+      "examples": [
+        "12345"
+      ],
+      "pattern": "^(.*)$"
     }
   },
   "required": [

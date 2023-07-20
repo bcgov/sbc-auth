@@ -203,7 +203,7 @@ class InvitationType(Enum):
 class AffiliationInvitationType(Enum):
     """Affiliation Invitation type."""
 
-    EMAIL = 'EMAIL'  # Used to indicate an affiliation invitation initiated through email
+    EMAIL = 'EMAIL'
     PASSCODE = 'PASSCODE'  # Used to indicate an affiliation invitation initiated through a valid passcode
 
 
@@ -219,6 +219,8 @@ class InvitationStatus(Enum):
 
     ACCEPTED = 'ACCEPTED'
     PENDING = 'PENDING'
+    EXPIRED = 'EXPIRED'
+    FAILED = 'FAILED'
 
 
 class LoginSource(Enum):

@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from auth_api.config import get_named_config
+from auth_api.utils.enums import InvitationStatus as InvitationStatuses
 from .affiliation_invitation_type import AffiliationInvitationType
 
 from .base_model import BaseModel
@@ -57,7 +58,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     @hybrid_property
     def expires_on(self):
         """Calculate the expiry date based on the config value."""
-        if self.invitation_status_code == 'PENDING':
+        if self.invitation_status_code == InvitationStatuses.PENDING.value:
             return self.sent_date + timedelta(minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
         return None
 
@@ -65,33 +66,35 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
     def status(self):
         """Calculate the status based on the config value."""
         current_time = datetime.now()
-        if self.invitation_status_code == 'PENDING':
+        if self.invitation_status_code == InvitationStatuses.PENDING.value:
             expiry_time = self.sent_date + timedelta(
                 minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
             if current_time >= expiry_time:
-                return 'EXPIRED'
+                return InvitationStatuses.EXPIRED.value
         return self.invitation_status_code
 
     @classmethod
     def create_from_dict(cls, invitation_info: dict, user_id, affiliation_id=None):
         """Create a new Invitation from the provided dictionary."""
-        if invitation_info:
-            affiliation_invitation = AffiliationInvitation()
-            affiliation_invitation.sender_id = user_id
-            affiliation_invitation.affiliation_id = affiliation_id
-            affiliation_invitation.from_org_id = invitation_info['fromOrgId']
-            affiliation_invitation.to_org_id = invitation_info['toOrgId']
-            affiliation_invitation.entity_id = invitation_info['entityId']
-            affiliation_invitation.recipient_email = invitation_info['recipientEmail']
-            affiliation_invitation.sent_date = datetime.now()
-            affiliation_invitation.invitation_status = InvitationStatus.get_default_status()
+        if not invitation_info:
+            return None
 
-            if affiliation_invitation.type is None:
-                affiliation_invitation.type = AffiliationInvitationType.get_default_type().code
+        affiliation_invitation = AffiliationInvitation()
+        affiliation_invitation.sender_id = user_id
+        affiliation_invitation.affiliation_id = affiliation_id
+        affiliation_invitation.from_org_id = invitation_info['fromOrgId']
+        affiliation_invitation.to_org_id = invitation_info['toOrgId']
+        affiliation_invitation.entity_id = invitation_info['entityId']
+        affiliation_invitation.recipient_email = invitation_info['recipientEmail']
+        affiliation_invitation.sent_date = datetime.now()
+        affiliation_invitation.type = invitation_info.get('type')
+        affiliation_invitation.invitation_status = InvitationStatus.get_default_status()
 
-            affiliation_invitation.save()
-            return affiliation_invitation
-        return None
+        if affiliation_invitation.type is None:
+            affiliation_invitation.type = AffiliationInvitationType.get_default_type().code
+
+        affiliation_invitation.save()
+        return affiliation_invitation
 
     @classmethod
     def find_invitations_by_sender(cls, user_id):
@@ -141,36 +144,36 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             .filter(AffiliationInvitation.from_org_id == from_org_id) \
             .filter(AffiliationInvitation.to_org_id == to_org_id) \
             .filter(AffiliationInvitation.entity_id == entity_id) \
-            .filter(or_(AffiliationInvitation.invitation_status_code == 'PENDING',
-                        AffiliationInvitation.invitation_status_code == 'ACCEPTED')).all()
+            .filter(or_(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value,
+                        AffiliationInvitation.invitation_status_code == InvitationStatuses.ACCEPTED.value)).all()
 
     @staticmethod
     def find_pending_invitations_by_sender(user_id):
         """Find all affiliation invitations that are in pending state."""
         return db.session.query(AffiliationInvitation). \
             filter(AffiliationInvitation.sender_id == user_id). \
-            filter(AffiliationInvitation.invitation_status_code == 'PENDING').all()
+            filter(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value).all()
 
     @staticmethod
     def find_pending_invitations_by_from_org(org_id):
         """Find all affiliation invitations that are in pending state from an org."""
         return db.session.query(AffiliationInvitation) \
             .filter(AffiliationInvitation.from_org_id == org_id) \
-            .filter(AffiliationInvitation.invitation_status_code == 'PENDING').all()
+            .filter(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value).all()
 
     @staticmethod
     def find_pending_invitations_by_to_org(org_id):
         """Find all affiliation invitations that are in pending state to an org."""
         return db.session.query(AffiliationInvitation) \
             .filter(AffiliationInvitation.to_org_id == org_id) \
-            .filter(AffiliationInvitation.invitation_status_code == 'PENDING').all()
+            .filter(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value).all()
 
     @staticmethod
     def find_pending_invitations_by_entity(entity_id):
         """Find all affiliation invitations that are in pending state."""
         return db.session.query(AffiliationInvitation) \
             .filter(AffiliationInvitation.entity_id == entity_id) \
-            .filter(AffiliationInvitation.invitation_status_code == 'PENDING').all()
+            .filter(AffiliationInvitation.invitation_status_code == InvitationStatuses.PENDING.value).all()
 
     @staticmethod
     def find_invitations_by_status(user_id, status):
@@ -184,5 +187,11 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         self.sender_id = sender_id
         self.sent_date = datetime.now()
         self.invitation_status = InvitationStatus.get_default_status()
+        self.save()
+        return self
+
+    def expire_invitation(self):
+        """Update this affiliation invitation with the new data."""
+        self.invitation_status = InvitationStatus.get_status_by_code(InvitationStatuses.EXPIRED.value)
         self.save()
         return self

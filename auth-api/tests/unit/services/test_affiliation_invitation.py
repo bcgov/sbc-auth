@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
                                                                                     User(user), '')
-        updated_invitation = new_invitation.update_affiliation_invitation(User(user), '').as_dict()
+        updated_invitation = new_invitation.update_affiliation_invitation(User(user), '', {}).as_dict()
         assert updated_invitation['status'] == 'PENDING'
 
 
@@ -191,7 +191,7 @@ def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_
         old_token = new_invitation.as_dict().get('token')
         with freeze_time(
                 lambda: datetime.now() + timedelta(seconds=1)):  # to give time difference..or else token will be same..
-            updated_invitation = new_invitation.update_affiliation_invitation(User(user), '').as_dict()
+            updated_invitation = new_invitation.update_affiliation_invitation(User(user), '', {}).as_dict()
             new_token = updated_invitation.get('token')
         assert old_token != new_token
         assert updated_invitation['status'] == 'PENDING'
@@ -221,8 +221,8 @@ def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_moc
                                                                                     User(user_invitee), '').as_dict()
         token = AffiliationInvitationService\
             .generate_confirmation_token(new_invitation['id'],
-                                         new_invitation['from_org_id'],
-                                         new_invitation['to_org_id'],
+                                         new_invitation['from_org']['id'],
+                                         new_invitation['to_org']['id'],
                                          entity_dictionary['business_identifier'])
 
         AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '')
@@ -271,7 +271,7 @@ def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, busine
                                                                                     User(user_invitee),
                                                                                     '').as_dict()
             patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-            affiliation = AffiliationService.find_affiliation(new_invitation['to_org_id'],
+            affiliation = AffiliationService.find_affiliation(new_invitation['to_org']['id'],
                                                               entity_dictionary['business_identifier'])
             assert affiliation
             assert invitation

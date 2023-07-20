@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -47,9 +47,7 @@ class AffiliationInvitations(Resource):
             org_id = request.args.get('orgId', None)
             status = request.args.get('status', None)
             data = AffiliationInvitationService.search_invitations_for_from_org(org_id, status)
-
-            if data is None:
-                data = []
+            data = data or {'affiliationInvitations': []}
 
             response, status = data, http_status.HTTP_200_OK
 
@@ -90,11 +88,10 @@ class AffiliationInvitation(Resource):
     @_jwt.requires_auth
     def get(affiliation_invitation_id):
         """Get the affiliation invitation specified by the provided id."""
-        affiliation_invitation = AffiliationInvitationService.\
-            find_affiliation_invitation_by_id(affiliation_invitation_id)
-        if affiliation_invitation is None:
+        if not (affiliation_invitation := AffiliationInvitationService.
+                find_affiliation_invitation_by_id(affiliation_invitation_id)):
             response, status = {'message': 'The requested affiliation invitation could not be found.'}, \
-                               http_status.HTTP_404_NOT_FOUND
+                http_status.HTTP_404_NOT_FOUND
         else:
             response, status = affiliation_invitation.as_dict(), http_status.HTTP_200_OK
         return response, status
@@ -106,15 +103,17 @@ class AffiliationInvitation(Resource):
     def patch(affiliation_invitation_id):
         """Update the affiliation invitation specified by the provided id."""
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
+        request_json = request.get_json()
         try:
             affiliation_invitation = AffiliationInvitationService\
                 .find_affiliation_invitation_by_id(affiliation_invitation_id)
             if affiliation_invitation is None:
                 response, status = {'message': 'The requested affiliation invitation could not be found.'}, \
-                                   http_status.HTTP_404_NOT_FOUND
+                    http_status.HTTP_404_NOT_FOUND
             else:
                 user = UserService.find_by_jwt_token()
-                response, status = affiliation_invitation.update_affiliation_invitation(user, origin).as_dict(),\
+                response, status = affiliation_invitation\
+                    .update_affiliation_invitation(user, origin, request_json).as_dict(),\
                     http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -150,10 +149,9 @@ class InvitationAction(Resource):
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
 
         try:
-            user = UserService.find_by_jwt_token()
-            if user is None:
+            if not (user := UserService.find_by_jwt_token()):
                 response, status = {'message': 'Not authorized to perform this action'}, \
-                                   http_status.HTTP_401_UNAUTHORIZED
+                    http_status.HTTP_401_UNAUTHORIZED
             else:
                 affiliation_invitation_id = AffiliationInvitationService\
                     .validate_token(affiliation_invitation_token, int(affiliation_invitation_id)).as_dict().get('id')

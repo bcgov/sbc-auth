@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,12 +71,65 @@ def test_add_affiliation_invitation(client, jwt, session, keycloak_mock, busines
     result_json = rv_invitation.json
 
     assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
-    assert result_json['fromOrgId'] == from_org_id
-    assert result_json['toOrgId'] == to_org_id
+    assert result_json['fromOrg']
+    assert result_json['fromOrg']['id'] == from_org_id
+    assert result_json['toOrg']
+    assert result_json['toOrg']['id'] == to_org_id
+    assert result_json['businessIdentifier'] == business_identifier
     assert result_json['status'] == 'PENDING'
 
     # Defaults to EMAIL affiliation invitation type
     assert result_json['type'] == 'EMAIL'
+
+
+@pytest.mark.parametrize('from_org_info, to_org_info, entity_info, role, claims', [
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
+     TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
+     TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
+     TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
+     TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
+     TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
+     TestJwtClaims.public_bceid_user)
+])
+def test_add_affiliation_invitation_with_passcode(client, jwt, session, keycloak_mock, business_mock, stan_server,
+                                                  from_org_info, to_org_info, entity_info, role,
+                                                  claims):
+    """Assert that an affiliation invitation can be POSTed."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock,
+                                                                                             from_org_info,
+                                                                                             to_org_info,
+                                                                                             entity_info,
+                                                                                             claims)
+
+    invitation_payload = factory_affiliation_invitation(from_org_id=from_org_id,
+                                                        to_org_id=to_org_id,
+                                                        business_identifier=business_identifier)
+    invitation_payload['passCode'] = entity_info['passCode']
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        invitation_payload), headers=headers, content_type='application/json')
+    dictionary = json.loads(rv_invitation.data)
+
+    assert rv_invitation.status_code == http_status.HTTP_201_CREATED
+    assert dictionary.get('token') is not None
+    result_json = rv_invitation.json
+
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    assert result_json['fromOrg']
+    assert result_json['fromOrg']['id'] == from_org_id
+    assert result_json['toOrg']
+    assert result_json['toOrg']['id'] == to_org_id
+    assert result_json['businessIdentifier'] == business_identifier
+    assert result_json['status'] == 'ACCEPTED'
+    assert result_json['type'] == 'PASSCODE'
 
 
 def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mock, business_mock, stan_server):
@@ -199,6 +252,37 @@ def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
     dictionary = json.loads(rv_invitation.data)
     assert dictionary['status'] == 'PENDING'
+
+
+def test_expire_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that an affiliation invitation can be expired."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=to_org_id,
+            business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    updated_affiliation_invitation = {'status': 'EXPIRED'}
+
+    rv_invitation = client.patch('/api/v1/affiliationInvitations/{}'.format(affiliation_invitation_id), data=json.dumps(
+        updated_affiliation_invitation),
+                                 headers=headers, content_type='application/json')
+
+    result_json = rv_invitation.json
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['status'] == 'EXPIRED'
 
 
 def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
