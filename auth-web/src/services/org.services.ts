@@ -1,4 +1,10 @@
-import { Affiliation, AffiliationsResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import {
+  Affiliation,
+  AffiliationInvitationStatus,
+  AffiliationsResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody
+} from '@/models/affiliation'
 import {
   CreateRequestBody as CreateOrganizationRequestBody,
   Member,
@@ -14,10 +20,9 @@ import {
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
-import { Businesses } from '@/models/business'
 import ConfigHelper from '@/util/config-helper'
+import { CorpTypes } from '@/util/constants'
 import { Invitations } from '@/models/Invitation'
-import { PatchActions } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class OrgService {
@@ -90,6 +95,19 @@ export default class OrgService {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`,
       { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
   }
+
+  static async removeAffiliationInvitation (orgId: number, affiliationInvitationId: number) {
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/affiliations/invitations/${affiliationInvitationId}`)
+  }
+
+  static async cancelAffiliationInvitation (orgId: number, affiliationInvitationId: number) {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/affiliations/invitations/${affiliationInvitationId}/cancel`)
+  }
+
+  static async getAffiliationInvitations (orgIdentifier: number) {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/invitations`)
+  }
+
   // TODO can be remove this since we moved from org to user affidavit
   static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/admins/affidavits`)
