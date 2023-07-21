@@ -155,7 +155,7 @@ export const useAffiliations = () => {
     )
   }
 
-  /** Returns the Name Request type using the entity type code */
+  /** Returns the Name Request type using the NR type code */
   const nameRequestType = (business: Business): string => {
     if (isNameRequest(business)) {
       const nrType = CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
