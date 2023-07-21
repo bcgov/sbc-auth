@@ -265,9 +265,11 @@ export enum NrRequestTypes {
 
   // Alteration
   BECV = 'Alteration',
-  CCV = 'Alteration',
   BECR = 'Alteration',
-  UC = 'Alteration',
+
+  // Conversion
+  CCV = 'Conversion (Act)',
+  UC = 'Conversion (Act)',
 
   // Incorporation
   BC = 'Incorporation', // BC Benefit Company Incorporation
