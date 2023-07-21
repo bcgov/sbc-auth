@@ -253,7 +253,7 @@ export enum NrRequestTypes {
   ULBE = 'Alteration', // BC Benefit Company
   ULCR = 'Alteration', // B.C. limited Company
 
-  // Amalgamation *
+  // Amalgamation
   BEAM = 'Amalgamation', // BC Benefit Company Incorporation
   XCUL = 'Amalgamation', // Extraprovincial Unlimited Liability Company
 
