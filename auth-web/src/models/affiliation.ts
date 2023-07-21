@@ -79,6 +79,7 @@ export interface NameRequestResponse {
   folioNumber?: string
   target?: NrTargetTypes
   entityTypeCd?: string
+  requestTypeCd?: string
   natureOfBusiness?: string
   expirationDate?: Date
   nrNum?: string

@@ -270,7 +270,7 @@ export default class CommonUtils {
   }
 
   /** use entity type to get NR type from enum */
-  static mapEntityTypeToNrType (entityTypeCd: string): string {
-    return NrRequestTypes[entityTypeCd]
+  static mapRequestTypeCdToNrType (requestTypeCd: string): string {
+    return NrRequestTypes[requestTypeCd]
   }
 }

@@ -158,7 +158,7 @@ export const useAffiliations = () => {
   /** Returns the Name Request type using the entity type code */
   const nameRequestType = (business: Business): string => {
     if (isNameRequest(business)) {
-      const nrType: string = CommonUtils.mapEntityTypeToNrType(business.nameRequest?.entityTypeCd)
+      const nrType: string = CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
       if (nrType) {
         const emDash = '—' // ALT + 0151
         return `${emDash} ${nrType}`
