@@ -200,6 +200,13 @@ class InvitationType(Enum):
     STANDARD = 'STANDARD'  # Used to indicate the standard email invite with admin approval
 
 
+class AffiliationInvitationType(Enum):
+    """Affiliation Invitation type."""
+
+    EMAIL = 'EMAIL'
+    PASSCODE = 'PASSCODE'  # Used to indicate an affiliation invitation initiated through a valid passcode
+
+
 class IdpHint(Enum):
     """IdpHint for user login."""
 
@@ -212,6 +219,8 @@ class InvitationStatus(Enum):
 
     ACCEPTED = 'ACCEPTED'
     PENDING = 'PENDING'
+    EXPIRED = 'EXPIRED'
+    FAILED = 'FAILED'
 
 
 class LoginSource(Enum):

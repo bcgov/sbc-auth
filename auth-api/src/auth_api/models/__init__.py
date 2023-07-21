@@ -24,6 +24,7 @@ from .activity_log import ActivityLog
 from .affidavit import Affidavit
 from .affidavit_status import AffidavitStatus
 from .affiliation import Affiliation
+from .affiliation_invitation import AffiliationInvitation
 from .business_size_code import BusinessSizeCode
 from .business_type_code import BusinessTypeCode
 from .contact import Contact
