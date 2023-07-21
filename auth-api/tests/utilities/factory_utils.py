@@ -190,6 +190,21 @@ def factory_affiliation_service(entity_id, org_id):
     return affiliation_service
 
 
+def factory_affiliation_invitation(from_org_id,
+                                   to_org_id,
+                                   business_identifier,
+                                   email='abc123@email.com',
+                                   sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S')):
+    """Produce an affiliation invitation for the given from/to org, business and email."""
+    return {
+        'fromOrgId': from_org_id,
+        'toOrgId': to_org_id,
+        'businessIdentifier': business_identifier,
+        'recipientEmail': email,
+        'sentDate': sent_date
+    }
+
+
 def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
     """Return a valid contact object with the provided fields."""
     contact = ContactModel(email=contact_info['email'])

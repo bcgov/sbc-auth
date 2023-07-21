@@ -16,6 +16,7 @@ from .activity_log import ActivityLog
 from .activity_log_publisher import ActivityLogPublisher
 from .affidavit import Affidavit
 from .affiliation import Affiliation
+from .affiliation_invitation import AffiliationInvitation
 from .api_gateway import ApiGateway
 from .codes import Codes
 from .contact import Contact

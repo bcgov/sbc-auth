@@ -21,6 +21,7 @@ from .contact_link import ContactLinkSchema
 from .corp_type import CorpTypeSchema
 from .documents import DocumentSchema
 from .entity import EntitySchema
+from .affiliation_invitation import AffiliationInvitationSchema
 from .invitation import InvitationSchema
 from .invitation_membership import InvitationMembershipSchema
 from .membership import MembershipSchema
