@@ -6,7 +6,8 @@ import { useStore } from 'vuex-composition-helpers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrRequestType, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
+import CommonUtils from '@/util/common-util'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrRequestTypes, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
@@ -154,11 +155,13 @@ export const useAffiliations = () => {
     )
   }
 
+  /** Returns the Name Request type using the entity type code */
   const nameRequestType = (business: Business): string => {
     if (isNameRequest(business)) {
-      const nrType: string = NrRequestType[business.nameRequest?.entityTypeCd]
+      const nrType: string = CommonUtils.mapEntityTypeToNrType(business.nameRequest?.entityTypeCd)
       if (nrType) {
-        return '\u2014 ' + nrType
+        const emDash = '—' // ALT + 0151
+        return `${emDash} ${nrType}`
       }
     }
     return ''

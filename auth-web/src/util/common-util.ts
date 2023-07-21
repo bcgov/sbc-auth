@@ -1,5 +1,5 @@
 import { Address, BaseAddressModel } from '@/models/address'
-import { Permission } from '@/util/constants'
+import { NrRequestTypes, Permission } from '@/util/constants'
 import moment from 'moment'
 
 /**
@@ -267,5 +267,10 @@ export default class CommonUtils {
   // trim last slas from URL
   static trimTrailingSlashURL (url) {
     return (url) ? url.trim().replace(/\/+$/, '') : ''
+  }
+
+  /** use entity type to get NR type from enum */
+  static mapEntityTypeToNrType (entityTypeCd: string): string {
+    return NrRequestTypes[entityTypeCd]
   }
 }

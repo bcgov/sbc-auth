@@ -247,7 +247,7 @@ export enum NrEntityType {
     INFO = 'INFO', // special value for sub-menu
 }
 
-export enum NrRequestType {
+export enum NrRequestTypes {
   // Name Change
   BEC = 'Name Change',
   CCC = 'Name Change',
@@ -274,11 +274,11 @@ export enum NrRequestType {
   CC = 'Incorporation', // CCC - Incorporation/Amalgamation
   CP = 'Incorporation', // Cooperative - Incorporation/Amalgamation
   CR = 'Incorporation', // BC Company - Incorporation/Amalgamation
+  UL = 'Incorporation', // Unlimited Liability Company
+  XCR = 'Incorporation', // Corporation (Foreign) - Extrapro Registration/Amalgamation
 
   // Registration
   FR = 'Registration', // Sole Proprietorship/General Partnership/DBA - Registration
-  UL = 'Registration', // Unlimited Liability Company
-  XCR = 'Registration', // Corporation (Foreign) - Extrapro Registration/Amalgamation
 
   // Restoration
   RCC = 'Restoration',

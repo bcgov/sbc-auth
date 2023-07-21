@@ -61,8 +61,9 @@
 
       <!-- Type -->
       <template v-slot:item-slot-Type="{ item }">
-        <div class="gray-9 font-weight-bold type-text">{{ type(item) }}</div>
-        <div v-if="enableNameRequestType && isNameRequest(item)" class="gray-9 font-weight-bold type-text ml-1">{{ nameRequestType(item) }}</div>
+        <div class="gray-9 font-weight-bold d-inline-block">{{ type(item) }}</div>
+        <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
+        <div v-if="enableNameRequestType && isNameRequest(item)" class="gray-9 font-weight-bold d-inline-block ml-1">{{ nameRequestType(item) }}</div>
         <div>{{ typeDescription(item) }}</div>
       </template>
 
@@ -568,10 +569,6 @@ export default defineComponent({
 
       .type-column {
         min-width: 12rem;
-      }
-
-      .type-text {
-        display: inline-block;
       }
     }
   }
