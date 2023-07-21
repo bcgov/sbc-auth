@@ -7,7 +7,7 @@ import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import CommonUtils from '@/util/common-util'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrRequestTypes, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
