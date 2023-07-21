@@ -377,4 +377,9 @@ def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,
     to_org_id = dictionary_to_org['id']
     business_identifier = dictionary_entity['businessIdentifier']
 
+    client.post('/api/v1/orgs/{}/affiliations'.format(from_org_id), headers=headers,
+                data=json.dumps(
+                    {'businessIdentifier': business_identifier,
+                     'passCode': entity_info['passCode']}), content_type='application/json')
+
     return headers, from_org_id, to_org_id, business_identifier
