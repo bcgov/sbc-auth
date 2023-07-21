@@ -79,7 +79,9 @@ class AffiliationInvitation:
         to_org_id = affiliation_invitation_info['toOrgId']
         business_identifier = affiliation_invitation_info['businessIdentifier']
 
-        check_auth(org_id=from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        check_auth(org_id=from_org_id,
+                   business_identifier=business_identifier,
+                   one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         # Validate from/to organizations exists
         if not (from_org := OrgModel.find_by_org_id(from_org_id)):
@@ -159,7 +161,9 @@ class AffiliationInvitation:
 
     def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
         """Update the specified affiliation invitation with new data."""
-        check_auth(org_id=self._model.from_org_id, one_of_roles=(ADMIN, COORDINATOR, STAFF))
+        check_auth(org_id=self._model.from_org_id,
+                   business_identifier=self._model.entity.business_identifier,
+                   one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         invitation: AffiliationInvitationModel = self._model
