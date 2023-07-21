@@ -247,7 +247,7 @@ export enum NrEntityType {
     INFO = 'INFO', // special value for sub-menu
 }
 
-export enum NrRequestTypes {
+export enum NrRequestTypeStrings {
   // Alteration
   BECV = 'Alteration', // BC Benefit Company Incorporation
   ULBE = 'Alteration', // BC Benefit Company

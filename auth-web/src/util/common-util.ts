@@ -1,5 +1,5 @@
 import { Address, BaseAddressModel } from '@/models/address'
-import { NrRequestTypes, Permission } from '@/util/constants'
+import { NrRequestTypeStrings, Permission } from '@/util/constants'
 import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import moment from 'moment'
 
@@ -272,6 +272,6 @@ export default class CommonUtils {
 
   /** use NR request type code to get NR type from enum */
   static mapRequestTypeCdToNrType (requestTypeCd: NrRequestTypeCodes): string {
-    return NrRequestTypes[requestTypeCd]
+    return NrRequestTypeStrings[requestTypeCd] as string
   }
 }
