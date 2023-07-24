@@ -250,24 +250,38 @@ export enum NrEntityType {
 export enum NrRequestTypeStrings {
   // Alteration
   BECV = 'Alteration', // BC Benefit Company Incorporation
+  CSSO = 'Alteration', // Society
   ULBE = 'Alteration', // BC Benefit Company
   ULCR = 'Alteration', // B.C. limited Company
+  XCSO = 'Alteration', // Extraprovincial Society
 
   // Amalgamation
+  ASO = 'Amalgamation', // Society
   BEAM = 'Amalgamation', // BC Benefit Company Incorporation
-  XCUL = 'Amalgamation', // Extraprovincial Unlimited Liability Company
+  XCUL = 'Amalgamation', // (Future) Extraprovincial Unlimited Liability Company
+
+  // Assumed Name (not used to display NR type, kept for reference)
+  // AL = 'Assumed Name', // Extraprovincial Limited Liability Company
+  // AS = 'Assumed Name', // (Future) Extraprovincial Cooperative
+  // UA = 'Assumed Name', // (Future) Extraprovincial Unlimited Liability Company
+  // XASO = 'Assumed Name', // Extraprovincial Society
+
+  // Change Assumed Name (not used to display NR type, kept for reference)
+  // XCASO = 'Change Assumed Name', // Extraprovincial Society
 
   // Continuation in
   BECT = 'Continuation In', // BC Benefit Company Incorporation
   CCCT = 'Continuation In', // Community Contribution Co.
   CT = 'Continuation In', // B.C. Company
   CTC = 'Continuation In', // Cooperative
+  CTSO = 'Continuation In', // Society
   ULCT = 'Continuation In', // Unlimited Liability Co.
 
   // Conversion
   BECR = 'Conversion (Act)', // BC Benefit Company Incorporation
   CCV = 'Conversion (Act)', // Community Contribution Co.
   UC = 'Conversion (Act)', // Unlimited Liability Co.
+  ULCB = 'Conversion (Act)', // Unlimited Liability Co.
 
   // Incorporation
   BC = 'Incorporation', // BC Benefit Company Incorporation
@@ -277,10 +291,12 @@ export enum NrRequestTypeStrings {
   FI = 'Incorporation', // Financial Institution (BC)
   PA = 'Incorporation', // Private Act
   PAR = 'Incorporation', // Parish
+  SO = 'Incorporation', // Society
   UL = 'Incorporation', // Unlimited Liability Co.
-  XCR = 'Incorporation', // Corporation (Foreign)
+  XCR = 'Incorporation', // (Future) Extraprovincial Corporation
   XCP = 'Incorporation', // Extraprovincial Cooperative
-  XUL = 'Incorporation', // Extraprovincial Unlimited Liability Company
+  XSO = 'Incorporation', // Extraprovincial Society
+  XUL = 'Incorporation', // (Future) Extraprovincial Unlimited Liability Company
 
   // Name Change
   BEC = 'Name Change', // BC Benefit Company Incorporation
@@ -288,24 +304,19 @@ export enum NrRequestTypeStrings {
   CCP = 'Name Change', // Cooperative
   CCR = 'Name Change', // B.C. Company
   CFI = 'Name Change', // Financial Institution (BC)
-  CFR = 'Name Change',
-  CFR_DBA = 'Name Change', // Sole Proprietorship (DBA)
-  CFR_FR = 'Name Change', // Sole Proprietorship
-  CFR_GP = 'Name Change', // General Partnership
+  CFR = 'Name Change', // Sole Proprietorship/General Partnership/DBA
   CLC = 'Name Change', // Extraprovincial Limited Liability Company
   CLL = 'Name Change', // Limited Liability Partnership
   CLP = 'Name Change', // Limited Partnership
+  CSO = 'Name Change', // Society
   CUL = 'Name Change', // Unlimited Liability Co.
   XCCP = 'Name Change', // Extraprovincial Cooperative
-  XCCR = 'Name Change', // Corporation (Foreign)
+  XCCR = 'Name Change', // (Future) Extraprovincial Corporation
   XCLL = 'Name Change', // Extraprovincial Limited Liability Partnership
   XCLP = 'Name Change', // Extraprovincial Limited Partnership
 
   // Registration
-  FR = 'Registration', // Sole Proprietorship/General Partnership/DBA - Registration
-  FR_DBA = 'Registration', // Sole Proprietorship (DBA)
-  FR_FR = 'Registration', // Sole Proprietorship
-  FR_GP = 'Registration', // General Partnership
+  FR = 'Registration', // Sole Proprietorship/General Partnership/DBA
   LC = 'Registration', // Extraprovincial Limited Liability Company
   LL = 'Registration', // Limited Liability Partnership
   LP = 'Registration', // Limited Partnership
@@ -314,7 +325,7 @@ export enum NrRequestTypeStrings {
 
   // Reinstatement
   RLC = 'Reinstatement', // Extraprovincial Limited Liability Company
-  XRCR = 'Reinstatement', // Corporation (Foreign)
+  XRCR = 'Reinstatement', // (Future) Extraprovincial Corporation
 
   // Restoration
   BERE = 'Restoration', // BC Benefit Company Incorporation
@@ -322,10 +333,11 @@ export enum NrRequestTypeStrings {
   RCP = 'Restoration', // Cooperative
   RCR = 'Restoration', // B.C. Company
   RFI = 'Restoration', // Financial Institution (BC)
-  RSO = 'Restoration',
+  RSO = 'Restoration', // Society
   RUL = 'Restoration', // Unlimited Liability Co.
   XRCP = 'Restoration', // Extraprovincial Cooperative
-  XRUL = 'Restoration' // Extraprovincial Unlimited Liability Company
+  XRSO = 'Restoration', // Extraprovincial Society
+  XRUL = 'Restoration' // (Future) Extraprovincial Unlimited Liability Company
 }
 
 export enum BusinessState {
