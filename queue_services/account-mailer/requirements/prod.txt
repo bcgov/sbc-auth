@@ -1,5 +1,5 @@
 Flask
-jsonschema
+jsonschema==4.17.3
 python-dotenv
 sentry-sdk[flask]
 asyncio-nats-client
