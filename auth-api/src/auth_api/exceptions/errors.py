@@ -70,6 +70,7 @@ class Error(Enum):
     NR_CONSUMED = 'The specified name request has already been consumed.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_APPROVED = 'The specified name request has not been approved.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_STATUS = 'The specified name request cannot be used.', http_status.HTTP_400_BAD_REQUEST
+    NR_REJECTED = 'The specified name request has been rejected.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_FOUND = 'The specified name request number could not be found.', http_status.HTTP_400_BAD_REQUEST
     NR_NOT_PAID = 'The payment for the specified name request number is not complete.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CONTACT = 'Invalid email or phone number.', http_status.HTTP_400_BAD_REQUEST
