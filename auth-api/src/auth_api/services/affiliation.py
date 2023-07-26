@@ -223,6 +223,8 @@ class Affiliation:
             nr_phone = nr_json.get('applicants').get('phoneNumber')
             nr_email = nr_json.get('applicants').get('emailAddress')
 
+            if status == NRStatus.REJECTED.value:
+                raise BusinessException(Error.NR_REJECTED, None)
             if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value, NRStatus.DRAFT.value):
                 raise BusinessException(Error.NR_INVALID_STATUS, None)
 

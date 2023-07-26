@@ -113,6 +113,7 @@ class NRStatus(Enum):
     CONDITIONAL = 'CONDITIONAL'
     DRAFT = 'DRAFT'
     CONSUMED = 'CONSUMED'
+    REJECTED = 'REJECTED'
 
 
 class NRNameStatus(Enum):
