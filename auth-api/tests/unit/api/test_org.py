@@ -1528,7 +1528,8 @@ def test_add_bcol_linked_org_different_name(client, jwt, session, keycloak_mock)
     ('NR_Approved', NRStatus.APPROVED.value, 'COMPLETED', None),
     ('NR_Draft', NRStatus.DRAFT.value, 'COMPLETED', None),
     ('NR_Draft', NRStatus.DRAFT.value, 'REJECTED', Error.NR_NOT_PAID),
-    ('NR_Consumed', NRStatus.CONSUMED.value, 'COMPLETED', Error.NR_INVALID_STATUS)
+    ('NR_Consumed', NRStatus.CONSUMED.value, 'COMPLETED', Error.NR_INVALID_STATUS),
+    ('NR_Rejected', NRStatus.REJECTED.value, 'REJECTED', Error.NR_REJECTED)
 ])
 def test_new_business_affiliation(client, jwt, session, keycloak_mock, mocker, test_name, nr_status, payment_status,
                                   error):
