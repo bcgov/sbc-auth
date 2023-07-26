@@ -323,7 +323,7 @@ export default class AddBusinessDialog extends Vue {
       !!this.businessIdentifier &&
       !!this.passcode &&
       (!this.isFirm || this.isCertified) &&
-      !!this.certifiedBy &&
+      (!!this.certifiedBy || !this.isFirm) &&
       this.$refs.addBusinessForm.validate()
     )
   }
