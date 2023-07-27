@@ -205,6 +205,7 @@ class AffiliationInvitationType(Enum):
 
     EMAIL = 'EMAIL'
     PASSCODE = 'PASSCODE'  # Used to indicate an affiliation invitation initiated through a valid passcode
+    REQUEST = 'REQUEST'  # Used to indicate an affiliation invitation initiated through Access Request modal
 
 
 class IdpHint(Enum):
