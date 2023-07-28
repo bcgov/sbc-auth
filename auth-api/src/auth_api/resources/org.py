@@ -20,13 +20,13 @@ import orjson
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
-from auth_api.exceptions import BusinessException, ServiceUnavailableException
+from auth_api.exceptions import BusinessException, ServiceUnavailableException, Error
 from auth_api.models import Affiliation as AffiliationModel, Org as OrgModel
 from auth_api.models.dataclass import PaginationInfo  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.models.org import OrgSearch  # noqa: I005; Not sure why isort doesn't like this
 from auth_api.schemas import InvitationSchema, MembershipSchema
 from auth_api.schemas import utils as schema_utils
-from auth_api.services import Affidavit as AffidavitService
+from auth_api.services import Affidavit as AffidavitService, AffiliationInvitation as AffiliationInvitationService, Entity as EntityService
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services import Invitation as InvitationService
@@ -319,6 +319,56 @@ class OrgContacts(Resource):
             response, status = OrgService.delete_contact(org_id).as_dict(), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('GET,POST,OPTIONS')
+@API.route('/<int:org_id>/affiliationInvitations', methods=['GET', 'OPTIONS'])
+class OrgAffiliationInvitationsRequestAccess(Resource):
+    """Resource for managing affiliation invitations for an org."""
+
+    @staticmethod
+    def _verify_permissions(org_id):
+        if UserService.is_context_user_staff():
+            return
+
+        user = UserService.find_by_jwt_token()
+
+        if not user:
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+        if not UserService.is_user_member_of_org(user=user, org_id=org_id):
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+    @classmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    def get(cls, org_id):
+        """Return all affiliation invitations associated with this org."""
+
+        status = request.args.get('status', None)
+        statuses = request.args.get('statuses', None)
+        filter_by_status = None
+        filter_by_types = None
+
+        if status is not None:
+            filter_by_status = [status]
+        elif statuses is not None:
+            filter_by_status = statuses.split(',')
+
+        try:
+            cls._verify_permissions(org_id)
+
+            data = AffiliationInvitationService.\
+                get_all_invitations_with_details_related_to_org(org_id=org_id, statuses=filter_by_status)
+            data = [AffiliationInvitationService.as_dict_with_details(elem[0], elem[1], elem[2], elem[3]) for elem in data]
+
+            response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
         return response, status
 
 

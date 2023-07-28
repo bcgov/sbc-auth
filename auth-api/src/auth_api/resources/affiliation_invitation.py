@@ -18,7 +18,7 @@ from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
-from auth_api.exceptions import BusinessException
+from auth_api.exceptions import BusinessException, Error
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services import User as UserService
@@ -162,4 +162,64 @@ class InvitationAction(Resource):
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('GET,DELETE,OPTIONS')
+@API.route('/<string:affiliation_invitation_id>/authorize',
+           methods=['GET', 'DELETE', 'OPTIONS'])
+class InvitationActionAuthorize(Resource):
+    """Check if user is active part of the Org. Authorize/Refuse invite if he is."""
+
+    @staticmethod
+    def _verify_permissions(user, affiliation_invitation_id):
+        if not user:
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+        affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)
+        if not affiliation_invitation:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        to_org_id = affiliation_invitation.as_dict()['to_org']['id']
+        if not UserService.is_user_member_of_org(user=user, org_id=to_org_id):
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+    @classmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.requires_auth
+    def get(cls, affiliation_invitation_id: str):
+        """Check if user is active part of the Org. Authorize invite if he is."""
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
+
+        try:
+            user = UserService.find_by_jwt_token()
+            cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
+
+            response, status = AffiliationInvitationService \
+                .accept_affiliation_invitation(affiliation_invitation_id, user, origin).as_dict(), \
+                http_status.HTTP_200_OK
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
+        return response, status
+
+    @classmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.requires_auth
+    def delete(cls, affiliation_invitation_id: str):
+        """Check if user is active part of the Org. Refuse invite authorization if he is."""
+        try:
+            user = UserService.find_by_jwt_token()
+            cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
+
+            response, status = AffiliationInvitationService \
+                .refuse_affiliation_invitation(affiliation_invitation_id).as_dict(), \
+                http_status.HTTP_200_OK
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
         return response, status

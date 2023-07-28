@@ -34,6 +34,7 @@ from auth_api.models.entity import Entity as EntityModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
@@ -78,6 +79,9 @@ class AffiliationInvitation:
         from_org_id = affiliation_invitation_info['fromOrgId']
         to_org_id = affiliation_invitation_info['toOrgId']
         business_identifier = affiliation_invitation_info['businessIdentifier']
+
+        if from_org_id == to_org_id:
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         check_auth(org_id=from_org_id,
                    business_identifier=business_identifier,
@@ -388,6 +392,8 @@ class AffiliationInvitation:
             raise BusinessException(Error.ACTIONED_AFFILIATION_INVITATION, None)
         if affiliation_invitation.invitation_status_code == InvitationStatus.EXPIRED.value:
             raise BusinessException(Error.EXPIRED_AFFILIATION_INVITATION, None)
+        if affiliation_invitation.invitation_status_code == InvitationStatus.FAILED.value:
+            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
 
         org_id = affiliation_invitation.to_org_id
         entity_id = affiliation_invitation.entity_id
@@ -406,3 +412,78 @@ class AffiliationInvitation:
 
         current_app.logger.debug('<accept_affiliation_invitation')
         return AffiliationInvitation(affiliation_invitation)
+
+    @staticmethod
+    @user_context
+    def get_all_invitations_with_details_related_to_org(org_id, statuses=None, **kwargs):
+        """Get affiliation invitations for from org and for to org."""
+        # If staff return full list
+        if UserService.is_context_user_staff():
+            return AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+
+        current_user: UserService = UserService.find_by_jwt_token()
+        if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
+            return []
+
+        return AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+
+    @staticmethod
+    def get_all_invitations_sent_to_org_for_entity(org_id, entity_id, status_filters=None, types_filter=None):
+        """Get affiliation invitations that were sent to specific org and are related to the entity."""
+        # If staff return full list
+        if UserService.is_context_user_staff():
+            return AffiliationInvitationModel.find_all_sent_to_org_for_entity(to_org_id=org_id, entity_id=entity_id, status_filters=status_filters, types_filter=types_filter)
+
+        current_user: UserService = UserService.find_by_jwt_token()
+        if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
+            return []
+
+        return AffiliationInvitationModel \
+            .find_all_sent_to_org_for_entity(to_org_id=org_id,
+                                             entity_id=entity_id,
+                                             status_filters=status_filters,
+                                             types_filter=types_filter)
+
+    @staticmethod
+    def refuse_affiliation_invitation(invitation_id):
+        invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
+        if not invitation:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        if not invitation.status == InvitationStatus.PENDING.value:
+            raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
+
+        invitation = invitation.fail_invitation()
+
+        return AffiliationInvitation(invitation)
+
+    @staticmethod
+    def as_dict_with_details(affiliation_invitation, from_org, to_org, entity):
+        """ Returns nested dict with details about sub entities """
+        affiliation_invitation = AffiliationInvitation(affiliation_invitation).as_dict()
+        from_org = OrgService(from_org).as_dict()
+        to_org = OrgService(to_org).as_dict()
+        entity = EntityService(entity).as_dict()
+
+        msg = affiliation_invitation['additional_message'] if 'additional_message' in affiliation_invitation else ''
+
+        return {
+            'status': affiliation_invitation['status'],
+            'type': affiliation_invitation['type'],
+            'id': affiliation_invitation['id'],
+            'additional_message': msg,
+            'from_org': {
+                'id': from_org['id'],
+                'uuid': from_org['uuid'],
+                'name': from_org['name']
+            },
+            'to_org': {
+                'id': to_org['id'],
+                'uuid': to_org['uuid'],
+                'name': to_org['name']
+            },
+            'entity': {
+                'business_identifier': entity['business_identifier'],
+                'name': entity['name']
+            }
+        }
