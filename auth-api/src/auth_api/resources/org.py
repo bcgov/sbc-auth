@@ -433,6 +433,7 @@ class OrgAffiliation(Resource):
     @cors.crossdomain(origin='*')
     def get(org_id, business_identifier):
         """Get the affiliation by org id and business identifier with authorized user."""
+        # Note this is used by LEAR - which passes in the user's token to query for an affiliation for an NR.
         try:
             if AuthorizationService.get_user_authorizations_for_entity(business_identifier):
                 # get affiliation
