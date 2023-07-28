@@ -36,7 +36,8 @@ class Error(Enum):
                                       http_status.HTTP_400_BAD_REQUEST
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     EXPIRED_AFFILIATION_INVITATION = 'The affiliation invitation has expired.', http_status.HTTP_400_BAD_REQUEST
-    INVALID_AFFILIATION_INVITATION_STATE = 'The affiliation invitation is in an invalid state for this action.', http_status.HTTP_400_BAD_REQUEST
+    INVALID_AFFILIATION_INVITATION_STATE = 'The affiliation invitation is in an invalid state for this action.', \
+                                           http_status.HTTP_400_BAD_REQUEST
     INVALID_AFFILIATION_INVITATION_TOKEN = 'The affiliation invitation token is invalid.', \
                                            http_status.HTTP_400_BAD_REQUEST
     FAILED_AFFILIATION_INVITATION = 'Failed to dispatch the affiliation invitation', \

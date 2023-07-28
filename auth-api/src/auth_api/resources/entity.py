@@ -226,9 +226,7 @@ class AffiliationInvitationResource(Resource):
     @_jwt.requires_auth
     @cors.crossdomain(origin='*')
     def get(business_identifier, org_id):
-        """Return list of Affiliation Invitations with details for business with provided business identifier
-        and directed to the org with provided org_id."""
-        # get all affiliation invitations associated with this org
+        """Return list of Affiliation Invitations with details."""
         status = request.args.get('status', None)
         statuses = request.args.get('statuses', None)
         affiliation_invitation_type = request.args.get('type', None)
@@ -244,7 +242,8 @@ class AffiliationInvitationResource(Resource):
             filter_by_types = [affiliation_invitation_type]
 
         try:
-            if not (business := EntityService.find_by_business_identifier(business_identifier=business_identifier, skip_auth=True)):
+            if not (business := EntityService.find_by_business_identifier(business_identifier=business_identifier,
+                                                                          skip_auth=True)):
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
 
             data = AffiliationInvitationService. \
@@ -253,7 +252,8 @@ class AffiliationInvitationResource(Resource):
                                                            status_filters=filter_by_status,
                                                            types_filter=filter_by_types)
 
-            data = [AffiliationInvitationService.as_dict_with_details(elem[0], elem[1], elem[2], elem[3]) for elem in data]
+            data = [AffiliationInvitationService.as_dict_with_details
+                    (elem[0], elem[1], elem[2], elem[3]) for elem in data]
 
             response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
 

@@ -176,7 +176,8 @@ class InvitationActionAuthorize(Resource):
         if not user:
             raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
-        affiliation_invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(affiliation_invitation_id)
+        affiliation_invitation = AffiliationInvitationService. \
+            find_affiliation_invitation_by_id(affiliation_invitation_id)
         if not affiliation_invitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 

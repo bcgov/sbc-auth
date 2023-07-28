@@ -31,7 +31,7 @@ from .db import db
 from .invite_status import InvitationStatus
 
 
-class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-attributes
+class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-attributes,too-many-public-methods
     """Model for an Affiliation Invitation record."""
 
     __tablename__ = 'affiliation_invitations'
@@ -206,13 +206,14 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         return self
 
     def fail_invitation(self):
+        """Update invitation with FAILED status."""
         self.invitation_status = InvitationStatus.get_status_by_code(InvitationStatuses.FAILED.value)
         self.save()
         return self
 
     @classmethod
     def find_all_related_to_org(cls, org_id, status_filters=None, types_filter=None):
-        """Gets all affiliation invitations that are related to the org (either from or to org) filtered by statuses"""
+        """Return all affiliation invitations that are related to the org (from org or to org) filtered by statuses."""
         from_org = aliased(OrgModel)
         to_org = aliased(OrgModel)
         entity = aliased(EntityModel)
@@ -225,7 +226,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         )
 
         if status_filters is not None:
-            results = results.filter(AffiliationInvitation.status.in_(status_filters))
+            results = results.filter(AffiliationInvitation.status.in_(status_filters))  # pylint: disable=no-member
 
         if types_filter is not None:
             results = results.filter(AffiliationInvitation.type.in_(types_filter))
@@ -234,6 +235,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
 
     @classmethod
     def find_all_sent_to_org_for_entity(cls, to_org_id, entity_id, status_filters=None, types_filter=None):
+        """Return all affiliation invitations sent to org for given entity."""
         from_org = aliased(OrgModel)
         to_org = aliased(OrgModel)
         entity = aliased(EntityModel)
@@ -245,7 +247,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             .filter(AffiliationInvitation.to_org_id == to_org_id)
 
         if status_filters is not None:
-            results = results.filter(AffiliationInvitation.status.in_(status_filters))
+            results = results.filter(AffiliationInvitation.status.in_(status_filters))  # pylint: disable=no-member
 
         if types_filter is not None:
             results = results.filter(AffiliationInvitation.type.in_(types_filter))

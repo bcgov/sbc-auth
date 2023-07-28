@@ -74,6 +74,7 @@ class AffiliationInvitation:
     def create_affiliation_invitation(affiliation_invitation_info: Dict,
                                       # pylint:disable=unused-argument,too-many-locals
                                       user, invitation_origin, **kwargs):
+        # pylint:disable=too-many-branches
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
@@ -414,8 +415,7 @@ class AffiliationInvitation:
         return AffiliationInvitation(affiliation_invitation)
 
     @staticmethod
-    @user_context
-    def get_all_invitations_with_details_related_to_org(org_id, statuses=None, **kwargs):
+    def get_all_invitations_with_details_related_to_org(org_id, statuses=None):
         """Get affiliation invitations for from org and for to org."""
         # If staff return full list
         if UserService.is_context_user_staff():
@@ -432,7 +432,10 @@ class AffiliationInvitation:
         """Get affiliation invitations that were sent to specific org and are related to the entity."""
         # If staff return full list
         if UserService.is_context_user_staff():
-            return AffiliationInvitationModel.find_all_sent_to_org_for_entity(to_org_id=org_id, entity_id=entity_id, status_filters=status_filters, types_filter=types_filter)
+            return AffiliationInvitationModel.find_all_sent_to_org_for_entity(to_org_id=org_id,
+                                                                              entity_id=entity_id,
+                                                                              status_filters=status_filters,
+                                                                              types_filter=types_filter)
 
         current_user: UserService = UserService.find_by_jwt_token()
         if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
@@ -446,6 +449,7 @@ class AffiliationInvitation:
 
     @staticmethod
     def refuse_affiliation_invitation(invitation_id):
+        """Set affiliation invitation to FAILED state (refusing authorization for affiliation)."""
         invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
         if not invitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -459,7 +463,7 @@ class AffiliationInvitation:
 
     @staticmethod
     def as_dict_with_details(affiliation_invitation, from_org, to_org, entity):
-        """ Returns nested dict with details about sub entities """
+        """Return nested dict with details about affiliation invitation and sub entities."""
         affiliation_invitation = AffiliationInvitation(affiliation_invitation).as_dict()
         from_org = OrgService(from_org).as_dict()
         to_org = OrgService(to_org).as_dict()
