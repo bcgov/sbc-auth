@@ -194,14 +194,16 @@ def factory_affiliation_invitation(from_org_id,
                                    to_org_id,
                                    business_identifier,
                                    email='abc123@email.com',
-                                   sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S')):
+                                   sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S'),
+                                   affiliation_invitation_type='EMAIL'):
     """Produce an affiliation invitation for the given from/to org, business and email."""
     return {
         'fromOrgId': from_org_id,
         'toOrgId': to_org_id,
         'businessIdentifier': business_identifier,
         'recipientEmail': email,
-        'sentDate': sent_date
+        'sentDate': sent_date,
+        'type': affiliation_invitation_type
     }
 
 
