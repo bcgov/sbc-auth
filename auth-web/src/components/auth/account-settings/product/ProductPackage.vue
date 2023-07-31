@@ -20,7 +20,7 @@
     <template v-else>
       <template v-if="productList && productList.length > 0">
         <div v-for="product in productList" :key="product.code">
-          <Product
+          <Product v-if="!product.parentCode"
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
             :userName="currentUser.fullName"
