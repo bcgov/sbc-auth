@@ -13,7 +13,8 @@
             "relationship_id": 12,
             "date_submitted": "2020-11-23T15:14:20.712096+00:00",
             "due_date": "2020-11-03T20:50:39.366030+00:00",
-            "type": "PENDING_STAFF_REVIEW"
+            "type": "PENDING_STAFF_REVIEW",
+            "externalSourceId": "5"
         },
         {
             "id": 125,
@@ -22,7 +23,8 @@
             "relationship_id": 12,
             "date_submitted": "2020-11-23T15:14:20.712096+00:00",
             "due_date": "2020-11-03T20:50:39.366030+00:00",
-            "type": "PENDING_STAFF_REVIEW"
+            "type": "PENDING_STAFF_REVIEW",
+            "externalSourceId": "10"
         }
     ],
     "properties": {
@@ -98,6 +100,14 @@
             "default": "",
             "examples": [
                 "OPEN"
+            ]
+        },
+        "externalSourceId": {
+            "type": "string",
+            "title": "External source identifier",
+            "default": "",
+            "examples": [
+                "10"
             ]
         }
     },
