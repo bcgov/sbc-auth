@@ -61,7 +61,9 @@
 
       <!-- Type -->
       <template v-slot:item-slot-Type="{ item }">
-        <div class="gray-9 font-weight-bold">{{ type(item) }}</div>
+        <div class="gray-9 font-weight-bold d-inline-block">{{ type(item) }}</div>
+        <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
+        <div v-if="enableNameRequestType && isNameRequest(item)" class="gray-9 font-weight-bold d-inline-block ml-1">{{ nameRequestType(item) }}</div>
         <div>{{ typeDescription(item) }}</div>
       </template>
 
@@ -199,6 +201,7 @@ import {
   CorpTypes,
   EntityAlertTypes,
   FilingTypes,
+  LDFlags,
   NrDisplayStates,
   NrState,
   NrTargetTypes,
@@ -211,6 +214,7 @@ import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import EntityDetails from './EntityDetails.vue'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
@@ -230,7 +234,7 @@ export default defineComponent({
     const store = useStore()
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
       getHeaders, headers, type, status, updateFilter, typeDescription,
-      isNameRequest, number, name, canUseNameRequest, tempDescription,
+      isNameRequest, nameRequestType, number, name, canUseNameRequest, tempDescription,
       isTemporaryBusiness } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
 
@@ -458,6 +462,11 @@ export default defineComponent({
       getHeaders(newCol)
     })
 
+    // feature flags
+    const enableNameRequestType = (): boolean => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableNameRequestType) || false
+    }
+
     return {
       actionHandler,
       actionButtonText,
@@ -470,9 +479,11 @@ export default defineComponent({
       headers,
       affiliations,
       entityCount,
+      enableNameRequestType,
       isNameRequest,
       isRejectedName,
       isApprovedName,
+      nameRequestType,
       name,
       open,
       number,
