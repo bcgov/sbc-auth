@@ -28,5 +28,11 @@ def test_get_all_products(client, session):  # pylint:disable=unused-argument
 
     assert schema_utils.validate(item_list, 'products')[0]
     # assert the structure is correct by checking for name, description properties in each element
+    mhr_sub_prods = ['MHR_QSLN', 'MHR_QSHM', 'MHR_QSHD']
     for item in item_list:
         assert item['code'] and item['description']
+        if item['code'] in mhr_sub_prods:
+            assert item['parentCode'] == 'MHR'
+            assert item['keycloak_group']
+        else:
+            assert not item.get('parentCode')
