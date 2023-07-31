@@ -10,6 +10,12 @@
             "description": "Personal Property Registry",
             "url": "https://dev.bcregistry.ca/business/ppr",
             "type": "INTERNAL"
+        },
+        {
+            "description": "Qualified Supplier - Lawyers and Notaries",
+            "url": "https://www.bcregistry.ca/ppr",
+            "type": "INTERNAL",
+            "parentCode": "MHR"
         }
     ],
     "required": [
@@ -79,6 +85,15 @@
             "default": "",
             "examples": [
                 "INTERNAL"
+            ]
+        },
+        "parentCode": {
+            "$id": "#/properties/parentCode",
+            "type": ["string", "null"],
+            "title": "Parent Product Code",
+            "default": "",
+            "examples": [
+                "MHR"
             ]
         }
     },
