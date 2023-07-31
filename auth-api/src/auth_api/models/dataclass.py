@@ -93,4 +93,4 @@ class ProductReviewTask:
     product_description: str
     product_subscription_id: int
     user_id: str
-    external_source_id: str = None
+    external_source_id: Optional[str] = None
