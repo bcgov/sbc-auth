@@ -19,7 +19,7 @@ from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
 
-from auth_api.models.dataclass import Activity, KeycloakGroupSubscription
+from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.services.keycloak import KeycloakService
@@ -126,7 +126,14 @@ class Product:
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
                     user = UserModel.find_by_jwt_token()
                     external_source_id = subscription.get('externalSourceId')
-                    Product._create_review_task(org, product_model, product_subscription, user, external_source_id)
+                    Product._create_review_task(ProductReviewTask(org_id=org.id,
+                                                                  org_name=org.name,
+                                                                  product_code=product_subscription.product_code,
+                                                                  product_description=product_model.description,
+                                                                  product_subscription_id=product_subscription.id,
+                                                                  user_id=user.id,
+                                                                  external_source_id=external_source_id
+                                                                  ))
 
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -137,7 +144,8 @@ class Product:
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
 
     @staticmethod
-    def _subscribe_and_publish_activity(org_id, product_code, status_code, product_model_description):
+    def _subscribe_and_publish_activity(org_id: int, product_code: str, status_code: str,
+                                        product_model_description: str):
         subscription = ProductSubscriptionModel(org_id=org_id, product_code=product_code, status_code=status_code)\
             .flush()
         if status_code == ProductSubscriptionStatus.ACTIVE.value:
@@ -147,23 +155,23 @@ class Product:
         return subscription
 
     @staticmethod
-    def _create_review_task(org, product_model, product_subscription, user, external_source_id=None):
-        task_type = product_model.description
+    def _create_review_task(review_task: ProductReviewTask):
+        task_type = review_task.product_description
         action_type = TaskAction.QUALIFIED_SUPPLIER_REVIEW.value \
-            if product_subscription.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES \
+            if review_task.product_code in QUALIFIED_SUPPLIER_PRODUCT_CODES \
             else TaskAction.PRODUCT_REVIEW.value
 
-        task_info = {'name': org.name,
-                     'relationshipId': product_subscription.id,
-                     'relatedTo': user.id,
+        task_info = {'name': review_task.org_name,
+                     'relationshipId': review_task.product_subscription_id,
+                     'relatedTo': review_task.user_id,
                      'dateSubmitted': datetime.today(),
                      'relationshipType': TaskRelationshipType.PRODUCT.value,
                      'type': task_type,
                      'action': action_type,
                      'status': TaskStatus.OPEN.value,
-                     'accountId': org.id,
+                     'accountId': review_task.org_id,
                      'relationship_status': TaskRelationshipStatus.PENDING_STAFF_REVIEW.value,
-                     'externalSourceId': external_source_id
+                     'externalSourceId': review_task.external_source_id
                      }
         TaskService.create_task(task_info, False)
 
