@@ -397,7 +397,7 @@ def setup_additional_affiliation_invitation_data(client, jwt, session, keycloak_
                                                  new_org_count=5,
                                                  new_entity_count=1
                                                  ):  # pylint:disable=unused-argument
-    """Setup additional data for testing affiliation invitations."""
+    """Set up additional data for testing affiliation invitations."""
     headers = factory_auth_header(jwt=jwt, claims=claims)
     headers_entity = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
 
@@ -525,7 +525,8 @@ def _create_affiliations_for_test(client, headers,
             headers=headers, content_type='application/json')
 
 
-def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, keycloak_mock, business_mock, stan_server):
+def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, keycloak_mock, business_mock,
+                                                     stan_server):
     """Assert that correct count of affiliation invitations is returned for provided org id."""
     orig_val_max_number_of_orgs = app.config.get('MAX_NUMBER_OF_ORGS')
     app.config.update(MAX_NUMBER_OF_ORGS=10)
@@ -559,6 +560,7 @@ def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, 
            or affiliation_invitations[1]['fromOrg']['id'] == new_org_ids[1]
 
     app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
+
 
 def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt, session, keycloak_mock, business_mock,
                                                                 stan_server):
