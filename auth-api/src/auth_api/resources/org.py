@@ -334,9 +334,6 @@ class OrgAffiliationInvitationsRequestAccess(Resource):
 
         user = UserService.find_by_jwt_token()
 
-        if not user:
-            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
-
         if not UserService.is_user_member_of_org(user=user, org_id=org_id):
             raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
@@ -360,8 +357,6 @@ class OrgAffiliationInvitationsRequestAccess(Resource):
 
             data = AffiliationInvitationService. \
                 get_all_invitations_with_details_related_to_org(org_id=org_id, statuses=filter_by_status)
-            data = [AffiliationInvitationService.as_dict_with_details
-                    (elem[0], elem[1], elem[2], elem[3]) for elem in data]
 
             response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
 

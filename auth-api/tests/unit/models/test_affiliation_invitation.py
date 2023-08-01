@@ -152,7 +152,7 @@ def test_find_invitations_by_sender(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_sender(invitation.sender_id)
+    retrieved_invitation = AffiliationInvitationModel.filter_by(sender_id=invitation.sender_id)
     assert len(retrieved_invitation) > 0
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert retrieved_invitation[0].token == invitation.token
@@ -174,7 +174,7 @@ def test_find_invitations_from_org(session):
     session.add(invitation)
     session.commit()
 
-    found_invitations = AffiliationInvitationModel.find_invitations_from_org(invitation.from_org_id)
+    found_invitations = AffiliationInvitationModel.filter_by(from_org_id=invitation.from_org_id)
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].from_org_id == invitation.from_org_id
@@ -187,7 +187,7 @@ def test_find_invitations_to_org(session):  # pylint:disable=unused-argument
     session.add(invitation)
     session.commit()
 
-    found_invitations = AffiliationInvitationModel.find_invitations_to_org(invitation.to_org_id)
+    found_invitations = AffiliationInvitationModel.filter_by(to_org_id=invitation.to_org_id)
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].to_org_id == invitation.to_org_id
@@ -213,7 +213,8 @@ def test_find_pending_invitations_by_sender(session):  # pylint:disable=unused-a
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_pending_invitations_by_sender(invitation.sender_id)
+    retrieved_invitation = AffiliationInvitationModel.filter_by(sender_id=invitation.sender_id,
+                                                                status_codes=['PENDING'])
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == 'PENDING'
@@ -225,7 +226,7 @@ def test_find_pending_invitations_by_from_org(session):  # pylint:disable=unused
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_pending_invitations_by_from_org(invitation.from_org_id)
+    retrieved_invitation = AffiliationInvitationModel.filter_by(from_org_id=invitation.from_org_id)
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == 'PENDING'
@@ -237,7 +238,7 @@ def test_find_pending_invitations_by_to_org(session):  # pylint:disable=unused-a
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_pending_invitations_by_to_org(invitation.to_org_id)
+    retrieved_invitation = AffiliationInvitationModel.filter_by(to_org_id=invitation.to_org_id)
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == 'PENDING'
@@ -249,10 +250,12 @@ def test_invitations_by_status(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'PENDING')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(sender_id=invitation.sender_id, status_codes=['PENDING'])
     assert len(retrieved_invitation) == 1
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(sender_id=invitation.sender_id, status_codes=['INVALID'])
     assert len(retrieved_invitation) == 0
 
 
@@ -262,10 +265,12 @@ def test_invitations_by_expired_status(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'EXPIRED')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(sender_id=invitation.sender_id, status_codes=['EXPIRED'])
     assert len(retrieved_invitation) == 1
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(sender_id=invitation.sender_id, status_codes=['INVALID'])
     assert len(retrieved_invitation) == 0
 
 
@@ -275,7 +280,8 @@ def test_invitations_by_invalid_status(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(sender_id=invitation.sender_id, status_codes=['INVALID'])
     assert len(retrieved_invitation) == 0
 
 
@@ -388,7 +394,7 @@ def test_update_invitation_as_failed(session):
     invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
     session.add(invitation)
     session.commit()
-    invitation.fail_invitation()
+    invitation.set_status('FAILED')
     assert invitation
     assert invitation.invitation_status_code == 'FAILED'
 
@@ -444,9 +450,9 @@ def test_find_all_related_to_org(session):
     assert len(affiliation_invitations) == affiliation_invitation_count
 
 
-def test_fid_all_sent_to_org_affiliated_with_entity(session):
+def test_find_all_sent_to_org_affiliated_with_entity(session):
     """Assert that finding affiliations sent to org and requested for specific entity return correct count."""
     affiliation_invitation_count = 5
     _setup_multiple_orgs_and_invites(session, create_affiliation_invitation_count=affiliation_invitation_count)
-    affiliation_invitations: List = AffiliationInvitationModel.find_all_sent_to_org_for_entity(to_org_id=1, entity_id=1)
+    affiliation_invitations: List = AffiliationInvitationModel.filter_by(to_org_id=1, entity_id=1)
     assert len(affiliation_invitations) == affiliation_invitation_count - 1

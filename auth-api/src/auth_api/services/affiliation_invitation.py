@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service for managing Affiliation Invitation data."""
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -34,7 +34,6 @@ from auth_api.models.entity import Entity as EntityModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
-from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
@@ -68,6 +67,16 @@ class AffiliationInvitation:
         affiliation_invitation_schema = AffiliationInvitationSchema()
         obj = affiliation_invitation_schema.dump(self._model, many=False)
         return obj
+
+    @classmethod
+    def affiliation_invitation_to_dict(cls, model: AffiliationInvitationModel) -> Dict:
+        """Return the Affiliation Invitation model as a dictionary."""
+        return AffiliationInvitationSchema().dump(model, many=False)
+
+    @classmethod
+    def affiliation_invitations_to_dict_list(cls, models: List[AffiliationInvitationModel]) -> List[Dict]:
+        """Return list of AffiliationInvitationModels converted to list dicts."""
+        return [AffiliationInvitationSchema().dump(model) for model in models]
 
     @staticmethod
     @user_context
@@ -142,6 +151,7 @@ class AffiliationInvitation:
             # Fetch the up-to-date business details from legal API
             business = AffiliationInvitation._get_business_details(business_identifier,
                                                                    RestService.get_service_account_token())
+            # business = {'business': {'legalName': 'hello whatsup'}}
             AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
                                                               business['business']['legalName'],
                                                               f'{invitation_origin}/{context_path}')
@@ -198,7 +208,7 @@ class AffiliationInvitation:
                                                               f'{invitation_origin}/{context_path}')
         # Expire invitation
         elif new_status == InvitationStatus.EXPIRED.value:
-            invitation = self._model.expire_invitation()
+            invitation = self._model.set_status(InvitationStatus.EXPIRED.value)
 
         return AffiliationInvitation(invitation)
 
@@ -229,7 +239,7 @@ class AffiliationInvitation:
 
         # If staff return full list
         if user_from_context.is_staff():
-            return AffiliationInvitationModel.find_pending_invitations_by_from_org(org_id)
+            return AffiliationInvitationModel.filter_by(from_org_id=org_id, status_codes=['PENDING'])
 
         current_user: UserService = UserService.find_by_jwt_token()
         current_user_membership: MembershipModel = \
@@ -268,7 +278,7 @@ class AffiliationInvitation:
 
         # If staff return full list
         if user_from_context.is_staff():
-            return AffiliationInvitationModel.find_pending_invitations_by_to_org(org_id)
+            return AffiliationInvitationModel.filter_by(to_org_id=org_id, status_codes=['PENDING'])
 
         current_user: UserService = UserService.find_by_jwt_token()
         current_user_membership: MembershipModel = \
@@ -414,38 +424,41 @@ class AffiliationInvitation:
         current_app.logger.debug('<accept_affiliation_invitation')
         return AffiliationInvitation(affiliation_invitation)
 
-    @staticmethod
-    def get_all_invitations_with_details_related_to_org(org_id, statuses=None):
+    @classmethod
+    def get_all_invitations_with_details_related_to_org(cls, org_id, statuses=None) -> List[Dict]:
         """Get affiliation invitations for from org and for to org."""
         # If staff return full list
         if UserService.is_context_user_staff():
-            return AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+            return cls.affiliation_invitations_to_dict_list(
+                AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+            )
 
         current_user: UserService = UserService.find_by_jwt_token()
         if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
             return []
 
-        return AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+        return cls.affiliation_invitations_to_dict_list(
+            AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+        )
 
     @staticmethod
-    def get_all_invitations_sent_to_org_for_entity(org_id, entity_id, status_filters=None, types_filter=None):
+    def get_all_invitations_sent_to_org_for_entity(org_id, entity_id, status_codes=None, invitation_types=None) -> List:
         """Get affiliation invitations that were sent to specific org and are related to the entity."""
         # If staff return full list
         if UserService.is_context_user_staff():
-            return AffiliationInvitationModel.find_all_sent_to_org_for_entity(to_org_id=org_id,
-                                                                              entity_id=entity_id,
-                                                                              status_filters=status_filters,
-                                                                              types_filter=types_filter)
+            return AffiliationInvitationModel.filter_by(to_org_id=org_id,
+                                                        entity_id=entity_id,
+                                                        status_codes=status_codes,
+                                                        invitation_types=invitation_types)
 
         current_user: UserService = UserService.find_by_jwt_token()
         if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
             return []
 
-        return AffiliationInvitationModel \
-            .find_all_sent_to_org_for_entity(to_org_id=org_id,
-                                             entity_id=entity_id,
-                                             status_filters=status_filters,
-                                             types_filter=types_filter)
+        return AffiliationInvitationModel.filter_by(to_org_id=org_id,
+                                                    entity_id=entity_id,
+                                                    status_codes=status_codes,
+                                                    invitation_types=invitation_types)
 
     @staticmethod
     def refuse_affiliation_invitation(invitation_id):
@@ -457,37 +470,6 @@ class AffiliationInvitation:
         if not invitation.status == InvitationStatus.PENDING.value:
             raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
 
-        invitation = invitation.fail_invitation()
+        invitation = invitation.set_status(InvitationStatus.FAILED.value)
 
         return AffiliationInvitation(invitation)
-
-    @staticmethod
-    def as_dict_with_details(affiliation_invitation, from_org, to_org, entity):
-        """Return nested dict with details about affiliation invitation and sub entities."""
-        affiliation_invitation = AffiliationInvitation(affiliation_invitation).as_dict()
-        from_org = OrgService(from_org).as_dict()
-        to_org = OrgService(to_org).as_dict()
-        entity = EntityService(entity).as_dict()
-
-        msg = affiliation_invitation['additional_message'] if 'additional_message' in affiliation_invitation else ''
-
-        return {
-            'status': affiliation_invitation['status'],
-            'type': affiliation_invitation['type'],
-            'id': affiliation_invitation['id'],
-            'additional_message': msg,
-            'from_org': {
-                'id': from_org['id'],
-                'uuid': from_org['uuid'],
-                'name': from_org['name']
-            },
-            'to_org': {
-                'id': to_org['id'],
-                'uuid': to_org['uuid'],
-                'name': to_org['name']
-            },
-            'entity': {
-                'business_identifier': entity['business_identifier'],
-                'name': entity['name']
-            }
-        }

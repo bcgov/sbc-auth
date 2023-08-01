@@ -29,8 +29,9 @@ class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ances
         model = AffiliationInvitationModel
         fields = (
             'id', 'from_org', 'to_org', 'business_identifier', 'recipient_email', 'sent_date', 'expires_on',
-            'accepted_date', 'status', 'token', 'type', 'affiliation_id')
+            'accepted_date', 'status', 'token', 'type', 'affiliation_id', 'entity')
 
     from_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
     to_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
+    entity = fields.Nested('EntitySchema', only=('business_identifier', 'name'))
     business_identifier = fields.String(attribute='entity.business_identifier', data_key='businessIdentifier')

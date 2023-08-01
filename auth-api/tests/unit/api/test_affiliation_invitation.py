@@ -440,7 +440,7 @@ def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, b
     invitation_dictionary = json.loads(rv_invitation.data)
     affiliation_invitation_id = invitation_dictionary['id']
 
-    rv_invitation = client.get(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorize',
+    rv_invitation = client.put(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorize',
                                headers=headers,
                                content_type='application/json')
 

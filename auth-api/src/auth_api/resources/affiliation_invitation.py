@@ -165,9 +165,9 @@ class InvitationAction(Resource):
         return response, status
 
 
-@cors_preflight('GET,DELETE,OPTIONS')
+@cors_preflight('PUT,DELETE,OPTIONS')
 @API.route('/<string:affiliation_invitation_id>/authorize',
-           methods=['GET', 'DELETE', 'OPTIONS'])
+           methods=['PUT', 'DELETE', 'OPTIONS'])
 class InvitationActionAuthorize(Resource):
     """Check if user is active part of the Org. Authorize/Refuse invite if he is."""
 
@@ -189,7 +189,7 @@ class InvitationActionAuthorize(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_jwt.requires_auth
-    def get(cls, affiliation_invitation_id: str):
+    def put(cls, affiliation_invitation_id: str):
         """Check if user is active part of the Org. Authorize invite if he is."""
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
 
@@ -198,7 +198,9 @@ class InvitationActionAuthorize(Resource):
             cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
 
             response, status = AffiliationInvitationService \
-                .accept_affiliation_invitation(affiliation_invitation_id, user, origin).as_dict(), \
+                .accept_affiliation_invitation(affiliation_invitation_id=affiliation_invitation_id,
+                                               user=user,
+                                               origin=origin).as_dict(), \
                 http_status.HTTP_200_OK
 
         except BusinessException as exception:
@@ -217,7 +219,7 @@ class InvitationActionAuthorize(Resource):
             cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
 
             response, status = AffiliationInvitationService \
-                .refuse_affiliation_invitation(affiliation_invitation_id).as_dict(), \
+                .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id).as_dict(), \
                 http_status.HTTP_200_OK
 
         except BusinessException as exception:

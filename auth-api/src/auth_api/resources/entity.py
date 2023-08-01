@@ -227,19 +227,8 @@ class AffiliationInvitationResource(Resource):
     @cors.crossdomain(origin='*')
     def get(business_identifier, org_id):
         """Return list of Affiliation Invitations with details."""
-        status = request.args.get('status', None)
-        statuses = request.args.get('statuses', None)
-        affiliation_invitation_type = request.args.get('type', None)
-        filter_by_status = None
-        filter_by_types = None
-
-        if status is not None:
-            filter_by_status = [status]
-        elif statuses is not None:
-            filter_by_status = statuses.split(',')
-
-        if affiliation_invitation_type is not None:
-            filter_by_types = [affiliation_invitation_type]
+        filter_by_status = request.args.getlist('status')
+        filter_by_type = request.args.getlist('type')
 
         try:
             if not (business := EntityService.find_by_business_identifier(business_identifier=business_identifier,
@@ -249,11 +238,10 @@ class AffiliationInvitationResource(Resource):
             data = AffiliationInvitationService. \
                 get_all_invitations_sent_to_org_for_entity(org_id=org_id,
                                                            entity_id=business.identifier,
-                                                           status_filters=filter_by_status,
-                                                           types_filter=filter_by_types)
+                                                           status_codes=filter_by_status,
+                                                           invitation_types=filter_by_type)
 
-            data = [AffiliationInvitationService.as_dict_with_details
-                    (elem[0], elem[1], elem[2], elem[3]) for elem in data]
+            data = AffiliationInvitationService.affiliation_invitations_to_dict_list(data)
 
             response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
 
