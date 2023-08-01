@@ -246,6 +246,9 @@ class ProductCode(Enum):
     DIR_SEARCH = 'DIR_SEARCH'
     NAMES_REQUEST = 'NRO'
     MHR = 'MHR'
+    MHR_QSLN = 'MHR_QSLN'  # Qualified Supplier - Lawyers and Notaries
+    MHR_QSHM = 'MHR_QSHM'  # Qualified Supplier - Home Manufacturers
+    MHR_QSHD = 'MHR_QSHD'  # Qualified Supplier - Home Dealers
 
 
 class TaskRelationshipType(Enum):
@@ -294,6 +297,7 @@ class TaskAction(Enum):
     AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW'
     ACCOUNT_REVIEW = 'ACCOUNT_REVIEW'
     PRODUCT_REVIEW = 'PRODUCT_REVIEW'
+    QUALIFIED_SUPPLIER_REVIEW = 'QUALIFIED_SUPPLIER_REVIEW'
 
 
 class ActivityAction(Enum):

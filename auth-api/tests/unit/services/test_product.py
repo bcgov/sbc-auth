@@ -91,12 +91,23 @@ def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monke
     ppr_code = ProductCodeModel.find_by_code('PPR')
     ppr_code.keycloak_group = 'ppr'
     ppr_code.save()
-    mhr_code = ProductCodeModel.find_by_code('MHR')
-    mhr_code.keycloak_group = None
-    mhr_code.save()
     vs_code = ProductCodeModel.find_by_code('VS')
     vs_code.keycloak_group = 'vs'
     vs_code.save()
+
+    # Filter MHR out - testing separately
+    mhr_code = ProductCodeModel.find_by_code('MHR')
+    mhr_code.keycloak_group = None
+    mhr_code.save()
+    mhr_qsln_code = ProductCodeModel.find_by_code('MHR_QSLN')
+    mhr_qsln_code.keycloak_group = None
+    mhr_qsln_code.save()
+    mhr_qshm_code = ProductCodeModel.find_by_code('MHR_QSHM')
+    mhr_qshm_code.keycloak_group = None
+    mhr_qshm_code.save()
+    mhr_qshd_code = ProductCodeModel.find_by_code('MHR_QSHD')
+    mhr_qshd_code.keycloak_group = None
+    mhr_qshd_code.save()
 
     user1 = factory_user_model(TestUserInfo.get_user_with_kc_guid(user.id))
     patch_token_info({'sub': user.id, 'idp_userid': user1.idp_userid}, monkeypatch)
@@ -222,3 +233,107 @@ def test_get_users_product_subscriptions_kc_groups(session, keycloak_mock, monke
     assert kc_groups[1].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
     assert kc_groups[2].group_name == 'vs'
     assert kc_groups[2].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+
+
+def test_get_users_sub_product_subscriptions_kc_groups(session, keycloak_mock, monkeypatch):
+    """Assert that our keycloak groups are returned correctly for sub products."""
+    # Used these to test without the keycloak_mock.
+    request = KeycloakScenario.create_user_request()
+    user = KeycloakService.add_user(request, return_if_exists=True)
+
+    # Filter out types that are not parents or children
+    bca_code = ProductCodeModel.find_by_code('BCA')
+    bca_code.keycloak_group = None
+    bca_code.save()
+    ppr_code = ProductCodeModel.find_by_code('PPR')
+    ppr_code.keycloak_group = None
+    ppr_code.save()
+    vs_code = ProductCodeModel.find_by_code('VS')
+    vs_code.keycloak_group = None
+    vs_code.save()
+
+    # Set up parent product and sub products
+    mhr_code = ProductCodeModel.find_by_code('MHR')
+    mhr_code.keycloak_group = 'mhr'
+    mhr_code.save()
+    mhr_qsln_code = ProductCodeModel.find_by_code('MHR_QSLN')
+    mhr_qsln_code.keycloak_group = 'mhr_qsln'
+    mhr_qsln_code.parent_code = 'MHR'
+    mhr_qsln_code.save()
+    mhr_qshm_code = ProductCodeModel.find_by_code('MHR_QSHM')
+    mhr_qshm_code.keycloak_group = 'mhr_qshm'
+    mhr_qshm_code.parent_code = 'MHR'
+    mhr_qshm_code.save()
+    mhr_qshd_code = ProductCodeModel.find_by_code('MHR_QSHD')
+    mhr_qshd_code.keycloak_group = 'mhr_qshd'
+    mhr_qshd_code.parent_code = 'MHR'
+    mhr_qshd_code.save()
+
+    user1 = factory_user_model(TestUserInfo.get_user_with_kc_guid(user.id))
+    patch_token_info({'sub': user.id, 'idp_userid': user1.idp_userid}, monkeypatch)
+
+    # Validate no associations
+    kc_groups = ProductService.get_users_product_subscriptions_kc_groups([user1.id])
+    assert kc_groups[0].user_guid == user1.keycloak_guid
+    assert kc_groups[0].group_name == 'mhr'
+    assert kc_groups[0].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[1].user_guid == user1.keycloak_guid
+    assert kc_groups[1].group_name == 'mhr_qshd'
+    assert kc_groups[1].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[2].user_guid == user1.keycloak_guid
+    assert kc_groups[2].group_name == 'mhr_qshm'
+    assert kc_groups[2].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[3].user_guid == user1.keycloak_guid
+    assert kc_groups[3].group_name == 'mhr_qsln'
+    assert kc_groups[3].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+
+    org = Org.create_org(TestOrgInfo.org1, user_id=user1.id)
+    org_id1 = org.as_dict().get('id')
+    factory_membership_model(user1.id, org_id1, member_status=Status.ACTIVE.value)
+    factory_product_model(org_id1, product_code=ProductCode.MHR_QSHM.value,
+                          status_code=ProductSubscriptionStatus.ACTIVE.value)
+
+    # Validate sub product subscription
+    kc_groups = ProductService.get_users_product_subscriptions_kc_groups([user1.id])
+    assert kc_groups[0].user_guid == user1.keycloak_guid
+    assert kc_groups[0].group_name == 'mhr'
+    assert kc_groups[0].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[1].user_guid == user1.keycloak_guid
+    assert kc_groups[1].group_name == 'mhr_qshd'
+    assert kc_groups[1].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[2].user_guid == user1.keycloak_guid
+    assert kc_groups[2].group_name == 'mhr_qshm'
+    assert kc_groups[2].group_action == KeycloakGroupActions.ADD_TO_GROUP.value
+    assert kc_groups[3].user_guid == user1.keycloak_guid
+    assert kc_groups[3].group_name == 'mhr_qsln'
+    assert kc_groups[3].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+
+    # Validate subscription for Qualified Supplier - Lawyers and Notaries
+    # Include parent as well
+    factory_product_model(org_id1, product_code=ProductCode.MHR_QSLN.value,
+                          status_code=ProductSubscriptionStatus.ACTIVE.value)
+    factory_product_model(org_id1, product_code=mhr_qsln_code.parent_code,
+                          status_code=ProductSubscriptionStatus.ACTIVE.value)
+
+    kc_groups = ProductService.get_users_product_subscriptions_kc_groups([user1.id])
+    assert kc_groups[0].group_name == 'mhr'
+    assert kc_groups[0].group_action == KeycloakGroupActions.ADD_TO_GROUP.value
+    assert kc_groups[1].group_name == 'mhr_qshd'
+    assert kc_groups[1].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[2].group_name == 'mhr_qshm'
+    assert kc_groups[2].group_action == KeycloakGroupActions.ADD_TO_GROUP.value
+    assert kc_groups[3].group_name == 'mhr_qsln'
+    assert kc_groups[3].group_action == KeycloakGroupActions.ADD_TO_GROUP.value
+
+    # Validate there should be no active subscriptions
+    [membership.delete() for membership in Membership.find_members_by_org_id(org_id1)]
+
+    kc_groups = ProductService.get_users_product_subscriptions_kc_groups([user1.id])
+    assert kc_groups[0].group_name == 'mhr'
+    assert kc_groups[0].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[1].group_name == 'mhr_qshd'
+    assert kc_groups[1].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[2].group_name == 'mhr_qshm'
+    assert kc_groups[2].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value
+    assert kc_groups[3].group_name == 'mhr_qsln'
+    assert kc_groups[3].group_action == KeycloakGroupActions.REMOVE_FROM_GROUP.value

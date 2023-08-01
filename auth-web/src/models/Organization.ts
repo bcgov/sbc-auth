@@ -246,6 +246,7 @@ export interface OrgProduct {
   hidden?:boolean
   premiumOnly?:boolean
   needReview?:boolean
+  parentCode?: string;
 }
 
 export interface OrgProductsRequestBody {
