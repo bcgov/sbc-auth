@@ -56,7 +56,7 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
-    const componentState = reactive({
+    const componentState: any = reactive({
       accounts: [],
       selectedAccount: {},
       requestAccessMessage: '',
