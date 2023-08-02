@@ -44,7 +44,7 @@ from auth_api.utils.enums import (
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import (
     JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgTypeInfo, TestUserInfo)
-from utilities.sqlalchemy import clear_event_listeners
+from tests.utilities.sqlalchemy import clear_event_listeners
 
 
 def factory_auth_header(jwt, claims):
