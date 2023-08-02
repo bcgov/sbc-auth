@@ -188,9 +188,10 @@ class Affiliation:
     @user_context
     def is_authorized(entity: Entity, pass_code: str, **kwargs) -> bool:
         """Return True if user is authorized to create an affiliation."""
-        user_context: UserContext = kwargs['user_context']
+        user_from_context: UserContext = kwargs['user_context']
         current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
-        if user_context.is_staff() or (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+        if user_from_context.is_staff() or \
+           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
             return True
         if entity.corp_type in ['SP', 'GP']:
             if not pass_code:

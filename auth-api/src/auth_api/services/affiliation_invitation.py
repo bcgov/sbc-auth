@@ -138,7 +138,6 @@ class AffiliationInvitation:
             token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
                                                           config_secret='ENTITY_SVC_CLIENT_SECRET')
             business = AffiliationInvitation._get_business_details(business_identifier, token)
-                                                                   
             AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
                                                               business['business']['legalName'],
                                                               f'{invitation_origin}/{context_path}')
