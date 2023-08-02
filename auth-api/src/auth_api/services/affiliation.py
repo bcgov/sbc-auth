@@ -31,6 +31,7 @@ from auth_api.models.membership import Membership as MembershipModel
 from auth_api.schemas import AffiliationSchema
 from auth_api.services.entity import Entity as EntityService
 from auth_api.services.org import Org as OrgService
+from auth_api.services.user import User as UserService
 from auth_api.utils.enums import ActivityAction, CorpType, NRNameStatus, NRStatus
 from auth_api.utils.passcode import validate_passcode
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, STAFF
@@ -162,11 +163,7 @@ class Affiliation:
         entity_id = entity.identifier
         entity_type = entity.corp_type
 
-        authorized = True
-
-        authorized = Affiliation.is_authorized(business_identifier, pass_code, entity, entity_type)
-
-        if not authorized:
+        if not Affiliation.is_authorized(entity, pass_code):
             current_app.logger.debug('<create_affiliation not authorized')
             raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
@@ -189,24 +186,23 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def is_authorized(business_identifier, pass_code, entity, entity_type, **kwargs):
-        user_from_context: UserContext = kwargs['user_context']
-        if user_from_context.is_staff() or MembershipModel.check_if_sbc_staff(user_from_context.user_id):
+    def is_authorized(entity: Entity, pass_code: str, **kwargs) -> bool:
+        """Return True if user is authorized to create an affiliation."""
+        user_context: UserContext = kwargs['user_context']
+        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
+        if user_context.is_staff() or (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
             return True
-        if entity_type in ['SP', 'GP']:
+        if entity.corp_type in ['SP', 'GP']:
             if not pass_code:
-                authorized = False
-            else:
-                token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
-                                                              config_secret='ENTITY_SVC_CLIENT_SECRET')
-                authorized = Affiliation._validate_firms_party(token, business_identifier, pass_code)
-        else:
-            if pass_code:
-                authorized = validate_passcode(pass_code, entity.pass_code)
-            else:
-                if entity.pass_code:
-                    authorized = False
-        return authorized
+                return False
+            token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
+                                                          config_secret='ENTITY_SVC_CLIENT_SECRET')
+            return Affiliation._validate_firms_party(token, entity.business_identifier, pass_code)
+        if pass_code:
+            return validate_passcode(pass_code, entity.pass_code)
+        if entity.pass_code:
+            return False
+        return True
 
     @staticmethod
     def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
