@@ -77,7 +77,7 @@
             <!-- Passcode -->
             <v-expand-transition>
               <v-text-field
-                v-if="isBusinessIdentifierValid"
+                v-if="isBusinessIdentifierValid && !isGovStaffAccount"
                 filled
                 :label="passcodeLabel"
                 :hint="passcodeHint"
@@ -93,7 +93,7 @@
 
             <!-- Authorization Name -->
             <v-expand-transition>
-              <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
+              <section v-if="isBusinessIdentifierValid && showAuthorization && !isGovStaffAccount" class="mt-6">
                 <header class="font-weight-bold">Authorization</header>
                 <v-text-field
                   filled
@@ -113,7 +113,7 @@
             <!-- Certify (firms only) -->
             <v-expand-transition>
               <Certify
-                v-if="isBusinessIdentifierValid && isFirm"
+                v-if="isBusinessIdentifierValid && isFirm && !isGovStaffAccount"
                 :certifiedBy="certifiedBy"
                 entity="registered entity"
                 @update:isCertified="isCertified = $event"
@@ -124,7 +124,7 @@
 
             <!-- Folio Number -->
             <v-expand-transition>
-              <section v-if="isBusinessIdentifierValid" class="mt-6">
+              <section v-if="isBusinessIdentifierValid && !isGovStaffAccount" class="mt-6">
                 <header class="font-weight-bold">Folio / Reference Number</header>
                 <p class="mt-4 mb-0">
                   If you file forms for a number of companies, you may want to enter a
@@ -314,6 +314,10 @@ export default class AddBusinessDialog extends Vue {
   }
 
   get isFormValid (): boolean {
+    // if user is a staff user or sbc staff user, then only require the business identifier
+    if (this.isGovStaffAccount && !!this.businessIdentifier) {
+      return true
+    }
     // business id is required
     // passcode is required
     // firms must accept certify clause
@@ -334,6 +338,11 @@ export default class AddBusinessDialog extends Vue {
       this.isLoading = true
       try {
         // try to add business
+        if (this.isGovStaffAccount) {
+          const addResponse = await this.addBusiness({
+            businessIdentifier: this.businessIdentifier
+          })
+        }
         const addResponse = await this.addBusiness({
           businessIdentifier: this.businessIdentifier,
           certifiedByName: this.authorizationName,
