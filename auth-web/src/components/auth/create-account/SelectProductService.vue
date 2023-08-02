@@ -13,7 +13,7 @@
     <template v-else>
       <template v-if="productList && productList.length > 0">
         <div v-for="product in productList" :key="product.code" v-display-mode>
-          <Product
+          <Product v-if="!product.parentCode"
             :productDetails="product"
             @set-selected-product="setSelectedProduct"
             @toggle-product-details="toggleProductDetails"
