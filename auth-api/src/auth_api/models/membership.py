@@ -200,6 +200,14 @@ class Membership(VersionedModel):  # pylint: disable=too-few-public-methods # Te
         count = query.session.execute(count_q).scalar()
         return count
 
+
+    @classmethod
+    def check_if_sbc_staff(cls, user_id: int) -> bool:
+        """Return True if the use has membership to sbc staff organization."""
+        return db.session.query(Membership).filter(
+            and_(Membership.user_id == user_id, Membership.status == Status.ACTIVE.value,
+                 Membership.org.has(OrgModel.type_code == OrgType.SBC_STAFF.value))).count() > 0
+    
     def reset(self):
         """Reset member."""
         if self.membership_type_code == 'ADMIN':
