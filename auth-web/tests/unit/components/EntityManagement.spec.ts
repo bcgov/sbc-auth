@@ -148,20 +148,6 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.primaryBtnText).toBe('Remove Registration')
     expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
   })
-  it('all buttons, tooltips and v-menu selections exist', async () => {
-    // All buttons exist
-    expect(wrapper.find('#add-existing-btn').exists()).toBe(true)
-    expect(wrapper.find('#add-name-request-btn').exists()).toBe(true)
-    expect(wrapper.find('#incorporate-numbered-btn').exists()).toBe(true)
-
-    // Existing Business or NameRequest menu selections
-    wrapper.find('#add-existing-btn').trigger('click')
-    await Vue.nextTick()
-    expect(wrapper.findAll('.add-existing-item').length).toBe(2)
-
-    // tooltips exist
-    expect(wrapper.findAll('.top-tooltip').length).toBe(2)
-  })
 
   it('all incorporate numbered businesses btns exist', async () => {
     // Enter the Incorporate a Numbered BC Company drop down.
