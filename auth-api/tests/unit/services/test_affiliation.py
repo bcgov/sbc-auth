@@ -26,10 +26,11 @@ from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affiliation as AffiliationService
-from auth_api.utils.enums import ActivityAction
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo
+from auth_api.utils.enums import ActivityAction, OrgType
+from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestOrgTypeInfo, TestUserInfo
 from tests.utilities.factory_utils import (
-    factory_entity_service, factory_org_service, patch_get_firms_parties, patch_token_info)
+    convert_org_to_staff_org, factory_entity_service, factory_membership_model, factory_org_service,
+    factory_user_model_with_contact, patch_get_firms_parties, patch_token_info)
 
 
 def test_create_affiliation(session, auth_mock, monkeypatch):  # pylint:disable=unused-argument
@@ -166,6 +167,53 @@ def test_create_affiliation_firms(session, auth_mock, monkeypatch):  # pylint:di
     assert affiliation
     assert affiliation.entity.identifier == entity_service.identifier
     assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
+
+
+@pytest.mark.parametrize('test_name, org_type, should_succeed', [
+    ('sbc_staff_create_affiliation_no_passcode_success', OrgType.SBC_STAFF.value, True),
+    ('staff_create_affiliation_no_passcode_success', OrgType.STAFF.value, True),
+    ('premium_create_affiliation_failure', OrgType.PREMIUM.value, False)
+])
+def test_create_affiliation_staff_sbc_staff(
+    session, auth_mock, monkeypatch, test_name: str, org_type: OrgType, should_succeed: bool
+):  # pylint:disable=unused-argument
+    """Assert Staff or SBC staff can create an affiliation, without passcode."""
+    db_user = factory_user_model_with_contact(user_info=TestUserInfo.user_test)
+    entity_service = factory_entity_service(entity_info=TestEntityInfo.entity_lear_mock3)
+    entity_dictionary = entity_service.as_dict()
+    business_identifier = entity_dictionary['business_identifier']
+
+    org_service = factory_org_service()
+    org_dictionary = org_service.as_dict()
+    org_id = org_dictionary['id']
+
+    factory_membership_model(db_user.id, org_id)
+
+    # We can't create an org with SBC_STAFF or STAFF intentionally for security purposes.
+    if org_type in [OrgType.SBC_STAFF.value, OrgType.STAFF.value]:
+        convert_org_to_staff_org(org_id, org_type)
+
+    # Requires staff role.
+    if org_type == OrgType.STAFF.value:
+        user = TestJwtClaims.staff_role
+        user['idp_userid'] = db_user.idp_userid
+        user['sub'] = db_user.keycloak_guid
+        patch_token_info(user, monkeypatch)
+    else:
+        # Match the token to the db_user.
+        user = TestJwtClaims.public_bceid_account_holder_user
+        user['idp_userid'] = db_user.idp_userid
+        user['sub'] = db_user.keycloak_guid
+        patch_token_info(user, monkeypatch)
+
+    if should_succeed:
+        affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
+        assert affiliation
+        assert affiliation.entity.identifier == entity_service.identifier
+        assert affiliation.as_dict()['organization']['id'] == org_dictionary['id']
+    else:
+        with pytest.raises(BusinessException):
+            affiliation = AffiliationService.create_affiliation(org_id, business_identifier)
 
 
 def test_create_affiliation_firms_party_with_additional_space(session,
