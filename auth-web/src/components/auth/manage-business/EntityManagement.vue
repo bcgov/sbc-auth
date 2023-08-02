@@ -200,6 +200,7 @@
       />
 
       <PasscodeResetOptionsModal
+        v-if = "!(isStaffAccount || isSbcStaffAccount)"
         ref="passcodeResetOptionsModal"
         data-test="dialog-passcode-reset-options"
         @confirm-passcode-reset-options="remove($event)"
