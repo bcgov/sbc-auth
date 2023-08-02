@@ -165,13 +165,28 @@
             large color="primary"
             id="add-button"
             :loading="isLoading"
-            @click="add()"
+            @click="add(); snackbar = true"
           >
             <span>Add</span>
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-snackbar
+      v-model="snackbar"
+      :timeout="timeout"
+      >
+      {{ businessIdentifier }} was successfully added to your table.
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="white"
+          v-bind="attrs"
+          @click="snackbar = false"
+        >
+          mdi-close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </div>
 </template>
 
@@ -225,6 +240,8 @@ export default class AddBusinessDialog extends Vue {
   isLoading = false
   isCertified = false // firms only
   authorizationName = ''
+  snackbar = false
+  timeout: 4000
 
   readonly authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
 
@@ -338,16 +355,11 @@ export default class AddBusinessDialog extends Vue {
       this.isLoading = true
       try {
         // try to add business
-        if (this.isGovStaffAccount) {
-          const addResponse = await this.addBusiness({
-            businessIdentifier: this.businessIdentifier
-          })
+        let businessData = {businessIdentifier: this.businessIdentifier}
+        if (!this.isGovStaffAccount) {
+          businessData = { ...businessData, certifiedByName: this.authorizationName, passCode: this.passcode}
         }
-        const addResponse = await this.addBusiness({
-          businessIdentifier: this.businessIdentifier,
-          certifiedByName: this.authorizationName,
-          passCode: this.passcode
-        })
+        const addResponse = await this.addBusiness(businessData)
         // check if add didn't succeed
         if (addResponse?.status !== StatusCodes.CREATED) {
           this.$emit('add-unknown-error')
