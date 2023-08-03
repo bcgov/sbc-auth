@@ -165,28 +165,14 @@
             large color="primary"
             id="add-button"
             :loading="isLoading"
-            @click="add(); snackbar = true"
+            @click="add()"
           >
             <span>Add</span>
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar
-      v-model="snackbar"
-      :timeout="timeout"
-      >
-      {{ businessIdentifier }} was successfully added to your table.
-      <template v-slot:action="{ attrs }">
-        <v-btn
-          color="white"
-          v-bind="attrs"
-          @click="snackbar = false"
-        >
-          mdi-close
-        </v-btn>
-      </template>
-    </v-snackbar>
+
   </div>
 </template>
 
@@ -240,8 +226,6 @@ export default class AddBusinessDialog extends Vue {
   isLoading = false
   isCertified = false // firms only
   authorizationName = ''
-  snackbar = false
-  timeout: 4000
 
   readonly authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
 
@@ -355,9 +339,9 @@ export default class AddBusinessDialog extends Vue {
       this.isLoading = true
       try {
         // try to add business
-        let businessData = {businessIdentifier: this.businessIdentifier}
+        let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
         if (!this.isGovStaffAccount) {
-          businessData = { ...businessData, certifiedByName: this.authorizationName, passCode: this.passcode}
+          businessData = { ...businessData, certifiedByName: this.authorizationName, passCode: this.passcode }
         }
         const addResponse = await this.addBusiness(businessData)
         // check if add didn't succeed
@@ -376,7 +360,7 @@ export default class AddBusinessDialog extends Vue {
           folioNumber: this.folioNumber
         })
         // let parent know that add was successful
-        this.$emit('add-success')
+        this.$emit('add-success', this.businessIdentifier)
       } catch (exception) {
         if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
           this.$emit('add-failed-invalid-code', this.passcodeLabel)
