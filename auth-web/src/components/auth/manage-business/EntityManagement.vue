@@ -307,6 +307,15 @@
           <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
       </ModalDialog>
+      <!-- Message for successfully adding name request -->
+      <v-snackbar
+        id="success-nr-snackbar"
+        v-model="showSnackbar"
+        :timeout="4000"
+        transition="fade"
+      >
+        {{ snackbarText }}
+      </v-snackbar>
     </v-container>
   </div>
 </template>
