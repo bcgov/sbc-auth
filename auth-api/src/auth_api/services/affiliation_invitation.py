@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service for managing Affiliation Invitation data."""
+from dataclasses import fields
 from datetime import datetime
 from typing import Dict, List
 from urllib.parse import urlencode
@@ -30,6 +31,7 @@ from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
+from auth_api.models.dataclass import AffiliationInvitationSearch, AffiliationInvitationData
 from auth_api.models.entity import Entity as EntityModel
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
@@ -77,6 +79,51 @@ class AffiliationInvitation:
     def affiliation_invitations_to_dict_list(cls, models: List[AffiliationInvitationModel]) -> List[Dict]:
         """Return list of AffiliationInvitationModels converted to list dicts."""
         return [AffiliationInvitationSchema().dump(model) for model in models]
+
+    @classmethod
+    def enrich_affiliation_invitations_dict_list_with_business_data(cls, affiliation_invitation_dicts: List[Dict]) -> List[AffiliationInvitationData]:
+        """Enrich affiliation invitation model data with business details."""
+        token = RestService.get_service_account_token(
+            config_id='ENTITY_SVC_CLIENT_ID',
+            config_secret='ENTITY_SVC_CLIENT_SECRET')
+
+        business_identifiers = [afi['business_identifier'] for afi in affiliation_invitation_dicts]
+
+        business_entities = AffiliationInvitation. \
+            _get_multiple_business_details(business_identifiers=business_identifiers, token=token)
+        result = []
+
+        def _init_dict_for_dataclass_from_dict(dataclass, initial_dict: Dict):
+            return {field.name: initial_dict.get(field.name) for field in fields(dataclass)}
+
+        for affiliation_invitation_dict in affiliation_invitation_dicts:
+            from_org = AffiliationInvitationData.OrgDetails(
+                **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
+                                                     affiliation_invitation_dict['from_org']))
+            to_org = AffiliationInvitationData.OrgDetails(
+                **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
+                                                     affiliation_invitation_dict['to_org']))
+
+            business_entity = next(
+                (business_entity for business_entity in business_entities if
+                 affiliation_invitation_dict['business_identifier'] == business_entity['identifier']),
+                None)
+
+            entity = AffiliationInvitationData.EntityDetails(business_identifier=business_entity['identifier'],
+                                                             name=business_entity[
+                                                                 'legalName']) if business_entity else None
+
+            aid = AffiliationInvitationData(
+                **{
+                    **_init_dict_for_dataclass_from_dict(AffiliationInvitationData, affiliation_invitation_dict),
+                    'from_org': from_org,
+                    'to_org': to_org,
+                    'entity': entity
+                }
+            )
+            result.append(aid)
+
+        return result
 
     @staticmethod
     @user_context
@@ -150,8 +197,10 @@ class AffiliationInvitation:
         if affiliation_invitation.type != AffiliationInvitationType.PASSCODE.value:
             # Fetch the up-to-date business details from legal API
             business = AffiliationInvitation._get_business_details(business_identifier,
-                                                                   RestService.get_service_account_token())
-            # business = {'business': {'legalName': 'hello whatsup'}}
+                                                                   RestService.get_service_account_token(
+                                                                       config_id='ENTITY_SVC_CLIENT_ID',
+                                                                       config_secret='ENTITY_SVC_CLIENT_SECRET'))
+
             AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
                                                               business['business']['legalName'],
                                                               f'{invitation_origin}/{context_path}')
@@ -173,6 +222,22 @@ class AffiliationInvitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None) from e
 
         return get_business_response.json()
+
+    @staticmethod
+    def _get_multiple_business_details(business_identifiers: List[str], token: str) -> List:
+        """Return json of multiple business details by calling legal-api."""
+
+        legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
+        get_businesses_url = f'{legal_api_url}/businesses/search'
+
+        data = {'identifiers': business_identifiers}
+        try:
+            get_business_response = RestService.post(get_businesses_url, token=token, data=data)
+        except (HTTPError, ServiceUnavailableException) as e:
+            current_app.logger.info(e)
+            raise BusinessException(Error.DATA_NOT_FOUND, None) from e
+
+        return get_business_response.json()['businessEntities']
 
     def update_affiliation_invitation(self, user, invitation_origin, affiliation_invitation_info: Dict):
         """Update the specified affiliation invitation with new data."""
@@ -226,43 +291,10 @@ class AffiliationInvitation:
         invitation.delete()
 
     @staticmethod
-    @user_context
-    def get_invitations_for_from_org(org_id, status=None, **kwargs):
-        """Get affiliation invitations for from org."""
-        user_from_context: UserContext = kwargs['user_context']
-
-        if not OrgModel.find_by_org_id(org_id):
-            return None
-
-        if status:
-            status = InvitationStatus[status]
-
-        # If staff return full list
-        if user_from_context.is_staff():
-            return AffiliationInvitationModel.filter_by(from_org_id=org_id, status_codes=['PENDING'])
-
-        current_user: UserService = UserService.find_by_jwt_token()
-        current_user_membership: MembershipModel = \
-            MembershipModel.find_membership_by_user_and_org(user_id=current_user.identifier, org_id=org_id)
-
-        # If no active membership return empty array
-        if current_user_membership is None or \
-                current_user_membership.status != Status.ACTIVE.value:
-            return []
-
-        return AffiliationInvitationModel.find_invitations_from_org(org_id=org_id, status=status)
-
-    @staticmethod
-    @user_context
-    def search_invitations_for_from_org(org_id, status=None, **kwargs):
-        """Search affiliation invitations for from org."""
-        invitation_models = AffiliationInvitation.get_invitations_for_from_org(org_id, status, **kwargs) or []
-        invitations_result = {
-            'affiliationInvitations': [AffiliationInvitation(invitation).as_dict()
-                                       for invitation in invitation_models]
-        }
-
-        return invitations_result
+    def search_invitations(search_filter: AffiliationInvitationSearch):
+        """Search affiliation invitations."""
+        invitation_models = AffiliationInvitationModel().filter_by(search_filter=search_filter)
+        return [AffiliationInvitation(invitation).as_dict() for invitation in invitation_models]
 
     @staticmethod
     @user_context
@@ -278,7 +310,8 @@ class AffiliationInvitation:
 
         # If staff return full list
         if user_from_context.is_staff():
-            return AffiliationInvitationModel.filter_by(to_org_id=org_id, status_codes=['PENDING'])
+            return AffiliationInvitationModel \
+                .filter_by(AffiliationInvitationSearch(to_org_id=org_id, status_codes=['PENDING']))
 
         current_user: UserService = UserService.find_by_jwt_token()
         current_user_membership: MembershipModel = \
@@ -425,12 +458,12 @@ class AffiliationInvitation:
         return AffiliationInvitation(affiliation_invitation)
 
     @classmethod
-    def get_all_invitations_with_details_related_to_org(cls, org_id, statuses=None) -> List[Dict]:
+    def get_all_invitations_with_details_related_to_org(cls, org_id, search_filter) -> List[Dict]:
         """Get affiliation invitations for from org and for to org."""
         # If staff return full list
         if UserService.is_context_user_staff():
             return cls.affiliation_invitations_to_dict_list(
-                AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+                AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, search_filter=search_filter)
             )
 
         current_user: UserService = UserService.find_by_jwt_token()
@@ -438,27 +471,8 @@ class AffiliationInvitation:
             return []
 
         return cls.affiliation_invitations_to_dict_list(
-            AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, status_filters=statuses)
+            AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, search_filter=search_filter)
         )
-
-    @staticmethod
-    def get_all_invitations_sent_to_org_for_entity(org_id, entity_id, status_codes=None, invitation_types=None) -> List:
-        """Get affiliation invitations that were sent to specific org and are related to the entity."""
-        # If staff return full list
-        if UserService.is_context_user_staff():
-            return AffiliationInvitationModel.filter_by(to_org_id=org_id,
-                                                        entity_id=entity_id,
-                                                        status_codes=status_codes,
-                                                        invitation_types=invitation_types)
-
-        current_user: UserService = UserService.find_by_jwt_token()
-        if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
-            return []
-
-        return AffiliationInvitationModel.filter_by(to_org_id=org_id,
-                                                    entity_id=entity_id,
-                                                    status_codes=status_codes,
-                                                    invitation_types=invitation_types)
 
     @staticmethod
     def refuse_affiliation_invitation(invitation_id):
@@ -469,6 +483,9 @@ class AffiliationInvitation:
 
         if not invitation.status == InvitationStatus.PENDING.value:
             raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
+
+        # todo: ticket #16222 https://github.com/bcgov/entity/issues/16222
+        # send email on refused affiliation
 
         invitation = invitation.set_status(InvitationStatus.FAILED.value)
 

@@ -19,9 +19,12 @@ from flask_restx import Namespace, Resource, cors
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException, Error
+from auth_api.models.dataclass import AffiliationInvitationSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
+from auth_api.services import Entity as EntityService
 from auth_api.services import User as UserService
+from auth_api.services.authorization import check_auth
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
@@ -39,17 +42,38 @@ class AffiliationInvitations(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles(
-        [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Get affiliation invitations."""
         try:
+            get_business_details = request.args.get('businessDetails', False)
             org_id = request.args.get('orgId', None)
-            status = request.args.get('status', None)
-            data = AffiliationInvitationService.search_invitations_for_from_org(org_id, status)
-            data = data or {'affiliationInvitations': []}
+            business_identifier = request.args.get('businessIdentifier', None)
 
-            response, status = data, http_status.HTTP_200_OK
+            search_filter = AffiliationInvitationSearch()
+            search_filter.from_org_id = request.args.get('fromOrgId', None)
+            search_filter.to_org_id = request.args.get('toOrgId', None)
+            search_filter.status_codes = request.args.getlist('statuses')
+            search_filter.invitation_types = request.args.getlist('types')
+            if business_identifier:
+                business = EntityService\
+                    .find_by_business_identifier(business_identifier=business_identifier, skip_auth=True)
+                search_filter.entity_id = business.identifier if business else None
+
+            auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
+            if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id):
+                raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+            if org_id:
+                data = AffiliationInvitationService. \
+                    get_all_invitations_with_details_related_to_org(org_id=org_id, search_filter=search_filter)
+            else:
+                data = AffiliationInvitationService. \
+                    search_invitations(search_filter=search_filter)
+            if get_business_details:
+                data = AffiliationInvitationService.enrich_affiliation_invitations_dict_list_with_business_data(data)
+
+            response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

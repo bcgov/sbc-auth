@@ -25,6 +25,7 @@ from auth_api.utils.enums import AffiliationInvitationType as AffiliationInvitat
 from .affiliation_invitation_type import AffiliationInvitationType
 
 from .base_model import BaseModel
+from .dataclass import AffiliationInvitationSearch
 from .db import db
 from .invite_status import InvitationStatus
 
@@ -103,52 +104,47 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         affiliation_invitation.save()
         return affiliation_invitation
 
-    # pylint: disable=too-many-arguments
     @classmethod
-    def filter_by(cls,
-                  from_org_id=None,
-                  to_org_id=None,
-                  sender_id=None,
-                  approver_id=None,
-                  entity_id=None,
-                  affiliation_id=None,
-                  status_codes=None,
-                  invitation_types=None
-                  ) -> list:
+    def filter_by(cls, search_filter: AffiliationInvitationSearch, query=None) -> list:
         """Filter list of Affiliation Invitations by provided filters. At least one filter needs to be provided."""
-        results = db.session.query(AffiliationInvitation)
         filter_set = False
 
-        if from_org_id is not None:
-            results = results.filter(AffiliationInvitation.from_org_id == from_org_id)
+        if query:
+            results = query
+            filter_set = True
+        else:
+            results = db.session.query(AffiliationInvitation)
+
+        if search_filter.from_org_id:
+            results = results.filter(AffiliationInvitation.from_org_id == search_filter.from_org_id)
             filter_set = True
 
-        if to_org_id is not None:
-            results = results.filter(AffiliationInvitation.to_org_id == to_org_id)
+        if search_filter.to_org_id:
+            results = results.filter(AffiliationInvitation.to_org_id == search_filter.to_org_id)
             filter_set = True
 
-        if sender_id is not None:
-            results = results.filter(AffiliationInvitation.sender_id == sender_id)
+        if search_filter.sender_id:
+            results = results.filter(AffiliationInvitation.sender_id == search_filter.sender_id)
             filter_set = True
 
-        if approver_id is not None:
-            results = results.filter(AffiliationInvitation.approver_id == approver_id)
+        if search_filter.approver_id:
+            results = results.filter(AffiliationInvitation.approver_id == search_filter.approver_id)
             filter_set = True
 
-        if entity_id is not None:
-            results = results.filter(AffiliationInvitation.entity_id == entity_id)
+        if search_filter.entity_id:
+            results = results.filter(AffiliationInvitation.entity_id == search_filter.entity_id)
             filter_set = True
 
-        if affiliation_id is not None:
-            results = results.filter(AffiliationInvitation.affiliation_id == affiliation_id)
+        if search_filter.affiliation_id:
+            results = results.filter(AffiliationInvitation.affiliation_id == search_filter.affiliation_id)
             filter_set = True
 
-        if status_codes is not None and status_codes:
-            results = results.filter(AffiliationInvitation.status.in_(status_codes))  # pylint: disable=no-member
+        if search_filter.status_codes:
+            results = results.filter(AffiliationInvitation.status.in_(search_filter.status_codes))  # pylint: disable=no-member
             filter_set = True
 
-        if invitation_types is not None and status_codes:
-            results = results.filter(AffiliationInvitation.type.in_(invitation_types))
+        if search_filter.invitation_types:
+            results = results.filter(AffiliationInvitation.type.in_(search_filter.invitation_types))
             filter_set = True
 
         if not filter_set:
@@ -212,17 +208,11 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         return self
 
     @classmethod
-    def find_all_related_to_org(cls, org_id, status_filters=None, types_filter=None):
+    def find_all_related_to_org(cls, org_id, search_filter=AffiliationInvitationSearch()):
         """Return all affiliation invitations that are related to the org (from org or to org) filtered by statuses."""
-        results = db.session.query(AffiliationInvitation) \
+        query = db.session.query(AffiliationInvitation) \
             .filter(
             or_(AffiliationInvitation.to_org_id == org_id, AffiliationInvitation.from_org_id == org_id)
         )
 
-        if status_filters is not None:
-            results = results.filter(AffiliationInvitation.status.in_(status_filters))  # pylint: disable=no-member
-
-        if types_filter is not None:
-            results = results.filter(AffiliationInvitation.type.in_(types_filter))
-
-        return results.all()
+        return cls.filter_by(search_filter=search_filter, query=query)

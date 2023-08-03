@@ -14,7 +14,7 @@
 """This module holds data classes."""
 
 from typing import List, Optional
-from attr import dataclass, field
+from dataclasses import dataclass, field
 
 from auth_api.utils.enums import KeycloakGroupActions
 
@@ -41,6 +41,49 @@ class PaginationInfo:
 
 
 @dataclass
+class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attributes
+    """Used for searching Affiliation Invitations."""
+    status_codes: Optional[List[str]] = None
+    invitation_types: Optional[List[str]] = None
+    from_org_id: Optional[str] = None
+    to_org_id: Optional[str] = None
+    sender_id: Optional[str] = None
+    approver_id: Optional[str] = None
+    entity_id: Optional[str] = None
+    affiliation_id: Optional[str] = None
+
+
+@dataclass
+class AffiliationInvitationData:  # pylint: disable=too-many-instance-attributes
+    """Used for as affiliation invitation DTO."""
+
+    @dataclass
+    class EntityDetails:
+        """Used for as entity details in affiliation invitation DTO."""
+        business_identifier: str
+        name: str
+
+    @dataclass
+    class OrgDetails:
+        """Used for as org details in affiliation invitation DTO."""
+        id: str
+        name: str
+
+    id: str
+    type: str
+    status_code: str
+    affiliation_id: str
+    business_identifier: str
+    recipient_email: str
+    sent_date: str
+    accepted_date: str
+
+    from_org: OrgDetails
+    to_org: OrgDetails
+    entity: EntityDetails
+
+
+@dataclass
 class OrgSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching organizations."""
 
@@ -58,7 +101,7 @@ class OrgSearch:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class TaskSearch:
+class TaskSearch:   # pylint: disable=too-many-instance-attributes
     """Used for searching tasks."""
 
     status: List[str] = field()

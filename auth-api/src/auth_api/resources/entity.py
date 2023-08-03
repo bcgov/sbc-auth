@@ -18,9 +18,8 @@ from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
-from auth_api.exceptions import BusinessException, Error
+from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
-from auth_api.services.affiliation_invitation import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
@@ -215,37 +214,3 @@ class AuthorizationResource(Resource):
         expanded: bool = request.args.get('expanded', False)
         authorisations = AuthorizationService.get_user_authorizations_for_entity(business_identifier, expanded)
         return authorisations, http_status.HTTP_200_OK
-
-
-@cors_preflight('GET,OPTIONS')
-@API.route('/<string:business_identifier>/affiliationInvitations/toOrg/<int:org_id>', methods=['GET', 'OPTIONS'])
-class AffiliationInvitationResource(Resource):
-    """Resource for managing Affiliation Invitations."""
-
-    @staticmethod
-    @_jwt.requires_auth
-    @cors.crossdomain(origin='*')
-    def get(business_identifier, org_id):
-        """Return list of Affiliation Invitations with details."""
-        filter_by_status = request.args.getlist('status')
-        filter_by_type = request.args.getlist('type')
-
-        try:
-            if not (business := EntityService.find_by_business_identifier(business_identifier=business_identifier,
-                                                                          skip_auth=True)):
-                raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-            data = AffiliationInvitationService. \
-                get_all_invitations_sent_to_org_for_entity(org_id=org_id,
-                                                           entity_id=business.identifier,
-                                                           status_codes=filter_by_status,
-                                                           invitation_types=filter_by_type)
-
-            data = AffiliationInvitationService.affiliation_invitations_to_dict_list(data)
-
-            response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
-
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-
-        return response, status
