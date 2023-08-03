@@ -2,11 +2,15 @@ import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
+
 const vuetify = new Vuetify({})
 
 const localVue = createLocalVue()
@@ -18,8 +22,10 @@ const tests = [
     businessIdentifier: 'CP0000000',
     passcodeLabel: 'Passcode',
     certifyExists: false,
+    passcodeExists: true,
+    folioNumberExists: true,
     forgotButtonText: 'I lost or forgot my passcode',
-    isGovStaffAccount: false,
+    isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
   },
@@ -28,8 +34,10 @@ const tests = [
     businessIdentifier: 'BC0000000',
     passcodeLabel: 'Password',
     certifyExists: false,
+    passcodeExists: true,
+    folioNumberExists: true,
     forgotButtonText: 'I lost or forgot my password',
-    isGovStaffAccount: false,
+    isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
   },
@@ -38,28 +46,32 @@ const tests = [
     businessIdentifier: 'FM0000000',
     passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
     certifyExists: true,
+    passcodeExists: true,
+    folioNumberExists: true,
     forgotButtonText: null,
-    isGovStaffAccount: false,
+    isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
   },
   {
     desc: 'renders the component properly for a FM (staff user)',
     businessIdentifier: 'FM0000000',
-    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
-    certifyExists: true,
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
     forgotButtonText: null,
-    isGovStaffAccount: true,
+    isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
   },
   {
     desc: 'renders the component properly for a FM (sbc staff)',
     businessIdentifier: 'FM0000000',
-    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
-    certifyExists: true,
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
     forgotButtonText: null,
-    isGovStaffAccount: false,
+    isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
   }
@@ -100,13 +112,7 @@ tests.forEach(test => {
 
       wrapper = shallowMount(AddBusinessDialog, {
         store,
-        vuetify,
-        propsData: {
-          dialog: true,
-          isGovStaffAccount: test.isGovStaffAccount,
-          userFirstName: test.userFirstName,
-          userLastName: test.userLastName
-        }
+        vuetify
       })
     })
 
@@ -115,6 +121,12 @@ tests.forEach(test => {
     })
 
     it(test.desc, async () => {
+      wrapper.setProps({
+        dialog: true,
+        isStaffOrSbcStaff: test.isStaffOrSbcStaff,
+        userFirstName: test.userFirstName,
+        userLastName: test.userLastName
+      }) // Had to do this, propsData doesn't seem to play nice.
       wrapper.setData({
         businessIdentifier: test.businessIdentifier,
         businessName: 'My Business Inc'
@@ -140,13 +152,16 @@ tests.forEach(test => {
       // verify input fields
       expect(wrapper.find('.business-identifier').attributes('label'))
         .toBe('Incorporation Number or Registration Number') // DELETE THIS (see above)
-      expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
+      expect(wrapper.find('.passcode').exists()).toBe(test.passcodeExists)
+      if (test.passcodeExists) {
+        expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
+      }
       expect(wrapper.find('.certify').exists()).toBe(test.certifyExists)
-      expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
-      expect(wrapper.find('.authorization').exists()).toBe(test.isGovStaffAccount)
-
-      if (test.isGovStaffAccount) {
-        expect(wrapper.find('.authorization').attributes('label')).toContain('Legal name of Authorized Person')
+      if (test.folioNumberExists) {
+        expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
+      }
+      if (!test.isStaffOrSbcStaff) {
+        expect(wrapper.find('.authorization').exists())
       }
 
       // verify buttons

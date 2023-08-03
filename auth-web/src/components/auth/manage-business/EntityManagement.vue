@@ -209,7 +209,7 @@
       <!-- Add an Existing Business Dialog -->
       <AddBusinessDialog
         :dialog="addBusinessDialog"
-        :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
+        :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
         @add-success="showAddSuccessModal"

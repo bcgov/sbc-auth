@@ -74,7 +74,7 @@
               />
             </template>
 
-            <template v-if="!isGovStaffAccount">
+            <template v-if="!isStaffOrSbcStaff">
               <!-- Passcode -->
               <v-expand-transition>
                 <v-text-field
@@ -201,7 +201,7 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
-    isGovStaffAccount: {
+    isStaffOrSbcStaff: {
       type: Boolean,
       default: false
     },
@@ -236,8 +236,8 @@ export default defineComponent({
     const isLoading = ref(false)
     const isCertified = ref(false) // firms only
     const authorizationName = ref('')
-    const addBusinessForm = ref(null)
-    const helpDialog = ref(null)
+    const addBusinessForm = ref<HTMLFormElement>()
+    const helpDialog = ref<HelpDialog>()
 
     // Computed properties
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
@@ -260,11 +260,11 @@ export default defineComponent({
     })
 
     const showAuthorization = computed(() => {
-      return isFirm.value && props.isGovStaffAccount
+      return isFirm.value && props.isStaffOrSbcStaff
     })
 
     const certifiedBy = computed(() => {
-      return props.isGovStaffAccount ? authorizationName.value : `${props.userLastName}, ${props.userFirstName}`
+      return props.isStaffOrSbcStaff ? authorizationName.value : `${props.userLastName}, ${props.userFirstName}`
     })
 
     const authorizationRules = computed(() => {
@@ -327,7 +327,7 @@ export default defineComponent({
 
     const isFormValid = computed(() => {
       // if user is a staff user or sbc staff user, then only require the business identifier
-      if (props.isGovStaffAccount && !!businessIdentifier.value) {
+      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
         return true
       }
       // business id is required
@@ -379,7 +379,7 @@ export default defineComponent({
         try {
           // try to add business
           let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
-          if (!props.isGovStaffAccount) {
+          if (!props.isStaffOrSbcStaff) {
             businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
           }
           const addResponse = await addBusiness(businessData)
