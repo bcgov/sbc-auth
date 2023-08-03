@@ -196,7 +196,7 @@
                       <div class="subtitle"> (If you forgot or don't have a business {{passwordText}})</div>
                     </v-list-item-title>
                   </template>
-                  <div style="color:#313132;">
+                  <div class="list-body">
                     <div>
                       An email will be sent to the registered office contact email of the business:
                     </div>
@@ -211,8 +211,8 @@
                   <template v-slot:activator>
                     <v-list-item-title>Request authorization from the business</v-list-item-title>
                   </template>
-                  <div style="color:#313132;">
-                    place holder
+                  <div class="list-body">
+                    <!-- Placeholder -->
                   </div>
                 </v-list-group>
 
@@ -220,8 +220,8 @@
                   <template v-slot:activator>
                     <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
                   </template>
-                  <div style="color:#313132;">
-                    place holder
+                  <div class="list-body">
+                    <!-- Placeholder -->
                   </div>
                 </v-list-group>
 
@@ -585,6 +585,10 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
+.list-body {
+  color:#313132;
+}
+
 .v-tooltip__content {
   background-color: RGBA(73, 80, 87, 0.95) !important;
   color: white !important;
@@ -689,7 +693,7 @@ dt {
 }
 
 .v-list-item{
-  background: #FFFFFF;
+  background: $BCgovInputBG;
   height: 4rem !important;
   margin: 0 !important;
 }
