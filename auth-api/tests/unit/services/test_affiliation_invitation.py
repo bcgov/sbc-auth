@@ -26,6 +26,7 @@ from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
+from auth_api.models.dataclass import AffiliationInvitationSearch
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services import Entity as EntityService
@@ -345,10 +346,9 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
 
         AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '')
 
-        invitations: list = AffiliationInvitationService\
-            .get_invitations_for_from_org(org_id=from_org_id,
-                                          status='PENDING',
-                                          token_info=TestJwtClaims.public_user_role)
+        invitations: list = AffiliationInvitationService \
+            .search_invitations(AffiliationInvitationSearch(from_org_id=from_org_id,
+                                                            status_codes=['PENDING']))
         assert invitations
         assert len(invitations) == 1
 
@@ -374,6 +374,6 @@ def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, busines
         AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '')
 
         invitations: list = AffiliationInvitationService \
-            .get_invitations_for_to_org(org_id=to_org_id, status='PENDING', token_info=TestJwtClaims.public_user_role)
+            .search_invitations(search_filter=AffiliationInvitationSearch(to_org_id=to_org_id, status_codes=['PENDING']))
         assert invitations
         assert len(invitations) == 1

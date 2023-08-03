@@ -329,10 +329,8 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
 
 def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that affiliation invitations can be retrieved."""
-    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
-                                                                                             jwt,
-                                                                                             session,
-                                                                                             keycloak_mock)
+    headers, from_org_id, to_org_id, business_identifier = \
+        setup_affiliation_invitation_data(client, jwt, session, keycloak_mock)
 
     client.post('/api/v1/affiliationInvitations', data=json.dumps(
         factory_affiliation_invitation(
@@ -341,7 +339,8 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
             business_identifier=business_identifier)),
                                 headers=headers, content_type='application/json')
 
-    rv_invitations = client.get('/api/v1/affiliationInvitations?orgId={}'.format(from_org_id),
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv_invitations = client.get('/api/v1/affiliationInvitations?fromOrgId={}'.format(from_org_id),
                                 headers=headers,
                                 content_type='application/json')
 
@@ -548,16 +547,18 @@ def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, 
                                   business_identifier1=business_identifier,
                                   business_identifier2=new_business_identifiers[0])
 
-    url = f'/api/v1/orgs/{new_org_ids[0]}/affiliationInvitations'
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    expected_org_id = new_org_ids[0]
+    url = f'/api/v1/affiliationInvitations?orgId={expected_org_id}&businessDetails=True'
     affiliation_invitations_response = client.get(url, headers=headers)
     affiliation_invitations_dict: dict = json.loads(affiliation_invitations_response.data)
     affiliation_invitations = affiliation_invitations_dict['affiliationInvitations']
 
     assert len(affiliation_invitations) == 2   # should be two, one for 'toOrg' other for 'fromOrg'
-    assert affiliation_invitations[0]['toOrg']['id'] == new_org_ids[0] \
-           or affiliation_invitations[0]['fromOrg']['id'] == new_org_ids[0]
-    assert affiliation_invitations[1]['toOrg']['id'] == new_org_ids[1] \
-           or affiliation_invitations[1]['fromOrg']['id'] == new_org_ids[1]
+    assert affiliation_invitations[0]['toOrg']['id'] == expected_org_id \
+           or affiliation_invitations[0]['fromOrg']['id'] == expected_org_id
+    assert affiliation_invitations[1]['toOrg']['id'] == expected_org_id \
+           or affiliation_invitations[1]['fromOrg']['id'] == expected_org_id
 
     app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
 
@@ -585,13 +586,15 @@ def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt
                                   business_identifier1=business_identifier,
                                   business_identifier2=new_business_identifiers[0])
 
-    url = f'/api/v1/entities/{business_identifier}/affiliationInvitations/toOrg/{new_org_ids[0]}'
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    expected_org_id = new_org_ids[0]
+    url = f'/api/v1/affiliationInvitations?toOrgId={expected_org_id}&business_identifier={business_identifier}&businessDetails=True'
     affiliation_invitations_response = client.get(url, headers=headers)
     affiliation_invitations_dict: dict = json.loads(affiliation_invitations_response.data)
     affiliation_invitations = affiliation_invitations_dict['affiliationInvitations']
 
     assert len(affiliation_invitations) == 1   # should be only one to org and business identifier match
-    assert affiliation_invitations[0]['toOrg']['id'] == new_org_ids[0]
+    assert affiliation_invitations[0]['toOrg']['id'] == expected_org_id
     assert affiliation_invitations[0]['entity']['businessIdentifier'] == business_identifier
 
     app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
