@@ -67,7 +67,6 @@ export interface NameRequestResponse {
   expirationDate?: Date
   nrNum?: string
   requestActionCd?: string
-  requestTypeCd?: string
   stateCd?: string
   natureBusinessInfo?: string
   applicants?: Array<Applicant>
