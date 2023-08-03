@@ -8,9 +8,9 @@
 
     <v-container justify class="view-container">
       <div class="view-header align-center">
-        <h1 class="view-header__title">{{ viewTitle }}<br>
-          <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
-        </h1>
+          <h1 class="view-header__title">{{ viewTitle }}<br>
+            <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
+          </h1>
         <div class="view-header__actions">
            <!-- Incorporate a Numbered BC Company or Business -->
           <v-menu v-model="incorporateNumberedDropdown">
@@ -60,6 +60,7 @@
                   </ul>
                 </div>
               </v-tooltip>
+
               <!-- Feature Flagged Buttons -->
               <div v-if="enableBcCccUlc">
                 <v-tooltip right content-class="right-tooltip">
@@ -139,6 +140,8 @@
           </v-btn>
         </div>
       </div>
+
+      <CreateNewBusinessHelpVue/>
 
       <search-business-name-request
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
@@ -314,6 +317,7 @@ import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BusinessLookupResultIF } from '@bcrs-shared-components/interfaces/business-lookup-interfaces'
 import ConfigHelper from '@/util/config-helper'
+import CreateNewBusinessHelpVue from './CreateNewBusinessHelp.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -326,6 +330,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     AddBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
+    CreateNewBusinessHelpVue,
     ModalDialog,
     PasscodeResetOptionsModal,
     SearchBusinessNameRequest
