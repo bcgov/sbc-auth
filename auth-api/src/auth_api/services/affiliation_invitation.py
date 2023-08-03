@@ -32,7 +32,7 @@ from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models.affiliation import Affiliation as AffiliationModel
 from auth_api.models.dataclass import AffiliationInvitationSearch, AffiliationInvitationData
-from auth_api.models.entity import Entity as EntityModel
+from auth_api.models.entity import Entity as EntityModel  # noqa: I005
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
@@ -81,7 +81,8 @@ class AffiliationInvitation:
         return [AffiliationInvitationSchema().dump(model) for model in models]
 
     @classmethod
-    def enrich_affiliation_invitations_dict_list_with_business_data(cls, affiliation_invitation_dicts: List[Dict]) -> List[AffiliationInvitationData]:
+    def enrich_affiliation_invitations_dict_list_with_business_data(cls, affiliation_invitation_dicts: List[Dict]) -> \
+            List[AffiliationInvitationData]:
         """Enrich affiliation invitation model data with business details."""
         token = RestService.get_service_account_token(
             config_id='ENTITY_SVC_CLIENT_ID',
@@ -226,7 +227,6 @@ class AffiliationInvitation:
     @staticmethod
     def _get_multiple_business_details(business_identifiers: List[str], token: str) -> List:
         """Return json of multiple business details by calling legal-api."""
-
         legal_api_url = current_app.config.get('LEGAL_API_URL') + current_app.config.get('LEGAL_API_VERSION_2')
         get_businesses_url = f'{legal_api_url}/businesses/search'
 

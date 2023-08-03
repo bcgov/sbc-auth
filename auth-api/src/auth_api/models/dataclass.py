@@ -43,6 +43,7 @@ class PaginationInfo:
 @dataclass
 class AffiliationInvitationSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching Affiliation Invitations."""
+
     status_codes: Optional[List[str]] = None
     invitation_types: Optional[List[str]] = None
     from_org_id: Optional[str] = None
@@ -60,12 +61,14 @@ class AffiliationInvitationData:  # pylint: disable=too-many-instance-attributes
     @dataclass
     class EntityDetails:
         """Used for as entity details in affiliation invitation DTO."""
+
         business_identifier: str
         name: str
 
     @dataclass
     class OrgDetails:
         """Used for as org details in affiliation invitation DTO."""
+
         id: str
         name: str
 

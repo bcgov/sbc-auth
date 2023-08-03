@@ -288,6 +288,7 @@ def business_mock(monkeypatch):
     monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details',
                         get_businesses)
 
+
 @pytest.fixture()
 def nr_mock(monkeypatch):
     """Mock nr get call."""

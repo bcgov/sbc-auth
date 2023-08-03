@@ -140,7 +140,8 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
             filter_set = True
 
         if search_filter.status_codes:
-            results = results.filter(AffiliationInvitation.status.in_(search_filter.status_codes))  # pylint: disable=no-member
+            results = results.filter(
+                AffiliationInvitation.status.in_(search_filter.status_codes))  # pylint: disable=no-member
             filter_set = True
 
         if search_filter.invitation_types:

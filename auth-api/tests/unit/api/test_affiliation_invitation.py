@@ -588,12 +588,13 @@ def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     expected_org_id = new_org_ids[0]
-    url = f'/api/v1/affiliationInvitations?toOrgId={expected_org_id}&business_identifier={business_identifier}&businessDetails=True'
+    url = f'/api/v1/affiliationInvitations?toOrgId=' \
+          f'{expected_org_id}&business_identifier={business_identifier}&businessDetails=True'
     affiliation_invitations_response = client.get(url, headers=headers)
     affiliation_invitations_dict: dict = json.loads(affiliation_invitations_response.data)
     affiliation_invitations = affiliation_invitations_dict['affiliationInvitations']
 
-    assert len(affiliation_invitations) == 1   # should be only one to org and business identifier match
+    assert len(affiliation_invitations) == 1  # should be only one to org and business identifier match
     assert affiliation_invitations[0]['toOrg']['id'] == expected_org_id
     assert affiliation_invitations[0]['entity']['businessIdentifier'] == business_identifier
 

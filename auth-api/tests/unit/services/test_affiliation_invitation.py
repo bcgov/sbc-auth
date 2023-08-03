@@ -374,6 +374,8 @@ def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, busines
         AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '')
 
         invitations: list = AffiliationInvitationService \
-            .search_invitations(search_filter=AffiliationInvitationSearch(to_org_id=to_org_id, status_codes=['PENDING']))
+            .search_invitations(
+                search_filter=AffiliationInvitationSearch(to_org_id=to_org_id, status_codes=['PENDING'])
+            )
         assert invitations
         assert len(invitations) == 1
