@@ -217,16 +217,13 @@ export default defineComponent({
   setup (props, { emit }) {
     // Store and Actions
     const store = useStore()
-    const addBusiness = (loginPayload: LoginPayload) => {
-      // Replace with your actual Vuex action call
+    const addBusiness = async (loginPayload: LoginPayload) => {
       return store.dispatch('business/addBusiness', loginPayload)
     }
-    const updateBusinessName = (businessNumber: string) => {
-      // Replace with your actual Vuex action call
+    const updateBusinessName = async (businessNumber: string) => {
       return store.dispatch('business/updateBusinessName', businessNumber)
     }
-    const updateFolioNumber = (folioNumberload: FolioNumberload) => {
-      // Replace with your actual Vuex action call
+    const updateFolioNumber = async (folioNumberload: FolioNumberload) => {
       return store.dispatch('business/updateFolioNumber', folioNumberload)
     }
 
