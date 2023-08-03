@@ -148,10 +148,15 @@
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal('business')"
+        @add-unknown-error="showUnknownErrorModal"
         @business-already-added="showBusinessAlreadyAdded($event)"
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
+        @add-name-request-dialog="showAddNRModal()"
+        @on-cancel-nr="cancelAddNameRequest()"
+        @add-success-nr="showAddSuccessModalNR"
+        @add-nr-error="showNRErrorModal()"
+        @add-failed-no-nr="showNRNotFoundModal()"
       />
 
       <v-row  no-gutters id="dashboard-actions" class="mb-n3">

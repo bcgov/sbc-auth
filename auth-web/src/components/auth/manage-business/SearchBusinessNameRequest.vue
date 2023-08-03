@@ -26,30 +26,60 @@
         </v-form>
         <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
           <template>
-            <!-- TODO 16720: Name Request search lookup -->
             <div>
               Add Name search field
             </div>
+            <!-- TODO 16720: Search for name request to trigger showAddNRModal -->
+            <!-- <name-request-lookup
+              @business="requestNames = $event.name; businessIdentifier = $event.identifier"
+              @name-request-selected="showAddNRModal()"
+            /> -->
           </template>
         </v-form>
       </v-col>
     </v-row>
-
+    <!-- Add Name Request Dialog -->
+    <ModalDialog
+      ref="addNRDialog"
+      :is-persistent="true"
+      title="Manage a Name Request"
+      :show-icon="false"
+      :show-actions="false"
+      max-width="640"
+      data-test-tag="add-name-request"
+    >
+      <template v-slot:text>
+        <AddNameRequestForm
+          class="mt-6"
+          :businessIdentifier="businessIdentifier"
+          :requestNames="requestNames"
+          @close-add-nr-modal="cancelAddNameRequest()"
+          @add-success="showAddSuccessModalNR"
+          @add-failed-show-msg="showNRErrorModal()"
+          @add-failed-no-nr="showNRNotFoundModal()"
+          @add-unknown-error="showUnknownErrorModal('nr')"
+        />
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { mapActions } from 'vuex'
 
 @Component({
   components: {
+    AddNameRequestForm,
     BusinessLookup,
     Certify,
-    HelpDialog
+    HelpDialog,
+    ModalDialog
   },
   methods: {
     ...mapActions('business', [
@@ -70,6 +100,12 @@ export default class SearchBusinessNameRequest extends Vue {
   businessName = ''
   businessIdentifier = '' // aka incorporation number or registration number
   clearSearch = 0
+  manageNameRequestDialog = { show: false }
+  requestNames = [] // names in a name request
+
+  $refs: {
+    addNRDialog: ModalDialog
+  }
 
   showAddSuccessModal () {
     this.clearSearch++
@@ -92,6 +128,25 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   cancelAddBusiness () {
     this.$emit('on-cancel')
+  }
+  cancelAddNameRequest () {
+    this.$refs.addNRDialog.close()
+    this.$emit('on-cancel-nr')
+  }
+  showAddSuccessModalNR () {
+    this.$refs.addNRDialog.close()
+    this.$emit('add-success-nr')
+  }
+  showNRErrorModal () {
+    this.$refs.addNRDialog.close()
+    this.$emit('add-nr-error')
+  }
+  showNRNotFoundModal () {
+    this.$refs.addNRDialog.close()
+    this.$emit('add-failed-no-nr')
+  }
+  showAddNRModal () {
+    this.$refs.addNRDialog.open()
   }
 }
 </script>
