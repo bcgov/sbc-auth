@@ -338,7 +338,7 @@ export default defineComponent({
       return (
         !!businessIdentifier.value &&
         !!passcode.value &&
-        (!isFirm.value || (isCertified.value && certifiedBy.value)) &&
+        (!isFirm.value || (isCertified.value && !!certifiedBy.value)) &&
         addBusinessForm.value.validate()
       )
     })
