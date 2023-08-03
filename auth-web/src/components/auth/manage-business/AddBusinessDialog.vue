@@ -285,7 +285,7 @@ export default defineComponent({
   props: {
     dialogType: {
       type: String,
-      default: false
+      default: ''
     },
     isStaffOrSbcStaff: {
       type: Boolean,

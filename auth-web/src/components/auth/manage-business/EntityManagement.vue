@@ -540,7 +540,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showAddBusinessModal () {
-    this.addBusinessDialog = 'MODIFY'
+    this.addBusinessDialog = 'ADD'
   }
 
   showAddNRModal () {

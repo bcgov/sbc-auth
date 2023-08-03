@@ -18,7 +18,7 @@ localVue.use(Vuex)
 
 const testCaseList = [
   {
-    desc: 'renders the component properly for a CP',
+    description: 'Should render for a BC account',
     businessIdentifier: 'CP0000000',
     passcodeInputLabel: 'Passcode',
     certifyExists: false,
@@ -30,7 +30,7 @@ const testCaseList = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a BC',
+    description: 'Should render for a CP account',
     businessIdentifier: 'BC0000000',
     passcodeInputLabel: 'Password',
     certifyExists: false,
@@ -42,7 +42,7 @@ const testCaseList = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a FM (client User)',
+    description: 'Should render for a FM Client account',
     businessIdentifier: 'FM0000000',
     passcodeInputLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
     certifyExists: true,
@@ -54,7 +54,7 @@ const testCaseList = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a FM (staff user)',
+    description: 'Should render for a FM Staff account',
     businessIdentifier: 'FM0000000',
     certifyExists: false,
     passcodeExists: false,
@@ -65,7 +65,7 @@ const testCaseList = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a FM (sbc staff)',
+    description: 'Should render for a FM SBC Staff account',
     businessIdentifier: 'FM0000000',
     certifyExists: false,
     passcodeExists: false,
@@ -128,7 +128,7 @@ testCaseList.forEach(test => {
         wrapper.destroy()
       })
 
-      it(test.desc, async () => {
+      it(test.description, async () => {
         wrapper.setProps({
           dialogType: dialogType
         })
@@ -144,6 +144,16 @@ testCaseList.forEach(test => {
         // expect(wrapper.find('businesslookup-stub').exists()).toBe(true) // UN-COMMENT (see below)
         expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
 
+        // button components
+        expect(wrapper.find('#add-button span').text()).toBe(dialogType === 'ADD' ? 'Add' : 'Manage This Business')
+        expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
+        if (!test.certifyExists) {
+          expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
+        }
+        if (test.forgotButtonText) {
+          expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
+        }
+
         // *** UN-COMMENT THIS WHEN BUSINESS LOOKUP IS ENABLED ***
         // // verify data list
         // const dl = wrapper.find('dl')
@@ -155,7 +165,7 @@ testCaseList.forEach(test => {
         // expect(dd.at(1).text()).toBe(test.businessIdentifier)
 
         if (dialogType === 'ADD') {
-          // verify input fields
+          // input components
           expect(wrapper.find('.business-identifier').attributes('label'))
             .toBe('Incorporation Number or Registration Number') // DELETE THIS (see above)
           expect(wrapper.find('.passcode').exists()).toBe(test.passcodeExists)
@@ -169,20 +179,10 @@ testCaseList.forEach(test => {
           if (!test.isStaffOrSbcStaff) {
             expect(wrapper.find('.authorization').exists())
           }
-  
-          // verify buttons
-          if (!test.certifyExists) {
-            expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
-          }
-          if (test.forgotButtonText) {
-            expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
-          }
-          expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
-  
-          // always enable add button
-          expect(wrapper.find('#add-button span').text()).toBe('Add')
         } else if (dialogType === 'MODIFY') {
-
+          if (!test.isStaffOrSbcStaff) {
+            expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
+          }
         }
       })
     })
