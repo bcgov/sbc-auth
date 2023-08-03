@@ -165,6 +165,7 @@
                   </template>
                   <div class="item-content">
                     <v-text-field
+                      v-if="isBusinessIdentifierValid"
                       filled
                       :label="passcodeLabel"
                       :hint="passcodeHint"
