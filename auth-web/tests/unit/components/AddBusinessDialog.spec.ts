@@ -112,8 +112,15 @@ tests.forEach(test => {
 
       wrapper = shallowMount(AddBusinessDialog, {
         store,
-        vuetify
-      })
+        vuetify,
+        propsData: {
+          dialog: true,
+          isGovStaffAccount: test.isStaffOrSbcStaff,
+          userFirstName: test.userFirstName,
+          userLastName: test.userLastName
+        }
+      }
+      )
     })
 
     afterAll(() => {
@@ -121,12 +128,6 @@ tests.forEach(test => {
     })
 
     it(test.desc, async () => {
-      wrapper.setProps({
-        dialog: true,
-        isStaffOrSbcStaff: test.isStaffOrSbcStaff,
-        userFirstName: test.userFirstName,
-        userLastName: test.userLastName
-      }) // Had to do this, propsData doesn't seem to play nice.
       wrapper.setData({
         businessIdentifier: test.businessIdentifier,
         businessName: 'My Business Inc'
