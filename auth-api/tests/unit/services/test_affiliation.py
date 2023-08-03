@@ -194,17 +194,11 @@ def test_create_affiliation_staff_sbc_staff(
         convert_org_to_staff_org(org_id, org_type)
 
     # Requires staff role.
-    if org_type == OrgType.STAFF.value:
-        user = TestJwtClaims.staff_role
-        user['idp_userid'] = db_user.idp_userid
-        user['sub'] = db_user.keycloak_guid
-        patch_token_info(user, monkeypatch)
-    else:
-        # Match the token to the db_user.
-        user = TestJwtClaims.public_bceid_account_holder_user
-        user['idp_userid'] = db_user.idp_userid
-        user['sub'] = db_user.keycloak_guid
-        patch_token_info(user, monkeypatch)
+    user = TestJwtClaims.staff_role if org_type == OrgType.STAFF.value \
+        else TestJwtClaims.public_bceid_account_holder_user
+    user['idp_userid'] = db_user.idp_userid
+    user['sub'] = db_user.keycloak_guid
+    patch_token_info(user, monkeypatch)
 
     if should_succeed:
         affiliation = AffiliationService.create_affiliation(org_id, business_identifier)

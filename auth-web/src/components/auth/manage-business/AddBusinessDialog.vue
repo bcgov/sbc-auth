@@ -361,6 +361,20 @@ export default defineComponent({
       }
     }
 
+    const handleException = (exception) => {
+      if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
+        emit('add-failed-invalid-code', passcodeLabel.value)
+      } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
+        emit('add-failed-no-entity')
+      } else if (exception.response?.status === StatusCodes.NOT_ACCEPTABLE) {
+        emit('add-failed-passcode-claimed')
+      } else if (exception.response?.status === StatusCodes.BAD_REQUEST) {
+        emit('business-already-added', { name: businessName.value, identifier: businessIdentifier.value })
+      } else {
+        emit('add-unknown-error')
+      }
+    }
+
     const add = async () => {
       addBusinessForm.value.validate()
       if (isFormValid.value) {
@@ -390,17 +404,7 @@ export default defineComponent({
           // let parent know that add was successful
           emit('add-success', businessIdentifier.value)
         } catch (exception) {
-          if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
-            emit('add-failed-invalid-code', passcodeLabel.value)
-          } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
-            emit('add-failed-no-entity')
-          } else if (exception.response?.status === StatusCodes.NOT_ACCEPTABLE) {
-            emit('add-failed-passcode-claimed')
-          } else if (exception.response?.status === StatusCodes.BAD_REQUEST) {
-            emit('business-already-added', { name: businessName.value, identifier: businessIdentifier.value })
-          } else {
-            emit('add-unknown-error')
-          }
+          handleException(exception)
         } finally {
           resetForm()
         }
