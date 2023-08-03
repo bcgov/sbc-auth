@@ -342,6 +342,11 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async searchBusinessIndex (identifier: string): Promise<number> {
+    return this.businesses.findIndex(business => business.businessIdentifier === identifier)
+  }
+
+  @Action({ rawError: true })
   public async createBNRequest (request: BNRequest): Promise<any> {
     return BusinessService.createBNRequest(request)
   }

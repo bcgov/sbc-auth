@@ -175,7 +175,7 @@ export default defineComponent({
 
     onMounted(async () => {
       localVars.isLoading = true
-      // to show businsss type value need to get all code
+      // to show business type value need to get all code
       await getBusinessTypeCodes()
       await getBusinessSizeCodes()
       updateAccountDetails()
