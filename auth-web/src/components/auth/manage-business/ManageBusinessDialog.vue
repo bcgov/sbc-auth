@@ -354,7 +354,6 @@ export default class ManageBusinessDialog extends Vue {
       v => CommonUtils.validateIncorporationNumber(v) ||
         'Incorporation Number or Registration Number is not valid'
     ]
-    // this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 
   openHelp (): void {
