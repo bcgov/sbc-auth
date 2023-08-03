@@ -239,7 +239,7 @@
           <AddNameRequestForm
             class="mt-6"
             @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success="enableBusinessNrSearch ? showAddSuccessModalNR : showAddSuccessModalNR()"
+            @add-success="showAddSuccessModalNR"
             @add-failed-show-msg="showNRErrorModal()"
             @add-failed-no-entity="showNRNotFoundModal()"
             @add-unknown-error="showUnknownErrorModal('nr')"
@@ -307,19 +307,6 @@
           <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
       </ModalDialog>
-
-      <!-- Message for successfully adding name request -->
-
-      <template v-if="enableBusinessNrSearch">
-        <v-snackbar
-          id="success-nr-snackbar"
-          v-model="showSnackbar"
-          :timeout="4000"
-          transition="fade"
-        >
-          {{ snackbarText }}
-        </v-snackbar>
-      </template>
     </v-container>
   </div>
 </template>
@@ -449,10 +436,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.isLoading = 0 // falsy
   }
 
-  get enableBusinessNrSearch (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
-  }
-
   private get enableMandatoryAddress (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
   }
@@ -496,11 +479,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
     await this.syncBusinesses()
 
-    const res = await this.searchNRIndex(nameRequestNumber)
+    const nameRequestIndexResponse = await this.searchNRIndex(nameRequestNumber)
 
     this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
     this.showSnackbar = true
-    this.highlightIndex = res
+    this.highlightIndex = nameRequestIndexResponse
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
@@ -553,12 +536,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       this.dialogTitle = 'Error Adding Existing Name Request'
       this.dialogText = 'An error occurred adding your name request. Please try again.'
     }
-    this.$refs.errorDialog.open()
-  }
-
-  showBusinessAlreadyAdded (event) {
-    this.dialogTitle = 'Business Already Added'
-    this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
