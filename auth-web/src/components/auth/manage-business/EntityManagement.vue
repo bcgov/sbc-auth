@@ -219,6 +219,7 @@
         @add-unknown-error="showUnknownErrorModal('business')"
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
+        @business-already-added="showBusinessAlreadyAdded($event)"
       />
 
       <!-- Add Name Request Dialog -->
@@ -505,6 +506,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.addBusinessDialog = false
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showBusinessAlreadyAdded (event) {
+    this.addBusinessDialog = false
+    this.dialogTitle = 'Business Already Added'
+    this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
