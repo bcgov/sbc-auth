@@ -218,7 +218,7 @@ export default class AddBusinessDialog extends Vue {
 
   // local variables
   businessName = ''
-  businessIdentifier = '' // aka incorporation number of registration number
+  businessIdentifier = '' // aka incorporation number or registration number
   businessIdentifierRules = []
   passcode = '' // aka password or proprietor/partner
   folioNumber = ''

@@ -68,7 +68,7 @@ export default class SearchBusinessNameRequest extends Vue {
   manageBusinessDialog = { show: false }
   searchType = 'Incorporated'
   businessName = ''
-  businessIdentifier = '' // aka incorporation number of registration number
+  businessIdentifier = '' // aka incorporation number or registration number
   clearSearch = 0
 
   showAddSuccessModal () {

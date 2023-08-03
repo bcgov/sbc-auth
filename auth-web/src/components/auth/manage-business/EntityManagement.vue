@@ -25,7 +25,6 @@
                     v-on="{ ...onNumberedMenu, ...onNumberedTooltip }"
                     @click="incorporateNumberedDropdown = !incorporateNumberedDropdown"
                   >
-                    <!-- <v-icon>mdi-plus</v-icon> -->
                     <span>Incorporate a Numbered BC Company</span>
                     <v-icon class="ml-2 mr-n2">{{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
                   </v-btn>
@@ -308,6 +307,7 @@ import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDial
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
+import { BusinessLookupResultIF } from '@bcrs-shared-components/interfaces/business-lookup-interfaces'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -460,7 +460,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.successDialog.open()
   }
 
-  async showAddSuccessModalNR (nrNumber) {
+  async showAddSuccessModalNR (nrNumber: string) {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
@@ -526,7 +526,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.errorDialog.open()
   }
 
-  showBusinessAlreadyAdded (event) {
+  showBusinessAlreadyAdded (event: BusinessLookupResultIF) {
     this.dialogTitle = 'Business Already Added'
     this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()

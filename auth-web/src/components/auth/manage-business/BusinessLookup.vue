@@ -101,9 +101,9 @@ export default class BusinessLookup extends Vue {
   @Debounce(600)
   private async onSearchFieldChanged (): Promise<void> {
     // safety check
-    if (this.searchField && this.searchField.length < 3) {
+    if (this.searchField && this.searchField?.length < 3) {
       this.state = States.TYPING
-    } else if (this.searchField && this.searchField.length > 2) {
+    } else if (this.searchField && this.searchField?.length > 2) {
       this.state = States.SEARCHING
       const searchStatus = null // search all (ACTIVE + HISTORICAL)
       this.searchResults = await BusinessLookupServices.search(this.searchField, searchStatus).catch(() => [])
