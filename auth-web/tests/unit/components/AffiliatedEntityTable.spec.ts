@@ -4,15 +4,17 @@ import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedE
 import { BaseVDataTable } from '@/components/datatable'
 import { EntityAlertTypes } from '@/util/constants'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
-import Vue from 'vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
+import Vue, { VueConstructor } from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
-import { businesses } from './../test-utils/test-data/affiliations'
+import { businesses, moreBusinesses, actions } from './../test-utils/test-data/affiliations'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
+import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -40,15 +42,32 @@ const businessModule = {
   }
 }
 
+const moreBusinessModule = {
+  namespaced: true,
+  state: { businesses: moreBusinesses },
+  action: {
+    addBusiness: jest.fn(),
+    updateBusinessName: jest.fn(),
+    updateFolioNumber: jest.fn()
+  }
+}
+
 sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
   AUTH_API_URL: 'https://localhost:8080/api/v1/11',
   PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }))
 
-const store = new Vuex.Store({
+const oldStore = new Vuex.Store({
   strict: false,
   modules: {
     business: businessModule
+  }
+})
+
+const newStore = new Vuex.Store({
+  strict: false,
+  modules: {
+    business: moreBusinessModule
   }
 })
 
@@ -57,30 +76,33 @@ const vuetify = new Vuetify({})
 describe('AffiliatedEntityTable.vue', () => {
   setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
+  let localVue: VueConstructor<any>
 
   const headers = getAffiliationTableHeaders(['Number', 'Type', 'Status'])
 
   beforeEach(async () => {
-    const localVue = createLocalVue()
-    wrapper = mount(AffiliatedEntityTable, {
-      store,
-      localVue,
-      vuetify,
-      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
-      mocks: { $t: () => '' }
-    })
+    localVue = createLocalVue()
   })
 
   afterEach(() => {
     wrapper.destroy()
+    sessionStorage.clear()
 
     jest.resetModules()
     jest.clearAllMocks()
   })
 
-  it('Renders affiliated entity table', async () => {
-    // verify table header
-    expect(wrapper.find('.table-header').text()).toBe('My List (7)')
+  it('Renders affiliated entity table with old actions menu', async () => {
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': false })
+    wrapper = mount(AffiliatedEntityTable, {
+      store: oldStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+    
+    expect(wrapper.find('.table-header').text()).toContain('My List (7)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
@@ -88,6 +110,7 @@ describe('AffiliatedEntityTable.vue', () => {
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
+    expect(wrapper.find('.column-selector').exists()).toBe(true)
     expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
     expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
@@ -169,5 +192,66 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Historical')
     expect(columns.at(4).text()).toBe('Open')
+  })
+
+  it('Render affiliated entity table with new actions menu', async () => {
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': true, 'ia-supported-entities':'BEN' })
+    wrapper = mount(AffiliatedEntityTable, {
+      store: newStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+
+    expect(wrapper.find('.table-header').text()).toContain('My List (18)')
+
+    // Wait for the component to render after any state changes
+    await wrapper.vm.$nextTick()
+
+    // verify table
+    expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
+    expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
+    expect(wrapper.find('.column-selector').exists()).toBe(true)
+    expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
+    expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
+    const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
+    expect(titles.length).toBe(headers.length)
+    expect(titles.at(0).text()).toBe('Business Name')
+    expect(titles.at(1).text()).toBe('Number')
+    expect(titles.at(2).text()).toBe('Type')
+    expect(titles.at(3).text()).toBe('Status')
+    expect(titles.at(4).text()).toBe('Actions')
+
+    // verify actions menu
+    const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
+    expect(itemRows.length).toBe(moreBusinesses.length)
+    
+    for(let i=0; i<itemRows.length; ++i) {
+      const action = itemRows.at(i).findAll(itemCell).at(4)
+      expect(action.text()).toBe(actions.at(i).primary)
+      expect(action.find('.external-icon').exists()).toBe(actions.at(i).external)
+      const button = action.find('.more-actions .more-actions-btn')
+      await button.trigger('click')
+      await flushPromises()
+
+      const secondaryActions = action.findAll('.v-list-item__subtitle')
+      for(let j=0; j<secondaryActions.length; ++j){
+        expect(secondaryActions.at(j).text()).toBe(actions.at(i).secondary.at(j))
+      }
+    }
+  })
+
+  it('Tooltips exist in affiliated entity table', async () => {
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': false })
+    wrapper = mount(AffiliatedEntityTable, {
+      store: oldStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+
+    expect(wrapper.findAll('.v-tooltip').exists()).toBeTruthy()
   })
 })

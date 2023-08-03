@@ -2,7 +2,29 @@
   <div id="affiliated-entity-section">
     <v-card flat>
       <div class="table-header">
-        <label><strong>My List </strong>({{ entityCount }})</label>
+        <v-row
+        no-gutters
+        class="mb-n8"
+        >
+          <v-col class="pt-3 pl-1">
+            <label><strong>My List </strong>({{ entityCount }})</label>
+          </v-col>
+          <v-col class="column-actions">
+            <v-select
+            dense multiple
+            class="column-selector pb-2 pr-2"
+            background-color="white"
+            label="Columns to Show"
+            v-model="selectedColumns"
+            :items="columns"
+            :menu-props="{ bottom: true, offsetY: true }"
+            @change="updateHeaders"
+            >
+              <template v-slot:selection>
+              </template>
+            </v-select>
+          </v-col>
+        </v-row>
       </div>
       <base-v-data-table
         id="affiliated-entity-table"
@@ -71,7 +93,88 @@
       </template>
 
       <!-- Actions -->
-      <template v-slot:item-slot-Actions="{ item, index }">
+      <template v-if="enableNewActionsMenu()" v-slot:item-slot-Actions="{ item, index }">
+        <div class="new-actions mx-auto" :id="`action-menu-${index}`">
+          <span class="open-action">
+            <v-tooltip top content-class="top-tooltip" :disabled="disableTooltip(item)">
+              <template v-slot:activator="{on}">
+                <v-btn
+                  small
+                  color="primary"
+                  min-width="5rem"
+                  min-height="2rem"
+                  class="open-action-btn"
+                  v-on="on"
+                  @click="action(item)"
+                >
+                  {{ getPrimaryAction(item) }}
+                <v-icon class='external-icon pl-1' v-if="isOpenExternal(item)" small>mdi-open-in-new</v-icon>
+              </v-btn>
+              </template>
+              <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
+            </v-tooltip>
+            <!-- More Actions Menu -->
+            <span class="more-actions">
+              <v-menu
+                :attach="`#action-menu-${index}`"
+                v-model="dropdown[index]"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    small
+                    color="primary"
+                    min-height="2rem"
+                    class="more-actions-btn"
+                    v-on="on"
+                  >
+                    <v-icon>{{dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-if="showOpenButton(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="use-name-request-button"
+                    @click="goToNameRequest(item.nameRequest)"
+                  >
+                    <v-list-item-subtitle>
+                      <v-icon small>mdi-format-list-bulleted-square</v-icon>
+                      <span class="pl-1">Open Name Request</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    v-if="showRemoveButton(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="remove-button"
+                    @click="removeBusiness(item)"
+                  >
+                    <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+                      <v-icon small>mdi-delete-forever</v-icon>
+                      <span class="pl-1">Delete {{tempDescription(item)}}</span>
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-else>
+                      <v-icon small>mdi-delete</v-icon>
+                      <span class="pl-1">Remove From Table</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    v-if="showAmalgamateShortForm(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="use-name-request-button"
+                  >
+                    <v-list-item-subtitle>
+                      <v-icon small>mdi-checkbox-multiple-blank-outline</v-icon>
+                      <span class="pl-1">Amalgamate Now (Short Form)</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </span>
+          </span>
+        </div>
+      </template>
+
+      <template v-else v-slot:item-slot-Actions="{ item, index }">
         <div class="actions mx-auto" :id="`action-menu-${index}`">
           <span class="open-action">
             <v-btn
@@ -89,6 +192,7 @@
               <v-menu
                 :attach="`#action-menu-${index}`"
                 v-model="dropdown[index]"
+                left
               >
                 <template v-slot:activator="{ on }">
                   <v-btn
@@ -145,6 +249,7 @@ import {
   CorpTypes,
   EntityAlertTypes,
   FilingTypes,
+  LDFlags,
   NrDisplayStates,
   NrState,
   NrTargetTypes,
@@ -158,7 +263,9 @@ import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import { Emit } from 'vue-property-decorator'
 import EntityDetails from './EntityDetails.vue'
+import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 import { useStore } from 'vuex-composition-helpers'
 
@@ -166,7 +273,6 @@ export default defineComponent({
   name: 'AffiliatedEntityTable',
   components: { EntityDetails, BaseVDataTable },
   props: {
-    selectedColumns: { default: [] as string[] },
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
@@ -178,8 +284,11 @@ export default defineComponent({
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
       getHeaders, headers, type, status, updateFilter, typeDescription,
       isNameRequest, number, name, canUseNameRequest, tempDescription,
-      isTemporaryBusiness } = useAffiliations()
+      isTemporaryBusiness, getEntityType } = useAffiliations()
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
+
+    const selectedColumns = ['Number', 'Type', 'Status']
+    const columns = ['Number', 'Type', 'Status']
 
     const createNamedBusiness = ({ filingType, business }: { filingType: FilingTypes, business: Business}) => {
       return store.dispatch('business/createNamedBusiness', { filingType, business })
@@ -252,7 +361,6 @@ export default defineComponent({
         CorpTypes.BC_ULC_COMPANY]
 
       let filingResponse = null
-
       if (regTypes.includes(business.nameRequest?.legalType)) {
         filingResponse = await createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
       } else if (iaTypes.includes(business.nameRequest?.legalType)) {
@@ -298,6 +406,11 @@ export default defineComponent({
       window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
     }
 
+    /** Navigation handler for Societies Online */
+    const goToSocieties = (): void => {
+      window.location.href = appendAccountId(ConfigHelper.getSocietiesUrl())
+    }
+
     /** Handler for draft IA creation and navigation */
     const useNameRequest = async (item: Business) => {
       switch (item.nameRequest.target) {
@@ -338,16 +451,273 @@ export default defineComponent({
       clearAllFilters()
     }
 
-    watch(() => props.selectedColumns, (newCol: string[]) => {
+    const updateHeaders = (newCol: string[]): void => {
       getHeaders(newCol)
-    })
+    }
 
-    watch(() => affiliations.results, () => {
-      clearFilters()
-      getHeaders(props.selectedColumns)
-    })
+    const enableNewActionsMenu = (): boolean => {
+      return launchdarklyServices.getFlag(LDFlags.EnableNewActionsMenu) || false
+    }
+
+    const isModernizedEntity = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || [] // move to somewhere factory?
+      console.log(supportedEntityFlags)
+      return supportedEntityFlags.includes(entityType)
+    }
+
+    const isColinEntity = (item: Business): boolean => { // not include ones modernized (feature flag)
+      const entityType = getEntityType(item)
+      // talk to Sev to see if there's better way to check colin
+      return (!isModernizedEntity(item) && (
+        entityType === CorpTypes.BC_COMPANY ||
+        entityType === CorpTypes.BC_CCC ||
+        entityType === CorpTypes.BC_ULC_COMPANY ||
+        entityType === CorpTypes.CCC_CONTINUE_IN ||
+        entityType === CorpTypes.BC_CORPORATION ||
+        entityType === CorpTypes.ULC_CONTINUE_IN ||
+        entityType === CorpTypes.EXTRA_PRO_REG ||
+        entityType === CorpTypes.LL_PARTNERSHIP ||
+        entityType === CorpTypes.LIMITED_CO ||
+        entityType === CorpTypes.LIM_PARTNERSHIP ||
+        entityType === CorpTypes.BC_UNLIMITED ||
+        entityType === CorpTypes.XPRO_LL_PARTNR ||
+        entityType === CorpTypes.XPRO_LIM_PARTNR
+      ))
+    }
+
+    const isSocieties = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      return (entityType === CorpTypes.CONT_IN_SOCIETY ||
+        entityType === CorpTypes.SOCIETY ||
+        entityType === CorpTypes.XPRO_SOCIETY)
+    }
+
+    const isOtherEntities = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      return (entityType === CorpTypes.FINANCIAL ||
+        entityType === CorpTypes.PRIVATE_ACT ||
+        entityType === CorpTypes.PARISHES)
+    }
+
+    const isAllowRestore = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      return (entityType === CorpTypes.BC_COMPANY ||
+        entityType === CorpTypes.BC_CCC ||
+        entityType === CorpTypes.BC_ULC_COMPANY ||
+        entityType === CorpTypes.COOP ||
+        entityType === CorpTypes.BENEFIT_COMPANY)
+    }
+
+    const getNrRequestDescription = (item: Business): string => { // can move to factory
+      const nrRequestActionCd = item.nameRequest?.requestActionCd
+      switch (nrRequestActionCd) {
+        case NrRequestActionCodes.AMALGAMATE:
+          return 'Amalgamate Now'
+        case NrRequestActionCodes.CONVERSION:
+          return 'Alter Now'
+        case NrRequestActionCodes.CHANGE_NAME:
+          return 'Change Name Now'
+        case NrRequestActionCodes.MOVE:
+          return 'Continue In Now'
+        case NrRequestActionCodes.NEW_BUSINESS: {
+          if (isOtherEntities(item)) {
+            return 'Download Form'
+          }
+          return 'Register Now'
+        }
+        case NrRequestActionCodes.RESTORE: {
+          return isAllowRestore(item) ? 'Restore Now' : 'Reinstate Now'
+        }
+        case NrRequestActionCodes.RENEW:
+          return 'Restore Now'
+        default:
+          return 'Open Name Request'
+      }
+    }
+
+    const getPrimaryAction = (item: Business): string => {
+      if (isTemporaryBusiness(item)) {
+        return 'Resume Draft'
+      } else if (isNameRequest(item)) {
+        const nrStatus = status(item)
+        switch (nrStatus) {
+          case NrDisplayStates.APPROVED: {
+            return getNrRequestDescription(item)
+          }
+          case NrDisplayStates.REJECTED:
+          case NrDisplayStates.CONSUMED:
+            return 'Remove From Table'
+          default:
+            return 'Open Name Request'
+        }
+      } else {
+        return 'Manage Business'
+      }
+    }
+
+    const isOpenExternal = (item: Business): boolean => {
+      if (isTemporaryBusiness(item)) {
+        return false
+      }
+
+      if (isNameRequest(item)) {
+        const nrState = status(item)
+        if (nrState !== NrDisplayStates.APPROVED) {
+          return false
+        }
+        const nrRequestActionCd = item.nameRequest?.requestActionCd
+        if (nrRequestActionCd === NrRequestActionCodes.NEW_BUSINESS) {
+          return !isModernizedEntity(item)
+        }
+        // temporarily show external icon for amalgamate and continue in
+        if (nrRequestActionCd === NrRequestActionCodes.AMALGAMATE ||
+          nrRequestActionCd === NrRequestActionCodes.MOVE) {
+          return true
+        }
+        return false
+      }
+
+      // check for business
+      return !isModernizedEntity(item)
+    }
+
+    const isBusinessAffiliated = (businessIdentifier: string): boolean => {
+      return affiliations.results.some(k => businessIdentifier === k.businessIdentifier)
+    }
+
+    const goToAmalgamate = (item: Business): void => {
+      // For now, go to COLIN with external link + icon + matching hover text
+      goToCorpOnline()
+    }
+
+    // Continue In
+    const goToRelocate = (item: Business): void => {
+      goToCorpOnline()
+    }
+
+    const goToFormPage = (): void => {
+      window.location.href = ConfigHelper.getCorpFormsUrl()
+    }
+
+    const goToRegister = async (item: Business): Promise<void> => {
+      if (isModernizedEntity(item)) {
+        const businessIdentifier = await createBusinessRecord(item)
+        goToDashboard(businessIdentifier)
+      } else if (isColinEntity(item)) {
+        goToCorpOnline()
+      } else if (isSocieties(item)) {
+        goToSocieties()
+      } else {
+        goToFormPage()
+      }
+    }
+
+    const redirect = (item: Business): void => {
+      if (isTemporaryBusiness(item)) {
+        goToDashboard(item.businessIdentifier)
+      } else if (isNameRequest(item)) {
+        if (status(item) === NrDisplayStates.APPROVED) {
+          const nrRequestActionCd = item.nameRequest?.requestActionCd
+          switch (nrRequestActionCd) {
+            case NrRequestActionCodes.AMALGAMATE:
+              goToAmalgamate(item)
+              break
+            case NrRequestActionCodes.MOVE:
+              goToRelocate(item)
+              break
+            case NrRequestActionCodes.CONVERSION:
+            case NrRequestActionCodes.CHANGE_NAME:
+            case NrRequestActionCodes.RESTORE:
+            case NrRequestActionCodes.RENEW: {
+              if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
+                goToDashboard(item.nameRequest?.corpNum)
+              } else {
+                let action = ''
+                if (nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
+                  action = 'alter'
+                } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
+                  action = 'change name'
+                } else {
+                  const action = isAllowRestore(item) ? 'restore' : 'reinstate'
+                }
+                context.emit('business-unavailable-error', action)
+              }
+              break
+            }
+            case NrRequestActionCodes.NEW_BUSINESS: {
+              goToRegister(item)
+              break
+            }
+            default:
+              goToNameRequest(item.nameRequest)
+              break
+          }
+        } else {
+          goToNameRequest(item.nameRequest)
+        }
+      } else {
+        // For business
+        if (isModernizedEntity(item)) {
+          goToDashboard(item.businessIdentifier)
+        } else if (isSocieties(item)) {
+          goToSocieties()
+        } else {
+          goToCorpOnline()
+        }
+      }
+    }
+
+    const action = (item: Business): void => {
+      if (isNameRequest(item) && (status(item) === NrDisplayStates.REJECTED || status(item) === NrDisplayStates.CONSUMED)) {
+        removeBusiness(item)
+      } else {
+        redirect(item)
+      }
+    }
+
+    const showRemoveButton = (item: Business): boolean => {
+      if (isNameRequest(item) && (status(item) === NrDisplayStates.REJECTED || status(item) === NrDisplayStates.CONSUMED)) {
+        return false
+      }
+      return true
+    }
+
+    const showOpenButton = (item: Business): boolean => {
+      if (isNameRequest(item) &&
+      status(item) !== NrDisplayStates.HOLD &&
+      status(item) !== NrDisplayStates.EXPIRED &&
+      status(item) !== NrDisplayStates.PROCESSING) {
+        return true
+      }
+      return false
+    }
+
+    const showAmalgamateShortForm = (item: Business): boolean => {
+      // reserve for changes in the future
+      return false
+    }
+
+    const getTooltipTargetDescription = (item: Business): string => {
+      if (isSocieties(item)) {
+        return 'Societies Online'
+      }
+      return 'Corporate Online'
+    }
+
+    const disableTooltip = (item: Business): boolean => {
+      if (isOpenExternal(item)) {
+        if (isNameRequest(item) && isOtherEntities(item)) {
+          return true
+        }
+        return false
+      }
+      return true
+    }
 
     return {
+      selectedColumns,
+      columns,
       clearFiltersTrigger,
       clearFilters,
       isloading,
@@ -378,7 +748,18 @@ export default defineComponent({
       getDetails,
       isFrozed,
       isBadstanding,
-      isDissolution
+      isDissolution,
+      updateHeaders,
+      getPrimaryAction,
+      enableNewActionsMenu,
+      isOpenExternal,
+      action,
+      showRemoveButton,
+      showOpenButton,
+      goToNameRequest,
+      showAmalgamateShortForm,
+      getTooltipTargetDescription,
+      disableTooltip
     }
   }
 })
@@ -389,6 +770,11 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 
 #affiliated-entity-section {
+  .column-selector {
+    float: right;
+    width: 200px;
+    border-radius: 4px;
+  }
   .table-header {
     display: flex;
     background-color: $app-lt-blue;
@@ -478,9 +864,51 @@ export default defineComponent({
       margin-left: 0.5rem;
     }
   }
+
+  .new-actions {
+    height:30px;
+    width: 240px;
+
+    .open-action {
+      border-right: 1px solid $gray1;
+    }
+
+    .open-action-btn {
+      font-size: .875rem;
+      box-shadow: none;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      margin-right: 1px;
+      width: 170px;
+    }
+
+    .more-actions-btn {
+      box-shadow: none;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    .v-btn + .v-btn {
+      margin-left: 0.5rem;
+    }
+  }
 }
 
 // Vuetify Overrides
+::v-deep {
+  .column-actions {
+    .v-input__slot {
+      height: 42px !important;
+      min-height: 42px !important;
+    }
+    .v-input .v-label {
+      transform: translateX(10px) translateY(-25px) scale(1);
+      top: 30px;
+      color: $gray7;
+      font-size: .875rem;
+    }
+  }
+}
 ::v-deep .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
   &:hover {
     background-color: $app-background-blue;
@@ -550,5 +978,37 @@ export default defineComponent({
     border-radius: 10px;
     background-color: lightgray;
   }
+}
+
+// Tooltips
+.v-tooltip__content {
+  background-color: RGBA(73, 80, 87, 0.95) !important;
+  color: white !important;
+  border-radius: 4px;
+  font-size: 12px !important;
+  line-height: 18px !important;
+  padding: 15px !important;
+  letter-spacing: 0;
+  max-width: 360px !important;
+}
+
+.v-tooltip__content:after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  right: 100% !important;
+  margin-top: -10px !important;
+  border-top: 10px solid transparent !important;
+  border-bottom: 10px solid transparent !important;
+  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
+}
+
+.top-tooltip:after {
+  top: 100% !important;
+  left: 45% !important;
+  margin-top: 0 !important;
+  border-right: 10px solid transparent !important;
+  border-left: 10px solid transparent !important;
+  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
 }
 </style>

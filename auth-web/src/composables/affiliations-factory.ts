@@ -223,6 +223,14 @@ export const useAffiliations = () => {
     affiliations.filters.isActive = false
   }
 
+  const getEntityType = (item: Business): CorpTypes => {
+    let entityType = item.corpType.code
+    if (isNameRequest(item)) {
+      entityType = item.nameRequest?.legalType
+    }
+    return entityType
+  }
+
   return {
     entityCount,
     loadAffiliations,
@@ -239,6 +247,7 @@ export const useAffiliations = () => {
     name,
     canUseNameRequest,
     tempDescription,
-    isTemporaryBusiness
+    isTemporaryBusiness,
+    getEntityType
   }
 }

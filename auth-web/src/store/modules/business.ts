@@ -149,7 +149,10 @@ export default class BusinessModule extends VuexModule {
           entityTypeCd: nr.entityTypeCd,
           natureOfBusiness: nr.natureBusinessInfo,
           expirationDate: nr.expirationDate,
-          applicants: nr.applicants
+          applicants: nr.applicants,
+          requestTypeCd: nr.requestTypeCd,
+          requestActionCd: nr.requestActionCd,
+          corpNum: nr.corpNum
         }
       }
       affiliatedEntities.push(entity)

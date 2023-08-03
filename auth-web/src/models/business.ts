@@ -77,9 +77,12 @@ export interface NameRequest {
     natureOfBusiness?: string
     expirationDate?: Date
     nrNum?: string
+    requestTypeCd?: string
+    requestActionCd?: string
     stateCd?: string
     natureBusinessInfo?: string
     applicants?: Array<Applicant>
+    corpNum?: string
 }
 
 export interface Applicant {

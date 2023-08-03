@@ -112,6 +112,11 @@ describe('Entity Management Component', () => {
     expect(modal.exists()).toBe(true)
   })
 
+  it('EntityManagement contains businessUnavailableDialog modal', () => {
+    const modal = wrapper.find({ ref: 'businessUnavailableDialog' })
+    expect(modal.exists()).toBe(true)
+  })
+
   it('calls the nr open modal with correct buttons', async () => {
     const removeNRPayload = getPayLoad('NR')
     wrapper.vm.showConfirmationOptionsModal(removeNRPayload)
