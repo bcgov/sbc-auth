@@ -496,17 +496,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
     await this.syncBusinesses()
 
-    if (nameRequestNumber && this.enableBusinessNrSearch) {
-      const nrIndexResponse = await this.searchNRIndex(nameRequestNumber)
-      this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
-      this.showSnackbar = true
-      this.highlightIndex = nrIndexResponse
-      setTimeout(() => {
-        this.highlightIndex = -1
-      }, 4000)
-    } else {
-      this.$refs.successDialog.open()
-    }
+    const res = await this.searchNRIndex(nrNumber)
+
+    this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
+    this.showSnackbar = true
+    this.highlightIndex = res
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
   }
 
   showInvalidCodeModal (label: string) {
