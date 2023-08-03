@@ -509,7 +509,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.errorDialog.open()
   }
 
-  showBusinessAlreadyAdded (event) {
+  showBusinessAlreadyAdded (event: { name, identifier }) {
     this.addBusinessDialog = false
     this.dialogTitle = 'Business Already Added'
     this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
