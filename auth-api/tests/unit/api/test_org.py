@@ -23,7 +23,6 @@ from unittest.mock import patch
 import pytest
 from datetime import datetime
 from faker import Faker
-from sqlalchemy import event
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
@@ -33,7 +32,6 @@ from auth_api.models import Affiliation as AffiliationModel
 from auth_api.models import Entity as EntityModel
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
-from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import Affiliation as AffiliationService
@@ -50,10 +48,9 @@ from tests.utilities.factory_scenarios import (
     DeleteAffiliationPayload, TestAffidavit, TestAffliationInfo, TestContactInfo, TestEntityInfo, TestJwtClaims,
     TestOrgInfo, TestPaymentMethodInfo)
 from tests.utilities.factory_utils import (
-    factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
+    convert_org_to_staff_org, factory_affiliation_model, factory_auth_header, factory_entity_model, factory_invitation,
     factory_invitation_anonymous, factory_membership_model, factory_org_model, factory_user_model,
     patch_pay_account_delete, patch_pay_account_delete_error)
-from tests.utilities.sqlalchemy import clear_event_listeners
 
 FAKE = Faker()
 
@@ -1299,13 +1296,7 @@ def test_add_new_business_affiliation_staff(client, jwt, session, keycloak_mock,
     dictionary = json.loads(rv.data)
     org_id = dictionary['id']
 
-    # Clearing the event listeners here, because we can't change the type_code.
-    clear_event_listeners(OrgModel)
-    org_db = OrgModel.find_by_id(org_id)
-    org_db.type_code = OrgType.SBC_STAFF.value
-    org_db.save()
-    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
-    event.listen(OrgModel, 'before_insert', receive_before_insert)
+    convert_org_to_staff_org(org_id, OrgType.SBC_STAFF.value)
 
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_manage_business)
     rv = client.post('/api/v1/orgs/{}/affiliations?newBusiness=true'.format(org_id), headers=headers,
