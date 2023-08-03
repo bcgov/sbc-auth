@@ -1,20 +1,20 @@
 import '../test-utils/composition-api-setup' // important to import this first
+import Vue, { VueConstructor } from 'vue'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { actions, businesses, moreBusinesses } from './../test-utils/test-data/affiliations'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BaseVDataTable } from '@/components/datatable'
 import { EntityAlertTypes } from '@/util/constants'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
 import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
-import Vue, { VueConstructor } from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
-import { businesses, moreBusinesses, actions } from './../test-utils/test-data/affiliations'
+import flushPromises from 'flush-promises'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
-import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -101,7 +101,7 @@ describe('AffiliatedEntityTable.vue', () => {
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
       mocks: { $t: () => '' }
     })
-    
+
     expect(wrapper.find('.table-header').text()).toContain('My List (7)')
 
     // Wait for the component to render after any state changes
@@ -195,7 +195,7 @@ describe('AffiliatedEntityTable.vue', () => {
   })
 
   it('Render affiliated entity table with new actions menu', async () => {
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': true, 'ia-supported-entities':'BEN' })
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': true, 'ia-supported-entities': 'BEN' })
     wrapper = mount(AffiliatedEntityTable, {
       store: newStore,
       localVue,
@@ -226,8 +226,8 @@ describe('AffiliatedEntityTable.vue', () => {
     // verify actions menu
     const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
     expect(itemRows.length).toBe(moreBusinesses.length)
-    
-    for(let i=0; i<itemRows.length; ++i) {
+
+    for (let i = 0; i < itemRows.length; ++i) {
       const action = itemRows.at(i).findAll(itemCell).at(4)
       expect(action.text()).toBe(actions.at(i).primary)
       expect(action.find('.external-icon').exists()).toBe(actions.at(i).external)
@@ -236,7 +236,7 @@ describe('AffiliatedEntityTable.vue', () => {
       await flushPromises()
 
       const secondaryActions = action.findAll('.v-list-item__subtitle')
-      for(let j=0; j<secondaryActions.length; ++j){
+      for (let j = 0; j < secondaryActions.length; ++j) {
         expect(secondaryActions.at(j).text()).toBe(actions.at(i).secondary.at(j))
       }
     }

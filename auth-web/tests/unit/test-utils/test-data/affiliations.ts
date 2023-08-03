@@ -137,7 +137,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045460',
       state: 'PROCESSING',
@@ -159,7 +159,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045461',
       state: 'DRAFT',
@@ -181,7 +181,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045462',
       state: 'EXPIRED',
@@ -203,7 +203,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045463',
       state: 'REJECTED',
@@ -225,7 +225,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045464',
       state: 'CONSUMED',
@@ -247,7 +247,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045465',
       state: 'APPROVED',
@@ -269,7 +269,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045466',
       state: 'APPROVED',
@@ -291,7 +291,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045467',
       state: 'APPROVED',
@@ -313,7 +313,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045468',
       state: 'APPROVED',
@@ -335,7 +335,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045469',
       state: 'APPROVED',
@@ -357,7 +357,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045470',
       state: 'APPROVED',
@@ -379,7 +379,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045471',
       state: 'APPROVED',
@@ -401,7 +401,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045472',
       state: 'APPROVED',
@@ -423,7 +423,7 @@ export const moreBusinesses: Business[] = [
         decision_text: 'Decision text',
         name_type_cd: 'Name type code',
         designation: 'Designation',
-        state: 'State',
+        state: 'State'
       }],
       nrNumber: 'NR 4045473',
       state: 'APPROVED',
@@ -492,7 +492,7 @@ export const moreBusinesses: Business[] = [
       corpNum: 'corpNum'
     },
     nrNumber: 'NR 1234567'
-  },
+  }
 ]
 
 export const actions = [
@@ -585,5 +585,5 @@ export const actions = [
     'primary': 'Resume Draft',
     'secondary': ['Delete Registration'],
     'external': false
-  },
+  }
 ]
