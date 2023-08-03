@@ -115,7 +115,7 @@ tests.forEach(test => {
         vuetify,
         propsData: {
           dialog: true,
-          isGovStaffAccount: test.isStaffOrSbcStaff,
+          isStaffOrSbcStaff: test.isStaffOrSbcStaff,
           userFirstName: test.userFirstName,
           userLastName: test.userLastName
         }
@@ -153,6 +153,7 @@ tests.forEach(test => {
       // verify input fields
       expect(wrapper.find('.business-identifier').attributes('label'))
         .toBe('Incorporation Number or Registration Number') // DELETE THIS (see above)
+      const passcode = wrapper.find('.passcode').exists()
       expect(wrapper.find('.passcode').exists()).toBe(test.passcodeExists)
       if (test.passcodeExists) {
         expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
