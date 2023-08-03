@@ -237,7 +237,6 @@ export default class AddNameRequestForm extends Vue {
 
 .form__btns {
   display: flex;
-  // justify-content: flex-end;
 
   .v-btn + .v-btn {
     margin-left: 0.5rem;
