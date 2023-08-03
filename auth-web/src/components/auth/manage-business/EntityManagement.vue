@@ -489,14 +489,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.successDialog.open()
   }
 
-  async showAddSuccessModalNR (nameRequestNumber?: any) {
+  async showAddSuccessModalNR (nameRequestNumber: string) {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
 
     await this.syncBusinesses()
 
-    const res = await this.searchNRIndex(nrNumber)
+    const res = await this.searchNRIndex(nameRequestNumber)
 
     this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
     this.showSnackbar = true
