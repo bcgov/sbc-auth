@@ -243,15 +243,6 @@ export default defineComponent({
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
 
-  // local variables
-  businessName = ''
-  businessIdentifier = '' // aka incorporation number or registration number
-  businessIdentifierRules = []
-  passcode = '' // aka password or proprietor/partner
-  folioNumber = ''
-  isLoading = false
-  isCertified = false // firms only
-  authorizationName = ''
     const enableBusinessNrSearch = computed(() => {
       return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
     })

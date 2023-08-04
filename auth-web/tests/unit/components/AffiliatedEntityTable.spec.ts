@@ -59,6 +59,9 @@ const moreBusinessModule = {
     addBusiness: jest.fn(),
     updateBusinessName: jest.fn(),
     updateFolioNumber: jest.fn()
+  }
+}
+
 const orgModule = {
   namespaced: true,
   state: {
@@ -85,7 +88,8 @@ const oldStore = new Vuex.Store({
 const newStore = new Vuex.Store({
   strict: false,
   modules: {
-    business: moreBusinessModule
+    business: moreBusinessModule,
+    org: orgModule
   }
 })
 
@@ -120,7 +124,7 @@ describe('AffiliatedEntityTable.vue', () => {
       mocks: { $t: () => '' }
     })
 
-    expect(wrapper.find('.table-header').text()).toContain('My List (7)')
+    expect(wrapper.find('.table-header').text()).toContain('My List (9)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
@@ -285,6 +289,7 @@ describe('AffiliatedEntityTable.vue', () => {
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
       mocks: { $t: () => '' }
     })
+
     const allWithInvites = businesses.filter(b => b.affiliationInvites)
     expect(wrapper.find('#affiliationInvitesStatus').exists()).toBeTruthy()
     expect(wrapper.findAll('#affiliationInvitesStatus').length).toBe(allWithInvites.length)

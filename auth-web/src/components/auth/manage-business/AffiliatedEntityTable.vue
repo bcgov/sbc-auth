@@ -185,7 +185,7 @@
           </span>
         </div>
       </template>
-      
+
       <template v-else v-slot:item-slot-Actions="{ item, index }">
         <div class='actions mx-auto' :id='`action-menu-${index}`'>
           <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
@@ -320,7 +320,6 @@ import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import EntityDetails from './EntityDetails.vue'
 import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
@@ -341,7 +340,7 @@ export default defineComponent({
     const store = useStore()
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
       getHeaders, headers, type, status, updateFilter, typeDescription,
-      isNameRequest, number, name, canUseNameRequest, tempDescription,
+      isNameRequest, nameRequestType, number, name, canUseNameRequest, tempDescription,
       isTemporaryBusiness, getEntityType } = useAffiliations()
 
     const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
@@ -839,7 +838,7 @@ export default defineComponent({
 
     // feature flags
     const enableNameRequestType = (): boolean => {
-      return LaunchDarklyService.getFlag(LDFlags.EnableNameRequestType) || false
+      return launchdarklyServices.getFlag(LDFlags.EnableNewActionsMenu) || false
     }
 
     return {

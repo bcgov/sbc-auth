@@ -197,7 +197,7 @@ describe('Entity Management Component', () => {
     jest.advanceTimersByTime(1000)
     await Vue.nextTick()
 
-    expect(wrapper.find('#success-nr-snackbar').exists()).toBe(true)
+    expect(wrapper.find('#success-nr-business-snackbar').exists()).toBe(true)
     expect(wrapper.vm.showSnackbar).toBe(true)
 
     jest.clearAllTimers()
@@ -210,7 +210,7 @@ describe('Entity Management Component', () => {
     jest.advanceTimersByTime(5000)
     await Vue.nextTick()
 
-    expect(wrapper.find('#success-nr-snackbar').exists()).toBe(true)
+    expect(wrapper.find('#success-nr-business-snackbar').exists()).toBe(true)
     expect(wrapper.vm.showSnackbar).toBe(false)
 
     jest.clearAllTimers()

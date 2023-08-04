@@ -21,9 +21,9 @@ import { mapState } from 'vuex'
 })
 // TODO in the mounted ; do load all the properties if its not loaded already
 export default class AccountMixin extends Vue {
-  readonly currentOrganization!: Organization
+  protected readonly currentOrganization!: Organization
 
-  getAccountFromSession (): AccountSettings {
+  protected getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
   get isPremiumAccount (): boolean {
