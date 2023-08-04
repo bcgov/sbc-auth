@@ -331,6 +331,7 @@ export default defineComponent({
     const requestAuthRegistryOption = ref(false)
 
     const businessDialogTypes = ref(BusinessDialogTypes)
+    // local variables
 
     // Computed properties
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
