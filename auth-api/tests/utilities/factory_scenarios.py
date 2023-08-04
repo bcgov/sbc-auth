@@ -513,7 +513,10 @@ class TestOrgStatusInfo(dict, Enum):
 class TestOrgInfo(dict, Enum):
     """Test scenarios of org."""
 
+    affiliation_from_org = {'name': 'Test Affiliation Invitation From Org'}
+    affiliation_to_org = {'name': 'Test Affiliation Invitation To Org'}
     org1 = {'name': 'My Test Org'}
+    org_details = {'name': 'My test Org details'}
     org_branch_name = {'name': 'Foo', 'branchName': 'Bar', }
 
     org_onlinebanking = {'name': 'My Test Org', 'paymentInfo': {'paymentMethod': 'ONLINE_BANKING'}}
@@ -677,6 +680,9 @@ class TestOrgProductsInfo(dict, Enum):
                                        {'productCode': 'PPR'}]}
     org_products_vs = {'subscriptions': [{'productCode': 'VS'}]}
     org_products_business = {'subscriptions': [{'productCode': 'BUSINESS'}]}
+    mhr_qs_lawyer_and_notaries = {'subscriptions': [{'productCode': 'MHR_QSLN', 'externalSourceId': 'ABC123'}]}
+    mhr_qs_home_manufacturers = {'subscriptions': [{'productCode': 'MHR_QSHM', 'externalSourceId': 'ABC123'}]}
+    mhr_qs_home_dealers = {'subscriptions': [{'productCode': 'MHR_QSHD', 'externalSourceId': 'ABC123'}]}
 
 
 class TestEntityInfo(dict, Enum):

@@ -121,5 +121,73 @@ export const businesses: Business[] = [
     name: '0871095 B.C. LTD.',
     corpType: { code: CorpTypes.BENEFIT_COMPANY },
     status: 'HISTORICAL'
+  },
+  // request access (invitations)
+  // single
+  {
+    businessIdentifier: 'RequestAccessSingleTest111',
+    corpType: { code: CorpTypes.BC_COMPANY },
+    name: 'Request Access Single LTD.',
+    status: 'ACTIVE',
+    affiliationInvites: [
+      {
+        id: 11,
+        type: 'RequestAccess',
+        status: 'ACTIVE',
+        business: {
+          businessIdentifier: 'RequestAccessSingleTest111',
+          name: 'Request Access Single LTD.',
+          corpType: { code: CorpTypes.BC_COMPANY }
+        },
+        toOrg: { name: 'Org Z', id: 3113 },
+        fromOrg: { name: 'Org B', id: 1114 }
+      }
+    ]
+  },
+  // request access (invitations)
+  // multiple
+  {
+    businessIdentifier: 'RequestAccessMultiTest111',
+    corpType: { code: CorpTypes.BC_COMPANY },
+    name: 'Request Access Multi LTD.',
+    status: 'ACTIVE',
+    affiliationInvites: [
+      {
+        id: 12,
+        type: 'RequestAccess',
+        status: 'ACTIVE',
+        business: {
+          businessIdentifier: 'RequestAccessMultiTest111',
+          name: 'Request Access Multi LTD.',
+          corpType: { code: CorpTypes.BC_COMPANY }
+        },
+        toOrg: { name: 'Org Z', id: 3113 },
+        fromOrg: { name: 'Org B', id: 1114 }
+      },
+      {
+        id: 13,
+        type: 'RequestAccess',
+        status: 'ACTIVE',
+        business: {
+          businessIdentifier: 'RequestAccessMultiTest111',
+          name: 'Request Access Multi LTD.',
+          corpType: { code: CorpTypes.BC_COMPANY }
+        },
+        toOrg: { name: 'Org Z', id: 3113 },
+        fromOrg: { name: 'Org C', id: 1112 }
+      },
+      {
+        id: 14,
+        type: 'RequestAccess',
+        status: 'ACTIVE',
+        business: {
+          businessIdentifier: 'RequestAccessMultiTest111',
+          name: 'Request Access Multi LTD.',
+          corpType: { code: CorpTypes.BC_COMPANY }
+        },
+        toOrg: { name: 'Org Z', id: 3113 },
+        fromOrg: { name: 'Org D', id: 1111 }
+      }
+    ]
   }
 ]

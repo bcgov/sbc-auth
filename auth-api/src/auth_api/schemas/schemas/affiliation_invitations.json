@@ -1,0 +1,16 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation_invitations",
+    "type": "object",
+    "title": "Affiliation Invitation List",
+    "required": [
+    ],
+    "properties": {
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "https://bcrs.gov.bc.ca/.well_known/schemas/affiliation_invitation_response"
+        }
+      }
+    }
+  }

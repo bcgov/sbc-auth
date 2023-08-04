@@ -19,6 +19,8 @@ Test-Suite to ensure that the /orgs endpoint is working as expected.
 
 import json
 
+import pytest
+
 from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo
@@ -92,3 +94,61 @@ def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):
 
     list_products = json.loads(rv_products.data)
     assert len([x for x in list_products if x.get('subscriptionStatus') != 'NOT_SUBSCRIBED']) == 0
+
+
+@pytest.mark.parametrize('org_product_info', [
+    TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
+    TestOrgProductsInfo.mhr_qs_home_manufacturers,
+    TestOrgProductsInfo.mhr_qs_home_dealers,
+])
+def test_add_single_org_product_mhr_qualified_supplier(client, jwt, session, keycloak_mock, org_product_info):
+    """Assert that MHR sub products subscriptions can be created."""
+    # setup user and org
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
+                     headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+
+    # Create product subscription
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(org_product_info),
+                              headers=headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    # Fetch org products and validate subscription status
+    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products", headers=headers,
+                             content_type='application/json')
+    list_products = json.loads(rv_products.data)
+    mhr_product = next(prod for prod in list_products
+                       if prod.get('code') == org_product_info['subscriptions'][0]['productCode'])
+    assert mhr_product.get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'
+
+    # Should show up as a review task for staff
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
+
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(item_list['tasks']) == 1
+
+    task = item_list['tasks'][0]
+    assert task['relationshipStatus'] == 'PENDING_STAFF_REVIEW'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
+
+    # Approve task
+    rv = client.put('/api/v1/tasks/{}'.format(task['id']),
+                    data=json.dumps({'relationshipStatus': 'ACTIVE'}),
+                    headers=headers, content_type='application/json')
+
+    task = rv.json
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert task['relationshipStatus'] == 'ACTIVE'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']

@@ -47,6 +47,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
             'keycloak_group',
             'linked_product_code',
             'need_review',
+            'parent_code',
             'premium_only',
             'type_code',
             'url'
@@ -54,6 +55,7 @@ class ProductCode(BaseCodeModel):  # pylint: disable=too-few-public-methods
     }
 
     type_code = Column(ForeignKey('product_type_codes.code'), default='INTERNAL', nullable=False)
+    parent_code = Column(String(75), nullable=True)  # Used for sub products to define a parent product code
     premium_only = Column(Boolean(), default=False, nullable=True)  # Available only for premium accounts
     need_review = Column(Boolean(), default=False, nullable=True)  # Need a review from staff for activating product
     hidden = Column(Boolean(), default=False, nullable=True)  # Flag to hide from the UI

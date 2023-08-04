@@ -105,6 +105,14 @@
           "Affidavit is Missing Seal"
         ]
       ]
+    },
+    "externalSourceId": {
+      "type": "string",
+      "title": "External source identifier",
+      "default": "",
+      "examples": [
+        "10"
+      ]
     }
   }
 }
