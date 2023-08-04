@@ -174,8 +174,8 @@
       />
 
       <!-- Add an Existing Business Dialog -->
-      <AddBusinessDialog
-        :dialog="addBusinessDialog"
+      <ManageBusinessDialog
+        :showDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -317,13 +317,13 @@ import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BusinessLookupResultIF } from '@bcrs-shared-components/interfaces/business-lookup-interfaces'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
@@ -332,7 +332,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
-    AddBusinessDialog,
+    ManageBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
     ModalDialog,
@@ -353,7 +353,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   // for template
   readonly CorpTypes = CorpTypes
-
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
@@ -364,14 +363,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
-  protected addBusinessDialog = false
+  showManageBusinessDialog = false
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
   highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
-  private addAffiliationDropdown: boolean = false
   private incorporateNumberedDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
@@ -469,7 +467,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModal (businessIdentifier: string) {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
     await this.syncBusinesses()
@@ -481,31 +479,32 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }, 4000)
   }
 
-  async showAddSuccessModalNR (nrNumber: string) {
+  async showAddSuccessModalNR (nameRequestNumber: string) {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
 
     await this.syncBusinesses()
-    const res = await this.searchNRIndex(nrNumber)
 
-    this.snackbarText = nrNumber + ' was sucessfully added to your table.'
+    const nameRequestIndexResponse = await this.searchNRIndex(nameRequestNumber)
+
+    this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
     this.showSnackbar = true
-    this.highlightIndex = res
+    this.highlightIndex = nameRequestIndexResponse
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
   }
 
   showInvalidCodeModal (label: string) {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
     this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
     this.$refs.errorDialog.open()
   }
 
   showEntityNotFoundModal () {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
     this.$refs.errorDialog.open()
@@ -528,7 +527,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showPasscodeClaimedModal () {
     const contactNumber = this.$t('techSupportTollFree').toString()
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Passcode Already Claimed'
     this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
     this.$refs.errorDialog.open()
@@ -536,7 +535,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showUnknownErrorModal (type: string) {
     if (type === 'business') {
-      this.addBusinessDialog = false
+      this.showManageBusinessDialog = false
       this.dialogTitle = 'Error Adding Existing Business'
       this.dialogText = 'An error occurred adding your business. Please try again.'
     } else if (type === 'nr') {
@@ -548,13 +547,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showBusinessAlreadyAdded (event: BusinessLookupResultIF) {
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Already Added'
     this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
-    this.addBusinessDialog = true
+    this.showManageBusinessDialog = true
   }
 
   showAddNRModal () {
@@ -656,7 +656,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   cancelAddBusiness () {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
   }
 
   cancelAddNameRequest () {

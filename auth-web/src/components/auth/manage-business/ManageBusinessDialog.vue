@@ -1,5 +1,5 @@
 <template>
-  <div id="add-business-dialog">
+  <div id="manage-business-dialog">
     <HelpDialog
       :helpDialogBlurb="helpDialogBlurb"
       ref="helpDialog"
@@ -7,141 +7,104 @@
 
     <v-dialog
       attach="#entity-management"
-      v-model="dialog"
+      v-model="isDialogVisible"
       persistent
       scrollable
       max-width="50rem"
       data-test-tag="add-business"
       @keydown.esc="resetForm(true)"
     >
-      <v-card>
+      <v-card class="px-3">
         <v-card-title data-test="dialog-header">
-          <span>Add an Existing Business</span>
+          <span>Manage a B.C. Business</span>
         </v-card-title>
 
-        <v-card-text class="py-2">
-          <p>
-            Add an existing business to your list by providing the following required pieces of information:
-          </p>
-          <v-tooltip top nudge-bottom="80" content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
-              <ul class="add-business-unordered-list">
-                <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
-                <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
-                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
-                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
-                  of the proprietor or a partner</span>.</li>
-              </ul>
-            </template>
-            <span>
-              For individuals, it should be "Last Name, First Name Middlename".<br>
-              E.g. Watson, John Hamish
-            </span>
-          </v-tooltip>
+        <v-card-text>
+          <v-form ref="addBusinessForm" lazy-validation class="mt-0">
+            <template>
+              <div class="font-weight-bold mr-2 float-left">Business Name:</div>
+              <div>{{businessName}}</div>
 
-          <v-form ref="addBusinessForm" lazy-validation class="mt-6">
-            <template v-if="enableBusinessNrSearch">
-              <!-- Search for business identifier or name -->
-              <!-- NB: use v-if to re-mount component between instances -->
-              <BusinessLookup
-                v-if="dialog"
-                @business="businessName = $event.name; businessIdentifier = $event.identifier"
-              />
+              <div class="font-weight-bold mr-2 float-left">Incorporation Number:</div>
+              <div>{{businessIdentifier}}</div>
 
-              <template v-if="businessIdentifier">
-                <dl>
-                  <dt class="font-weight-bold mr-2">Business Name:</dt>
-                  <dd>{{businessName}}</dd>
-
-                  <dt class="font-weight-bold mr-2">Incorporation Number:</dt>
-                  <dd>{{businessIdentifier}}</dd>
-                </dl>
-              </template>
+              <div class="my-5">
+                You must be authorized to manage this business. You can be authorized in one of the following ways:
+              </div>
             </template>
 
-            <template v-else>
-              <!-- Business Identifier -->
-              <v-text-field
-                filled req persistent-hint validate-on-blur
-                label="Incorporation Number or Registration Number"
-                hint="Example: BC1234567, CP1234567 or FM1234567"
-                :rules="businessIdentifierRules"
-                v-model="businessIdentifier"
-                @blur="formatBusinessIdentifier()"
-                class="business-identifier mb-n2"
-                aria-label="Incorporation Number and Password or Passcode"
-                autofocus
-              />
-            </template>
+            <v-card class="mx-auto" flat>
+              <v-list class="mr-2">
 
-            <template v-if="!isStaffOrSbcStaff">
-              <!-- Passcode -->
-              <v-expand-transition>
-                <v-text-field
-                  v-if="isBusinessIdentifierValid"
-                  filled
-                  :label="passcodeLabel"
-                  :hint="passcodeHint"
-                  persistent-hint
-                  :rules="passcodeRules"
-                  :maxlength="passcodeMaxLength"
-                  v-model="passcode"
-                  autocomplete="off"
-                  class="passcode mt-6 mb-n2"
-                  :aria-label="passcodeLabel"
-                />
-              </v-expand-transition>
+                <v-list-group class="top-of-list" eager v-model="passcodeOption">
+                  <template v-slot:activator>
+                    <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
+                  </template>
+                  <div class="item-content">
+                    <v-text-field
+                      v-if="isBusinessIdentifierValid"
+                      filled
+                      :label="passcodeLabel"
+                      :hint="passcodeHint"
+                      persistent-hint
+                      :rules="passcodeRules"
+                      :maxlength="passcodeMaxLength"
+                      v-model="passcode"
+                      autocomplete="off"
+                      type="password"
+                      class="passcode mt-0 mb-2"
+                      :aria-label="passcodeLabel"
+                    />
+                    <Certify
+                      v-if="isBusinessIdentifierValid && isFirm"
+                      :certifiedBy="certifiedBy"
+                      entity="registered entity"
+                      @update:isCertified="isCertified = $event"
+                      class="certify"
+                      :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
+                    />
+                  </div>
+                </v-list-group>
 
-              <!-- Authorization Name -->
-              <v-expand-transition>
-                <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
-                  <header class="font-weight-bold">Authorization</header>
-                  <v-text-field
-                    filled
-                    persistent-hint
-                    :label="authorizationLabel"
-                    :rules="authorizationRules"
-                    :maxlength="authorizationMaxLength"
-                    :aria-label="authorizationLabel"
-                    v-model="authorizationName"
-                    autocomplete="off"
-                    class="authorization mt-4 pb-1"
-                    hide-details="auto"
-                  />
-                </section>
-              </v-expand-transition>
+                <v-list-group v-model="emailOption">
+                  <template v-slot:activator>
+                    <v-list-item-title>
+                      Confirm authorization using your registered office email address
+                      <div class="subtitle"> (If you forgot or don't have a business {{passwordText}})</div>
+                    </v-list-item-title>
+                  </template>
+                  <div class="list-body">
+                    <div>
+                      An email will be sent to the registered office contact email of the business:
+                    </div>
+                    <div><b>{}**@********</b></div>
+                    <div style="margin:6px 5px 16px 0 !important">
+                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
+                    </div>
+                  </div>
+                </v-list-group>
 
-              <!-- Certify (firms only) -->
-              <v-expand-transition>
-                <Certify
-                  v-if="isBusinessIdentifierValid && isFirm"
-                  :certifiedBy="certifiedBy"
-                  entity="registered entity"
-                  @update:isCertified="isCertified = $event"
-                  class="certify"
-                  :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
-                />
-              </v-expand-transition>
+                <v-list-group v-model="requestAuthBusinessOption">
+                  <template v-slot:activator>
+                    <v-list-item-title>Request authorization from the business</v-list-item-title>
+                  </template>
+                  <div class="list-body">
+                    <!-- Placeholder -->
+                  </div>
+                </v-list-group>
 
-              <!-- Folio Number -->
-              <v-expand-transition>
-                <section v-if="isBusinessIdentifierValid" class="mt-6">
-                  <header class="font-weight-bold">Folio / Reference Number</header>
-                  <p class="mt-4 mb-0">
-                    If you file forms for a number of companies, you may want to enter a
-                    folio or reference number to help you keep track of your transactions.
-                  </p>
-                  <v-text-field
-                    filled hide-details
-                    label="Folio or Reference Number (Optional)"
-                    :maxlength="50"
-                    v-model="folioNumber"
-                    class="folio-number mt-6"
-                    aria-label="Folio or Reference Number (Optional)"
-                  />
-                </section>
-              </v-expand-transition>
-            </template>
+                <v-list-group v-model="requestAuthRegistryOption">
+                  <template v-slot:activator>
+                    <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
+                  </template>
+                  <div class="list-body">
+                    <!-- Placeholder -->
+                  </div>
+                </v-list-group>
+
+              </v-list>
+            </v-card>
+
           </v-form>
         </v-card-text>
 
@@ -169,7 +132,7 @@
             :loading="isLoading"
             @click="add()"
           >
-            <span>Add</span>
+            <span>Manage This Business</span>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -179,7 +142,6 @@
 </template>
 
 <script lang="ts">
-import { FolioNumberload, LoginPayload } from '@/models/business'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
@@ -187,6 +149,7 @@ import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
 import { useStore } from 'vuex-composition-helpers'
 
@@ -197,7 +160,15 @@ export default defineComponent({
     HelpDialog
   },
   props: {
-    dialog: {
+    initialBusinessIdentifier: {
+      type: String,
+      default: ''
+    },
+    initialBusinessName: {
+      type: String,
+      default: ''
+    },
+    showBusinessDialog: {
       type: Boolean,
       default: false
     },
@@ -223,9 +194,6 @@ export default defineComponent({
     const updateBusinessName = async (businessNumber: string) => {
       return store.dispatch('business/updateBusinessName', businessNumber)
     }
-    const updateFolioNumber = async (folioNumberload: FolioNumberload) => {
-      return store.dispatch('business/updateFolioNumber', folioNumberload)
-    }
 
     // Local variables
     const businessName = ref('')
@@ -238,8 +206,10 @@ export default defineComponent({
     const authorizationName = ref('')
     const addBusinessForm = ref<HTMLFormElement>()
     const helpDialog = ref<HelpDialog>()
-
-    // Computed properties
+    const passcodeOption = ref(false)
+    const emailOption = ref(false)
+    const requestAuthBusinessOption = ref(false)
+    const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
 
@@ -310,6 +280,10 @@ export default defineComponent({
       ]
     })
 
+    const passwordText = computed(() => {
+      return (isCooperative.value ? 'passcode' : 'password')
+    })
+
     const forgotButtonText = computed(() => {
       return 'I lost or forgot my ' + (isCooperative.value ? 'passcode' : 'password')
     })
@@ -330,26 +304,43 @@ export default defineComponent({
       if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
         return true
       }
-      // business id is required
-      // passcode is required
-      // firms must accept certify clause
-      // staff users must enter names
-      // validate the form itself (according to the components' rules/state)
-      return (
+      let isValid = false
+      const isAddFormValid = (
         !!businessIdentifier.value &&
         !!passcode.value &&
         (!isFirm.value || (isCertified.value && !!certifiedBy.value)) &&
         addBusinessForm.value.validate()
       )
+      const isModifyFormValid = (
+        !!businessIdentifier.value &&
+        !!passcode.value &&
+        (!isFirm.value || isCertified.value) &&
+        (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
+        addBusinessForm.value.validate()
+      )
+      // if user is a staff user or sbc staff user, then only require the business identifier
+      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
+        return true
+      }
+
+      if (isModifyFormValid) {
+        isValid = true
+      }
+      return isValid
+    })
+
+    const isDialogVisible = computed(() => {
+      return props.showBusinessDialog
     })
 
     // Methods
     const resetForm = (emitCancel = false) => {
-      businessName.value = ''
-      businessIdentifier.value = ''
       passcode.value = ''
-      folioNumber.value = ''
       authorizationName.value = ''
+      passcodeOption.value = false
+      emailOption.value = false
+      requestAuthBusinessOption.value = false
+      requestAuthRegistryOption.value = false
       addBusinessForm.value.resetValidation()
       isLoading.value = false
       if (emitCancel) {
@@ -392,11 +383,6 @@ export default defineComponent({
           if (businessResponse?.status !== StatusCodes.OK) {
             emit('add-unknown-error')
           }
-          // update folio number
-          await updateFolioNumber({
-            businessIdentifier: businessIdentifier.value,
-            folioNumber: folioNumber.value
-          })
           // let parent know that add was successful
           emit('add-success', businessIdentifier.value)
         } catch (exception) {
@@ -420,6 +406,13 @@ export default defineComponent({
       helpDialog.value.open()
     }
 
+    watch(() => props.initialBusinessIdentifier, (newValue) => {
+      if (props.initialBusinessIdentifier) {
+        businessIdentifier.value = props.initialBusinessIdentifier
+        businessName.value = props.initialBusinessName
+      }
+    })
+
     // Watchers
     watch(businessIdentifier, (newValue) => {
       emit('on-business-identifier', newValue)
@@ -427,6 +420,11 @@ export default defineComponent({
 
     // Return the setup data - These will be removed with script setup.
     return {
+      requestAuthRegistryOption,
+      requestAuthBusinessOption,
+      emailOption,
+      passcodeOption,
+      isDialogVisible,
       addBusinessForm,
       helpDialog,
       businessName,
@@ -449,6 +447,7 @@ export default defineComponent({
       passcodeHint,
       passcodeMaxLength,
       passcodeRules,
+      passwordText,
       forgotButtonText,
       helpDialogBlurb,
       isFormValid,
@@ -463,6 +462,10 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+
+.list-body {
+  color:#313132;
+}
 
 .v-tooltip__content {
   background-color: RGBA(73, 80, 87, 0.95) !important;
@@ -537,8 +540,7 @@ dt {
 
   #cancel-button,
   #add-button {
-    min-width: unset !important;
-    width: 100px;
+    min-width: 80px !important;
   }
 
   // override disabled button color
@@ -554,5 +556,54 @@ dt {
   ::v-deep .v-text-field__details {
     margin-bottom: 0 !important;
   }
+}
+
+::v-deep {
+
+.v-list-group{
+  border-bottom: 1px solid rgb(228, 228, 228);
+  &.top-of-list{
+    border-top: 1px solid rgb(228, 228, 228);
+  }
+  .item-content{
+    color: #000 !important;
+  }
+}
+
+.v-list-item{
+  background: $BCgovInputBG;
+  height: 4rem !important;
+  margin: 0 !important;
+}
+
+.v-list-item--link>
+.v-list-item__title{
+  font-weight: 300 !important;
+  margin-left:-1rem !important;
+  color: var(--v-primary-base) !important;
+  .subtitle {
+    line-height: 1.5rem;
+    font-size: 9pt;
+    color: var(--v-primary-base) !important;
+    font-weight: normal;
+  }
+}
+
+.v-list-item--active>
+.v-list-item__title{
+  font-weight: 600 !important;
+  margin-left:-1rem !important;
+  color: #000 !important;
+  .subtitle {
+    line-height: 1.5rem;
+    font-size: 9pt;
+    color: #000 !important;
+    font-weight: normal;
+  }
+}
+
+.v-list-item__content{
+  color: #000 !important;
+}
 }
 </style>

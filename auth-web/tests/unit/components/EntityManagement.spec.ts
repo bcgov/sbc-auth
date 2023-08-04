@@ -4,6 +4,7 @@ import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -11,6 +12,8 @@ import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
+// @ts-ignore
+Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
@@ -176,7 +179,7 @@ describe('Entity Management Component', () => {
 
     expect(mockedSyncBusinesses).toHaveBeenCalled()
     expect(mockedSearchNRIndex).toHaveBeenCalled()
-    expect(wrapper.vm.snackbarText).toBe('NR 1111111 was sucessfully added to your table.')
+    expect(wrapper.vm.snackbarText).toBe('NR 1111111 was successfully added to your table.')
   })
 
   it('calls the nr error modal', async () => {
