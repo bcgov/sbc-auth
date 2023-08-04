@@ -348,8 +348,6 @@ export default defineComponent({
       return CommonUtils.isFirmNumber(businessIdentifier.value)
     })
 
-
-
     const showAuthorization = computed(() => {
       return isFirm.value && props.isStaffOrSbcStaff
     })
@@ -404,7 +402,7 @@ export default defineComponent({
     const passwordText = computed(() => {
       return (isCooperative.value ? 'passcode' : 'password')
     })
-    
+
     const forgotButtonText = computed(() => {
       return 'I lost or forgot my ' + (isCooperative.value ? 'passcode' : 'password')
     })
