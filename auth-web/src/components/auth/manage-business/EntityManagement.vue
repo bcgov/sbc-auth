@@ -288,7 +288,7 @@
           <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
       </ModalDialog>
-
+       <!-- Message for successfully adding business or name request -->
       <v-snackbar
         id="success-nr-business-snackbar"
         v-model="showSnackbar"
