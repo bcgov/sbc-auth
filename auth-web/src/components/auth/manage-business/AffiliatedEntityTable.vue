@@ -583,7 +583,7 @@ export default defineComponent({
     }
 
     const isBusinessAffiliated = (businessIdentifier: string): boolean => {
-      return affiliations.results.some(k => businessIdentifier === k.businessIdentifier)
+      return affiliations.results.some(business => businessIdentifier === business.businessIdentifier)
     }
 
     const goToAmalgamate = (item: Business): void => {
