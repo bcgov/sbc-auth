@@ -754,7 +754,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   float: right;
   width: 200px;
   height: 10% !important;
-  transform: translate(-10px,42px);
+  transform: translate(0px,-20px);
   z-index: 1;
 }
 

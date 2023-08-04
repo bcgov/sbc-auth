@@ -32,7 +32,7 @@
               class="save-continue-button"
               @click="changeDialogType('MODIFY')"
               data-test="next-button"
-            > Click Me
+            > Open Name Request
             </v-btn>
             <!-- TODO 16720: Search for name request to trigger showAddNRModal -->
             <!-- <name-request-lookup
@@ -44,20 +44,22 @@
       </v-col>
     </v-row>
 
-    <!-- AddBusinessDialog -->
-    <AddBusinessDialog
-      :dialogType="dialogType"
-      :isStaffOrSbcStaff="isGovStaffAccount"
-      :userFirstName="userFirstName"
-      :userLastName="userLastName"
-      @add-success="showAddSuccessModal()"
-      @add-failed-invalid-code="showInvalidCodeModal($event)"
-      @add-failed-no-entity="showEntityNotFoundModal()"
-      @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-      @add-unknown-error="showUnknownErrorModal('business')"
-      @on-cancel="changeDialogType('')"
-      @on-business-identifier="businessIdentifier = $event"
-    />
+    <template v-if="isEnableBusinessNrSearch">
+      <!-- AddBusinessDialog -->
+      <AddBusinessDialog
+        :dialogType="dialogType"
+        :isStaffOrSbcStaff="isGovStaffAccount"
+        :userFirstName="userFirstName"
+        :userLastName="userLastName"
+        @add-success="showAddSuccessModal()"
+        @add-failed-invalid-code="showInvalidCodeModal($event)"
+        @add-failed-no-entity="showEntityNotFoundModal()"
+        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+        @add-unknown-error="showUnknownErrorModal('business')"
+        @on-cancel="changeDialogType('')"
+        @on-business-identifier="businessIdentifier = $event"
+      />
+    </template>
     <!-- Add Business Dialog -->
     <ModalDialog
       ref="addNRDialog"
@@ -91,6 +93,8 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { mapActions } from 'vuex'
 
@@ -175,6 +179,10 @@ export default class SearchBusinessNameRequest extends Vue {
   changeDialogType (type) {
     if (type) this.dialogType = type
     else this.dialogType = ''
+  }
+
+  private get isEnableBusinessNrSearch (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
   }
 }
 </script>
