@@ -288,7 +288,7 @@
           <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
       </ModalDialog>
-
+       <!-- Message for successfully adding business or name request -->
       <v-snackbar
         id="success-nr-business-snackbar"
         v-model="showSnackbar"
@@ -335,8 +335,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions('business', ['searchBusinessIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions('business', ['searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions('business', ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
     ...mapActions('org', ['syncAddress'])
   }
 })

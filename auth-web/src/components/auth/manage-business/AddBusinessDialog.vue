@@ -246,6 +246,9 @@ export default defineComponent({
     const enableBusinessNrSearch = computed(() => {
       return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
     })
+    const enableBusinessNrSearch = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
+    })
 
     const isBusinessIdentifierValid = computed(() => {
       return CommonUtils.validateIncorporationNumber(businessIdentifier.value)

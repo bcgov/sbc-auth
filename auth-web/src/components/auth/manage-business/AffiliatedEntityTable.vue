@@ -475,6 +475,11 @@ export default defineComponent({
       getHeaders(props.selectedColumns)
     })
 
+    // feature flags
+    const enableNameRequestType = (): boolean => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableNameRequestType) || false
+    }
+
     return {
       actionHandler,
       actionButtonText,
