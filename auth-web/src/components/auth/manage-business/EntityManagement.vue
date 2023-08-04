@@ -208,7 +208,7 @@
 
       <!-- Add an Existing Business Dialog -->
       <AddBusinessDialog
-        :dialogType="addBusinessDialog"
+        :dialogType="businessDialogType"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -372,7 +372,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
-  protected addBusinessDialog = ''
+  protected businessDialogType = ''
 
   /** V-model for dropdown menus. */
   private addAffiliationDropdown: boolean = false
@@ -475,7 +475,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModal () {
-    this.addBusinessDialog = ''
+    this.businessDialogType = ''
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
     await this.syncBusinesses()
@@ -500,14 +500,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showInvalidCodeModal (label: string) {
-    this.addBusinessDialog = ''
+    this.businessDialogType = ''
     this.dialogTitle = `Invalid ${label}`
     this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
     this.$refs.errorDialog.open()
   }
 
   showEntityNotFoundModal () {
-    this.addBusinessDialog = ''
+    this.businessDialogType = ''
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
     this.$refs.errorDialog.open()
@@ -530,7 +530,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showPasscodeClaimedModal () {
     const contactNumber = this.$t('techSupportTollFree').toString()
-    this.addBusinessDialog = ''
+    this.businessDialogType = ''
     this.dialogTitle = 'Passcode Already Claimed'
     this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
     this.$refs.errorDialog.open()
@@ -538,7 +538,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showUnknownErrorModal (type: string) {
     if (type === 'business') {
-      this.addBusinessDialog = ''
+      this.businessDialogType = ''
       this.dialogTitle = 'Error Adding Existing Business'
       this.dialogText = 'An error occurred adding your business. Please try again.'
     } else if (type === 'nr') {
@@ -550,7 +550,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showAddBusinessModal () {
-    this.addBusinessDialog = BusinessDialogTypes.ADD
+    this.businessDialogType = BusinessDialogTypes.ADD
   }
 
   showAddNRModal () {
@@ -640,7 +640,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   cancelAddBusiness () {
-    this.addBusinessDialog = ''
+    this.businessDialogType = ''
   }
 
   cancelAddNameRequest () {
