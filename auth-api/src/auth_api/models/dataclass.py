@@ -33,6 +33,14 @@ class Activity:
 
 
 @dataclass
+class PaginationInfo:
+    """Used for providing pagination info."""
+
+    page: int
+    limit: int
+
+
+@dataclass
 class OrgSearch:  # pylint: disable=too-many-instance-attributes
     """Used for searching organizations."""
 
@@ -73,3 +81,16 @@ class KeycloakGroupSubscription:
     product_code: str
     group_name: str
     group_action: KeycloakGroupActions
+
+
+@dataclass
+class ProductReviewTask:
+    """Used for creating product subscription review task."""
+
+    org_id: str
+    org_name: str
+    product_code: str
+    product_description: str
+    product_subscription_id: int
+    user_id: str
+    external_source_id: Optional[str] = None

@@ -1,5 +1,5 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import { AffiliationInviteInfo, AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, NameRequest, PasscodeResetLoad } from '@/models/business'
 import {
@@ -147,6 +147,7 @@ export default class BusinessModule extends VuexModule {
           folioNumber: nr.folioNumber,
           target: getTarget(nr),
           entityTypeCd: nr.entityTypeCd,
+          requestTypeCd: nr.requestTypeCd,
           natureOfBusiness: nr.natureBusinessInfo,
           expirationDate: nr.expirationDate,
           applicants: nr.applicants,
@@ -156,6 +157,44 @@ export default class BusinessModule extends VuexModule {
       }
       affiliatedEntities.push(entity)
     })
+
+    if (LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) { // featureFlagIt
+      const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
+        .catch(err => {
+          console.log(err) // eslint-disable-line no-console
+          return null
+        })
+
+      if (resp?.data?.affiliationInvites) {
+        const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
+
+        affiliationInviteInfos.forEach(affiliationInviteInfo => {
+          const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === affiliationInviteInfo.business.businessIdentifier)
+          const affiliationInviteInfosArray = [affiliationInviteInfo]
+
+          if (business) {
+            business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
+          } else if (affiliationInviteInfo.fromOrg.id === this.currentOrganization.id) {
+            const b = { ...affiliationInviteInfo.business, affiliationInvites: affiliationInviteInfosArray }
+            affiliatedEntities.push(b)
+          } else {
+            // do nothing, no row to add it, and not a request from this org.
+          }
+        })
+
+        // bubble the ones with the invitations to the top
+        affiliatedEntities.sort((a, b) => {
+          if (a.affiliationInvites && !b.affiliationInvites) {
+            return -1
+          }
+          if (!a.affiliationInvites && b.affiliationInvites) {
+            return 1
+          }
+          return 0
+        })
+      }
+    }
+
     // update store with initial results
     this.setBusinesses(affiliatedEntities)
   }
@@ -305,6 +344,9 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async searchBusinessIndex (identifier: string): Promise<number> {
+    return this.businesses.findIndex(business => business.businessIdentifier === identifier)
+  }
   public async searchNRIndex (identifier: string): Promise<number> {
     return this.businesses.findIndex(business => business.nrNumber === identifier)
   }

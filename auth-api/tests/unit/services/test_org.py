@@ -19,15 +19,14 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
-from sqlalchemy import event
 
-from auth_api.models.dataclass import Activity
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import ContactLink as ContactLinkModel
 from auth_api.models import Org as OrgModel
-from auth_api.models.org import receive_before_insert, receive_before_update
+from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import Task as TaskModel
+from auth_api.models.dataclass import Activity
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
@@ -42,16 +41,16 @@ from auth_api.services.keycloak import KeycloakService
 from auth_api.services.rest_service import RestService
 from auth_api.utils.constants import GROUP_ACCOUNT_HOLDERS
 from auth_api.utils.enums import (
-    AccessType, ActivityAction, LoginSource, OrgStatus, OrgType, PatchActions, PaymentMethod, SuspensionReasonCode,
-    TaskAction, TaskRelationshipStatus, TaskStatus)
+    AccessType, ActivityAction, LoginSource, OrgStatus, OrgType, PatchActions, PaymentMethod, ProductSubscriptionStatus,
+    SuspensionReasonCode, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
-    patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put, patch_token_info)
-from tests.utilities.sqlalchemy import clear_event_listeners
+    convert_org_to_staff_org, factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation,
+    factory_membership_model, factory_org_model, factory_org_service, factory_user_model,
+    factory_user_model_with_contact, patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put,
+    patch_token_info)
 
 # noqa: I005
 
@@ -416,12 +415,7 @@ def test_create_product_subscription_staff(session, keycloak_mock, org_type, mon
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
     # Clearing the event listeners here, because we can't change the type_code.
-    clear_event_listeners(OrgModel)
-    org_db = OrgModel.find_by_id(org._model.id)
-    org_db.type_code = org_type
-    org_db.save()
-    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
-    event.listen(OrgModel, 'before_insert', receive_before_insert)
+    convert_org_to_staff_org(org._model.id, org_type)
 
     subscriptions = ProductService.create_product_subscription(org._model.id,
                                                                TestOrgProductsInfo.org_products2,
@@ -1131,3 +1125,84 @@ def test_patch_org_access_type(session, monkeypatch):  # pylint:disable=unused-a
     patch_info['accessType'] = AccessType.GOVN.value
     updated_org = org.patch_org(PatchActions.UPDATE_ACCESS_TYPE.value, patch_info)
     assert updated_org['access_type'] == AccessType.GOVN.value
+
+
+@pytest.mark.asyncio
+def test_create_product_single_subscription_qs(session, monkeypatch):
+    """Assert that qualified supplier sub product subscriptions can be created."""
+    # Create a user in keycloak
+    keycloak_service = KeycloakService()
+    request = KeycloakScenario.create_user_by_user_info(TestJwtClaims.public_bceid_user)
+    keycloak_service.add_user(request, return_if_exists=True)
+    kc_user = keycloak_service.get_user_by_username(request.user_name)
+    user = factory_user_model(TestUserInfo.get_bceid_user_with_kc_guid(kc_guid=kc_user.id))
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
+
+    org = OrgService.create_org(TestOrgInfo.org_premium, user_id=user.id)
+    assert org
+    dictionary = org.as_dict()
+    assert dictionary['name'] == TestOrgInfo.org_premium['name']
+
+    product_code = TestOrgProductsInfo.mhr_qs_lawyer_and_notaries['subscriptions'][0]['productCode']
+    external_source_id = TestOrgProductsInfo.mhr_qs_lawyer_and_notaries['subscriptions'][0]['externalSourceId']
+
+    ProductService.create_product_subscription(org_id=dictionary['id'],
+                                               subscription_data=TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
+                                               skip_auth=True)
+
+    org_subscriptions = ProductSubscriptionModel.find_by_org_ids(org_ids=[dictionary['id']])
+    org_prod_sub = next(prod for prod in org_subscriptions
+                        if prod.product_code == product_code)
+
+    token_info = TestJwtClaims.get_test_user(sub=user.keycloak_guid, source=LoginSource.STAFF.value)
+    patch_token_info(token_info, monkeypatch)
+    all_subs = ProductService.get_all_product_subscription(org_id=dictionary['id'])
+
+    prod_sub = next(sub for sub in all_subs if sub.get('code') == product_code)
+    parent_prod_sub = next(sub for sub in all_subs if sub.get('code') == 'MHR')
+
+    # MHR Qualified Supplier product and parent product should be in pending staff review
+    assert prod_sub
+    assert prod_sub['code'] == product_code
+    assert prod_sub['needReview']
+    assert prod_sub['parentCode'] == 'MHR'
+    assert prod_sub['subscriptionStatus'] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+    assert prod_sub['keycloak_group'] == 'mhr_qualified_user'
+
+    # Parent Product MHR should also be pending staff review
+    assert parent_prod_sub
+    assert parent_prod_sub['code'] == 'MHR'
+    assert not parent_prod_sub['needReview']
+    assert not parent_prod_sub.get('parentCode')
+    assert parent_prod_sub['subscriptionStatus'] == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
+    assert parent_prod_sub['keycloak_group'] == 'mhr_search_user'
+
+    # Staff review task should have been created
+    task = TaskModel.find_by_task_relationship_id(
+        task_relationship_type=TaskRelationshipType.PRODUCT.value, relationship_id=org_prod_sub.id)
+
+    assert task
+    assert task.account_id == dictionary['id']
+    assert task.external_source_id == external_source_id
+    assert task.relationship_type == TaskRelationshipType.PRODUCT.value
+    assert task.relationship_status == TaskRelationshipStatus.PENDING_STAFF_REVIEW.value
+    assert task.relationship_id == org_prod_sub.id
+    assert task.action == TaskAction.QUALIFIED_SUPPLIER_REVIEW.value
+
+    task_info = {
+        'relationshipStatus': TaskRelationshipStatus.ACTIVE.value
+    }
+
+    # Approve task and update org keycloak groups
+    TaskService.update_task(TaskService(task), task_info=task_info)
+    ProductService.update_org_product_keycloak_groups(dictionary['id'])
+
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
+    user_groups = keycloak_service.get_user_groups(user_id=kc_user.id)
+    groups = []
+    for group in user_groups:
+        groups.append(group.get('name'))
+
+    # Confirm account has the expected groups
+    assert 'mhr_search_user' in groups
+    assert 'mhr_qualified_user' in groups

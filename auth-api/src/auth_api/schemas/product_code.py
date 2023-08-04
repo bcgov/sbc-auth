@@ -29,5 +29,6 @@ class ProductCodeSchema(ma.ModelSchema):  # pylint: disable=too-many-ancestors, 
         exclude = ['default', 'linked_product_code']
 
     type_code = fields.String(data_key='type')
+    parent_code = fields.String(data_key='parentCode')
     premium_only = fields.Boolean(data_key='premiumOnly')
     need_review = fields.Boolean(data_key='needReview')

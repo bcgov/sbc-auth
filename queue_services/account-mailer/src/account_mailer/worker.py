@@ -211,7 +211,8 @@ async def process_event(event_message: dict, flask_app):
                     .format(user_first_name=email_msg.get('userFirstName'),
                             user_last_name=email_msg.get('userLastName'),
                             product_name=email_msg.get('productName'),
-                            account_name=email_msg.get('orgName')
+                            account_name=email_msg.get('orgName'),
+                            business_name=email_msg.get('businessName')
                             )
                 template_name = TemplateType[f'{MessageType(message_type).name}_TEMPLATE_NAME'].value
             else:
@@ -226,7 +227,8 @@ async def process_event(event_message: dict, flask_app):
                 'label': email_msg.get('label'),
                 'product_name': email_msg.get('productName'),
                 'remarks': email_msg.get('remarks'),
-                'applicationDate': email_msg.get('applicationDate')
+                'applicationDate': email_msg.get('applicationDate'),
+                'business_name': email_msg.get('businessName')
             }
 
             org_id = email_msg.get('accountId')

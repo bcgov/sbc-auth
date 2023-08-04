@@ -1,12 +1,14 @@
 import { CorpTypes, FilingTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { Contact } from './contact'
+import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 
 export interface LoginPayload {
     businessIdentifier: string
     passCode?: string
     phone?: string
     email?: string
-    certifiedByName: string
+    certifiedByName?: string
 }
 
 export interface FolioNumberload {
@@ -37,6 +39,7 @@ export interface Business {
     goodStanding?: boolean
     adminFreeze?: boolean
     dissolved?: boolean
+    affiliationInvites?: AffiliationInviteInfo[]
 }
 
 export interface BusinessSearchResultDto {
@@ -74,6 +77,7 @@ export interface NameRequest {
     folioNumber?: string
     target?: NrTargetTypes
     entityTypeCd?: string
+    requestTypeCd?: NrRequestTypeCodes
     natureOfBusiness?: string
     expirationDate?: Date
     nrNum?: string

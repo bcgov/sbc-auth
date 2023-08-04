@@ -398,6 +398,46 @@
       ],
       "clientRoles": {},
       "subGroups": []
+    },
+    {
+      "name": "mhr_search_user",
+      "path": "/mhr_search_user",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "name": "mhr_qualified_user",
+      "path": "/mhr_qualified_user",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "name": "mhr_manufacturer",
+      "path": "/mhr_manufacturer",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
+    },
+    {
+      "name": "mhr_general_user",
+      "path": "/mhr_general_user",
+      "attributes": {},
+      "realmRoles": [
+        "edit"
+      ],
+      "clientRoles": {},
+      "subGroups": []
     }
   ],
   "defaultRoles": [

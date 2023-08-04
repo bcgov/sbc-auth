@@ -21,35 +21,35 @@ import { mapState } from 'vuex'
 })
 // TODO in the mounted ; do load all the properties if its not loaded already
 export default class AccountMixin extends Vue {
-  protected readonly currentOrganization!: Organization
+  readonly currentOrganization!: Organization
 
-  protected getAccountFromSession (): AccountSettings {
+  getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
-  protected get isPremiumAccount (): boolean {
+  get isPremiumAccount (): boolean {
     return this.currentOrganization?.orgType === Account.PREMIUM
   }
-  protected get isRegularAccount (): boolean {
+  get isRegularAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.REGULAR
   }
 
-  protected get anonAccount (): boolean {
+  get anonAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.ANONYMOUS
   }
 
-  protected get isGovmAccount (): boolean {
+  get isGovmAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.GOVM
   }
 
-  protected get isGovnAccount (): boolean {
+  get isGovnAccount (): boolean {
     return this.currentOrganization?.accessType === AccessType.GOVN
   }
 
-  protected get isStaffAccount (): boolean {
+  get isStaffAccount (): boolean {
     return this.currentOrganization?.orgType === Account.STAFF
   }
 
-  protected get isSbcStaffAccount (): boolean {
+  get isSbcStaffAccount (): boolean {
     return this.currentOrganization?.orgType === Account.SBC_STAFF
   }
 }

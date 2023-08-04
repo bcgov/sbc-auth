@@ -27,6 +27,7 @@ from sbc_common_components.exception_handling.exception_handler import Exception
 
 from .account import API as ACCOUNTS_API
 from .acitivity_log import API as ACTIVITY_LOG_API
+from .affiliation_invitation import API as AFFILIATION_INVITATION_API
 from .apihelper import Api
 from .bcol_profiles import API as BCOL_PROFILE_API
 from .bulk_user import API as BULK_USER_API
@@ -88,6 +89,7 @@ API.add_namespace(BULK_USER_API, path='/bulk/users')
 API.add_namespace(USER_SETTINGS_API, path='/users/<string:user_id>/settings')
 API.add_namespace(ENTITY_API, path='/entities')
 API.add_namespace(ORG_API, path='/orgs')
+API.add_namespace(AFFILIATION_INVITATION_API, path='/affiliationInvitations')
 API.add_namespace(INVITATION_API, path='/invitations')
 API.add_namespace(DOCUMENTS_API, path='/documents')
 API.add_namespace(DOCUMENTS_AFFIDAVIT_API, path='/documents/affidavit')
