@@ -266,8 +266,27 @@ def business_mock(monkeypatch):
             }
         }
 
+    def get_businesses(business_identifiers, token):
+        return [
+            {
+                'identifier': 'CP0002103',
+                'legalName': 'BarFoo, Inc.',
+                'legalType': 'CP'
+            },
+            {
+
+                'identifier': 'CP0002104',
+                'legalName': 'BarFooMeToo, Inc.',
+                'legalType': 'CP'
+
+            }
+        ]
+
     monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
                         get_business)
+
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_multiple_business_details',
+                        get_businesses)
 
 
 @pytest.fixture()
