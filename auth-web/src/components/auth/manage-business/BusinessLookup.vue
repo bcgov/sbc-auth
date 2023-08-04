@@ -1,6 +1,6 @@
 <template>
   <!-- once in Summary state, need to re-mount to reuse this component -->
-  <div id="business-lookup" v-if="state !== States.SUMMARY">
+  <div id="business-lookup">
     <v-autocomplete
       :hide-no-data="state != States.NO_RESULTS"
       :items="searchResults"

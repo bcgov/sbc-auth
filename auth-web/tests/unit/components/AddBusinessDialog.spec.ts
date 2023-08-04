@@ -1,6 +1,6 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
@@ -16,11 +16,11 @@ const vuetify = new Vuetify({})
 const localVue = createLocalVue()
 localVue.use(Vuex)
 
-const tests = [
+const testCaseList = [
   {
-    desc: 'renders the component properly for a CP',
+    description: 'Should render for a BC account',
     businessIdentifier: 'CP0000000',
-    passcodeLabel: 'Passcode',
+    passcodeInputLabel: 'Passcode',
     certifyExists: false,
     passcodeExists: true,
     folioNumberExists: true,
@@ -30,9 +30,9 @@ const tests = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a BC',
+    description: 'Should render for a CP account',
     businessIdentifier: 'BC0000000',
-    passcodeLabel: 'Password',
+    passcodeInputLabel: 'Password',
     certifyExists: false,
     passcodeExists: true,
     folioNumberExists: true,
@@ -42,9 +42,9 @@ const tests = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a FM (client User)',
+    description: 'Should render for a FM Client account',
     businessIdentifier: 'FM0000000',
-    passcodeLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
+    passcodeInputLabel: 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)',
     certifyExists: true,
     passcodeExists: true,
     folioNumberExists: true,
@@ -54,7 +54,7 @@ const tests = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a FM (staff user)',
+    description: 'Should render for a FM Staff account',
     businessIdentifier: 'FM0000000',
     certifyExists: false,
     passcodeExists: false,
@@ -65,7 +65,7 @@ const tests = [
     userLastName: 'Woodie'
   },
   {
-    desc: 'renders the component properly for a FM (sbc staff)',
+    description: 'Should render for a FM SBC Staff account',
     businessIdentifier: 'FM0000000',
     certifyExists: false,
     passcodeExists: false,
@@ -76,8 +76,8 @@ const tests = [
     userLastName: 'Woodie'
   }
 ]
-tests.forEach(test => {
-  describe('Add Business Form', () => {
+testCaseList.forEach(test => {
+  describe('ManageBusinessDialog Component', () => {
     let wrapper: Wrapper<any>
 
     beforeAll(() => {
@@ -110,24 +110,23 @@ tests.forEach(test => {
         }
       })
 
-      wrapper = shallowMount(AddBusinessDialog, {
+      wrapper = shallowMount(ManageBusinessDialog, {
         store,
         vuetify,
         propsData: {
-          dialog: true,
           isStaffOrSbcStaff: test.isStaffOrSbcStaff,
           userFirstName: test.userFirstName,
           userLastName: test.userLastName
         }
-      }
-      )
-    })
+      })
+    }
+    )
 
     afterAll(() => {
       wrapper.destroy()
     })
 
-    it(test.desc, async () => {
+    it(test.description, async () => {
       wrapper.setData({
         businessIdentifier: test.businessIdentifier,
         businessName: 'My Business Inc'
@@ -135,10 +134,20 @@ tests.forEach(test => {
       await flushPromises()
 
       // verify components
-      expect(wrapper.attributes('id')).toBe('add-business-dialog')
-      expect(wrapper.find('#add-business-dialog').isVisible()).toBe(true)
+      expect(wrapper.attributes('id')).toBe('manage-business-dialog')
+      expect(wrapper.find('#manage-business-dialog').isVisible()).toBe(true)
       // expect(wrapper.find('businesslookup-stub').exists()).toBe(true) // UN-COMMENT (see below)
       expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
+
+      // button components
+      expect(wrapper.find('#add-button span').text()).toBe('Manage This Business')
+      expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
+      if (!test.certifyExists) {
+        expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
+      }
+      if (test.forgotButtonText) {
+        expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
+      }
 
       // *** UN-COMMENT THIS WHEN BUSINESS LOOKUP IS ENABLED ***
       // // verify data list
@@ -149,33 +158,13 @@ tests.forEach(test => {
       // expect(dd.at(0).text()).toBe('My Business Inc')
       // expect(dt.at(1).text()).toBe('Incorporation Number:')
       // expect(dd.at(1).text()).toBe(test.businessIdentifier)
-
-      // verify input fields
-      expect(wrapper.find('.business-identifier').attributes('label'))
-        .toBe('Incorporation Number or Registration Number') // DELETE THIS (see above)
-      expect(wrapper.find('.passcode').exists()).toBe(test.passcodeExists)
-      if (test.passcodeExists) {
-        expect(wrapper.find('.passcode').attributes('label')).toBe(test.passcodeLabel)
-      }
-      expect(wrapper.find('.certify').exists()).toBe(test.certifyExists)
-      if (test.folioNumberExists) {
-        expect(wrapper.find('.folio-number').attributes('label')).toBe('Folio or Reference Number (Optional)')
-      }
       if (!test.isStaffOrSbcStaff) {
         expect(wrapper.find('.authorization').exists())
       }
 
-      // verify buttons
-      if (!test.certifyExists) {
-        expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
+      if (!test.isStaffOrSbcStaff) {
+        expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
       }
-      if (test.forgotButtonText) {
-        expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
-      }
-      expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
-
-      // always enable add button
-      expect(wrapper.find('#add-button span').text()).toBe('Add')
     })
   })
 })

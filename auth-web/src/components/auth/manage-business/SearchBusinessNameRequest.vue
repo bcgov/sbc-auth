@@ -20,15 +20,20 @@
             <!-- Search for business identifier or name -->
             <!-- NB: use v-if to re-mount component between instances -->
             <business-lookup
-              @business="businessName = $event.name; businessIdentifier = $event.identifier; manageBusinessDialog.show=true;"
+              @business="businessName = $event.name; businessIdentifier = $event.identifier; showManageBusinessDialog = true;"
             />
           </template>
         </v-form>
         <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
           <template>
-            <div>
-              Add Name search field
-            </div>
+            <v-btn
+              large
+              color="primary"
+              class="save-continue-button"
+              @click="showManageBusinessDialog = true;"
+              data-test="next-button"
+            > Open Name Request
+            </v-btn>
             <!-- TODO 16720: Search for name request to trigger showAddNRModal -->
             <!-- <name-request-lookup
               @business="requestNames = $event.name; businessIdentifier = $event.identifier"
@@ -38,7 +43,26 @@
         </v-form>
       </v-col>
     </v-row>
-    <!-- Add Name Request Dialog -->
+
+    <template v-if="isEnableBusinessNrSearch">
+      <ManageBusinessDialog
+        :showBusinessDialog="showManageBusinessDialog"
+        :initialBusinessIdentifier="businessIdentifier"
+        :initialBusinessName="businessName"
+        :dialogType="dialogType"
+        :isStaffOrSbcStaff="isGovStaffAccount"
+        :userFirstName="userFirstName"
+        :userLastName="userLastName"
+        @add-success="showAddSuccessModal()"
+        @add-failed-invalid-code="showInvalidCodeModal($event)"
+        @add-failed-no-entity="showEntityNotFoundModal()"
+        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+        @add-unknown-error="showUnknownErrorModal('business')"
+        @on-cancel="showManageBusinessDialog = false"
+        @on-business-identifier="businessIdentifier = $event"
+      />
+    </template>
+    <!-- Add Business Dialog -->
     <ModalDialog
       ref="addNRDialog"
       :is-persistent="true"
@@ -70,11 +94,16 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import { LDFlags } from '@/util/constants'
+import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+
 import { mapActions } from 'vuex'
 
 @Component({
   components: {
+    ManageBusinessDialog,
     AddNameRequestForm,
     BusinessLookup,
     Certify,
@@ -95,13 +124,12 @@ export default class SearchBusinessNameRequest extends Vue {
   @Prop({ default: '' }) readonly userLastName: string
 
   // local variables
-  manageBusinessDialog = { show: false }
   searchType = 'Incorporated'
   businessName = ''
   businessIdentifier = '' // aka incorporation number or registration number
   clearSearch = 0
-  manageNameRequestDialog = { show: false }
   requestNames = [] // names in a name request
+  showManageBusinessDialog = false
 
   $refs: {
     addNRDialog: ModalDialog
@@ -147,6 +175,10 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   showAddNRModal () {
     this.$refs.addNRDialog.open()
+  }
+
+  get isEnableBusinessNrSearch (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
   }
 }
 </script>
