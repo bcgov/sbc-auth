@@ -188,7 +188,7 @@
 
       <!-- Add an Existing Business Dialog -->
       <AddBusinessDialog
-        :dialogType="businessDialogType"
+        :showDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -302,8 +302,8 @@
 </template>
 
 <script lang="ts">
-import { BusinessDialogTypes, CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -344,8 +344,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   // for template
   readonly CorpTypes = CorpTypes
-  readonly BusinessDialogTypes = BusinessDialogTypes
-
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
@@ -356,14 +354,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
-  protected businessDialogType = ''
+  showManageBusinessDialog = false
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
   highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
-  private addAffiliationDropdown: boolean = false
   private incorporateNumberedDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
@@ -460,7 +457,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModal (businessIdentifier: string) {
-    this.businessDialogType = ''
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
     await this.syncBusinesses()
@@ -490,14 +487,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showInvalidCodeModal (label: string) {
-    this.businessDialogType = ''
+    this.showManageBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
     this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
     this.$refs.errorDialog.open()
   }
 
   showEntityNotFoundModal () {
-    this.businessDialogType = ''
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
     this.$refs.errorDialog.open()
@@ -520,7 +517,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showPasscodeClaimedModal () {
     const contactNumber = this.$t('techSupportTollFree').toString()
-    this.businessDialogType = ''
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Passcode Already Claimed'
     this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
     this.$refs.errorDialog.open()
@@ -528,7 +525,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showUnknownErrorModal (type: string) {
     if (type === 'business') {
-      this.businessDialogType = ''
+      this.showManageBusinessDialog = false
       this.dialogTitle = 'Error Adding Existing Business'
       this.dialogText = 'An error occurred adding your business. Please try again.'
     } else if (type === 'nr') {
@@ -540,14 +537,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showBusinessAlreadyAdded (event: BusinessLookupResultIF) {
-    this.businessDialogType = ''
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Already Added'
     this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
-    this.businessDialogType = BusinessDialogTypes.ADD
+    this.showManageBusinessDialog = true
   }
 
   showAddNRModal () {
@@ -637,7 +634,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   cancelAddBusiness () {
-    this.businessDialogType = ''
+    this.showManageBusinessDialog = false
   }
 
   cancelAddNameRequest () {

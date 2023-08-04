@@ -20,7 +20,7 @@
             <!-- Search for business identifier or name -->
             <!-- NB: use v-if to re-mount component between instances -->
             <business-lookup
-              @business="businessName = $event.name; businessIdentifier = $event.identifier; manageBusinessDialog.show=true;"
+              @business="businessName = $event.name; businessIdentifier = $event.identifier; showManageBusinessDialog = true;"
             />
           </template>
         </v-form>
@@ -30,7 +30,7 @@
               large
               color="primary"
               class="save-continue-button"
-              @click="changeDialogType('MODIFY')"
+              @click="showManageBusinessDialog = true;"
               data-test="next-button"
             > Open Name Request
             </v-btn>
@@ -47,6 +47,9 @@
     <template v-if="isEnableBusinessNrSearch">
       <!-- AddBusinessDialog -->
       <AddBusinessDialog
+        :showBusinessDialog="showManageBusinessDialog"
+        :initialBusinessIdentifier="businessIdentifier"
+        :initialBusinessName="businessName"
         :dialogType="dialogType"
         :isStaffOrSbcStaff="isGovStaffAccount"
         :userFirstName="userFirstName"
@@ -56,7 +59,7 @@
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
         @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="changeDialogType('')"
+        @on-cancel="showManageBusinessDialog = false"
         @on-business-identifier="businessIdentifier = $event"
       />
     </template>
@@ -96,6 +99,7 @@ import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+
 import { mapActions } from 'vuex'
 
 @Component({
@@ -122,13 +126,12 @@ export default class SearchBusinessNameRequest extends Vue {
 
   // local variables
   dialogType = ''
-  manageBusinessDialog = { show: false }
   searchType = 'Incorporated'
   businessName = ''
   businessIdentifier = '' // aka incorporation number or registration number
   clearSearch = 0
-  manageNameRequestDialog = { show: false }
   requestNames = [] // names in a name request
+  showManageBusinessDialog = false
 
   $refs: {
     addNRDialog: ModalDialog
@@ -176,13 +179,8 @@ export default class SearchBusinessNameRequest extends Vue {
     this.$refs.addNRDialog.open()
   }
 
-  changeDialogType (type) {
-    if (type) this.dialogType = type
-    else this.dialogType = ''
-  }
-
-  private get isEnableBusinessNrSearch (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
+  get isEnableBusinessNrSearch (): boolean {
+    return true || LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
   }
 }
 </script>

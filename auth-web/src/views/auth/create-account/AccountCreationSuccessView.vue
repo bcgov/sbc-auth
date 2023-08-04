@@ -56,7 +56,6 @@ import { mapState } from 'vuex'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-
   private goTo (page) {
     switch (page) {
       case 'home': this.$router.push('/')

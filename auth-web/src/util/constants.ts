@@ -1,8 +1,3 @@
-export enum BusinessDialogTypes {
-    ADD = 'ADD',
-    MODIFY = 'MODIFY',
-}
-
 export enum SessionStorageKeys {
     KeyCloakToken = 'KEYCLOAK_TOKEN',
     ApiConfigKey = 'AUTH_API_CONFIG',

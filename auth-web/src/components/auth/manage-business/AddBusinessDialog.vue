@@ -16,134 +16,11 @@
     >
       <v-card class="px-3">
         <v-card-title data-test="dialog-header">
-          <span>{{dialogType === businessDialogTypes.ADD ? 'Add an Existing Business' : 'Manage a B.C. Business'}}</span>
+          <span>Manage a B.C. Business</span>
         </v-card-title>
 
         <v-card-text>
-          <p v-if="dialogType === businessDialogTypes.ADD">
-            Add an existing business to your list by providing the following required pieces of information:
-          </p>
-          <v-tooltip v-if="dialogType === businessDialogTypes.ADD" top nudge-bottom="80" content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
-              <ul class="add-business-unordered-list">
-                <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
-                <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
-                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
-                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
-                  of the proprietor or a partner</span>.</li>
-              </ul>
-            </template>
-            <span>
-              For individuals, it should be "Last Name, First Name Middlename".<br>
-              E.g. Watson, John Hamish
-            </span>
-          </v-tooltip>
-
-          <v-form v-if="dialogType === businessDialogTypes.ADD" ref="addBusinessForm" lazy-validation class="mt-6">
-            <template v-if="enableBusinessNrSearch">
-              <!-- Search for business identifier or name -->
-              <!-- NB: use v-if to re-mount component between instances -->
-              <BusinessLookup
-                v-if="isDialogVisible"
-                @business="businessName = $event.name; businessIdentifier = $event.identifier"
-              />
-
-              <template v-if="businessIdentifier">
-                <dl>
-                  <dt class="font-weight-bold mr-2">Business Name:</dt>
-                  <dd>{{businessName}}</dd>
-
-                  <dt class="font-weight-bold mr-2">Incorporation Number:</dt>
-                  <dd>{{businessIdentifier}}</dd>
-                </dl>
-              </template>
-            </template>
-
-            <template v-else>
-              <!-- Business Identifier -->
-              <v-text-field
-                filled req persistent-hint validate-on-blur
-                label="Incorporation Number or Registration Number"
-                hint="Example: BC1234567, CP1234567 or FM1234567"
-                :rules="businessIdentifierRules"
-                v-model="businessIdentifier"
-                @blur="formatBusinessIdentifier()"
-                class="business-identifier mb-n2"
-                aria-label="Incorporation Number and Password or Passcode"
-                autofocus
-              />
-            </template>
-
-            <template v-if="!isStaffOrSbcStaff">
-              <!-- Passcode -->
-              <v-expand-transition>
-                <v-text-field
-                  v-if="isBusinessIdentifierValid"
-                  filled
-                  :label="passcodeLabel"
-                  :hint="passcodeHint"
-                  persistent-hint
-                  :rules="passcodeRules"
-                  :maxlength="passcodeMaxLength"
-                  v-model="passcode"
-                  autocomplete="off"
-                  class="passcode mt-6 mb-n2"
-                  :aria-label="passcodeLabel"
-                />
-              </v-expand-transition>
-
-              <!-- Authorization Name -->
-              <v-expand-transition>
-                <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
-                  <header class="font-weight-bold">Authorization</header>
-                  <v-text-field
-                    filled
-                    persistent-hint
-                    :label="authorizationLabel"
-                    :rules="authorizationRules"
-                    :maxlength="authorizationMaxLength"
-                    :aria-label="authorizationLabel"
-                    v-model="authorizationName"
-                    autocomplete="off"
-                    class="authorization mt-4 pb-1"
-                    hide-details="auto"
-                  />
-                </section>
-              </v-expand-transition>
-
-              <!-- Certify (firms only) -->
-              <v-expand-transition>
-                <Certify
-                  v-if="isBusinessIdentifierValid && isFirm"
-                  :certifiedBy="certifiedBy"
-                  entity="registered entity"
-                  @update:isCertified="isCertified = $event"
-                  class="certify"
-                  :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
-                />
-              </v-expand-transition>
-
-              <!-- Folio Number -->
-              <v-expand-transition>
-                <section v-if="isBusinessIdentifierValid" class="mt-6">
-                  <header class="font-weight-bold">Folio / Reference Number</header>
-                  <p class="mt-4 mb-0">
-                    If you file forms for a number of companies, you may want to enter a
-                    folio or reference number to help you keep track of your transactions.
-                  </p>
-                  <v-text-field
-                    filled hide-details
-                    label="Folio or Reference Number (Optional)"
-                    :maxlength="50"
-                    v-model="folioNumber"
-                    class="folio-number mt-6"
-                    aria-label="Folio or Reference Number (Optional)"
-                  />
-                </section>
-              </v-expand-transition>
-            </template>
-          </v-form>
-          <v-form  v-if="dialogType === businessDialogTypes.MODIFY" ref="addBusinessForm" lazy-validation class="mt-0">
+          <v-form ref="addBusinessForm" lazy-validation class="mt-0">
             <template>
               <div class="font-weight-bold mr-2 float-left">Business Name:</div>
               <div>{{businessName}}</div>
@@ -255,7 +132,7 @@
             :loading="isLoading"
             @click="add()"
           >
-            <span>{{ dialogType === businessDialogTypes.ADD ? 'Add' : dialogType === businessDialogTypes.MODIFY ? 'Manage This Business' : '' }}</span>
+            <span>Manage This Business</span>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -265,14 +142,14 @@
 </template>
 
 <script lang="ts">
-import { BusinessDialogTypes, LDFlags } from '@/util/constants'
-import { FolioNumberload, LoginPayload } from '@/models/business'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
 import { useStore } from 'vuex-composition-helpers'
 
@@ -283,9 +160,17 @@ export default defineComponent({
     HelpDialog
   },
   props: {
-    dialogType: {
+    initialBusinessIdentifier: {
       type: String,
       default: ''
+    },
+    initialBusinessName: {
+      type: String,
+      default: ''
+    },
+    showBusinessDialog: {
+      type: Boolean,
+      default: false
     },
     isStaffOrSbcStaff: {
       type: Boolean,
@@ -309,9 +194,6 @@ export default defineComponent({
     const updateBusinessName = async (businessNumber: string) => {
       return store.dispatch('business/updateBusinessName', businessNumber)
     }
-    const updateFolioNumber = async (folioNumberload: FolioNumberload) => {
-      return store.dispatch('business/updateFolioNumber', folioNumberload)
-    }
 
     // Local variables
     const businessName = ref('')
@@ -328,7 +210,6 @@ export default defineComponent({
     const emailOption = ref(false)
     const requestAuthBusinessOption = ref(false)
     const requestAuthRegistryOption = ref(false)
-    const businessDialogTypes = ref(BusinessDialogTypes)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
 
@@ -442,33 +323,24 @@ export default defineComponent({
         return true
       }
 
-      if (props.dialogType === BusinessDialogTypes.ADD && isAddFormValid) {
-        isValid = true
-      }
-      if (props.dialogType === BusinessDialogTypes.MODIFY && isModifyFormValid) {
+      if (isModifyFormValid) {
         isValid = true
       }
       return isValid
     })
 
     const isDialogVisible = computed(() => {
-      return props.dialogType !== ''
+      return props.showBusinessDialog
     })
 
     // Methods
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
       authorizationName.value = ''
-      if (props.dialogType === BusinessDialogTypes.ADD) {
-        businessName.value = ''
-        businessIdentifier.value = ''
-        folioNumber.value = ''
-      } else if (props.dialogType === BusinessDialogTypes.MODIFY) {
-        passcodeOption.value = false
-        emailOption.value = false
-        requestAuthBusinessOption.value = false
-        requestAuthRegistryOption.value = false
-      }
+      passcodeOption.value = false
+      emailOption.value = false
+      requestAuthBusinessOption.value = false
+      requestAuthRegistryOption.value = false
       addBusinessForm.value.resetValidation()
       isLoading.value = false
       if (emitCancel) {
@@ -511,13 +383,6 @@ export default defineComponent({
           if (businessResponse?.status !== StatusCodes.OK) {
             emit('add-unknown-error')
           }
-          if (props.dialogType === BusinessDialogTypes.ADD) {
-            // update folio number
-            await updateFolioNumber({
-              businessIdentifier: businessIdentifier.value,
-              folioNumber: folioNumber.value
-            })
-          }
           // let parent know that add was successful
           emit('add-success', businessIdentifier.value)
         } catch (exception) {
@@ -541,6 +406,13 @@ export default defineComponent({
       helpDialog.value.open()
     }
 
+    watch(() => props.initialBusinessIdentifier, (newValue) => {
+      if (props.initialBusinessIdentifier) {
+        businessIdentifier.value = props.initialBusinessIdentifier
+        businessName.value = props.initialBusinessName
+      }
+    })
+
     // Watchers
     watch(businessIdentifier, (newValue) => {
       emit('on-business-identifier', newValue)
@@ -548,7 +420,6 @@ export default defineComponent({
 
     // Return the setup data - These will be removed with script setup.
     return {
-      businessDialogTypes,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
       emailOption,
