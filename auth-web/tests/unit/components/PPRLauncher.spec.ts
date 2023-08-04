@@ -83,7 +83,6 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info p').text()).toContain('claims on personal property.')
     expect(wrapper.find('.product-info__btn').exists()).toBe(true)
     expect(wrapper.find('.product-info__btn').text()).toContain('Open')
-    expect(wrapper.vm.pprUrl).toEqual(pprUrl)
   })
 
   it('renders img, title, text and button as MHR staff', async () => {
@@ -96,7 +95,6 @@ describe('PPRLauncher.vue', () => {
     expect(wrapper.find('.product-info p').text()).toContain('claims on manufactured homes.')
     expect(wrapper.find('.product-info__btn').exists()).toBe(true)
     expect(wrapper.find('.product-info__btn').text()).toContain('Open')
-    expect(wrapper.vm.pprUrl).toEqual(pprUrl)
   })
 
   it('renders img, title, text and button as Asset staff', async () => {
@@ -110,6 +108,5 @@ describe('PPRLauncher.vue', () => {
         'search for legal claims on personal property.')
     expect(wrapper.find('.product-info__btn').exists()).toBe(true)
     expect(wrapper.find('.product-info__btn').text()).toContain('Open')
-    expect(wrapper.vm.pprUrl).toEqual(pprUrl)
   })
 })

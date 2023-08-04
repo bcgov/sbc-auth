@@ -19,7 +19,6 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
-from sqlalchemy import event
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -28,7 +27,6 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.dataclass import Activity
-from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.services import ActivityLogPublisher
 from auth_api.services import Affidavit as AffidavitService
 from auth_api.services import Affiliation as AffiliationService
@@ -49,10 +47,10 @@ from tests.utilities.factory_scenarios import (
     KeycloakScenario, TestAffidavit, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo,
     TestOrgProductsInfo, TestOrgTypeInfo, TestPaymentMethodInfo, TestUserInfo)
 from tests.utilities.factory_utils import (
-    factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation, factory_membership_model,
-    factory_org_model, factory_org_service, factory_user_model, factory_user_model_with_contact,
-    patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put, patch_token_info)
-from tests.utilities.sqlalchemy import clear_event_listeners
+    convert_org_to_staff_org, factory_contact_model, factory_entity_model, factory_entity_service, factory_invitation,
+    factory_membership_model, factory_org_model, factory_org_service, factory_user_model,
+    factory_user_model_with_contact, patch_pay_account_delete, patch_pay_account_post, patch_pay_account_put,
+    patch_token_info)
 
 # noqa: I005
 
@@ -417,12 +415,7 @@ def test_create_product_subscription_staff(session, keycloak_mock, org_type, mon
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
 
     # Clearing the event listeners here, because we can't change the type_code.
-    clear_event_listeners(OrgModel)
-    org_db = OrgModel.find_by_id(org._model.id)
-    org_db.type_code = org_type
-    org_db.save()
-    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
-    event.listen(OrgModel, 'before_insert', receive_before_insert)
+    convert_org_to_staff_org(org._model.id, org_type)
 
     subscriptions = ProductService.create_product_subscription(org._model.id,
                                                                TestOrgProductsInfo.org_products2,

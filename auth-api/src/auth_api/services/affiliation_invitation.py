@@ -131,14 +131,18 @@ class AffiliationInvitation:
         # Validate from/to organizations exists
         if not (from_org := OrgModel.find_by_org_id(from_org_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
         if not OrgModel.find_by_org_id(to_org_id):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
         # Validate that entity exists
         if not (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
         # Check if affiliation already exists
         if AffiliationModel.find_affiliation_by_org_and_entity_ids(to_org_id, entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+
         # Check if an affiliation invitation already exists
         if AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
                                                                          to_org_id=to_org_id,
@@ -198,11 +202,9 @@ class AffiliationInvitation:
 
         if affiliation_invitation.type != AffiliationInvitationType.PASSCODE.value:
             # Fetch the up-to-date business details from legal API
-            business = AffiliationInvitation._get_business_details(business_identifier,
-                                                                   RestService.get_service_account_token(
-                                                                       config_id='ENTITY_SVC_CLIENT_ID',
-                                                                       config_secret='ENTITY_SVC_CLIENT_SECRET'))
-
+            token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
+                                                          config_secret='ENTITY_SVC_CLIENT_SECRET')
+            business = AffiliationInvitation._get_business_details(business_identifier, token)
             AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
                                                               business['business']['legalName'],
                                                               f'{invitation_origin}/{context_path}')

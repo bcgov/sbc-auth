@@ -56,12 +56,20 @@ export default defineComponent({
     }
   },
   setup (props, { emit }) {
+    // Will remove this after Vue upgrade.
+    interface ComponentState {
+      accounts: any[];
+      selectedAccount: any;
+      requestAccessMessage: string;
+      isLoading: boolean;
+    }
+
     const componentState = reactive({
       accounts: [],
       selectedAccount: {},
       requestAccessMessage: '',
       isLoading: true
-    })
+    }) as ComponentState
 
     const emitSelectedAccount = (selectedAcc) => {
       emit('selectAccount', selectedAcc)

@@ -74,72 +74,74 @@
               />
             </template>
 
-            <!-- Passcode -->
-            <v-expand-transition>
-              <v-text-field
-                v-if="isBusinessIdentifierValid"
-                filled
-                :label="passcodeLabel"
-                :hint="passcodeHint"
-                persistent-hint
-                :rules="passcodeRules"
-                :maxlength="passcodeMaxLength"
-                v-model="passcode"
-                autocomplete="off"
-                class="passcode mt-6 mb-n2"
-                :aria-label="passcodeLabel"
-              />
-            </v-expand-transition>
-
-            <!-- Authorization Name -->
-            <v-expand-transition>
-              <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
-                <header class="font-weight-bold">Authorization</header>
+            <template v-if="!isStaffOrSbcStaff">
+              <!-- Passcode -->
+              <v-expand-transition>
                 <v-text-field
+                  v-if="isBusinessIdentifierValid"
                   filled
+                  :label="passcodeLabel"
+                  :hint="passcodeHint"
                   persistent-hint
-                  :label="authorizationLabel"
-                  :rules="authorizationRules"
-                  :maxlength="authorizationMaxLength"
-                  :aria-label="authorizationLabel"
-                  v-model="authorizationName"
+                  :rules="passcodeRules"
+                  :maxlength="passcodeMaxLength"
+                  v-model="passcode"
                   autocomplete="off"
-                  class="authorization mt-4 pb-1"
-                  hide-details="auto"
+                  class="passcode mt-6 mb-n2"
+                  :aria-label="passcodeLabel"
                 />
-              </section>
-            </v-expand-transition>
+              </v-expand-transition>
 
-            <!-- Certify (firms only) -->
-            <v-expand-transition>
-              <Certify
-                v-if="isBusinessIdentifierValid && isFirm"
-                :certifiedBy="certifiedBy"
-                entity="registered entity"
-                @update:isCertified="isCertified = $event"
-                class="certify"
-                :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
-              />
-            </v-expand-transition>
+              <!-- Authorization Name -->
+              <v-expand-transition>
+                <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
+                  <header class="font-weight-bold">Authorization</header>
+                  <v-text-field
+                    filled
+                    persistent-hint
+                    :label="authorizationLabel"
+                    :rules="authorizationRules"
+                    :maxlength="authorizationMaxLength"
+                    :aria-label="authorizationLabel"
+                    v-model="authorizationName"
+                    autocomplete="off"
+                    class="authorization mt-4 pb-1"
+                    hide-details="auto"
+                  />
+                </section>
+              </v-expand-transition>
 
-            <!-- Folio Number -->
-            <v-expand-transition>
-              <section v-if="isBusinessIdentifierValid" class="mt-6">
-                <header class="font-weight-bold">Folio / Reference Number</header>
-                <p class="mt-4 mb-0">
-                  If you file forms for a number of companies, you may want to enter a
-                  folio or reference number to help you keep track of your transactions.
-                </p>
-                <v-text-field
-                  filled hide-details
-                  label="Folio or Reference Number (Optional)"
-                  :maxlength="50"
-                  v-model="folioNumber"
-                  class="folio-number mt-6"
-                  aria-label="Folio or Reference Number (Optional)"
+              <!-- Certify (firms only) -->
+              <v-expand-transition>
+                <Certify
+                  v-if="isBusinessIdentifierValid && isFirm"
+                  :certifiedBy="certifiedBy"
+                  entity="registered entity"
+                  @update:isCertified="isCertified = $event"
+                  class="certify"
+                  :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
                 />
-              </section>
-            </v-expand-transition>
+              </v-expand-transition>
+
+              <!-- Folio Number -->
+              <v-expand-transition>
+                <section v-if="isBusinessIdentifierValid" class="mt-6">
+                  <header class="font-weight-bold">Folio / Reference Number</header>
+                  <p class="mt-4 mb-0">
+                    If you file forms for a number of companies, you may want to enter a
+                    folio or reference number to help you keep track of your transactions.
+                  </p>
+                  <v-text-field
+                    filled hide-details
+                    label="Folio or Reference Number (Optional)"
+                    :maxlength="50"
+                    v-model="folioNumber"
+                    class="folio-number mt-6"
+                    aria-label="Folio or Reference Number (Optional)"
+                  />
+                </section>
+              </v-expand-transition>
+            </template>
           </v-form>
         </v-card-text>
 
@@ -172,12 +174,13 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { FolioNumberload, LoginPayload } from '@/models/business'
+import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
@@ -185,225 +188,277 @@ import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { StatusCodes } from 'http-status-codes'
-import { mapActions } from 'vuex'
+import { useStore } from 'vuex-composition-helpers'
 
-@Component({
+export default defineComponent({
   components: {
     BusinessLookup,
     Certify,
     HelpDialog
   },
-  methods: {
-    ...mapActions('business', [
-      'addBusiness',
-      'updateBusinessName',
-      'updateFolioNumber'
-    ])
-  }
-})
-export default class AddBusinessDialog extends Vue {
-  $refs: {
-    addBusinessForm: HTMLFormElement,
-    helpDialog: HelpDialog
-  }
+  props: {
+    dialog: {
+      type: Boolean,
+      default: false
+    },
+    isStaffOrSbcStaff: {
+      type: Boolean,
+      default: false
+    },
+    userFirstName: {
+      type: String,
+      default: ''
+    },
+    userLastName: {
+      type: String,
+      default: ''
+    }
+  },
+  setup (props, { emit }) {
+    // Store and Actions
+    const store = useStore()
+    const addBusiness = async (loginPayload: LoginPayload) => {
+      return store.dispatch('business/addBusiness', loginPayload)
+    }
+    const updateBusinessName = async (businessNumber: string) => {
+      return store.dispatch('business/updateBusinessName', businessNumber)
+    }
+    const updateFolioNumber = async (folioNumberload: FolioNumberload) => {
+      return store.dispatch('business/updateFolioNumber', folioNumberload)
+    }
 
-  @Prop({ default: false }) readonly dialog: boolean
-  @Prop({ default: false }) readonly isGovStaffAccount: boolean
-  @Prop({ default: '' }) readonly userFirstName: string
-  @Prop({ default: '' }) readonly userLastName: string
+    // Local variables
+    const businessName = ref('')
+    const businessIdentifier = ref('') // aka incorporation number of registration number
+    const businessIdentifierRules = ref(null)
+    const passcode = ref('') // aka password or proprietor/partner
+    const folioNumber = ref('')
+    const isLoading = ref(false)
+    const isCertified = ref(false) // firms only
+    const authorizationName = ref('')
+    const addBusinessForm = ref<HTMLFormElement>()
+    const helpDialog = ref<HelpDialog>()
 
-  private readonly addBusiness!: (loginPayload: LoginPayload) => any
-  private readonly updateBusinessName!: (businessNumber: string) => any
-  private readonly updateFolioNumber!: (folioNumberload: FolioNumberload) => void
+    // Computed properties
+    const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
+    const authorizationMaxLength = 100
 
-  // local variables
-  businessName = ''
-  businessIdentifier = '' // aka incorporation number of registration number
-  businessIdentifierRules = []
-  passcode = '' // aka password or proprietor/partner
-  folioNumber = ''
-  isLoading = false
-  isCertified = false // firms only
-  authorizationName = ''
+    const enableBusinessNrSearch = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
+    })
 
-  readonly authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
+    const isBusinessIdentifierValid = computed(() => {
+      return CommonUtils.validateIncorporationNumber(businessIdentifier.value)
+    })
 
-  readonly authorizationMaxLength = 100
+    const isCooperative = computed(() => {
+      return CommonUtils.isCooperativeNumber(businessIdentifier.value)
+    })
 
-  get enableBusinessNrSearch (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
-  }
+    const isFirm = computed(() => {
+      return CommonUtils.isFirmNumber(businessIdentifier.value)
+    })
 
-  get isBusinessIdentifierValid (): boolean {
-    return CommonUtils.validateIncorporationNumber(this.businessIdentifier)
-  }
+    const showAuthorization = computed(() => {
+      return isFirm.value && props.isStaffOrSbcStaff
+    })
 
-  get isCooperative (): boolean {
-    return CommonUtils.isCooperativeNumber(this.businessIdentifier)
-  }
+    const certifiedBy = computed(() => {
+      return props.isStaffOrSbcStaff ? authorizationName.value : `${props.userLastName}, ${props.userFirstName}`
+    })
 
-  get isFirm (): boolean {
-    return CommonUtils.isFirmNumber(this.businessIdentifier)
-  }
-
-  get showAuthorization (): boolean {
-    return (this.isFirm && this.isGovStaffAccount)
-  }
-
-  get certifiedBy (): string {
-    if (this.isGovStaffAccount) return this.authorizationName
-    else return `${this.userLastName}, ${this.userFirstName}`
-  }
-
-  get authorizationRules (): any[] {
-    return [
-      v => !!v || 'Authorization is required'
-    ]
-  }
-
-  get passcodeLabel (): string {
-    if (this.isFirm) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
-    if (this.isCooperative) return 'Passcode'
-    return 'Password'
-  }
-
-  get passcodeHint (): string {
-    if (this.isFirm) return 'Name as it appears on the Business Summary or the Statement of Registration'
-    if (this.isCooperative) return 'Passcode must be exactly 9 digits'
-    return 'Password must be 8 to 15 characters'
-  }
-
-  get passcodeMaxLength (): number {
-    if (this.isFirm) return 150
-    if (this.isCooperative) return 9
-    return 15
-  }
-
-  get passcodeRules (): any[] {
-    if (this.isFirm) {
+    const authorizationRules = computed(() => {
       return [
-        v => !!v || 'Proprietor or Partner Name is required',
-        v => v.length <= 150 || 'Maximum 150 characters'
+        (v) => !!v || 'Authorization is required'
       ]
-    }
-    if (this.isCooperative) {
+    })
+
+    const passcodeLabel = computed(() => {
+      if (isFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
+      if (isCooperative.value) return 'Passcode'
+      return 'Password'
+    })
+
+    const passcodeHint = computed(() => {
+      if (isFirm.value) return 'Name as it appears on the Business Summary or the Statement of Registration'
+      if (isCooperative.value) return 'Passcode must be exactly 9 digits'
+      return 'Password must be 8 to 15 characters'
+    })
+
+    const passcodeMaxLength = computed(() => {
+      if (isFirm.value) return 150
+      if (isCooperative.value) return 9
+      return 15
+    })
+
+    const passcodeRules = computed(() => {
+      if (isFirm.value) {
+        return [
+          (v) => !!v || 'Proprietor or Partner Name is required',
+          (v) => v.length <= 150 || 'Maximum 150 characters'
+        ]
+      }
+      if (isCooperative.value) {
+        return [
+          (v) => !!v || 'Passcode is required',
+          (v) => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
+        ]
+      }
       return [
-        v => !!v || 'Passcode is required',
-        v => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
+        (v) => !!v || 'Password is required',
+        (v) => CommonUtils.validateCorporatePassword(v) || 'Password must be 8 to 15 characters'
       ]
-    }
-    return [
-      v => !!v || 'Password is required',
-      v => CommonUtils.validateCorporatePassword(v) || 'Password must be 8 to 15 characters'
-    ]
-  }
+    })
 
-  get forgotButtonText (): string {
-    return 'I lost or forgot my ' + (this.isCooperative ? 'passcode' : 'password')
-  }
+    const forgotButtonText = computed(() => {
+      return 'I lost or forgot my ' + (isCooperative.value ? 'passcode' : 'password')
+    })
 
-  get helpDialogBlurb (): string {
-    if (this.isCooperative) {
-      return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
-        'please contact us at:'
-    } else {
-      const url = 'www.corporateonline.gov.bc.ca'
-      return `If you have forgotten or lost your password, please visit <a href="https://${url}">${url}</a> ` +
-        'and choose the option "Forgot Company Password", or contact us at:'
-    }
-  }
+    const helpDialogBlurb = computed(() => {
+      if (isCooperative.value) {
+        return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+          'please contact us at:'
+      } else {
+        const url = 'www.corporateonline.gov.bc.ca'
+        return `If you have forgotten or lost your password, please visit <a href="https://${url}">${url}</a> ` +
+          'and choose the option "Forgot Company Password", or contact us at:'
+      }
+    })
 
-  get isFormValid (): boolean {
-    // business id is required
-    // passcode is required
-    // firms must accept certify clause
-    // staff users must enter names
-    // validate the form itself (according to the components' rules/state)
-    return (
-      !!this.businessIdentifier &&
-      !!this.passcode &&
-      (!this.isFirm || this.isCertified) &&
-      (!!this.certifiedBy || !this.isFirm) &&
-      this.$refs.addBusinessForm.validate()
-    )
-  }
+    const isFormValid = computed(() => {
+      // if user is a staff user or sbc staff user, then only require the business identifier
+      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
+        return true
+      }
+      // business id is required
+      // passcode is required
+      // firms must accept certify clause
+      // staff users must enter names
+      // validate the form itself (according to the components' rules/state)
+      return (
+        !!businessIdentifier.value &&
+        !!passcode.value &&
+        (!isFirm.value || (isCertified.value && !!certifiedBy.value)) &&
+        addBusinessForm.value.validate()
+      )
+    })
 
-  async add (): Promise<void> {
-    this.$refs.addBusinessForm.validate()
-    if (this.isFormValid) {
-      this.isLoading = true
-      try {
-        // try to add business
-        const addResponse = await this.addBusiness({
-          businessIdentifier: this.businessIdentifier,
-          certifiedByName: this.authorizationName,
-          passCode: this.passcode
-        })
-        // check if add didn't succeed
-        if (addResponse?.status !== StatusCodes.CREATED) {
-          this.$emit('add-unknown-error')
-        }
-        // try to update business name
-        const businessResponse = await this.updateBusinessName(this.businessIdentifier)
-        // check if update didn't succeed
-        if (businessResponse?.status !== StatusCodes.OK) {
-          this.$emit('add-unknown-error')
-        }
-        // update folio number
-        await this.updateFolioNumber({
-          businessIdentifier: this.businessIdentifier,
-          folioNumber: this.folioNumber
-        })
-        // let parent know that add was successful
-        this.$emit('add-success')
-      } catch (exception) {
-        if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
-          this.$emit('add-failed-invalid-code', this.passcodeLabel)
-        } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
-          this.$emit('add-failed-no-entity')
-        } else if (exception.response?.status === StatusCodes.NOT_ACCEPTABLE) {
-          this.$emit('add-failed-passcode-claimed')
-        } else {
-          this.$emit('add-unknown-error')
-        }
-      } finally {
-        this.resetForm()
+    // Methods
+    const resetForm = (emitCancel = false) => {
+      businessName.value = ''
+      businessIdentifier.value = ''
+      passcode.value = ''
+      folioNumber.value = ''
+      authorizationName.value = ''
+      addBusinessForm.value.resetValidation()
+      isLoading.value = false
+      if (emitCancel) {
+        emit('on-cancel')
       }
     }
-  }
 
-  resetForm (emitCancel = false): void {
-    this.businessName = ''
-    this.businessIdentifier = ''
-    this.passcode = ''
-    this.folioNumber = ''
-    this.authorizationName = ''
-    this.$refs.addBusinessForm.resetValidation()
-    this.isLoading = false
-    if (emitCancel) {
-      this.$emit('on-cancel')
+    const handleException = (exception) => {
+      if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
+        emit('add-failed-invalid-code', passcodeLabel.value)
+      } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
+        emit('add-failed-no-entity')
+      } else if (exception.response?.status === StatusCodes.NOT_ACCEPTABLE) {
+        emit('add-failed-passcode-claimed')
+      } else if (exception.response?.status === StatusCodes.BAD_REQUEST) {
+        emit('business-already-added', { name: businessName.value, identifier: businessIdentifier.value })
+      } else {
+        emit('add-unknown-error')
+      }
+    }
+
+    const add = async () => {
+      addBusinessForm.value.validate()
+      if (isFormValid.value) {
+        isLoading.value = true
+        try {
+          // try to add business
+          let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
+          if (!props.isStaffOrSbcStaff) {
+            businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
+          }
+          const addResponse = await addBusiness(businessData)
+          // check if add didn't succeed
+          if (addResponse?.status !== StatusCodes.CREATED) {
+            emit('add-unknown-error')
+          }
+          // try to update business name
+          const businessResponse = await updateBusinessName(businessIdentifier.value)
+          // check if update didn't succeed
+          if (businessResponse?.status !== StatusCodes.OK) {
+            emit('add-unknown-error')
+          }
+          // update folio number
+          await updateFolioNumber({
+            businessIdentifier: businessIdentifier.value,
+            folioNumber: folioNumber.value
+          })
+          // let parent know that add was successful
+          emit('add-success', businessIdentifier.value)
+        } catch (exception) {
+          handleException(exception)
+        } finally {
+          resetForm()
+        }
+      }
+    }
+
+    const formatBusinessIdentifier = () => {
+      businessIdentifierRules.value = [
+        (v) => !!v || 'Incorporation Number or Registration Number is required',
+        (v) => CommonUtils.validateIncorporationNumber(v) ||
+          'Incorporation Number or Registration Number is not valid'
+      ]
+      businessIdentifier.value = CommonUtils.formatIncorporationNumber(businessIdentifier.value)
+    }
+
+    const openHelp = () => {
+      helpDialog.value.open()
+    }
+
+    // Watchers
+    watch(businessIdentifier, (newValue) => {
+      emit('on-business-identifier', newValue)
+    }, { immediate: true })
+
+    // Return the setup data - These will be removed with script setup.
+    return {
+      addBusinessForm,
+      helpDialog,
+      businessName,
+      businessIdentifier,
+      passcode,
+      folioNumber,
+      isLoading,
+      isCertified,
+      authorizationName,
+      authorizationLabel,
+      authorizationMaxLength,
+      enableBusinessNrSearch,
+      isBusinessIdentifierValid,
+      isCooperative,
+      isFirm,
+      showAuthorization,
+      certifiedBy,
+      authorizationRules,
+      passcodeLabel,
+      passcodeHint,
+      passcodeMaxLength,
+      passcodeRules,
+      forgotButtonText,
+      helpDialogBlurb,
+      isFormValid,
+      add,
+      resetForm,
+      formatBusinessIdentifier,
+      openHelp
     }
   }
-
-  formatBusinessIdentifier (): void {
-    this.businessIdentifierRules = [
-      v => !!v || 'Incorporation Number or Registration Number is required',
-      v => CommonUtils.validateIncorporationNumber(v) ||
-        'Incorporation Number or Registration Number is not valid'
-    ]
-    this.businessIdentifier = CommonUtils.formatIncorporationNumber(this.businessIdentifier)
-  }
-
-  openHelp (): void {
-    this.$refs.helpDialog.open()
-  }
-
-  /** Emits event to parent initially and when business identifier changes. */
-  @Watch('businessIdentifier', { immediate: true })
-  private onBusinessIdentifierChange (): void {
-    this.$emit('on-business-identifier', this.businessIdentifier)
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>
