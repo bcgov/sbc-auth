@@ -14,7 +14,7 @@
 
 """Tests to verify the invitations API end-point.
 
-Test-Suite to ensure that the /invitations endpoint is working as expected.
+Test-Suite to ensure that the /affiliationsInvitations endpoint is working as expected.
 """
 import json
 
@@ -329,10 +329,8 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
 
 def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that affiliation invitations can be retrieved."""
-    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
-                                                                                             jwt,
-                                                                                             session,
-                                                                                             keycloak_mock)
+    headers, from_org_id, to_org_id, business_identifier = \
+        setup_affiliation_invitation_data(client, jwt, session, keycloak_mock)
 
     client.post('/api/v1/affiliationInvitations', data=json.dumps(
         factory_affiliation_invitation(
@@ -341,7 +339,8 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
             business_identifier=business_identifier)),
                                 headers=headers, content_type='application/json')
 
-    rv_invitations = client.get('/api/v1/affiliationInvitations?orgId={}'.format(from_org_id),
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    rv_invitations = client.get('/api/v1/affiliationInvitations?fromOrgId={}'.format(from_org_id),
                                 headers=headers,
                                 content_type='application/json')
 
@@ -383,3 +382,217 @@ def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,
                      'passCode': entity_info['passCode']}), content_type='application/json')
 
     return headers, from_org_id, to_org_id, business_identifier
+
+
+def _get_entity_json_for_post(counter):
+    return {'businessIdentifier': f'CP000{counter}',
+            'businessNumber': f'791861078BC{counter}',
+            'name': f'Testing entity {counter}',
+            'passCode': '222222222', 'corpTypeCode': 'CP'}
+
+
+def setup_additional_affiliation_invitation_data(client, jwt, session, keycloak_mock,
+                                                 claims=TestJwtClaims.public_user_role,
+                                                 new_org_count=5,
+                                                 new_entity_count=1
+                                                 ):  # pylint:disable=unused-argument
+    """Set up additional data for testing affiliation invitations."""
+    headers = factory_auth_header(jwt=jwt, claims=claims)
+    headers_entity = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+
+    new_org_ids = []
+    new_entity_business_identifiers = []
+
+    for i in range(new_org_count):
+        new_org_json = client.post('/api/v1/orgs', data=json.dumps({'name': f'Test Affiliation Invitation Org {i}'}),
+                                   headers=headers, content_type='application/json')
+        new_org: dict = json.loads(new_org_json.data)
+        new_org_ids.append(new_org.get('id'))
+
+    for i in range(new_entity_count):
+        new_entity_info = _get_entity_json_for_post(i)
+        client.post('/api/v1/entities', data=json.dumps(new_entity_info),
+                    headers=headers_entity, content_type='application/json')
+
+        new_entity_business_identifiers.append(new_entity_info['businessIdentifier'])
+
+    return new_org_ids, new_entity_business_identifiers
+
+
+def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that an affiliation invitation (type REQUEST) can be authorized."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=to_org_id,
+            business_identifier=business_identifier)),
+        headers=headers, content_type='application/json')
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    rv_invitation = client.patch(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/accept',
+                                 headers=headers,
+                                 content_type='application/json')
+
+    result_json = rv_invitation.json
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['status'] == 'ACCEPTED'
+
+
+def test_reject_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that an affiliation invitation (type REQUEST) can be refused to be authorized."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+    # create affiliation invitation in test
+    sample_invite = factory_affiliation_invitation(
+        from_org_id=from_org_id,
+        to_org_id=to_org_id,
+        business_identifier=business_identifier)
+
+    rv_invitation = client.post(
+        '/api/v1/affiliationInvitations',
+        data=json.dumps(sample_invite),
+        headers=headers, content_type='application/json'
+    )
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    rv_invitation = client.patch(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/refuse',
+                                 headers=headers,
+                                 content_type='application/json')
+
+    result_json = rv_invitation.json
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['status'] == 'FAILED'
+
+
+def _create_affiliations_for_test(client, headers,
+                                  org_id1, org_id2, org_id3, org_id4,
+                                  business_identifier1, business_identifier2):
+    sample_invites = [
+        factory_affiliation_invitation(
+            from_org_id=org_id1,
+            to_org_id=org_id2,
+            business_identifier=business_identifier1,
+            affiliation_invitation_type='REQUEST'
+        ),
+        factory_affiliation_invitation(
+            from_org_id=org_id2,
+            to_org_id=org_id3,
+            business_identifier=business_identifier1,
+            affiliation_invitation_type='REQUEST'),
+        factory_affiliation_invitation(
+            from_org_id=org_id3,
+            to_org_id=org_id4,
+            business_identifier=business_identifier1,
+            affiliation_invitation_type='REQUEST'),
+        factory_affiliation_invitation(
+            from_org_id=org_id4,
+            to_org_id=org_id1,
+            business_identifier=business_identifier1,
+            affiliation_invitation_type='REQUEST'),
+        factory_affiliation_invitation(
+            from_org_id=org_id4,
+            to_org_id=org_id1,
+            business_identifier=business_identifier2,
+            affiliation_invitation_type='REQUEST')]
+
+    # create affiliation invitation in test
+    for i in range(len(sample_invites)):
+        data = json.dumps(sample_invites[i])
+        client.post(
+            '/api/v1/affiliationInvitations',
+            data=data,
+            headers=headers, content_type='application/json')
+
+
+def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, keycloak_mock, business_mock,
+                                                     stan_server):
+    """Assert that correct count of affiliation invitations is returned for provided org id."""
+    orig_val_max_number_of_orgs = app.config.get('MAX_NUMBER_OF_ORGS')
+    app.config.update(MAX_NUMBER_OF_ORGS=10)
+    # setup all the required data
+    headers, org_id_0a, org_id_0b, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                           jwt,
+                                                                                           session,
+                                                                                           keycloak_mock)
+    new_org_ids, new_business_identifiers = setup_additional_affiliation_invitation_data(client,
+                                                                                         jwt,
+                                                                                         session,
+                                                                                         keycloak_mock)
+
+    _create_affiliations_for_test(client, headers,
+                                  org_id1=new_org_ids[0],
+                                  org_id2=new_org_ids[1],
+                                  org_id3=new_org_ids[2],
+                                  org_id4=new_org_ids[3],
+                                  business_identifier1=business_identifier,
+                                  business_identifier2=new_business_identifiers[0])
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    expected_org_id = new_org_ids[0]
+    url = f'/api/v1/affiliationInvitations?orgId={expected_org_id}&businessDetails=True'
+    affiliation_invitations_response = client.get(url, headers=headers)
+    affiliation_invitations_dict: dict = json.loads(affiliation_invitations_response.data)
+    affiliation_invitations = affiliation_invitations_dict['affiliationInvitations']
+
+    assert len(affiliation_invitations) == 2   # should be two, one for 'toOrg' other for 'fromOrg'
+    assert affiliation_invitations[0]['toOrg']['id'] == expected_org_id \
+           or affiliation_invitations[0]['fromOrg']['id'] == expected_org_id
+    assert affiliation_invitations[1]['toOrg']['id'] == expected_org_id \
+           or affiliation_invitations[1]['fromOrg']['id'] == expected_org_id
+
+    app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
+
+
+def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt, session, keycloak_mock, business_mock,
+                                                                stan_server):
+    """Assert that correct count of affiliation invitations is returned for provided org id and business identifier."""
+    # setup all the required data
+    orig_val_max_number_of_orgs = app.config.get('MAX_NUMBER_OF_ORGS')
+    app.config.update(MAX_NUMBER_OF_ORGS=10)
+    headers, org_id_0a, org_id_0b, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                           jwt,
+                                                                                           session,
+                                                                                           keycloak_mock)
+    new_org_ids, new_business_identifiers = setup_additional_affiliation_invitation_data(client,
+                                                                                         jwt,
+                                                                                         session,
+                                                                                         keycloak_mock)
+
+    _create_affiliations_for_test(client, headers,
+                                  org_id1=new_org_ids[0],
+                                  org_id2=new_org_ids[1],
+                                  org_id3=new_org_ids[2],
+                                  org_id4=new_org_ids[3],
+                                  business_identifier1=business_identifier,
+                                  business_identifier2=new_business_identifiers[0])
+
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    expected_org_id = new_org_ids[0]
+    url = f'/api/v1/affiliationInvitations?toOrgId=' \
+          f'{expected_org_id}&business_identifier={business_identifier}&businessDetails=True'
+    affiliation_invitations_response = client.get(url, headers=headers)
+    affiliation_invitations_dict: dict = json.loads(affiliation_invitations_response.data)
+    affiliation_invitations = affiliation_invitations_dict['affiliationInvitations']
+
+    assert len(affiliation_invitations) == 1  # should be only one to org and business identifier match
+    assert affiliation_invitations[0]['toOrg']['id'] == expected_org_id
+    assert affiliation_invitations[0]['entity']['businessIdentifier'] == business_identifier
+
+    app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
