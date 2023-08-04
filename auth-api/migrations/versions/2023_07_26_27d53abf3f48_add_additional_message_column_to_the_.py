@@ -1,7 +1,7 @@
 """Add 'additional message' column to the Affiliation invitation table.
 
 Revision ID: 27d53abf3f48
-Revises: b20a33cb84f2
+Revises: 746771099983
 Create Date: 2023-07-26 15:47:32.875016
 
 """
@@ -11,7 +11,7 @@ from sqlalchemy import column, table, String, Boolean
 
 # revision identifiers, used by Alembic.
 revision = '27d53abf3f48'
-down_revision = 'b20a33cb84f2'
+down_revision = '746771099983'
 branch_labels = None
 depends_on = None
 
