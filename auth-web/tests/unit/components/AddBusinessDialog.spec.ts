@@ -1,6 +1,6 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'

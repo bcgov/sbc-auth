@@ -124,7 +124,6 @@ export default class SearchBusinessNameRequest extends Vue {
   @Prop({ default: '' }) readonly userLastName: string
 
   // local variables
-  dialogType = ''
   searchType = 'Incorporated'
   businessName = ''
   businessIdentifier = '' // aka incorporation number or registration number
