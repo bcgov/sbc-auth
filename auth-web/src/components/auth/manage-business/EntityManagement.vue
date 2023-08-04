@@ -141,7 +141,7 @@
         </div>
       </div>
 
-      <CreateNewBusinessHelpVue/>
+      <CreateNewBusinessHelp/>
 
       <search-business-name-request
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
@@ -317,7 +317,7 @@ import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BusinessLookupResultIF } from '@bcrs-shared-components/interfaces/business-lookup-interfaces'
 import ConfigHelper from '@/util/config-helper'
-import CreateNewBusinessHelpVue from './CreateNewBusinessHelp.vue'
+import CreateNewBusinessHelp from './CreateNewBusinessHelp.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -330,7 +330,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     AddBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
-    CreateNewBusinessHelpVue,
+    CreateNewBusinessHelp,
     ModalDialog,
     PasscodeResetOptionsModal,
     SearchBusinessNameRequest
