@@ -192,13 +192,14 @@
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
-        @add-success="showAddSuccessModal()"
+        @add-success="showAddSuccessModal"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
         @add-unknown-error="showUnknownErrorModal('business')"
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
+        @business-already-added="showBusinessAlreadyAdded($event)"
       />
 
       <!-- Add Name Request Dialog -->
@@ -287,11 +288,11 @@
           <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
         </template>
       </ModalDialog>
-      <!-- Message for successfully adding name request -->
+       <!-- Message for successfully adding business or name request -->
       <v-snackbar
-        id="success-nr-snackbar"
+        id="success-nr-business-snackbar"
         v-model="showSnackbar"
-        :timeout="4000"
+        :timeout="timeoutMs"
         transition="fade"
       >
         {{ snackbarText }}
@@ -334,7 +335,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     ...mapState('user', ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions('business', ['searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions('business', ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
     ...mapActions('org', ['syncAddress'])
   }
 })
@@ -356,12 +357,17 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
   protected businessDialogType = ''
+  snackbarText: string = null
+  showSnackbar = false
+  timeoutMs = 4000
+  highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
   private addAffiliationDropdown: boolean = false
   private incorporateNumberedDropdown: boolean = false
 
-  private readonly searchNRIndex!: (identifier: string) => Promise<number>
+  readonly searchBusinessIndex!: (identifier: string) => Promise<number>
+  readonly searchNRIndex!: (identifier: string) => Promise<number>
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
@@ -369,6 +375,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private readonly syncAddress!: () => Address
   private selectedColumns = ['Number', 'Type', 'Status']
   private columns = ['Number', 'Type', 'Status']
+  highlightIndex = -1
 
   private snackbarText: string = null
   private showSnackbar = false
@@ -457,12 +464,17 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     await this.syncBusinesses()
   }
 
-  async showAddSuccessModal () {
+  async showAddSuccessModal (businessIdentifier: string) {
     this.businessDialogType = ''
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
     await this.syncBusinesses()
-    this.$refs.successDialog.open()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.snackbarText = businessIdentifier + ' was successfully added to your table.'
+    this.showSnackbar = true
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
   }
 
   async showAddSuccessModalNR (nameRequestNumber: string) {
@@ -493,6 +505,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.businessDialogType = ''
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
+    this.$refs.errorDialog.open()
+  }
+
+  showBusinessAlreadyAdded (event: { name, identifier }) {
+    this.addBusinessDialog = false
+    this.dialogTitle = 'Business Already Added'
+    this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 

@@ -16,6 +16,7 @@
 Test Utility for creating model factory.
 """
 import datetime
+from sqlalchemy import event
 
 from requests.exceptions import HTTPError
 
@@ -30,6 +31,7 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import Task as TaskModel
 from auth_api.models.membership import Membership as MembershipModel
+from auth_api.models.org import receive_before_insert, receive_before_update
 from auth_api.models.product_subscription import ProductSubscription as ProductSubscriptionModel
 from auth_api.models.user import User as UserModel
 from auth_api.services import Affiliation as AffiliationService
@@ -37,11 +39,12 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import Task as TaskService
 from auth_api.utils.enums import (
-    AccessType, InvitationType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType, TaskStatus,
-    TaskTypePrefix)
+    AccessType, InvitationType, OrgType, ProductSubscriptionStatus, TaskRelationshipStatus, TaskRelationshipType,
+    TaskStatus, TaskTypePrefix)
 from auth_api.utils.roles import Role
 from tests.utilities.factory_scenarios import (
     JWT_HEADER, TestBCOLInfo, TestContactInfo, TestEntityInfo, TestOrgInfo, TestOrgTypeInfo, TestUserInfo)
+from tests.utilities.sqlalchemy import clear_event_listeners
 
 
 def factory_auth_header(jwt, claims):
@@ -188,6 +191,21 @@ def factory_affiliation_service(entity_id, org_id):
     affiliation.save()
     affiliation_service = AffiliationService(affiliation)
     return affiliation_service
+
+
+def factory_affiliation_invitation(from_org_id,
+                                   to_org_id,
+                                   business_identifier,
+                                   email='abc123@email.com',
+                                   sent_date=datetime.datetime.now().strftime('Y-%m-%d %H:%M:%S')):
+    """Produce an affiliation invitation for the given from/to org, business and email."""
+    return {
+        'fromOrgId': from_org_id,
+        'toOrgId': to_org_id,
+        'businessIdentifier': business_identifier,
+        'recipientEmail': email,
+        'sentDate': sent_date
+    }
 
 
 def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
@@ -418,3 +436,14 @@ def patch_get_firms_parties(monkeypatch):
             pass
 
     monkeypatch.setattr('auth_api.services.rest_service.RestService.get', lambda *args, **kwargs: MockPartiesResponse())
+
+
+def convert_org_to_staff_org(org_id: int, type_code: OrgType):
+    """Convert an org to a staff org."""
+    # Clearing the event listeners here, because we can't change the type_code.
+    clear_event_listeners(OrgModel)
+    org_db = OrgModel.find_by_id(org_id)
+    org_db.type_code = type_code
+    org_db.save()
+    event.listen(OrgModel, 'before_update', receive_before_update, raw=True)
+    event.listen(OrgModel, 'before_insert', receive_before_insert)

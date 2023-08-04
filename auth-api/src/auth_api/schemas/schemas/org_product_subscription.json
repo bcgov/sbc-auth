@@ -16,6 +16,14 @@
             "PPR"
           ],
           "pattern": "^(.*)$"
+        },
+        "externalSourceId": {
+          "type": "string",
+          "title": "External source identifier",
+          "default": "",
+          "examples": [
+            "10"
+          ]
         }
       },
       "required": [

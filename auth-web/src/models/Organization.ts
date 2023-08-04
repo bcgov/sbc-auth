@@ -32,6 +32,11 @@ export interface Organizations
   orgs : Organization[]
 }
 
+export interface OrgNameAndId {
+  name: string
+  id: number
+}
+
 export interface Organization {
   id?: number;
   name: string;
@@ -241,6 +246,7 @@ export interface OrgProduct {
   hidden?:boolean
   premiumOnly?:boolean
   needReview?:boolean
+  parentCode?: string;
 }
 
 export interface OrgProductsRequestBody {

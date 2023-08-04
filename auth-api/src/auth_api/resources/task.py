@@ -93,7 +93,7 @@ class TaskUpdate(Resource):
                 task_dict = task.update_task(task_info=request_json,
                                              origin_url=origin).as_dict()
                 # ProductService uses TaskService already. So, we need to avoid circular import.
-                if request_json.get('relationshipStatus') == TaskRelationshipType.PRODUCT.value:
+                if task_dict['relationship_type'] == TaskRelationshipType.PRODUCT.value:
                     ProductService.update_org_product_keycloak_groups(task_dict['account_id'])
                 response = task_dict
                 status = http_status.HTTP_200_OK

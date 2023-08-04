@@ -332,37 +332,70 @@ export default defineComponent({
 
     const businessDialogTypes = ref(BusinessDialogTypes)
     // local variables
+    const enableBusinessNrSearch = computed(() => {
+      return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
+    })
 
     // Computed properties
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
+    const isBusinessIdentifierValid = computed(() => {
+      return CommonUtils.validateIncorporationNumber(businessIdentifier.value)
+    })
 
     const isDialogVisible = computed(() => {
       return props.dialogType !== ''
+    })
+    const isCooperative = computed(() => {
+      return CommonUtils.isCooperativeNumber(businessIdentifier.value)
     })
 
     const enableBusinessNrSearch = computed(() => {
       return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
     })
+    const isFirm = computed(() => {
+      return CommonUtils.isFirmNumber(businessIdentifier.value)
+    })
 
     const isBusinessIdentifierValid = computed(() => {
       return CommonUtils.validateIncorporationNumber(businessIdentifier.value)
+    })
+    const showAuthorization = computed(() => {
+      return isFirm.value && props.isStaffOrSbcStaff
     })
 
     const isCooperative = computed(() => {
       return CommonUtils.isCooperativeNumber(businessIdentifier.value)
     })
+    const certifiedBy = computed(() => {
+      return props.isStaffOrSbcStaff ? authorizationName.value : `${props.userLastName}, ${props.userFirstName}`
+    })
 
     const isFirm = computed(() => {
       return CommonUtils.isFirmNumber(businessIdentifier.value)
+    })
+    const authorizationRules = computed(() => {
+      return [
+        (v) => !!v || 'Authorization is required'
+      ]
     })
 
     const showAuthorization = computed(() => {
       return isFirm.value && props.isStaffOrSbcStaff
     })
+    const passcodeLabel = computed(() => {
+      if (isFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
+      if (isCooperative.value) return 'Passcode'
+      return 'Password'
+    })
 
     const certifiedBy = computed(() => {
       return props.isStaffOrSbcStaff ? authorizationName.value : `${props.userLastName}, ${props.userFirstName}`
+    })
+    const passcodeHint = computed(() => {
+      if (isFirm.value) return 'Name as it appears on the Business Summary or the Statement of Registration'
+      if (isCooperative.value) return 'Passcode must be exactly 9 digits'
+      return 'Password must be 8 to 15 characters'
     })
 
     const authorizationRules = computed(() => {
@@ -370,11 +403,34 @@ export default defineComponent({
         (v) => !!v || 'Authorization is required'
       ]
     })
+    const passcodeMaxLength = computed(() => {
+      if (isFirm.value) return 150
+      if (isCooperative.value) return 9
+      return 15
+    })
 
     const passcodeLabel = computed(() => {
       if (isFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
       if (isCooperative.value) return 'Passcode'
       return 'Password'
+    })
+    const passcodeRules = computed(() => {
+      if (isFirm.value) {
+        return [
+          (v) => !!v || 'Proprietor or Partner Name is required',
+          (v) => v.length <= 150 || 'Maximum 150 characters'
+        ]
+      }
+      if (isCooperative.value) {
+        return [
+          (v) => !!v || 'Passcode is required',
+          (v) => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
+        ]
+      }
+      return [
+        (v) => !!v || 'Password is required',
+        (v) => CommonUtils.validateCorporatePassword(v) || 'Password must be 8 to 15 characters'
+      ]
     })
 
     const passcodeHint = computed(() => {
@@ -382,11 +438,24 @@ export default defineComponent({
       if (isCooperative.value) return 'Passcode must be exactly 9 digits'
       return 'Password must be 8 to 15 characters'
     })
+    const forgotButtonText = computed(() => {
+      return 'I lost or forgot my ' + (isCooperative.value ? 'passcode' : 'password')
+    })
 
     const passcodeMaxLength = computed(() => {
       if (isFirm.value) return 150
       if (isCooperative.value) return 9
       return 15
+    })
+    const helpDialogBlurb = computed(() => {
+      if (isCooperative.value) {
+        return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+          'please contact us at:'
+      } else {
+        const url = 'www.corporateonline.gov.bc.ca'
+        return `If you have forgotten or lost your password, please visit <a href="https://${url}">${url}</a> ` +
+          'and choose the option "Forgot Company Password", or contact us at:'
+      }
     })
 
     const passcodeRules = computed(() => {
@@ -406,7 +475,37 @@ export default defineComponent({
         (v) => !!v || 'Password is required',
         (v) => CommonUtils.validateCorporatePassword(v) || 'Password must be 8 to 15 characters'
       ]
+    const isFormValid = computed(() => {
+      // if user is a staff user or sbc staff user, then only require the business identifier
+      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
+        return true
+      }
+      // business id is required
+      // passcode is required
+      // firms must accept certify clause
+      // staff users must enter names
+      // validate the form itself (according to the components' rules/state)
+      return (
+        !!businessIdentifier.value &&
+        !!passcode.value &&
+        (!isFirm.value || (isCertified.value && !!certifiedBy.value)) &&
+        addBusinessForm.value.validate()
+      )
     })
+
+    // Methods
+    const resetForm = (emitCancel = false) => {
+      businessName.value = ''
+      businessIdentifier.value = ''
+      passcode.value = ''
+      folioNumber.value = ''
+      authorizationName.value = ''
+      addBusinessForm.value.resetValidation()
+      isLoading.value = false
+      if (emitCancel) {
+        emit('on-cancel')
+      }
+    }
 
     const forgotButtonText = computed(() => {
       return 'I lost or forgot my ' + (isCooperative.value ? 'passcode' : 'password')
@@ -471,6 +570,18 @@ export default defineComponent({
       if (emitCancel) {
         emit('on-cancel')
       }
+    const handleException = (exception) => {
+      if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
+        emit('add-failed-invalid-code', passcodeLabel.value)
+      } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
+        emit('add-failed-no-entity')
+      } else if (exception.response?.status === StatusCodes.NOT_ACCEPTABLE) {
+        emit('add-failed-passcode-claimed')
+      } else if (exception.response?.status === StatusCodes.BAD_REQUEST) {
+        emit('business-already-added', { name: businessName.value, identifier: businessIdentifier.value })
+      } else {
+        emit('add-unknown-error')
+      }
     }
 
     const handleException = (exception) => {
@@ -515,6 +626,38 @@ export default defineComponent({
               folioNumber: folioNumber.value
             })
           }
+          // let parent know that add was successful
+          emit('add-success', businessIdentifier.value)
+        } catch (exception) {
+          handleException(exception)
+        } finally {
+          resetForm()
+    const add = async () => {
+      addBusinessForm.value.validate()
+      if (isFormValid.value) {
+        isLoading.value = true
+        try {
+          // try to add business
+          let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
+          if (!props.isStaffOrSbcStaff) {
+            businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
+          }
+          const addResponse = await addBusiness(businessData)
+          // check if add didn't succeed
+          if (addResponse?.status !== StatusCodes.CREATED) {
+            emit('add-unknown-error')
+          }
+          // try to update business name
+          const businessResponse = await updateBusinessName(businessIdentifier.value)
+          // check if update didn't succeed
+          if (businessResponse?.status !== StatusCodes.OK) {
+            emit('add-unknown-error')
+          }
+          // update folio number
+          await updateFolioNumber({
+            businessIdentifier: businessIdentifier.value,
+            folioNumber: folioNumber.value
+          })
           // let parent know that add was successful
           emit('add-success', businessIdentifier.value)
         } catch (exception) {

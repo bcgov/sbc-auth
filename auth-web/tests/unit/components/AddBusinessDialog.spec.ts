@@ -123,7 +123,8 @@ testCaseList.forEach(test => {
             userLastName: test.userLastName
           }
         })
-      })
+      }
+      )
 
       afterAll(() => {
         wrapper.destroy()
@@ -164,6 +165,9 @@ testCaseList.forEach(test => {
         // expect(dd.at(0).text()).toBe('My Business Inc')
         // expect(dt.at(1).text()).toBe('Incorporation Number:')
         // expect(dd.at(1).text()).toBe(test.businessIdentifier)
+      if (!test.isStaffOrSbcStaff) {
+        expect(wrapper.find('.authorization').exists())
+      }
 
         if (dialogType === BusinessDialogTypes.ADD) {
           // input components

@@ -200,6 +200,13 @@ class InvitationType(Enum):
     STANDARD = 'STANDARD'  # Used to indicate the standard email invite with admin approval
 
 
+class AffiliationInvitationType(Enum):
+    """Affiliation Invitation type."""
+
+    EMAIL = 'EMAIL'
+    PASSCODE = 'PASSCODE'  # Used to indicate an affiliation invitation initiated through a valid passcode
+
+
 class IdpHint(Enum):
     """IdpHint for user login."""
 
@@ -212,6 +219,8 @@ class InvitationStatus(Enum):
 
     ACCEPTED = 'ACCEPTED'
     PENDING = 'PENDING'
+    EXPIRED = 'EXPIRED'
+    FAILED = 'FAILED'
 
 
 class LoginSource(Enum):
@@ -236,6 +245,9 @@ class ProductCode(Enum):
     DIR_SEARCH = 'DIR_SEARCH'
     NAMES_REQUEST = 'NRO'
     MHR = 'MHR'
+    MHR_QSLN = 'MHR_QSLN'  # Qualified Supplier - Lawyers and Notaries
+    MHR_QSHM = 'MHR_QSHM'  # Qualified Supplier - Home Manufacturers
+    MHR_QSHD = 'MHR_QSHD'  # Qualified Supplier - Home Dealers
 
 
 class TaskRelationshipType(Enum):
@@ -284,6 +296,7 @@ class TaskAction(Enum):
     AFFIDAVIT_REVIEW = 'AFFIDAVIT_REVIEW'
     ACCOUNT_REVIEW = 'ACCOUNT_REVIEW'
     PRODUCT_REVIEW = 'PRODUCT_REVIEW'
+    QUALIFIED_SUPPLIER_REVIEW = 'QUALIFIED_SUPPLIER_REVIEW'
 
 
 class ActivityAction(Enum):
