@@ -26,9 +26,14 @@
         </v-form>
         <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
           <template>
-            <div>
-              Add Name search field
-            </div>
+            <v-btn
+              large
+              color="primary"
+              class="save-continue-button"
+              @click="changeDialogType('MODIFY')"
+              data-test="next-button"
+            > Click Me
+            </v-btn>
             <!-- TODO 16720: Search for name request to trigger showAddNRModal -->
             <!-- <name-request-lookup
               @business="requestNames = $event.name; businessIdentifier = $event.identifier"
@@ -38,6 +43,21 @@
         </v-form>
       </v-col>
     </v-row>
+
+    <!-- AddBusinessDialog -->
+    <AddBusinessDialog
+      :dialogType="dialogType"
+      :isStaffOrSbcStaff="isGovStaffAccount"
+      :userFirstName="userFirstName"
+      :userLastName="userLastName"
+      @add-success="showAddSuccessModal()"
+      @add-failed-invalid-code="showInvalidCodeModal($event)"
+      @add-failed-no-entity="showEntityNotFoundModal()"
+      @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+      @add-unknown-error="showUnknownErrorModal('business')"
+      @on-cancel="changeDialogType('')"
+      @on-business-identifier="businessIdentifier = $event"
+    />
     <!-- Add Business Dialog -->
     <ModalDialog
       ref="addNRDialog"
@@ -66,6 +86,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
@@ -75,6 +96,7 @@ import { mapActions } from 'vuex'
 
 @Component({
   components: {
+    AddBusinessDialog,
     AddNameRequestForm,
     BusinessLookup,
     Certify,
@@ -95,6 +117,7 @@ export default class SearchBusinessNameRequest extends Vue {
   @Prop({ default: '' }) readonly userLastName: string
 
   // local variables
+  dialogType = ''
   manageBusinessDialog = { show: false }
   searchType = 'Incorporated'
   businessName = ''
@@ -147,6 +170,11 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   showAddNRModal () {
     this.$refs.addNRDialog.open()
+  }
+
+  changeDialogType (type) {
+    if (type) this.dialogType = type
+    else this.dialogType = ''
   }
 }
 </script>
