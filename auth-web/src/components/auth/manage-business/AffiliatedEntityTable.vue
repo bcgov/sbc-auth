@@ -838,7 +838,7 @@ export default defineComponent({
 
     // feature flags
     const enableNameRequestType = (): boolean => {
-      return launchdarklyServices.getFlag(LDFlags.EnableNewActionsMenu) || false
+      return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
     }
 
     return {
