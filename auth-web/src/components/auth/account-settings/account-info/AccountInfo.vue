@@ -480,12 +480,6 @@ export default class AccountInfo extends Mixins(
     this.$refs.suspensionCompleteDialog.close()
   }
 
-  protected getAccountFromSession (): AccountSettings {
-    return JSON.parse(
-      ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}')
-    )
-  }
-
   private async updateDetails () {
     this.errorMessage = ''
     const { branchName, businessSize, businessType, name, isBusinessAccount } = this.accountDetails

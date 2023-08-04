@@ -56,7 +56,6 @@ import { mapState } from 'vuex'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
 
   private goTo (page) {
     switch (page) {

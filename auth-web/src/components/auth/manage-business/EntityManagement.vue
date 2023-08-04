@@ -377,11 +377,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private columns = ['Number', 'Type', 'Status']
   highlightIndex = -1
 
-  private snackbarText: string = null
-  private showSnackbar = false
-
-  private highlightIndex = -1
-
   $refs: {
     successDialog: ModalDialog
     errorDialog: ModalDialog
@@ -508,13 +503,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.errorDialog.open()
   }
 
-  showBusinessAlreadyAdded (event: { name, identifier }) {
-    this.addBusinessDialog = false
-    this.dialogTitle = 'Business Already Added'
-    this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
-    this.$refs.errorDialog.open()
-  }
-
   showNRNotFoundModal () {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Not Found'
@@ -552,6 +540,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showBusinessAlreadyAdded (event: BusinessLookupResultIF) {
+    this.businessDialogType = ''
     this.dialogTitle = 'Business Already Added'
     this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
