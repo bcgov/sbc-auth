@@ -159,20 +159,6 @@
         @add-failed-no-nr="showNRNotFoundModal()"
       />
 
-      <v-row  no-gutters id="dashboard-actions" class="mb-n3">
-        <v-col>
-          <v-select
-            dense filled multiple hide-details
-            class="column-selector"
-            label="Columns to Show"
-            v-model="selectedColumns"
-            :items="columns"
-            :menu-props="{ bottom: true, offsetY: true }"
-          >
-            <template v-slot:selection></template>
-          </v-select>
-        </v-col>
-      </v-row>
       <AffiliatedEntityTable
         :selectedColumns="selectedColumns"
         :loading="isLoading"
@@ -793,19 +779,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 }
 
-.column-selector {
-  float: right;
-  width: 200px;
-  height: 10% !important;
-  transform: translate(-10px,42px);
-  z-index: 1;
-}
-
 // Vuetify Overrides
 ::v-deep {
-  .column-selector.v-text-field .v-input__control {
-    background: white;
-  }
 
   .v-data-table td {
     padding-top: 1rem;
