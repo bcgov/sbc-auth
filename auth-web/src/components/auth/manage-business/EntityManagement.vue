@@ -187,7 +187,7 @@
       />
 
       <!-- Add an Existing Business Dialog -->
-      <AddBusinessDialog
+      <ManageBusinessDialog
         :showDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
@@ -308,7 +308,7 @@ import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
@@ -323,7 +323,7 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
 @Component({
   components: {
-    AddBusinessDialog,
+    ManageBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
     ModalDialog,

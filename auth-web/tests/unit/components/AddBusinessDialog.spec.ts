@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
-import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
@@ -77,7 +77,7 @@ const testCaseList = [
   }
 ]
 testCaseList.forEach(test => {
-  describe('AddBusinessDialog Component', () => {
+  describe('ManageBusinessDialog Component', () => {
     let wrapper: Wrapper<any>
 
     beforeAll(() => {
@@ -110,7 +110,7 @@ testCaseList.forEach(test => {
         }
       })
 
-      wrapper = shallowMount(AddBusinessDialog, {
+      wrapper = shallowMount(ManageBusinessDialog, {
         store,
         vuetify,
         propsData: {
@@ -134,8 +134,8 @@ testCaseList.forEach(test => {
       await flushPromises()
 
       // verify components
-      expect(wrapper.attributes('id')).toBe('add-business-dialog')
-      expect(wrapper.find('#add-business-dialog').isVisible()).toBe(true)
+      expect(wrapper.attributes('id')).toBe('manage-business-dialog')
+      expect(wrapper.find('#manage-business-dialog').isVisible()).toBe(true)
       // expect(wrapper.find('businesslookup-stub').exists()).toBe(true) // UN-COMMENT (see below)
       expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
 

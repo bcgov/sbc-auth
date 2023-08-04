@@ -1,5 +1,5 @@
 <template>
-  <div id="add-business-dialog">
+  <div id="manage-business-dialog">
     <HelpDialog
       :helpDialogBlurb="helpDialogBlurb"
       ref="helpDialog"
