@@ -38,7 +38,7 @@
         </v-form>
       </v-col>
     </v-row>
-    <!-- Add Name Request Dialog -->
+    <!-- Add Business Dialog -->
     <ModalDialog
       ref="addNRDialog"
       :is-persistent="true"
