@@ -189,9 +189,9 @@ class InvitationAction(Resource):
         return response, status
 
 
-@cors_preflight('PUT,DELETE,OPTIONS')
-@API.route('/<string:affiliation_invitation_id>/authorize',
-           methods=['PUT', 'DELETE', 'OPTIONS'])
+@cors_preflight('PATCH,OPTIONS')
+@API.route('/<string:affiliation_invitation_id>/authorization/<string:authorize_action>',
+           methods=['PATCH', 'OPTIONS'])
 class InvitationActionAuthorize(Resource):
     """Check if user is active part of the Org. Authorize/Refuse invite if he is."""
 
@@ -213,38 +213,27 @@ class InvitationActionAuthorize(Resource):
     @TRACER.trace()
     @cors.crossdomain(origin='*')
     @_jwt.requires_auth
-    def put(cls, affiliation_invitation_id: str):
-        """Check if user is active part of the Org. Authorize invite if he is."""
+    def patch(cls, affiliation_invitation_id, authorize_action):
+        """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""
         origin = request.environ.get('HTTP_ORIGIN', 'localhost')
 
         try:
             user = UserService.find_by_jwt_token()
             cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
 
-            response, status = AffiliationInvitationService \
-                .accept_affiliation_invitation(affiliation_invitation_id=affiliation_invitation_id,
-                                               user=user,
-                                               origin=origin).as_dict(), \
-                http_status.HTTP_200_OK
-
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-
-        return response, status
-
-    @classmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_jwt.requires_auth
-    def delete(cls, affiliation_invitation_id: str):
-        """Check if user is active part of the Org. Refuse invite authorization if he is."""
-        try:
-            user = UserService.find_by_jwt_token()
-            cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
-
-            response, status = AffiliationInvitationService \
-                .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id).as_dict(), \
-                http_status.HTTP_200_OK
+            if authorize_action == 'accept':
+                response, status = AffiliationInvitationService \
+                    .accept_affiliation_invitation(affiliation_invitation_id=affiliation_invitation_id,
+                                                   user=user,
+                                                   origin=origin).as_dict(), \
+                    http_status.HTTP_200_OK
+            elif authorize_action == 'refuse':
+                response, status = AffiliationInvitationService \
+                    .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id).as_dict(), \
+                    http_status.HTTP_200_OK
+            else:
+                err = {'code': 400, 'message': f'{authorize_action} is not supported on this endpoint'}
+                raise BusinessException(err, http_status.HTTP_400_BAD_REQUEST)
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

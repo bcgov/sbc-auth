@@ -127,11 +127,30 @@ class AffiliationInvitation:
         return result
 
     @staticmethod
+    def _validate_prerequisites(business_identifier, from_org_id, to_org_id):
+        # Validate from/to organizations exists
+        if not (from_org := OrgModel.find_by_org_id(from_org_id)):
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        if not OrgModel.find_by_org_id(to_org_id):
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # Validate that entity exists
+        if not (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)):
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+        # Check if affiliation already exists
+        if AffiliationModel.find_affiliation_by_org_and_entity_ids(to_org_id, entity.identifier):
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+        # Check if an affiliation invitation already exists
+        if AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
+                                                                         to_org_id=to_org_id,
+                                                                         entity_id=entity.identifier):
+            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+        return entity, from_org
+
+    @staticmethod
     @user_context
     def create_affiliation_invitation(affiliation_invitation_info: Dict,
                                       # pylint:disable=unused-argument,too-many-locals
                                       user, invitation_origin, **kwargs):
-        # pylint:disable=too-many-branches
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
@@ -145,26 +164,8 @@ class AffiliationInvitation:
                    business_identifier=business_identifier,
                    one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
-        # Validate from/to organizations exists
-        if not (from_org := OrgModel.find_by_org_id(from_org_id)):
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        if not OrgModel.find_by_org_id(to_org_id):
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        # Validate that entity exists
-        if not (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)):
-            raise BusinessException(Error.DATA_NOT_FOUND, None)
-
-        # Check if affiliation already exists
-        if AffiliationModel.find_affiliation_by_org_and_entity_ids(to_org_id, entity.identifier):
-            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-
-        # Check if an affiliation invitation already exists
-        if AffiliationInvitationModel.find_invitations_by_org_entity_ids(from_org_id=from_org_id,
-                                                                         to_org_id=to_org_id,
-                                                                         entity_id=entity.identifier):
-            raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
+        entity, from_org = AffiliationInvitation. \
+            _validate_prerequisites(business_identifier, from_org_id, to_org_id)
 
         affiliation_invitation_info['entityId'] = entity.identifier
 

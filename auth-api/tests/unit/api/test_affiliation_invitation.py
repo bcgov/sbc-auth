@@ -425,23 +425,20 @@ def test_authorize_affiliation_invitation(client, jwt, session, keycloak_mock, b
                                                                                              jwt,
                                                                                              session,
                                                                                              keycloak_mock)
-    # create affiliation invitation in test
-    sample_invite = factory_affiliation_invitation(
-        from_org_id=from_org_id,
-        to_org_id=to_org_id,
-        business_identifier=business_identifier)
 
-    rv_invitation = client.post(
-        '/api/v1/affiliationInvitations',
-        data=json.dumps(sample_invite),
-        headers=headers, content_type='application/json'
-    )
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=to_org_id,
+            business_identifier=business_identifier)),
+        headers=headers, content_type='application/json')
+
     invitation_dictionary = json.loads(rv_invitation.data)
     affiliation_invitation_id = invitation_dictionary['id']
 
-    rv_invitation = client.put(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorize',
-                               headers=headers,
-                               content_type='application/json')
+    rv_invitation = client.patch(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/accept',
+                                 headers=headers,
+                                 content_type='application/json')
 
     result_json = rv_invitation.json
 
@@ -472,9 +469,9 @@ def test_reject_authorize_affiliation_invitation(client, jwt, session, keycloak_
     invitation_dictionary = json.loads(rv_invitation.data)
     affiliation_invitation_id = invitation_dictionary['id']
 
-    rv_invitation = client.delete(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorize',
-                                  headers=headers,
-                                  content_type='application/json')
+    rv_invitation = client.patch(f'/api/v1/affiliationInvitations/{affiliation_invitation_id}/authorization/refuse',
+                                 headers=headers,
+                                 content_type='application/json')
 
     result_json = rv_invitation.json
 
