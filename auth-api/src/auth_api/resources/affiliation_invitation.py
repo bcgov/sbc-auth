@@ -229,7 +229,7 @@ class InvitationActionAuthorize(Resource):
                     http_status.HTTP_200_OK
             elif authorize_action == 'refuse':
                 response, status = AffiliationInvitationService \
-                    .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id).as_dict(), \
+                    .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id, user=user).as_dict(), \
                     http_status.HTTP_200_OK
             else:
                 err = {'code': 400, 'message': f'{authorize_action} is not supported on this endpoint'}
