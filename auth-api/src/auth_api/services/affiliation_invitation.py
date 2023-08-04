@@ -459,24 +459,21 @@ class AffiliationInvitation:
         return AffiliationInvitation(affiliation_invitation)
 
     @classmethod
-    def get_all_invitations_with_details_related_to_org(cls, org_id, search_filter) -> List[Dict]:
+    def get_all_invitations_with_details_related_to_org(cls, org_id: int, search_filter: AffiliationInvitationSearch) \
+            -> List[Dict]:
         """Get affiliation invitations for from org and for to org."""
         # If staff return full list
-        if UserService.is_context_user_staff():
+        current_user: UserService = UserService.find_by_jwt_token()
+        if UserService.is_context_user_staff() or \
+                UserService.is_user_member_of_org(org_id=org_id, user=current_user):
             return cls.affiliation_invitations_to_dict_list(
                 AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, search_filter=search_filter)
             )
 
-        current_user: UserService = UserService.find_by_jwt_token()
-        if not UserService.is_user_member_of_org(org_id=org_id, user=current_user):
-            return []
-
-        return cls.affiliation_invitations_to_dict_list(
-            AffiliationInvitationModel.find_all_related_to_org(org_id=org_id, search_filter=search_filter)
-        )
+        return []
 
     @staticmethod
-    def refuse_affiliation_invitation(invitation_id):
+    def refuse_affiliation_invitation(invitation_id: int):
         """Set affiliation invitation to FAILED state (refusing authorization for affiliation)."""
         invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
         if not invitation:
