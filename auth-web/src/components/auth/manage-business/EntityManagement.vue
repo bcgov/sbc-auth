@@ -321,8 +321,8 @@
 </template>
 
 <script lang="ts">
+import { BusinessDialogTypes, CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -360,6 +360,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   // for template
   readonly CorpTypes = CorpTypes
+  readonly BusinessDialogTypes = BusinessDialogTypes
 
   private removeBusinessPayload = null
   private dialogTitle = ''
@@ -549,7 +550,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showAddBusinessModal () {
-    this.addBusinessDialog = 'ADD'
+    this.addBusinessDialog = BusinessDialogTypes.ADD
   }
 
   showAddNRModal () {

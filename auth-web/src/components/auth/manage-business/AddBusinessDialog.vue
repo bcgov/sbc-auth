@@ -16,14 +16,14 @@
     >
       <v-card class="px-3">
         <v-card-title data-test="dialog-header">
-          <span>{{dialogType === 'ADD' ? 'Add an Existing Business' : 'Manage a B.C. Business'}}</span>
+          <span>{{dialogType === businessDialogTypes.ADD ? 'Add an Existing Business' : 'Manage a B.C. Business'}}</span>
         </v-card-title>
 
         <v-card-text>
-          <p v-if="dialogType === 'ADD'">
+          <p v-if="dialogType === businessDialogTypes.ADD">
             Add an existing business to your list by providing the following required pieces of information:
           </p>
-          <v-tooltip v-if="dialogType === 'ADD'" top nudge-bottom="80" content-class="top-tooltip">
+          <v-tooltip v-if="dialogType === businessDialogTypes.ADD" top nudge-bottom="80" content-class="top-tooltip">
             <template v-slot:activator="{ on, attrs }">
               <ul class="add-business-unordered-list">
                 <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
@@ -39,7 +39,7 @@
             </span>
           </v-tooltip>
 
-          <v-form v-if="dialogType === 'ADD'" ref="addBusinessForm" lazy-validation class="mt-6">
+          <v-form v-if="dialogType === businessDialogTypes.ADD" ref="addBusinessForm" lazy-validation class="mt-6">
             <template v-if="enableBusinessNrSearch">
               <!-- Search for business identifier or name -->
               <!-- NB: use v-if to re-mount component between instances -->
@@ -143,7 +143,7 @@
               </v-expand-transition>
             </template>
           </v-form>
-          <v-form  v-if="dialogType === 'MODIFY'" ref="addBusinessForm" lazy-validation class="mt-0">
+          <v-form  v-if="dialogType === businessDialogTypes.MODIFY" ref="addBusinessForm" lazy-validation class="mt-0">
             <template>
               <div class="font-weight-bold mr-2 float-left">Business Name:</div>
               <div>{{businessName}}</div>
@@ -255,7 +255,7 @@
             :loading="isLoading"
             @click="add()"
           >
-            <span>{{ dialogType === 'ADD' ? 'Add' : 'Manage This Business' }}</span>
+            <span>{{ dialogType === businessDialogTypes.ADD ? 'Add' : dialogType === businessDialogTypes.MODIFY ? 'Manage This Business' : '' }}</span>
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -265,13 +265,13 @@
 </template>
 
 <script lang="ts">
+import { BusinessDialogTypes, LDFlags } from '@/util/constants'
 import { FolioNumberload, LoginPayload } from '@/models/business'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { StatusCodes } from 'http-status-codes'
 import { useStore } from 'vuex-composition-helpers'
@@ -329,6 +329,8 @@ export default defineComponent({
     const emailOption = ref(false)
     const requestAuthBusinessOption = ref(false)
     const requestAuthRegistryOption = ref(false)
+
+    const businessDialogTypes = ref(BusinessDialogTypes)
 
     // Computed properties
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
@@ -444,8 +446,8 @@ export default defineComponent({
         return true
       }
 
-      if (props.dialogType === 'ADD' && isAddFormValid) isValid = true
-      if (props.dialogType === 'MODIFY' && isModifyFormValid) isValid = true
+      if (props.dialogType === businessDialogTypes.ADD && isAddFormValid) isValid = true
+      if (props.dialogType === businessDialogTypes.MODIFY && isModifyFormValid) isValid = true
       return isValid
     })
 
@@ -453,11 +455,11 @@ export default defineComponent({
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
       authorizationName.value = ''
-      if (props.dialogType === 'ADD') {
+      if (props.dialogType === businessDialogTypes.ADD) {
         businessName.value = ''
         businessIdentifier.value = ''
         folioNumber.value = ''
-      } else if (props.dialogType === 'MODIFY') {
+      } else if (props.dialogType === businessDialogTypes.MODIFY) {
         passcodeOption.value = false
         emailOption.value = false
         requestAuthBusinessOption.value = false
@@ -505,7 +507,7 @@ export default defineComponent({
           if (businessResponse?.status !== StatusCodes.OK) {
             emit('add-unknown-error')
           }
-          if (props.dialogType === 'ADD') {
+          if (props.dialogType === businessDialogTypes.ADD) {
             // update folio number
             await updateFolioNumber({
               businessIdentifier: businessIdentifier.value,
@@ -542,6 +544,7 @@ export default defineComponent({
 
     // Return the setup data - These will be removed with script setup.
     return {
+      businessDialogTypes,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
       emailOption,

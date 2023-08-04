@@ -6,6 +6,7 @@ import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import { BusinessDialogTypes } from '@/util/constants'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -76,7 +77,7 @@ const testCaseList = [
     userLastName: 'Woodie'
   }
 ]
-const dialogTypes = [ 'ADD', 'MODIFY' ]
+const dialogTypes = [ BusinessDialogTypes.ADD, BusinessDialogTypes.MODIFY ]
 
 testCaseList.forEach(test => {
   dialogTypes.forEach(dialogType => {
@@ -145,7 +146,7 @@ testCaseList.forEach(test => {
         expect(wrapper.findComponent(HelpDialog).exists()).toBe(true)
 
         // button components
-        expect(wrapper.find('#add-button span').text()).toBe(dialogType === 'ADD' ? 'Add' : 'Manage This Business')
+        expect(wrapper.find('#add-button span').text()).toBe(dialogType === BusinessDialogTypes.ADD ? 'Add' : dialogType === BusinessDialogTypes.MODIFY ? 'Manage This Business' : '')
         expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
         if (!test.certifyExists) {
           expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
@@ -164,7 +165,7 @@ testCaseList.forEach(test => {
         // expect(dt.at(1).text()).toBe('Incorporation Number:')
         // expect(dd.at(1).text()).toBe(test.businessIdentifier)
 
-        if (dialogType === 'ADD') {
+        if (dialogType === BusinessDialogTypes.ADD) {
           // input components
           expect(wrapper.find('.business-identifier').attributes('label'))
             .toBe('Incorporation Number or Registration Number') // DELETE THIS (see above)
@@ -179,7 +180,7 @@ testCaseList.forEach(test => {
           if (!test.isStaffOrSbcStaff) {
             expect(wrapper.find('.authorization').exists())
           }
-        } else if (dialogType === 'MODIFY') {
+        } else if (dialogType === BusinessDialogTypes.MODIFY) {
           if (!test.isStaffOrSbcStaff) {
             expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
           }
