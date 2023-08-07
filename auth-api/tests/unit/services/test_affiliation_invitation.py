@@ -25,8 +25,10 @@ import auth_api.services.authorization as auth
 import auth_api.utils.account_mailer
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.models import AffiliationInvitation as AffiliationInvitationModel, Org as OrgModel, Entity as EntityModel
+from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
+from auth_api.models import Entity as EntityModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
+from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import AffiliationInvitationSearch
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
