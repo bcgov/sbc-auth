@@ -22,16 +22,20 @@ import pytest
 from freezegun import freeze_time
 
 import auth_api.services.authorization as auth
+import auth_api.utils.account_mailer
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
+from auth_api.models import Entity as EntityModel
 from auth_api.models import InvitationStatus as InvitationStatusModel
+from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import AffiliationInvitationSearch
 from auth_api.services import Affiliation as AffiliationService
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
+from auth_api.utils.enums import InvitationStatus
 from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_affiliation_invitation, factory_user_model, patch_token_info
 
@@ -379,3 +383,153 @@ def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, busines
             )
         assert invitations
         assert len(invitations) == 1
+
+
+def _setup_affiliation_invitation_data(affiliation_invitation_type='EMAIL',
+                                       affiliation_invitation_status_code=InvitationStatus.PENDING.value):
+    from_org = OrgModel()
+    from_org.id = 1
+    from_org.name = 'From the moon inc.'
+    to_org = OrgModel()
+    to_org.id = 2
+    to_org.name = 'To the stars inc.'
+
+    affiliation_invitation = AffiliationInvitationModel()
+    affiliation_invitation.from_org = from_org
+    affiliation_invitation.to_org = to_org
+    affiliation_invitation.recipient_email = 'abc@test.com'
+    affiliation_invitation.from_org_id = from_org.id
+    affiliation_invitation.to_org_id = to_org.id
+    affiliation_invitation.invitation_status_code = affiliation_invitation_status_code
+    affiliation_invitation.type = affiliation_invitation_type
+
+    return affiliation_invitation
+
+
+@patch.object(auth_api.services.affiliation_invitation, 'publish_to_mailer')
+def test_send_affiliation_invitation_magic_link(publish_to_mailer_mock,
+                                                session, auth_mock, keycloak_mock, business_mock, monkeypatch):
+    """Verify Magic link data for email is correctly generated."""
+    affiliation_invitation = _setup_affiliation_invitation_data()
+    business_name = 'Busy Inc.'
+    affiliation_invitation.token = 'ABCD'
+
+    AffiliationInvitationService.send_affiliation_invitation(
+        affiliation_invitation=affiliation_invitation,
+        business_name=business_name
+    )
+
+    expected_data = {
+        'accountId': affiliation_invitation.to_org.id,
+        'businessName': business_name,
+        'emailAddresses': affiliation_invitation.recipient_email,
+        'orgName': affiliation_invitation.to_org.name,
+        'contextUrl': 'None/VG8gdGhlIHN0YXJzIGluYy4%3D/affiliationInvitation/acceptToken//ABCD'
+    }
+
+    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitation',
+                                              org_id=affiliation_invitation.to_org.id,
+                                              data=expected_data)
+
+
+@patch.object(auth_api.services.affiliation_invitation, 'publish_to_mailer')
+def test_send_affiliation_invitation_request_sent(publish_to_mailer_mock,
+                                                  session, auth_mock, keycloak_mock, business_mock, monkeypatch):
+    """Verify REQUEST ACCESS - on create request - data for email is correctly generated."""
+    additional_message = 'Ad Astra.'
+    affiliation_invitation = _setup_affiliation_invitation_data(affiliation_invitation_type='REQUEST')
+    business_name = 'Troll incorporated'
+    affiliation_invitation.additional_message = additional_message
+
+    AffiliationInvitationService.send_affiliation_invitation(
+        affiliation_invitation=affiliation_invitation,
+        business_name=business_name
+    )
+
+    expected_data = {
+        'accountId': affiliation_invitation.to_org.id,
+        'businessName': business_name,
+        'emailAddresses': affiliation_invitation.recipient_email,
+        'orgName': affiliation_invitation.to_org.name,
+        'fromOrgName': affiliation_invitation.from_org.name,
+        'toOrgName': affiliation_invitation.to_org.name,
+        'additionalMessage': additional_message
+    }
+
+    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequest',
+                                              org_id=affiliation_invitation.to_org.id,
+                                              data=expected_data)
+
+
+@patch.object(auth_api.services.affiliation_invitation, 'publish_to_mailer')
+def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
+                                                        session, auth_mock, keycloak_mock, business_mock, monkeypatch):
+    """Verify REQUEST ACCESS - on authorize request - data for email is correctly generated."""
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.RestService.get_service_account_token',
+                        lambda config_id, config_secret: 'TestToken')
+
+    affiliation_invitation = \
+        _setup_affiliation_invitation_data(affiliation_invitation_type='REQUEST',
+                                           affiliation_invitation_status_code=InvitationStatus.ACCEPTED.value)
+    business_name = 'BarFoo, Inc.'  # will get it from business mock 'get_business' method
+
+    # simulate subquery for entity
+    entity = EntityModel()
+    entity.name = business_name
+    affiliation_invitation.entity = entity
+
+    AffiliationInvitationService.send_affiliation_invitation_authorization_email(
+        affiliation_invitation=affiliation_invitation,
+        is_authorized=True
+    )
+
+    expected_data = {
+        'accountId': affiliation_invitation.to_org.id,
+        'businessName': business_name,
+        'emailAddresses': affiliation_invitation.recipient_email,
+        'orgName': affiliation_invitation.to_org.name,
+        'fromOrgName': affiliation_invitation.from_org.name,
+        'toOrgName': affiliation_invitation.to_org.name,
+        'isAuthorized': True
+    }
+
+    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
+                                              org_id=affiliation_invitation.to_org.id,
+                                              data=expected_data)
+
+
+@patch.object(auth_api.services.affiliation_invitation, 'publish_to_mailer')
+def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
+                                                     session, auth_mock, keycloak_mock, business_mock, monkeypatch):
+    """Verify REQUEST ACCESS - on refuse request - data for email is correctly generated."""
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.RestService.get_service_account_token',
+                        lambda config_id, config_secret: 'TestToken')
+
+    affiliation_invitation = \
+        _setup_affiliation_invitation_data(affiliation_invitation_type='REQUEST',
+                                           affiliation_invitation_status_code=InvitationStatus.FAILED.value)
+    business_name = 'BarFoo, Inc.'  # will get it from business mock 'get_business' method
+
+    # simulate subquery for entity
+    entity = EntityModel()
+    entity.name = business_name
+    affiliation_invitation.entity = entity
+
+    AffiliationInvitationService.send_affiliation_invitation_authorization_email(
+        affiliation_invitation=affiliation_invitation,
+        is_authorized=False
+    )
+
+    expected_data = {
+        'accountId': affiliation_invitation.to_org.id,
+        'businessName': business_name,
+        'emailAddresses': affiliation_invitation.recipient_email,
+        'orgName': affiliation_invitation.to_org.name,
+        'fromOrgName': affiliation_invitation.from_org.name,
+        'toOrgName': affiliation_invitation.to_org.name,
+        'isAuthorized': False
+    }
+
+    publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
+                                              org_id=affiliation_invitation.to_org.id,
+                                              data=expected_data)

@@ -55,6 +55,8 @@ class MessageType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
+    AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitation.request'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'bc.registry.auth.affiliationInvitation.request.authorize'
 
 
 class SubjectType(Enum):
@@ -102,6 +104,9 @@ class SubjectType(Enum):
                                       'Update your information.'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                         'Update your information.'
+    AFFILIATION_INVITATION_REQUEST = '[BC Registries and Online Services] Request to manage {business_name}'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = '[BC Registries and Online Services] ' \
+                                                   'Request to manage {business_name}'
 
 
 class TitleType(Enum):
@@ -126,6 +131,8 @@ class TitleType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'Your Account Creation Request is On hold '
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
+    AFFILIATION_INVITATION_REQUEST = 'You have been authorized to manage the business.'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'You have been authorized to manage the business.'
 
 
 class TemplateType(Enum):
@@ -164,6 +171,8 @@ class TemplateType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
     RESUBMIT_BCEID_ORG_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_org'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
+    AFFILIATION_INVITATION_REQUEST_TEMPLATE_NAME = 'affiliation_invitation_request'
+    AFFILIATION_INVITATION_REQUEST_AUTHORIZATION_TEMPLATE_NAME = 'affiliation_invitation_request_authorization'
 
 
 class Constants(Enum):

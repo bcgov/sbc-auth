@@ -68,7 +68,7 @@ async def process_event(event_message: dict, flask_app):
     with flask_app.app_context():
         message_type = event_message.get('type', None)
         email_msg = event_message.get('data')
-        email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
+        logo_url = email_msg['logo_url'] = minio_service.MinioService.get_minio_public_url('bc_logo_for_email.png')
         email_dict = None
         token = RestService.get_service_account_token()
         logger.debug('message_type recieved %s', message_type)
@@ -202,6 +202,23 @@ async def process_event(event_message: dict, flask_app):
                 recipients=email_msg.get('emailAddresses'),
                 template_name=template_name,
                 subject=subject, **email_msg)
+
+        elif message_type in {MessageType.AFFILIATION_INVITATION_REQUEST.value,
+                              MessageType.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value}:
+            business_name = email_msg.get('businessName')
+            email_dict = common_mailer.process(
+                **{
+                    'org_id': None,
+                    'recipients': email_msg.get('emailAddresses'),
+                    'template_name': TemplateType[f'{MessageType(message_type).name}_TEMPLATE_NAME'].value,
+                    'subject': SubjectType[MessageType(message_type).name].value.format(business_name=business_name),
+                    'logo_url': logo_url,
+                    'business_name': business_name,
+                    'requesting_account': email_msg.get('fromOrgName'),
+                    'account_name': email_msg.get('toOrgName'),
+                    'is_authorized': email_msg.get('isAuthorized', None),
+                    'additional_message': email_msg.get('additionalMessage', None)
+                })
 
         else:
             if any(x for x in MessageType if x.value == message_type):
