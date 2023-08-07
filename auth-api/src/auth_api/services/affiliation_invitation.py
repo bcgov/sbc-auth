@@ -339,28 +339,58 @@ class AffiliationInvitation:
         return AffiliationInvitation(invitation)
 
     @staticmethod
-    def send_affiliation_invitation(affiliation_invitation: AffiliationInvitationModel, business_name, app_url,
-                                    query_params: Dict[str, any] = None):
-        """Send the email notification."""
-        current_app.logger.debug('<send_affiliation_invitation')
-        org_name = affiliation_invitation.to_org.name
-        org_id = affiliation_invitation.to_org_id
-        mail_configs = AffiliationInvitation._get_affiliation_invitation_configs(org_name)
-        recipient = affiliation_invitation.recipient_email
-        token_confirm_url = f"{app_url}/{mail_configs.get('token_confirm_path')}/{affiliation_invitation.token}"
+    def _get_token_confirm_path(app_url, org_name, token, query_params=None):
+        """Get the config for different email types."""
+        escape_url = escape_wam_friendly_url(org_name)
+        path = f'{escape_url}/affiliationInvitation/acceptToken/'
+        token_confirm_url = f'{app_url}/{path}/{token}'
+
         if query_params:
             token_confirm_url += f'?{urlencode(query_params)}'
 
+        return token_confirm_url
+
+    @staticmethod
+    def send_affiliation_invitation(affiliation_invitation: AffiliationInvitationModel,
+                                    business_name,
+                                    app_url=None,
+                                    query_params: Dict[str, any] = None,
+                                    is_authorized=None):
+        """Send the email notification."""
+        current_app.logger.debug('<send_affiliation_invitation')
+        affiliation_invitation_type = affiliation_invitation.type
+        to_org_name = affiliation_invitation.to_org.name
+        to_org_id = affiliation_invitation.to_org_id
+
         data = {
-            'accountId': org_id,
+            'accountId': to_org_id,
             'businessName': business_name,
-            'emailAddresses': recipient,
-            'contextUrl': token_confirm_url,
-            'orgName': org_name
+            'emailAddresses': affiliation_invitation.recipient_email,
+            'orgName': to_org_name
         }
+        notification_type = 'affiliationInvitation'
+
+        if affiliation_invitation_type == AffiliationInvitationType.EMAIL.value:
+            # if MAGIC LINK type, add data for magic link
+            data['contextUrl'] = AffiliationInvitation._get_token_confirm_path(
+                app_url=app_url,
+                org_name=to_org_name,
+                token=affiliation_invitation.token,
+                query_params=query_params)
+
+        elif affiliation_invitation_type == AffiliationInvitationType.REQUEST.value:
+            # if ACCESS REQUEST type, add data for access request type
+            data['fromOrgName'] = affiliation_invitation.from_org.name
+            data['toOrgName'] = to_org_name
+            if is_authorized is not None:
+                notification_type = 'affiliationInvitationRequestAuthorization'
+                data['isAuthorized'] = is_authorized
+            else:
+                notification_type = 'affiliationInvitationRequest'
+                data['additionalMessage'] = affiliation_invitation.additional_message
 
         try:
-            publish_to_mailer(notification_type=mail_configs.get('notification_type'), org_id=org_id, data=data)
+            publish_to_mailer(notification_type=notification_type, org_id=to_org_id, data=data)
         except BusinessException as exception:
             affiliation_invitation.invitation_status_code = InvitationStatus.FAILED.value
             affiliation_invitation.save()
@@ -371,17 +401,21 @@ class AffiliationInvitation:
         current_app.logger.debug('>send_affiliation_invitation')
 
     @staticmethod
-    def _get_affiliation_invitation_configs(org_name):
-        """Get the config for different email types."""
-        escape_url = escape_wam_friendly_url(org_name)
-        token_confirm_path = f'{escape_url}/affiliationInvitation/acceptToken/'
+    def send_affiliation_invitation_authorization_email(affiliation_invitation: AffiliationInvitationModel,
+                                                        is_authorized: bool):
+        """Send authorization email, either for accepted or refused authorization."""
+        token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
+                                                      config_secret='ENTITY_SVC_CLIENT_SECRET')
+        business = AffiliationInvitation. \
+            _get_business_details(business_identifier=affiliation_invitation.entity.business_identifier,
+                                  token=token)
+        business_name = business['business']['legalName']
 
-        default_configs = {
-            'token_confirm_path': token_confirm_path,
-            'notification_type': 'affiliationInvitation',
-        }
-
-        return default_configs
+        AffiliationInvitation.send_affiliation_invitation(
+            affiliation_invitation=affiliation_invitation,
+            business_name=business_name,
+            is_authorized=is_authorized
+        )
 
     @staticmethod
     def generate_confirmation_token(affiliation_invitation_id, from_org_id, to_org_id, business_identifier):
@@ -457,6 +491,11 @@ class AffiliationInvitation:
             .get_status_by_code(InvitationStatus.ACCEPTED.value)
         affiliation_invitation.save()
 
+        if affiliation_invitation.type == AffiliationInvitationType.REQUEST.value:
+            AffiliationInvitation. \
+                send_affiliation_invitation_authorization_email(affiliation_invitation=affiliation_invitation,
+                                                                is_authorized=True)
+
         current_app.logger.debug('<accept_affiliation_invitation')
         return AffiliationInvitation(affiliation_invitation)
 
@@ -475,7 +514,7 @@ class AffiliationInvitation:
         return []
 
     @staticmethod
-    def refuse_affiliation_invitation(invitation_id: int):
+    def refuse_affiliation_invitation(invitation_id: int, user: UserService):
         """Set affiliation invitation to FAILED state (refusing authorization for affiliation)."""
         invitation: AffiliationInvitationModel = AffiliationInvitationModel.find_invitation_by_id(invitation_id)
         if not invitation:
@@ -484,9 +523,11 @@ class AffiliationInvitation:
         if not invitation.status == InvitationStatus.PENDING.value:
             raise BusinessException(Error.INVALID_AFFILIATION_INVITATION_STATE, None)
 
-        # todo: ticket #16222 https://github.com/bcgov/entity/issues/16222
-        # send email on refused affiliation
+        invitation.invitation_status_code = InvitationStatus.FAILED.value
+        invitation.approver_id = user.identifier
+        invitation.save()
 
-        invitation = invitation.set_status(InvitationStatus.FAILED.value)
+        AffiliationInvitation. \
+            send_affiliation_invitation_authorization_email(affiliation_invitation=invitation, is_authorized=False)
 
         return AffiliationInvitation(invitation)

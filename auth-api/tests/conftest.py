@@ -257,7 +257,7 @@ def keycloak_mock(monkeypatch):
 def business_mock(monkeypatch):
     """Mock get business call."""
 
-    def get_business(business_identifier, bearer_token):
+    def get_business(business_identifier, token):
         return {
             'business': {
                 'identifier': 'CP0002103',
