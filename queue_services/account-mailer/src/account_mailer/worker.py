@@ -203,8 +203,8 @@ async def process_event(event_message: dict, flask_app):
                 template_name=template_name,
                 subject=subject, **email_msg)
 
-        elif message_type == MessageType.AFFILIATION_INVITATION_REQUEST.value \
-                or message_type == MessageType.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value:
+        elif message_type in {MessageType.AFFILIATION_INVITATION_REQUEST.value,
+                              MessageType.AFFILIATION_INVITATION_REQUEST_AUTHORIZATION.value}:
             business_name = email_msg.get('businessName')
             email_dict = common_mailer.process(
                 **{
