@@ -18,7 +18,7 @@
             v-model="selectedColumns"
             :items="columns"
             :menu-props="{ bottom: true, offsetY: true }"
-            @change="updateHeaders"
+            @change="getHeaders($event)"
             >
               <template v-slot:selection>
               </template>
@@ -509,10 +509,6 @@ export default defineComponent({
       clearAllFilters()
     }
 
-    const updateHeaders = (newCol: string[]): void => {
-      getHeaders(newCol)
-    }
-
     const isCurrentOrganization = (orgId: number) => {
       return orgId === store.state.org.currentOrganization.id
     }
@@ -855,6 +851,7 @@ export default defineComponent({
       affiliations,
       entityCount,
       enableNameRequestType,
+      getHeaders,
       isNameRequest,
       isRejectedName,
       isApprovedName,
@@ -881,7 +878,6 @@ export default defineComponent({
       isFrozed,
       isBadstanding,
       isDissolution,
-      updateHeaders,
       getPrimaryAction,
       enableNewActionsMenu,
       isOpenExternal,
