@@ -120,8 +120,8 @@
                   @click="action(item)"
                 >
                   {{ getPrimaryAction(item) }}
-                <v-icon class='external-icon pl-1' v-if="isOpenExternal(item)" small>mdi-open-in-new</v-icon>
-              </v-btn>
+                  <v-icon class='external-icon pl-1' v-if="isOpenExternal(item)" small>mdi-open-in-new</v-icon>
+                </v-btn>
               </template>
               <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
             </v-tooltip>
