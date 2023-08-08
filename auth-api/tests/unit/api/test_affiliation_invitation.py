@@ -361,6 +361,9 @@ def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,
     client.post('/api/v1/users', headers=headers, content_type='application/json')
     rv_from_org = client.post('/api/v1/orgs', data=json.dumps(from_org_info),
                               headers=headers, content_type='application/json')
+    # if you run into this, it's likely it's to a pay-api call. Make sure your secrets are correct.
+    assert rv_from_org.status_code != http_status.HTTP_500_INTERNAL_SERVER_ERROR
+
     rv_to_org = client.post('/api/v1/orgs', data=json.dumps(to_org_info),
                             headers=headers, content_type='application/json')
 
