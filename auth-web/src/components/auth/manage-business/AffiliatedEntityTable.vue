@@ -596,7 +596,7 @@ export default defineComponent({
         entityType === CorpTypes.PARISHES)
     }
 
-    const isAllowRestore = (item: Business): boolean => {
+    const isForRestore = (item: Business): boolean => {
       const entityType = getEntityType(item)
       return (entityType === CorpTypes.BC_COMPANY ||
         entityType === CorpTypes.BC_CCC ||
@@ -623,7 +623,7 @@ export default defineComponent({
           return 'Register Now'
         }
         case NrRequestActionCodes.RESTORE: {
-          return isAllowRestore(item) ? 'Restore Now' : 'Reinstate Now'
+          return isForRestore(item) ? 'Restore Now' : 'Reinstate Now'
         }
         case NrRequestActionCodes.RENEW:
           return 'Restore Now'
@@ -735,7 +735,7 @@ export default defineComponent({
                 } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
                   action = 'change name'
                 } else {
-                  action = isAllowRestore(item) ? 'restore' : 'reinstate'
+                  action = isForRestore(item) ? 'restore' : 'reinstate'
                 }
                 context.emit('business-unavailable-error', action)
               }
