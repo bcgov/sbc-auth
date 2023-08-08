@@ -159,22 +159,7 @@
         @add-failed-no-nr="showNRNotFoundModal()"
       />
 
-      <v-row  no-gutters id="dashboard-actions" class="mb-n3">
-        <v-col>
-          <v-select
-            dense filled multiple hide-details
-            class="column-selector"
-            label="Columns to Show"
-            v-model="selectedColumns"
-            :items="columns"
-            :menu-props="{ bottom: true, offsetY: true }"
-          >
-            <template v-slot:selection></template>
-          </v-select>
-        </v-col>
-      </v-row>
       <AffiliatedEntityTable
-        :selectedColumns="selectedColumns"
         :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
         :highlight-index="highlightIndex"
@@ -370,8 +355,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
-  private selectedColumns = ['Number', 'Type', 'Status']
-  private columns = ['Number', 'Type', 'Status']
   highlightIndex = -1
 
   $refs: {
@@ -755,27 +738,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 }
 
-.column-selector {
-  float: right;
-  width: 200px;
-  height: 10% !important;
-  transform: translate(0px,-20px);
-  z-index: 1;
-}
-
 // Vuetify Overrides
 ::v-deep {
   .column-selector.v-text-field .v-input__control {
     background: white;
-  }
-
-  #dashboard-actions {
-    .v-input .v-label {
-      transform: translateY(-10px) scale(1);
-      top: 30px;
-      color: $gray7;
-      font-size: .875rem;
-    }
   }
 
   .v-data-table td {

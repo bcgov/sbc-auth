@@ -10,7 +10,6 @@
       :clearable="state !== States.INITIAL && state !== States.SEARCHING"
       :append-icon="state === States.INITIAL ? 'mdi-magnify':''"
       autocomplete="chrome-off"
-      autofocus
       class="mt-5 mb-n2"
       filled
       hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
@@ -184,5 +183,10 @@ p {
 ::v-deep .v-input__icon .mdi-magnify {
   -webkit-transform: none !important;
   transform: none !important;
+}
+
+// Background color of Busines Name or Incorporation/Registration Number field
+::v-deep .v-input__slot {
+  background: #fff !important;
 }
 </style>

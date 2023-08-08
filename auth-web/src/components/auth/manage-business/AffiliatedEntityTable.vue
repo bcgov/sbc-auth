@@ -1,9 +1,35 @@
 <template>
   <div id="affiliated-entity-section">
     <v-card flat>
-      <div class="table-header">
-        <label><strong>My List </strong>({{ entityCount }})</label>
-      </div>
+      <v-row
+          id="dashboard-actions"
+          class="table-header px-6 py-3 soft-corners-top mt-4"
+          align="center"
+          no-gutters
+        >
+          <v-col cols="auto" class="py-1">
+            <label><strong id="table-title">My List </strong>({{ entityCount }})</label>
+          </v-col>
+          <v-col>
+            <v-row justify="end" no-gutters>
+              <v-col class="pl-4 py-1" cols="auto">
+                <v-select
+                    dense filled multiple hide-details
+                    class="column-selector text-input-style-above"
+                    v-model="selectedColumns"
+                    :items="columns"
+                    :menu-props="{ bottom: true, offsetY: true }"
+                    style="width: 240px;"
+                    placeholder="Columns to Show"
+                  >
+                    <template v-slot:selection="{ index }">
+                      <span v-if="index === 0">Columns to Show</span>
+                    </template>
+                </v-select>
+              </v-col>
+            </v-row>
+          </v-col>
+      </v-row>
       <base-v-data-table
         id="affiliated-entity-table"
         :clearFiltersTrigger="clearFiltersTrigger"
@@ -211,7 +237,7 @@ import {
 } from '@/util/constants'
 import { Business, NameRequest, Names } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { Ref, SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
@@ -226,7 +252,6 @@ export default defineComponent({
   name: 'AffiliatedEntityTable',
   components: { EntityDetails, BaseVDataTable },
   props: {
-    selectedColumns: { default: [] as string[] },
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
@@ -461,13 +486,17 @@ export default defineComponent({
       }
     }
 
-    watch(() => props.selectedColumns, (newCol: string[]) => {
+    const selectedColumns = ref<string[]>(['Number', 'Type', 'Status'])
+    const columns = ref<string[]>(['Number', 'Type', 'Status'])
+
+    watch(selectedColumns, (newCol: string[]) => {
       getHeaders(newCol)
     })
 
     watch(() => affiliations.results, () => {
       clearFilters()
-      getHeaders(props.selectedColumns)
+      // Remove cast in Vue3, npm serve has linting issues.
+      getHeaders((selectedColumns as Ref<string[]>).value)
     })
 
     // feature flags
@@ -513,7 +542,9 @@ export default defineComponent({
       getDetails,
       isFrozed,
       isBadstanding,
-      isDissolution
+      isDissolution,
+      selectedColumns,
+      columns
     }
   }
 })
@@ -615,7 +646,44 @@ export default defineComponent({
   }
 }
 
+.text-input-style-above {
+  label {
+    font-size: 0.875rem !important;
+    color: $gray7 !important;
+    padding-left: 6px;
+  }
+  span {
+    padding-left: 6px;
+    font-size: 14px;
+    color: $gray7;
+  }
+}
+
+#table-title {
+  font-size: 1rem;
+}
+
+.column-selector {
+  width: 200px;
+  height: 10% !important;
+  z-index: 1;
+}
+
 // Vuetify Overrides
+
+// Background color of Columns to Show box located in the table header
+::v-deep .table-header .v-input__slot {
+  background: #fff !important;
+  height: 45px !important;
+  min-height: 45px !important;
+}
+
+// Dropdown list items for Columns to Show, need to be smaller.
+::v-deep .v-list-item {
+  min-height: 0 !important;
+  height: 32px;
+}
+
 ::v-deep .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
   &:hover {
     background-color: $app-background-blue;
