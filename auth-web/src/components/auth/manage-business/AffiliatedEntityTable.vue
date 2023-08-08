@@ -759,7 +759,7 @@ export default defineComponent({
                 } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
                   action = 'change name'
                 } else {
-                  const action = isAllowRestore(item) ? 'restore' : 'reinstate'
+                  action = isAllowRestore(item) ? 'restore' : 'reinstate'
                 }
                 context.emit('business-unavailable-error', action)
               }
