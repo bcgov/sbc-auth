@@ -61,7 +61,7 @@ class AffiliationInvitations(Resource):
                 search_filter.entity_id = business.identifier if business else None
 
             auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
-            if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id):
+            if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id, disabled_roles=[None]):
                 raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
 
             if org_id:
