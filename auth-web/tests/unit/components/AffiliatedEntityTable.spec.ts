@@ -112,8 +112,7 @@ describe('AffiliatedEntityTable.vue', () => {
     jest.clearAllMocks()
   })
 
-  it('Renders affiliated entity table with old actions menu', async () => {
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': false })
+  it('Renders affiliated entity table with correct contents', async () => {
     wrapper = mount(AffiliatedEntityTable, {
       store: oldStore,
       localVue,
@@ -155,7 +154,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Processing')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Open Name Request')
 
     // second item
     columns = itemRows.at(startCountAt + 1).findAll(itemCell)
@@ -164,7 +163,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Approved')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Open Name Request')
 
     // third item
     columns = itemRows.at(startCountAt + 2).findAll(itemCell)
@@ -173,7 +172,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Pending Staff Review')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Open Name Request')
 
     // fourth item
     columns = itemRows.at(startCountAt + 3).findAll(itemCell)
@@ -182,7 +181,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Registration')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Resume Draft')
 
     // fifth item
     columns = itemRows.at(startCountAt + 4).findAll(itemCell)
@@ -191,7 +190,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Sole Proprietorship')
     expect(columns.at(3).text()).toBe('Consumed')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Remove From Table')
 
     // sixth item
     columns = itemRows.at(startCountAt + 5).findAll(itemCell)
@@ -199,7 +198,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(3).text()).toBe('Draft')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Resume Draft')
 
     expect(wrapper.findComponent(EntityDetails).exists()).toBeTruthy()
     const entityDetails = wrapper.findComponent(EntityDetails)
@@ -215,11 +214,11 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(1).text()).toBe('BC0871095')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Historical')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Manage Business')
   })
 
-  it('Render affiliated entity table with new actions menu', async () => {
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': true, 'ia-supported-entities': 'BEN' })
+  it('Render affiliated entity table with correct actions menu', async () => {
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN' })
     wrapper = mount(AffiliatedEntityTable, {
       store: newStore,
       localVue,
@@ -266,7 +265,6 @@ describe('AffiliatedEntityTable.vue', () => {
   })
 
   it('Tooltips exist in affiliated entity table', async () => {
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'enable-new-actions-menu': false })
     wrapper = mount(AffiliatedEntityTable, {
       store: oldStore,
       localVue,
@@ -278,7 +276,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(wrapper.findAll('.v-tooltip').exists()).toBeTruthy()
   })
 
-  it('details for Access Request', async () => {
+  it('Details for Access Request', async () => {
     wrapper = mount(AffiliatedEntityTable, {
       store: oldStore,
       localVue,
