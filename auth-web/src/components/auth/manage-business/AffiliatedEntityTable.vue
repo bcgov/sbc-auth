@@ -582,8 +582,7 @@ export default defineComponent({
 
     const isModernizedEntity = (item: Business): boolean => {
       const entityType = getEntityType(item)
-      const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || [] // move to somewhere factory?
-      console.log(supportedEntityFlags)
+      const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.IaSupportedEntities)?.split(' ') || []
       return supportedEntityFlags.includes(entityType)
     }
 
