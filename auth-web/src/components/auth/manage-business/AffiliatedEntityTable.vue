@@ -3,22 +3,22 @@
     <v-card flat>
       <div class="table-header">
         <v-row
-        no-gutters
-        class="mb-n8"
+          no-gutters
+          class="mb-n8"
         >
           <v-col class="pt-3 pl-1">
             <label><strong>My List </strong>({{ entityCount }})</label>
           </v-col>
           <v-col class="column-actions">
             <v-select
-            dense multiple
-            class="column-selector pb-2 pr-2"
-            background-color="white"
-            label="Columns to Show"
-            v-model="selectedColumns"
-            :items="columns"
-            :menu-props="{ bottom: true, offsetY: true }"
-            @change="getHeaders($event)"
+              dense multiple
+              class="column-selector pb-2 pr-2"
+              background-color="white"
+              label="Columns to Show"
+              v-model="selectedColumns"
+              :items="columns"
+              :menu-props="{ bottom: true, offsetY: true }"
+              @change="getHeaders($event)"
             >
               <template v-slot:selection>
               </template>
