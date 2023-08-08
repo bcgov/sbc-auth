@@ -305,12 +305,6 @@ export default defineComponent({
         return true
       }
       let isValid = false
-      const isAddFormValid = (
-        !!businessIdentifier.value &&
-        !!passcode.value &&
-        (!isFirm.value || (isCertified.value && !!certifiedBy.value)) &&
-        addBusinessForm.value.validate()
-      )
       const isModifyFormValid = (
         !!businessIdentifier.value &&
         !!passcode.value &&
