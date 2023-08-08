@@ -66,6 +66,36 @@
                   </div>
                 </v-list-group>
 
+                <v-list-group v-model="nameOption">
+                  <template v-slot:activator>
+                    <v-list-item-title>
+                      Use the name of a proprietor or partner
+                    </v-list-item-title>
+                  </template>
+                  <div class="item-content">
+                    <v-text-field
+                      filled
+                      label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                      hint="Name as it appears on the Business Summary or the Statement of Registration"
+                      persistent-hint
+                      :rules="nameRules"
+                      :maxlength="passcodeMaxLength"
+                      v-model="proprietorPartnerName"
+                      autocomplete="off"
+                      type="password"
+                      class="passcode mt-0 mb-2"
+                      :aria-label="passcodeLabel"
+                    />
+                  </div>
+                    <Certify
+                      :certifiedBy="certifiedBy"
+                      entity="registered entity"
+                      @update:isCertified="isCertified = $event"
+                      class="certify"
+                      :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
+                    />
+                </v-list-group>
+
                 <v-list-group v-model="emailOption">
                   <template v-slot:activator>
                     <v-list-item-title>
@@ -200,6 +230,7 @@ export default defineComponent({
     const businessIdentifier = ref('') // aka incorporation number of registration number
     const businessIdentifierRules = ref(null)
     const passcode = ref('') // aka password or proprietor/partner
+    const proprietorPartnerName = ref('') // aka password or proprietor/partner name
     const folioNumber = ref('')
     const isLoading = ref(false)
     const isCertified = ref(false) // firms only
@@ -208,6 +239,7 @@ export default defineComponent({
     const helpDialog = ref<HelpDialog>()
     const passcodeOption = ref(false)
     const emailOption = ref(false)
+    const nameOption = ref(false)
     const requestAuthBusinessOption = ref(false)
     const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
@@ -259,6 +291,25 @@ export default defineComponent({
       if (isFirm.value) return 150
       if (isCooperative.value) return 9
       return 15
+    })
+
+    const nameRules = computed(() => {
+      if (isFirm.value) {
+        return [
+          (v) => !!v || 'Proprietor or Partner Name is required',
+          (v) => v.length <= 150 || 'Maximum 150 characters'
+        ]
+      }
+      if (isCooperative.value) {
+        return [
+          (v) => !!v || 'Passcode is required',
+          (v) => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
+        ]
+      }
+      return [
+        (v) => !!v || 'Password is required',
+        (v) => CommonUtils.validateCorporatePassword(v) || 'Password must be 8 to 15 characters'
+      ]
     })
 
     const passcodeRules = computed(() => {
@@ -336,9 +387,11 @@ export default defineComponent({
     // Methods
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
+      proprietorPartnerName.value = ''
       authorizationName.value = ''
       passcodeOption.value = false
       emailOption.value = false
+      nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
       addBusinessForm.value.resetValidation()
@@ -423,6 +476,7 @@ export default defineComponent({
       requestAuthRegistryOption,
       requestAuthBusinessOption,
       emailOption,
+      nameOption,
       passcodeOption,
       isDialogVisible,
       addBusinessForm,
@@ -430,6 +484,7 @@ export default defineComponent({
       businessName,
       businessIdentifier,
       passcode,
+      proprietorPartnerName,
       folioNumber,
       isLoading,
       isCertified,
@@ -447,6 +502,7 @@ export default defineComponent({
       passcodeHint,
       passcodeMaxLength,
       passcodeRules,
+      nameRules,
       passwordText,
       forgotButtonText,
       helpDialogBlurb,
