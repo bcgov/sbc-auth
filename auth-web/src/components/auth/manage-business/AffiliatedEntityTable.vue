@@ -582,26 +582,6 @@ export default defineComponent({
       return supportedEntityFlags.includes(entityType)
     }
 
-    const isColinEntity = (item: Business): boolean => { // not include ones modernized (feature flag)
-      const entityType = getEntityType(item)
-
-      return (!isModernizedEntity(item) && (
-        entityType === CorpTypes.BC_COMPANY ||
-        entityType === CorpTypes.BC_CCC ||
-        entityType === CorpTypes.BC_ULC_COMPANY ||
-        entityType === CorpTypes.CCC_CONTINUE_IN ||
-        entityType === CorpTypes.BC_CORPORATION ||
-        entityType === CorpTypes.ULC_CONTINUE_IN ||
-        entityType === CorpTypes.EXTRA_PRO_REG ||
-        entityType === CorpTypes.LL_PARTNERSHIP ||
-        entityType === CorpTypes.LIMITED_CO ||
-        entityType === CorpTypes.LIM_PARTNERSHIP ||
-        entityType === CorpTypes.BC_UNLIMITED ||
-        entityType === CorpTypes.XPRO_LL_PARTNR ||
-        entityType === CorpTypes.XPRO_LIM_PARTNR
-      ))
-    }
-
     const isSocieties = (item: Business): boolean => {
       const entityType = getEntityType(item)
       return (entityType === CorpTypes.CONT_IN_SOCIETY ||
@@ -720,12 +700,12 @@ export default defineComponent({
       if (isModernizedEntity(item)) {
         const businessIdentifier = await createBusinessRecord(item)
         goToDashboard(businessIdentifier)
-      } else if (isColinEntity(item)) {
-        goToCorpOnline()
       } else if (isSocieties(item)) {
         goToSocieties()
-      } else {
+      } else if (isOtherEntities(item)) {
         goToFormPage()
+      } else {
+        goToCorpOnline()
       }
     }
 
