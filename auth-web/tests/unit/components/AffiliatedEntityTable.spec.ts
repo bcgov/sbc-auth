@@ -12,7 +12,6 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
-import flushPromises from 'flush-promises'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
@@ -72,11 +71,6 @@ const orgModule = {
   }
 }
 
-sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
-  AUTH_API_URL: 'https://localhost:8080/api/v1/11',
-  PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
-}))
-
 const oldStore = new Vuex.Store({
   strict: false,
   modules: {
@@ -104,6 +98,10 @@ describe('AffiliatedEntityTable.vue', () => {
 
   beforeEach(async () => {
     localVue = createLocalVue()
+    sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
+      AUTH_API_URL: 'https://localhost:8080/api/v1/11',
+      PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
+    }))
   })
 
   afterEach(() => {
@@ -259,7 +257,6 @@ describe('AffiliatedEntityTable.vue', () => {
       expect(action.find('.external-icon').exists()).toBe(actions.at(i).external)
       const button = action.find('.more-actions .more-actions-btn')
       await button.trigger('click')
-      await flushPromises()
 
       const secondaryActions = action.findAll('.v-list-item__subtitle')
       for (let j = 0; j < secondaryActions.length; ++j) {
