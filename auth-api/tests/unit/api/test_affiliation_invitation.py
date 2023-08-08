@@ -544,7 +544,6 @@ def test_getting_affiliation_invitations_for_the_org(app, client, jwt, session, 
                                   business_identifier1=business_identifier,
                                   business_identifier2=new_business_identifiers[0])
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     expected_org_id = new_org_ids[0]
     url = f'/api/v1/affiliationInvitations?orgId={expected_org_id}&businessDetails=True'
     affiliation_invitations_response = client.get(url, headers=headers)
@@ -583,7 +582,6 @@ def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt
                                   business_identifier1=business_identifier,
                                   business_identifier2=new_business_identifiers[0])
 
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
     expected_org_id = new_org_ids[0]
     url = f'/api/v1/affiliationInvitations?toOrgId=' \
           f'{expected_org_id}&business_identifier={business_identifier}&businessDetails=True'
