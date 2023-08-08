@@ -584,7 +584,7 @@ export default defineComponent({
 
     const isColinEntity = (item: Business): boolean => { // not include ones modernized (feature flag)
       const entityType = getEntityType(item)
-      // talk to Sev to see if there's better way to check colin
+
       return (!isModernizedEntity(item) && (
         entityType === CorpTypes.BC_COMPANY ||
         entityType === CorpTypes.BC_CCC ||
@@ -625,7 +625,7 @@ export default defineComponent({
         entityType === CorpTypes.BENEFIT_COMPANY)
     }
 
-    const getNrRequestDescription = (item: Business): string => { // can move to factory
+    const getNrRequestDescription = (item: Business): string => {
       const nrRequestActionCd = item.nameRequest?.requestActionCd
       switch (nrRequestActionCd) {
         case NrRequestActionCodes.AMALGAMATE:
