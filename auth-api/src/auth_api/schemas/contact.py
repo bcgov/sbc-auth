@@ -18,6 +18,7 @@ from marshmallow import fields, post_dump
 from auth_api.models import Contact as ContactModel
 
 from .base_schema import BaseSchema
+from ..utils.util import mask_email
 
 
 class ContactSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -48,11 +49,5 @@ class ContactSchemaPublic(BaseSchema):
     @post_dump(pass_many=False)
     def _mask_email_field(self, data, many):  # pylint: disable=unused-argument
         """Mask email field."""
-        email = data.get('email')
-        parts = email.split('@')
-        if len(parts) == 2:
-            username, domain = parts
-            masked_username = username[:2] + '*' * (len(username) - 2)
-            masked_domain = domain[:2] + '*' * (len(domain) - 2)
-            data['email'] = masked_username + '@' + masked_domain
+        data['email'] = mask_email(data.get('email'))
         return data
