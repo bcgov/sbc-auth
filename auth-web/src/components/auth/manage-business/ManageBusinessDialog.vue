@@ -1,9 +1,5 @@
 <template>
   <div id="manage-business-dialog">
-    <HelpDialog
-      :helpDialogBlurb="helpDialogBlurb"
-      ref="helpDialog"
-    />
 
     <v-dialog
       attach="#entity-management"
@@ -14,7 +10,23 @@
       data-test-tag="add-business"
       @keydown.esc="resetForm(true)"
     >
-      <v-card class="px-3">
+      <HelpDialog
+        :helpDialogBlurb="helpDialogBlurb"
+        :inline="true"
+        ref="helpDialog"
+      />
+
+      <AuthorizationEmailSent
+        v-if="!showHelp && showAuthorizationEmailSentDialog"
+        :email="businessContactEmail"
+        @open-help="openHelp"
+        @close-dialog="showAuthorizationEmailSentDialog = false"
+      />
+
+      <v-card
+        v-if="!showHelp && !showAuthorizationEmailSentDialog"
+        class="px-3"
+      >
         <v-card-title data-test="dialog-header">
           <span>Manage a B.C. Business</span>
         </v-card-title>
@@ -77,30 +89,32 @@
                     <div>
                       An email will be sent to the registered office contact email of the business:
                     </div>
-                    <div><b>{}**@********</b></div>
-                    <div style="margin:6px 5px 16px 0 !important">
+                    <div><b>{{businessContactEmail}}</b></div>
+                    <div class="mt-1 mr-1 mb-4">
                       To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
                     </div>
                   </div>
                 </v-list-group>
 
-                <v-list-group v-model="requestAuthBusinessOption">
-                  <template v-slot:activator>
-                    <v-list-item-title>Request authorization from the business</v-list-item-title>
-                  </template>
-                  <div class="list-body">
-                    <!-- Placeholder -->
-                  </div>
-                </v-list-group>
+                <template v-if="enableDelegationFeature">
+                  <v-list-group  v-model="requestAuthBusinessOption">
+                    <template v-slot:activator>
+                      <v-list-item-title>Request authorization from the business</v-list-item-title>
+                    </template>
+                    <div class="list-body">
+                      <!-- Placeholder for RTR -->
+                    </div>
+                  </v-list-group>
 
-                <v-list-group v-model="requestAuthRegistryOption">
-                  <template v-slot:activator>
-                    <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
-                  </template>
-                  <div class="list-body">
-                    <!-- Placeholder -->
-                  </div>
-                </v-list-group>
+                  <v-list-group v-if="enableDelegationFeature" v-model="requestAuthRegistryOption">
+                    <template v-slot:activator>
+                      <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
+                    </template>
+                    <div class="list-body">
+                      <!-- Placeholder for RTR-->
+                    </div>
+                  </v-list-group>
+                </template>
 
               </v-list>
             </v-card>
@@ -109,16 +123,14 @@
         </v-card-text>
 
         <v-card-actions class="form__btns">
-          <v-btn
-            v-if="isBusinessIdentifierValid && !isFirm"
-            large text
-            class="pl-2 pr-2 mr-auto"
-            id="forgot-button"
+          <span
             @click.stop="openHelp()"
+            class="pl-2 pr-2 mr-auto"
+            id="help-button"
           >
             <v-icon>mdi-help-circle-outline</v-icon>
-            <span>{{forgotButtonText}}</span>
-          </v-btn>
+            Help
+          </span>
           <v-btn
             large outlined color="primary"
             id="cancel-button"
@@ -143,9 +155,13 @@
 
 <script lang="ts">
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
 import BusinessLookup from './BusinessLookup.vue'
+import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
+import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -155,6 +171,7 @@ import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   components: {
+    AuthorizationEmailSent,
     BusinessLookup,
     Certify,
     HelpDialog
@@ -199,6 +216,7 @@ export default defineComponent({
     const businessName = ref('')
     const businessIdentifier = ref('') // aka incorporation number of registration number
     const businessIdentifierRules = ref(null)
+    const contactInfo = ref(null)
     const passcode = ref('') // aka password or proprietor/partner
     const folioNumber = ref('')
     const isLoading = ref(false)
@@ -208,10 +226,12 @@ export default defineComponent({
     const helpDialog = ref<HelpDialog>()
     const passcodeOption = ref(false)
     const emailOption = ref(false)
+    const enableDelegationFeature = ref(false)
     const requestAuthBusinessOption = ref(false)
     const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
+    const showAuthorizationEmailSentDialog = ref(false)
 
     const enableBusinessNrSearch = computed(() => {
       return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
@@ -284,10 +304,6 @@ export default defineComponent({
       return (isCooperative.value ? 'passcode' : 'password')
     })
 
-    const forgotButtonText = computed(() => {
-      return 'I lost or forgot my ' + (isCooperative.value ? 'passcode' : 'password')
-    })
-
     const helpDialogBlurb = computed(() => {
       if (isCooperative.value) {
         return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
@@ -327,6 +343,10 @@ export default defineComponent({
       return props.showBusinessDialog
     })
 
+    const businessContactEmail = computed(() => {
+      return contactInfo.value?.email
+    })
+
     // Methods
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
@@ -357,6 +377,23 @@ export default defineComponent({
     }
 
     const add = async () => {
+      if (emailOption.value) {
+        try {
+          // TODO will fix this after BE is ready.
+          // const payload: CreateAffiliationInvitation = {
+          //   fromOrgId: number,
+          //   businessIdentifier: businessIdentifier.value,
+          // }
+          // await AffiliationInvitationService.createInvitation()
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err)
+        } finally {
+          showAuthorizationEmailSentDialog.value = true
+        }
+        return
+      }
+
       addBusinessForm.value.validate()
       if (isFormValid.value) {
         isLoading.value = true
@@ -400,10 +437,21 @@ export default defineComponent({
       helpDialog.value.open()
     }
 
-    watch(() => props.initialBusinessIdentifier, (newValue) => {
-      if (props.initialBusinessIdentifier) {
-        businessIdentifier.value = props.initialBusinessIdentifier
+    const showHelp = computed(() => {
+      return helpDialog.value?.isDialogOpen
+    })
+
+    watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
+      if (businessIdentifier) {
+        businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName
+        try {
+          const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
+          contactInfo.value = contact?.data
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
       }
     })
 
@@ -442,13 +490,16 @@ export default defineComponent({
       passcodeMaxLength,
       passcodeRules,
       passwordText,
-      forgotButtonText,
       helpDialogBlurb,
       isFormValid,
       add,
       resetForm,
       formatBusinessIdentifier,
-      openHelp
+      openHelp,
+      businessContactEmail,
+      enableDelegationFeature,
+      showHelp,
+      showAuthorizationEmailSentDialog
     }
   }
 })
@@ -457,6 +508,13 @@ export default defineComponent({
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 
+#help-button {
+  color: var(--v-primary-base) !important;
+  .v-icon {
+    transform: translate(0, -2px) !important;
+    color: var(--v-primary-base) !important;
+  }
+}
 .list-body {
   color:#313132;
 }
