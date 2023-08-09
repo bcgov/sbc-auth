@@ -320,7 +320,7 @@ class TestJwtClaims(dict, Enum):
         },
         'product_code': ProductCode.BUSINESS.value
     }
-    
+
     system_admin_role = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',

@@ -20,7 +20,7 @@ from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
-from werkzeug.exceptions import HTTPException, Forbidden
+from werkzeug.exceptions import HTTPException
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -449,15 +449,19 @@ def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  
                 if prod.get('code') == TestOrgProductsInfo.org_products_nds['subscriptions'][0]['productCode'])
 
 
-@pytest.mark.parametrize('test_name,token_info',[
-    ('test_public_user',TestJwtClaims.public_user_role),
-    ('test_public_bceid_user',TestJwtClaims.public_bceid_account_holder_user),
-    ('test_gov_user',TestJwtClaims.gov_account_holder_user),
-    ('test_bcol_admin_user',TestJwtClaims.bcol_admin_role),
-    ('test_staff',TestJwtClaims.staff_role),
-    ('test_staff_admin',TestJwtClaims.staff_admin_role)
+@pytest.mark.parametrize('test_name,token_info', [
+    ('test_public_user', TestJwtClaims.public_user_role),
+    ('test_public_bceid_user', TestJwtClaims.public_bceid_account_holder_user),
+    ('test_gov_user', TestJwtClaims.gov_account_holder_user),
+    ('test_bcol_admin_user', TestJwtClaims.bcol_admin_role),
+    ('test_staff', TestJwtClaims.staff_role),
+    ('test_staff_admin', TestJwtClaims.staff_admin_role)
 ])
-def test_create_product_subscription_nds_unauthorized(session, keycloak_mock, monkeypatch, test_name, token_info):  # pylint:disable=unused-argument
+def test_create_product_subscription_nds_unauthorized(session,  # pylint:disable=unused-argument
+                                                      keycloak_mock,
+                                                      monkeypatch,
+                                                      test_name,
+                                                      token_info):
     """Assert a product subscription for NDS cannot be created by a non system token."""
     # setup an org
     user_with_token = TestUserInfo.user1
