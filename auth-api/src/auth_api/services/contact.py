@@ -18,7 +18,7 @@ This module manages the Contact information for a user or entity.
 
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001, I003, I004
 
-from auth_api.schemas import ContactSchema  # noqa: I001, I003, I004
+from auth_api.schemas import ContactSchema, ContactSchemaPublic  # noqa: I001, I003, I004
 
 
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
@@ -35,11 +35,11 @@ class Contact:
         return self._model.id
 
     @ServiceTracing.disable_tracing
-    def as_dict(self):
+    def as_dict(self, masked_email_only=False):
         """Return the Contact as a python dict.
 
         None fields are not included in the dict.
         """
-        contact_schema = ContactSchema()
+        contact_schema = ContactSchemaPublic() if masked_email_only else ContactSchema()
         obj = contact_schema.dump(self._model, many=False)
         return obj

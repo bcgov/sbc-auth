@@ -16,6 +16,8 @@
 Test suite to ensure that the  model routines are working as expected.
 """
 from _datetime import datetime, timedelta
+from typing import List
+from uuid import uuid4
 
 from auth_api.config import get_named_config
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
@@ -25,9 +27,54 @@ from auth_api.models import OrgStatus as OrgStatusModel
 from auth_api.models import OrgType as OrgTypeModel
 from auth_api.models import PaymentType as PaymentTypeModel
 from auth_api.models import User
+from auth_api.models.dataclass import AffiliationInvitationSearch
 
 
-def factory_affiliation_invitation_model(session, status, sent_date=datetime.now()):
+def _get_random_affiliation_invitation_model(
+        # mandatory params
+        user: User,
+        from_org_id: int,
+        to_org_id: int,
+        entity_id: int,
+        # optional params below
+        affiliation_identifier: int = 1,
+        affiliation_type='REQUEST',
+        invitation_token='ABCD',
+        sent_date=datetime.now(),
+        recipient_email=None,
+        invitation_status_code='PENDING',
+        approver_id=None,
+        additional_message=None
+):
+    if recipient_email is None:
+        recipient_email = str(uuid4()) + '@test.com'
+
+    affiliation_invitation_model = AffiliationInvitationModel()
+    affiliation_invitation_model.recipient_email = recipient_email
+    affiliation_invitation_model.sender = user
+    affiliation_invitation_model.sent_date = sent_date
+    affiliation_invitation_model.invitation_status_code = invitation_status_code
+    affiliation_invitation_model.token = invitation_token
+    affiliation_invitation_model.from_org_id = from_org_id
+    affiliation_invitation_model.to_org_id = to_org_id
+    affiliation_invitation_model.entity_id = entity_id
+    affiliation_invitation_model.type = affiliation_type
+    affiliation_invitation_model.approver_id = approver_id
+    affiliation_invitation_model.additional_message = additional_message
+    return affiliation_invitation_model
+
+
+def _create_org(new_org_id, org_type: OrgTypeModel, org_status: OrgStatusModel, preferred_payment: PaymentTypeModel):
+    random_org = OrgModel()
+    random_org.name = f'Test Org #${new_org_id}'
+    random_org.org_type = org_type
+    random_org.org_status = org_status
+    random_org.preferred_payment = preferred_payment
+    random_org.id = new_org_id
+    return random_org
+
+
+def factory_affiliation_invitation_model(session, status, sent_date=datetime.now(), affiliation_invitation_type=None):
     """Produce a templated affiliation_invitation model."""
     user = User(username='CP1234567',
                 keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
@@ -74,6 +121,8 @@ def factory_affiliation_invitation_model(session, status, sent_date=datetime.now
     affiliation_invitation.from_org_id = from_org.id
     affiliation_invitation.to_org_id = to_org.id
     affiliation_invitation.entity_id = entity.id
+    if affiliation_invitation_type is not None:
+        affiliation_invitation.type = affiliation_invitation_type
 
     affiliation_invitation.save()
     return affiliation_invitation
@@ -104,7 +153,8 @@ def test_find_invitations_by_sender(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_sender(invitation.sender_id)
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id))
     assert len(retrieved_invitation) > 0
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert retrieved_invitation[0].token == invitation.token
@@ -126,7 +176,8 @@ def test_find_invitations_from_org(session):
     session.add(invitation)
     session.commit()
 
-    found_invitations = AffiliationInvitationModel.find_invitations_from_org(invitation.from_org_id)
+    found_invitations = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(from_org_id=invitation.from_org_id))
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].from_org_id == invitation.from_org_id
@@ -139,7 +190,8 @@ def test_find_invitations_to_org(session):  # pylint:disable=unused-argument
     session.add(invitation)
     session.commit()
 
-    found_invitations = AffiliationInvitationModel.find_invitations_to_org(invitation.to_org_id)
+    found_invitations = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(to_org_id=invitation.to_org_id))
     assert found_invitations
     assert len(found_invitations) == 1
     assert found_invitations[0].to_org_id == invitation.to_org_id
@@ -165,7 +217,8 @@ def test_find_pending_invitations_by_sender(session):  # pylint:disable=unused-a
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_pending_invitations_by_sender(invitation.sender_id)
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['PENDING']))
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == 'PENDING'
@@ -177,7 +230,8 @@ def test_find_pending_invitations_by_from_org(session):  # pylint:disable=unused
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_pending_invitations_by_from_org(invitation.from_org_id)
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(from_org_id=invitation.from_org_id))
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == 'PENDING'
@@ -189,7 +243,8 @@ def test_find_pending_invitations_by_to_org(session):  # pylint:disable=unused-a
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_pending_invitations_by_to_org(invitation.to_org_id)
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(to_org_id=invitation.to_org_id))
     assert len(retrieved_invitation) == 1
     assert retrieved_invitation[0].recipient_email == invitation.recipient_email
     assert invitation.invitation_status_code == 'PENDING'
@@ -201,10 +256,12 @@ def test_invitations_by_status(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'PENDING')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['PENDING']))
     assert len(retrieved_invitation) == 1
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['INVALID']))
     assert len(retrieved_invitation) == 0
 
 
@@ -214,10 +271,12 @@ def test_invitations_by_expired_status(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'EXPIRED')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['EXPIRED']))
     assert len(retrieved_invitation) == 1
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['INVALID']))
     assert len(retrieved_invitation) == 0
 
 
@@ -227,7 +286,8 @@ def test_invitations_by_invalid_status(session):
     session.add(invitation)
     session.commit()
 
-    retrieved_invitation = AffiliationInvitationModel.find_invitations_by_status(invitation.sender_id, 'INVALID')
+    retrieved_invitation = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(sender_id=invitation.sender_id, status_codes=['INVALID']))
     assert len(retrieved_invitation) == 0
 
 
@@ -318,3 +378,88 @@ def test_invitations_status_expiry(session):
     result: str = invitation.status
 
     assert result == 'EXPIRED'
+
+
+def test_invitations_status_for_request_does_not_expire(session):
+    """Assert status stays PENDING for invitation of type REQUEST."""
+    sent_date = datetime.now() - timedelta(minutes=int(get_named_config().AFFILIATION_TOKEN_EXPIRY_PERIOD_MINS))
+    invitation = factory_affiliation_invitation_model(session=session,
+                                                      status='PENDING',
+                                                      sent_date=sent_date,
+                                                      affiliation_invitation_type='REQUEST')
+    session.add(invitation)
+    session.commit()
+
+    result: str = invitation.status
+
+    assert result == 'PENDING'
+
+
+def test_update_invitation_as_failed(session):
+    """Assert that an Affiliation Invitation can be FAILED (e.g. reject authorization request for REQUEST type)."""
+    invitation = factory_affiliation_invitation_model(session=session, status='PENDING')
+    session.add(invitation)
+    session.commit()
+    invitation.set_status('FAILED')
+    assert invitation
+    assert invitation.invitation_status_code == 'FAILED'
+
+
+def _setup_multiple_orgs_and_invites(session, create_org_count=5, create_affiliation_invitation_count=5):
+    user = User(username='CP1234567',
+                keycloak_guid='1b20db59-19a0-4727-affe-c6f64309fd04')
+
+    session.add(user)
+    session.commit()
+
+    org_type = OrgTypeModel(code='TEST', description='Test')
+    session.add(org_type)
+    session.commit()
+
+    org_status = OrgStatusModel(code='TEST', description='Test')
+    session.add(org_status)
+    session.commit()
+
+    preferred_payment = PaymentTypeModel(code='TEST', description='Test')
+    session.add(preferred_payment)
+    session.commit()
+
+    for i in range(1, create_org_count + 1):
+        new_org = _create_org(new_org_id=i, org_type=org_type, org_status=org_status,
+                              preferred_payment=preferred_payment)
+        session.add(new_org)
+
+    session.commit()
+
+    entity = EntityModel(business_identifier='CP1234567', business_number='791861073BC0001', name='Interesting, Inc.',
+                         corp_type_code='CP', id=1)
+    session.add(entity)
+    session.commit()
+
+    for i in range(1, create_affiliation_invitation_count + 1):
+        if i == 1:
+            new_ai = _get_random_affiliation_invitation_model(user=user, to_org_id=2, from_org_id=1,
+                                                              entity_id=entity.id)
+        else:
+            new_ai = _get_random_affiliation_invitation_model(user=user, to_org_id=1, from_org_id=i,
+                                                              entity_id=entity.id)
+        session.add(new_ai)
+
+    session.commit()
+
+
+def test_find_all_related_to_org(session):
+    """Assert that finding affiliations related to org returns correct count."""
+    affiliation_invitation_count = 5
+    _setup_multiple_orgs_and_invites(session, create_affiliation_invitation_count=affiliation_invitation_count)
+    affiliation_invitations: List = AffiliationInvitationModel.find_all_related_to_org(org_id=1)
+    assert len(affiliation_invitations) == affiliation_invitation_count
+
+
+def test_find_all_sent_to_org_affiliated_with_entity(session):
+    """Assert that finding affiliations sent to org and requested for specific entity return correct count."""
+    affiliation_invitation_count = 5
+    _setup_multiple_orgs_and_invites(session, create_affiliation_invitation_count=affiliation_invitation_count)
+    affiliation_invitations: List = AffiliationInvitationModel \
+        .filter_by(AffiliationInvitationSearch(to_org_id='1', entity_id='1'))
+    assert len(affiliation_invitations) == affiliation_invitation_count - 1

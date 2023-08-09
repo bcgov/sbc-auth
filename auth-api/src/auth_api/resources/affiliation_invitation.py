@@ -18,10 +18,13 @@ from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
-from auth_api.exceptions import BusinessException
+from auth_api.exceptions import BusinessException, Error
+from auth_api.models.dataclass import AffiliationInvitationSearch
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
+from auth_api.services import Entity as EntityService
 from auth_api.services import User as UserService
+from auth_api.services.authorization import check_auth
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import Role
 from auth_api.utils.util import cors_preflight
@@ -39,17 +42,38 @@ class AffiliationInvitations(Resource):
     @staticmethod
     @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles(
-        [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
     def get():
         """Get affiliation invitations."""
         try:
+            get_business_details = request.args.get('businessDetails', False)
             org_id = request.args.get('orgId', None)
-            status = request.args.get('status', None)
-            data = AffiliationInvitationService.search_invitations_for_from_org(org_id, status)
-            data = data or {'affiliationInvitations': []}
+            business_identifier = request.args.get('businessIdentifier', None)
 
-            response, status = data, http_status.HTTP_200_OK
+            search_filter = AffiliationInvitationSearch()
+            search_filter.from_org_id = request.args.get('fromOrgId', None)
+            search_filter.to_org_id = request.args.get('toOrgId', None)
+            search_filter.status_codes = request.args.getlist('statuses')
+            search_filter.invitation_types = request.args.getlist('types')
+            if business_identifier:
+                business = EntityService\
+                    .find_by_business_identifier(business_identifier=business_identifier, skip_auth=True)
+                search_filter.entity_id = business.identifier if business else None
+
+            auth_check_org_id = org_id or search_filter.from_org_id or search_filter.to_org_id
+            if not UserService.is_context_user_staff() and check_auth(org_id=auth_check_org_id, disabled_roles=[None]):
+                raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+            if org_id:
+                data = AffiliationInvitationService. \
+                    get_all_invitations_with_details_related_to_org(org_id=org_id, search_filter=search_filter)
+            else:
+                data = AffiliationInvitationService. \
+                    search_invitations(search_filter=search_filter)
+            if get_business_details:
+                data = AffiliationInvitationService.enrich_affiliation_invitations_dict_list_with_business_data(data)
+
+            response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -162,4 +186,56 @@ class InvitationAction(Resource):
 
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+        return response, status
+
+
+@cors_preflight('PATCH,OPTIONS')
+@API.route('/<string:affiliation_invitation_id>/authorization/<string:authorize_action>',
+           methods=['PATCH', 'OPTIONS'])
+class InvitationActionAuthorize(Resource):
+    """Check if user is active part of the Org. Authorize/Refuse invite if he is."""
+
+    @staticmethod
+    def _verify_permissions(user, affiliation_invitation_id):
+        if not user:
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+        affiliation_invitation = AffiliationInvitationService. \
+            find_affiliation_invitation_by_id(affiliation_invitation_id)
+        if not affiliation_invitation:
+            raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        to_org_id = affiliation_invitation.as_dict()['to_org']['id']
+        if not UserService.is_user_member_of_org(user=user, org_id=to_org_id):
+            raise BusinessException(Error.NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION, None)
+
+    @classmethod
+    @TRACER.trace()
+    @cors.crossdomain(origin='*')
+    @_jwt.requires_auth
+    def patch(cls, affiliation_invitation_id, authorize_action):
+        """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""
+        origin = request.environ.get('HTTP_ORIGIN', 'localhost')
+
+        try:
+            user = UserService.find_by_jwt_token()
+            cls._verify_permissions(user=user, affiliation_invitation_id=affiliation_invitation_id)
+
+            if authorize_action == 'accept':
+                response, status = AffiliationInvitationService \
+                    .accept_affiliation_invitation(affiliation_invitation_id=affiliation_invitation_id,
+                                                   user=user,
+                                                   origin=origin).as_dict(), \
+                    http_status.HTTP_200_OK
+            elif authorize_action == 'refuse':
+                response, status = AffiliationInvitationService \
+                    .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id, user=user).as_dict(), \
+                    http_status.HTTP_200_OK
+            else:
+                err = {'code': 400, 'message': f'{authorize_action} is not supported on this endpoint'}
+                raise BusinessException(err, http_status.HTTP_400_BAD_REQUEST)
+
+        except BusinessException as exception:
+            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+
         return response, status

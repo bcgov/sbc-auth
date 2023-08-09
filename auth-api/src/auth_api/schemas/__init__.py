@@ -16,7 +16,7 @@
 from .activity_log import ActivityLogSchema
 from .affidavit import AffidavitSchema
 from .affiliation import AffiliationSchema
-from .contact import ContactSchema
+from .contact import ContactSchema, ContactSchemaPublic
 from .contact_link import ContactLinkSchema
 from .corp_type import CorpTypeSchema
 from .documents import DocumentSchema

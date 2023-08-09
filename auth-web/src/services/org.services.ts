@@ -97,15 +97,17 @@ export default class OrgService {
   }
 
   static async removeAffiliationInvitation (orgId: number, affiliationInvitationId: number) {
-    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/affiliations/invitations/${affiliationInvitationId}`)
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitation/${affiliationInvitationId}`)
   }
 
   static async cancelAffiliationInvitation (orgId: number, affiliationInvitationId: number) {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}/affiliations/invitations/${affiliationInvitationId}/cancel`)
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}/authorization/refuse`)
   }
 
   static async getAffiliationInvitations (orgIdentifier: number) {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/invitations`)
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
+      { params: { orgId: orgIdentifier } }
+    )
   }
 
   // TODO can be remove this since we moved from org to user affidavit

@@ -23,7 +23,7 @@ import { mapState } from 'vuex'
 export default class AccountMixin extends Vue {
   protected readonly currentOrganization!: Organization
 
-  protected getAccountFromSession (): AccountSettings {
+  getAccountFromSession (): AccountSettings {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))
   }
   get isPremiumAccount (): boolean {
