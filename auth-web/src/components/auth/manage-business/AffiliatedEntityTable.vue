@@ -353,12 +353,12 @@ export default defineComponent({
 
     /** Navigation handler for Corporate Online application */
     const goToCorpOnline = (): void => {
-      window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
+      window.open(appendAccountId(ConfigHelper.getCorporateOnlineUrl()), '_blank')
     }
 
     /** Navigation handler for Societies Online */
     const goToSocieties = (): void => {
-      window.location.href = appendAccountId(ConfigHelper.getSocietiesUrl())
+      window.open(appendAccountId(ConfigHelper.getSocietiesUrl()), '_blank')
     }
 
     /** Handler for draft IA creation and navigation */
@@ -592,7 +592,7 @@ export default defineComponent({
     }
 
     const goToFormPage = (): void => {
-      window.location.href = ConfigHelper.getCorpFormsUrl()
+      window.open(ConfigHelper.getCorpFormsUrl(), '_blank')
     }
 
     const goToRegister = async (item: Business): Promise<void> => {
