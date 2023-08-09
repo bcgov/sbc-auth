@@ -367,10 +367,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showSnackbar = false
   timeoutMs = 4000
   highlightRowIndex = NaN // for newly added NR or Business
-  snackbarText: string = null
-  showSnackbar = false
-  timeoutMs = 4000
-  highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
   private incorporateNumberedDropdown: boolean = false
@@ -382,7 +378,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
-  highlightIndex = -1
   highlightIndex = -1
 
   $refs: {
@@ -513,7 +508,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showBusinessAlreadyAdded (event: { name, identifier }) {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Already Added'
     this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
@@ -552,13 +547,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       this.dialogTitle = 'Error Adding Existing Name Request'
       this.dialogText = 'An error occurred adding your name request. Please try again.'
     }
-    this.$refs.errorDialog.open()
-  }
-
-  showBusinessAlreadyAdded (event: BusinessLookupResultIF) {
-    this.showManageBusinessDialog = false
-    this.dialogTitle = 'Business Already Added'
-    this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
