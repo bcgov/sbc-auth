@@ -754,9 +754,7 @@ export default defineComponent({
       goToNameRequest,
       showAmalgamateShortForm,
       getTooltipTargetDescription,
-      disableTooltip,
-      selectedColumns,
-      columns
+      disableTooltip
     }
   }
 })
