@@ -37,12 +37,12 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
 
     id = Column(Integer, primary_key=True)
     from_org_id = Column(ForeignKey('orgs.id'), nullable=False, index=True)
-    to_org_id = Column(ForeignKey('orgs.id'), nullable=False, index=True)
+    to_org_id = Column(ForeignKey('orgs.id'), nullable=True, index=True)
     entity_id = Column(ForeignKey('entities.id'), nullable=False, index=True)
     affiliation_id = Column(ForeignKey('affiliations.id'), nullable=True, index=True)
     sender_id = Column(ForeignKey('users.id'), nullable=False)
     approver_id = Column(ForeignKey('users.id'), nullable=True)
-    recipient_email = Column(String(100), nullable=False)
+    recipient_email = Column(String(100), nullable=True)
     sent_date = Column(DateTime, nullable=False)
     accepted_date = Column(DateTime, nullable=True)
     token = Column(String(100), nullable=True)  # stores the one time affiliation invitation token
@@ -92,7 +92,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         affiliation_invitation.from_org_id = invitation_info['fromOrgId']
         affiliation_invitation.to_org_id = invitation_info['toOrgId']
         affiliation_invitation.entity_id = invitation_info['entityId']
-        affiliation_invitation.recipient_email = invitation_info['recipientEmail']
+        affiliation_invitation.recipient_email = invitation_info.get('recipientEmail')
         affiliation_invitation.sent_date = datetime.now()
         affiliation_invitation.type = invitation_info.get('type')
         affiliation_invitation.invitation_status = InvitationStatus.get_default_status()

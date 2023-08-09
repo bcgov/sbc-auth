@@ -249,6 +249,7 @@ class ProductCode(Enum):
     MHR_QSLN = 'MHR_QSLN'  # Qualified Supplier - Lawyers and Notaries
     MHR_QSHM = 'MHR_QSHM'  # Qualified Supplier - Home Manufacturers
     MHR_QSHD = 'MHR_QSHD'  # Qualified Supplier - Home Dealers
+    NDS = 'NDS'
 
 
 class TaskRelationshipType(Enum):
