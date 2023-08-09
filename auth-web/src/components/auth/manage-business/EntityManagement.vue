@@ -160,7 +160,6 @@
       />
 
       <AffiliatedEntityTable
-        :selectedColumns="selectedColumns"
         :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
         :highlight-index="highlightIndex"
@@ -379,8 +378,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
-  private selectedColumns = ['Number', 'Type', 'Status']
-  private columns = ['Number', 'Type', 'Status']
   highlightIndex = -1
 
   $refs: {

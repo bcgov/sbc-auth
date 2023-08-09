@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="isDialogOpen" max-width="45rem">
+  <component :is="componentType" v-model="isDialogOpen" v-if="isDialogOpen" max-width="45rem">
     <v-card>
       <v-card-title>Need Assistance?</v-card-title>
       <v-card-text>
@@ -33,7 +33,7 @@
         <v-btn large color="primary" @click="close()">OK</v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </component>
 </template>
 
 <script lang="ts">
@@ -41,9 +41,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class HelpDialog extends Vue {
-  private isDialogOpen = false
+  isDialogOpen = false
 
   @Prop({ default: '' }) readonly helpDialogBlurb: string
+  @Prop({ default: false }) readonly inline: boolean
 
   public open () {
     this.isDialogOpen = true
@@ -51,6 +52,14 @@ export default class HelpDialog extends Vue {
 
   public close () {
     this.isDialogOpen = false
+  }
+
+  get componentType (): string {
+    if (this.inline) {
+      return 'div'
+    } else {
+      return 'v-dialog'
+    }
   }
 }
 </script>
