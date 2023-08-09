@@ -205,6 +205,7 @@ class AffiliationInvitationType(Enum):
 
     EMAIL = 'EMAIL'
     PASSCODE = 'PASSCODE'  # Used to indicate an affiliation invitation initiated through a valid passcode
+    REQUEST = 'REQUEST'  # Used to indicate an affiliation invitation initiated through Access Request modal
 
 
 class IdpHint(Enum):
@@ -248,6 +249,7 @@ class ProductCode(Enum):
     MHR_QSLN = 'MHR_QSLN'  # Qualified Supplier - Lawyers and Notaries
     MHR_QSHM = 'MHR_QSHM'  # Qualified Supplier - Home Manufacturers
     MHR_QSHD = 'MHR_QSHD'  # Qualified Supplier - Home Dealers
+    NDS = 'NDS'
 
 
 class TaskRelationshipType(Enum):

@@ -36,6 +36,8 @@ class Error(Enum):
                                       http_status.HTTP_400_BAD_REQUEST
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     EXPIRED_AFFILIATION_INVITATION = 'The affiliation invitation has expired.', http_status.HTTP_400_BAD_REQUEST
+    INVALID_AFFILIATION_INVITATION_STATE = 'The affiliation invitation is in an invalid state for this action.', \
+                                           http_status.HTTP_400_BAD_REQUEST
     INVALID_AFFILIATION_INVITATION_TOKEN = 'The affiliation invitation token is invalid.', \
                                            http_status.HTTP_400_BAD_REQUEST
     FAILED_AFFILIATION_INVITATION = 'Failed to dispatch the affiliation invitation', \
@@ -93,6 +95,7 @@ class Error(Enum):
                                    http_status.HTTP_400_BAD_REQUEST
     PATCH_INVALID_ACTION = 'PATCH_INVALID_ACTION', http_status.HTTP_400_BAD_REQUEST
     SERVICE_UNAVAILABLE = '3rd party application unavailable', http_status.HTTP_503_SERVICE_UNAVAILABLE
+    NOT_AUTHORIZED_TO_PERFORM_THIS_ACTION = 'Not authorized to perform this action', http_status.HTTP_403_FORBIDDEN
 
     def __new__(cls, message, status_code):
         """Attributes for the enum."""
