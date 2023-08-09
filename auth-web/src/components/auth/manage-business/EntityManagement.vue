@@ -482,7 +482,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         }
       } catch (error) {
         // Handle unexpected errors
-        console.error('An error occurred while processing the invitation:', error)
         this.showMagicLinkErrorModal()
       }
     }
