@@ -84,9 +84,11 @@ export interface NameRequestResponse {
   natureOfBusiness?: string
   expirationDate?: Date
   nrNum?: string
+  requestActionCd?: string
   stateCd?: string
   natureBusinessInfo?: string
   applicants?: Array<Applicant>
+  corpNum?: string
 }
 
 export interface AffiliationsResponse {
