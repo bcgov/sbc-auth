@@ -74,3 +74,15 @@ def escape_wam_friendly_url(param):
     base64_org_name = base64.b64encode(bytes(param, encoding='utf-8')).decode('utf-8')
     encode_org_name = urllib.parse.quote(base64_org_name, safe='')
     return encode_org_name
+
+
+def mask_email(email: str):
+    """Return masked email."""
+    if email:
+        parts = email.split('@')
+        if len(parts) == 2:
+            username, domain = parts
+            masked_username = username[:2] + '*' * (len(username) - 2)
+            masked_domain = domain[:2] + '*' * (len(domain) - 2)
+            email = masked_username + '@' + masked_domain
+    return email
