@@ -451,6 +451,9 @@ def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  
     ('test_public_bceid_user', TestJwtClaims.public_bceid_user),
     ('test_gov_user', TestJwtClaims.gov_account_holder_user),
     ('test_bcol_admin_user', TestJwtClaims.bcol_admin_role),
+    ('test_staff_manage_business', TestJwtClaims.staff_manage_business),
+    ('test_staff_view_accounts', TestJwtClaims.staff_view_accounts_role),
+    ('test_staff_manage_accounts', TestJwtClaims.staff_manage_accounts_role),
     ('test_staff_admin', TestJwtClaims.staff_admin_role)
 ])
 def test_create_product_subscription_nds_unauthorized(session,  # pylint:disable=unused-argument
