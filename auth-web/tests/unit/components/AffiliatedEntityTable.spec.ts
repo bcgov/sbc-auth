@@ -1,16 +1,17 @@
 import '../test-utils/composition-api-setup' // important to import this first
+import Vue, { VueConstructor } from 'vue'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { actions, businesses, moreBusinesses } from './../test-utils/test-data/affiliations'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BaseVDataTable } from '@/components/datatable'
 import { EntityAlertTypes } from '@/util/constants'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
-import Vue from 'vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
-import { businesses } from './../test-utils/test-data/affiliations'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
@@ -50,6 +51,16 @@ const businessModule = {
   }
 }
 
+const moreBusinessModule = {
+  namespaced: true,
+  state: { businesses: moreBusinesses },
+  action: {
+    addBusiness: jest.fn(),
+    updateBusinessName: jest.fn(),
+    updateFolioNumber: jest.fn()
+  }
+}
+
 const orgModule = {
   namespaced: true,
   state: {
@@ -60,15 +71,18 @@ const orgModule = {
   }
 }
 
-sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
-  AUTH_API_URL: 'https://localhost:8080/api/v1/11',
-  PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
-}))
-
-const store = new Vuex.Store({
+const oldStore = new Vuex.Store({
   strict: false,
   modules: {
     business: businessModule,
+    org: orgModule
+  }
+})
+
+const newStore = new Vuex.Store({
+  strict: false,
+  modules: {
+    business: moreBusinessModule,
     org: orgModule
   }
 })
@@ -78,30 +92,36 @@ const vuetify = new Vuetify({})
 describe('AffiliatedEntityTable.vue', () => {
   setupIntersectionObserverMock()
   let wrapper: Wrapper<any>
+  let localVue: VueConstructor<any>
 
   const headers = getAffiliationTableHeaders(['Number', 'Type', 'Status'])
 
   beforeEach(async () => {
-    const localVue = createLocalVue()
-    wrapper = mount(AffiliatedEntityTable, {
-      store,
-      localVue,
-      vuetify,
-      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
-      mocks: { $t: () => '' }
-    })
+    localVue = createLocalVue()
+    sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
+      AUTH_API_URL: 'https://localhost:8080/api/v1/11',
+      PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
+    }))
   })
 
   afterEach(() => {
     wrapper.destroy()
+    sessionStorage.clear()
 
     jest.resetModules()
     jest.clearAllMocks()
   })
 
-  it('Renders affiliated entity table', async () => {
-    // verify table header
-    expect(wrapper.find('.table-header').text()).toBe(`My List (${businesses.length}) Columns to Show`)
+  it('Renders affiliated entity table with correct contents', async () => {
+    wrapper = mount(AffiliatedEntityTable, {
+      store: oldStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+
+    expect(wrapper.find('.table-header').text()).toContain('My List (9)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
@@ -109,6 +129,7 @@ describe('AffiliatedEntityTable.vue', () => {
     // verify table
     expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
     expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
+    expect(wrapper.find('.column-selector').exists()).toBe(true)
     expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
     expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
     const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
@@ -133,7 +154,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Processing')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Open Name Request')
 
     // second item
     columns = itemRows.at(startCountAt + 1).findAll(itemCell)
@@ -142,7 +163,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Approved')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Open Name Request')
 
     // third item
     columns = itemRows.at(startCountAt + 2).findAll(itemCell)
@@ -151,7 +172,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Pending Staff Review')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Open Name Request')
 
     // fourth item
     columns = itemRows.at(startCountAt + 3).findAll(itemCell)
@@ -160,7 +181,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Registration')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Draft')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Resume Draft')
 
     // fifth item
     columns = itemRows.at(startCountAt + 4).findAll(itemCell)
@@ -169,7 +190,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(2).text()).toContain('Name Request')
     expect(columns.at(2).text()).toContain('BC Sole Proprietorship')
     expect(columns.at(3).text()).toBe('Consumed')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Remove From Table')
 
     // sixth item
     columns = itemRows.at(startCountAt + 5).findAll(itemCell)
@@ -177,7 +198,7 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(1).text()).toBe('Pending')
     expect(columns.at(2).text()).toContain('Incorporation Application')
     expect(columns.at(3).text()).toBe('Draft')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Resume Draft')
 
     expect(wrapper.findComponent(EntityDetails).exists()).toBeTruthy()
     const entityDetails = wrapper.findComponent(EntityDetails)
@@ -193,10 +214,77 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(1).text()).toBe('BC0871095')
     expect(columns.at(2).text()).toContain('BC Benefit Company')
     expect(columns.at(3).text()).toBe('Historical')
-    expect(columns.at(4).text()).toBe('Open')
+    expect(columns.at(4).text()).toBe('Manage Business')
   })
 
-  it('details for Access Request', async () => {
+  it('Render affiliated entity table with correct actions menu', async () => {
+    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN' })
+    wrapper = mount(AffiliatedEntityTable, {
+      store: newStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+
+    expect(wrapper.find('.table-header').text()).toContain('My List (18)')
+
+    // Wait for the component to render after any state changes
+    await wrapper.vm.$nextTick()
+
+    // verify table
+    expect(wrapper.findComponent(BaseVDataTable).exists()).toBe(true)
+    expect(wrapper.findComponent(BaseVDataTable).find(header).exists()).toBe(true)
+    expect(wrapper.find('.column-selector').exists()).toBe(true)
+    expect(wrapper.find('#affiliated-entity-table').exists()).toBe(true)
+    expect(wrapper.find('.v-data-table__wrapper').exists()).toBe(true)
+    const titles = wrapper.findComponent(BaseVDataTable).findAll(headerTitles)
+    expect(titles.length).toBe(headers.length)
+    expect(titles.at(0).text()).toBe('Business Name')
+    expect(titles.at(1).text()).toBe('Number')
+    expect(titles.at(2).text()).toBe('Type')
+    expect(titles.at(3).text()).toBe('Status')
+    expect(titles.at(4).text()).toBe('Actions')
+
+    // verify actions menu
+    const itemRows = wrapper.findComponent(BaseVDataTable).findAll(itemRow)
+    expect(itemRows.length).toBe(moreBusinesses.length)
+
+    for (let i = 0; i < itemRows.length; ++i) {
+      const action = itemRows.at(i).findAll(itemCell).at(4)
+      expect(action.text()).toBe(actions.at(i).primary)
+      expect(action.find('.external-icon').exists()).toBe(actions.at(i).external)
+      const button = action.find('.more-actions .more-actions-btn')
+      await button.trigger('click')
+
+      const secondaryActions = action.findAll('.v-list-item__subtitle')
+      for (let j = 0; j < secondaryActions.length; ++j) {
+        expect(secondaryActions.at(j).text()).toBe(actions.at(i).secondary.at(j))
+      }
+    }
+  })
+
+  it('Tooltips exist in affiliated entity table', async () => {
+    wrapper = mount(AffiliatedEntityTable, {
+      store: oldStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+
+    expect(wrapper.findAll('.v-tooltip').exists()).toBeTruthy()
+  })
+
+  it('Details for Access Request', async () => {
+    wrapper = mount(AffiliatedEntityTable, {
+      store: oldStore,
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
+
     const allWithInvites = businesses.filter(b => b.affiliationInvites)
     expect(wrapper.find('#affiliationInvitesStatus').exists()).toBeTruthy()
     expect(wrapper.findAll('#affiliationInvitesStatus').length).toBe(allWithInvites.length)
