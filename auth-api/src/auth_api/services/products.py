@@ -39,7 +39,7 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
-from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, PREMIUM_ORG_TYPES, STAFF
+from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, PREMIUM_ORG_TYPES, Role, STAFF
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
@@ -96,6 +96,9 @@ class Product:
                 raise BusinessException(Error.PRODUCT_SUBSCRIPTION_EXISTS, None)
             product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_code)
             if product_model:
+                # Check if product requires system admin, if yes abort
+                if product_model.need_system_admin:
+                    check_auth(system_required=True, org_id=org_id)
                 # Check if product needs premium account, if yes skip and continue.
                 if product_model.premium_only and org.type_code not in PREMIUM_ORG_TYPES:
                     continue
