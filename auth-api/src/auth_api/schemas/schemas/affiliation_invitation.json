@@ -30,7 +30,8 @@
       "title": "Type of Affiliation Invitation.",
       "examples": [
         "EMAIL",
-        "PASSCODE"
+        "PASSCODE",
+        "REQUEST"
       ]
     },
     "passCode": {
@@ -40,6 +41,10 @@
         "12345"
       ],
       "pattern": "^(.*)$"
+    },
+    "additionalMessage": {
+      "type": "string",
+      "title": "Additional Message"
     }
   },
   "required": [

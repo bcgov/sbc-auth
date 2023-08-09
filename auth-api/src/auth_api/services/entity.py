@@ -244,7 +244,7 @@ class Entity:
 
         return self
 
-    def get_contact(self):
+    def get_contact(self) -> ContactModel:
         """Get the contact for this business."""
         contact_link = ContactLinkModel.find_by_entity_id(self._model.id)
         if contact_link is None:

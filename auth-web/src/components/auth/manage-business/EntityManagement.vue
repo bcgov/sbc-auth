@@ -507,6 +507,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.errorDialog.open()
   }
 
+  showBusinessAlreadyAdded (event: { name, identifier }) {
+    this.showManageBusinessDialog = false
+    this.dialogTitle = 'Business Already Added'
+    this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
+    this.$refs.errorDialog.open()
+  }
+
   showNRNotFoundModal () {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Not Found'
@@ -540,13 +547,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       this.dialogTitle = 'Error Adding Existing Name Request'
       this.dialogText = 'An error occurred adding your name request. Please try again.'
     }
-    this.$refs.errorDialog.open()
-  }
-
-  showBusinessAlreadyAdded (event: BusinessLookupResultIF) {
-    this.showManageBusinessDialog = false
-    this.dialogTitle = 'Business Already Added'
-    this.dialogText = `The business ${event.name} with the businss number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 

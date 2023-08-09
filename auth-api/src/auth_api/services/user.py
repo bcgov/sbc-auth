@@ -639,3 +639,21 @@ class User:  # pylint: disable=too-many-instance-attributes disable=too-many-pub
         else:
             user_membership.status = Status.INACTIVE.value
             user_membership.flush()
+
+    @staticmethod
+    @user_context
+    def is_context_user_staff(**kwargs):
+        """Check if user in user context has is a staff."""
+        user_from_context: UserContext = kwargs['user_context']
+        return user_from_context.is_staff()
+
+    @staticmethod
+    def is_user_member_of_org(user, org_id: int) -> bool:
+        """Verify if user (UserService wrapper) is active member of the provided org."""
+        if not user:
+            return False
+
+        current_user_membership: MembershipModel = \
+            MembershipModel.find_membership_by_user_and_org(user_id=user.identifier, org_id=org_id)
+
+        return current_user_membership is not None and current_user_membership.status == Status.ACTIVE.value
