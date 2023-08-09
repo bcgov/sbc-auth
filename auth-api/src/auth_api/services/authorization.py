@@ -213,7 +213,7 @@ class Authorization:
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
     user_from_context: UserContext = kwargs['user_context']
-    if user_from_context.is_staff():
+    if user_from_context.is_staff() and not kwargs.get('system_required', None):
         _check_for_roles(STAFF, kwargs)
     elif user_from_context.is_system():
         business_identifier = kwargs.get('business_identifier', None)
