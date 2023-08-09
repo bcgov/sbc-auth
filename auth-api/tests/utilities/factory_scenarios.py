@@ -321,6 +321,22 @@ class TestJwtClaims(dict, Enum):
         'product_code': ProductCode.BUSINESS.value
     }
 
+    system_admin_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'firstname': fake.first_name(),
+        'lastname': fake.last_name(),
+        'preferred_username': fake.user_name(),
+        'realm_access': {
+            'roles': [
+                'system',
+                'staff'
+            ]
+        },
+        'product_code': 'ALL'
+    }
+
     passcode = {
         'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
         'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
@@ -680,6 +696,7 @@ class TestOrgProductsInfo(dict, Enum):
                                        {'productCode': 'PPR'}]}
     org_products_vs = {'subscriptions': [{'productCode': 'VS'}]}
     org_products_business = {'subscriptions': [{'productCode': 'BUSINESS'}]}
+    org_products_nds = {'subscriptions': [{'productCode': 'NDS'}]}
     mhr_qs_lawyer_and_notaries = {'subscriptions': [{'productCode': 'MHR_QSLN', 'externalSourceId': 'ABC123'}]}
     mhr_qs_home_manufacturers = {'subscriptions': [{'productCode': 'MHR_QSHM', 'externalSourceId': 'ABC123'}]}
     mhr_qs_home_dealers = {'subscriptions': [{'productCode': 'MHR_QSHD', 'externalSourceId': 'ABC123'}]}

@@ -15,10 +15,12 @@
 
 Test suite to ensure that the Org service routines are working as expected.
 """
+from http import HTTPStatus
 from unittest.mock import ANY, Mock, patch
 
 import pytest
 from requests import Response
+from werkzeug.exceptions import HTTPException
 
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
@@ -425,6 +427,54 @@ def test_create_product_subscription_staff(session, keycloak_mock, org_type, mon
                 if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][0]['productCode'])
     assert next(prod for prod in subscriptions
                 if prod.get('code') == TestOrgProductsInfo.org_products2['subscriptions'][1]['productCode'])
+
+
+def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
+    """Assert a product subscription for NDS can be created with a system admin token."""
+    # setup an org
+    user = factory_user_model(TestUserInfo.user_test)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    org_dict = org.as_dict()
+    # add the NDS product subscription via system admin token
+    patch_token_info(TestJwtClaims.system_admin_role, monkeypatch)
+    subscriptions = ProductService.create_product_subscription(org_dict['id'],
+                                                               TestOrgProductsInfo.org_products_nds,
+                                                               skip_auth=False)
+    assert next(prod for prod in subscriptions
+                if prod.get('code') == TestOrgProductsInfo.org_products_nds['subscriptions'][0]['productCode'])
+
+
+@pytest.mark.parametrize('test_name,token_info', [
+    ('test_public_user', TestJwtClaims.public_user_role),
+    ('test_public_bceid_user', TestJwtClaims.public_bceid_user),
+    ('test_gov_user', TestJwtClaims.gov_account_holder_user),
+    ('test_bcol_admin_user', TestJwtClaims.bcol_admin_role),
+    ('test_staff_manage_business', TestJwtClaims.staff_manage_business),
+    ('test_staff_view_accounts', TestJwtClaims.staff_view_accounts_role),
+    ('test_staff_manage_accounts', TestJwtClaims.staff_manage_accounts_role),
+    ('test_staff_admin', TestJwtClaims.staff_admin_role)
+])
+def test_create_product_subscription_nds_unauthorized(session,  # pylint:disable=unused-argument
+                                                      keycloak_mock,
+                                                      monkeypatch,
+                                                      test_name,
+                                                      token_info):
+    """Assert a product subscription for NDS cannot be created by a non system token."""
+    # setup an org
+    user = factory_user_model(TestUserInfo.user_test)
+    patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
+    org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
+    assert org
+    org_dict = org.as_dict()
+    # attempt to add the NDS product subscription to it
+    patch_token_info(token_info, monkeypatch)
+    with pytest.raises(HTTPException) as exception:
+        ProductService.create_product_subscription(org_dict['id'],
+                                                   TestOrgProductsInfo.org_products_nds,
+                                                   skip_auth=False)
+    assert exception.value.code == HTTPStatus.FORBIDDEN
 
 
 def test_create_org_with_duplicate_name(session, monkeypatch):  # pylint:disable=unused-argument
