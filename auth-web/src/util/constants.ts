@@ -430,7 +430,8 @@ export enum LDFlags {
     ProductCSOStatus = 'product-CSO-status',
     ProductSiteRegistryStatus = 'product-ESRA-status',
     ProductWillsStatus = 'product-VS-status',
-    SentryEnable = 'sentry-enable'
+    SentryEnable = 'sentry-enable',
+    SupportRestorationEntities = 'supported-restoration-entities'
 }
 
 export enum DateFilterCodes {
