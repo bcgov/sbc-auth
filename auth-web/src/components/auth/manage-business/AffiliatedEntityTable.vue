@@ -353,12 +353,12 @@ export default defineComponent({
 
     /** Navigation handler for Corporate Online application */
     const goToCorpOnline = (): void => {
-      window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
+      window.open(appendAccountId(ConfigHelper.getCorporateOnlineUrl()), '_blank')
     }
 
     /** Navigation handler for Societies Online */
     const goToSocieties = (): void => {
-      window.location.href = appendAccountId(ConfigHelper.getSocietiesUrl())
+      window.open(appendAccountId(ConfigHelper.getSocietiesUrl()), '_blank')
     }
 
     /** Handler for draft IA creation and navigation */
@@ -484,6 +484,12 @@ export default defineComponent({
         entityType === CorpTypes.PARISHES)
     }
 
+    const isSupportedRestorationEntities = (item: Business): boolean => {
+      const entityType = getEntityType(item)
+      const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.SupportRestorationEntities)?.split(' ') || []
+      return supportedEntityFlags.includes(entityType)
+    }
+
     const isForRestore = (item: Business): boolean => {
       const entityType = getEntityType(item)
       return (entityType === CorpTypes.BC_COMPANY ||
@@ -559,6 +565,11 @@ export default defineComponent({
           nrRequestActionCd === NrRequestActionCodes.MOVE) {
           return true
         }
+        // temporarily show external icon for restore/reinstate for some entity types
+        if (nrRequestActionCd === NrRequestActionCodes.RESTORE ||
+          nrRequestActionCd === NrRequestActionCodes.RENEW) {
+          return !isSupportedRestorationEntities(item)
+        }
         return false
       }
 
@@ -581,7 +592,7 @@ export default defineComponent({
     }
 
     const goToFormPage = (): void => {
-      window.location.href = ConfigHelper.getCorpFormsUrl()
+      window.open(ConfigHelper.getCorpFormsUrl(), '_blank')
     }
 
     const goToRegister = async (item: Business): Promise<void> => {
@@ -611,9 +622,7 @@ export default defineComponent({
               goToRelocate(item)
               break
             case NrRequestActionCodes.CONVERSION:
-            case NrRequestActionCodes.CHANGE_NAME:
-            case NrRequestActionCodes.RESTORE:
-            case NrRequestActionCodes.RENEW: {
+            case NrRequestActionCodes.CHANGE_NAME: {
               if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
                 goToDashboard(item.nameRequest?.corpNum)
               } else {
@@ -622,10 +631,22 @@ export default defineComponent({
                   action = 'alter'
                 } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
                   action = 'change name'
-                } else {
-                  action = isForRestore(item) ? 'restore' : 'reinstate'
                 }
                 context.emit('business-unavailable-error', action)
+              }
+              break
+            }
+            case NrRequestActionCodes.RESTORE:
+            case NrRequestActionCodes.RENEW: {
+              if (!isSupportedRestorationEntities(item)) {
+                goToCorpOnline()
+              } else {
+                if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
+                  goToDashboard(item.nameRequest?.corpNum)
+                } else {
+                  const action = isForRestore(item) ? 'restore' : 'reinstate'
+                  context.emit('business-unavailable-error', action)
+                }
               }
               break
             }
@@ -691,8 +712,11 @@ export default defineComponent({
 
     const disableTooltip = (item: Business): boolean => {
       if (isOpenExternal(item)) {
-        if (isNameRequest(item) && isOtherEntities(item)) {
-          return true
+        if (isNameRequest(item)) {
+          const nrRequestActionCd = item.nameRequest?.requestActionCd
+          if (nrRequestActionCd === NrRequestActionCodes.NEW_BUSINESS && isOtherEntities(item)) {
+            return true
+          }
         }
         return false
       }
