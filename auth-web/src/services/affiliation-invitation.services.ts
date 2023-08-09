@@ -15,4 +15,7 @@ export default class AffiliationInvitationService {
   public static async updateInvitation (orgId: string): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`)
   }
+  public static async acceptInvitation (invitationId: string): Promise<AxiosResponse<any>> {
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${invitationId}`)
+  }
 }

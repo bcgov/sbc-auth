@@ -218,4 +218,23 @@ describe('Entity Management Component', () => {
 
     jest.clearAllTimers()
   })
+
+  it('calls the link expired modal with correct title and message', () => {
+    const name = 'Test Business'
+    wrapper.vm.showLinkExpiredModal(name)
+    expect(wrapper.vm.dialogTitle).toBe('Link Expired')
+    expect(wrapper.vm.dialogText).toBe(`Your authorization request to manage ${name} has expired. Please try again.`)
+  })
+
+  it('calls the authorization error modal with correct title and message', () => {
+    wrapper.vm.showAuthorizationErrorModal()
+    expect(wrapper.vm.dialogTitle).toBe('Unable to Manage Business')
+    expect(wrapper.vm.dialogText).toBe('The account that requested authorisation does not match your current account. Please log in as the account that initiated the request.')
+  })
+
+  it('calls the magic link error modal with correct title and message', () => {
+    wrapper.vm.showMagicLinkErrorModal()
+    expect(wrapper.vm.dialogTitle).toBe('Error Adding a Business to Your Account')
+    expect(wrapper.vm.dialogText).toBe('An error occurred adding your business. Please try again.')
+  })
 })

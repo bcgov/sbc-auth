@@ -258,6 +258,23 @@
         </template>
       </ModalDialog>
 
+      <!-- Link Expire Error Dialog -->
+      <ModalDialog
+        ref="linkExpireErrorDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+      >
+        <template v-slot:icon>
+          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        </template>
+        <template v-slot:actions>
+          <v-btn large  outlined color="primary" @click="close()" data-test="dialog-ok-button">Return to My List</v-btn>
+          <v-btn large color="primary" @click="reSendEmail()" data-test="dialog-ok-button">Re-send Authorization Email</v-btn>
+        </template>
+      </ModalDialog>
+
       <!-- Business Unavailable Dialog for unaffiliated business-->
       <ModalDialog
         class="business-unavailable-dialog"
@@ -319,7 +336,9 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
-import { BusinessLookupResultIF } from '@bcrs-shared-components/interfaces/business-lookup-interfaces'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import { AffiliationInvitationStatus } from '@/models/affiliation'
+import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
@@ -328,6 +347,9 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { namespace } from 'vuex-class'
+
+const BusinessModule = namespace('business')
 
 @Component({
   components: {
@@ -349,6 +371,10 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
+
+  // action from business module
+  @BusinessModule.Action('isAffiliated')
+  readonly isAffiliated!: (identifier: string) => Promise<boolean>
 
   // for template
   readonly CorpTypes = CorpTypes
@@ -384,10 +410,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     successDialog: ModalDialog
     errorDialog: ModalDialog
     addNRDialog: ModalDialog
-    passcodeResetOptionsModal: PasscodeResetOptionsModal,
-    removedBusinessSuccessDialog: ModalDialog,
+    passcodeResetOptionsModal: PasscodeResetOptionsModal
+    removedBusinessSuccessDialog: ModalDialog
     removalConfirmDialog: ModalDialog
     businessUnavailableDialog: ModalDialog
+    linkExpireErrorDialog: ModalDialog
   }
 
   private async mounted () {
@@ -416,6 +443,49 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
     this.setAccountChangedHandler(this.setup)
     this.setup()
+    this.parseUrlAndAddAffiliation()
+  }
+
+  // Function to parse the URL and extract the parameters, used for magic link email
+  parseUrlAndAddAffiliation = async () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const accountId = urlParams.get('accountid')
+    const linkId = urlParams.get('linkid')
+
+    if (accountId && linkId) {
+      try {
+        const invitation = await AffiliationInvitationService.getInvitations(linkId)
+        const identifier = invitation.data?.businessIdentifier
+        // 1. link expired
+        if (invitation.data.status === AffiliationInvitationStatus.Expired) {
+          this.showLinkExpiredModal(identifier)
+          return
+        }
+
+        // 2. business already added
+        const isAdded = await this.isAffiliated(identifier)
+        const business = await BusinessService.searchBusiness(identifier)
+        if (isAdded && business && business.data && business.status === 200) {
+          this.showBusinessAlreadyAdded({ name: business?.data.business?.legalName, identifier })
+          return
+        }
+        // 3. TODO not Authorized
+
+        // Accept invitation
+        const response = await AffiliationInvitationService.acceptInvitation(linkId)
+
+        // Check response for adding magic link success or error
+        if (response.statusText === 'success') {
+          this.showAddSuccessModalbyEmail(response.data.identifier)
+        } else {
+          this.showMagicLinkErrorModal()
+        }
+      } catch (error) {
+        // Handle unexpected errors
+        console.error('An error occurred while processing the invitation:', error)
+        this.showMagicLinkErrorModal()
+      }
+    }
   }
 
   private async setup (): Promise<void> {
@@ -476,6 +546,16 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }, 4000)
   }
 
+  async showAddSuccessModalbyEmail (businessIdentifier: string) {
+    await this.syncBusinesses()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.snackbarText = 'You can now manage ' + businessIdentifier + '.'
+    this.showSnackbar = true
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
   async showAddSuccessModalNR (nameRequestNumber: string) {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
@@ -526,6 +606,26 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.dialogTitle = 'Error Adding Name Request'
     this.dialogText =
     'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    this.$refs.errorDialog.open()
+  }
+
+  showLinkExpiredModal (name: string) {
+    this.dialogTitle = `Link Expired`
+    this.dialogText = `Your authorization request to manage ${name} has expired. Please try again.`
+    this.$refs.linkExpireErrorDialog.open()
+  }
+
+  showAuthorizationErrorModal () {
+    this.dialogTitle = 'Unable to Manage Business'
+    this.dialogText =
+    'The account that requested authorisation does not match your current account. Please log in as the account that initiated the request.'
+    this.$refs.errorDialog.open()
+  }
+
+  showMagicLinkErrorModal () {
+    this.dialogTitle = 'Error Adding a Business to Your Account'
+    this.dialogText =
+    'An error occurred adding your business. Please try again.'
     this.$refs.errorDialog.open()
   }
 
@@ -682,6 +782,18 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   close () {
     this.$refs.errorDialog.close()
+  }
+
+  reSendEmail () {
+    try {
+      // TODO will fix this after BE is ready.
+      // await AffiliationInvitationService.createInvitation()
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err)
+    } finally {
+      this.showMagicLinkErrorModal()
+    }
   }
 
   closeBusinessUnavailableDialog () {
