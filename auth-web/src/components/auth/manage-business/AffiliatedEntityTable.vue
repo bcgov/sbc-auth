@@ -206,7 +206,7 @@ import {
 } from '@/util/constants'
 import { Business, NameRequest, Names } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { Ref, SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
@@ -900,6 +900,29 @@ export default defineComponent({
       margin-left: 0.5rem;
     }
   }
+}
+
+.text-input-style-above {
+  label {
+    font-size: 0.875rem !important;
+    color: $gray7 !important;
+    padding-left: 6px;
+  }
+  span {
+    padding-left: 6px;
+    font-size: 14px;
+    color: $gray7;
+  }
+}
+
+#table-title {
+  font-size: 1rem;
+}
+
+.column-selector {
+  width: 200px;
+  height: 10% !important;
+  z-index: 1;
 }
 
 // Vuetify Overrides

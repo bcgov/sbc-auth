@@ -19,8 +19,9 @@
           <template>
             <!-- Search for business identifier or name -->
             <!-- NB: use v-if to re-mount component between instances -->
-            <business-lookup
-              @business="businessName = $event.name; businessIdentifier = $event.identifier; showManageBusinessDialog = true;"
+            <BusinessLookup
+              @business="businessEvent"
+              :key="businessLookupKey"
             />
           </template>
         </v-form>
@@ -30,7 +31,7 @@
               large
               color="primary"
               class="save-continue-button"
-              @click="showManageBusinessDialog = true;"
+              @click="businessIdentifier = 'NR1234567'; showAddNRModal()"
               data-test="next-button"
             > Open Name Request
             </v-btn>
@@ -49,7 +50,6 @@
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
         :initialBusinessName="businessName"
-        :dialogType="dialogType"
         :isStaffOrSbcStaff="isGovStaffAccount"
         :userFirstName="userFirstName"
         :userLastName="userLastName"
@@ -58,7 +58,7 @@
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
         @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="showManageBusinessDialog = false"
+        @on-cancel="cancelEvent"
         @on-business-identifier="businessIdentifier = $event"
       />
     </template>
@@ -128,8 +128,9 @@ export default class SearchBusinessNameRequest extends Vue {
   businessName = ''
   businessIdentifier = '' // aka incorporation number or registration number
   clearSearch = 0
-  requestNames = [] // names in a name request
+  requestNames = [{ 'name': 'Hello', 'state': 'REJECTED' }, { 'name': 'Hello2', 'state': 'APPROVED' }] // names in a name request
   showManageBusinessDialog = false
+  businessLookupKey = 0 // force re-mount of BusinessLookup component
 
   $refs: {
     addNRDialog: ModalDialog
@@ -176,6 +177,18 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
+  businessEvent (event: { name: string, identifier: string }) {
+    this.businessName = event?.name || ''
+    this.businessIdentifier = event?.identifier || ''
+    this.showManageBusinessDialog = true
+  }
+  cancelEvent () {
+    this.showManageBusinessDialog = false
+    this.businessIdentifier = ''
+    this.businessName = ''
+    // Force a re-render for our BusinessLookup component - to reset it's state.
+    this.businessLookupKey++
+  }
 
   get isEnableBusinessNrSearch (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
@@ -188,6 +201,10 @@ export default class SearchBusinessNameRequest extends Vue {
 ::v-deep {
   .v-radio .v-icon {
     color: var(--v-primary-base);
+  }
+  // Radio button color, set it to blue
+  .v-input--selection-controls__input:hover, .v-input--selection-controls__input:focus  {
+    color: var(--v-primary-base) !important;
   }
 }
 

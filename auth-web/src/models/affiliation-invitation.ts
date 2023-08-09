@@ -1,0 +1,24 @@
+export interface AffiliationInvitationOrg {
+    id: number
+    name: string
+    orgType: string
+}
+
+export interface AffiliationInvitation {
+    id: number
+    businessIdentifier: string
+    expiresOn?: string
+    fromOrg?: AffiliationInvitationOrg
+    toOrg?: AffiliationInvitationOrg
+    receipientEmail?: string
+    sentDate?: string
+    status: string
+    token?: string
+    type: string
+}
+
+export interface CreateAffiliationInvitation {
+    fromOrgId: string
+    toOrgId?: string
+    businessIdentifier: string
+}
