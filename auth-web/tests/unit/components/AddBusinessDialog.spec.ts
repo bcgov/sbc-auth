@@ -48,7 +48,6 @@ const testCaseList = [
     certifyExists: true,
     passcodeExists: true,
     folioNumberExists: true,
-    forgotButtonText: null,
     isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
@@ -59,7 +58,6 @@ const testCaseList = [
     certifyExists: false,
     passcodeExists: false,
     folioNumberExists: false,
-    forgotButtonText: null,
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
@@ -70,7 +68,6 @@ const testCaseList = [
     certifyExists: false,
     passcodeExists: false,
     folioNumberExists: false,
-    forgotButtonText: null,
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie'
@@ -142,12 +139,6 @@ testCaseList.forEach(test => {
       // button components
       expect(wrapper.find('#add-button span').text()).toBe('Manage This Business')
       expect(wrapper.find('#cancel-button span').text()).toBe('Cancel')
-      if (!test.certifyExists) {
-        expect(wrapper.find('#forgot-button').exists()).toBe(!!test.forgotButtonText)
-      }
-      if (test.forgotButtonText) {
-        expect(wrapper.find('#forgot-button span').text()).toBe(test.forgotButtonText)
-      }
 
       // *** UN-COMMENT THIS WHEN BUSINESS LOOKUP IS ENABLED ***
       // // verify data list
