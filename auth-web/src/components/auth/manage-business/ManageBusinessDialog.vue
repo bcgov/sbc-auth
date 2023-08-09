@@ -386,7 +386,7 @@ export default defineComponent({
           // }
           // await AffiliationInvitationService.createInvitation()
         } catch (err) {
-          // @ts-ignore
+          // eslint-disable-next-line no-console
           console.log(err)
         } finally {
           showAuthorizationEmailSentDialog.value = true
@@ -449,7 +449,7 @@ export default defineComponent({
           const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
           contactInfo.value = contact?.data
         } catch (err) {
-          // @ts-ignore
+          // eslint-disable-next-line no-console
           console.error(err)
         }
       }
