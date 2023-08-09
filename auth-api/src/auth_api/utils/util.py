@@ -76,7 +76,7 @@ def escape_wam_friendly_url(param):
     return encode_org_name
 
 
-def mask_email(email: str):
+def mask_email(email: str) -> str:
     """Return masked email."""
     if email:
         parts = email.split('@')
