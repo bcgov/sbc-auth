@@ -94,4 +94,9 @@ export default class ModalDialog extends Vue {
     justify-content: center;
     padding: 1.5rem;
   }
+  // Info Dialog Variant
+ .info-dialog .v-card__actions {
+    justify-content: center;
+    padding: 1.5rem;
+  }
 </style>

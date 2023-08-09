@@ -159,25 +159,12 @@
         @add-failed-no-nr="showNRNotFoundModal()"
       />
 
-      <v-row  no-gutters id="dashboard-actions" class="mb-n3">
-        <v-col>
-          <v-select
-            dense filled multiple hide-details
-            class="column-selector"
-            label="Columns to Show"
-            v-model="selectedColumns"
-            :items="columns"
-            :menu-props="{ bottom: true, offsetY: true }"
-          >
-            <template v-slot:selection></template>
-          </v-select>
-        </v-col>
-      </v-row>
       <AffiliatedEntityTable
         :selectedColumns="selectedColumns"
         :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
         :highlight-index="highlightIndex"
+        @business-unavailable-error="showBusinessUnavailableModal($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -269,6 +256,28 @@
         </template>
         <template v-slot:actions>
           <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+        </template>
+      </ModalDialog>
+
+      <!-- Business Unavailable Dialog for unaffiliated business-->
+      <ModalDialog
+        class="business-unavailable-dialog"
+        ref="businessUnavailableDialog"
+        :title="dialogTitle"
+        max-width="640"
+        dialog-class="info-dialog"
+        :showIcon="false"
+        :showCloseIcon="true"
+      >
+        <template v-slot:text>
+          <p>{{ dialogText }}</p>
+          <p><br/>Please contact us if you require assistance.</p>
+          <p><br/><v-icon small>mdi-phone</v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a></p>
+          <p><v-icon small>mdi-phone</v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a></p>
+          <p><v-icon small>mdi-email</v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a></p>
+        </template>
+        <template v-slot:actions>
+          <v-btn large color="primary" @click="closeBusinessUnavailableDialog()" data-test="dialog-ok-button">OK</v-btn>
         </template>
       </ModalDialog>
 
@@ -381,6 +390,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     passcodeResetOptionsModal: PasscodeResetOptionsModal,
     removedBusinessSuccessDialog: ModalDialog,
     removalConfirmDialog: ModalDialog
+    businessUnavailableDialog: ModalDialog
   }
 
   private async mounted () {
@@ -574,6 +584,18 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
+  showBusinessUnavailableModal (action: string) {
+    this.dialogTitle = 'Business unavailable'
+    this.dialogText = 'You are not authorized to access the business'
+    if (action === 'change name') {
+      this.dialogText += ' to change its name'
+    } else {
+      this.dialogText += ' you wish to ' + action
+    }
+    this.dialogText += '. Please add this business to your table to continue.'
+    this.$refs.businessUnavailableDialog.open()
+  }
+
   private populateNRmodalValues () {
     this.dialogTitle = this.$t('removeNRConfirmTitle').toString()
     this.dialogText = this.$t('removeNRConfirmText').toString()
@@ -664,11 +686,19 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   close () {
     this.$refs.errorDialog.close()
   }
+
+  closeBusinessUnavailableDialog () {
+    this.$refs.businessUnavailableDialog.close()
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+
+.v-icon.v-icon {
+  color: $app-dk-blue;
+}
 
 .loading-container.grayed-out {
   // these are the same styles as dialog overlay:
@@ -755,28 +785,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 }
 
-.column-selector {
-  float: right;
-  width: 200px;
-  height: 10% !important;
-  transform: translate(0px,-20px);
-  z-index: 1;
-}
-
 // Vuetify Overrides
 ::v-deep {
-  .column-selector.v-text-field .v-input__control {
-    background: white;
-  }
-
-  #dashboard-actions {
-    .v-input .v-label {
-      transform: translateY(-10px) scale(1);
-      top: 30px;
-      color: $gray7;
-      font-size: .875rem;
-    }
-  }
 
   .v-data-table td {
     padding-top: 1rem;
