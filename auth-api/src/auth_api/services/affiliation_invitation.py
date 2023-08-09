@@ -398,7 +398,6 @@ class AffiliationInvitation:
             if is_authorized is not None:
                 notification_type = 'affiliationInvitationRequestAuthorization'
                 data['isAuthorized'] = is_authorized
-                data['isAuthorized'] = is_authorized
             else:
                 notification_type = 'affiliationInvitationRequest'
                 data['additionalMessage'] = affiliation_invitation.additional_message
