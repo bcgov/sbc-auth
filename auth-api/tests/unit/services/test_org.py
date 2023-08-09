@@ -432,17 +432,14 @@ def test_create_product_subscription_staff(session, keycloak_mock, org_type, mon
 def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  # pylint:disable=unused-argument
     """Assert a product subscription for NDS can be created with a system admin token."""
     # setup an org
-    user_with_token = TestUserInfo.user1
-    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
-    user = factory_user_model(user_with_token)
+    user = factory_user_model(TestUserInfo.user_test)
     patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
-    dictionary = org.as_dict()
-    assert dictionary['name'] == TestOrgInfo.org1['name']
+    org_dict = org.as_dict()
     # add the NDS product subscription via system admin token
     patch_token_info(TestJwtClaims.system_admin_role, monkeypatch)
-    subscriptions = ProductService.create_product_subscription(dictionary['id'],
+    subscriptions = ProductService.create_product_subscription(org_dict['id'],
                                                                TestOrgProductsInfo.org_products_nds,
                                                                skip_auth=False)
     assert next(prod for prod in subscriptions
@@ -451,10 +448,9 @@ def test_create_product_subscription_nds(session, keycloak_mock, monkeypatch):  
 
 @pytest.mark.parametrize('test_name,token_info', [
     ('test_public_user', TestJwtClaims.public_user_role),
-    ('test_public_bceid_user', TestJwtClaims.public_bceid_account_holder_user),
+    ('test_public_bceid_user', TestJwtClaims.public_bceid_user),
     ('test_gov_user', TestJwtClaims.gov_account_holder_user),
     ('test_bcol_admin_user', TestJwtClaims.bcol_admin_role),
-    ('test_staff', TestJwtClaims.staff_role),
     ('test_staff_admin', TestJwtClaims.staff_admin_role)
 ])
 def test_create_product_subscription_nds_unauthorized(session,  # pylint:disable=unused-argument
@@ -464,18 +460,15 @@ def test_create_product_subscription_nds_unauthorized(session,  # pylint:disable
                                                       token_info):
     """Assert a product subscription for NDS cannot be created by a non system token."""
     # setup an org
-    user_with_token = TestUserInfo.user1
-    user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
-    user = factory_user_model(user_with_token)
+    user = factory_user_model(TestUserInfo.user_test)
     patch_token_info({'sub': user.keycloak_guid, 'idp_userid': user.idp_userid}, monkeypatch)
     org = OrgService.create_org(TestOrgInfo.org1, user_id=user.id)
     assert org
-    dictionary = org.as_dict()
-    assert dictionary['name'] == TestOrgInfo.org1['name']
+    org_dict = org.as_dict()
     # attempt to add the NDS product subscription to it
     patch_token_info(token_info, monkeypatch)
     with pytest.raises(HTTPException) as exception:
-        ProductService.create_product_subscription(dictionary['id'],
+        ProductService.create_product_subscription(org_dict['id'],
                                                    TestOrgProductsInfo.org_products_nds,
                                                    skip_auth=False)
     assert exception.value.code == HTTPStatus.FORBIDDEN

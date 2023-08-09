@@ -144,7 +144,7 @@ def test_reset_password_by_member(session, auth_mock, keycloak_mock, monkeypatch
     with pytest.raises(HTTPException) as excinfo:
         patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
         UserService.reset_password_for_anon_user(user_info, user_name)
-        assert excinfo.exception.code == 403
+    assert excinfo.value.code == 403
 
 
 def test_delete_otp_for_user(session, auth_mock, keycloak_mock, monkeypatch):
