@@ -392,6 +392,7 @@ export default defineComponent({
           // }
           // await AffiliationInvitationService.createInvitation()
         } catch (err) {
+          // @ts-ignore
           console.log(err)
         } finally {
           showAuthorizationEmailSentDialog.value = true
@@ -454,6 +455,7 @@ export default defineComponent({
           const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
           contactInfo.value = contact?.data
         } catch (err) {
+          // @ts-ignore
           console.error(err)
         }
       }

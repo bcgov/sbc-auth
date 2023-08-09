@@ -101,7 +101,7 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Renders affiliated entity table', async () => {
     // verify table header
-    expect(wrapper.find('.table-header').text()).toBe(`My List (${businesses.length})`)
+    expect(wrapper.find('.table-header').text()).toBe(`My List (${businesses.length}) Columns to Show`)
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
