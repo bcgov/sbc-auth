@@ -96,6 +96,30 @@ def test_dir_search_doesnt_get_any_product(client, jwt, session, keycloak_mock):
     assert len([x for x in list_products if x.get('subscriptionStatus') != 'NOT_SUBSCRIBED']) == 0
 
 
+def test_new_dir_search_can_be_returned(client, jwt, session, keycloak_mock):  # pylint:disable=unused-argument
+    """Assert new dir search product subscriptions can be subscribed to via system admin / returned via org user."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs',
+                     data=json.dumps(TestOrgInfo.org1),
+                     headers=headers,
+                     content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+    system_admin_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_admin_role)
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(TestOrgProductsInfo.org_products_nds),
+                              headers=system_admin_headers,
+                              content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products?include_hidden=true",
+                             headers=headers,
+                             content_type='application/json')
+    list_products = json.loads(rv_products.data)
+    nds_product = next(prod for prod in list_products if prod.get('code') == 'NDS')
+    assert nds_product.get('subscriptionStatus') == 'ACTIVE'
+
+
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
