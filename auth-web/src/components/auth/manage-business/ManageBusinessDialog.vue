@@ -37,7 +37,7 @@
               <div class="font-weight-bold mr-2 float-left">Incorporation Number:</div>
               <div>{{businessIdentifier}}</div>
 
-              <div class="my-5">
+              <div class="my-2">
                 You must be authorized to manage this business. You can be authorized in one of the following ways:
               </div>
             </template>
