@@ -170,7 +170,7 @@
             large color="primary"
             id="add-button"
             :loading="isLoading"
-            @click="add()"
+            @click="manageBusiness()"
           >
             <span>Manage This Business</span>
           </v-btn>
@@ -182,6 +182,7 @@
 </template>
 
 <script lang="ts">
+import { CorpTypes, LDFlags } from '@/util/constants'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
@@ -191,7 +192,6 @@ import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
@@ -268,7 +268,7 @@ export default defineComponent({
     const showAuthorizationEmailSentDialog = ref(false)
 
     const isBusinessLegalTypeSPorGP = computed(() => {
-      return props.businessLegalType === 'SP' || props.businessLegalType === 'GP'
+      return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
     })
 
     const enableBusinessNrSearch = computed(() => {
@@ -373,14 +373,13 @@ export default defineComponent({
     })
 
     const isFormValid = computed(() => {
-      // if user is a staff user or sbc staff user, then only require the business identifier
-      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
-        return true
+      if (isBusinessLegalTypeSPorGP) {
+        return !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
       }
+
       let isValid = false
       const isModifyFormValid = (
-        !!businessIdentifier.value &&
-        !!passcode.value &&
+        !!businessIdentifier.value && !!passcode.value &&
         (!isFirm.value || isCertified.value) &&
         (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
         addBusinessForm.value.validate()
@@ -435,7 +434,7 @@ export default defineComponent({
       }
     }
 
-    const add = async () => {
+    const manageBusiness = async () => {
       if (emailOption.value) {
         try {
           // TODO will fix this after BE is ready.
@@ -452,7 +451,6 @@ export default defineComponent({
         }
         return
       }
-
       addBusinessForm.value.validate()
       if (isFormValid.value) {
         isLoading.value = true
@@ -460,7 +458,11 @@ export default defineComponent({
           // try to add business
           let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
           if (!props.isStaffOrSbcStaff) {
-            businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
+            businessData = {
+              ...businessData,
+              certifiedByName: authorizationName.value,
+              passCode: isBusinessLegalTypeSPorGP ? proprietorPartnerName.value : passcode.value
+            }
           }
           const addResponse = await addBusiness(businessData)
           // check if add didn't succeed
@@ -555,7 +557,7 @@ export default defineComponent({
       passwordText,
       helpDialogBlurb,
       isFormValid,
-      add,
+      manageBusiness,
       resetForm,
       formatBusinessIdentifier,
       openHelp,
