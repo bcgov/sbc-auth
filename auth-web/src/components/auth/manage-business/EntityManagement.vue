@@ -371,6 +371,8 @@ const BusinessModule = namespace('business')
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
+  @Prop({ default: '' }) readonly base64Token: string
+  @Prop({ default: '' }) readonly base64OrgName: string
 
   // action from business module
   @BusinessModule.Action('isAffiliated')
@@ -448,42 +450,49 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   // Function to parse the URL and extract the parameters, used for magic link email
   parseUrlAndAddAffiliation = async () => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const accountId = urlParams.get('accountid')
-    const linkId = urlParams.get('linkid')
+    if (!this.$route.meta.checkMagicLink) {
+      return
+    }
+    const decodedToken = atob(this.base64Token) // Decode the Base64 token
+    const token = JSON.parse(decodedToken)
+    const legalName = atob(this.base64OrgName)
+    const identifier = token.businessIdentifier
+    const invitationId = token.id
+    try {
+      const invitation = await AffiliationInvitationService.getInvitationbyId(invitationId)
 
-    if (accountId && linkId) {
-      try {
-        const invitation = await AffiliationInvitationService.getInvitations(linkId)
-        const identifier = invitation.data?.businessIdentifier
-        // 1. link expired
-        if (invitation.data.status === AffiliationInvitationStatus.Expired) {
-          this.showLinkExpiredModal(identifier)
-          return
-        }
-
-        // 2. business already added
-        const isAdded = await this.isAffiliated(identifier)
-        const business = await BusinessService.searchBusiness(identifier)
-        if (isAdded && business && business.data && business.status === 200) {
-          this.showBusinessAlreadyAdded({ name: business?.data.business?.legalName, identifier })
-          return
-        }
-        // 3. TODO not Authorized
-
-        // Accept invitation
-        const response = await AffiliationInvitationService.acceptInvitation(linkId)
-
-        // Check response for adding magic link success or error
-        if (response.statusText === 'success') {
-          this.showAddSuccessModalbyEmail(response.data.identifier)
-        } else {
-          this.showMagicLinkErrorModal()
-        }
-      } catch (error) {
-        // Handle unexpected errors
-        this.showMagicLinkErrorModal()
+      // 1. Link expired
+      if (invitation.data.status === AffiliationInvitationStatus.Expired) {
+        this.showLinkExpiredModal(identifier)
+        return
       }
+
+      // 2. business already added
+      const isAdded = await this.isAffiliated(identifier)
+      if (isAdded) {
+        this.showBusinessAlreadyAdded({ name: legalName, identifier })
+        return
+      }
+
+      // 3. Accept invitation
+      const response = await AffiliationInvitationService.acceptInvitation(invitationId, this.base64Token)
+
+      // 4. Unauthorized
+      if (response.status === 400) {
+        this.showAuthorizationErrorModal()
+        return
+      }
+
+      // Check response for adding magic link success or error
+      if (response.status === 200) {
+        this.showAddSuccessModalbyEmail(identifier)
+        return
+      }
+
+      throw new Error('Magic link error') // Throw an error to be caught by the catch block
+    } catch (error) {
+      // Handle unexpected errors
+      this.showMagicLinkErrorModal()
     }
   }
 
