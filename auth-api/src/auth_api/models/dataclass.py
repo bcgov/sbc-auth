@@ -74,12 +74,13 @@ class AffiliationInvitationData:  # pylint: disable=too-many-instance-attributes
 
     id: str
     type: str
-    status_code: str
     affiliation_id: str
     business_identifier: str
     recipient_email: str
     sent_date: str
     accepted_date: str
+    status: str
+    additional_message: str
 
     from_org: OrgDetails
     to_org: OrgDetails
