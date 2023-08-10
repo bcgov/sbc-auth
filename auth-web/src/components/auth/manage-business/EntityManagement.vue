@@ -271,7 +271,8 @@
         </template>
         <template v-slot:actions>
           <v-btn large  outlined color="primary" @click="close()" data-test="dialog-ok-button">Return to My List</v-btn>
-          <v-btn large color="primary" @click="reSendEmail()" data-test="dialog-ok-button">Re-send Authorization Email</v-btn>
+          <!-- TODO - handle by ticket 15769, add @click="reSendEmail()" -->
+          <v-btn large color="primary" data-test="dialog-ok-button">Re-send Authorization Email</v-btn>
         </template>
       </ModalDialog>
 
@@ -478,18 +479,18 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       const response = await AffiliationInvitationService.acceptInvitation(invitationId, this.base64Token)
 
       // 4. Unauthorized
-      if (response.status === 400) {
+      if (response.status === 401) {
         this.showAuthorizationErrorModal()
         return
       }
 
-      // Check response for adding magic link success or error
+      // 5. Adding magic link success
       if (response.status === 200) {
         this.showAddSuccessModalbyEmail(identifier)
         return
       }
 
-      throw new Error('Magic link error') // Throw an error to be caught by the catch block
+      throw new Error('Magic link error')
     } catch (error) {
       // Handle unexpected errors
       this.showMagicLinkErrorModal()
@@ -790,18 +791,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   close () {
     this.$refs.errorDialog.close()
-  }
-
-  reSendEmail () {
-    try {
-      // TODO will fix this after BE is ready.
-      // await AffiliationInvitationService.createInvitation()
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err)
-    } finally {
-      this.showMagicLinkErrorModal()
-    }
   }
 
   closeBusinessUnavailableDialog () {
