@@ -240,6 +240,34 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
+      path: '/:base64OrgName/affiliationInvitation/acceptToken//:base64Token',
+      name: 'account-magic-link',
+      component: EntityManagement,
+      props: route => {
+        try {
+          const base64Token = route.params.base64Token
+          const decodedToken = atob(base64Token) // Decode the Base64 token
+          const orgId = JSON.parse(decodedToken).fromOrgId // Extract the orgId from the decoded token
+
+          return {
+            orgId: orgId,
+            base64Token: route.params.base64Token,
+            base64OrgName: route.params.base64OrgName
+          }
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error('Error decoding token:', error)
+        }
+      },
+      meta: {
+        checkMagicLink: true,
+        showNavBar: true,
+        disabledRoles: [Role.AnonymousUser],
+        requiresAuth: true,
+        requiresActiveAccount: true
+      }
+    },
+    {
       path: '/account/:orgId/settings',
       name: 'account-settings',
       component: accountSettings,
