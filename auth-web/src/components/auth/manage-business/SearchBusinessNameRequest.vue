@@ -179,7 +179,7 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
-  businessEvent (event: { name: string, identifier: string }) {
+  businessEvent (event: { name: string, identifier: string, legalType: string }) {
     this.businessName = event?.name || ''
     this.businessIdentifier = event?.identifier || ''
     this.businessLegalType = event?.legalType || ''

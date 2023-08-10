@@ -1,4 +1,5 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
+import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import Vue from 'vue'
@@ -6,7 +7,6 @@ import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-import { CorpTypes } from '@/util/constants'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
