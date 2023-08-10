@@ -236,7 +236,9 @@ class Product:
         subscriptions_dict = {x.product_code: x.status_code for x in product_subscriptions}
 
         # Include hidden products only for staff and SBC staff
-        include_hidden = user_from_context.is_staff() or org.type_code == OrgType.SBC_STAFF.value
+        include_hidden = user_from_context.is_staff() \
+            or org.type_code == OrgType.SBC_STAFF.value \
+            or kwargs.get('include_hidden', False)
 
         products = Product.get_products(include_hidden=include_hidden, staff_check=False)
         for product in products:

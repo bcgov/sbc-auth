@@ -62,7 +62,10 @@ class OrgProducts(Resource):
     def get(org_id):
         """GET a new product subscription to the org using the request body."""
         try:
-            response, status = json.dumps(ProductService.get_all_product_subscription(org_id)), http_status.HTTP_200_OK
+            include_hidden = request.args.get('include_hidden', None) == 'true'  # used by NDS
+            response, status = json.dumps(ProductService.get_all_product_subscription(org_id=org_id,
+                                                                                      include_hidden=include_hidden)
+                                          ), http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
