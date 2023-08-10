@@ -13,11 +13,12 @@
 # limitations under the License.
 """Manager for affiliation invitation schema and export."""
 
-from marshmallow import fields
+from marshmallow import fields, post_dump
 
 from auth_api.models import AffiliationInvitation as AffiliationInvitationModel
 
 from .base_schema import BaseSchema
+from ..utils.util import mask_email
 
 
 class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ancestors, too-few-public-methods
@@ -32,5 +33,16 @@ class AffiliationInvitationSchema(BaseSchema):  # pylint: disable=too-many-ances
             'accepted_date', 'status', 'token', 'type', 'affiliation_id')
 
     from_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
-    to_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'))
+    to_org = fields.Nested('OrgSchema', only=('id', 'name', 'org_type'), allow_none=True, required=False)
     business_identifier = fields.String(attribute='entity.business_identifier', data_key='business_identifier')
+
+
+# pylint: disable=too-many-ancestors, too-few-public-methods
+class AffiliationInvitationSchemaPublic(AffiliationInvitationSchema):
+    """This is the public schema for the Affiliation Invitation model that masks the email."""
+
+    @post_dump(pass_many=False)
+    def _mask_recipient_email_field(self, data, many):  # pylint: disable=unused-argument
+        """Mask recipient email field."""
+        data['recipient_email'] = mask_email(data.get('recipient_email'))
+        return data

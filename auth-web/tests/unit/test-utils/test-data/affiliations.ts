@@ -622,7 +622,7 @@ export const actions = [
   {
     'primary': 'Reinstate Now',
     'secondary': ['Open Name Request', 'Remove From Table'],
-    'external': false
+    'external': true
   },
   {
     'primary': 'Change Name Now',

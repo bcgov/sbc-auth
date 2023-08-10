@@ -94,7 +94,8 @@ class AffiliationInvitations(Resource):
         try:
             user = UserService.find_by_jwt_token()
             response, status = AffiliationInvitationService.create_affiliation_invitation(request_json,
-                                                                                          user, origin).as_dict(), \
+                                                                                          user, origin)\
+                .as_dict(mask_email=True), \
                 http_status.HTTP_201_CREATED
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -117,7 +118,8 @@ class AffiliationInvitation(Resource):
             response, status = {'message': 'The requested affiliation invitation could not be found.'}, \
                 http_status.HTTP_404_NOT_FOUND
         else:
-            response, status = affiliation_invitation.as_dict(), http_status.HTTP_200_OK
+            dictionary = affiliation_invitation.as_dict(mask_email=True)
+            response, status = dictionary, http_status.HTTP_200_OK
         return response, status
 
     @staticmethod
@@ -137,7 +139,7 @@ class AffiliationInvitation(Resource):
             else:
                 user = UserService.find_by_jwt_token()
                 response, status = affiliation_invitation\
-                    .update_affiliation_invitation(user, origin, request_json).as_dict(),\
+                    .update_affiliation_invitation(user, origin, request_json).as_dict(mask_email=True),\
                     http_status.HTTP_200_OK
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -181,7 +183,7 @@ class InvitationAction(Resource):
                     .validate_token(affiliation_invitation_token, int(affiliation_invitation_id)).as_dict().get('id')
 
                 response, status = AffiliationInvitationService\
-                    .accept_affiliation_invitation(affiliation_invitation_id, user, origin).as_dict(), \
+                    .accept_affiliation_invitation(affiliation_invitation_id, user, origin).as_dict(mask_email=True), \
                     http_status.HTTP_200_OK
 
         except BusinessException as exception:
@@ -225,11 +227,12 @@ class InvitationActionAuthorize(Resource):
                 response, status = AffiliationInvitationService \
                     .accept_affiliation_invitation(affiliation_invitation_id=affiliation_invitation_id,
                                                    user=user,
-                                                   origin=origin).as_dict(), \
+                                                   origin=origin).as_dict(mask_email=True), \
                     http_status.HTTP_200_OK
             elif authorize_action == 'refuse':
                 response, status = AffiliationInvitationService \
-                    .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id, user=user).as_dict(), \
+                    .refuse_affiliation_invitation(invitation_id=affiliation_invitation_id, user=user)\
+                    .as_dict(mask_email=True), \
                     http_status.HTTP_200_OK
             else:
                 err = {'code': 400, 'message': f'{authorize_action} is not supported on this endpoint'}

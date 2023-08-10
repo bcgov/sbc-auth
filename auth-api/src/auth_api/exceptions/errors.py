@@ -34,6 +34,7 @@ class Error(Enum):
     ACTIONED_INVITATION = 'The invitation has already been accepted.', http_status.HTTP_400_BAD_REQUEST
     ACTIONED_AFFILIATION_INVITATION = 'The affiliation invitation has already been accepted.', \
                                       http_status.HTTP_400_BAD_REQUEST
+    INVALID_BUSINESS_EMAIL = 'Business contact email not valid.', http_status.HTTP_400_BAD_REQUEST
     EXPIRED_INVITATION = 'The invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     EXPIRED_AFFILIATION_INVITATION = 'The affiliation invitation has expired.', http_status.HTTP_400_BAD_REQUEST
     INVALID_AFFILIATION_INVITATION_STATE = 'The affiliation invitation is in an invalid state for this action.', \

@@ -36,19 +36,22 @@ from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
 from auth_api.services import User
 from auth_api.utils.enums import InvitationStatus
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import factory_affiliation_invitation, factory_user_model, patch_token_info
 
 
 def create_test_entity():
     """Create test entity data."""
-    return EntityService.save_entity({
+    entity = EntityService.save_entity({
         'businessIdentifier': TestEntityInfo.entity_passcode['businessIdentifier'],
         'businessNumber': TestEntityInfo.entity_passcode['businessNumber'],
         'passCode': TestEntityInfo.entity_passcode['passCode'],
         'name': TestEntityInfo.entity_passcode['name'],
         'corpTypeCode': TestEntityInfo.entity_passcode['corpTypeCode']
     })
+
+    entity.add_contact(TestContactInfo.contact1)
+    return entity
 
 
 def setup_org_and_entity(user):
@@ -276,7 +279,7 @@ def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, busine
                                                                                     User(user_invitee),
                                                                                     '').as_dict()
             patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
-            affiliation = AffiliationService.find_affiliation(new_invitation['to_org']['id'],
+            affiliation = AffiliationService.find_affiliation(new_invitation['from_org']['id'],
                                                               entity_dictionary['business_identifier'])
             assert affiliation
             assert invitation
@@ -420,15 +423,15 @@ def test_send_affiliation_invitation_magic_link(publish_to_mailer_mock,
     )
 
     expected_data = {
-        'accountId': affiliation_invitation.to_org.id,
+        'accountId': affiliation_invitation.from_org.id,
         'businessName': business_name,
         'emailAddresses': affiliation_invitation.recipient_email,
-        'orgName': affiliation_invitation.to_org.name,
-        'contextUrl': 'None/VG8gdGhlIHN0YXJzIGluYy4%3D/affiliationInvitation/acceptToken//ABCD'
+        'orgName': affiliation_invitation.from_org.name,
+        'contextUrl': 'None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken//ABCD'
     }
 
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitation',
-                                              org_id=affiliation_invitation.to_org.id,
+                                              org_id=affiliation_invitation.from_org.id,
                                               data=expected_data)
 
 
@@ -447,17 +450,17 @@ def test_send_affiliation_invitation_request_sent(publish_to_mailer_mock,
     )
 
     expected_data = {
-        'accountId': affiliation_invitation.to_org.id,
+        'accountId': affiliation_invitation.from_org.id,
         'businessName': business_name,
         'emailAddresses': affiliation_invitation.recipient_email,
-        'orgName': affiliation_invitation.to_org.name,
+        'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
         'toOrgName': affiliation_invitation.to_org.name,
         'additionalMessage': additional_message
     }
 
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequest',
-                                              org_id=affiliation_invitation.to_org.id,
+                                              org_id=affiliation_invitation.from_org.id,
                                               data=expected_data)
 
 
@@ -484,17 +487,17 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
     )
 
     expected_data = {
-        'accountId': affiliation_invitation.to_org.id,
+        'accountId': affiliation_invitation.from_org.id,
         'businessName': business_name,
         'emailAddresses': affiliation_invitation.recipient_email,
-        'orgName': affiliation_invitation.to_org.name,
+        'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
         'toOrgName': affiliation_invitation.to_org.name,
         'isAuthorized': True
     }
 
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
-                                              org_id=affiliation_invitation.to_org.id,
+                                              org_id=affiliation_invitation.from_org.id,
                                               data=expected_data)
 
 
@@ -521,15 +524,15 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
     )
 
     expected_data = {
-        'accountId': affiliation_invitation.to_org.id,
+        'accountId': affiliation_invitation.from_org.id,
         'businessName': business_name,
         'emailAddresses': affiliation_invitation.recipient_email,
-        'orgName': affiliation_invitation.to_org.name,
+        'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
         'toOrgName': affiliation_invitation.to_org.name,
         'isAuthorized': False
     }
 
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
-                                              org_id=affiliation_invitation.to_org.id,
+                                              org_id=affiliation_invitation.from_org.id,
                                               data=expected_data)

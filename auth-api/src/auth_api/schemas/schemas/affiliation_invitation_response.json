@@ -31,9 +31,7 @@
     "required": [
         "id",
         "fromOrg",
-        "toOrg",
         "businessIdentifier",
-        "recipientEmail",
         "sentDate",
         "status"
     ],
@@ -79,12 +77,7 @@
         "toOrg": {
             "$id": "#/properties/toOrg",
             "type": "object",
-            "title": "To Org ",
-            "required":[
-                "id",
-                "name",
-                "orgType"
-            ]
+            "title": "To Org "
         },
         "businessIdentifier": {
             "$id": "#/properties/businessIdentifier",

@@ -166,12 +166,10 @@ export enum LearFilingTypes {
 export enum CorpTypes {
     // actual corp types
 
-    // in colin but modernized
     BC_CCC = 'CC',
     BC_COMPANY = 'BC',
     BC_ULC_COMPANY = 'ULC',
 
-    // modernized
     BENEFIT_COMPANY = 'BEN',
     COOP = 'CP',
     PARTNERSHIP = 'GP',
@@ -432,7 +430,8 @@ export enum LDFlags {
     ProductCSOStatus = 'product-CSO-status',
     ProductSiteRegistryStatus = 'product-ESRA-status',
     ProductWillsStatus = 'product-VS-status',
-    SentryEnable = 'sentry-enable'
+    SentryEnable = 'sentry-enable',
+    SupportRestorationEntities = 'supported-restoration-entities'
 }
 
 export enum DateFilterCodes {
