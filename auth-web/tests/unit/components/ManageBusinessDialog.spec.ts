@@ -6,6 +6,7 @@ import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import { CorpTypes } from '@/util/constants'
 
 // @ts-ignore
 Vue.use(VueCompositionAPI)
@@ -184,7 +185,7 @@ testCaseList.forEach(test => {
       if (!test.isStaffOrSbcStaff) {
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
       }
-      if (test.businessLegalType === 'SP' || test.businessLegalType === 'GP') {
+      if (test.businessLegalType === CorpTypes.SOLE_PROP || test.businessLegalType === CorpTypes.PARTNERSHIP) {
         expect(wrapper.find('#proprietor-partner-name-group').exists())
         expect(wrapper.find('#proprietor-partner-name-group').isVisible()).toBe(true)
         expect(wrapper.find('#passcode-group').exists()).toBeFalsy()
