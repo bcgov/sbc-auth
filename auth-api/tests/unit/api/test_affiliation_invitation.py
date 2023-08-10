@@ -24,7 +24,8 @@ from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services.keycloak import KeycloakService
-from tests.utilities.factory_scenarios import TestEntityInfo, TestJwtClaims, TestOrgInfo
+from auth_api.utils.util import mask_email
+from tests.utilities.factory_scenarios import TestContactInfo, TestEntityInfo, TestJwtClaims, TestOrgInfo
 from tests.utilities.factory_utils import factory_affiliation_invitation, factory_auth_header
 
 
@@ -81,6 +82,57 @@ def test_add_affiliation_invitation(client, jwt, session, keycloak_mock, busines
     # Defaults to EMAIL affiliation invitation type
     assert result_json['type'] == 'EMAIL'
 
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
+
+
+@pytest.mark.parametrize('from_org_info, entity_info, role, claims', [
+    (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'ADMIN', TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'USER', TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR', TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'ADMIN', TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'USER', TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.affiliation_from_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR', TestJwtClaims.public_bceid_user)
+])
+def test_add_affiliation_invitation_exclude_to_org(client, jwt, session, keycloak_mock, business_mock, stan_server,
+                                                   from_org_info, entity_info, role,
+                                                   claims):  # pylint:disable=unused-argument
+    """Assert that an affiliation invitation can be POSTed without a to_org."""
+    headers, from_org_id, to_org_id, \
+        business_identifier = setup_affiliation_invitation_data(client=client,
+                                                                jwt=jwt,
+                                                                session=session,
+                                                                keycloak_mock=keycloak_mock,
+                                                                from_org_info=from_org_info,
+                                                                entity_info=entity_info,
+                                                                claims=claims)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=None,
+            business_identifier=business_identifier)),
+        headers=headers, content_type='application/json')
+
+    dictionary = json.loads(rv_invitation.data)
+
+    assert rv_invitation.status_code == http_status.HTTP_201_CREATED
+    assert dictionary.get('token') is not None
+    result_json = rv_invitation.json
+
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    assert result_json['fromOrg']
+    assert result_json['fromOrg']['id'] == from_org_id
+    assert not result_json.get('toOrg')
+    assert result_json['businessIdentifier'] == business_identifier
+    assert result_json['status'] == 'PENDING'
+
+    # Defaults to EMAIL affiliation invitation type
+    assert result_json['type'] == 'EMAIL'
+
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
+
 
 @pytest.mark.parametrize('from_org_info, to_org_info, entity_info, role, claims', [
     (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
@@ -130,6 +182,57 @@ def test_add_affiliation_invitation_with_passcode(client, jwt, session, keycloak
     assert result_json['businessIdentifier'] == business_identifier
     assert result_json['status'] == 'ACCEPTED'
     assert result_json['type'] == 'PASSCODE'
+    assert result_json.get('recipientEmail') is None
+
+
+@pytest.mark.parametrize('from_org_info, to_org_info, entity_info, role, claims', [
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
+     TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
+     TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
+     TestJwtClaims.public_user_role),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'ADMIN',
+     TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'USER',
+     TestJwtClaims.public_bceid_user),
+    (TestOrgInfo.affiliation_from_org, TestOrgInfo.affiliation_to_org, TestEntityInfo.entity_lear_mock, 'COORDINATOR',
+     TestJwtClaims.public_bceid_user)
+])
+def test_add_affiliation_invitation_with_passcode_exclude_to_org(client, jwt, session, keycloak_mock, business_mock,
+                                                                 stan_server, from_org_info, to_org_info, entity_info,
+                                                                 role, claims):
+    """Assert that an affiliation invitation can be POSTed."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock,
+                                                                                             from_org_info,
+                                                                                             to_org_info,
+                                                                                             entity_info,
+                                                                                             claims)
+
+    invitation_payload = factory_affiliation_invitation(from_org_id=from_org_id,
+                                                        to_org_id=None,
+                                                        business_identifier=business_identifier)
+    invitation_payload['passCode'] = entity_info['passCode']
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        invitation_payload), headers=headers, content_type='application/json')
+    dictionary = json.loads(rv_invitation.data)
+
+    assert rv_invitation.status_code == http_status.HTTP_201_CREATED
+    assert dictionary.get('token') is not None
+    result_json = rv_invitation.json
+
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    assert result_json['fromOrg']
+    assert result_json['fromOrg']['id'] == from_org_id
+    assert result_json.get('toOrg') is None
+    assert result_json['businessIdentifier'] == business_identifier
+    assert result_json['status'] == 'ACCEPTED'
+    assert result_json['type'] == 'PASSCODE'
+    assert result_json.get('recipientEmail') is None
 
 
 def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mock, business_mock, stan_server):
@@ -155,6 +258,53 @@ def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mo
     assert rv_invitation.status_code == http_status.HTTP_400_BAD_REQUEST
     dictionary = json.loads(rv_invitation.data)
     assert dictionary['message'] == 'The data you want to insert already exists.'
+
+
+def test_affiliation_invitation_already_exists_exclude_to_org(client, jwt, session, keycloak_mock, business_mock,
+                                                              stan_server):
+    """Assert that POSTing an already existing affiliation invitation returns a 400."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=None,
+            business_identifier=business_identifier)),
+        headers=headers, content_type='application/json')
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(from_org_id=from_org_id,
+                                       to_org_id=None,
+                                       business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    assert rv_invitation.status_code == http_status.HTTP_400_BAD_REQUEST
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['message'] == 'The data you want to insert already exists.'
+
+
+def test_affiliation_invitation_missing_contact(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that creating an invitation with a missing contact email returns a 400."""
+    headers, from_org_id, to_org_id, \
+        business_identifier = setup_affiliation_invitation_data(client=client,
+                                                                jwt=jwt,
+                                                                session=session,
+                                                                keycloak_mock=keycloak_mock,
+                                                                create_contact=False)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=None,
+            business_identifier=business_identifier)),
+        headers=headers, content_type='application/json')
+
+    assert rv_invitation.status_code == http_status.HTTP_400_BAD_REQUEST
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['message'] == 'Business contact email not valid.'
 
 
 def test_delete_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
@@ -222,6 +372,9 @@ def test_get_affiliation_invitation_by_id(client, jwt, session, keycloak_mock, b
     assert rv.status_code == http_status.HTTP_200_OK
     assert result_json['id'] == affiliation_invitation_id
 
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
+
 
 def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be updated."""
@@ -253,6 +406,43 @@ def test_update_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     dictionary = json.loads(rv_invitation.data)
     assert dictionary['status'] == 'PENDING'
 
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
+
+
+def test_update_affiliation_invitation_exclude_to_org(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that an affiliation invitation can be updated."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=None,
+            business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    updated_affiliation_invitation = {}
+
+    rv_invitation = client.patch('/api/v1/affiliationInvitations/{}'.format(affiliation_invitation_id), data=json.dumps(
+        updated_affiliation_invitation),
+                                 headers=headers, content_type='application/json')
+
+    result_json = rv_invitation.json
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['status'] == 'PENDING'
+
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
+
 
 def test_expire_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
     """Assert that an affiliation invitation can be expired."""
@@ -283,6 +473,43 @@ def test_expire_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
     dictionary = json.loads(rv_invitation.data)
     assert dictionary['status'] == 'EXPIRED'
+
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
+
+
+def test_expire_affiliation_invitation_exclude_to_org(client, jwt, session, keycloak_mock, business_mock, stan_server):
+    """Assert that an affiliation invitation can be expired."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=None,
+            business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    invitation_dictionary = json.loads(rv_invitation.data)
+    affiliation_invitation_id = invitation_dictionary['id']
+
+    updated_affiliation_invitation = {'status': 'EXPIRED'}
+
+    rv_invitation = client.patch('/api/v1/affiliationInvitations/{}'.format(affiliation_invitation_id), data=json.dumps(
+        updated_affiliation_invitation),
+                                 headers=headers, content_type='application/json')
+
+    result_json = rv_invitation.json
+
+    assert rv_invitation.status_code == http_status.HTTP_200_OK
+    assert schema_utils.validate(result_json, 'affiliation_invitation_response')[0]
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['status'] == 'EXPIRED'
+
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['recipientEmail'])
 
 
 def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, business_mock, stan_server):
@@ -318,13 +545,27 @@ def test_accept_affiliation_invitation(client, jwt, session, keycloak_mock, busi
     assert rv_invitation.status_code == http_status.HTTP_200_OK
     assert dictionary['status'] == 'ACCEPTED'
 
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], dictionary['recipientEmail'])
+
+    # Assert from org affiliation is created
+    rv_affiliations = client.get('/api/v1/orgs/{}/affiliations'.format(from_org_id), headers=headers)
+    assert rv_affiliations.status_code == http_status.HTTP_200_OK
+
+    assert schema_utils.validate(rv_affiliations.json, 'affiliations_response')[0]
+    affiliations = json.loads(rv_affiliations.data)
+    assert affiliations is not None
+    assert len(affiliations['entities']) == 1
+    assert affiliations['entities'][0]['businessIdentifier'] == business_identifier
+
+    # Assert to org affiliation is empty
     rv_affiliations = client.get('/api/v1/orgs/{}/affiliations'.format(to_org_id), headers=headers)
     assert rv_affiliations.status_code == http_status.HTTP_200_OK
 
     assert schema_utils.validate(rv_affiliations.json, 'affiliations_response')[0]
     affiliations = json.loads(rv_affiliations.data)
     assert affiliations is not None
-    assert affiliations['entities'][0]['businessIdentifier'] == business_identifier
+    assert len(affiliations['entities']) == 0
 
 
 def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, business_mock, stan_server):
@@ -350,12 +591,16 @@ def test_get_affiliation_invitations(client, jwt, session, keycloak_mock, busine
     assert result_json['affiliationInvitations']
     assert len(result_json['affiliationInvitations']) == 1
 
+    # Assert email is masked
+    assert_masked_email(TestContactInfo.contact1['email'], result_json['affiliationInvitations'][0]['recipientEmail'])
+
 
 def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,
                                       from_org_info=TestOrgInfo.affiliation_from_org,
                                       to_org_info=TestOrgInfo.affiliation_to_org,
                                       entity_info=TestEntityInfo.entity_lear_mock,
-                                      claims=TestJwtClaims.public_user_role):  # pylint:disable=unused-argument
+                                      claims=TestJwtClaims.public_user_role,
+                                      create_contact=True):  # pylint:disable=unused-argument
     """Set up seed data for an affiliation invitation."""
     headers = factory_auth_header(jwt=jwt, claims=claims)
     client.post('/api/v1/users', headers=headers, content_type='application/json')
@@ -368,8 +613,15 @@ def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,
                             headers=headers, content_type='application/json')
 
     headers_entity = factory_auth_header(jwt=jwt, claims=TestJwtClaims.passcode)
+
     rv_entity = client.post('/api/v1/entities', data=json.dumps(entity_info),
                             headers=headers_entity, content_type='application/json')
+
+    if create_contact:
+        client.post('/api/v1/entities/{}/contacts'.format(entity_info['businessIdentifier']),
+                    headers=headers_entity,
+                    data=json.dumps(TestContactInfo.contact1),
+                    content_type='application/json')
 
     dictionary_from_org = json.loads(rv_from_org.data)
     dictionary_to_org = json.loads(rv_to_org.data)
@@ -378,11 +630,6 @@ def setup_affiliation_invitation_data(client, jwt, session, keycloak_mock,
     from_org_id = dictionary_from_org['id']
     to_org_id = dictionary_to_org['id']
     business_identifier = dictionary_entity['businessIdentifier']
-
-    client.post('/api/v1/orgs/{}/affiliations'.format(from_org_id), headers=headers,
-                data=json.dumps(
-                    {'businessIdentifier': business_identifier,
-                     'passCode': entity_info['passCode']}), content_type='application/json')
 
     return headers, from_org_id, to_org_id, business_identifier
 
@@ -597,3 +844,9 @@ def test_getting_affiliation_invitations_sent_to_org_for_entity(app, client, jwt
     assert affiliation_invitations[0]['entity']['businessIdentifier'] == business_identifier
 
     app.config.update(MAX_NUMBER_OF_ORGS=orig_val_max_number_of_orgs)
+
+
+def assert_masked_email(unmasked_email: str, masked_email: str):
+    """Assert the recipient email is masked."""
+    assert masked_email != unmasked_email
+    assert masked_email == mask_email(unmasked_email)
