@@ -20,7 +20,7 @@
         v-if="!showHelp && showAuthorizationEmailSentDialog"
         :email="businessContactEmail"
         @open-help="openHelp"
-        @close-dialog="showAuthorizationEmailSentDialog = false"
+        @close-dialog="onAuthorizationEmailSentClose"
       />
 
       <v-card
@@ -420,6 +420,10 @@ export default defineComponent({
       }
     }
 
+    const onAuthorizationEmailSentClose = () => {
+      emit('on-cancel')
+    }
+
     const handleException = (exception) => {
       if (exception.response?.status === StatusCodes.UNAUTHORIZED) {
         emit('add-failed-invalid-code', passcodeLabel.value)
@@ -559,6 +563,7 @@ export default defineComponent({
       isFormValid,
       manageBusiness,
       resetForm,
+      onAuthorizationEmailSentClose,
       formatBusinessIdentifier,
       openHelp,
       businessContactEmail,
