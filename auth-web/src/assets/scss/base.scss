@@ -184,3 +184,15 @@ legend {
 .gray-9 {
   color: $gray9;
 }
+
+.CardComponent {
+  > div {
+    padding: 0!important;
+    padding-right: clamp(12px, 1.4vw, 20px)!important;
+    padding-left: clamp(12px, 1.4vw, 20px)!important;
+    padding-top: clamp(12px, 1.4vw, 20px)!important;
+    &:last-of-type {
+      padding-bottom: clamp(12px, 1.4vw, 20px)!important;
+    }
+  }
+}

@@ -23,10 +23,7 @@
         @close-dialog="onAuthorizationEmailSentClose"
       />
 
-      <v-card
-        v-if="!showHelp && !showAuthorizationEmailSentDialog"
-        class="px-3"
-      >
+      <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog" class="CardComponent">
         <v-card-title data-test="dialog-header">
           <span>Manage a B.C. Business</span>
         </v-card-title>
@@ -48,7 +45,7 @@
             <v-card class="mx-auto" flat>
               <v-list class="mr-2">
 
-                <v-list-group class="top-of-list" eager v-model="passcodeOption">
+                <v-list-group v-if="!isBusinessLegalTypeSPorGP" class="top-of-list" eager v-model="passcodeOption">
                   <template v-slot:activator>
                     <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
                   </template>
@@ -78,7 +75,7 @@
                   </div>
                 </v-list-group>
 
-                <v-list-group v-if="isBusinessLegalTypeSPorGP" v-model="nameOption">
+                <v-list-group v-if="isBusinessLegalTypeSPorGP" class="top-of-list" v-model="nameOption">
                   <template v-slot:activator>
                     <v-list-item-title>
                       Use the name of a proprietor or partner
