@@ -1,93 +1,84 @@
 <template>
-  <div id="help-resolution" class="mb-12">
-    <div class="ma-6">
-      <div class="help-btn top" @click="helpToggle = !helpToggle">
-        <v-icon color="primary">mdi-help-circle-outline</v-icon>
-        <span v-if="!helpToggle" class="pl-2">{{ helpContent.toggleHelpShow }}</span>
-        <span v-else class="pl-2">{{ helpContent.toggleHelpHide }}</span>
-      </div>
-      <v-expand-transition v-if="helpToggle">
-        <section class="help-section info-text">
-          <header class="help-header mt-4">
-            <p class="title-text mt-4">{{ helpContent.title }}</p>
-          </header>
-          <br>
-          <div class="help-text mt-4">
-            <p>{{ helpContent.intro }}</p>
-            <ol>
-                <li class="mt-12" v-for="(step, index) in helpContent.steps" :key="index">
-                    <strong>{{ step.title }}</strong>
-                    <ul class="mt-8">
-                    <li v-for="(item, i) in step.items" :key="i">
-                        <p v-if="typeof item === 'string'">{{ item }}</p>
-                        <p v-else v-html="item.content"></p>
-                    </li>
-                    </ul>
-                </li>
-            </ol>
-          </div>
-          <div class="help-btn bottom" @click="helpToggle = !helpToggle">{{ helpContent.toggleHelpHide }}</div>
-        </section>
-      </v-expand-transition>
+  <section class="help-content">
+    <header class="d-flex justify-center mt-4">
+      <p class="title-text mt-4">{{ helpContent.title }}</p>
+    </header>
+    <div class="help-text mt-4">
+      <p>{{ helpContent.intro }}</p>
+      <ol>
+        <li class="mt-12" v-for="(step, index) in helpContent.steps" :key="index">
+          <strong>{{ step.title }}</strong>
+          <ul class="mt-8">
+            <li v-for="(item, i) in step.items" :key="i">
+              <p v-if="typeof item === 'string'">{{ item }}</p>
+              <p v-else v-html="item.content"></p>
+            </li>
+          </ul>
+        </li>
+      </ol>
     </div>
-  </div>
+  </section>
 </template>
 
-<script lang="ts">
-import helpContent from '../../../resources/helpContent.json'
-import { ref } from '@vue/composition-api'
-
+<script>
 export default {
-  setup () {
-    const helpToggle = ref(false)
-    return { helpToggle, helpContent }
+  data () {
+    return {
+      helpContent: {
+        'title': 'Help with Starting a Business',
+        'intro': 'Start a named or numbered business in B.C. by following these steps:',
+        'steps': [
+          {
+            'title': 'Decide on a Business Type',
+            'items': [
+              {
+                'content': "Decide which business structure is the most appropriate for you. A few options are: a sole proprietorship, partnership, or corporation. Each structure has different legal and financial implications. <a href='https://entity-selection-prod.apps.silver.devops.gov.bc.ca/'>Use the Business Structures Wizard to help you decide.</a>",
+                'isHtml': true
+              },
+              'If you want to start a corporation, you also have the choice of using a named or numbered company.'
+            ]
+          },
+          {
+            'title': 'Request a Business Name or Use a Numbered Company',
+            'items': [
+              'Both named and numbered companies are started by selecting the "Get Started with a B.C.-based business button.',
+              'If you would like to start a named business you must first submit a name request. Create a unique name for your business and submit this name for examination by the Business Registry.'
+            ]
+          },
+          {
+            'title': 'Incorporate or Register',
+            'items': [
+              'If you requested your business name through your account, your Name Request (NR) will appear in your Business Registry dashboard. If you did not request your name through your account, you will need to add your Name Request to your dashboard manually using the name your requested or your NR number. You can track the approval status of your name request on your Business Registry dashboard.',
+              'If one of your requested names is approved, you can use it to incorporate or register your business by selecting "Register Now" beside the name.',
+              'Follow the steps in the application and complete all of the required information including addresses, contact information, people and roles, and share structure (when applicable).',
+              "Retain a copy of all incorporation or registration documents for your business' records."
+            ]
+          },
+          {
+            'title': 'Manage and Maintain Your Business',
+            'items': [
+              'Once your business is incorporated or registered you are required to keep information about your business up to date with the Business Registry.',
+              'By managing your business through your BC Registries account you can:',
+              'View and change business information.',
+              'See when annual reports are due and file them each year (if applicable).',
+              "See the history of your business' filings and download copies of all documents.",
+              'Dissolve your business.'
+            ]
+          }
+        ]
+      }
+    }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
-
-#sr-heading {
-  color: $gray9
-}
-
-.help-btn {
-  cursor: pointer;
-  color: $app-blue;
-  vertical-align: middle;
-}
-
-.v-icon {
-  margin-top: -3px;
-}
-
-.help-section {
-  border-top: 1px dashed $gray6;
-  border-bottom: 1px dashed $gray6;
-  margin: 1.5rem 0;
-  padding: 1rem 0;
-}
-
-.help-header {
-  display: flex;
-  justify-content: center;
-}
-
-.help-btn.bottom {
-  font-size: $px-13;
-  text-decoration: underline;
-  display: flex;
-  direction: rtl;
-}
-
 .title-text {
   color: #1669bb;
 }
 
 .help-text {
-  margin-left: 80px;
-  margin-right: 80px;
+  width: 80%;
+  margin: 0 auto;
 }
-
 </style>
