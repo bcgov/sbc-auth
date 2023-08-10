@@ -78,7 +78,7 @@
                   </div>
                 </v-list-group>
 
-                <v-list-group v-model="nameOption">
+                <v-list-group v-if="isBusinessLegalTypeSPorGP" v-model="nameOption">
                   <template v-slot:activator>
                     <v-list-item-title>
                       Use the name of a proprietor or partner
@@ -90,14 +90,12 @@
                       label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                       hint="Name as it appears on the Business Summary or the Statement of Registration"
                       persistent-hint
-                      :rules="nameRules"
-                      :maxlength="passcodeMaxLength"
+                      :rules="proprietorPartnerNameRules"
                       v-model="proprietorPartnerName"
                       autocomplete="off"
-                      type="password"
-                      class="passcode mt-0 mb-2"
-                      :aria-label="passcodeLabel"
+                      aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                     />
+                      <!-- :maxlength="passcodeMaxLength" -->
                   </div>
                     <Certify
                       :certifiedBy="certifiedBy"
@@ -215,6 +213,10 @@ export default defineComponent({
       type: String,
       default: ''
     },
+    businessLegalType: {
+      type: String,
+      default: ''
+    },
     showBusinessDialog: {
       type: Boolean,
       default: false
@@ -265,6 +267,10 @@ export default defineComponent({
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
 
+    const isBusinessLegalTypeSPorGP = computed(() => {
+      return props.businessLegalType === 'SP' || props.businessLegalType === 'GP'
+    })
+
     const enableBusinessNrSearch = computed(() => {
       return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
     })
@@ -313,7 +319,7 @@ export default defineComponent({
       return 15
     })
 
-    const nameRules = computed(() => {
+    const proprietorPartnerNameRules = computed(() => {
       if (isFirm.value) {
         return [
           (v) => !!v || 'Proprietor or Partner Name is required',
@@ -533,6 +539,7 @@ export default defineComponent({
       authorizationName,
       authorizationLabel,
       authorizationMaxLength,
+      isBusinessLegalTypeSPorGP,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
       isCooperative,
@@ -544,7 +551,7 @@ export default defineComponent({
       passcodeHint,
       passcodeMaxLength,
       passcodeRules,
-      nameRules,
+      proprietorPartnerNameRules,
       passwordText,
       helpDialogBlurb,
       isFormValid,
