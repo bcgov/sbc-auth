@@ -317,21 +317,9 @@ export default defineComponent({
     })
 
     const proprietorPartnerNameRules = computed(() => {
-      if (isFirm.value) {
-        return [
-          (v) => !!v || 'Proprietor or Partner Name is required',
-          (v) => v.length <= 150 || 'Maximum 150 characters'
-        ]
-      }
-      if (isCooperative.value) {
-        return [
-          (v) => !!v || 'Passcode is required',
-          (v) => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
-        ]
-      }
       return [
-        (v) => !!v || 'Password is required',
-        (v) => CommonUtils.validateCorporatePassword(v) || 'Password must be 8 to 15 characters'
+        (v) => !!v || 'Proprietor or Partner Name is required',
+        (v) => v.length <= 150 || 'Maximum 150 characters'
       ]
     })
 
