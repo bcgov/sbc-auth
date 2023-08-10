@@ -92,7 +92,6 @@
                       autocomplete="off"
                       aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                     />
-                      <!-- :maxlength="passcodeMaxLength" -->
                   </div>
                     <Certify
                       :certifiedBy="certifiedBy"
