@@ -174,9 +174,9 @@ class AffiliationInvitation:
                              org_id: Optional[int] = None) -> Optional[str]:
         """Get affiliation invitation email based on provided params."""
         if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
-            contacts = OrgService.get_contacts(org_id=org_id)
-            if contact := contacts.get('contacts', None):
-                return contact[0]['email'] if contact else None
+            contacts_dict = OrgService.get_contacts(org_id=org_id)
+            if contacts := contacts_dict.get('contacts', None):
+                return contacts[0].get('email', None) if contacts else None
 
             # this guardrail is due to the fact that previously contact was not mandatory on Orgs. It is now.
             current_app.logger.error(f'failed to retrieve contact for org_id:{org_id}')
@@ -195,7 +195,7 @@ class AffiliationInvitation:
             return AffiliationInvitation.get_invitation_email(affiliation_invitation_type=invitation_type,
                                                               entity=entity, org_id=org_id)
 
-        return affiliation_invitation_info['recipientEmail']
+        return affiliation_invitation_info.get('recipientEmail', None)
 
     @staticmethod
     @user_context

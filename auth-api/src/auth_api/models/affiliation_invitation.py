@@ -96,7 +96,7 @@ class AffiliationInvitation(BaseModel):  # pylint: disable=too-many-instance-att
         affiliation_invitation.sent_date = datetime.now()
         affiliation_invitation.type = invitation_info.get('type')
         affiliation_invitation.invitation_status = InvitationStatus.get_default_status()
-        affiliation_invitation.additional_message = invitation_info.get('additional_message', None)
+        affiliation_invitation.additional_message = invitation_info.get('additionalMessage', None)
 
         if affiliation_invitation.type is None:
             affiliation_invitation.type = AffiliationInvitationType.get_default_type().code
