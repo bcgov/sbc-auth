@@ -207,6 +207,12 @@ class AffiliationInvitationType(Enum):
     PASSCODE = 'PASSCODE'  # Used to indicate an affiliation invitation initiated through a valid passcode
     REQUEST = 'REQUEST'  # Used to indicate an affiliation invitation initiated through Access Request modal
 
+    @classmethod
+    def from_value(cls, value):
+        """Return instance from value of the enum."""
+        return \
+            AffiliationInvitationType(value) if value in cls._value2member_map_ else None  # pylint: disable=no-member
+
 
 class IdpHint(Enum):
     """IdpHint for user login."""
