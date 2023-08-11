@@ -409,7 +409,6 @@ class AffiliationInvitation:
     def send_affiliation_invitation(affiliation_invitation: AffiliationInvitationModel,
                                     business_name,
                                     app_url=None,
-                                    query_params: Dict[str, any] = None,
                                     is_authorized=None,
                                     email_addresses=None):
         """Send the email notification."""
@@ -432,8 +431,8 @@ class AffiliationInvitation:
             data['contextUrl'] = AffiliationInvitation._get_token_confirm_path(
                 app_url=app_url,
                 org_name=from_org_name,
-                token=affiliation_invitation.token,
-                query_params=query_params)
+                token=affiliation_invitation.token
+            )
 
         elif affiliation_invitation_type == AffiliationInvitationType.REQUEST.value:
             if not email_addresses:
