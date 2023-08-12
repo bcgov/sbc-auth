@@ -46,7 +46,7 @@ class AffiliationInvitations(Resource):
     def get():
         """Get affiliation invitations."""
         try:
-            get_business_details = request.args.get('businessDetails', False)
+            get_business_details = request.args.get('businessDetails', 'false')
             org_id = request.args.get('orgId', None)
             business_identifier = request.args.get('businessIdentifier', None)
 
@@ -70,7 +70,8 @@ class AffiliationInvitations(Resource):
             else:
                 data = AffiliationInvitationService. \
                     search_invitations(search_filter=search_filter)
-            if get_business_details:
+
+            if get_business_details.lower() == 'true':
                 data = AffiliationInvitationService.enrich_affiliation_invitations_dict_list_with_business_data(data)
 
             response, status = {'affiliationInvitations': data}, http_status.HTTP_200_OK
