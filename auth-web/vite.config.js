@@ -58,6 +58,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './tests/unit/setup.ts',
+    threading: true,
     // hide Vue Devtools message
     onConsoleLog: function (log) {
       if (log.includes('Download the Vue Devtools extension')) {
