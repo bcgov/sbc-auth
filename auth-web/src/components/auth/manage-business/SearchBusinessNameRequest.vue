@@ -97,9 +97,9 @@ import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { LoginPayload } from '@/models/business'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-
 import { mapActions } from 'vuex'
 
 @Component({
@@ -137,7 +137,9 @@ export default class SearchBusinessNameRequest extends Vue {
     addNRDialog: ModalDialog
     manageBusinessDialog: HTMLFormElement
   }
-
+  addBusiness = async (loginPayload: LoginPayload) => {
+    return this.$store.dispatch('business/addBusiness', loginPayload)
+  }
   showAddSuccessModal (event) {
     this.clearSearch++
     this.$emit('add-success', event)
@@ -179,11 +181,17 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
-  businessEvent (event: { name: string, identifier: string }) {
+  async businessEvent (event: { name: string, identifier: string }) {
     this.businessName = event?.name || ''
     this.businessIdentifier = event?.identifier || ''
     if (this.isGovStaffAccount) {
-      this.$refs.manageBusinessDialog.add(this.businessIdentifier)
+      try {
+        let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
+        await this.addBusiness(businessData)
+        this.$emit('add-success', this.businessIdentifier)
+      } catch (err) {
+        console.error('Error adding business: ', err)
+      }
     } else {
       this.showManageBusinessDialog = true
     }
