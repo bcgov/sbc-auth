@@ -2,15 +2,13 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
+import VueCompositionAPI from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
 import can from '@/directives/can'
 import sinon from 'sinon'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -24,7 +22,7 @@ describe('PADInfoForm.vue', () => {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   const startingOrgPADInfo = {
     'bankAccountNumber': 'XXX4567',
@@ -52,7 +50,7 @@ describe('PADInfoForm.vue', () => {
         userHasToAcceptTOS: false
       },
       actions: {
-        getTermsOfUse: jest.fn(() => null)
+        getTermsOfUse: vi.fn(() => null)
       },
       mutations: {},
       getters: {}
@@ -63,7 +61,7 @@ describe('PADInfoForm.vue', () => {
       state: {
         currentOrgPADInfo: { ...startingOrgPADInfo }
       },
-      actions: { updatePadInfo: jest.fn() }
+      actions: { updatePadInfo: vi.fn() }
     }
 
     const store = new Vuex.Store({
@@ -84,8 +82,8 @@ describe('PADInfoForm.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

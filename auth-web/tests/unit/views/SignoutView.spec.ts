@@ -15,7 +15,7 @@ describe('SignoutView.vue', () => {
     'REGISTRY_HOME_URL': 'https://localhost:8080/'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -33,8 +33,8 @@ describe('SignoutView.vue', () => {
       localVue
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

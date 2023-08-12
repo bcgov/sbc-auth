@@ -24,7 +24,7 @@ describe('PPRLauncher.vue', () => {
   const config = {
     'PPR_WEB_URL': pprUrl
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   let userModule = {
     namespaced: true,
@@ -67,8 +67,8 @@ describe('PPRLauncher.vue', () => {
   })
   afterEach(() => {
     wrapper.destroy()
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', async () => {

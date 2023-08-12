@@ -1,11 +1,15 @@
+// TODO: Broken still
 import { createLocalVue, mount } from '@vue/test-utils'
 import { Account } from '@/util/constants'
+import { createI18n } from 'vue-i18n-bridge'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
-import MockI18n from '../test-utils/test-data/MockI18n'
+import { config } from '@vue/test-utils'
 import Vue from 'vue'
+import VueCompositionAPI from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import MockI18n from '../test-utils/test-data/MockI18n'
 
 Vue.use(VueRouter)
 Vue.use(Vuetify)
@@ -18,7 +22,7 @@ const en = {
   deactivateMemberRemovalTitle: 'i8n deactivateMemberRemovalTitle',
   padRemovalTitle: 'i8n padRemovalTitle'
 }
-const i18n = MockI18n.mock(en)
+
 
 function assertElements (wrapper: any) {
   expect(wrapper.text()).toContain(en.deactivateMemberRemovalTitle)
@@ -31,7 +35,13 @@ describe('Deactivated card.vue', () => {
   let wrapper: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
-  localVue.use(i18n)
+  const i18n = MockI18n.mock(en)
+  localVue.use(i18n as any, { bridge: true })
+  
+
+  beforeEach(() => {
+    vi.mock('useI18n')  
+  })
 
   afterEach(() => {
     wrapper.destroy()
@@ -41,7 +51,7 @@ describe('Deactivated card.vue', () => {
     wrapper = mount(DeactivateCard, {
       vuetify,
       localVue,
-      router
+      router,
     })
 
     expect(wrapper.vm).toBeTruthy()

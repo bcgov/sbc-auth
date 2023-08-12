@@ -11,7 +11,7 @@ Vue.use(Vuetify)
 Vue.use(VueRouter)
 Vue.use(VueI18n)
 
-jest.mock('../../../src/services/bcol.services')
+vi.mock('../../../src/services/bcol.services')
 
 describe('CreateAccountInfoForm.vue', () => {
   let localVue
@@ -22,7 +22,7 @@ describe('CreateAccountInfoForm.vue', () => {
     PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     localVue = createLocalVue()
     localVue.use(Vuex)
@@ -35,11 +35,11 @@ describe('CreateAccountInfoForm.vue', () => {
         orgCreateMessage: 'test'
       },
       actions: {
-        createOrg: jest.fn(),
-        syncOrganizations: jest.fn()
+        createOrg: vi.fn(),
+        syncOrganizations: vi.fn()
       },
       mutations: {
-        setOrgCreateMessage: jest.fn()
+        setOrgCreateMessage: vi.fn()
       },
       getters: OrgModule.getters
     }
@@ -51,8 +51,8 @@ describe('CreateAccountInfoForm.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('Mounting works', () => {

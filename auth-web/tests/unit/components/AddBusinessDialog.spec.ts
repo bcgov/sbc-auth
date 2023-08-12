@@ -2,13 +2,12 @@ import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
+import VueCompositionAPI from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
 // @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 const vuetify = new Vuetify({})
@@ -96,9 +95,9 @@ tests.forEach(test => {
 
         },
         action: {
-          addBusiness: jest.fn(),
-          updateBusinessName: jest.fn(),
-          updateFolioNumber: jest.fn()
+          addBusiness: vi.fn(),
+          updateBusinessName: vi.fn(),
+          updateFolioNumber: vi.fn()
         }
       }
 

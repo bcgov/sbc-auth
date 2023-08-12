@@ -25,13 +25,13 @@ describe('SetupGovmAccountForm.vue', () => {
     namespaced: true,
     state: {},
     actions: {
-      createOrgByStaff: jest.fn(),
-      createInvitation: jest.fn()
+      createOrgByStaff: vi.fn(),
+      createInvitation: vi.fn()
     }
   }
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     store = new Vuex.Store({
       state: {},
       strict: false,

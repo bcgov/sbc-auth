@@ -28,7 +28,7 @@ describe('IncorporationSearchResultView.vue', () => {
     namespaced: true,
     state: {},
     actions: {
-      addOrgSettings: jest.fn()
+      addOrgSettings: vi.fn()
     }
   }
   const businessModule = {
@@ -43,13 +43,13 @@ describe('IncorporationSearchResultView.vue', () => {
   }
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     store = new Vuex.Store({
       state: {},
       strict: false,
@@ -98,7 +98,7 @@ describe('IncorporationSearchResultView.vue', () => {
         }
       },
       actions: {
-        addOrgSettings: jest.fn()
+        addOrgSettings: vi.fn()
       }
     }
     const unAffiliatedbusinessModule = {

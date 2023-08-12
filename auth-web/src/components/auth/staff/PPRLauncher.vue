@@ -38,9 +38,8 @@ export default class PPRLauncher extends Vue {
     return ConfigHelper.getPPRWebUrl()
   }
 
-  private getImgUrl (img) {
-    const images = require.context('@/assets/img/')
-    return images('./' + img)
+  async getImgUrl (img) {
+    return await import(`/* @vite-ignore */ @/assets/${img}`)
   }
 
   @Watch('currentUser', { deep: true, immediate: true })

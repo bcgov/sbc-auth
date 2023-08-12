@@ -6,14 +6,11 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import can from '@/directives/can'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
@@ -24,7 +21,7 @@ describe('ReviewBankInformation.vue', () => {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -39,10 +36,10 @@ describe('ReviewBankInformation.vue', () => {
         currentOrganization: {}
       },
       actions: {
-        getOrgPayments: jest.fn(),
-        updateOrg: jest.fn(),
-        updatePadInfo: jest.fn(),
-        validatePADInfo: jest.fn()
+        getOrgPayments: vi.fn(),
+        updateOrg: vi.fn(),
+        updatePadInfo: vi.fn(),
+        validatePADInfo: vi.fn()
       },
       mutations: {},
       getters: {}
@@ -67,8 +64,8 @@ describe('ReviewBankInformation.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

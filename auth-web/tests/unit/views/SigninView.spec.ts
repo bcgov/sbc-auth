@@ -17,7 +17,7 @@ describe('Signin.vue', () => {
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -38,8 +38,8 @@ describe('Signin.vue', () => {
       localVue
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

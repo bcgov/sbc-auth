@@ -1,8 +1,5 @@
 import './composition-api-setup' // ensure this happens before any imports trigger use of composition-api
-import 'core-js/stable' // to polyfill ECMAScript features
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
-import 'regenerator-runtime/runtime' // to use transpiled generator functions
-import './registerServiceWorker'
 import * as Sentry from '@sentry/vue'
 import App from './App.vue'
 import CommonUtils from '@/util/common-util'

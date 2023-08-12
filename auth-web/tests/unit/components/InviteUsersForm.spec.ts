@@ -13,7 +13,7 @@ Vue.use(VueRouter)
 Vue.use(VueI18n)
 document.body.setAttribute('data-app', 'true')
 
-jest.mock('../../../src/services/bcol.services')
+vi.mock('../../../src/services/bcol.services')
 
 describe('InviteUsersForm.vue', () => {
   let store
@@ -25,7 +25,7 @@ describe('InviteUsersForm.vue', () => {
     PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     localVue.use(Vuex)
     localVue.use(Vuetify)
@@ -52,12 +52,12 @@ describe('InviteUsersForm.vue', () => {
         pendingOrgMembers: []
       },
       actions: {
-        createInvitation: jest.fn(),
-        resendInvitation: jest.fn()
+        createInvitation: vi.fn(),
+        resendInvitation: vi.fn()
       },
       mutations: {
-        resetInvitations: jest.fn(),
-        setCurrentOrganization: jest.fn().mockImplementation(() => {
+        resetInvitations: vi.fn(),
+        setCurrentOrganization: vi.fn().mockImplementation(() => {
           orgModule.state.currentOrganization = {
             name: 'testOrg_regular',
             accessType: AccessType.REGULAR
@@ -96,8 +96,8 @@ describe('InviteUsersForm.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

@@ -2,15 +2,15 @@ import Axios from 'axios'
 import { ProductsRequestBody } from '@/models/Staff'
 import StaffService from '../../../src/services/staff.services'
 
-jest.mock('../../../src/services/staff.services')
+vi.mock('../../../src/services/staff.services')
 /*
-jest.mock('axios', () => ({
-  create: jest.fn(() => Promise.resolve({ data: { }})),
-  get: jest.fn(() => Promise.resolve({ data: {mockob}})),
-  all: jest.fn(),
-  post: jest.fn(() => Promise.resolve({ data: {}})),
-  put: jest.fn(),
-  patch: jest.fn()
+vi.mock('axios', () => ({
+  create: vi.fn(() => Promise.resolve({ data: { }})),
+  get: vi.fn(() => Promise.resolve({ data: {mockob}})),
+  all: vi.fn(),
+  post: vi.fn(() => Promise.resolve({ data: {}})),
+  put: vi.fn(),
+  patch: vi.fn()
 }), {
   virtual: true
 })
@@ -29,15 +29,15 @@ var mockProducts : ProductsRequestBody = {
   ]
 }
 
-const spyGetProducts = jest.spyOn(StaffService, 'getProducts')
-const spyGetAccountTypes = jest.spyOn(StaffService, 'getAccountTypes')
-const spyAddProducts = jest.spyOn(StaffService, 'addProducts')
+const spyGetProducts = vi.spyOn(StaffService, 'getProducts')
+const spyGetAccountTypes = vi.spyOn(StaffService, 'getAccountTypes')
+const spyAddProducts = vi.spyOn(StaffService, 'addProducts')
 
 describe('Get staff service', () => {
   const results = []
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    jest.clearAllMocks()
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
+    vi.clearAllMocks()
 
     StaffService.getProducts()
     StaffService.getAccountTypes()

@@ -143,7 +143,7 @@ export default class App extends Mixins(NextPageMixin) {
 
   /** The About text. */
   get aboutText (): string {
-    return process.env.ABOUT_TEXT
+    return import.meta.env.ABOUT_TEXT
   }
 
   private startAccountSwitch () {

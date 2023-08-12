@@ -415,7 +415,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
 // Note this uses .fas-search
-@import '~fas-ui/src/assets/scss/search.scss';
+@import '~/fas-ui/src/assets/scss/search.scss';
 
 // Vuetify Override
 .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {

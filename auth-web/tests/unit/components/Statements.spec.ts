@@ -19,7 +19,7 @@ describe('Statements.vue', () => {
     AUTH_API_URL: 'https://localhost:8080/api/v1/sbc',
     PAY_API_URL: 'https://pay.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     localVue = createLocalVue()
@@ -28,8 +28,8 @@ describe('Statements.vue', () => {
     const orgModule = {
       namespaced: true,
       actions: {
-        getStatementsList: jest.fn(),
-        getStatement: jest.fn()
+        getStatementsList: vi.fn(),
+        getStatement: vi.fn()
       },
       state: {
         currentOrganization: {
@@ -85,8 +85,8 @@ describe('Statements.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', () => {

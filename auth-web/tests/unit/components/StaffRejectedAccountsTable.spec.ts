@@ -33,7 +33,7 @@ describe('StaffRejectedAccountsTable.vue', () => {
         ]
       },
       actions: {
-        rejectedStaffOrgs: jest.fn()
+        rejectedStaffOrgs: vi.fn()
       }
     }
 
@@ -55,8 +55,8 @@ describe('StaffRejectedAccountsTable.vue', () => {
       mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

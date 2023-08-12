@@ -1,11 +1,8 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { IconTooltip } from '@/components'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 const vuetify = new Vuetify({})
