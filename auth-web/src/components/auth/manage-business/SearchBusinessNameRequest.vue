@@ -47,13 +47,14 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
+        ref="manageBusinessDialog"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
         :initialBusinessName="businessName"
         :isStaffOrSbcStaff="isGovStaffAccount"
         :userFirstName="userFirstName"
         :userLastName="userLastName"
-        @add-success="showAddSuccessModal()"
+        @add-success="showAddSuccessModal"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
@@ -134,11 +135,12 @@ export default class SearchBusinessNameRequest extends Vue {
 
   $refs: {
     addNRDialog: ModalDialog
+    manageBusinessDialog: HTMLFormElement
   }
 
-  showAddSuccessModal () {
+  showAddSuccessModal (event) {
     this.clearSearch++
-    this.$emit('add-success')
+    this.$emit('add-success', event)
   }
   showInvalidCodeModal (event) {
     this.$emit('add-failed-invalid-code', event)
@@ -180,7 +182,11 @@ export default class SearchBusinessNameRequest extends Vue {
   businessEvent (event: { name: string, identifier: string }) {
     this.businessName = event?.name || ''
     this.businessIdentifier = event?.identifier || ''
-    this.showManageBusinessDialog = true
+    if (this.isGovStaffAccount) {
+      this.$refs.manageBusinessDialog.add(this.businessIdentifier)
+    } else {
+      this.showManageBusinessDialog = true
+    }
   }
   cancelEvent () {
     this.showManageBusinessDialog = false

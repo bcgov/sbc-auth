@@ -63,7 +63,7 @@
                       :maxlength="passcodeMaxLength"
                       v-model="passcode"
                       autocomplete="off"
-                      type="password"
+                      type="input"
                       class="passcode mt-0 mb-2"
                       :aria-label="passcodeLabel"
                     />
@@ -219,6 +219,7 @@ export default defineComponent({
     const contactInfo = ref(null)
     const passcode = ref('') // aka password or proprietor/partner
     const folioNumber = ref('')
+    let formValidation = false
     const isLoading = ref(false)
     const isCertified = ref(false) // firms only
     const authorizationName = ref('')
@@ -290,7 +291,7 @@ export default defineComponent({
       }
       if (isCooperative.value) {
         return [
-          (v) => !!v || 'Passcode is required',
+          (v) => !!v || 'Passcode is required, enter the passcode you have setup in Corporate Online',
           (v) => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
         ]
       }
@@ -301,7 +302,7 @@ export default defineComponent({
     })
 
     const passwordText = computed(() => {
-      return (isCooperative.value ? 'passcode' : 'password')
+      return (isCooperative.value ? 'Passcode' : 'password')
     })
 
     const helpDialogBlurb = computed(() => {
@@ -355,7 +356,9 @@ export default defineComponent({
       emailOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
-      addBusinessForm.value.resetValidation()
+      if (!props.isStaffOrSbcStaff) {
+        addBusinessForm.value.resetValidation()
+      }
       isLoading.value = false
       if (emitCancel) {
         emit('on-cancel')
@@ -376,7 +379,15 @@ export default defineComponent({
       }
     }
 
-    const add = async () => {
+    const addBusinessToList = async (businessID) => {
+      let businessData: LoginPayload = { businessIdentifier: businessID }
+      if (!props.isStaffOrSbcStaff) {
+        businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
+      }
+      return addBusiness(businessData)
+    }
+
+    const add = async (businessID) => {
       if (emailOption.value) {
         try {
           // TODO will fix this after BE is ready.
@@ -393,17 +404,18 @@ export default defineComponent({
         }
         return
       }
-
-      addBusinessForm.value.validate()
-      if (isFormValid.value) {
+      if (!props.isStaffOrSbcStaff) {
+        addBusinessForm.value.validate()
+        formValidation = isFormValid.value
+      } else {
+        formValidation = true
+      }
+      if (formValidation) {
         isLoading.value = true
         try {
           // try to add business
-          let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
-          if (!props.isStaffOrSbcStaff) {
-            businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
-          }
-          const addResponse = await addBusiness(businessData)
+          const addResponse = await addBusinessToList(businessID)
+
           // check if add didn't succeed
           if (addResponse?.status !== StatusCodes.CREATED) {
             emit('add-unknown-error')
