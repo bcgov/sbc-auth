@@ -4,7 +4,7 @@
           <span>Authorization Email Sent</span>
         </v-card-title>
         <v-card-text>
-          <p>An email was sent to <b>{{ propsEmail }}</b></p>
+          <p>An email was sent to <b>{{ email }}</b></p>
           <p>Confirm your access by clicking the link inside. This will add the business to your Business Registry List. The link is valid for 15 minutes.</p>
         </v-card-text>
         <v-card-actions class="form__btns">
@@ -39,13 +39,9 @@ export default defineComponent({
     const closeAuthEmailSentDialog = () => {
       emit('close-dialog')
     }
-    const propsEmail = computed(() => {
-      return props.email
-    })
 
     return {
       openHelp,
-      propsEmail,
       closeAuthEmailSentDialog
     }
   }

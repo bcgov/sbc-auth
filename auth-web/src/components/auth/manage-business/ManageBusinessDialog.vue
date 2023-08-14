@@ -23,7 +23,7 @@
         @close-dialog="onAuthorizationEmailSentClose"
       />
 
-      <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog" class="CardComponent">
+      <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog">
         <v-card-title data-test="dialog-header">
           <span>Manage a B.C. Business</span>
         </v-card-title>
@@ -89,6 +89,7 @@
                       persistent-hint
                       :rules="proprietorPartnerNameRules"
                       v-model="proprietorPartnerName"
+                      maxlength="150"
                       autocomplete="off"
                       aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                     />
@@ -357,24 +358,18 @@ export default defineComponent({
     })
 
     const isFormValid = computed(() => {
-      if (isBusinessLegalTypeSPorGP) {
-        return !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
-      }
-
       let isValid = false
-      const isModifyFormValid = (
-        !!businessIdentifier.value && !!passcode.value &&
-        (!isFirm.value || isCertified.value) &&
-        (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
-        addBusinessForm.value.validate()
-      )
-      // if user is a staff user or sbc staff user, then only require the business identifier
-      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
-        return true
-      }
-
-      if (isModifyFormValid) {
+      if (isBusinessLegalTypeSPorGP) {
+        isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
+      } else if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
         isValid = true
+      } else {
+        isValid =
+          !!businessIdentifier.value &&
+          !!passcode.value &&
+          (!isFirm.value || isCertified.value) &&
+          (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
+          addBusinessForm.value.validate()
       }
       return isValid
     })
