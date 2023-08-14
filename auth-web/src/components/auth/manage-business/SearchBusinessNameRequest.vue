@@ -47,6 +47,7 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
+        :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
         :initialBusinessName="businessName"
@@ -127,6 +128,7 @@ export default class SearchBusinessNameRequest extends Vue {
   searchType = 'Incorporated'
   businessName = ''
   businessIdentifier = '' // aka incorporation number or registration number
+  businessLegalType = ''
   clearSearch = 0
   requestNames = [{ 'name': 'Hello', 'state': 'REJECTED' }, { 'name': 'Hello2', 'state': 'APPROVED' }] // names in a name request
   showManageBusinessDialog = false
@@ -177,14 +179,16 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
-  businessEvent (event: { name: string, identifier: string }) {
+  businessEvent (event: { name: string, identifier: string, legalType: string }) {
     this.businessName = event?.name || ''
     this.businessIdentifier = event?.identifier || ''
+    this.businessLegalType = event?.legalType || ''
     this.showManageBusinessDialog = true
   }
   cancelEvent () {
     this.showManageBusinessDialog = false
     this.businessIdentifier = ''
+    this.businessLegalType = ''
     this.businessName = ''
     // Force a re-render for our BusinessLookup component - to reset it's state.
     this.businessLookupKey++

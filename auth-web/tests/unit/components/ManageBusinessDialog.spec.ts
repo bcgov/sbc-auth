@@ -1,4 +1,5 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
+import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import Vue from 'vue'
@@ -27,7 +28,8 @@ const testCaseList = [
     forgotButtonText: 'I lost or forgot my passcode',
     isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie'
+    userLastName: 'Woodie',
+    businessLegalType: ''
   },
   {
     description: 'Should render for a CP account',
@@ -39,7 +41,8 @@ const testCaseList = [
     forgotButtonText: 'I lost or forgot my password',
     isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie'
+    userLastName: 'Woodie',
+    businessLegalType: ''
   },
   {
     description: 'Should render for a FM Client account',
@@ -50,7 +53,8 @@ const testCaseList = [
     folioNumberExists: true,
     isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie'
+    userLastName: 'Woodie',
+    businessLegalType: ''
   },
   {
     description: 'Should render for a FM Staff account',
@@ -60,7 +64,8 @@ const testCaseList = [
     folioNumberExists: false,
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie'
+    userLastName: 'Woodie',
+    businessLegalType: ''
   },
   {
     description: 'Should render for a FM SBC Staff account',
@@ -70,7 +75,30 @@ const testCaseList = [
     folioNumberExists: false,
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
-    userLastName: 'Woodie'
+    userLastName: 'Woodie',
+    businessLegalType: ''
+  },
+  {
+    description: 'Should render for a SP Entity',
+    businessIdentifier: 'FM0000000',
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
+    isStaffOrSbcStaff: true,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+    businessLegalType: 'SP'
+  },
+  {
+    description: 'Should render for a GP Entity',
+    businessIdentifier: 'FM0000000',
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
+    isStaffOrSbcStaff: true,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+    businessLegalType: 'GP'
   }
 ]
 testCaseList.forEach(test => {
@@ -113,7 +141,8 @@ testCaseList.forEach(test => {
         propsData: {
           isStaffOrSbcStaff: test.isStaffOrSbcStaff,
           userFirstName: test.userFirstName,
-          userLastName: test.userLastName
+          userLastName: test.userLastName,
+          businessLegalType: test.businessLegalType
         }
       })
     }
@@ -155,6 +184,14 @@ testCaseList.forEach(test => {
 
       if (!test.isStaffOrSbcStaff) {
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
+      }
+      if (test.businessLegalType === CorpTypes.SOLE_PROP || test.businessLegalType === CorpTypes.PARTNERSHIP) {
+        expect(wrapper.find('#proprietor-partner-name-group').exists())
+        expect(wrapper.find('#proprietor-partner-name-group').isVisible()).toBe(true)
+        expect(wrapper.find('#passcode-group').exists()).toBeFalsy()
+      } else {
+        expect(wrapper.find('#proprietor-partner-name-group').exists()).toBeFalsy()
+        expect(wrapper.find('#passcode-group').isVisible()).toBe(true)
       }
     })
   })
