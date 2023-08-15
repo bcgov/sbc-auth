@@ -146,7 +146,7 @@ export default class SetupAccountForm extends Vue {
 
   $refs: {
     setupGovmAccountForm: HTMLFormElement,
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   public readonly ministryNameRules = [

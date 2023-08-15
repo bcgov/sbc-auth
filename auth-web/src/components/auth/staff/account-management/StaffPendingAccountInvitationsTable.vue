@@ -103,7 +103,7 @@ import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 })
 export default class StaffPendingAccountInvitationsTable extends Mixins(PaginationMixin) {
   $refs: {
-    confirmActionDialog: ModalDialog
+    confirmActionDialog: InstanceType<typeof ModalDialog>
   }
 
   private readonly pendingInvitationOrgs!: Organization[]

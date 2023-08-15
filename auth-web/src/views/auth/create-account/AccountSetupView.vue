@@ -129,7 +129,7 @@ export default class AccountSetupView extends Vue {
   @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   private stepperConfig: Array<StepConfiguration> =

@@ -135,7 +135,7 @@ export default class SearchBusinessNameRequest extends Vue {
   businessLookupKey = 0 // force re-mount of BusinessLookup component
 
   $refs: {
-    addNRDialog: ModalDialog
+    addNRDialog: InstanceType<typeof ModalDialog>
   }
   addBusiness = async (loginPayload: LoginPayload) => {
     return this.$store.dispatch('business/addBusiness', loginPayload)

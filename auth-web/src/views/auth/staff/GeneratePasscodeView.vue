@@ -82,8 +82,8 @@ export default class GeneratePasscodeView extends Vue {
 
   $refs: {
     generatePasscodeForm: HTMLFormElement,
-    generatePasscodeModal: ModalDialog,
-    generatePasscodeSuccessDialog: ModalDialog
+    generatePasscodeModal: InstanceType<typeof ModalDialog>,
+    generatePasscodeSuccessDialog: InstanceType<typeof ModalDialog>
   }
 
   public open () {
