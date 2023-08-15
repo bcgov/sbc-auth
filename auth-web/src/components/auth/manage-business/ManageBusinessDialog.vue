@@ -249,7 +249,6 @@ export default defineComponent({
     const passcode = ref('') // aka password or proprietor/partner
     const proprietorPartnerName = ref('') // aka password or proprietor/partner name
     const folioNumber = ref('')
-    let formValidation = false
     const isLoading = ref(false)
     const isCertified = ref(false) // firms only
     const authorizationName = ref('')
@@ -393,9 +392,7 @@ export default defineComponent({
       nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
-      if (!props.isStaffOrSbcStaff) {
-        addBusinessForm.value.resetValidation()
-      }
+      addBusinessForm.value.resetValidation()
       isLoading.value = false
       if (emitCancel) {
         emit('on-cancel')
@@ -420,16 +417,23 @@ export default defineComponent({
       }
     }
 
-
-    const addBusinessToList = async (businessID) => {
-      let businessData: LoginPayload = { businessIdentifier: businessID }
-      if (!props.isStaffOrSbcStaff) {
-        businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
+    const manageBusiness = async () => {
+      if (emailOption.value) {
+        try {
+          // TODO will fix this after BE is ready.
+          // const payload: CreateAffiliationInvitation = {
+          //   fromOrgId: number,
+          //   businessIdentifier: businessIdentifier.value,
+          // }
+          // await AffiliationInvitationService.createInvitation()
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err)
+        } finally {
+          showAuthorizationEmailSentDialog.value = true
+        }
+        return
       }
-      return addBusiness(businessData)
-    }
-
-
       addBusinessForm.value.validate()
       if (isFormValid.value) {
         isLoading.value = true
