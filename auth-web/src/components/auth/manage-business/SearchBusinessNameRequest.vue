@@ -47,7 +47,6 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
-        ref="manageBusinessDialog"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
         :initialBusinessName="businessName"
@@ -135,7 +134,6 @@ export default class SearchBusinessNameRequest extends Vue {
 
   $refs: {
     addNRDialog: ModalDialog
-    manageBusinessDialog: HTMLFormElement
   }
   addBusiness = async (loginPayload: LoginPayload) => {
     return this.$store.dispatch('business/addBusiness', loginPayload)
