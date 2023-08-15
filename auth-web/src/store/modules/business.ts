@@ -1,5 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AffiliationInviteInfo, AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import {
+  AffiliationInvitationStatus,
+  AffiliationResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody
+} from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, NameRequest, PasscodeResetLoad } from '@/models/business'
 import {
@@ -163,28 +168,27 @@ export default class BusinessModule extends VuexModule {
           return null
         })
 
-      if (resp?.data?.affiliationInvitations) {
-        const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvitations
+      const pendingAffiliationInvitations = resp?.data?.affiliationInvitations || []
 
-        affiliationInviteInfos.forEach(affiliationInviteInfo => {
-          const business: Business = affiliatedEntities.find(
-            businesses => businesses.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
-          const affiliationInviteInfosArray = [affiliationInviteInfo]
+      for (const affiliationInviteInfo of pendingAffiliationInvitations) {
+        const isFromOrg = affiliationInviteInfo.fromOrg.id === this.currentOrganization.id
+        const isToOrgAndPending = affiliationInviteInfo.toOrg.id === this.currentOrganization.id &&
+          affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
+        const isAccepted = affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
+        const business = affiliatedEntities.find(business => business.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
 
-          if (business) {
-            // toOrg needs to be active to display, if it is fromOrg, display it.
-            if (AffiliationInviteInfo.isToOrgAndActive(affiliationInviteInfo, this.currentOrganization.id) ||
-              AffiliationInviteInfo.isFromOrg(affiliationInviteInfo, this.currentOrganization.id)) {
-              business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
-            }
-          } else if (AffiliationInviteInfo.isFromOrg(affiliationInviteInfo, this.currentOrganization.id) &&
-            !AffiliationInviteInfo.isAccepted(affiliationInviteInfo)) {
-            const b = { ...affiliationInviteInfo.entity, affiliationInvites: affiliationInviteInfosArray }
-            affiliatedEntities.push(b)
-          } else {
-            // do nothing, no row to add it, and not a request from this org.
-          }
-        })
+        if (business && (isToOrgAndPending || isFromOrg)) {
+          business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInviteInfo])
+        } else if (!business && isFromOrg && !isAccepted) {
+          const newBusiness = { ...affiliationInviteInfo.entity, affiliationInvites: [affiliationInviteInfo] }
+          affiliatedEntities.push(newBusiness)
+        } else {
+          // do not add invitation to the list.
+        }
+      }
+
+      if (pendingAffiliationInvitations) {
+        console.log('sorting, sorting')
         // bubble the ones with the invitations to the top
         affiliatedEntities.sort((a, b) => {
           if (a.affiliationInvites && !b.affiliationInvites) {

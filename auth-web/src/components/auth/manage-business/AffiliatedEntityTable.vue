@@ -422,8 +422,7 @@ export default defineComponent({
     const actionHandler = (business: Business) => {
       const affiliationInviteInfo = business.affiliationInvites[0]
       const invitationStatus = affiliationInviteInfo.status
-      if (invitationStatus === AffiliationInvitationStatus.Pending ||
-        invitationStatus === AffiliationInvitationStatus.Failed) {
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed].includes(invitationStatus)) {
         OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
           .then(() => {
             context.emit('remove-affiliation-invitation')
