@@ -35,6 +35,23 @@ export class AffiliationInviteInfo {
   entity: Business
   fromOrg: OrgNameAndId
   toOrg: OrgNameAndId
+
+  static isFromOrg (affiliationInviteInfo: AffiliationInviteInfo, fromOrgId: number): boolean {
+    return affiliationInviteInfo.fromOrg.id === fromOrgId
+  }
+
+  static isToOrg (affiliationInviteInfo: AffiliationInviteInfo, toOrgId: number): boolean {
+    return affiliationInviteInfo.toOrg.id === toOrgId
+  }
+
+  static isToOrgAndActive (affiliationInviteInfo: AffiliationInviteInfo, toOrgId: number): boolean {
+    return AffiliationInviteInfo.isToOrg(affiliationInviteInfo, toOrgId) &&
+      affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
+  }
+
+  static isAccepted (affiliationInviteInfo: AffiliationInviteInfo): boolean {
+    return affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
+  }
 }
 
 export interface AffiliationFilter {
