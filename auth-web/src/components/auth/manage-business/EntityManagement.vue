@@ -197,6 +197,7 @@
         :selectedColumns="selectedColumns"
         :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
+        @remove-affiliation-invitation="removeAffiliationInvitation()"
         :highlight-index="highlightIndex"
       />
 
@@ -558,6 +559,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showAddNRModal () {
     this.dialogTitle = 'Add an Existing Name Request'
     this.$refs.addNRDialog.open()
+  }
+
+  async removeAffiliationInvitation () {
+    await this.syncBusinesses()
   }
 
   showConfirmationOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
