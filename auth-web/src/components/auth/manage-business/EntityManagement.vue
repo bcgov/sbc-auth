@@ -585,7 +585,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showInvalidCodeModal (label: string) {
     this.showManageBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
-    this.dialogText = `Unable to add the business. The provided ${label.toLocaleLowerCase()} is invalid.`
+    this.dialogText = `Unable to add the business. The provided ${label.toLowerCase()} is invalid.`
     this.$refs.errorDialog.open()
   }
 
