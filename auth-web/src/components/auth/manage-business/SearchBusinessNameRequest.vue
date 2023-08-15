@@ -195,6 +195,7 @@ export default class SearchBusinessNameRequest extends Vue {
         this.$emit('add-success', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {
+        // eslint-disable-next-line no-console
         console.error('Error adding business: ', err)
       }
     } else {
