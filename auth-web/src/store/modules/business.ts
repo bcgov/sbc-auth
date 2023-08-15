@@ -163,23 +163,28 @@ export default class BusinessModule extends VuexModule {
           return null
         })
 
-      if (resp?.data?.affiliationInvites) {
-        const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
+      if (resp?.data?.affiliationInvitations) {
+        const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvitations
 
         affiliationInviteInfos.forEach(affiliationInviteInfo => {
-          const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === affiliationInviteInfo.business.businessIdentifier)
+          const business: Business = affiliatedEntities.find(
+            businesses => businesses.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
           const affiliationInviteInfosArray = [affiliationInviteInfo]
 
           if (business) {
-            business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
-          } else if (affiliationInviteInfo.fromOrg.id === this.currentOrganization.id) {
-            const b = { ...affiliationInviteInfo.business, affiliationInvites: affiliationInviteInfosArray }
+            // toOrg needs to be active to display, if it is fromOrg, display it.
+            if (AffiliationInviteInfo.isToOrgAndActive(affiliationInviteInfo, this.currentOrganization.id) ||
+              AffiliationInviteInfo.isFromOrg(affiliationInviteInfo, this.currentOrganization.id)) {
+              business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
+            }
+          } else if (AffiliationInviteInfo.isFromOrg(affiliationInviteInfo, this.currentOrganization.id) &&
+            !AffiliationInviteInfo.isAccepted(affiliationInviteInfo)) {
+            const b = { ...affiliationInviteInfo.entity, affiliationInvites: affiliationInviteInfosArray }
             affiliatedEntities.push(b)
           } else {
             // do nothing, no row to add it, and not a request from this org.
           }
         })
-
         // bubble the ones with the invitations to the top
         affiliatedEntities.sort((a, b) => {
           if (a.affiliationInvites && !b.affiliationInvites) {
