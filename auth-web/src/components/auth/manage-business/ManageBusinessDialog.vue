@@ -20,13 +20,10 @@
         v-if="!showHelp && showAuthorizationEmailSentDialog"
         :email="businessContactEmail"
         @open-help="openHelp"
-        @close-dialog="showAuthorizationEmailSentDialog = false"
+        @close-dialog="onAuthorizationEmailSentClose"
       />
 
-      <v-card
-        v-if="!showHelp && !showAuthorizationEmailSentDialog"
-        class="px-3"
-      >
+      <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog">
         <v-card-title data-test="dialog-header">
           <span>Manage a B.C. Business</span>
         </v-card-title>
@@ -40,7 +37,7 @@
               <div class="font-weight-bold mr-2 float-left">Incorporation Number:</div>
               <div>{{businessIdentifier}}</div>
 
-              <div class="my-5">
+              <div class="my-2">
                 You must be authorized to manage this business. You can be authorized in one of the following ways:
               </div>
             </template>
@@ -48,7 +45,7 @@
             <v-card class="mx-auto" flat>
               <v-list class="mr-2">
 
-                <v-list-group class="top-of-list" eager v-model="passcodeOption">
+                <v-list-group v-if="!isBusinessLegalTypeSPorGP" id="passcode-group" class="top-of-list" eager v-model="passcodeOption">
                   <template v-slot:activator>
                     <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
                   </template>
@@ -76,6 +73,34 @@
                       :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
                     />
                   </div>
+                </v-list-group>
+
+                <v-list-group v-if="isBusinessLegalTypeSPorGP" id="proprietor-partner-name-group" class="top-of-list" v-model="nameOption">
+                  <template v-slot:activator>
+                    <v-list-item-title>
+                      Use the name of a proprietor or partner
+                    </v-list-item-title>
+                  </template>
+                  <div class="item-content">
+                    <v-text-field
+                      filled
+                      label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                      hint="Name as it appears on the Business Summary or the Statement of Registration"
+                      persistent-hint
+                      :rules="proprietorPartnerNameRules"
+                      v-model="proprietorPartnerName"
+                      maxlength="150"
+                      autocomplete="off"
+                      aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
+                    />
+                  </div>
+                    <Certify
+                      :certifiedBy="certifiedBy"
+                      entity="registered entity"
+                      @update:isCertified="isCertified = $event"
+                      class="certify"
+                      :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
+                    />
                 </v-list-group>
 
                 <v-list-group v-model="emailOption">
@@ -142,7 +167,7 @@
             large color="primary"
             id="add-button"
             :loading="isLoading"
-            @click="add()"
+            @click="manageBusiness()"
           >
             <span>Manage This Business</span>
           </v-btn>
@@ -154,6 +179,7 @@
 </template>
 
 <script lang="ts">
+import { CorpTypes, LDFlags } from '@/util/constants'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
@@ -163,7 +189,6 @@ import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
@@ -182,6 +207,10 @@ export default defineComponent({
       default: ''
     },
     initialBusinessName: {
+      type: String,
+      default: ''
+    },
+    businessLegalType: {
       type: String,
       default: ''
     },
@@ -218,6 +247,7 @@ export default defineComponent({
     const businessIdentifierRules = ref(null)
     const contactInfo = ref(null)
     const passcode = ref('') // aka password or proprietor/partner
+    const proprietorPartnerName = ref('') // aka password or proprietor/partner name
     const folioNumber = ref('')
     let formValidation = false
     const isLoading = ref(false)
@@ -227,12 +257,17 @@ export default defineComponent({
     const helpDialog = ref<HelpDialog>()
     const passcodeOption = ref(false)
     const emailOption = ref(false)
+    const nameOption = ref(false)
     const enableDelegationFeature = ref(false)
     const requestAuthBusinessOption = ref(false)
     const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
+
+    const isBusinessLegalTypeSPorGP = computed(() => {
+      return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
+    })
 
     const enableBusinessNrSearch = computed(() => {
       return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
@@ -282,6 +317,13 @@ export default defineComponent({
       return 15
     })
 
+    const proprietorPartnerNameRules = computed(() => {
+      return [
+        (v) => !!v || 'Proprietor or Partner Name is required',
+        (v) => v.length <= 150 || 'Maximum 150 characters'
+      ]
+    })
+
     const passcodeRules = computed(() => {
       if (isFirm.value) {
         return [
@@ -317,25 +359,18 @@ export default defineComponent({
     })
 
     const isFormValid = computed(() => {
-      // if user is a staff user or sbc staff user, then only require the business identifier
-      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
-        return true
-      }
       let isValid = false
-      const isModifyFormValid = (
-        !!businessIdentifier.value &&
-        !!passcode.value &&
-        (!isFirm.value || isCertified.value) &&
-        (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
-        addBusinessForm.value.validate()
-      )
-      // if user is a staff user or sbc staff user, then only require the business identifier
-      if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
-        return true
-      }
-
-      if (isModifyFormValid) {
+      if (isBusinessLegalTypeSPorGP) {
+        isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
+      } else if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
         isValid = true
+      } else {
+        isValid =
+          !!businessIdentifier.value &&
+          !!passcode.value &&
+          (!isFirm.value || isCertified.value) &&
+          (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
+          addBusinessForm.value.validate()
       }
       return isValid
     })
@@ -351,9 +386,11 @@ export default defineComponent({
     // Methods
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
+      proprietorPartnerName.value = ''
       authorizationName.value = ''
       passcodeOption.value = false
       emailOption.value = false
+      nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
       if (!props.isStaffOrSbcStaff) {
@@ -363,6 +400,10 @@ export default defineComponent({
       if (emitCancel) {
         emit('on-cancel')
       }
+    }
+
+    const onAuthorizationEmailSentClose = () => {
+      emit('on-cancel')
     }
 
     const handleException = (exception) => {
@@ -379,6 +420,7 @@ export default defineComponent({
       }
     }
 
+
     const addBusinessToList = async (businessID) => {
       let businessData: LoginPayload = { businessIdentifier: businessID }
       if (!props.isStaffOrSbcStaff) {
@@ -387,35 +429,21 @@ export default defineComponent({
       return addBusiness(businessData)
     }
 
-    const add = async (businessID) => {
-      if (emailOption.value) {
-        try {
-          // TODO will fix this after BE is ready.
-          // const payload: CreateAffiliationInvitation = {
-          //   fromOrgId: number,
-          //   businessIdentifier: businessIdentifier.value,
-          // }
-          // await AffiliationInvitationService.createInvitation()
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        } finally {
-          showAuthorizationEmailSentDialog.value = true
-        }
-        return
-      }
-      if (!props.isStaffOrSbcStaff) {
-        addBusinessForm.value.validate()
-        formValidation = isFormValid.value
-      } else {
-        formValidation = true
-      }
-      if (formValidation) {
+
+      addBusinessForm.value.validate()
+      if (isFormValid.value) {
         isLoading.value = true
         try {
           // try to add business
-          const addResponse = await addBusinessToList(businessID)
-
+          let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
+          if (!props.isStaffOrSbcStaff) {
+            businessData = {
+              ...businessData,
+              certifiedByName: authorizationName.value,
+              passCode: isBusinessLegalTypeSPorGP ? proprietorPartnerName.value : passcode.value
+            }
+          }
+          const addResponse = await addBusiness(businessData)
           // check if add didn't succeed
           if (addResponse?.status !== StatusCodes.CREATED) {
             emit('add-unknown-error')
@@ -477,6 +505,7 @@ export default defineComponent({
       requestAuthRegistryOption,
       requestAuthBusinessOption,
       emailOption,
+      nameOption,
       passcodeOption,
       isDialogVisible,
       addBusinessForm,
@@ -484,12 +513,14 @@ export default defineComponent({
       businessName,
       businessIdentifier,
       passcode,
+      proprietorPartnerName,
       folioNumber,
       isLoading,
       isCertified,
       authorizationName,
       authorizationLabel,
       authorizationMaxLength,
+      isBusinessLegalTypeSPorGP,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
       isCooperative,
@@ -501,11 +532,13 @@ export default defineComponent({
       passcodeHint,
       passcodeMaxLength,
       passcodeRules,
+      proprietorPartnerNameRules,
       passwordText,
       helpDialogBlurb,
       isFormValid,
-      add,
+      manageBusiness,
       resetForm,
+      onAuthorizationEmailSentClose,
       formatBusinessIdentifier,
       openHelp,
       businessContactEmail,

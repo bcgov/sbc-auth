@@ -4,11 +4,8 @@
           <span>Authorization Email Sent</span>
         </v-card-title>
         <v-card-text>
-          An email was sent to {{  email }}
-
-          Confirm your access by clicking the link inside. This will add the business to your Business Registry List.
-
-          The link is valid for 15 minutes.
+          <p>An email was sent to <b>{{ email }}</b></p>
+          <p>Confirm your access by clicking the link inside. This will add the business to your Business Registry List. The link is valid for 15 minutes.</p>
         </v-card-text>
         <v-card-actions class="form__btns">
           <span
@@ -25,9 +22,16 @@
     </v-card>
 </template>
 <script lang="ts">
-import { defineComponent } from '@vue/composition-api'
+import { computed, defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
+  name: 'AuthorizationEmailSent',
+  props: {
+    email: {
+      type: String,
+      default: ''
+    }
+  },
   setup (props, { emit }) {
     const openHelp = () => {
       emit('open-help')

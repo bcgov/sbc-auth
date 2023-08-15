@@ -16,7 +16,7 @@
           <v-icon large color="success">mdi-check</v-icon>
         </slot>
 
-        <span>
+        <span class="modal-dialog-title">
           <slot name="title">{{ title }}</slot>
         </span>
 
@@ -29,7 +29,7 @@
       <!-- text -->
       <v-card-text>
         <slot name="text">
-          <div v-html="text"></div>
+          <div class="modal-dialog-text" v-html="text"></div>
         </slot>
       </v-card-text>
 
@@ -46,34 +46,57 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { defineComponent, ref } from '@vue/composition-api'
 
-@Component({})
-export default class ModalDialog extends Vue {
-  protected isOpen = false
+export default defineComponent({
+  name: 'ModalDialog',
+  props: {
+    title: { type: String, default: '' },
+    text: { type: String, default: '' },
+    showIcon: { type: Boolean, default: true },
+    showActions: { type: Boolean, default: true },
+    isPersistent: { type: Boolean, default: false },
+    fullscreenOnMobile: { type: Boolean, default: false },
+    isScrollable: { type: Boolean, default: false },
+    dialogClass: { type: String, default: '' },
+    maxWidth: { type: String, default: '' },
+    showCloseIcon: { type: Boolean, default: false }
+  },
+  setup () {
+    const isOpen = ref(false)
 
-  @Prop({ default: '' }) readonly title: string
-  @Prop({ default: '' }) readonly text: string
-  @Prop({ default: true }) readonly showIcon: boolean
-  @Prop({ default: true }) readonly showActions: boolean
-  @Prop({ default: false }) readonly isPersistent: boolean
-  @Prop({ default: false }) readonly fullscreenOnMobile: boolean
-  @Prop({ default: false }) readonly isScrollable: boolean
-  @Prop({ default: '' }) readonly dialogClass: string
-  @Prop({ default: '' }) readonly maxWidth: string
-  @Prop({ default: false }) readonly showCloseIcon: boolean
+    const open = () => {
+      isOpen.value = true
+    }
 
-  public open () {
-    this.isOpen = true
+    const close = () => {
+      isOpen.value = false
+    }
+
+    return {
+      open,
+      close,
+      isOpen
+    }
   }
-
-  public close () {
-    this.isOpen = false
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>
+  .notify-dialog {
+    background: red;
+  }
+  .modal-dialog-title {
+    text-align: center;
+    word-break: break-word;
+    font-size: var(--FONT_SIZE_TITLE);
+    color: var(--COLOR_GRAY9);
+  }
+  .modal-dialog-text {
+    text-align: center;
+    font-size: var(--FONT_SIZE_TEXT);
+    color: var(--COLOR_GRAY7);
+  }
   // Notify Dialog Variant
   // Vertical stacked title container (icon w/ text)
   // Center-aligned text throughout
@@ -98,5 +121,8 @@ export default class ModalDialog extends Vue {
  .info-dialog .v-card__actions {
     justify-content: center;
     padding: 1.5rem;
+  }
+  [title] {
+    text-align: center;
   }
 </style>

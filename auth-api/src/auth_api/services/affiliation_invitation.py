@@ -14,7 +14,7 @@
 """Service for managing Affiliation Invitation data."""
 from dataclasses import fields
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 from urllib.parse import urlencode
 
 from flask import current_app
@@ -36,6 +36,7 @@ from auth_api.models.entity import Entity as EntityModel  # noqa: I005
 from auth_api.models.org import Org as OrgModel
 from auth_api.schemas import AffiliationInvitationSchema
 from auth_api.services.entity import Entity as EntityService
+from auth_api.services.org import Org as OrgService
 from auth_api.services.user import User as UserService
 from auth_api.utils.enums import AccessType, AffiliationInvitationType, InvitationStatus, LoginSource, Status
 from auth_api.utils.roles import ADMIN, COORDINATOR, STAFF
@@ -87,6 +88,9 @@ class AffiliationInvitation:
     def enrich_affiliation_invitations_dict_list_with_business_data(cls, affiliation_invitation_dicts: List[Dict]) -> \
             List[AffiliationInvitationData]:
         """Enrich affiliation invitation model data with business details."""
+        if not affiliation_invitation_dicts:
+            return []
+
         token = RestService.get_service_account_token(
             config_id='ENTITY_SVC_CLIENT_ID',
             config_secret='ENTITY_SVC_CLIENT_SECRET')
@@ -130,7 +134,8 @@ class AffiliationInvitation:
         return result
 
     @staticmethod
-    def _validate_prerequisites(business_identifier, from_org_id, to_org_id):
+    def _validate_prerequisites(business_identifier, from_org_id, to_org_id,
+                                affiliation_invitation_type=AffiliationInvitationType.EMAIL):
         # Validate from organizations exists
         if not (from_org := OrgModel.find_by_org_id(from_org_id)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -144,15 +149,16 @@ class AffiliationInvitation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         # Validate that entity contact exists
-        if not (contact := entity.get_contact()):
+        if not (contact := entity.get_contact()) and \
+                affiliation_invitation_type != AffiliationInvitationType.REQUEST:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Validate that entity contact email exists
-        if not contact.email:
+        if contact and not contact.email:
             raise BusinessException(Error.INVALID_BUSINESS_EMAIL, None)
 
         # Check if affiliation already exists
-        if AffiliationModel.find_affiliation_by_org_and_entity_ids(to_org_id, entity.identifier):
+        if AffiliationModel.find_affiliation_by_org_and_entity_ids(from_org_id, entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
 
         # Check if an affiliation invitation already exists
@@ -161,6 +167,35 @@ class AffiliationInvitation:
                                                                          entity_id=entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
         return entity, from_org
+
+    @staticmethod
+    def get_invitation_email(affiliation_invitation_type: AffiliationInvitationType,
+                             entity: Optional[EntityService] = None,
+                             org_id: Optional[int] = None) -> Optional[str]:
+        """Get affiliation invitation email based on provided params."""
+        if affiliation_invitation_type == AffiliationInvitationType.REQUEST:
+            contacts_dict = OrgService.get_contacts(org_id=org_id)
+            if contacts := contacts_dict.get('contacts', None):
+                return contacts[0].get('email', None) if contacts else None
+
+            # this guardrail is due to the fact that previously contact was not mandatory on Orgs. It is now.
+            current_app.logger.error(f'failed to retrieve contact for org_id:{org_id}')
+            return None
+
+        if affiliation_invitation_type == AffiliationInvitationType.EMAIL:
+            return entity.get_contact().email
+
+        return None
+
+    @staticmethod
+    def _get_invitation_email(affiliation_invitation_info: Dict,
+                              entity: OrgService = None, org_id: Optional[int] = None) -> Optional[str]:
+        if invitation_type := AffiliationInvitationType.\
+                from_value(affiliation_invitation_info.get('type', AffiliationInvitationType.EMAIL.value)):
+            return AffiliationInvitation.get_invitation_email(affiliation_invitation_type=invitation_type,
+                                                              entity=entity, org_id=org_id)
+
+        return affiliation_invitation_info.get('recipientEmail', None)
 
     @staticmethod
     @user_context
@@ -172,6 +207,7 @@ class AffiliationInvitation:
         from_org_id = affiliation_invitation_info['fromOrgId']
         to_org_id = affiliation_invitation_info['toOrgId']
         business_identifier = affiliation_invitation_info['businessIdentifier']
+        affiliation_invitation_type = AffiliationInvitationType.from_value(affiliation_invitation_info.get('type'))
 
         if from_org_id == to_org_id:
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
@@ -180,10 +216,10 @@ class AffiliationInvitation:
                    one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
         entity, from_org = AffiliationInvitation. \
-            _validate_prerequisites(business_identifier, from_org_id, to_org_id)
+            _validate_prerequisites(business_identifier=business_identifier, from_org_id=from_org_id,
+                                    to_org_id=to_org_id, affiliation_invitation_type=affiliation_invitation_type)
 
         affiliation_invitation_info['entityId'] = entity.identifier
-        affiliation_invitation_info['recipientEmail'] = entity.get_contact().email
 
         if from_org.access_type == AccessType.ANONYMOUS.value:  # anonymous account never get bceid or bcsc choices
             mandatory_login_source = LoginSource.BCROS.value
@@ -204,6 +240,11 @@ class AffiliationInvitation:
             affiliation_invitation_info['recipientEmail'] = None
             affiliation_invitation_info['type'] = AffiliationInvitationType.PASSCODE.value
 
+        affiliation_invitation_info['recipientEmail'] = \
+            AffiliationInvitation._get_invitation_email(affiliation_invitation_info=affiliation_invitation_info,
+                                                        entity=entity,
+                                                        org_id=to_org_id)
+
         affiliation_invitation = AffiliationInvitationModel.create_from_dict(affiliation_invitation_info,
                                                                              user.identifier)
         confirmation_token = AffiliationInvitation.generate_confirmation_token(affiliation_invitation.id,
@@ -218,9 +259,10 @@ class AffiliationInvitation:
             token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
                                                           config_secret='ENTITY_SVC_CLIENT_SECRET')
             business = AffiliationInvitation._get_business_details(business_identifier, token)
-            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation,
-                                                              business['business']['legalName'],
-                                                              f'{invitation_origin}/{context_path}')
+            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
+                                                              business_name=business['business']['legalName'],
+                                                              app_url=f'{invitation_origin}/{context_path}',
+                                                              email_addresses=affiliation_invitation.recipient_email)
         else:
             return AffiliationInvitation.accept_affiliation_invitation(affiliation_invitation.id,
                                                                        user, invitation_origin,
@@ -283,9 +325,10 @@ class AffiliationInvitation:
             business = AffiliationInvitation._get_business_details(entity.business_identifier,
                                                                    RestService.get_service_account_token())
 
-            AffiliationInvitation.send_affiliation_invitation(invitation,
-                                                              business['business']['legalName'],
-                                                              f'{invitation_origin}/{context_path}')
+            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation=invitation,
+                                                              business_name=business['business']['legalName'],
+                                                              app_url=f'{invitation_origin}/{context_path}',
+                                                              email_addresses=invitation.recipient_email)
         # Expire invitation
         elif new_status == InvitationStatus.EXPIRED.value:
             invitation = self._model.set_status(InvitationStatus.EXPIRED.value)
@@ -366,8 +409,8 @@ class AffiliationInvitation:
     def send_affiliation_invitation(affiliation_invitation: AffiliationInvitationModel,
                                     business_name,
                                     app_url=None,
-                                    query_params: Dict[str, any] = None,
-                                    is_authorized=None):
+                                    is_authorized=None,
+                                    email_addresses=None):
         """Send the email notification."""
         current_app.logger.debug('<send_affiliation_invitation')
         affiliation_invitation_type = affiliation_invitation.type
@@ -378,7 +421,7 @@ class AffiliationInvitation:
         data = {
             'accountId': from_org_id,
             'businessName': business_name,
-            'emailAddresses': affiliation_invitation.recipient_email,
+            'emailAddresses': email_addresses,
             'orgName': from_org_name
         }
         notification_type = 'affiliationInvitation'
@@ -388,10 +431,15 @@ class AffiliationInvitation:
             data['contextUrl'] = AffiliationInvitation._get_token_confirm_path(
                 app_url=app_url,
                 org_name=from_org_name,
-                token=affiliation_invitation.token,
-                query_params=query_params)
+                token=affiliation_invitation.token
+            )
 
         elif affiliation_invitation_type == AffiliationInvitationType.REQUEST.value:
+            if not email_addresses:
+                # in case that this is old org, and it did not have email, or email was not explicitly provided
+                # skip email sending
+                return
+
             # if ACCESS REQUEST type, add data for access request type
             data['fromOrgName'] = affiliation_invitation.from_org.name
             data['toOrgName'] = to_org_name
@@ -424,9 +472,14 @@ class AffiliationInvitation:
                                   token=token)
         business_name = business['business']['legalName']
 
+        email_address = AffiliationInvitation. \
+            get_invitation_email(affiliation_invitation_type=AffiliationInvitationType.REQUEST,
+                                 org_id=affiliation_invitation.from_org_id)
+
         AffiliationInvitation.send_affiliation_invitation(
             affiliation_invitation=affiliation_invitation,
             business_name=business_name,
+            email_addresses=email_address,
             is_authorized=is_authorized
         )
 

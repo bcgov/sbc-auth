@@ -419,7 +419,8 @@ def test_send_affiliation_invitation_magic_link(publish_to_mailer_mock,
 
     AffiliationInvitationService.send_affiliation_invitation(
         affiliation_invitation=affiliation_invitation,
-        business_name=business_name
+        business_name=business_name,
+        email_addresses=affiliation_invitation.recipient_email
     )
 
     expected_data = {
@@ -446,7 +447,8 @@ def test_send_affiliation_invitation_request_sent(publish_to_mailer_mock,
 
     AffiliationInvitationService.send_affiliation_invitation(
         affiliation_invitation=affiliation_invitation,
-        business_name=business_name
+        business_name=business_name,
+        email_addresses=affiliation_invitation.recipient_email
     )
 
     expected_data = {
@@ -475,6 +477,10 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
         _setup_affiliation_invitation_data(affiliation_invitation_type='REQUEST',
                                            affiliation_invitation_status_code=InvitationStatus.ACCEPTED.value)
     business_name = 'BarFoo, Inc.'  # will get it from business mock 'get_business' method
+    expected_email = 'expected@email.com'
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.OrgService.get_contacts',
+                        lambda org_id: {'contacts': [
+                            {'email': expected_email}]} if org_id == affiliation_invitation.from_org_id else None)
 
     # simulate subquery for entity
     entity = EntityModel()
@@ -489,7 +495,7 @@ def test_send_affiliation_invitation_request_authorized(publish_to_mailer_mock,
     expected_data = {
         'accountId': affiliation_invitation.from_org.id,
         'businessName': business_name,
-        'emailAddresses': affiliation_invitation.recipient_email,
+        'emailAddresses': expected_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
         'toOrgName': affiliation_invitation.to_org.name,
@@ -511,6 +517,12 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
     affiliation_invitation = \
         _setup_affiliation_invitation_data(affiliation_invitation_type='REQUEST',
                                            affiliation_invitation_status_code=InvitationStatus.FAILED.value)
+
+    expected_email = 'expected@email.com'
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.OrgService.get_contacts',
+                        lambda org_id: {'contacts': [
+                            {'email': expected_email}]} if org_id == affiliation_invitation.from_org_id else None)
+
     business_name = 'BarFoo, Inc.'  # will get it from business mock 'get_business' method
 
     # simulate subquery for entity
@@ -526,7 +538,7 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
     expected_data = {
         'accountId': affiliation_invitation.from_org.id,
         'businessName': business_name,
-        'emailAddresses': affiliation_invitation.recipient_email,
+        'emailAddresses': expected_email,
         'orgName': affiliation_invitation.from_org.name,
         'fromOrgName': affiliation_invitation.from_org.name,
         'toOrgName': affiliation_invitation.to_org.name,
