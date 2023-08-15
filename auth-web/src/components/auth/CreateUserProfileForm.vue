@@ -142,7 +142,7 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
 
     $refs: {
       form: HTMLFormElement,
-      errorDialog: ModalDialog
+      errorDialog: InstanceType<typeof ModalDialog>
     }
 
     private usernameRules = [

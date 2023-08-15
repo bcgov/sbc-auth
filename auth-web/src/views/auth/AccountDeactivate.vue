@@ -189,9 +189,9 @@ export default class AccountDeactivate extends Vue {
   private isLoading = false
 
   $refs: {
-    confirmModal: ModalDialog,
-    successModal: ModalDialog,
-    errorModal: ModalDialog
+    confirmModal: InstanceType<typeof ModalDialog>,
+    successModal: InstanceType<typeof ModalDialog>,
+    errorModal: InstanceType<typeof ModalDialog>
 
   }
   private confirmationsList: { text: string, type?: string, selected: boolean }[] = [

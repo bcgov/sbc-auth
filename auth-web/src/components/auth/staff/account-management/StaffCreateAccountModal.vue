@@ -62,7 +62,7 @@ export default class StaffCreateAccountModal extends Vue {
   public accountTypes: any = StaffCreateAccountsTypes
 
   $refs: {
-    createAccountDialog: ModalDialog
+    createAccountDialog: InstanceType<typeof ModalDialog>
   }
 
   public open () {

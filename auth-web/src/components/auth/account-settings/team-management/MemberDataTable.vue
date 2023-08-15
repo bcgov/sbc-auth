@@ -272,7 +272,7 @@ export default class MemberDataTable extends Vue {
   private formatDate = CommonUtils.formatDisplayDate
 
   $refs: {
-    resetAuthenticatorDialog: ModalDialog
+    resetAuthenticatorDialog: InstanceType<typeof ModalDialog>
   }
 
   private get loginSourceEnum ():typeof LoginSource {

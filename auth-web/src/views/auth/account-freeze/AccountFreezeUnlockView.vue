@@ -97,7 +97,7 @@ export default class AccountFreezeUnlockView extends Vue {
   private isLoading: boolean = false
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   private stepperConfig: Array<StepConfiguration> =
