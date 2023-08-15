@@ -392,7 +392,9 @@ export default defineComponent({
       nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
-      addBusinessForm.value.resetValidation()
+      if (!props.isStaffOrSbcStaff) {
+        addBusinessForm.value.resetValidation()
+      }
       isLoading.value = false
       if (emitCancel) {
         emit('on-cancel')

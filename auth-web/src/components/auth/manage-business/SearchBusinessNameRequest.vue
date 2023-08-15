@@ -47,6 +47,7 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
+        ref="manageBusinessDialog"
         :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
@@ -136,6 +137,7 @@ export default class SearchBusinessNameRequest extends Vue {
 
   $refs: {
     addNRDialog: InstanceType<typeof ModalDialog>
+    manageBusinessDialog: InstanceType<typeof ManageBusinessDialog>
   }
   addBusiness = async (loginPayload: LoginPayload) => {
     return this.$store.dispatch('business/addBusiness', loginPayload)
@@ -191,6 +193,7 @@ export default class SearchBusinessNameRequest extends Vue {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
         await this.addBusiness(businessData)
         this.$emit('add-success', this.businessIdentifier)
+        this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {
         console.error('Error adding business: ', err)
       }
