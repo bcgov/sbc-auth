@@ -64,7 +64,7 @@ export default class ConfirmCancelButton extends Vue {
   @OrgModule.Action('resetAccountSetupProgress') private resetAccountSetupProgress!: () => Promise<void>
 
   $refs: {
-      confirmCancelDialog: ModalDialog
+      confirmCancelDialog: InstanceType<typeof ModalDialog>
   }
 
   private async confirmDialogResponse (response) {

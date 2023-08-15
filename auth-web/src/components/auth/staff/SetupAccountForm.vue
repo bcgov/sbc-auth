@@ -171,7 +171,7 @@ export default class SetupAccountForm extends Vue {
 
   $refs: {
     directorSearchForm: HTMLFormElement,
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   private readonly accountNameRules = [

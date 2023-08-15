@@ -272,11 +272,11 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
   private readonly pendingOrgMembers!: Member[]
 
   $refs: {
-    successDialog: ModalDialog
-    errorDialog: ModalDialog
-    inviteUsersDialog: ModalDialog
-    confirmActionDialog: ModalDialog
-    confirmActionDialogWithQuestion: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    errorDialog: InstanceType<typeof ModalDialog>
+    inviteUsersDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>
   }
 
   private get pendingApprovalCount () {

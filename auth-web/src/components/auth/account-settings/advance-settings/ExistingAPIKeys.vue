@@ -151,8 +151,8 @@ export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
   public selectedApi: any = {}
 
   $refs: {
-    successDialog: ModalDialog
-    confirmActionDialog: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialog: InstanceType<typeof ModalDialog>
   }
 
   public apliKeyList = []
