@@ -393,6 +393,7 @@ export default defineComponent({
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
       if (!props.isStaffOrSbcStaff) {
+        // This call will fal if user is Staff or SBC Staff, so in that case skip this line.
         addBusinessForm.value.resetValidation()
       }
       isLoading.value = false
