@@ -2,13 +2,13 @@ import VueI18n, { LocaleMessages } from 'vue-i18n'
 import { castToVueI18n, createI18n } from 'vue-i18n-bridge'
 import Vue from 'vue'
 import enLocals from '@/locales/en.json'
+
 Vue.use(VueI18n, { bridge: true, legacy: false })
 
 function loadLocaleMessages (): LocaleMessages {
-  const locales = enLocals
   const messages: LocaleMessages = { en: {} }
-  Object.keys(locales).forEach((key) => {
-    messages['en'][key] = locales[key]
+  Object.keys(enLocals).forEach((key) => {
+    messages['en'][key] = enLocals[key]
   })
   return messages
 }

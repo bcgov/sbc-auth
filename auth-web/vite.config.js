@@ -39,7 +39,6 @@ export default defineConfig({
     postcssNesting,
     VueI18nPlugin({
       bridge: true,
-      include: path.resolve(__dirname, './src/locales/**'),
       // Turn this off because we have html in our messages.
       strictMessage: false
     })
