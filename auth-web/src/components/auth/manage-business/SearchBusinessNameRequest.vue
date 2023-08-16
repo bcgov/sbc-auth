@@ -51,6 +51,7 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
+        ref="manageBusinessDialog"
         :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
@@ -58,7 +59,7 @@
         :isStaffOrSbcStaff="isGovStaffAccount"
         :userFirstName="userFirstName"
         :userLastName="userLastName"
-        @add-success="showAddSuccessModal()"
+        @add-success="showAddSuccessModal"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
@@ -101,9 +102,9 @@ import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { LoginPayload } from '@/models/business'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-
 import { mapActions } from 'vuex'
 
 @Component({
@@ -140,11 +141,14 @@ export default class SearchBusinessNameRequest extends Vue {
 
   $refs: {
     addNRDialog: InstanceType<typeof ModalDialog>
+    manageBusinessDialog: InstanceType<typeof ManageBusinessDialog>
   }
-
-  showAddSuccessModal () {
+  addBusiness = async (loginPayload: LoginPayload) => {
+    return this.$store.dispatch('business/addBusiness', loginPayload)
+  }
+  showAddSuccessModal (event) {
     this.clearSearch++
-    this.$emit('add-success')
+    this.$emit('add-success', event)
   }
   showInvalidCodeModal (event) {
     this.$emit('add-failed-invalid-code', event)
@@ -183,11 +187,24 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
-  businessEvent (event: { name: string, identifier: string, legalType: string }) {
+
+  async businessEvent (event: { name: string, identifier: string, legalType: string }) {
     this.businessName = event?.name || ''
     this.businessIdentifier = event?.identifier || ''
     this.businessLegalType = event?.legalType || ''
-    this.showManageBusinessDialog = true
+    if (this.isGovStaffAccount) {
+      try {
+        let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
+        await this.addBusiness(businessData)
+        this.$emit('add-success', this.businessIdentifier)
+        this.$refs.manageBusinessDialog.resetForm(true)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Error adding business: ', err)
+      }
+    } else {
+      this.showManageBusinessDialog = true
+    }
   }
   cancelEvent () {
     this.showManageBusinessDialog = false

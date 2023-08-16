@@ -144,7 +144,7 @@
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
-        @add-success="showAddSuccessModal()"
+        @add-success="showAddSuccessModal"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
@@ -585,7 +585,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showInvalidCodeModal (label: string) {
     this.showManageBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
-    this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
+    this.dialogText = `Unable to add the business. The provided ${label.toLowerCase()} is invalid.`
     this.$refs.errorDialog.open()
   }
 
