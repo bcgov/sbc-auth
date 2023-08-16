@@ -1,4 +1,4 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import Signin from '@/views/auth/SigninView.vue'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
@@ -32,7 +32,7 @@ describe('Signin.vue', () => {
 
     let vuetify = new Vuetify({})
 
-    wrapper = mount(Signin, {
+    wrapper = shallowMount(Signin, {
       store,
       vuetify,
       localVue

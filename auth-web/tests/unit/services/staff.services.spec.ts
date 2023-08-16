@@ -3,18 +3,6 @@ import { ProductsRequestBody } from '@/models/Staff'
 import StaffService from '../../../src/services/staff.services'
 
 vi.mock('../../../src/services/staff.services')
-/*
-vi.mock('axios', () => ({
-  create: vi.fn(() => Promise.resolve({ data: { }})),
-  get: vi.fn(() => Promise.resolve({ data: {mockob}})),
-  all: vi.fn(),
-  post: vi.fn(() => Promise.resolve({ data: {}})),
-  put: vi.fn(),
-  patch: vi.fn()
-}), {
-  virtual: true
-})
-*/
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
