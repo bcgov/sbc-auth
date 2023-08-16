@@ -117,6 +117,23 @@
                 </template>
                 <v-list>
                   <v-list-item
+                    v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
+                    class="actions-dropdown_item my-1"
+                    data-test="remove-button"
+                    v-can:REMOVE_BUSINESS.disable
+                    @click="removeBusiness(item)"
+                  >
+                    <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+                      <v-icon small>mdi-delete-forever</v-icon>
+                      <span class="pl-1">Delete {{tempDescription(item)}}</span>
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-else>
+                      <v-icon small>mdi-delete</v-icon>
+                      <span class="pl-1">Remove From Table</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    v-else
                     class="actions-dropdown_item my-1"
                     @click="openNewAffiliationInvite(item)"
                   >
@@ -230,7 +247,7 @@ export default defineComponent({
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
-  emits: ['add-unknown-error'],
+  emits: ['add-unknown-error', 'remove-affiliation-invitation'],
   mixins: [DateMixin],
   setup (props, context: SetupContext) {
     const isloading = false
@@ -405,11 +422,11 @@ export default defineComponent({
     const actionHandler = (business: Business) => {
       const affiliationInviteInfo = business.affiliationInvites[0]
       const invitationStatus = affiliationInviteInfo.status
-      if (invitationStatus === AffiliationInvitationStatus.Pending) {
-        OrgService.cancelAffiliationInvitation(affiliationInviteInfo.fromOrg.id, affiliationInviteInfo.id)
-      } else if (invitationStatus === AffiliationInvitationStatus.Failed) {
-        // remove from list action
-        OrgService.removeAffiliationInvitation(affiliationInviteInfo.fromOrg.id, affiliationInviteInfo.id)
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed].includes(invitationStatus)) {
+        OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          .then(() => {
+            context.emit('remove-affiliation-invitation')
+          })
       } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
         open(business)
       } else {

@@ -64,6 +64,9 @@ class AffiliationInvitationData:  # pylint: disable=too-many-instance-attributes
 
         business_identifier: str
         name: str
+        corp_type: str
+        state: str
+        corp_sub_type: Optional[str]
 
     @dataclass
     class OrgDetails:
