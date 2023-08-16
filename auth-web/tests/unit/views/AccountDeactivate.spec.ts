@@ -1,5 +1,5 @@
 import '@/composition-api-setup'
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import Vue from 'vue'
