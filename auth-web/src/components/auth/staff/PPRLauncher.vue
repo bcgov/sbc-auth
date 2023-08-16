@@ -2,7 +2,6 @@
   <v-card class="product-container" :href="pprUrl">
     <v-row align="center" no-gutters>
       <v-col cols="auto">
-        <!-- to use a dynamic src use 'require(<path>)' -->
         <img class="product-img" :src="getImgUrl(img)" />
       </v-col>
       <v-col class="product-info" align-self="baseline">
@@ -38,8 +37,8 @@ export default class PPRLauncher extends Vue {
     return ConfigHelper.getPPRWebUrl()
   }
 
-  async getImgUrl (img) {
-    return await import(`/* @vite-ignore */ @/assets/${img}`)
+  private getImgUrl (img) {
+    return new URL(`/src/assets/img/${img}`, import.meta.url)
   }
 
   @Watch('currentUser', { deep: true, immediate: true })
