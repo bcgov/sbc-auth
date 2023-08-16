@@ -22,17 +22,17 @@ describe('Codes service', () => {
     }]
     vi.doMock('axios', () => {
       return {
-          get: vi.fn().mockReturnValue({ data: testCodeSuspensionReasons }),
-          interceptors: {
-              request: {
-                  use: vi.fn(),
-                  eject: vi.fn()
-              },
-              response: {
-                  use: vi.fn(),
-                  eject: vi.fn()
-              }
+        get: vi.fn().mockReturnValue({ data: testCodeSuspensionReasons }),
+        interceptors: {
+          request: {
+            use: vi.fn(),
+            eject: vi.fn()
+          },
+          response: {
+            use: vi.fn(),
+            eject: vi.fn()
           }
+        }
       }
     })
     CodesService.getCodes('suspension-reason-codes').then((response) => {

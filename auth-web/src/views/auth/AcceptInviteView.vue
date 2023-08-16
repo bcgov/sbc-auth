@@ -64,13 +64,10 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
       const affidavitNeededURL = affidavitNeeded ? `?affidavit=true` : ''
       if (!this.userProfile.userTerms.isTermsOfUseAccepted) {
         await this.$router.push(`/${Pages.USER_PROFILE_TERMS}/${this.token}${affidavitNeededURL}`)
-        return
       } else if (this.token && affidavitNeeded) {
         await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
-        return
       } else if (!this.userContact && this.isProfileNeeded()) {
         await this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
-        return
       } else {
         const invitation = await this.acceptInvitation(this.token)
         const invitingOrg = invitation?.membership[0]?.org
@@ -98,7 +95,6 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         }
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
-        return
       }
     } catch (exception) {
       this.inviteError = true

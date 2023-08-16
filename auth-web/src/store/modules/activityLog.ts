@@ -4,12 +4,12 @@ import ActivityService from '@/services/activityLog.services'
 
 @Module({ namespaced: true })
 export default class ActvityLogModule extends VuexModule {
-    currentOrgActivity: ActivityLog
+  currentOrgActivity: ActivityLog
 
     @Mutation
-    public setCurrentOrgActivityLog (activityLog: ActivityLog) {
-      this.currentOrgActivity = activityLog
-    }
+  public setCurrentOrgActivityLog (activityLog: ActivityLog) {
+    this.currentOrgActivity = activityLog
+  }
 
     @Action({ commit: 'setCurrentOrgActivityLog', rawError: true })
     public async getActivityLog (filterParams:ActivityLogFilterParams): Promise<ActivityLog> {

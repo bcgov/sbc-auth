@@ -5,20 +5,20 @@ import CodesService from '@/services/codes.service'
 
 @Module({ namespaced: true })
 export default class CodesModule extends VuexModule {
-    suspensionReasonCodes: Code[] = []
-    businessSizeCodes: Code[] = []
-    businessTypeCodes: Code[] = []
-    onholdReasonCodes: Code[] = []
+  suspensionReasonCodes: Code[] = []
+  businessSizeCodes: Code[] = []
+  businessTypeCodes: Code[] = []
+  onholdReasonCodes: Code[] = []
 
-    suspensionReasonCodeTable = 'suspension_reason_codes'
-    businessSizeCodeTable = 'business_size_codes'
-    businessTypeCodeTable = 'business_type_codes'
-    onholdReasonCodeTable = 'staff_remark_codes'
+  suspensionReasonCodeTable = 'suspension_reason_codes'
+  businessSizeCodeTable = 'business_size_codes'
+  businessTypeCodeTable = 'business_type_codes'
+  onholdReasonCodeTable = 'staff_remark_codes'
 
     @Mutation
-    public setSuspensionReasonCodes (codes: Code[]) {
-      this.suspensionReasonCodes = codes
-    }
+  public setSuspensionReasonCodes (codes: Code[]) {
+    this.suspensionReasonCodes = codes
+  }
 
     @Mutation
     public setBusinessSizeCodes (codes: Code[]) {

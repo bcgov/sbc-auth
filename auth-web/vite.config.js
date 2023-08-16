@@ -53,6 +53,7 @@ export default defineConfig({
       'vue-i18n-bridge': path.resolve(__dirname, './node_modules/vue-i18n-bridge/dist/vue-i18n-bridge.runtime.esm-bundler.js'),
       // Fix for bcrs-shared-components unit tests fail
       '@bcrs-shared-components/mixins': path.resolve(__dirname, './node_modules/@bcrs-shared-components/mixins/index.ts'),
+      // Fix for module decorator unit tests fail
       'vuex-module-decorators': path.resolve(__dirname, './node_modules/vuex-module-decorators/dist/esm/index.js')
     },
     extensions: ['.js', '.ts', '.vue', '.json', '.css']

@@ -225,43 +225,43 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
     }
   ]
   protected readonly accountTypeMap: EnumDictionary<OrgAccountTypes, OrgMap> =
-  {
-    [OrgAccountTypes.ALL]: {
-    },
-    [OrgAccountTypes.BASIC]: {
-      accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-      orgType: Account.BASIC
-    },
-    [OrgAccountTypes.BASIC_OUT_OF_PROVINCE]: {
-      accessType: [AccessType.EXTRA_PROVINCIAL],
-      orgType: Account.BASIC
-    },
-    [OrgAccountTypes.PREMIUM]: {
-      accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
-      orgType: Account.PREMIUM
-    },
-    [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
-      accessType: [AccessType.EXTRA_PROVINCIAL],
-      orgType: Account.PREMIUM
-    },
-    [OrgAccountTypes.GOVM]: {
-      accessType: [AccessType.GOVM]
-    },
-    [OrgAccountTypes.GOVN]: {
-      accessType: [AccessType.GOVN]
-    },
-    [OrgAccountTypes.DIRECTOR_SEARCH]: {
-      accessType: [AccessType.ANONYMOUS]
-    },
-    [OrgAccountTypes.STAFF]: {
-      accessType: [AccessType.GOVM],
-      orgType: Account.STAFF
-    },
-    [OrgAccountTypes.SBC_STAFF]: {
-      accessType: [AccessType.GOVM],
-      orgType: Account.SBC_STAFF
+    {
+      [OrgAccountTypes.ALL]: {
+      },
+      [OrgAccountTypes.BASIC]: {
+        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
+        orgType: Account.BASIC
+      },
+      [OrgAccountTypes.BASIC_OUT_OF_PROVINCE]: {
+        accessType: [AccessType.EXTRA_PROVINCIAL],
+        orgType: Account.BASIC
+      },
+      [OrgAccountTypes.PREMIUM]: {
+        accessType: [AccessType.REGULAR, AccessType.REGULAR_BCEID],
+        orgType: Account.PREMIUM
+      },
+      [OrgAccountTypes.PREMIUM_OUT_OF_PROVINCE]: {
+        accessType: [AccessType.EXTRA_PROVINCIAL],
+        orgType: Account.PREMIUM
+      },
+      [OrgAccountTypes.GOVM]: {
+        accessType: [AccessType.GOVM]
+      },
+      [OrgAccountTypes.GOVN]: {
+        accessType: [AccessType.GOVN]
+      },
+      [OrgAccountTypes.DIRECTOR_SEARCH]: {
+        accessType: [AccessType.ANONYMOUS]
+      },
+      [OrgAccountTypes.STAFF]: {
+        accessType: [AccessType.GOVM],
+        orgType: Account.STAFF
+      },
+      [OrgAccountTypes.SBC_STAFF]: {
+        accessType: [AccessType.GOVM],
+        orgType: Account.SBC_STAFF
+      }
     }
-  }
   protected readonly accountTypes = Array.from(Object.keys(this.accountTypeMap))
   protected formatDate = CommonUtils.formatDisplayDate
   protected totalAccountsCount = 0
@@ -372,18 +372,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   protected getAccountTypeFromOrgAndAccessType (org:Organization): any {
     const entries = Object.entries(this.accountTypeMap)
     const byAccessTypeAndOrgType = entries.find(([key, value]) =>
-                                                  value?.accessType?.includes(org.accessType) &&
+      value?.accessType?.includes(org.accessType) &&
                                                   value?.orgType === org.orgType)
     if (byAccessTypeAndOrgType) {
       return byAccessTypeAndOrgType[0]
     }
     const byAccessType = entries.find(([key, value]) =>
-                                      value?.accessType?.includes(org.accessType))
+      value?.accessType?.includes(org.accessType))
     if (byAccessType) {
       return byAccessType[0]
     }
     const byOrgType = entries.find(([key, value]) =>
-                                    value?.orgType === org.orgType)
+      value?.orgType === org.orgType)
     if (byOrgType) {
       return byOrgType[0]
     }

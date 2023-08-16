@@ -5,14 +5,14 @@ import TaskService from '@/services/task.services'
 
 @Module({ namespaced: true })
 export default class TaskModule extends VuexModule {
-    currentTask: Task
-    pendingTasksCount: number = null
-    rejectedTasksCount: number = null
+  currentTask: Task
+  pendingTasksCount: number = null
+  rejectedTasksCount: number = null
 
     @Mutation
-    public setCurrentTask (task: Task) {
-      this.currentTask = task
-    }
+  public setCurrentTask (task: Task) {
+    this.currentTask = task
+  }
 
     @Mutation
     public setPendingTasksCount (pendingTasksCount: number) {

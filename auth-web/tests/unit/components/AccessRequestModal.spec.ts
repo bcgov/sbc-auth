@@ -6,9 +6,9 @@ import MockI18n from '../test-utils/test-data/MockI18n'
 import { OnholdOrRejectCode } from '@/util/constants'
 
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import VueCompositionAPI from '@vue/composition-api'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})

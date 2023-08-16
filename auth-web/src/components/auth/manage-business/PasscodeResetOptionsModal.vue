@@ -75,40 +75,40 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
   }
 })
 export default class PasscodeResetOptionsModal extends Vue {
-    private isResetPasscode: boolean = false
-    private emailAddress = ''
-    private confirmedEmailAddress = ''
-    private emailRules = CommonUtils.emailRules()
+  private isResetPasscode: boolean = false
+  private emailAddress = ''
+  private confirmedEmailAddress = ''
+  private emailRules = CommonUtils.emailRules()
 
-    $refs: {
+  $refs: {
     passcodeResetEmailForm: HTMLFormElement,
     passcodeResetOptionsDialog: ModalDialog
   }
 
-    private emailMustMatch (): string {
-      return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
-    }
+  private emailMustMatch (): string {
+    return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
+  }
 
-    public open () {
-      this.$refs.passcodeResetOptionsDialog.open()
-    }
+  public open () {
+    this.$refs.passcodeResetOptionsDialog.open()
+  }
 
-    public close () {
-      this.$refs.passcodeResetOptionsDialog.close()
-    }
+  public close () {
+    this.$refs.passcodeResetOptionsDialog.close()
+  }
 
-    private isFormValid (): boolean {
-      return this.$refs.passcodeResetEmailForm?.validate() && !this.emailMustMatch()
-    }
+  private isFormValid (): boolean {
+    return this.$refs.passcodeResetEmailForm?.validate() && !this.emailMustMatch()
+  }
 
-    private confirmPasscodeResetOptions () {
-      if (this.isResetPasscode) {
-        if (this.isFormValid()) {
-          this.$emit('confirm-passcode-reset-options', this.emailAddress)
-        }
-      } else {
-        this.$emit('confirm-passcode-reset-options')
+  private confirmPasscodeResetOptions () {
+    if (this.isResetPasscode) {
+      if (this.isFormValid()) {
+        this.$emit('confirm-passcode-reset-options', this.emailAddress)
       }
+    } else {
+      this.$emit('confirm-passcode-reset-options')
     }
+  }
 }
 </script>
