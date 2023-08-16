@@ -1,4 +1,3 @@
-// TODO: Broken still
 import { createLocalVue, mount } from '@vue/test-utils'
 import { Account } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'

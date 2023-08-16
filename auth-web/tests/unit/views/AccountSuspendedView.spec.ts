@@ -1,5 +1,4 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
-
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountSuspendedView from '@/views/auth/account-freeze/AccountSuspendedView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
