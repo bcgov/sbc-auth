@@ -174,6 +174,7 @@
 
       <!-- Add an Existing Business Dialog -->
       <ManageBusinessDialog
+        :orgId="orgId"
         :showDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"

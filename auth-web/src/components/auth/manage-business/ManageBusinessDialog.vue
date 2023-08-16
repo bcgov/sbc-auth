@@ -25,7 +25,7 @@
 
       <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog">
         <v-card-title data-test="dialog-header">
-          <span>Manage a B.C. Business</span>
+          <h2>Manage a B.C. Business</h2>
         </v-card-title>
 
         <v-card-text>
@@ -44,7 +44,6 @@
 
             <v-card class="mx-auto" flat>
               <v-list class="mr-2">
-
                 <v-list-group v-if="!isBusinessLegalTypeSPorGP" id="passcode-group" class="top-of-list" eager v-model="passcodeOption">
                   <template v-slot:activator>
                     <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
@@ -116,7 +115,7 @@
                     </div>
                     <div><b>{{businessContactEmail}}</b></div>
                     <div class="mt-1 mr-1 mb-4">
-                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
+                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.!
                     </div>
                   </div>
                 </v-list-group>
@@ -131,7 +130,7 @@
                     </div>
                   </v-list-group>
 
-                  <v-list-group v-if="enableDelegationFeature" v-model="requestAuthRegistryOption">
+                  <v-list-group v-model="requestAuthRegistryOption">
                     <template v-slot:activator>
                       <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
                     </template>
@@ -150,7 +149,7 @@
         <v-card-actions class="form__btns">
           <span
             @click.stop="openHelp()"
-            class="pl-2 pr-2 mr-auto"
+            class="cursor-pointer pl-2 pr-2 mr-auto"
             id="help-button"
           >
             <v-icon>mdi-help-circle-outline</v-icon>
@@ -202,6 +201,10 @@ export default defineComponent({
     HelpDialog
   },
   props: {
+    orgId: {
+      type: String,
+      default: ''
+    },
     initialBusinessIdentifier: {
       type: String,
       default: ''
@@ -359,7 +362,7 @@ export default defineComponent({
 
     const isFormValid = computed(() => {
       let isValid = false
-      if (isBusinessLegalTypeSPorGP) {
+      if (isBusinessLegalTypeSPorGP.value) {
         isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
       } else if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
         isValid = true
@@ -420,12 +423,11 @@ export default defineComponent({
     const manageBusiness = async () => {
       if (emailOption.value) {
         try {
-          // TODO will fix this after BE is ready.
-          // const payload: CreateAffiliationInvitation = {
-          //   fromOrgId: number,
-          //   businessIdentifier: businessIdentifier.value,
-          // }
-          // await AffiliationInvitationService.createInvitation()
+          const payload: CreateAffiliationInvitation = {
+            fromOrgId: props.orgId,
+            businessIdentifier: businessIdentifier.value
+          }
+          const createInvitationResponse = await AffiliationInvitationService.createInvitation(payload)
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err)
@@ -444,7 +446,7 @@ export default defineComponent({
             businessData = {
               ...businessData,
               certifiedByName: authorizationName.value,
-              passCode: isBusinessLegalTypeSPorGP ? proprietorPartnerName.value : passcode.value
+              passCode: isBusinessLegalTypeSPorGP.value ? proprietorPartnerName.value : passcode.value
             }
           }
           const addResponse = await addBusiness(businessData)
@@ -486,7 +488,7 @@ export default defineComponent({
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
-      if (businessIdentifier) {
+      if (businessIdentifier && newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName
         try {

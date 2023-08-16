@@ -1,7 +1,9 @@
 <template>
   <component :is="componentType" v-model="isDialogOpen" v-if="isDialogOpen" max-width="45rem">
     <v-card>
-      <v-card-title>Need Assistance?</v-card-title>
+      <v-card-title>
+        <h2>Need Assistance?</h2>
+      </v-card-title>
       <v-card-text>
         <p class="mb-7" v-html="helpDialogBlurb" />
 
