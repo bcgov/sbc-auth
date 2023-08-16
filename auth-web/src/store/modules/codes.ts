@@ -2,8 +2,9 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 
 import { Code } from '@/models/Code'
 import CodesService from '@/services/codes.service'
+import store from '..'
 
-@Module({ namespaced: true })
+@Module({ namespaced: true, store, dynamic: true, name: 'codes' })
 export default class CodesModule extends VuexModule {
   suspensionReasonCodes: Code[] = []
   businessSizeCodes: Code[] = []

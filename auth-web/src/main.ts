@@ -10,7 +10,6 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 // eslint-disable-next-line sort-imports
 import './routes/componentHooks'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'

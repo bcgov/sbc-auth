@@ -6,13 +6,9 @@ Vue.use(VueI18n, { bridge: true, legacy: false })
 
 function loadLocaleMessages (): LocaleMessages {
   const locales = enLocals
-  const messages: LocaleMessages = {}
+  const messages: LocaleMessages = { en: {} }
   Object.keys(locales).forEach((key) => {
-    const matched = key.match(/([A-Za-z0-9-_]+)\./i)
-    if (matched?.length > 1) {
-      const locale = matched[1]
-      messages[locale] = locales[key]
-    }
+    messages['en'][key] = locales[key]
   })
   return messages
 }
