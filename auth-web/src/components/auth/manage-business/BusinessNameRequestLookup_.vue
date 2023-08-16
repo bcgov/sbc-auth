@@ -57,14 +57,13 @@
 
 <script lang="ts">
 import { Component, Emit, Watch } from 'vue-property-decorator'
-import { Ref, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import { Debounce } from 'vue-debounce-decorator'
 import Vue from 'vue'
-import _ from 'lodash'
 import { namespace } from 'vuex-class'
-import { useStore } from 'vuex-composition-helpers'
+
+const BusinessModule = namespace('business')
 
 enum States {
   INITIAL = 'initial',
@@ -78,58 +77,61 @@ enum States {
 /*
  * See PPR's BusinessSearchAutocomplete.vue for a Composition API example.
  */
-// @Component({})
-export default defineComponent({
-  name: 'BusinessLookup',
-  props: {},
-  setup (props, { emit }) {
-    // local variables
-    const searchField = ref('')
-    const searchResults: Ref<BusinessLookupResultIF[]> = ref([])
-    const state = ref(States.INITIAL)
+@Component({})
+export default class BusinessNameRequestLookup extends Vue {
+  // enum for template
+  readonly States = States
 
-    // store
-    const store = useStore()
-    const isAffiliated = (businessIdentifier: string) => store.dispatch('business/isAffiliated', businessIdentifier)
+  // action from business module
+  @BusinessModule.Action('isAffiliated')
+  private readonly isAffiliated!: (identifier: string) => Promise<boolean>
 
-    const onSearchFieldChanged = _.debounce(async () => {
-      // safety check
-      if (searchField.value && searchField.value?.length < 3) {
-        state.value = States.TYPING
-      } else if (searchField.value && searchField.value?.length > 2) {
-        state.value = States.SEARCHING
-        const searchStatus = null // search all (ACTIVE + HISTORICAL)
-        searchResults.value = await BusinessLookupServices.search(searchField.value, searchStatus).catch(() => [])
+  /** V-model for search field. */
+  searchField = ''
 
-        // enable or disable items according to whether they have already been added
-        for (const result of searchResults.value) {
-          result.disabled = await isAffiliated(result.identifier)
-        }
+  /** Results from business lookup API. */
+  searchResults = [] as Array<BusinessLookupResultIF>
 
-        // display appropriate section
-        state.value = (searchResults.value.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
-      } else {
-        // reset variables
-        searchResults.value = []
-        state.value = States.INITIAL
+  /** State of this component. */
+  state = States.INITIAL
+
+  /** Called when searchField property has changed. */
+  @Watch('searchField')
+  @Debounce(600)
+  private async onSearchFieldChanged (): Promise<void> {
+    // safety check
+    if (this.searchField && this.searchField?.length < 3) {
+      this.state = States.TYPING
+    } else if (this.searchField && this.searchField?.length > 2) {
+      this.state = States.SEARCHING
+      const searchStatus = null // search all (ACTIVE + HISTORICAL)
+      this.searchResults = await BusinessLookupServices.search(this.searchField, searchStatus).catch(() => [])
+
+      // enable or disable items according to whether they have already been added
+      for (const result of this.searchResults) {
+        result.disabled = await this.isAffiliated(result.identifier)
       }
-    }, 600)
 
-    watch(searchField, onSearchFieldChanged)
-
-    const onItemSelected = (input: BusinessLookupResultIF) => {
-      emit('business', input)
-    }
-
-    return {
-      searchField,
-      searchResults,
-      state,
-      onItemSelected,
-      States
+      // display appropriate section
+      this.state = (this.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
+    } else {
+      // reset variables
+      this.searchResults = []
+      this.state = States.INITIAL
     }
   }
-})
+
+  /** When an item has been selected, emits event with business object. */
+  @Emit('business')
+  onItemSelected (input: BusinessLookupResultIF): void {
+    // safety check
+    if (input) {
+      // change to summary state
+      this.state = States.SUMMARY
+    }
+    // event data is automatically returned
+  }
+}
 </script>
 
 <style lang="scss" scoped>

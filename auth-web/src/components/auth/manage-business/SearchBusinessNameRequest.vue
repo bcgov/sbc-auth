@@ -27,19 +27,23 @@
         </v-form>
         <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
           <template>
-            <v-btn
+            <!-- <v-btn
               large
               color="primary"
               class="save-continue-button"
               @click="businessIdentifier = 'NR1234567'; showAddNRModal()"
               data-test="next-button"
             > Open Name Request
-            </v-btn>
+            </v-btn> -->
             <!-- TODO 16720: Search for name request to trigger showAddNRModal -->
             <!-- <name-request-lookup
               @business="requestNames = $event.name; businessIdentifier = $event.identifier"
               @name-request-selected="showAddNRModal()"
             /> -->
+            <BusinessLookup
+              @business="businessEvent"
+              :key="businessLookupKey"
+            />
           </template>
         </v-form>
       </v-col>
@@ -63,7 +67,7 @@
         @on-business-identifier="businessIdentifier = $event"
       />
     </template>
-    <!-- Add Business Dialog -->
+    <!-- Add Name Request Dialog -->
     <ModalDialog
       ref="addNRDialog"
       :is-persistent="true"
