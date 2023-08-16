@@ -161,7 +161,7 @@ export default class BusinessModule extends VuexModule {
       affiliatedEntities.push(entity)
     })
 
-    if (LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) { // featureFlagIt
+    if (!LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) { // featureFlagIt
       const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
         .catch(err => {
           console.log(err) // eslint-disable-line no-console
@@ -188,7 +188,6 @@ export default class BusinessModule extends VuexModule {
       }
 
       if (pendingAffiliationInvitations) {
-        console.log('sorting, sorting')
         // bubble the ones with the invitations to the top
         affiliatedEntities.sort((a, b) => {
           if (a.affiliationInvites && !b.affiliationInvites) {
