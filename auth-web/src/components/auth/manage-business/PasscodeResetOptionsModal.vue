@@ -82,7 +82,7 @@ export default class PasscodeResetOptionsModal extends Vue {
 
     $refs: {
     passcodeResetEmailForm: HTMLFormElement,
-    passcodeResetOptionsDialog: ModalDialog
+    passcodeResetOptionsDialog: InstanceType<typeof ModalDialog>
   }
 
     private emailMustMatch (): string {

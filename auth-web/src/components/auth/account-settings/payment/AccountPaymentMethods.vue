@@ -149,7 +149,7 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
   private isTOSandAcknowledgeCompleted:boolean = false // sert true if TOS already accepted
 
   $refs: {
-      errorDialog: ModalDialog
+      errorDialog: InstanceType<typeof ModalDialog>
     }
 
   private setSelectedPayment (payment) {

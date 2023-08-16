@@ -411,14 +411,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   highlightIndex = -1
 
   $refs: {
-    successDialog: ModalDialog
-    errorDialog: ModalDialog
-    addNRDialog: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    errorDialog: InstanceType<typeof ModalDialog>
+    addNRDialog: InstanceType<typeof ModalDialog>
     passcodeResetOptionsModal: PasscodeResetOptionsModal
-    removedBusinessSuccessDialog: ModalDialog
-    removalConfirmDialog: ModalDialog
-    businessUnavailableDialog: ModalDialog
-    linkExpireErrorDialog: ModalDialog
+    removedBusinessSuccessDialog: InstanceType<typeof ModalDialog>
+    removalConfirmDialog: InstanceType<typeof ModalDialog>
+    businessUnavailableDialog: InstanceType<typeof ModalDialog>
+    linkExpireErrorDialog: InstanceType<typeof ModalDialog>
   }
 
   private async mounted () {

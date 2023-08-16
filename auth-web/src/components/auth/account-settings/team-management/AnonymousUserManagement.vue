@@ -270,7 +270,7 @@ export default class AnonymousUserManagement extends Mixins(
   TeamManagementMixin
 ) {
   @Prop({ default: '' }) private orgId: string
-  // @Prop() private confirmActionDialogWithQuestion: ModalDialog;
+  // @Prop() private confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>;
 
   private isLoading = true
 
@@ -292,14 +292,14 @@ export default class AnonymousUserManagement extends Mixins(
   ]
 
   $refs: {
-    successDialog: ModalDialog
-    errorDialog: ModalDialog
-    confirmActionDialog: ModalDialog
-    confirmActionDialogWithQuestion: ModalDialog
-    addAnonUsersDialog: ModalDialog
-    addUsersSuccessDialog: ModalDialog
-    passwordResetDialog: ModalDialog
-    passwordResetSuccessDialog: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    errorDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialog: InstanceType<typeof ModalDialog>
+    confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>
+    addAnonUsersDialog: InstanceType<typeof ModalDialog>
+    addUsersSuccessDialog: InstanceType<typeof ModalDialog>
+    passwordResetDialog: InstanceType<typeof ModalDialog>
+    passwordResetSuccessDialog: InstanceType<typeof ModalDialog>
   }
 
   private async mounted () {

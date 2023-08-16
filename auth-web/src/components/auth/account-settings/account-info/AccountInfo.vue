@@ -321,8 +321,8 @@ export default class AccountInfo extends Mixins(
   $refs: {
     editAccountForm: HTMLFormElement
     mailingAddress: HTMLFormElement
-    suspendAccountDialog: ModalDialog
-    suspensionCompleteDialog: ModalDialog
+    suspendAccountDialog: InstanceType<typeof ModalDialog>
+    suspensionCompleteDialog: InstanceType<typeof ModalDialog>
     suspensionReasonForm: HTMLFormElement
     accountBusinessTypePickerRef: HTMLFormElement
   }
