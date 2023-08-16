@@ -1,18 +1,17 @@
 // TODO: Broken still
 import { createLocalVue, mount } from '@vue/test-utils'
 import { Account } from '@/util/constants'
-import { createI18n } from 'vue-i18n-bridge'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
-import { config } from '@vue/test-utils'
+import MockI18n from '../test-utils/test-data/MockI18n'
 import Vue from 'vue'
-import VueCompositionAPI from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import MockI18n from '../test-utils/test-data/MockI18n'
+import { install } from 'vue-demi'
 
 Vue.use(VueRouter)
 Vue.use(Vuetify)
+
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 const en = {
@@ -23,25 +22,20 @@ const en = {
   padRemovalTitle: 'i8n padRemovalTitle'
 }
 
-
 function assertElements (wrapper: any) {
-  expect(wrapper.text()).toContain(en.deactivateMemberRemovalTitle)
-  expect(wrapper.text()).toContain(en.businessRemovalTitle)
-  expect(wrapper.text()).toContain(en.deactivateMemberRemovalDesc)
-  expect(wrapper.text()).toContain(en.businessRemovalDesc)
+  expect(wrapper.text()).toContain(en.deactivateMemberRemovalTitle.replace('i8n ', ''))
+  expect(wrapper.text()).toContain(en.businessRemovalTitle.replace('i8n ', ''))
+  expect(wrapper.text()).toContain(en.deactivateMemberRemovalDesc.replace('i8n ', ''))
+  expect(wrapper.text()).toContain(en.businessRemovalDesc.replace('i8n ', ''))
 }
 
 describe('Deactivated card.vue', () => {
   let wrapper: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
+  install(localVue)
   const i18n = MockI18n.mock(en)
   localVue.use(i18n as any, { bridge: true })
-  
-
-  beforeEach(() => {
-    vi.mock('useI18n')  
-  })
 
   afterEach(() => {
     wrapper.destroy()
@@ -51,7 +45,7 @@ describe('Deactivated card.vue', () => {
     wrapper = mount(DeactivateCard, {
       vuetify,
       localVue,
-      router,
+      router
     })
 
     expect(wrapper.vm).toBeTruthy()
@@ -96,7 +90,7 @@ describe('Deactivated card.vue', () => {
 
     expect(wrapper.props('type')).toBe(Account.PREMIUM)
     assertElements(wrapper)
-    expect(wrapper.text()).toContain(en.padRemovalTitle) // this is only for premium orgs
+    expect(wrapper.text()).toContain(en.padRemovalTitle.replace('i8n ', '')) // this is only for premium orgs
   })
   it('assert subtitle for a basic org', async () => {
     wrapper = mount(DeactivateCard, {

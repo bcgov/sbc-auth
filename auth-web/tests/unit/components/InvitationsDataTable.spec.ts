@@ -9,7 +9,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 const vuetify = new Vuetify({})
 
 describe('InvitationsDataTable.vue', () => {

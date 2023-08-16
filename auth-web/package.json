@@ -75,9 +75,9 @@
     "vitest": "^0.34.1",
     "vue-class-component": "^7.1.0",
     "vue-cli-plugin-vuetify": "^2.0.3",
-    "vue-test-utils-helpers": "git+https://github.com/AmpleOrganics/vue-test-utils-helpers.git",
     "vue-template-compiler": "2.6.12",
+    "vue-test-utils-helpers": "git+https://github.com/AmpleOrganics/vue-test-utils-helpers.git",
     "vuelidate-property-decorators": "^1.0.28",
-    "vuex-module-decorators": "^0.10.1"
+    "vuex-module-decorators": "^1.2.0"
   }
 }

@@ -3,14 +3,14 @@ import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import Vue from 'vue'
+import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import VueI18n from 'vue-i18n'
 import i18n from '@/plugins/i18n'
 
 Vue.use(Vuetify)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
@@ -25,7 +25,6 @@ describe('AccountDeactivate.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
-    vi.mock('')
     const orgModule = {
       namespaced: true,
       state: {

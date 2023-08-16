@@ -8,7 +8,7 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
 Vue.use(Vuetify)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 Vue.use(VueRouter)
 
 describe('Statements.vue', () => {

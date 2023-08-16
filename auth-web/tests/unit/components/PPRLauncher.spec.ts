@@ -8,7 +8,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 
 describe('PPRLauncher.vue', () => {
   let wrapper: Wrapper<any>

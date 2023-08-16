@@ -42,8 +42,6 @@ vi.doMock('axios', () => {
 describe('Task service', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
-    vi.clearAllMocks()
   })
 
   it('call getTaskById() for task Details ', () => {
