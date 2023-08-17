@@ -170,9 +170,9 @@ describe('Entity Management Component', () => {
   })
 
   it('calls the nr success modal', async () => {
-    const mockedSyncBusinesses = jest.fn()
+    const mockedSyncBusinesses = vi.fn()
     wrapper.vm.syncBusinesses = mockedSyncBusinesses
-    const mockedSearchNRIndex = jest.fn().mockReturnValue(0)
+    const mockedSearchNRIndex = vi.fn().mockReturnValue(0)
     wrapper.vm.searchNRIndex = mockedSearchNRIndex
     wrapper.vm.showAddSuccessModalNR('NR 1111111')
     await flushPromises()
@@ -183,7 +183,7 @@ describe('Entity Management Component', () => {
   })
 
   it('calls the nr error modal', async () => {
-    const mockedNrErrorMethod = jest.fn()
+    const mockedNrErrorMethod = vi.fn()
     wrapper.vm.$refs.errorDialog.open = mockedNrErrorMethod
     wrapper.vm.showNRErrorModal()
     expect(wrapper.vm.dialogTitle).toBe('Error Adding Name Request')
@@ -194,29 +194,29 @@ describe('Entity Management Component', () => {
   })
 
   it('renders snackbar visible 1 second after toggled', async () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
 
     await wrapper.vm.showAddSuccessModalNR()
-    jest.advanceTimersByTime(1000)
+    vi.advanceTimersByTime(1000)
     await Vue.nextTick()
 
     expect(wrapper.find('#success-nr-business-snackbar').exists()).toBe(true)
     expect(wrapper.vm.showSnackbar).toBe(true)
 
-    jest.clearAllTimers()
+    vi.clearAllTimers()
   })
 
   it('renders snackbar invisible 5 seconds after toggled', async () => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
 
     await wrapper.vm.showAddSuccessModalNR()
-    jest.advanceTimersByTime(5000)
+    vi.advanceTimersByTime(5000)
     await Vue.nextTick()
 
     expect(wrapper.find('#success-nr-business-snackbar').exists()).toBe(true)
     expect(wrapper.vm.showSnackbar).toBe(false)
 
-    jest.clearAllTimers()
+    vi.clearAllTimers()
   })
 
   it('calls the link expired modal with correct title and message', () => {

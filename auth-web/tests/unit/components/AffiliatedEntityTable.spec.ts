@@ -55,9 +55,9 @@ const moreBusinessModule = {
   namespaced: true,
   state: { businesses: moreBusinesses },
   action: {
-    addBusiness: jest.fn(),
-    updateBusinessName: jest.fn(),
-    updateFolioNumber: jest.fn()
+    addBusiness: vi.fn(),
+    updateBusinessName: vi.fn(),
+    updateFolioNumber: vi.fn()
   }
 }
 
@@ -218,7 +218,7 @@ describe('AffiliatedEntityTable.vue', () => {
   })
 
   it('Render affiliated entity table with correct actions menu', async () => {
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN', 'supported-restoration-entities': 'BEN' })
+    sessionStorage[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN', 'supported-restoration-entities': 'BEN' })
     wrapper = mount(AffiliatedEntityTable, {
       store: newStore,
       localVue,

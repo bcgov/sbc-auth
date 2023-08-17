@@ -107,6 +107,7 @@
       <!-- Actions -->
       <template v-slot:item-slot-Actions="{ item, index }">
         <div class="new-actions mx-auto" :id="`action-menu-${index}`">
+          <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
           <span class="open-action">
             <v-tooltip top content-class="top-tooltip" :disabled="disableTooltip(item)">
               <template v-slot:activator="{on}">
@@ -135,66 +136,6 @@
                   <v-btn
                     small
                     color="primary"
-                    min-height="3rem"
-                    class="more-actions-btn"
-                    v-on="on"
-                  >
-                    <v-icon>{{dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
-                  </v-btn>
-                </template>
-                <v-list>
-                  <v-list-item
-                    v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
-                    class="actions-dropdown_item my-1"
-                    data-test="remove-button"
-                    v-can:REMOVE_BUSINESS.disable
-                    @click="removeBusiness(item)"
-                  >
-                    <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                      <v-icon small>mdi-delete-forever</v-icon>
-                      <span class="pl-1">Delete {{tempDescription(item)}}</span>
-                    </v-list-item-subtitle>
-                    <v-list-item-subtitle v-else>
-                      <v-icon small>mdi-delete</v-icon>
-                      <span class="pl-1">Remove From Table</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item
-                    v-else
-                    class="actions-dropdown_item my-1"
-                    @click="openNewAffiliationInvite(item)"
-                  >
-                    <v-list-item-subtitle>
-                      <v-icon small>mdi-file-certificate-outline</v-icon>
-                      <span class="pl-1">New Request</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </span>
-          </span>
-
-          <span class="open-action" v-else>
-            <v-btn
-              small
-              color="primary"
-              min-width="5rem"
-              min-height="2rem"
-              class="open-action-btn"
-              @click="open(item)"
-            >
-              Open
-            </v-btn>
-            <!-- More Actions Menu -->
-            <span class="more-actions">
-              <v-menu
-                :attach="`#action-menu-${index}`"
-                v-model="dropdown[index]"
-              >
-                <template v-slot:activator="{ on }">
-                  <v-btn
-                    small
-                    color="primary"
                     min-height="2rem"
                     class="more-actions-btn"
                     v-on="on"
@@ -203,6 +144,34 @@
                   </v-btn>
                 </template>
                 <v-list>
+                  <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
+                    <v-list-item
+                      v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
+                      class="actions-dropdown_item my-1"
+                      data-test="remove-button"
+                      v-can:REMOVE_BUSINESS.disable
+                      @click="removeBusiness(item)"
+                    >
+                      <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+                        <v-icon small>mdi-delete-forever</v-icon>
+                        <span class="pl-1">Delete {{tempDescription(item)}}</span>
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle v-else>
+                        <v-icon small>mdi-delete</v-icon>
+                        <span class="pl-1">Remove From Table</span>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item
+                      v-else
+                      class="actions-dropdown_item my-1"
+                      @click="openNewAffiliationInvite(item)"
+                    >
+                      <v-list-item-subtitle>
+                        <v-icon small>mdi-file-certificate-outline</v-icon>
+                        <span class="pl-1">New Request</span>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                  </template>
                   <v-list-item
                     v-if="showOpenButton(item)"
                     class="actions-dropdown_item my-1"
