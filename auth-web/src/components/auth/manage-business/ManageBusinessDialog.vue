@@ -342,7 +342,7 @@ export default defineComponent({
     })
 
     const passwordText = computed(() => {
-      return (isCooperative.value ? 'Passcode' : 'password')
+      return (isCooperative.value ? 'passcode' : 'password')
     })
 
     const helpDialogBlurb = computed(() => {

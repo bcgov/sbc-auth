@@ -139,7 +139,7 @@ export default class SearchBusinessNameRequest extends Vue {
     addNRDialog: InstanceType<typeof ModalDialog>
     manageBusinessDialog: InstanceType<typeof ManageBusinessDialog>
   }
-  addBusiness = async (loginPayload: LoginPayload) => {
+  addBusinessToList = async (loginPayload: LoginPayload) => {
     return this.$store.dispatch('business/addBusiness', loginPayload)
   }
   showAddSuccessModal (event) {
@@ -191,7 +191,7 @@ export default class SearchBusinessNameRequest extends Vue {
     if (this.isGovStaffAccount) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
-        await this.addBusiness(businessData)
+        await this.addBusinessToList(businessData)
         this.$emit('add-success', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {
