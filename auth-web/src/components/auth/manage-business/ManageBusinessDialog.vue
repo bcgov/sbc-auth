@@ -197,7 +197,6 @@ import { useStore } from 'vuex-composition-helpers'
 export default defineComponent({
   components: {
     AuthorizationEmailSent,
-    BusinessLookup,
     Certify,
     HelpDialog
   },
@@ -361,8 +360,6 @@ export default defineComponent({
       let isValid = false
       if (isBusinessLegalTypeSPorGP) {
         isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
-      } else if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
-        isValid = true
       } else {
         isValid =
           !!businessIdentifier.value &&
