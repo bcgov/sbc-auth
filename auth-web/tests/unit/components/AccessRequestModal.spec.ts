@@ -13,10 +13,6 @@ import initialize from '@/plugins/i18n'
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
-const en = {
-  onHoldOrRejectModalText: 'i8n onHoldOrRejectModalText'
-}
-
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 

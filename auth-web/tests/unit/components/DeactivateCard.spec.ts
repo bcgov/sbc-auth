@@ -1,10 +1,10 @@
-import initialize from '@/plugins/i18n'
-import { mount } from '@vue/test-utils'
 import { Account } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
+import initialize from '@/plugins/i18n'
+import { mount } from '@vue/test-utils'
 
 Vue.use(VueRouter)
 Vue.use(Vuetify)
