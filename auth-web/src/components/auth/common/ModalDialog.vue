@@ -41,7 +41,10 @@
       <!-- text -->
       <v-card-text>
         <slot name="text">
-          <div class="modal-dialog-text" v-html="text"></div>
+          <div
+            class="modal-dialog-text"
+            v-html="text"
+          />
         </slot>
       </v-card-text>
 

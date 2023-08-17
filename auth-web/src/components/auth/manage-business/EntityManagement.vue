@@ -21,7 +21,7 @@
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
-           <!-- Incorporate a Numbered BC Company or Business -->
+          <!-- Incorporate a Numbered BC Company or Business -->
           <v-menu v-model="incorporateNumberedDropdown">
             <template #activator="{ on: onNumberedMenu }">
               <v-tooltip
@@ -165,11 +165,18 @@
             id="add-name-request-btn"
             class="font-weight-regular"
             color="primary"
-            outlined dark large
+            outlined
+            dark
+            large
             @click="goToNameRequest()"
           >
             <span>Request a BC Business Name</span>
-            <v-icon small class="ml-2">mdi-open-in-new</v-icon>
+            <v-icon
+              small
+              class="ml-2"
+            >
+              mdi-open-in-new
+            </v-icon>
           </v-btn>
         </div>
       </div>
@@ -331,35 +338,73 @@
         dialog-class="notify-dialog"
         max-width="640"
       >
-        <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <template #icon>
+          <v-icon
+            large
+            color="error"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
         </template>
-        <template v-slot:actions>
-          <v-btn large  outlined color="primary" @click="close()" data-test="dialog-ok-button">Return to My List</v-btn>
+        <template #actions>
+          <v-btn
+            large
+            outlined
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="close()"
+          >
+            Return to My List
+          </v-btn>
           <!-- TODO - handle by ticket 15769, add @click="reSendEmail()" -->
-          <v-btn large color="primary" data-test="dialog-ok-button">Re-send Authorization Email</v-btn>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+          >
+            Re-send Authorization Email
+          </v-btn>
         </template>
       </ModalDialog>
 
       <!-- Business Unavailable Dialog for unaffiliated business-->
       <ModalDialog
-        class="business-unavailable-dialog"
         ref="businessUnavailableDialog"
+        class="business-unavailable-dialog"
         :title="dialogTitle"
         max-width="640"
         dialog-class="info-dialog"
         :showIcon="false"
         :showCloseIcon="true"
       >
-        <template v-slot:text>
+        <template #text>
           <p>{{ dialogText }}</p>
-          <p><br/>Please contact us if you require assistance.</p>
-          <p><br/><v-icon small>mdi-phone</v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a></p>
-          <p><v-icon small>mdi-phone</v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a></p>
-          <p><v-icon small>mdi-email</v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a></p>
+          <p><br>Please contact us if you require assistance.</p>
+          <p>
+            <br><v-icon small>
+              mdi-phone
+            </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+          </p>
+          <p>
+            <v-icon small>
+              mdi-phone
+            </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+          </p>
+          <p>
+            <v-icon small>
+              mdi-email
+            </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
+          </p>
         </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="closeBusinessUnavailableDialog()" data-test="dialog-ok-button">OK</v-btn>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="closeBusinessUnavailableDialog()"
+          >
+            OK
+          </v-btn>
         </template>
       </ModalDialog>
 
@@ -391,7 +436,7 @@
           </v-btn>
         </template>
       </ModalDialog>
-       <!-- Message for successfully adding business or name request -->
+      <!-- Message for successfully adding business or name request -->
       <v-snackbar
         id="success-nr-business-snackbar"
         v-model="showSnackbar"
@@ -416,7 +461,6 @@ import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
-import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'

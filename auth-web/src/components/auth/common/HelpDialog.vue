@@ -1,5 +1,10 @@
 <template>
-  <component :is="componentType" v-model="isDialogOpen" v-if="isDialogOpen" max-width="45rem">
+  <component
+    :is="componentType"
+    v-if="isDialogOpen"
+    v-model="isDialogOpen"
+    max-width="45rem"
+  >
     <v-card>
       <v-card-title>Need Assistance?</v-card-title>
       <v-card-text>
