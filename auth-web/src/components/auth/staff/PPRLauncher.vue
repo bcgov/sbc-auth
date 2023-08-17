@@ -11,6 +11,7 @@
         <img
           class="product-img"
           :src="getImgUrl(img)"
+          alt="Product Image"
         >
       </v-col>
       <v-col
