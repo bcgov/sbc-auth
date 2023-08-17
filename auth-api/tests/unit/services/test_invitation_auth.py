@@ -312,7 +312,7 @@ def test_invitation_anonymous(session, auth_mock, keycloak_mock, monkeypatch):
             InvitationService.accept_invitation(invitation_dict['id'], User(invitee_bcsc_user), '')
 
             invitation_model = InvitationModel.find_invitation_by_id(invitation_dict['id'])
-            assert invitation_model.login_source == LoginSource.BCSC.value
+            assert invitation_model.login_source is None
             assert invitation_model.invitation_status_code == InvitationStatus.ACCEPTED.value
 
             patch_token_info(TestJwtClaims.tester_role, monkeypatch)
