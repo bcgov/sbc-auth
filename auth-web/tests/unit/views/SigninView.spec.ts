@@ -1,4 +1,4 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import Signin from '@/views/auth/SigninView.vue'
 import UserModule from '@/store/modules/user'
 import Vue from 'vue'
@@ -17,7 +17,7 @@ describe('Signin.vue', () => {
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(keyCloakConfig)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -32,14 +32,14 @@ describe('Signin.vue', () => {
 
     let vuetify = new Vuetify({})
 
-    wrapper = mount(Signin, {
+    wrapper = shallowMount(Signin, {
       store,
       vuetify,
       localVue
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

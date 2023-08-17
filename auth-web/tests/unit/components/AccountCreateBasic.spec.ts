@@ -22,7 +22,7 @@ describe('AccountCreateBasic.vue', () => {
     localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'payment-type-in-account-creation': true, 'auth-options-learn-more': true, 'enable-ltd-and-ulc-affiliate': true })
+    sessionStorage[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'payment-type-in-account-creation': true, 'auth-options-learn-more': true, 'enable-ltd-and-ulc-affiliate': true })
     const orgModule = {
       namespaced: true,
       state: {
@@ -40,8 +40,8 @@ describe('AccountCreateBasic.vue', () => {
       actions: {
       },
       mutations: {
-        setCurrentOrganizationAddress: jest.fn(),
-        resetInvitations: jest.fn()
+        setCurrentOrganizationAddress: vi.fn(),
+        resetInvitations: vi.fn()
       }
     }
 
@@ -68,8 +68,8 @@ describe('AccountCreateBasic.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

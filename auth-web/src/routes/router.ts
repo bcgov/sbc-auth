@@ -122,16 +122,16 @@ function isStaff (): boolean {
 }
 
 export function getRoutes (): RouteConfig[] {
-  const accountSettings = () => import(/* webpackChunkName: "account-settings" */ '../views/auth/AccountSettings.vue')
-  const accountInfo = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/account-info/AccountInfo.vue')
-  const teamManagement = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/team-management/TeamManagement.vue')
-  const accountLoginOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
-  const accountPaymentOption = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/payment/AccountPaymentMethods.vue')
-  const transaction = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/transaction/Transactions.vue')
-  const statements = () => import(/* webpackChunkName: "account-settings" */ '../components/auth/account-settings/statement/Statements.vue')
-  const productPackage = () => import(/* webpackChunkName: "product-settings" */ '../components/auth/account-settings/product/ProductPackage.vue')
-  const activityLog = () => import(/* webpackChunkName: "activity-log" */ '../components/auth/account-settings/activity-log/ActivityLog.vue')
-  const developerAccess = () => import(/* webpackChunkName: "developer-access" */ '../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
+  const accountSettings = () => import('../views/auth/AccountSettings.vue')
+  const accountInfo = () => import('../components/auth/account-settings/account-info/AccountInfo.vue')
+  const teamManagement = () => import('../components/auth/account-settings/team-management/TeamManagement.vue')
+  const accountLoginOption = () => import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
+  const accountPaymentOption = () => import('../components/auth/account-settings/payment/AccountPaymentMethods.vue')
+  const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
+  const statements = () => import('../components/auth/account-settings/statement/Statements.vue')
+  const productPackage = () => import('../components/auth/account-settings/product/ProductPackage.vue')
+  const activityLog = () => import('../components/auth/account-settings/activity-log/ActivityLog.vue')
+  const developerAccess = () => import('../components/auth/account-settings/advance-settings/DeveloperAccess.vue')
 
   const routes = [
     { path: '/', name: 'root', redirect: 'decide-business' },

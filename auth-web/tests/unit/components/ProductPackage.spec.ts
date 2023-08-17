@@ -30,8 +30,8 @@ describe('Account settings ProductPackage.vue', () => {
     const orgModule = {
       namespaced: true,
       actions: {
-        getOrgProducts: jest.fn(),
-        addOrgProducts: jest.fn()
+        getOrgProducts: vi.fn(),
+        addOrgProducts: vi.fn()
       },
       state: {
         currentOrganization: {
@@ -63,8 +63,8 @@ describe('Account settings ProductPackage.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

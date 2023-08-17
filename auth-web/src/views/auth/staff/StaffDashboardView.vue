@@ -270,7 +270,7 @@ export default defineComponent({
 
 <style lang="scss" >
 // importing FAS styles need no scope
-@import '~fas-ui/src/assets/scss/search.scss';
+@import '~/fas-ui/src/assets/scss/search.scss';
 </style>
 
 <style lang="scss" scoped>

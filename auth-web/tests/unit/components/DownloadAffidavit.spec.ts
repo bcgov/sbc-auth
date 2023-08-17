@@ -45,8 +45,8 @@ describe('DownloadAffidavit.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

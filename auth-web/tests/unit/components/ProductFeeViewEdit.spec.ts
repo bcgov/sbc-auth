@@ -1,11 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import ProductFee from '@/components/auth/common/ProductFeeViewEdit.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -30,8 +27,8 @@ describe('ProductFeeViewEdit.vue', () => {
     }
   })
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

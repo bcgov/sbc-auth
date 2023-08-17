@@ -25,10 +25,13 @@ import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { NameRequestResponse } from './../../models/affiliation'
 import OrgService from '@/services/org.services'
+import store from '..'
 
 @Module({
   name: 'business',
-  namespaced: true
+  namespaced: true,
+  dynamic: true,
+  store
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined

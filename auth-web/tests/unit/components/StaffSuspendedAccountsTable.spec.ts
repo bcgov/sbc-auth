@@ -34,8 +34,8 @@ describe('StaffSuspendedAccountsTable.vue', () => {
         ]
       },
       actions: {
-        syncSuspendedStaffOrgs: jest.fn(),
-        searchOrgs: jest.fn()
+        syncSuspendedStaffOrgs: vi.fn(),
+        searchOrgs: vi.fn()
       }
     }
 
@@ -43,9 +43,9 @@ describe('StaffSuspendedAccountsTable.vue', () => {
       namespaced: true,
       state: {},
       actions: {
-        syncOrganization: jest.fn(),
-        syncMembership: jest.fn(),
-        addOrgSettings: jest.fn()
+        syncOrganization: vi.fn(),
+        syncMembership: vi.fn(),
+        addOrgSettings: vi.fn()
       }
     }
 
@@ -68,8 +68,8 @@ describe('StaffSuspendedAccountsTable.vue', () => {
       mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

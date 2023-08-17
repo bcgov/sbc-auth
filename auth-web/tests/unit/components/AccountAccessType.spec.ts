@@ -27,8 +27,8 @@ describe('AccountAccessType.vue', () => {
   }
 
   beforeEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

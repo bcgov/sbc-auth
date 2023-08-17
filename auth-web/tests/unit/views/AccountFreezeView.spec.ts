@@ -25,7 +25,7 @@ describe('AccountFreezeView.vue', () => {
   let userModule: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
@@ -35,7 +35,7 @@ describe('AccountFreezeView.vue', () => {
         userProfile: {}
       },
       actions: {
-        getUserProfile: jest.fn()
+        getUserProfile: vi.fn()
       }
     }
 
@@ -72,8 +72,8 @@ describe('AccountFreezeView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

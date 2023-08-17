@@ -33,7 +33,7 @@ import { mapState } from 'vuex'
   }
 })
 export default class TeamManagement extends Mixins(NextPageMixin) {
-  @Prop({ default: '' }) private orgId: string;
+  @Prop({ default: '' }) private orgId: string
 
   private async mounted () {
     // redirect to dir search/team management according to dir search user role change

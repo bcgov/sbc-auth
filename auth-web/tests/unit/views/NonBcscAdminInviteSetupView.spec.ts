@@ -23,7 +23,7 @@ describe('NonBcscAdminInviteSetupView.vue', () => {
         userProfile: {}
       },
       actions: {
-        createAffidavit: jest.fn()
+        createAffidavit: vi.fn()
       }
     }
 
@@ -44,8 +44,8 @@ describe('NonBcscAdminInviteSetupView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

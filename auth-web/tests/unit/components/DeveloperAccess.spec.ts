@@ -23,7 +23,7 @@ describe('GovmPaymentMethodSelector.vue', () => {
     'API_DOCUMENTATION_URL': 'https://developer.bcregistry.daxiom.ca/'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -54,8 +54,8 @@ describe('GovmPaymentMethodSelector.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

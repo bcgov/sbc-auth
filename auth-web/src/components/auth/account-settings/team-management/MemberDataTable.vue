@@ -34,12 +34,13 @@
     <!-- Authentication Column Template .Show it only for BCSC/BCEID -->
     <template
       v-slot:[`item.authentication`]="{ item }"
-      :data-test="getIndexedTag('last-active', item.index)"
       v-if="isRegularAccount()"
     >
-      <div v-if="item.user.loginSource ===loginSourceEnum.BCEID "> {{item.user.username}} </div>
-      <div v-if="item.user.loginSource ===loginSourceEnum.BCSC "> BCServicesCard </div>
-      <div v-else></div>
+      <div :data-test="getIndexedTag('last-active', item.index)">
+        <div v-if="item.user.loginSource ===loginSourceEnum.BCEID "> {{item.user.username}} </div>
+        <div v-if="item.user.loginSource ===loginSourceEnum.BCSC "> BCServicesCard </div>
+        <div v-else></div>
+      </div>
     </template>
 
     <!-- Role Column Template -->
@@ -103,9 +104,10 @@
     <!-- Date Column Template -->
     <template
       v-slot:[`item.lastActive`]="{ item }"
-      :data-test="getIndexedTag('last-active', item.index)"
     >
-      {{ formatDate(item.user.modified, 'MMMM DD, YYYY') }}
+      <div :data-test="getIndexedTag('last-active', item.index)">
+        {{ formatDate(item.user.modified, 'MMMM DD, YYYY') }}
+      </div>
     </template>
 
     <!-- Actions Column Template -->

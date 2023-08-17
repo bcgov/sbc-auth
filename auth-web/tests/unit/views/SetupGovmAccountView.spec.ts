@@ -25,12 +25,12 @@ describe('SetupGovmAccountView.vue', () => {
   localVue.use(Vuex)
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     store = new Vuex.Store({
       state: {},
       strict: false

@@ -51,8 +51,8 @@ describe('GovmAccountSetupView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('GovmAccountSetupView is a Vue instance', () => {

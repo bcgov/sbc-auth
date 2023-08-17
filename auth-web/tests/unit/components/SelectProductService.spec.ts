@@ -52,8 +52,8 @@ describe('SelectProductService.vue', () => {
         currentSelectedProducts: ['VS']
       },
       actions: {
-        getProductList: jest.fn(),
-        addToCurrentSelectedProducts: jest.fn()
+        getProductList: vi.fn(),
+        addToCurrentSelectedProducts: vi.fn()
       }
     }
 
@@ -82,8 +82,8 @@ describe('SelectProductService.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

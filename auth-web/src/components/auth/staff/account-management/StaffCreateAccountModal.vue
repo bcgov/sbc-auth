@@ -34,13 +34,15 @@
 
     </v-radio-group>
       </template>
-      <template v-slot:actions class="justify-end">
-        <v-btn large color="primary" @click="createAccount()" data-test="btn-continue" class="font font-weight-bold px-3">
-        Continue
-        </v-btn>
-        <v-btn large color="default" @click="close()" data-test="btn-cancel" class="font font-weight-bold px-3 mr-1 ml-5 ">
-          Cancel
-        </v-btn>
+      <template v-slot:actions>
+        <div class="justify-end">
+          <v-btn large color="primary" @click="createAccount()" data-test="btn-continue" class="font font-weight-bold px-3">
+          Continue
+          </v-btn>
+          <v-btn large color="default" @click="close()" data-test="btn-cancel" class="font font-weight-bold px-3 mr-1 ml-5 ">
+            Cancel
+          </v-btn>
+        </div>
       </template>
     </ModalDialog>
 

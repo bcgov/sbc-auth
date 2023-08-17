@@ -56,10 +56,13 @@ import StaffService from '@/services/staff.services'
 import UserService from '@/services/user.services'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import VonService from '@/services/von.services'
+import store from '..'
 
 @Module({
   name: 'org',
-  namespaced: true
+  namespaced: true,
+  store,
+  dynamic: true
 })
 export default class OrgModule extends VuexModule {
   list = []

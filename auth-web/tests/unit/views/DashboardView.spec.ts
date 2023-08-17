@@ -10,7 +10,7 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-jest.mock('../../../src/plugins/i18n', () => {})
+vi.mock('../../../src/plugins/i18n', () => {})
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -25,7 +25,7 @@ describe('DashboardView.vue', () => {
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
@@ -37,7 +37,7 @@ describe('DashboardView.vue', () => {
         }
       },
       actions: {
-        getUserProfile: jest.fn()
+        getUserProfile: vi.fn()
       }
     }
     const orgModule = {
@@ -47,8 +47,8 @@ describe('DashboardView.vue', () => {
         }
       },
       actions: {
-        syncOrganizations: jest.fn(),
-        syncCurrentOrganization: jest.fn()
+        syncOrganizations: vi.fn(),
+        syncCurrentOrganization: vi.fn()
       }
     }
 
@@ -72,8 +72,8 @@ describe('DashboardView.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', () => {

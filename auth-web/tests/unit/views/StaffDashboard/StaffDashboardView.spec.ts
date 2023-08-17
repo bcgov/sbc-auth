@@ -29,7 +29,7 @@ describe('StaffDashboardView tests', () => {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',
     PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(async () => {
     const localVue = createLocalVue()
@@ -41,7 +41,7 @@ describe('StaffDashboardView tests', () => {
         currentOrganization: { id: 123 },
         currentMembership: { membershipTypeCode: MembershipType.Admin }
       },
-      actions: { getOrgPayments: jest.fn(() => { return { credit: 0 } }) }
+      actions: { getOrgPayments: vi.fn(() => { return { credit: 0 } }) }
     }
     const userModule = {
       namespaced: true,
@@ -54,12 +54,12 @@ describe('StaffDashboardView tests', () => {
     const codeModule = {
       namespaced: true,
       state: {},
-      actions: { getCodes: jest.fn(() => []) }
+      actions: { getCodes: vi.fn(() => []) }
     }
     const taskModule = {
       namespaced: true,
       state: { pendingTasksCount: 0, rejectedTasksCount: 0 },
-      actions: { syncTasks: jest.fn() }
+      actions: { syncTasks: vi.fn() }
     }
     const staffModule = {
       namespaced: true,
@@ -68,8 +68,8 @@ describe('StaffDashboardView tests', () => {
         suspendedReviewCount: 0
       },
       actions: {
-        syncPendingInvitationOrgs: jest.fn(() => []),
-        syncSuspendedStaffOrgs: jest.fn(() => [])
+        syncPendingInvitationOrgs: vi.fn(() => []),
+        syncSuspendedStaffOrgs: vi.fn(() => [])
       }
     }
 
