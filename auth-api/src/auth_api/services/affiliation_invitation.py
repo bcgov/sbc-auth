@@ -118,8 +118,11 @@ class AffiliationInvitation:
                 None)
 
             entity = AffiliationInvitationData.EntityDetails(business_identifier=business_entity['identifier'],
-                                                             name=business_entity[
-                                                                 'legalName']) if business_entity else None
+                                                             name=business_entity['legalName'],
+                                                             state=business_entity['state'],
+                                                             corp_type=business_entity['legalType'],
+                                                             corp_sub_type=business_entity.get('legalSubType', None)
+                                                             ) if business_entity else None
 
             aid = AffiliationInvitationData(
                 **{

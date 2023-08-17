@@ -42,7 +42,7 @@ const UserModule = namespace('user')
   }
 })
 export default class NonBcscAdminInviteSetupView extends Mixins(NextPageMixin) {
-  @Prop({ default: undefined }) private readonly orgId: number; // org id used for bceid re-upload
+  @Prop({ default: undefined }) private readonly orgId: number // org id used for bceid re-upload
   @Prop() token: string
   @UserModule.Action('createAffidavit') private createAffidavit!: () => User
 

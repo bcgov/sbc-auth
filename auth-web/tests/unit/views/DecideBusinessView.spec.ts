@@ -20,7 +20,7 @@ describe('DecideBusinessView.vue', () => {
   var ob = {
     'ENTITY_SELECTOR_URL': 'https://entity-selection-dev.apps.silver.devops.gov.bc.ca/'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -39,8 +39,8 @@ describe('DecideBusinessView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

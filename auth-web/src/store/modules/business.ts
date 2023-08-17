@@ -1,5 +1,10 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
-import { AffiliationInviteInfo, AffiliationResponse, CreateRequestBody as CreateAffiliationRequestBody, CreateNRAffiliationRequestBody } from '@/models/affiliation'
+import {
+  AffiliationInvitationStatus,
+  AffiliationResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody
+} from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, NameRequest, PasscodeResetLoad } from '@/models/business'
 import {
@@ -20,10 +25,13 @@ import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { NameRequestResponse } from './../../models/affiliation'
 import OrgService from '@/services/org.services'
+import store from '..'
 
 @Module({
   name: 'business',
-  namespaced: true
+  namespaced: true,
+  dynamic: true,
+  store
 })
 export default class BusinessModule extends VuexModule {
   currentBusiness: Business = undefined
@@ -165,23 +173,26 @@ export default class BusinessModule extends VuexModule {
           return null
         })
 
-      if (resp?.data?.affiliationInvites) {
-        const affiliationInviteInfos: AffiliationInviteInfo[] = resp.data.affiliationInvites
+      const pendingAffiliationInvitations = resp?.data?.affiliationInvitations || []
 
-        affiliationInviteInfos.forEach(affiliationInviteInfo => {
-          const business: Business = affiliatedEntities.find(businesses => businesses.businessIdentifier === affiliationInviteInfo.business.businessIdentifier)
-          const affiliationInviteInfosArray = [affiliationInviteInfo]
+      for (const affiliationInviteInfo of pendingAffiliationInvitations) {
+        const isFromOrg = affiliationInviteInfo.fromOrg.id === this.currentOrganization.id
+        const isToOrgAndPending = affiliationInviteInfo.toOrg.id === this.currentOrganization.id &&
+          affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
+        const isAccepted = affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
+        const business = affiliatedEntities.find(business => business.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
 
-          if (business) {
-            business.affiliationInvites = (business.affiliationInvites || []).concat(affiliationInviteInfosArray)
-          } else if (affiliationInviteInfo.fromOrg.id === this.currentOrganization.id) {
-            const b = { ...affiliationInviteInfo.business, affiliationInvites: affiliationInviteInfosArray }
-            affiliatedEntities.push(b)
-          } else {
-            // do nothing, no row to add it, and not a request from this org.
-          }
-        })
+        if (business && (isToOrgAndPending || isFromOrg)) {
+          business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInviteInfo])
+        } else if (!business && isFromOrg && !isAccepted) {
+          const newBusiness = { ...affiliationInviteInfo.entity, affiliationInvites: [affiliationInviteInfo] }
+          affiliatedEntities.push(newBusiness)
+        } else {
+          // do not add invitation to the list.
+        }
+      }
 
+      if (pendingAffiliationInvitations) {
         // bubble the ones with the invitations to the top
         affiliatedEntities.sort((a, b) => {
           if (a.affiliationInvites && !b.affiliationInvites) {

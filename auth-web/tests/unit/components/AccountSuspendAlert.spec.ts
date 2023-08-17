@@ -18,7 +18,7 @@ describe('AccountSuspendAlert.vue', () => {
       namespaced: true,
       state: { currentOrganization: {} },
       actions: {
-        calculateFailedInvoices: jest.fn(() => {
+        calculateFailedInvoices: vi.fn(() => {
           return {
             totalTransactionAmount: 10,
             totalAmountToPay: 20
@@ -45,8 +45,8 @@ describe('AccountSuspendAlert.vue', () => {
       mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

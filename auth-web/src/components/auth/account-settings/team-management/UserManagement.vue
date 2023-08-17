@@ -238,7 +238,7 @@ import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vu
   }
 })
 export default class UserManagement extends Mixins(AccountChangeMixin, TeamManagementMixin, AccountMixin) {
-  @Prop({ default: '' }) private orgId: string;
+  @Prop({ default: '' }) private orgId: string
 
   private tab = null
   private isLoading = true

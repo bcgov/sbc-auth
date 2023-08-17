@@ -16,7 +16,7 @@ import { setupIntersectionObserverMock } from '../util/helper-functions'
 Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 
 const vuetify = new Vuetify({})
 
@@ -63,7 +63,7 @@ describe('Entity Management Component', () => {
 
       },
       action: {
-        addBusiness: jest.fn()
+        addBusiness: vi.fn()
       }
     }
 
@@ -96,14 +96,14 @@ describe('Entity Management Component', () => {
         }
       }
     })
-    mockedNrMethod = jest.fn()
+    mockedNrMethod = vi.fn()
     wrapper.vm.$refs.removalConfirmDialog.open = mockedNrMethod
   })
 
   afterEach(() => {
     wrapper.destroy()
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('EntityManagement is a Vue instance', () => {
@@ -136,7 +136,7 @@ describe('Entity Management Component', () => {
   })
   it('calls the Passcode reset open modal with correct buttons', async () => {
     const removeBusinessPayload: RemoveBusinessPayload = getPayLoad('CP')
-    const mockedPasscodeResetMethod = jest.fn()
+    const mockedPasscodeResetMethod = vi.fn()
     wrapper.vm.$refs.passcodeResetOptionsModal.open = mockedPasscodeResetMethod
     wrapper.vm.showConfirmationOptionsModal(removeBusinessPayload)
     expect(mockedNrMethod).toHaveBeenCalledTimes(0)

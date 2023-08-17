@@ -1,15 +1,16 @@
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
 import ActivityService from '@/services/activityLog.services'
+import store from '..'
 
-@Module({ namespaced: true })
+@Module({ namespaced: true, store, name: 'activity', dynamic: true })
 export default class ActvityLogModule extends VuexModule {
-    currentOrgActivity: ActivityLog
+  currentOrgActivity: ActivityLog
 
     @Mutation
-    public setCurrentOrgActivityLog (activityLog: ActivityLog) {
-      this.currentOrgActivity = activityLog
-    }
+  public setCurrentOrgActivityLog (activityLog: ActivityLog) {
+    this.currentOrgActivity = activityLog
+  }
 
     @Action({ commit: 'setCurrentOrgActivityLog', rawError: true })
     public async getActivityLog (filterParams:ActivityLogFilterParams): Promise<ActivityLog> {

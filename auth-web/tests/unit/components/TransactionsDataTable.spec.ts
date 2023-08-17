@@ -36,7 +36,7 @@ describe('TransactionsDataTable tests', () => {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',
     PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   const headers = getTransactionTableHeaders()
   const headersExtended = getTransactionTableHeaders(true)
@@ -102,7 +102,7 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(5).text()).toBe('25663')
     expect(row1Cells.at(6).text()).toBe('REG000123442')
     expect(row1Cells.at(7).text()).toBe('No Fee')
-    expect(row1Cells.at(8).text()).toBe('Completed  January 24, 2023')
+    expect(row1Cells.at(8).text()).toBe('CompletedJanuary 24, 2023')
     expect(row1Cells.at(9).text()).toBe('')
     // clear filters is hidden
     expect(wrapper.find('.clear-btn').exists()).toBe(false)
@@ -150,7 +150,7 @@ describe('TransactionsDataTable tests', () => {
     expect(row1Cells.at(9).text()).toBe('25663')
     expect(row1Cells.at(10).text()).toBe('REG000123442')
     expect(row1Cells.at(11).text()).toBe('No Fee')
-    expect(row1Cells.at(12).text()).toBe('Completed  January 24, 2023')
+    expect(row1Cells.at(12).text()).toBe('CompletedJanuary 24, 2023')
     expect(row1Cells.at(13).text()).toBe('')
   })
 

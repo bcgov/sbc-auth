@@ -32,7 +32,7 @@ describe('AccountInfo.vue', () => {
     'AUTH_API_URL': 'https://localhost:8080/api/v1/11',
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     orgModule = {
@@ -49,13 +49,13 @@ describe('AccountInfo.vue', () => {
         permissions: ['CHANGE_ADDRESS', 'CHANGE_ORG_NAME', 'VIEW_ADDRESS', 'VIEW_ADMIN_CONTACT']
       },
       actions: {
-        updateOrg: jest.fn(),
-        syncAddress: jest.fn(),
-        syncOrganization: jest.fn()
+        updateOrg: vi.fn(),
+        syncAddress: vi.fn(),
+        syncOrganization: vi.fn()
       },
       mutations: {
-        setCurrentOrganizationAddress: jest.fn(),
-        setCurrentOrganization: jest.fn().mockImplementation(() => {
+        setCurrentOrganizationAddress: vi.fn(),
+        setCurrentOrganization: vi.fn().mockImplementation(() => {
           orgModule.state.currentOrganization = {
             name: 'testOrg_suspended',
             statusCode: AccountStatus.SUSPENDED,
@@ -88,8 +88,8 @@ describe('AccountInfo.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterAll(() => {
@@ -103,7 +103,7 @@ describe('AccountInfo.vue', () => {
       vuetify,
       mixins: [Steppable],
       methods: {
-        getAccountFromSession: jest.fn(() => {
+        getAccountFromSession: vi.fn(() => {
           return {
             id: 1
           }
@@ -126,7 +126,7 @@ describe('AccountInfo.vue', () => {
       vuetify,
       mixins: [Steppable],
       methods: {
-        getAccountFromSession: jest.fn(() => {
+        getAccountFromSession: vi.fn(() => {
           return {
             id: 1
           }
@@ -139,7 +139,7 @@ describe('AccountInfo.vue', () => {
         ModalDialog: true
       }
     })
-    const stub = jest.fn()
+    const stub = vi.fn()
     wrapper.setMethods({ showSuspendAccountDialog: stub })
     wrapper.find('.suspend-account-btn').trigger('click')
     expect(wrapper.vm.showSuspendAccountDialog).toBeCalled()
@@ -152,7 +152,7 @@ describe('AccountInfo.vue', () => {
       vuetify,
       mixins: [Steppable],
       methods: {
-        getAccountFromSession: jest.fn(() => {
+        getAccountFromSession: vi.fn(() => {
           return {
             id: 1
           }
@@ -175,7 +175,7 @@ describe('AccountInfo.vue', () => {
       vuetify,
       mixins: [Steppable],
       methods: {
-        getAccountFromSession: jest.fn(() => {
+        getAccountFromSession: vi.fn(() => {
           return {
             id: 1
           }
@@ -225,7 +225,7 @@ describe('AccountInfo.vue', () => {
       vuetify,
       mixins: [Steppable],
       methods: {
-        getAccountFromSession: jest.fn(() => {
+        getAccountFromSession: vi.fn(() => {
           return {
             id: 1
           }
@@ -244,7 +244,7 @@ describe('AccountInfo.vue', () => {
     expect(wrapper.vm.isSuspensionReasonFormValid).toBeFalsy()
 
     wrapper.vm.selectedSuspensionReasonCode = 'Fraudulent'
-    const stub = jest.fn().mockImplementation(() => { wrapper.vm.isSuspensionReasonFormValid = true })
+    const stub = vi.fn().mockImplementation(() => { wrapper.vm.isSuspensionReasonFormValid = true })
 
     wrapper.setMethods({ showSuspendAccountDialog: stub })
     wrapper.find('.suspend-account-btn').trigger('click')

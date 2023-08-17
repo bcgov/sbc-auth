@@ -465,8 +465,9 @@ export default defineComponent({
               { ...componentAccountAdministrator(2) },
               { ...componentAgreementInformation(3) }
             ]
+          } else {
+            return []
           }
-          break
       }
     })
 

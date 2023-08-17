@@ -34,15 +34,15 @@ export default class ConfigHelper {
 
   static getBusinessURL () {
     // this needs trailing slash
-    return `${process.env.VUE_APP_DASHBOARD_URL}`
+    return `${import.meta.env.VUE_APP_DASHBOARD_URL}`
   }
 
   static getRegistryHomeURL () {
-    return `${process.env.VUE_APP_REGISTRY_HOME_URL}`
+    return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}`
   }
 
   static getBcrosDashboardURL () {
-    return `${process.env.VUE_APP_REGISTRY_HOME_URL}dashboard`
+    return `${import.meta.env.VUE_APP_REGISTRY_HOME_URL}dashboard`
   }
 
   static getBcrosURL () {
@@ -51,80 +51,80 @@ export default class ConfigHelper {
 
   static getSelfURL () {
     // this is without a trailing slash
-    return `${window.location.origin}${process.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
+    return `${window.location.origin}${import.meta.env.VUE_APP_PATH}`.replace(/\/$/, '') // remove the slash at the end
   }
 
   static getDirectorSearchURL () {
-    return `${process.env.VUE_APP_DIRECTOR_SEARCH_URL}`
+    return `${import.meta.env.VUE_APP_DIRECTOR_SEARCH_URL}`
   }
 
   static getNewBusinessURL () {
     // returns new business URL
-    return `${process.env.VUE_APP_BUSINESS_CREATE_URL}`
+    return `${import.meta.env.VUE_APP_BUSINESS_CREATE_URL}`
   }
 
   static getFileServerUrl () {
-    return `${process.env.VUE_APP_FILE_SERVER_URL}`
+    return `${import.meta.env.VUE_APP_FILE_SERVER_URL}`
   }
 
   static getNroUrl () {
-    return `${process.env.VUE_APP_NRO_URL}`
+    return `${import.meta.env.VUE_APP_NRO_URL}`
   }
 
   static getNameRequestUrl () {
-    return `${process.env.VUE_APP_NAME_REQUEST_URL}`
+    return `${import.meta.env.VUE_APP_NAME_REQUEST_URL}`
   }
 
   static getBceIdOsdLink () {
-    return `${process.env.VUE_APP_BCEID_OSD_LINK}`
+    return `${import.meta.env.VUE_APP_BCEID_OSD_LINK}`
   }
 
   static getAffidavitSize () {
-    return `${process.env.VUE_APP_AFFIDAVIT_FILE_SIZE}`
+    return `${import.meta.env.VUE_APP_AFFIDAVIT_FILE_SIZE}`
   }
 
   static getPayAPIURL () {
-    return `${process.env.VUE_APP_PAY_API_URL}` + `${process.env.VUE_APP_PAY_API_VERSION}`
+    return `${import.meta.env.VUE_APP_PAY_API_URL}` + `${import.meta.env.VUE_APP_PAY_API_VERSION}`
   }
 
   static getPaymentPayeeName () {
-    return `${process.env.VUE_APP_PAYMENT_PAYEE_NAME}` || 'BC Registries and Online Services'
+    return `${import.meta.env.VUE_APP_PAYMENT_PAYEE_NAME}` || 'BC Registries and Online Services'
   }
 
   static getAuthAPIUrl () {
-    return `${process.env.VUE_APP_AUTH_API_URL}` + `${process.env.VUE_APP_AUTH_API_VERSION}`
+    return `${import.meta.env.VUE_APP_AUTH_API_URL}` + `${import.meta.env.VUE_APP_AUTH_API_VERSION}`
   }
 
   static getAuthResetAPIUrl () {
-    return `${process.env.VUE_APP_AUTH_API_URL}` + '/test/reset'
+    return `${import.meta.env.VUE_APP_AUTH_API_URL}` + '/test/reset'
   }
 
   static getLegalAPIUrl () {
-    return `${process.env.VUE_APP_LEGAL_API_URL}` + `${process.env.VUE_APP_LEGAL_API_VERSION}`
+    return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION}`
   }
 
   static getLegalAPIV2Url () {
-    return `${process.env.VUE_APP_LEGAL_API_URL}` + `${process.env.VUE_APP_LEGAL_API_VERSION_2}`
+    return `${import.meta.env.VUE_APP_LEGAL_API_URL}` + `${import.meta.env.VUE_APP_LEGAL_API_VERSION_2}`
   }
 
   static getVonAPIUrl () {
-    return `${process.env.VUE_APP_VON_API_URL}` + `${process.env.VUE_APP_VON_API_VERSION}`
+    return `${import.meta.env.VUE_APP_VON_API_URL}` + `${import.meta.env.VUE_APP_VON_API_VERSION}`
   }
 
   static getStatusAPIUrl () {
-    return `${process.env.VUE_APP_STATUS_API_URL}` + `${process.env.VUE_APP_STATUS_API_VERSION}`
+    return `${import.meta.env.VUE_APP_STATUS_API_URL}` + `${import.meta.env.VUE_APP_STATUS_API_VERSION}`
   }
 
   static getEntitySelectorUrl () {
-    return `${process.env.VUE_APP_ENTITY_SELECTOR_URL}`
+    return `${import.meta.env.VUE_APP_ENTITY_SELECTOR_URL}`
   }
 
   static getOneStopUrl () {
-    return `${process.env.VUE_APP_ONE_STOP_URL}`
+    return `${import.meta.env.VUE_APP_ONE_STOP_URL}`
   }
 
   static getCorporateOnlineUrl () {
-    return `${process.env.VUE_APP_CORPORATE_ONLINE_URL}`
+    return `${import.meta.env.VUE_APP_CORPORATE_ONLINE_URL}`
   }
 
   static getSocietiesUrl () {
@@ -136,59 +136,59 @@ export default class ConfigHelper {
   }
 
   static getFasWebUrl () {
-    return `${process.env.VUE_APP_FAS_WEB_URL}`
+    return `${import.meta.env.VUE_APP_FAS_WEB_URL}`
   }
 
   static getPPRWebUrl () {
-    return `${process.env.VUE_APP_PPR_WEB_URL}`
+    return `${import.meta.env.VUE_APP_PPR_WEB_URL}`
   }
 
   static getSiteminderLogoutUrl () {
-    return `${process.env.VUE_APP_SITEMINDER_LOGOUT_URL}`
+    return `${import.meta.env.VUE_APP_SITEMINDER_LOGOUT_URL}`
   }
 
   static apiDocumentationUrl () {
-    return `${process.env.VUE_APP_API_DOCUMENTATION_URL}`
+    return `${import.meta.env.VUE_APP_API_DOCUMENTATION_URL}`
   }
 
   static getRegistrySearchUrl () {
-    return `${process.env.VUE_APP_REGISTRY_SEARCH_URL}`
+    return `${import.meta.env.VUE_APP_REGISTRY_SEARCH_URL}`
   }
 
   static getHotjarId () {
-    return `${process.env.VUE_APP_HOTJAR_ID}`
+    return `${import.meta.env.VUE_APP_HOTJAR_ID}`
   }
 
   static getLdClientId () {
-    return `${process.env.VUE_APP_AUTH_LD_CLIENT_ID}`
+    return `${import.meta.env.VUE_APP_AUTH_LD_CLIENT_ID}`
   }
 
   static getSentryDsn () {
-    return `${process.env.VUE_APP_SENTRY_DSN}`
+    return `${import.meta.env.VUE_APP_SENTRY_DSN}`
   }
 
   static getAddressCompleteKey () {
-    return `${process.env.VUE_APP_ADDRESS_COMPLETE_KEY}`
+    return `${import.meta.env.VUE_APP_ADDRESS_COMPLETE_KEY}`
   }
 
   static getAccountApprovalSlaInDays () {
-    return `${process.env.VUE_APP_APPROVE_ACCOUNT_SLA_DAYS}` || '5'
+    return `${import.meta.env.VUE_APP_APPROVE_ACCOUNT_SLA_DAYS}` || '5'
   }
 
   static getKeycloakAuthUrl () {
-    return `${process.env.VUE_APP_KEYCLOAK_AUTH_URL}`
+    return `${import.meta.env.VUE_APP_KEYCLOAK_AUTH_URL}`
   }
 
   static getKeycloakRealm () {
-    return `${process.env.VUE_APP_KEYCLOAK_REALM}`
+    return `${import.meta.env.VUE_APP_KEYCLOAK_REALM}`
   }
 
   static getKeycloakClientId () {
-    return `${process.env.VUE_APP_KEYCLOAK_CLIENTID}`
+    return `${import.meta.env.VUE_APP_KEYCLOAK_CLIENTID}`
   }
 
   static getNotifiyAPIUrl () {
-    return `${process.env.VUE_APP_NOTIFY_API_URL}` + `${process.env.VUE_APP_NOTIFY_API_VERSION}`
+    return `${import.meta.env.VUE_APP_NOTIFY_API_URL}` + `${import.meta.env.VUE_APP_NOTIFY_API_VERSION}`
   }
 
   static addToSession (key:string, value:any) {

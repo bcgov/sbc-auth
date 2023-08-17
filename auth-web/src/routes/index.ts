@@ -24,7 +24,7 @@ Vue.use(Router)
 
 const router = new Router({
   mode: 'history',
-  base: process.env.BASE_URL
+  base: import.meta.env.BASE_URL
 })
 
 router.addRoutes(getRoutes())
@@ -113,7 +113,7 @@ router.beforeEach(async (to, from, next) => {
             const urlParams = new URLSearchParams(window.location.search)
             let uriRedirectTo = urlParams.get('redirectUri')
             if (uriRedirectTo === '' || uriRedirectTo === null) {
-              uriRedirectTo = window.location.pathname.replace(process.env.VUE_APP_PATH, '')
+              uriRedirectTo = window.location.pathname.replace(import.meta.env.VUE_APP_PATH, '')
             }
             return next({
               path: `/${Pages.USER_PROFILE_TERMS}`,

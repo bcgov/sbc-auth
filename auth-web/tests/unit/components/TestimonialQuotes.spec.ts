@@ -1,12 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 document.body.setAttribute('data-app', 'true')
 

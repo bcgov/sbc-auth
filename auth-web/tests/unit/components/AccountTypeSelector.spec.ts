@@ -30,7 +30,7 @@ describe('AccountTypeSelector.vue', () => {
     'VUE_APP_COPS_REDIRECT_URL': 'https://coops-dev.pathfinder.gov.bc.ca/',
     'VUE_APP_PAY_ROOT_API': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     orgModule = {
@@ -46,13 +46,13 @@ describe('AccountTypeSelector.vue', () => {
         isCurrentSelectedProductsPremiumOnly: true
       },
       mutations: {
-        setSelectedAccountType: jest.fn(),
-        setCurrentOrganization: jest.fn(),
-        setCurrentOrganizationType: jest.fn(),
-        resetCurrentOrganisation: jest.fn(),
-        setAccountTypeBeforeChange: jest.fn(),
-        setAccessType: jest.fn(),
-        setIsCurrentProductsPremiumOnly: jest.fn().mockImplementation(() => {
+        setSelectedAccountType: vi.fn(),
+        setCurrentOrganization: vi.fn(),
+        setCurrentOrganizationType: vi.fn(),
+        resetCurrentOrganisation: vi.fn(),
+        setAccountTypeBeforeChange: vi.fn(),
+        setAccessType: vi.fn(),
+        setIsCurrentProductsPremiumOnly: vi.fn().mockImplementation(() => {
           orgModule.state.isCurrentSelectedProductsPremiumOnly = false
         })
       }
@@ -77,8 +77,8 @@ describe('AccountTypeSelector.vue', () => {
         user: userModule
       }
     })
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

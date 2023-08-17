@@ -20,7 +20,7 @@ const mockTask: Task[] = [{
   'type': 'Wills Registry'
 }]
 
-jest.mock('axios', () => {
+vi.doMock('axios', () => {
   return {
     create: () => {
       return {
@@ -31,8 +31,8 @@ jest.mock('axios', () => {
           return mockTask
         },
         interceptors: {
-          request: { eject: jest.fn(), use: jest.fn() },
-          response: { eject: jest.fn(), use: jest.fn() }
+          request: { eject: vi.fn(), use: vi.fn() },
+          response: { eject: vi.fn(), use: vi.fn() }
         }
       }
     }
@@ -41,9 +41,7 @@ jest.mock('axios', () => {
 
 describe('Task service', () => {
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
-    jest.clearAllMocks()
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
   })
 
   it('call getTaskById() for task Details ', () => {
