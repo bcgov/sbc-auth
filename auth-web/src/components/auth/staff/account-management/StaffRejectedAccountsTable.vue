@@ -18,8 +18,8 @@
         >
           <transition name="slide-fade">
             <v-data-table
-              v-model:items-per-page="tableDataOptions.itemsPerPage"
-              v-model:options="tableDataOptions"
+              :options.sync="tableDataOptions"
+              :items-per-page.sync="tableDataOptions.itemsPerPage"
               class="user-list"
               :headers="headerAccounts"
               :items="rejectedTasks"

@@ -5,7 +5,7 @@
     id="business-lookup"
   >
     <v-autocomplete
-      v-model="searchField"
+      :search-input.sync="searchField"
       :hide-no-data="state != States.NO_RESULTS"
       :items="searchResults"
       :loading="state === States.SEARCHING"
