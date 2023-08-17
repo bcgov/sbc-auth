@@ -447,11 +447,7 @@ export default class AccountInfo extends Mixins(
   }
 
   private updateAddress (address: Address) {
-    if (address.city == null && address.country == null && address.region == null && address.street == null && address.postalCode == null) {
-      return
-    }
     this.addressChanged = true
-    debugger
     this.setCurrentOrganizationAddress(address)
   }
 
