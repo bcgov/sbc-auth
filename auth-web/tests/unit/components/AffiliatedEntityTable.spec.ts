@@ -17,13 +17,13 @@ import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 Vue.use(Vuex)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-jest.mock('../../../src/services/user.services')
+vi.mock('../../../src/services/user.services')
 
 // selectors
 const header = baseVdataTable.header
@@ -45,9 +45,9 @@ const businessModule = {
   namespaced: true,
   state: { businesses },
   action: {
-    addBusiness: jest.fn(),
-    updateBusinessName: jest.fn(),
-    updateFolioNumber: jest.fn()
+    addBusiness: vi.fn(),
+    updateBusinessName: vi.fn(),
+    updateFolioNumber: vi.fn()
   }
 }
 
@@ -55,9 +55,9 @@ const moreBusinessModule = {
   namespaced: true,
   state: { businesses: moreBusinesses },
   action: {
-    addBusiness: jest.fn(),
-    updateBusinessName: jest.fn(),
-    updateFolioNumber: jest.fn()
+    addBusiness: vi.fn(),
+    updateBusinessName: vi.fn(),
+    updateFolioNumber: vi.fn()
   }
 }
 
@@ -108,8 +108,8 @@ describe('AffiliatedEntityTable.vue', () => {
     wrapper.destroy()
     sessionStorage.clear()
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('Renders affiliated entity table with correct contents', async () => {
@@ -218,7 +218,7 @@ describe('AffiliatedEntityTable.vue', () => {
   })
 
   it('Render affiliated entity table with correct actions menu', async () => {
-    sessionStorage.__STORE__[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN', 'supported-restoration-entities': 'BEN' })
+    sessionStorage[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN', 'supported-restoration-entities': 'BEN' })
     wrapper = mount(AffiliatedEntityTable, {
       store: newStore,
       localVue,

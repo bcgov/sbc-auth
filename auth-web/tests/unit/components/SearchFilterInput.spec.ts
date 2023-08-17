@@ -54,8 +54,8 @@ describe('SearchFilterInput.vue', () => {
       attachToDocument: true
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

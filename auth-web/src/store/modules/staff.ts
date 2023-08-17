@@ -15,10 +15,13 @@ import StaffService from '@/services/staff.services'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
+import store from '..'
 
 @Module({
   name: 'staff',
-  namespaced: true
+  namespaced: true,
+  store,
+  dynamic: true
 })
 export default class StaffModule extends VuexModule {
   products: ProductCode[] = []

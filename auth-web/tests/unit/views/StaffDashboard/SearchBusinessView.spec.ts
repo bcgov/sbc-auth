@@ -10,7 +10,7 @@ import Vuex from 'vuex'
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
-jest.mock('../../../../src/services/org.services')
+vi.mock('../../../../src/services/org.services')
 
 describe('StaffDashboardView.vue', () => {
   let cmp
@@ -21,7 +21,7 @@ describe('StaffDashboardView.vue', () => {
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
@@ -63,7 +63,7 @@ describe('StaffDashboardView.vue', () => {
       }
     })
 
-    const isFormValid = jest.fn(() => true)
+    const isFormValid = vi.fn(() => true)
 
     let vuetify = new Vuetify({})
 
@@ -75,8 +75,8 @@ describe('StaffDashboardView.vue', () => {
     })
     cmp.setData({ businessIdentifier: 'CP0000000' })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('searchbusiness screen enter button exists, ppr launcher exists', () => {

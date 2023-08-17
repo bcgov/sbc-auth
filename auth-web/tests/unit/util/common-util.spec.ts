@@ -40,7 +40,7 @@ describe('Common Util Test', () => {
   beforeEach(async () => {
     // mock the window.location.pathname function
     delete window.location
-    window.location = { pathname: jest.fn() } as any
+    window.location = { pathname: vi.fn() } as any
   })
 
   it('is isUrl [positive]', () => {

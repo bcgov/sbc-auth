@@ -1,7 +1,7 @@
 import Axios from 'axios'
 import PaymentServices from '../../../src/services/payment.services'
 
-jest.mock('../../../src/services/payment.services')
+vi.mock('../../../src/services/payment.services')
 
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
@@ -12,20 +12,20 @@ var mockob = {
 describe('create a transaction', () => {
   const results = []
   beforeAll(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should call create transaction ', () => {
-    const spyCreateTransaction = jest.spyOn(PaymentServices, 'createTransaction')
+    const spyCreateTransaction = vi.spyOn(PaymentServices, 'createTransaction')
     PaymentServices.createTransaction('paymentId', 'www.redirecturl.com')
     expect(spyCreateTransaction).toBeCalledTimes(1)
     expect(spyCreateTransaction).toHaveBeenCalledWith('paymentId', 'www.redirecturl.com')
   })
 
   it('should call update transaction without receipt number ', () => {
-    const spyUpdateTransaction = jest.spyOn(PaymentServices, 'updateTransaction')
+    const spyUpdateTransaction = vi.spyOn(PaymentServices, 'updateTransaction')
     PaymentServices.updateTransaction('paymentId', 'transactionId')
     expect(spyUpdateTransaction).toBeCalledTimes(1)
     expect(spyUpdateTransaction).toHaveBeenCalledWith('paymentId', 'transactionId')

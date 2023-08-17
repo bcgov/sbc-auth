@@ -10,14 +10,14 @@ import { axios } from '@/util/http-util'
 export default class BusinessLookupServices {
   /** The full Registries Search API URL. */
   static get registriesSearchApiUrl (): string {
-    const url = `${process.env.VUE_APP_REGISTRIES_SEARCH_API_URL}`
-    const version = `${process.env.VUE_APP_REGISTRIES_SEARCH_API_VERSION}`
+    const url = `${import.meta.env.VUE_APP_REGISTRIES_SEARCH_API_URL}`
+    const version = `${import.meta.env.VUE_APP_REGISTRIES_SEARCH_API_VERSION}`
     return (url + version + '/')
   }
 
   /** The Registries Search API Key. */
   static get registriesSearchApiKey (): string {
-    return `${process.env.VUE_APP_REGISTRIES_SEARCH_API_KEY}`
+    return `${import.meta.env.VUE_APP_REGISTRIES_SEARCH_API_KEY}`
   }
 
   /** The Account ID. */

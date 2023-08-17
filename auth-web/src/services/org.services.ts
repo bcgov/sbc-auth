@@ -96,17 +96,13 @@ export default class OrgService {
       { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
   }
 
-  static async removeAffiliationInvitation (orgId: number, affiliationInvitationId: number) {
-    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitation/${affiliationInvitationId}`)
-  }
-
-  static async cancelAffiliationInvitation (orgId: number, affiliationInvitationId: number) {
-    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}/authorization/refuse`)
+  static async removeAffiliationInvitation (affiliationInvitationId: number) {
+    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}`)
   }
 
   static async getAffiliationInvitations (orgIdentifier: number) {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
-      { params: { orgId: orgIdentifier } }
+      { params: { orgId: orgIdentifier, businessDetails: true } }
     )
   }
 

@@ -6,8 +6,11 @@ import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
+// Not mocked globally, because PADInfoForm uses it.
+vi.mock('vue-the-mask')
 
 describe('Search Business Form: Initial', () => {
+  vi.mock('vue-the-mask')
   const wrapper: Wrapper<any> = mount(AdministrativeBN, {
     vuetify,
     propsData: {}

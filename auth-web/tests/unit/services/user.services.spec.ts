@@ -3,7 +3,7 @@ import { Contact } from '../../../src/models/contact'
 import { User } from '../../../src/models/user'
 import UserService from '../../../src/services/user.services'
 
-jest.mock('../../../src/services/user.services')
+vi.mock('../../../src/services/user.services')
 
 var mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
@@ -27,25 +27,25 @@ const mockReturnUser : User = {
   }
 }
 
-const spyGetUserProfile = jest.spyOn(UserService, 'getUserProfile')
-const spySyncUserProfile = jest.spyOn(UserService, 'syncUserProfile')
-const spyCreateContact = jest.spyOn(UserService, 'createContact')
-const spyGetContacts = jest.spyOn(UserService, 'getContacts')
-const spyUpdateContact = jest.spyOn(UserService, 'updateContact')
-const spyGetOrganizations = jest.spyOn(UserService, 'getOrganizations')
-const spyUpdateUserTerms = jest.spyOn(UserService, 'updateUserTerms')
-const spyDeactivateUser = jest.spyOn(UserService, 'deactivateUser')
-const spyDeleteAnonymousUser = jest.spyOn(UserService, 'deleteAnonymousUser')
-const spyGetMembership = jest.spyOn(UserService, 'getMembership')
-const spyCreateUsers = jest.spyOn(UserService, 'createUsers')
-const spyCreateUserProfile = jest.spyOn(UserService, 'createUserProfile')
+const spyGetUserProfile = vi.spyOn(UserService, 'getUserProfile')
+const spySyncUserProfile = vi.spyOn(UserService, 'syncUserProfile')
+const spyCreateContact = vi.spyOn(UserService, 'createContact')
+const spyGetContacts = vi.spyOn(UserService, 'getContacts')
+const spyUpdateContact = vi.spyOn(UserService, 'updateContact')
+const spyGetOrganizations = vi.spyOn(UserService, 'getOrganizations')
+const spyUpdateUserTerms = vi.spyOn(UserService, 'updateUserTerms')
+const spyDeactivateUser = vi.spyOn(UserService, 'deactivateUser')
+const spyDeleteAnonymousUser = vi.spyOn(UserService, 'deleteAnonymousUser')
+const spyGetMembership = vi.spyOn(UserService, 'getMembership')
+const spyCreateUsers = vi.spyOn(UserService, 'createUsers')
+const spyCreateUserProfile = vi.spyOn(UserService, 'createUserProfile')
 
 describe('Get user profile', () => {
   const results = []
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockob)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     // @ts-ignore
-    jest.clearAllMocks()
+    vi.clearAllMocks()
   })
 
   it('should call get users ', () => {

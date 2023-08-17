@@ -105,7 +105,7 @@ import moment from 'moment'
   }
 })
 export default class Statements extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: string;
+  @Prop({ default: '' }) private orgId: string
   private readonly currentMembership!: Member
   private readonly currentOrganization!: Organization
   private readonly getStatementsList!: (filterParams: StatementFilterParams) => StatementListResponse

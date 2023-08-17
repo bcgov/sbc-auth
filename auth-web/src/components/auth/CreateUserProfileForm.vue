@@ -124,19 +124,19 @@ import UserService from '@/services/user.services'
   }
 })
 export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
-    private username = ''
-    private password = ''
-    private confirmPassword = ''
-    private isLoading = false
-    private dialogTitle = ''
-    private dialogText = ''
-    private passwordRuleValid = false
+  private username = ''
+  private password = ''
+  private confirmPassword = ''
+  private isLoading = false
+  private dialogTitle = ''
+  private dialogText = ''
+  private passwordRuleValid = false
 
-    private inputHints = {
-      username: 'Minimum 8 characters',
-      password: `Minimum of 8 characters and includes the following:`,
-      confirmPassword: 'Minimum of 8 characters'
-    }
+  private inputHints = {
+    username: 'Minimum 8 characters',
+    password: `Minimum of 8 characters and includes the following:`,
+    confirmPassword: 'Minimum of 8 characters'
+  }
 
     @Prop() token: string
 

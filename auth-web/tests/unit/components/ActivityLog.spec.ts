@@ -45,7 +45,7 @@ describe('Account settings ActivityLog.vue', () => {
         }
       },
       actions: {
-        getActivityLog: jest.fn(() => {
+        getActivityLog: vi.fn(() => {
           return currentActivity
         })
       }
@@ -54,7 +54,7 @@ describe('Account settings ActivityLog.vue', () => {
     const orgModule = {
       namespaced: true,
       actions: {
-        getActivityLog: jest.fn()
+        getActivityLog: vi.fn()
       },
       state: {
         currentOrganization: {
@@ -92,8 +92,8 @@ describe('Account settings ActivityLog.vue', () => {
 
   afterEach(() => {
     wrapper.destroy()
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', () => {

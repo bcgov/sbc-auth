@@ -3,13 +3,10 @@ import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { BaseVDataTable } from '@/components/datatable'
 import { DEFAULT_DATA_OPTIONS } from '@/components/datatable/resources'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import { baseVdataTable } from '../test-utils/test-data/baseVdata'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 const vuetify = new Vuetify({})
@@ -42,7 +39,7 @@ const headersWithFilters: BaseTableHeaderI[] = [
     col: 'id',
     customFilter: {
       clearable: false,
-      filterApiFn: jest.fn(),
+      filterApiFn: vi.fn(),
       items: [{ text: 'one', value: 1 }, { text: 'two', value: 2 }],
       type: 'select',
       value: ''
@@ -54,7 +51,7 @@ const headersWithFilters: BaseTableHeaderI[] = [
     col: 'desc1',
     customFilter: {
       clearable: false,
-      filterApiFn: jest.fn(),
+      filterApiFn: vi.fn(),
       type: 'text',
       value: ''
     },

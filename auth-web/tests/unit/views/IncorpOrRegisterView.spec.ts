@@ -18,7 +18,7 @@ const config = { 'REGISTRY_HOME_URL': 'hello' }
 describe('IncorpOrRegisterView.vue', () => {
   let wrapper: any
   let wrapperFactory: any
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -49,8 +49,8 @@ describe('IncorpOrRegisterView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

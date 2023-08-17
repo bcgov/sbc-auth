@@ -69,8 +69,10 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
+import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { getModule } from 'vuex-module-decorators'
 
 @Component({
   computed: {
@@ -85,6 +87,7 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
   }
 })
 export default class AccountOverview extends Mixins(Steppable) {
+  private orgStore = getModule(OrgModule, this.$store)
   private readonly currentOrganization!: Organization
   private readonly calculateFailedInvoices!: () => FailedInvoice
   private formatDate = CommonUtils.formatDisplayDate

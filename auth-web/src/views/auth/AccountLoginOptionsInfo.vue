@@ -51,39 +51,39 @@ import { mapState } from 'vuex'
   }
 })
 export default class AccountLoginOptionsInfo extends Vue {
-    private readonly steps = [
-      {
-        number: 1,
-        stepTitle: 'Account administrators must log in with their <span class="lb">BC Services Card.</span>',
-        stepDescription: `All account administrators are required to use the BC Services Card to verify their identity.
+  private readonly steps = [
+    {
+      number: 1,
+      stepTitle: 'Account administrators must log in with their <span class="lb">BC Services Card.</span>',
+      stepDescription: `All account administrators are required to use the BC Services Card to verify their identity.
                           <span class="lb">We do this to ensure that no one is impersonating you or committing identity theft.</span>`,
-        icon: 'mdi-shield-account-outline'
-      },
-      {
-        number: 2,
-        stepTitle: 'Team Member Login Methods',
-        stepDescription: `As the preferred method of authentication, your team members do not need to remember passwords with the BC Services Card. 
+      icon: 'mdi-shield-account-outline'
+    },
+    {
+      number: 2,
+      stepTitle: 'Team Member Login Methods',
+      stepDescription: `As the preferred method of authentication, your team members do not need to remember passwords with the BC Services Card. 
                           Alternatively you can choose to have them login with a BCeID username and password, combined with a third-party authenticator app. 
                           These options are explained on the following page.`,
-        icon: 'mdi-account-group-outline'
-      },
-      {
-        number: 3,
-        stepTitle: 'Secure your account',
-        stepDescription: 'Secure your account from fraudsters with 2-factor authentication.',
-        icon: 'mdi-two-factor-authentication'
-      }
-    ]
-
-    private goToDownload () {
-      this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_DOWNLOAD}`)
-      window.scrollTo(0, 0)
+      icon: 'mdi-account-group-outline'
+    },
+    {
+      number: 3,
+      stepTitle: 'Secure your account',
+      stepDescription: 'Secure your account from fraudsters with 2-factor authentication.',
+      icon: 'mdi-two-factor-authentication'
     }
+  ]
 
-    private goBack () {
-      this.$router.push(`/${Pages.HOME}`)
-      window.scrollTo(0, 0)
-    }
+  private goToDownload () {
+    this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_DOWNLOAD}`)
+    window.scrollTo(0, 0)
+  }
+
+  private goBack () {
+    this.$router.push(`/${Pages.HOME}`)
+    window.scrollTo(0, 0)
+  }
 }
 </script>
 

@@ -295,7 +295,7 @@ export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
-@import '~fas-ui/src/assets/scss/search.scss';
+@import '~/fas-ui/src/assets/scss/search.scss';
 
  #header-filter-row {
     th {

@@ -33,7 +33,7 @@ import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings
   }
 })
 export default class DeveloperAccess extends Mixins(AccountChangeMixin) {
-APIDOCUMENTATION_URL = ConfigHelper.apiDocumentationUrl() || ''
+  APIDOCUMENTATION_URL = ConfigHelper.apiDocumentationUrl() || ''
 }
 </script>
 

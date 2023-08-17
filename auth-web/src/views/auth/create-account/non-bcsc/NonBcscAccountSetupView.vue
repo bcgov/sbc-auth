@@ -108,7 +108,7 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
   }
 })
 export default class NonBcscAccountSetupView extends Vue {
-  @Prop({ default: undefined }) private readonly orgId: number; // org id used for bceid re-uplaod
+  @Prop({ default: undefined }) private readonly orgId: number // org id used for bceid re-uplaod
   private readonly currentUser!: KCUserProfile
   private readonly currentOrgPaymentType!: string
   protected readonly userContact!: Contact
