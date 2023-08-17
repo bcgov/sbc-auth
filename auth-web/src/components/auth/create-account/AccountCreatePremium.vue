@@ -77,8 +77,8 @@
         >
           <template #label>
             <div
+              v-sanitize="grantAccessText"
               class="bcol-auth__label"
-              v-html="grantAccessText"
             />
           </template>
         </v-checkbox>

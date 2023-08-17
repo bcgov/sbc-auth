@@ -10,6 +10,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 // eslint-disable-next-line sort-imports
 import './routes/componentHooks'
 import Vue from 'vue'
+import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
@@ -26,6 +27,7 @@ import { LDFlags } from '@/util/constants'
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
 Vue.use(Search, { store, i18n })
+Vue.use(VueSanitize)
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all

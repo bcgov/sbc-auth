@@ -18,8 +18,8 @@
           Please Update Your Account Information
         </h1>
         <p
+          v-sanitize="$t('updateAccountInformation' , {'name': currentOrganization.name })"
           class="text-center mt-8"
-          v-html="$t('updateAccountInformation' , {'name': currentOrganization.name })"
         />
       </v-col>
     </v-row>
