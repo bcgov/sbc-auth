@@ -1,8 +1,7 @@
 <template>
   <SbcAuthenticationOptions
     :in-auth="true"
-  >
-  </SbcAuthenticationOptions>
+  />
 </template>
 
 <script lang="ts">

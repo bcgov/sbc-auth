@@ -7,8 +7,10 @@ import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import CommonUtils from '@/util/common-util'
-import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags, AffidavitNumberStatus } from '@/util/constants'
-import { CorpTypeCd, GetCorpFullDescription, GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
+import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, LDFlags,
+  AffidavitNumberStatus } from '@/util/constants'
+import { CorpTypeCd, GetCorpFullDescription,
+  GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
 
 const affiliations = (reactive({
   filters: {
@@ -170,22 +172,26 @@ export const useAffiliations = () => {
   /** Apply data table headers dynamically to account for computed properties. */
   const getHeaders = (columns?: string[]) => {
     headers.value = getAffiliationTableHeaders(columns)
-    const newHeaders: BaseTableHeaderI[] = headers.value.map((header: BaseTableHeaderI, index) => {
+    const newHeaders: BaseTableHeaderI[] = headers.value.map((header: BaseTableHeaderI) => {
       const businesses_: Business[] = businesses.value
       if (header.col === 'Type') {
-        const filterValue: { text: string, value: any }[] = businesses_.map(business => ({ text: type(business), value: type(business) }))
+        const filterValue: { text: string, value: any }[] =
+          businesses_.map(business => ({ text: type(business), value: type(business) }))
         return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
       } else if (header.col === 'Status') {
-        const filterValue: { text: string, value: any }[] = businesses_.map(business => ({ text: status(business), value: status(business) }))
+        const filterValue: { text: string, value: any }[] =
+          businesses_.map(business => ({ text: status(business), value: status(business) }))
         return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
       } else if (header.col === 'Name') {
         const filterValue: { text: string, value: any }[] = businesses_.map((business) => {
-          const businessName = isNameRequest(business) ? business.nameRequest.names.map(obj => obj.name).join(' ') : name(business)
+          const businessName = isNameRequest(business)
+            ? business.nameRequest.names.map(obj => obj.name).join(' ') : name(business)
           return { text: businessName, value: businessName }
         })
         return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
       } else if (header.col === 'Number') {
-        const filterValue: { text: string, value: any }[] = businesses_.map(business => ({ text: number(business), value: number(business) }))
+        const filterValue: { text: string, value: any }[] =
+          businesses_.map(business => ({ text: number(business), value: number(business) }))
         return { ...header, customFilter: { ...header.customFilter, items: filterValue } }
       } else {
         return { ...header }

@@ -1,14 +1,13 @@
-import Axios from 'axios'
 import { ProductsRequestBody } from '@/models/Staff'
 import StaffService from '../../../src/services/staff.services'
 
 vi.mock('../../../src/services/staff.services')
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }
 
-var mockProducts : ProductsRequestBody = {
+const mockProducts : ProductsRequestBody = {
   subscriptions: [
     {
       productCode: 'ppr',
@@ -22,7 +21,6 @@ const spyGetAccountTypes = vi.spyOn(StaffService, 'getAccountTypes')
 const spyAddProducts = vi.spyOn(StaffService, 'addProducts')
 
 describe('Get staff service', () => {
-  const results = []
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
     vi.clearAllMocks()

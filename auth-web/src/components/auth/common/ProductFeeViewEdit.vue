@@ -1,8 +1,10 @@
 <template>
   <v-card elevation="0">
-
     <div class="d-flex justify-space-between">
-      <div class="d-flex" :class="{ 'w-100': !viewOnlyMode }">
+      <div
+        class="d-flex"
+        :class="{ 'w-100': !viewOnlyMode }"
+      >
         <div
           class="font-weight-bold mr-5"
           :class="{ 'prod-fee-label': !viewOnlyMode }"
@@ -12,20 +14,29 @@
         <div v-if="viewOnlyMode">
           <div>
             Statutory Fee:
-            <span class="font-weight-bold" data-test="apply-filing">{{ applyFilingText }}</span>
+            <span
+              class="font-weight-bold"
+              data-test="apply-filing"
+            >{{ applyFilingText }}</span>
           </div>
           <div>
             Service Fee:
-            <span class="font-weight-bold" data-test="prod-filing">{{ getProductFee }}</span>
+            <span
+              class="font-weight-bold"
+              data-test="prod-filing"
+            >{{ getProductFee }}</span>
           </div>
         </div>
-        <div v-else class="d-flex w-100">
+        <div
+          v-else
+          class="d-flex w-100"
+        >
           <ProductFeeSelector
             :canSelect="true"
             :orgProductFeeCodes="getOrgProductFeeCodesForProduct(orgProduct.product)"
-            @update:updatedProductFee="updatedProductFee"
             :productCode="orgProduct.product"
             :selectedApplyFilingFees="existingFeeCodes"
+            @update:updatedProductFee="updatedProductFee"
           />
         </div>
       </div>
@@ -33,17 +44,23 @@
       <div v-if="viewOnlyMode">
         <span
           class="primary--text cursor-pointer"
-          @click="updateViewOnlyMode(false)"
           data-test="btn-edit"
+          @click="updateViewOnlyMode(false)"
         >
-          <v-icon color="primary" size="20"> mdi-pencil</v-icon>
+          <v-icon
+            color="primary"
+            size="20"
+          > mdi-pencil</v-icon>
           Change
         </span>
       </div>
     </div>
 
-    <v-card-actions class="pt-1 pr-0" v-if="!viewOnlyMode">
-      <v-spacer></v-spacer>
+    <v-card-actions
+      v-if="!viewOnlyMode"
+      class="pt-1 pr-0"
+    >
+      <v-spacer />
       <v-btn
         large
         class="save-btn px-9"
@@ -61,10 +78,11 @@
         class="ml-2 px-9"
         color="primary"
         aria-label="Cancel product fee"
-        @click="updateViewOnlyMode(true)"
         data-test="reset-button"
-        >Cancel</v-btn
+        @click="updateViewOnlyMode(true)"
       >
+        Cancel
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -76,7 +94,6 @@ import ProductFeeSelector from '@/components/auth/common/ProductFeeSelector.vue'
 
 export default defineComponent({
   name: 'ProductFeeViewEdit',
-  emits: ['save:saveProductFee'],
   components: {
     ProductFeeSelector
   },
@@ -96,6 +113,7 @@ export default defineComponent({
       type: Boolean
     }
   },
+  emits: ['save:saveProductFee'],
   setup (props, { emit }) {
     const viewOnlyMode = ref(true)
     const selectedFee = ref<any>({})

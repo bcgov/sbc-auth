@@ -48,7 +48,12 @@ export default class BusinessService {
   }
 
   static async resetBusinessPasscode (passcodeResetLoad: PasscodeResetLoad): Promise<AxiosResponse<any>> {
-    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${passcodeResetLoad.businessIdentifier}`, { businessIdentifier: passcodeResetLoad.businessIdentifier, passcodeResetEmail: passcodeResetLoad.passcodeResetEmail, resetPasscode: passcodeResetLoad.resetPasscode })
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/entities/${passcodeResetLoad.businessIdentifier}`,
+      {
+        businessIdentifier: passcodeResetLoad.businessIdentifier,
+        passcodeResetEmail: passcodeResetLoad.passcodeResetEmail,
+        resetPasscode: passcodeResetLoad.resetPasscode
+      })
   }
 
   static async getNrData (nrNumber: string): Promise<AxiosResponse<any>> {

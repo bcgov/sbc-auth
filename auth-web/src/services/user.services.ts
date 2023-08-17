@@ -89,7 +89,8 @@ export default class UserService {
     return axios.post(`${ConfigHelper.getAuthResetAPIUrl()}`)
   }
 
-  static async createNotaryDetails (documentId: String, notaryInfo: NotaryInformation, notaryContact: NotaryContact, userId: string): Promise<AxiosResponse<User>> {
+  static async createNotaryDetails (documentId: string, notaryInfo: NotaryInformation,
+    notaryContact: NotaryContact, userId: string): Promise<AxiosResponse<User>> {
     const inputrequest = {
       documentId: documentId,
       issuer: notaryInfo.notaryName,

@@ -1,11 +1,17 @@
 <template>
-    <v-simple-table>
+  <v-simple-table>
     <thead>
       <tr>
-        <th scope="col" class="text-left">
+        <th
+          scope="col"
+          class="text-left"
+        >
           Id
         </th>
-        <th scope="col" class="text-left">
+        <th
+          scope="col"
+          class="text-left"
+        >
           Email
         </th>
       </tr>
@@ -19,7 +25,7 @@
         <td>{{ item.email }}</td>
       </tr>
     </tbody>
-    </v-simple-table>
+  </v-simple-table>
 </template>
 <script lang="ts">
 import { defineComponent, onMounted, ref } from '@vue/composition-api'

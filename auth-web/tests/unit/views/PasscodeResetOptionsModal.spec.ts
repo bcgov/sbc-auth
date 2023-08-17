@@ -1,6 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
-import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -39,7 +38,8 @@ describe('PasscodeResetOptionsModal.vue', () => {
             case 'removeBusinessOptionModalResetPasscode':
               return '<li>Business will be removed from this account</li>' +
               '<li>New business passcode will be generated and will cancel the old business passcode</li>' +
-              '<li>New business passcode will be sent through email to the person who will be responsible for managing this business moving forward</li>'
+              '<li>New business passcode will be sent through email to the person who will be responsible for' +
+              ' managing this business moving forward</li>'
             case 'removeBusinessOptionModalDonotResetPasscode':
               return '<li>Business will be removed from this account</li>' +
               '<li>The current passcode for this business will be cancelled</li><li>You will not be able to add this' +

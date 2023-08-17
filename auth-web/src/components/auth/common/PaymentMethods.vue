@@ -1,29 +1,36 @@
 <template>
   <div>
-     <template v-if="isPaymentEJV">
-      <GLPaymentForm :canSelect="false"></GLPaymentForm>
+    <template v-if="isPaymentEJV">
+      <GLPaymentForm :canSelect="false" />
     </template>
     <template v-else-if="!isPaymentEJV">
       <v-card
+        v-for="payment in allowedPaymentMethods"
+        :key="payment.type"
+        v-can:CHANGE_PAYMENT_METHOD.disable.card
         outlined
         :ripple="false"
         hover
         class="payment-card py-8 px-8 mb-4 elevation-1"
         :class="{'selected': isPaymentSelected(payment)}"
-        v-for="payment in allowedPaymentMethods"
-        :key="payment.type"
-        v-can:CHANGE_PAYMENT_METHOD.disable.card
-        @click="paymentMethodSelected(payment)"
         :data-test="`div-payment-${payment.type}`"
+        @click="paymentMethodSelected(payment)"
       >
         <div>
           <header class="d-flex align-center">
             <div class="payment-icon-container mt-n2">
-              <v-icon x-large color="primary">{{payment.icon}}</v-icon>
+              <v-icon
+                x-large
+                color="primary"
+              >
+                {{ payment.icon }}
+              </v-icon>
             </div>
             <div class="pr-8">
-              <h3 class="title font-weight-bold payment-title mt-n1">{{payment.title}}</h3>
-              <div>{{payment.subtitle}}</div>
+              <h3 class="title font-weight-bold payment-title mt-n1">
+                {{ payment.title }}
+              </h3>
+              <div>{{ payment.subtitle }}</div>
             </div>
             <v-btn
               large
@@ -32,34 +39,39 @@
               width="120"
               class="font-weight-bold ml-auto"
               :outlined="!isPaymentSelected(payment)"
-              @click="paymentMethodSelected(payment)"
               :aria-label="'Select' + ' ' + payment.title"
               :data-test="`btn-payment-${payment.type}`"
+              @click="paymentMethodSelected(payment)"
             >
-              <span>{{(isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT'}}</span>
+              <span>{{ (isPaymentSelected(payment)) ? 'SELECTED' : 'SELECT' }}</span>
             </v-btn>
           </header>
 
           <div class="payment-card-contents">
             <v-expand-transition>
               <div v-if="isPaymentSelected(payment)">
-
                 <!-- PAD -->
-                <div class="pad-form-container pt-7" v-if="(payment.type === paymentTypes.PAD)">
-                  <v-divider class="mb-7"></v-divider>
+                <div
+                  v-if="(payment.type === paymentTypes.PAD)"
+                  class="pad-form-container pt-7"
+                >
+                  <v-divider class="mb-7" />
                   <PADInfoForm
-                    @is-pre-auth-debit-form-valid="isPADValid"
-                    @emit-pre-auth-debit-info="getPADInfo"
                     :isChangeView="isChangeView"
                     :isAcknowledgeNeeded="isAcknowledgeNeeded"
                     :isInitialAcknowledged="isInitialAcknowledged"
                     :isInitialTOSAccepted="isInitialTOSAccepted"
                     :clearOnEdit="isInitialTOSAccepted"
-                  ></PADInfoForm>
+                    @is-pre-auth-debit-form-valid="isPADValid"
+                    @emit-pre-auth-debit-info="getPADInfo"
+                  />
                 </div>
 
                 <!-- BCOL -->
-                <div class="pt-7" v-else-if="(payment.type === paymentTypes.BCOL)">
+                <div
+                  v-else-if="(payment.type === paymentTypes.BCOL)"
+                  class="pt-7"
+                >
                   <!-- showing BCOL details banner -->
                   <LinkedBCOLBanner
                     :bcolAccountName="currentOrganization.bcolAccountName"
@@ -67,13 +79,16 @@
                     :show-edit-btn="true"
                     :force-edit-mode="forceEditModeBCOL"
                     @emit-bcol-info="setBcolInfo"
-                  ></LinkedBCOLBanner>
+                  />
                 </div>
 
                 <!-- Other Payment Types -->
-                <div class="pt-7" v-else>
-                  <v-divider class="mb-7"></v-divider>
-                  <div v-html="payment.description"></div>
+                <div
+                  v-else
+                  class="pt-7"
+                >
+                  <v-divider class="mb-7" />
+                  <div v-html="payment.description" />
                 </div>
               </div>
             </v-expand-transition>
@@ -83,18 +98,21 @@
     </template>
     <!-- showing PAD form without card selector for single payment types -->
     <v-row v-else>
-      <v-col cols="9" class="py-0">
+      <v-col
+        cols="9"
+        class="py-0"
+      >
         <PADInfoForm
           :padInformation="{}"
-          @is-pre-auth-debit-form-valid="isPADValid($event)"
-          @emit-pre-auth-debit-info="getPADInfo($event)"
           :isChangeView="isChangeView"
           :isAcknowledgeNeeded="isAcknowledgeNeeded"
           :isInitialTOSAccepted="isInitialTOSAccepted"
           :isInitialAcknowledged="isInitialAcknowledged"
           :clearOnEdit="isInitialTOSAccepted"
+          @is-pre-auth-debit-form-valid="isPADValid($event)"
+          @emit-pre-auth-debit-info="getPADInfo($event)"
           @is-pad-info-touched="isPadInfoTouched($event)"
-        ></PADInfoForm>
+        />
       </v-col>
     </v-row>
   </div>
@@ -158,7 +176,10 @@ const PAYMENT_METHODS = {
           Once your account is created, you can use your account number to add BC Registries and Online Services as a payee in your financial institution's online banking system to make payments.
         </p>
         <p class="mb-0">
-          BC Registries and Online Services <strong>must receive payment in full</strong> from your financial institution prior to the release of items purchased through this service. Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your financial institution.
+          BC Registries and Online Services <strong>must receive payment in full</strong> 
+          from your financial institution prior to the release of items purchased through this service. 
+          Receipt of an online banking payment generally takes 3-4 days from when you make the payment with your 
+          financial institution.
         </p>`,
     isSelected: false
   }

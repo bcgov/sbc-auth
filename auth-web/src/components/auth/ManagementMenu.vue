@@ -1,16 +1,31 @@
 <template>
   <div class="team-toolbar">
-  <v-container class="pt-0 pb-0">
-    <div v-if="currentOrganization" class="team-name">{{ currentOrganization.name }}</div>
-    <nav>
-      <ul class="pl-0">
-        <li v-for="(item, i) in menu"
-          :key="i">
-          <v-btn large text color="#495057" :to="item.path" :data-test="item.testTag">{{ item.title }}</v-btn>
-        </li>
-      </ul>
-    </nav>
-  </v-container>
+    <v-container class="pt-0 pb-0">
+      <div
+        v-if="currentOrganization"
+        class="team-name"
+      >
+        {{ currentOrganization.name }}
+      </div>
+      <nav>
+        <ul class="pl-0">
+          <li
+            v-for="(item, i) in menu"
+            :key="i"
+          >
+            <v-btn
+              large
+              text
+              color="#495057"
+              :to="item.path"
+              :data-test="item.testTag"
+            >
+              {{ item.title }}
+            </v-btn>
+          </li>
+        </ul>
+      </nav>
+    </v-container>
   </div>
 </template>
 
@@ -18,7 +33,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
-import { User } from '@/models/user'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 import { mapState } from 'vuex'

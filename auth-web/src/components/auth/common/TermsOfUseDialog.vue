@@ -1,49 +1,51 @@
 <template>
   <div class="terms-container">
     <div
+      v-if="!canCheckTerms"
       role="button"
       aria-label="View Terms and Conditions"
       class="terms-button"
       tab-index="0"
       @click.stop="openDialog()"
-      v-if="!canCheckTerms"
-    >
-    </div>
+    />
     <v-checkbox
+      v-model="termsAccepted"
       color="primary"
       class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
       hide-details
-      v-model="termsAccepted"
-      v-on:change="emitTermsAcceptanceStatus"
       :disabled="!canCheckTerms"
       required
       data-test="check-termsAccepted"
+      @change="emitTermsAcceptanceStatus"
     >
-      <template v-slot:label>
+      <template #label>
         <span>I have read, understood and agree to the
           <strong
             class="faux-link"
             role="button"
             aria-description="Read, understand and agree to the terms of conditions"
             tabindex="0"
-            v-on:keyup.enter="openDialog()"
+            @keyup.enter="openDialog()"
             @click.stop="openDialog()"
           >terms and conditions</strong>
-          {{tosCheckBoxLabelAppend}}
+          {{ tosCheckBoxLabelAppend }}
         </span>
       </template>
     </v-checkbox>
     <v-dialog
+      v-model="termsDialog"
       scrollable
       width="800"
-      v-model="termsDialog"
       role="dialog"
       tabindex="-1"
       aria-labelled-by="dialogTitle"
-      :persistent="true">
+      :persistent="true"
+    >
       <v-card>
         <v-card-title>
-          <h2 id="dialogTitle">{{tosHeading}}</h2>
+          <h2 id="dialogTitle">
+            {{ tosHeading }}
+          </h2>
           <v-btn
             large
             icon
@@ -53,11 +55,15 @@
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="py-2 px-6" id="scroll-target" data-test="scroll-area">
+        <v-card-text
+          id="scroll-target"
+          class="py-2 px-6"
+          data-test="scroll-area"
+        >
           <div v-scroll:#scroll-target="onScroll">
             <TermsOfUse
               :tosType="tosType"
-            ></TermsOfUse>
+            />
           </div>
         </v-card-text>
         <v-card-actions>
@@ -66,16 +72,16 @@
             color="primary"
             class="agree-btn"
             :disabled="!atBottom"
-            @click="agreeToTerms"
             data-test="accept-button"
+            @click="agreeToTerms"
           >
             <span>Agree to Terms</span>
           </v-btn>
           <v-btn
             large
             depressed
-            @click="closeDialog"
             data-test="close-button"
+            @click="closeDialog"
           >
             Cancel
           </v-btn>
@@ -127,7 +133,7 @@ export default class TermsOfUseDialog extends Vue {
   }
 
   @Watch('userHasToAcceptTOS', { deep: true })
-  updateTermsAccepted (val, oldVal) {
+  updateTermsAccepted (val) {
     if (this.isUserTOS && val) {
       this.agreeToTerms()
     }

@@ -1,13 +1,19 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Choose authentication for your team</h1>
-      <p class="mt-3 mb-0">There are two different ways that your team can log in. Review the options below to learn more and make
+      <h1 class="view-header__title">
+        Choose authentication for your team
+      </h1>
+      <p class="mt-3 mb-0">
+        There are two different ways that your team can log in. Review the options below to learn more and make
         a selection for your team. You will be able to access authentication methods for your team in your
-        <a class="text-decoration-underline" @click="goToAccountSettings">account settings.</a>
+        <a
+          class="text-decoration-underline"
+          @click="goToAccountSettings"
+        >account settings.</a>
       </p>
     </div>
-    <account-login-option-picker @auth-type-selected="setLoginOption"></account-login-option-picker>
+    <account-login-option-picker @auth-type-selected="setLoginOption" />
     <div class="d-flex mt-10 justify-center">
       <v-btn
         large

@@ -3,13 +3,11 @@ import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/us
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import { RoleInfo } from '@/models/Organization'
-import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
 import store from '..'
@@ -165,7 +163,7 @@ export default class UserModule extends VuexModule {
       const doc:DocumentUpload = response?.data
       this.context.commit('setAffidavitDocId', doc.key) // need this while creating org
       const userId = this.context.rootGetters['auth/keycloakGuid']
-      const res = await DocumentService.uplpoadToUrl(doc.preSignedUrl, file, doc.key, userId)
+      await DocumentService.uploadToUrl(doc.preSignedUrl, file, doc.key, userId)
     }
   }
 
@@ -265,7 +263,8 @@ export default class UserModule extends VuexModule {
     const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
     if (response && response.data) {
       // filter by account type and sort by name(label)
-      const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT')).sort((a, b) => a.label.localeCompare(b.label))
+      const orgs = response.data.filter(userSettings =>
+        (userSettings.type === 'ACCOUNT')).sort((a, b) => a.label.localeCompare(b.label))
       return orgs
     }
     return []

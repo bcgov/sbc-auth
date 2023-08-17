@@ -1,15 +1,24 @@
 <template>
-  <v-form class="mt-8" ref="createAccountInfoForm"  data-test="form-stepper-basic-wrapper">
+  <v-form
+    ref="createAccountInfoForm"
+    class="mt-8"
+    data-test="form-stepper-basic-wrapper"
+  >
     <account-business-type
-    :govmAccount="govmAccount"
-    :errorMessage="errorMessage"
-    :saving="saving"
-    @update:org-business-type="updateOrgBusinessType"
-    @valid="checkOrgBusinessTypeValid">
-    </account-business-type>
+      :govmAccount="govmAccount"
+      :errorMessage="errorMessage"
+      :saving="saving"
+      @update:org-business-type="updateOrgBusinessType"
+      @valid="checkOrgBusinessTypeValid"
+    />
 
-    <fieldset v-if="isExtraProvUser || enablePaymentMethodSelectorStep " v-display-mode>
-      <legend class="mb-3">Mailing Address</legend>
+    <fieldset
+      v-if="isExtraProvUser || enablePaymentMethodSelectorStep "
+      v-display-mode
+    >
+      <legend class="mb-3">
+        Mailing Address
+      </legend>
       <base-address-form
         ref="mailingAddress"
         :editing="true"
@@ -20,30 +29,39 @@
       />
     </fieldset>
 
-    <v-divider class="mt-4 mb-10"></v-divider>
+    <v-divider class="mt-4 mb-10" />
 
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
         <v-btn
           large
           depressed
           color="default"
+          data-test="btn-back"
           @click="goBack"
-          data-test="btn-back">
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+        >
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           class="mr-3 save-btn"
           :loading="saving"
           :disabled="!isFormValid() || saving"
-          @click="save"
           data-test="save-button"
+          @click="save"
         >
-          <span >Next
+          <span>Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
         </v-btn>
@@ -51,15 +69,15 @@
           :disabled="saving"
           :target-route="cancelUrl"
           :showConfirmPopup="false"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
   </v-form>
 </template>
 
 <script lang="ts">
-import { Account, LDFlags, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Account, LDFlags, LoginSource } from '@/util/constants'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'

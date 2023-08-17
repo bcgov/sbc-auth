@@ -1,14 +1,23 @@
 <template>
   <div id="entity-management">
     <v-fade-transition>
-      <div class="loading-container grayed-out" v-show="!!isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="!!isLoading"/>
+      <div
+        v-show="!!isLoading"
+        class="loading-container grayed-out"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="!!isLoading"
+        />
       </div>
     </v-fade-transition>
 
-    <v-container justify class="view-container">
+    <v-container class="view-container justify">
       <div class="view-header align-center">
-        <h1 class="view-header__title">{{ viewTitle }}<br>
+        <h1 class="view-header__title">
+          {{ viewTitle }}<br>
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
@@ -16,68 +25,107 @@
             id="add-name-request-btn"
             class="font-weight-regular"
             color="primary"
-            outlined dark large
+            outlined
+            dark
+            large
             @click="goToNameRequest()"
           >
             <span>Request a BC Business Name</span>
-            <v-icon small class="ml-2">mdi-open-in-new</v-icon>
+            <v-icon
+              small
+              class="ml-2"
+            >
+              mdi-open-in-new
+            </v-icon>
           </v-btn>
         </div>
       </div>
 
-      <v-row no-gutters id="dashboard-actions" class="mb-n3">
+      <v-row
+        id="dashboard-actions"
+        no-gutters
+        class="mb-n3"
+      >
         <v-col cols="auto">
           <!-- Add Existing Name Request or Business -->
           <v-menu
             v-model="addAffiliationDropdown"
           >
-            <template v-slot:activator="{ on: onExistingMenu }">
-              <v-tooltip top content-class="top-tooltip">
-                <template v-slot:activator="{ on: onExistingTooltip }">
+            <template #activator="{ on: onExistingMenu }">
+              <v-tooltip
+                top
+                content-class="top-tooltip"
+              >
+                <template #activator="{ on: onExistingTooltip }">
                   <v-btn
                     id="add-existing-btn"
                     class="mt-2 mr-4"
                     color="primary"
-                    dark large
+                    dark
+                    large
                     v-on="{ ...onExistingMenu, ...onExistingTooltip }"
                     @click="addAffiliationDropdown = !addAffiliationDropdown"
                   >
                     <v-icon>mdi-plus</v-icon>
                     <span><strong>Add an Existing Business or Name Request</strong></span>
-                    <v-icon class="ml-2 mr-n2">{{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                    <v-icon class="ml-2 mr-n2">
+                      {{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
+                    </v-icon>
                   </v-btn>
                 </template>
-                <span>To view and manage existing businesses and Name Requests, you can manually add them to your table.</span>
+                <span>
+                  To view and manage existing businesses and Name Requests,
+                  you can manually add them to your table.
+                </span>
               </v-tooltip>
             </template>
             <v-list>
               <v-list-item>
                 <v-list-item-title class="d-inline-flex">
                   <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">Add an Existing...</div>
+                  <div class="ml-1 mt-1 add-existing-title">
+                    Add an Existing...
+                  </div>
                 </v-list-item-title>
               </v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddBusinessModal()">Business</v-list-item>
-              <v-list-item class="add-existing-item" @click="showAddNRModal()">Name Request</v-list-item>
+              <v-list-item
+                class="add-existing-item"
+                @click="showAddBusinessModal()"
+              >
+                Business
+              </v-list-item>
+              <v-list-item
+                class="add-existing-item"
+                @click="showAddNRModal()"
+              >
+                Name Request
+              </v-list-item>
             </v-list>
           </v-menu>
 
           <!-- Incorporate a Numbered BC Company or Business -->
           <v-menu v-model="incorporateNumberedDropdown">
-            <template v-slot:activator="{ on: onNumberedMenu }">
-              <v-tooltip top content-class="top-tooltip">
-                <template v-slot:activator="{ on: onNumberedTooltip }">
+            <template #activator="{ on: onNumberedMenu }">
+              <v-tooltip
+                top
+                content-class="top-tooltip"
+              >
+                <template #activator="{ on: onNumberedTooltip }">
                   <v-btn
                     id="incorporate-numbered-btn"
                     class="mt-2 mr-4"
                     color="primary"
-                    outlined dark large
+                    outlined
+                    dark
+                    large
                     v-on="{ ...onNumberedMenu, ...onNumberedTooltip }"
                     @click="incorporateNumberedDropdown = !incorporateNumberedDropdown"
                   >
                     <v-icon>mdi-plus</v-icon>
                     <span><strong>Incorporate a Numbered BC Company</strong></span>
-                    <v-icon class="ml-2 mr-n2">{{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                    <v-icon class="ml-2 mr-n2">
+                      {{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
+                    </v-icon>
                   </v-btn>
                 </template>
                 <span>Start an incorporation application for a numbered company in B.C.</span>
@@ -87,18 +135,24 @@
               <v-list-item>
                 <v-list-item-title class="d-inline-flex">
                   <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">Incorporate a...</div>
+                  <div class="ml-1 mt-1 add-existing-title">
+                    Incorporate a...
+                  </div>
                 </v-list-item-title>
               </v-list-item>
-              <v-tooltip right content-class="right-tooltip">
-                <template v-slot:activator="{ on, attrs }">
+              <v-tooltip
+                right
+                content-class="right-tooltip"
+              >
+                <template #activator="{ on, attrs }">
                   <v-list-item
                     v-bind="attrs"
-                    v-on="on"
-                    class="add-existing-item"
                     id="incorporate-numbered-ben-btn"
-                    @click="startNumberedCompany(CorpTypes.BENEFIT_COMPANY)">
-                  Numbered Benefit Company
+                    class="add-existing-item"
+                    v-on="on"
+                    @click="startNumberedCompany(CorpTypes.BENEFIT_COMPANY)"
+                  >
+                    Numbered Benefit Company
                   </v-list-item>
                 </template>
                 <div>
@@ -113,15 +167,19 @@
               </v-tooltip>
               <!-- Feature Flagged Buttons -->
               <div v-if="enableBcCccUlc">
-                <v-tooltip right content-class="right-tooltip">
-                  <template v-slot:activator="{ on, attrs }">
+                <v-tooltip
+                  right
+                  content-class="right-tooltip"
+                >
+                  <template #activator="{ on, attrs }">
                     <v-list-item
                       v-bind="attrs"
-                      v-on="on"
-                      class="add-existing-item"
                       id="incorporate-numbered-limited-btn"
-                      @click="startNumberedCompany(CorpTypes.BC_COMPANY)">
-                    Numbered Limited Company
+                      class="add-existing-item"
+                      v-on="on"
+                      @click="startNumberedCompany(CorpTypes.BC_COMPANY)"
+                    >
+                      Numbered Limited Company
                     </v-list-item>
                   </template>
                   <div>
@@ -134,15 +192,19 @@
                     </ul>
                   </div>
                 </v-tooltip>
-                <v-tooltip right content-class="right-tooltip">
-                  <template v-slot:activator="{ on, attrs }">
+                <v-tooltip
+                  right
+                  content-class="right-tooltip"
+                >
+                  <template #activator="{ on, attrs }">
                     <v-list-item
                       v-bind="attrs"
-                      v-on="on"
-                      class="add-existing-item"
                       id="incorporate-numbered-unlimited-btn"
-                      @click="startNumberedCompany(CorpTypes.BC_ULC_COMPANY)">
-                    Numbered Unlimited Liability Company
+                      class="add-existing-item"
+                      v-on="on"
+                      @click="startNumberedCompany(CorpTypes.BC_ULC_COMPANY)"
+                    >
+                      Numbered Unlimited Liability Company
                     </v-list-item>
                   </template>
                   <div>
@@ -155,15 +217,19 @@
                     </ul>
                   </div>
                 </v-tooltip>
-                <v-tooltip right content-class="right-tooltip">
-                  <template v-slot:activator="{ on, attrs }">
+                <v-tooltip
+                  right
+                  content-class="right-tooltip"
+                >
+                  <template #activator="{ on, attrs }">
                     <v-list-item
                       v-bind="attrs"
-                      v-on="on"
-                      class="add-existing-item"
                       id="incorporate-numbered-ccc-btn"
-                      @click="startNumberedCompany(CorpTypes.BC_CCC)">
-                    Numbered Community Contribution Company
+                      class="add-existing-item"
+                      v-on="on"
+                      @click="startNumberedCompany(CorpTypes.BC_CCC)"
+                    >
+                      Numbered Community Contribution Company
                     </v-list-item>
                   </template>
                   <div>
@@ -181,14 +247,16 @@
         </v-col>
         <v-col>
           <v-select
-            dense filled multiple
+            v-model="selectedColumns"
+            dense
+            filled
+            multiple
             class="column-selector"
             label="Columns to Show"
-            v-model="selectedColumns"
             :items="columns"
             :menu-props="{ bottom: true, offsetY: true }"
           >
-            <template v-slot:selection></template>
+            <template #selection />
           </v-select>
         </v-col>
       </v-row>
@@ -196,9 +264,9 @@
       <AffiliatedEntityTable
         :selectedColumns="selectedColumns"
         :loading="isLoading"
+        :highlight-index="highlightIndex"
         @remove-business="showConfirmationOptionsModal($event)"
         @remove-affiliation-invitation="removeAffiliationInvitation()"
-        :highlight-index="highlightIndex"
       />
 
       <PasscodeResetOptionsModal
@@ -233,7 +301,7 @@
         max-width="640"
         data-test-tag="add-name-request"
       >
-        <template v-slot:text>
+        <template #text>
           <p>
             Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone number
             OR applicant email that were used when the name was requested.
@@ -268,12 +336,30 @@
         max-width="640"
         data-test="remove-confirm-dialog"
       >
-        <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <template #icon>
+          <v-icon
+            large
+            color="error"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
         </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="primaryBtnHandler()" data-test="dialog-ok-button">{{primaryBtnText}}</v-btn>
-          <v-btn large @click="secondaryBtnHandler()" data-test="dialog-ok-button">{{ secondaryBtnText }}</v-btn>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="primaryBtnHandler()"
+          >
+            {{ primaryBtnText }}
+          </v-btn>
+          <v-btn
+            large
+            data-test="dialog-ok-button"
+            @click="secondaryBtnHandler()"
+          >
+            {{ secondaryBtnText }}
+          </v-btn>
         </template>
       </ModalDialog>
 
@@ -285,11 +371,23 @@
         dialog-class="notify-dialog"
         max-width="640"
       >
-        <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <template #icon>
+          <v-icon
+            large
+            color="error"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
         </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="close()"
+          >
+            OK
+          </v-btn>
         </template>
       </ModalDialog>
 
@@ -302,11 +400,23 @@
         max-width="640"
         :isPersistent="true"
       >
-        <template v-slot:icon>
-          <v-icon large color="primary">mdi-check</v-icon>
+        <template #icon>
+          <v-icon
+            large
+            color="primary"
+          >
+            mdi-check
+          </v-icon>
         </template>
-        <template v-slot:actions>
-          <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="removed-business-success-button"
+            @click="removedBusinessSuccessClose()"
+          >
+            OK
+          </v-btn>
         </template>
       </ModalDialog>
 

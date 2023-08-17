@@ -17,7 +17,7 @@ document.body.setAttribute('data-app', 'true')
 
 describe('DecideBusinessView.vue', () => {
   let wrapper: any
-  var ob = {
+  const ob = {
     'ENTITY_SELECTOR_URL': 'https://entity-selection-dev.apps.silver.devops.gov.bc.ca/'
   }
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)

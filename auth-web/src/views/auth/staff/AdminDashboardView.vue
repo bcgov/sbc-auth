@@ -1,10 +1,18 @@
 <template>
-  <v-container id="admin-dashboard-container" class="view-container">
+  <v-container
+    id="admin-dashboard-container"
+    class="view-container"
+  >
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Admin Dashboard</h1>
+      <h1 class="view-header__title">
+        Admin Dashboard
+      </h1>
     </div>
 
-    <v-row no-gutters v-if="canEditBn">
+    <v-row
+      v-if="canEditBn"
+      no-gutters
+    >
       <v-col cols="8">
         <AdministrativeBN />
       </v-col>

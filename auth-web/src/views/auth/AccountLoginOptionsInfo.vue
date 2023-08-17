@@ -1,42 +1,56 @@
 <template>
-    <v-container class="view-container">
-        <div class="view-header flex-column mb-10">
-          <h1 class="view-header__title">Before you get started</h1>
-          <p class="mt-3 mb-3">It's important to understand the basic rules for users on your BC Registries account.</p>
+  <v-container class="view-container">
+    <div class="view-header flex-column mb-10">
+      <h1 class="view-header__title">
+        Before you get started
+      </h1>
+      <p class="mt-3 mb-3">
+        It's important to understand the basic rules for users on your BC Registries account.
+      </p>
+    </div>
+    <v-card
+      flat
+      class="pt-10 py-11 px-10"
+    >
+      <section
+        v-for="step in steps"
+        :key="step.number"
+      >
+        <div class="d-flex">
+          <div class="step-icon-container pr-6 text-center">
+            <v-icon
+              x-large
+              color="blue-grey darken-1"
+              class="step-icon"
+            >
+              {{ step.icon }}
+            </v-icon>
+          </div>
+          <div>
+            <h2
+              class="mb-4"
+              v-html="step.stepTitle"
+            />
+            <p
+              class="mb-0"
+              v-html="step.stepDescription"
+            />
+          </div>
         </div>
-        <v-card flat class="pt-10 py-11 px-10">
-          <section
-            v-for="step in steps"
-            :key="step.number"
-          >
-            <div class="d-flex">
-              <div class="step-icon-container pr-6 text-center">
-                <v-icon
-                  x-large
-                  color="blue-grey darken-1"
-                  class="step-icon">
-                  {{step.icon}}
-                </v-icon>
-              </div>
-              <div>
-                <h2 class="mb-4" v-html="step.stepTitle"></h2>
-                <p class="mb-0" v-html="step.stepDescription"></p>
-              </div>
-            </div>
-            <v-divider class="mt-10 mb-9"/>
-          </section>
-        </v-card>
-        <div class="d-flex justify-center mt-12 mb-4">
-          <v-btn
-            large
-            color="primary"
-            class="action-btn font-weight-bold"
-            to="/account-login-options-chooser"
-          >
-            OK
-          </v-btn>
-        </div>
-    </v-container>
+        <v-divider class="mt-10 mb-9" />
+      </section>
+    </v-card>
+    <div class="d-flex justify-center mt-12 mb-4">
+      <v-btn
+        large
+        color="primary"
+        class="action-btn font-weight-bold"
+        to="/account-login-options-chooser"
+      >
+        OK
+      </v-btn>
+    </div>
+  </v-container>
 </template>
 
 <script lang="ts">

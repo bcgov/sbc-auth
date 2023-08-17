@@ -1,19 +1,34 @@
 <template>
   <v-card class="py-4 px-4">
-    <v-card-title data-test="title-deactivate" class="font-weight-bold mb-4">
+    <v-card-title
+      data-test="title-deactivate"
+      class="font-weight-bold mb-4"
+    >
       When this account is deactivated...
     </v-card-title>
 
     <v-card-text>
-      <div v-for="item in info" :key="item.title" class="d-flex ml-3 mt-1">
+      <div
+        v-for="item in info"
+        :key="item.title"
+        class="d-flex ml-3 mt-1"
+      >
         <div>
-          <v-icon size="30" color="error" class="mt-1 mr-4"
-            >mdi-alert-circle-outline</v-icon
+          <v-icon
+            size="30"
+            color="error"
+            class="mt-1 mr-4"
           >
+            mdi-alert-circle-outline
+          </v-icon>
         </div>
         <div class="ml-3 mt-1">
-          <h4 class="font-weight-bold">{{ t(item.title) }}</h4>
-          <p v-if="item.description">{{ t(item.description) }}</p>
+          <h4 class="font-weight-bold">
+            {{ t(item.title) }}
+          </h4>
+          <p v-if="item.description">
+            {{ t(item.description) }}
+          </p>
         </div>
       </div>
     </v-card-text>
@@ -23,8 +38,7 @@
 <script lang="ts">
 import { PropType, computed, defineComponent } from '@vue/composition-api'
 import { Account } from '@/util/constants'
-import Vue from 'vue'
-import { useI18n } from 'vue-i18n-bridge'
+import { useI18n } from 'vue-i18n-composable'
 
 export default defineComponent({
   name: 'DeactivateCard',

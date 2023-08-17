@@ -10,7 +10,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 document.body.setAttribute('data-app', 'true')
 
 vi.mock('../../../src/services/bcol.services')
@@ -78,13 +78,6 @@ describe('InviteUsersForm.vue', () => {
           'label': 'Submit searches and filings, add / remove businesses, add / remove team members',
           'name': 'COORDINATOR'
         }]
-      }
-    }
-
-    const invitationModule = {
-      namespaced: true,
-      state: {
-        invitations: []
       }
     }
 

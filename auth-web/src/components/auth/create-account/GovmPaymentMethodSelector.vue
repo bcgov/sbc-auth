@@ -1,37 +1,41 @@
 <template>
   <div data-test="div-stepper-payment-method-selector">
-    <GLPaymentForm @is-gl-info-form-valid="isGLInfoValid"></GLPaymentForm>
-    <v-divider class="my-10"></v-divider>
-      <v-row>
+    <GLPaymentForm @is-gl-info-form-valid="isGLInfoValid" />
+    <v-divider class="my-10" />
+    <v-row>
       <v-col class="py-0 d-inline-flex">
         <v-btn
           large
           depressed
           color="default"
-          @click="goBack"
           data-test="btn-stepper-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           class="save-continue-button mr-3"
-          @click="next"
           data-test="next-button"
           :disabled="!isGLValid"
+          @click="next"
         >
-          <span >
+          <span>
             Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
-
         </v-btn>
         <ConfirmCancelButton
           showConfirmPopup="true"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
   </div>
@@ -39,7 +43,7 @@
 
 <script lang="ts">
 
-import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'

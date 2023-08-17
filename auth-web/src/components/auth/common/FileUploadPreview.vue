@@ -1,20 +1,26 @@
 <template>
   <v-row>
-    <v-col class="py-0" sm="12" md="12">
-      <v-form ref="fileUploadInput" lazy-validation>
+    <v-col
+      class="py-0"
+      sm="12"
+      md="12"
+    >
+      <v-form
+        ref="fileUploadInput"
+        lazy-validation
+      >
         <v-file-input
+          v-model="fileUpload"
           label="Upload File"
           filled
           dense
-          v-model="fileUpload"
           accept="image/*, .pdf"
           class="file-upload-preview"
           :rules="fileUploadRules"
           show-size
-          @change="fileChange"
           color="primary"
-        >
-        </v-file-input>
+          @change="fileChange"
+        />
       </v-form>
     </v-col>
   </v-row>

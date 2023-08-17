@@ -1,12 +1,22 @@
 <template>
   <v-container>
     <v-fade-transition>
-      <div v-if="isLoading" class="loading-container">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
     </v-fade-transition>
     <header class="view-header mb-6">
-      <h2 class="view-header__title">Statements</h2>
+      <h2 class="view-header__title">
+        Statements
+      </h2>
       <v-btn
         large
         depressed
@@ -14,7 +24,12 @@
         title="Open Statement Settings"
         @click.stop="openSettingsModal"
       >
-        <v-icon small class="mr-2 ml-n1">mdi-settings</v-icon>
+        <v-icon
+          small
+          class="mr-2 ml-n1"
+        >
+          mdi-settings
+        </v-icon>
         Settings
       </v-btn>
     </header>
@@ -33,15 +48,15 @@
           itemsPerPageOptions: getPaginationOptions
         }"
       >
-        <template v-slot:loading>
+        <template #loading>
           Loading...
         </template>
-        <template v-slot:[`item.dateRange`]="{ item }">
+        <template #[`item.dateRange`]="{ item }">
           <div class="font-weight-bold">
-            {{formatDateRange(item.fromDate, item.toDate)}}
+            {{ formatDateRange(item.fromDate, item.toDate) }}
           </div>
         </template>
-        <template v-slot:[`item.action`]="{ item }">
+        <template #[`item.action`]="{ item }">
           <div>
             <v-btn
               text
@@ -52,7 +67,9 @@
               :data-test="getIndexedTag('csv-button', item.id)"
               @click="downloadStatement(item, 'CSV')"
             >
-              <v-icon class="ml-n2">mdi-file-table-outline</v-icon>
+              <v-icon class="ml-n2">
+                mdi-file-table-outline
+              </v-icon>
               <span class="ml-n1 font-weight-bold">CSV</span>
             </v-btn>
             <v-btn
@@ -63,7 +80,9 @@
               :data-test="getIndexedTag('pdf-button', item.id)"
               @click="downloadStatement(item, 'PDF')"
             >
-              <v-icon class="ml-n2">mdi-file-pdf-outline</v-icon>
+              <v-icon class="ml-n2">
+                mdi-file-pdf-outline
+              </v-icon>
               <span class="ml-n1 font-weight-bold">PDF</span>
             </v-btn>
           </div>
@@ -72,13 +91,13 @@
     </div>
     <StatementsSettings
       ref="statementSettingsModal"
-    ></StatementsSettings>
+    />
   </v-container>
 </template>
 
 <script lang="ts">
 import { Account, Pages } from '@/util/constants'
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem, StatementListResponse } from '@/models/statement'
 import { mapActions, mapState } from 'vuex'
@@ -164,7 +183,6 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   formatDateRange (date1, date2) {
-    let displayDate = ''
     let dateObj1 = this.getMomentDateObj(date1)
     let dateObj2 = this.getMomentDateObj(date2)
     let year = (dateObj1.year() === dateObj2.year()) ? dateObj1.year() : ''
@@ -185,7 +203,7 @@ export default class Statements extends Mixins(AccountChangeMixin) {
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async getTransactions (val, oldVal) {
+  async getTransactions (val) {
     const pageNumber = val.page || 1
     const itemsPerPage = val.itemsPerPage
     await this.loadStatementsList(pageNumber, itemsPerPage)

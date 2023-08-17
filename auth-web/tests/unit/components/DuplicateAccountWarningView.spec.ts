@@ -54,7 +54,7 @@ describe('DuplicateAccountWarningView.vue', () => {
       actions: {
         addOrgSettings: vi.fn(),
         syncOrganization: vi.fn(),
-        getOrgAdminContact: vi.fn().mockImplementation(scalar => {
+        getOrgAdminContact: vi.fn().mockImplementation(() => {
           return { city: 'Halifax',
             country: 'CA',
             created: '2021-05-14T23:53:58.711541',
