@@ -127,24 +127,27 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
       const userTerms = await this.saveUserTerms()
       if (userTerms?.userTerms?.isTermsOfUseAccepted) {
         await this.syncUser()
+
         // if this IDIR GOVM , user take him to accept invite itself.
         // IDIR user doesnt have user profile.so next page mixin will yield wrong navigation if used here.
-        const isGovmUser = this.isGovmUserLoggedin()
-        if (isGovmUser && this.token) {
-          this.$router.push(`/confirmtoken/${this.token}/${LoginSource.IDIR}`)
-          return
-        }
-        // if there is a token in the url , that means user is in the invitation flow
-        // so after TOS , dont create accont , rather let him create profile if he is not bcros user
-        const isBcrosUser = this.currentUser?.loginSource === LoginSource.BCROS
-        if (!isBcrosUser && this.token) {
-        // if user is in affidavit flow we need redirect to affidavit upload instead of user profile
-          if (affidavitNeeded) {
-            await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
+        if (this.token) {
+          const isGovmUser = this.isGovmUserLoggedin()
+          if (isGovmUser) {
+            this.$router.push(`/confirmtoken/${this.token}/${LoginSource.IDIR}`)
             return
           }
-          this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
-          return
+          // if there is a token in the url , that means user is in the invitation flow
+          // so after TOS , dont create accont , rather let him create profile if he is not bcros user
+          const isBcrosUser = this.currentUser?.loginSource === LoginSource.BCROS
+          if (!isBcrosUser) {
+          // if user is in affidavit flow we need redirect to affidavit upload instead of user profile
+            if (affidavitNeeded) {
+              await this.$router.push(`/${Pages.AFFIDAVIT_COMPLETE}/${this.token}`)
+              return
+            }
+            this.$router.push(`/${Pages.USER_PROFILE}/${this.token}`)
+            return
+          }
         }
         // special logic for handling redirection to create account page
         // if we dont redirect back to original page , pending org update flow wont work
