@@ -107,13 +107,13 @@
           @update:viewOnlyMode="viewOnlyMode"
         />
 
-        <template v-if="baseAddress">
+        <template v-if="originalAddress">
           <div v-can:VIEW_ADDRESS.hide>
             <v-divider class="mt-3 mb-5"></v-divider>
             <!-- TODO: can use v-can instead of v-if if all user with change permisson have view also -->
             <AccountMailingAddress
               ref="mailingAddress"
-              :baseAddress="baseAddress"
+              :baseAddress="originalAddress"
               @update:address="updateAddress"
               @valid="checkBaseAddressValidity"
               @update:updateDetails="updateDetails"
