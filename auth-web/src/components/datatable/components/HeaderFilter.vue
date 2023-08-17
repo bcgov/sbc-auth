@@ -1,36 +1,39 @@
 <!-- header filter in a seperate component helps improve performance -->
 <template>
-    <span>
-    <slot :name="'header-filter-slot-' + header.col" :header="header">
-        <v-select
-            v-if="header.hasFilter && header.customFilter.type === 'select'"
-            :class="['base-table__header__filter__select']"
-            :clearable="header.customFilter.clearable"
-            dense
-            filled
-            hide-details
-            item-text="text"
-            item-value="value"
-            :items="header.customFilter.items"
-            :label="!header.customFilter.value ? header.customFilter.label || '' : ''"
-            v-model="header.customFilter.value"
-            @reset="filter(header)"
-            @input="filter(header)"
-        />
-        <v-text-field
-            v-else-if="header.hasFilter && header.customFilter.type === 'text'"
-            :class="['base-table__header__filter__textbox', header.customFilter.value ? 'active' : '']"
-            :clearable="header.customFilter.clearable"
-            dense
-            filled
-            hide-details
-            :placeholder="!header.customFilter.value ? header.customFilter.label || '' : ''"
-            v-model.lazy="header.customFilter.value"
-            @reset="filter(header)"
-            @input="filter(header)"
-        />
+  <span>
+    <slot
+      :name="'header-filter-slot-' + header.col"
+      :header="header"
+    >
+      <v-select
+        v-if="header.hasFilter && header.customFilter.type === 'select'"
+        v-model="header.customFilter.value"
+        :class="['base-table__header__filter__select']"
+        :clearable="header.customFilter.clearable"
+        dense
+        filled
+        hide-details
+        item-text="text"
+        item-value="value"
+        :items="header.customFilter.items"
+        :label="!header.customFilter.value ? header.customFilter.label || '' : ''"
+        @reset="filter(header)"
+        @input="filter(header)"
+      />
+      <v-text-field
+        v-else-if="header.hasFilter && header.customFilter.type === 'text'"
+        v-model.lazy="header.customFilter.value"
+        :class="['base-table__header__filter__textbox', header.customFilter.value ? 'active' : '']"
+        :clearable="header.customFilter.clearable"
+        dense
+        filled
+        hide-details
+        :placeholder="!header.customFilter.value ? header.customFilter.label || '' : ''"
+        @reset="filter(header)"
+        @input="filter(header)"
+      />
     </slot>
-    </span>
+  </span>
 </template>
 
 <script lang="ts">

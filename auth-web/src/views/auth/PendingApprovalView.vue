@@ -5,17 +5,27 @@
     </template>
     <template v-else>
       <template v-if="isDenied">
-        <interim-landing :summary="$t('notAuthorized')" :description="$t('deniedInvitationMsg', { team: teamName })" icon="mdi-alert-circle-outline" iconColor="error">
-        </interim-landing>
+        <interim-landing
+          :summary="$t('notAuthorized')"
+          :description="$t('deniedInvitationMsg', { team: teamName })"
+          icon="mdi-alert-circle-outline"
+          iconColor="error"
+        />
       </template>
       <template v-else>
         <div v-if="teamName">
-          <interim-landing :summary="$t(title, { team: teamName })" :description="$t(description, descriptionParams)" icon="mdi-information-outline">
-          </interim-landing>
+          <interim-landing
+            :summary="$t(title, { team: teamName })"
+            :description="$t(description, descriptionParams)"
+            icon="mdi-information-outline"
+          />
         </div>
         <div v-if="!teamName">
-          <interim-landing :summary="$t('noPendingInvitationTitle')" :description="$t('noPendingInvitationMsg')" icon="mdi-information-outline">
-          </interim-landing>
+          <interim-landing
+            :summary="$t('noPendingInvitationTitle')"
+            :description="$t('noPendingInvitationMsg')"
+            icon="mdi-information-outline"
+          />
         </div>
       </template>
     </template>
@@ -31,7 +41,6 @@ import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import Vue from 'vue'
-import { mapState } from 'vuex'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')
@@ -64,7 +73,8 @@ export default class PendingApprovalView extends Vue {
       await this.syncMembership(this.currentOrganization.id)
     }
     this.isGVMUser = this.currentUser.roles.includes(Role.GOVMAccountUser) || false
-    this.isDenied = (this.currentMembership?.membershipStatus === MembershipStatus.Rejected || this.currentMembership?.membershipStatus === MembershipStatus.Inactive)
+    this.isDenied = (this.currentMembership?.membershipStatus === MembershipStatus.Rejected ||
+      this.currentMembership?.membershipStatus === MembershipStatus.Inactive)
     this.isAffidaventPendingAdmin = this.currentMembership?.membershipStatus === MembershipStatus.PendingStaffReview
   }
 

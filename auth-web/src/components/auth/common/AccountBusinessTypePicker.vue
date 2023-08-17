@@ -1,7 +1,13 @@
 <template>
-  <v-container class="view-container" v-can:EDIT_BUSINESS_INFO.disable.card>
+  <v-container
+    v-can:EDIT_BUSINESS_INFO.disable.card
+    class="view-container"
+  >
     <v-fade-transition>
-      <div v-if="isLoading" class="loading-inner-container">
+      <div
+        v-if="isLoading"
+        class="loading-inner-container"
+      >
         <v-progress-circular
           size="50"
           width="5"
@@ -10,45 +16,49 @@
         />
       </div>
     </v-fade-transition>
-    <div class="account-business-type-container" v-if="!isLoading">
-      <v-form ref="accountInformationForm" data-test="account-information-form">
-        <template>
-          <v-expand-transition class="business-account-type-details">
-            <v-row
-              justify="space-between"
-              data-test="business-account-type-details"
-            >
-              <v-col cols="6">
-                <v-select
-                  filled
-                  label="Business Type"
-                  item-text="desc"
-                  item-value="code"
-                  :items="businessTypeCodes"
-                  v-model="businessType"
-                  data-test="select-business-type"
-                  :rules="orgBusinessTypeRules"
-                  :menu-props="{ auto: true, offsetY: true, maxHeight: 400 }"
-                  ref="businessType"
-                />
-              </v-col>
-              <v-col cols="6">
-                <v-select
-                  filled
-                  label="Business Size"
-                  item-text="desc"
-                  item-value="code"
-                  :items="businessSizeCodes"
-                  v-model="businessSize"
-                  data-test="select-business-size"
-                  :rules="orgBusinessSizeRules"
-                  :menu-props="{ auto: true, offsetY: true, maxHeight: 400 }"
-                  ref="businessSize"
-                />
-              </v-col>
-            </v-row>
-          </v-expand-transition>
-        </template>
+    <div
+      v-if="!isLoading"
+      class="account-business-type-container"
+    >
+      <v-form
+        ref="accountInformationForm"
+        data-test="account-information-form"
+      >
+        <v-expand-transition class="business-account-type-details">
+          <v-row
+            justify="space-between"
+            data-test="business-account-type-details"
+          >
+            <v-col cols="6">
+              <v-select
+                ref="businessType"
+                v-model="businessType"
+                filled
+                label="Business Type"
+                item-text="desc"
+                item-value="code"
+                :items="businessTypeCodes"
+                data-test="select-business-type"
+                :rules="orgBusinessTypeRules"
+                :menu-props="{ auto: true, offsetY: true, maxHeight: 400 }"
+              />
+            </v-col>
+            <v-col cols="6">
+              <v-select
+                ref="businessSize"
+                v-model="businessSize"
+                filled
+                label="Business Size"
+                item-text="desc"
+                item-value="code"
+                :items="businessSizeCodes"
+                data-test="select-business-size"
+                :rules="orgBusinessSizeRules"
+                :menu-props="{ auto: true, offsetY: true, maxHeight: 400 }"
+              />
+            </v-col>
+          </v-row>
+        </v-expand-transition>
       </v-form>
     </div>
   </v-container>
@@ -60,11 +70,9 @@ import {
   Emit,
   Mixins,
   Prop,
-  Vue,
   Watch
 } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
-import { Account } from '@/util/constants'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Code } from '@/models/Code'
 import { namespace } from 'vuex-class'

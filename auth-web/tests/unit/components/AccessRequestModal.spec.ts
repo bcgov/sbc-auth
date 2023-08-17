@@ -57,8 +57,9 @@ describe('AccessRequestModal.vue', () => {
 
     })
 
-    const $t = (onHoldOrRejectModalText: string) =>
-      'To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose "Reject Account"'
+    const $t = () =>
+      `To place account on hold, please choose a reason. An email will be sent to the user to 
+      resolve the issue. Or choose "Reject Account"`
 
     wrapperFactory = (propsData) => {
       return mount(AccessRequestModal, {

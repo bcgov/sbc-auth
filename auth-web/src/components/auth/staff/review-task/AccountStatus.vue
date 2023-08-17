@@ -1,20 +1,38 @@
 <template>
   <div>
-    <h2 class="mb-5">{{`${tabNumber !==null ?  `${tabNumber}.` : ''} ${title}`}}</h2>
+    <h2 class="mb-5">
+      {{ `${tabNumber !==null ? `${tabNumber}.` : ''} ${title}` }}
+    </h2>
     <v-row>
-      <v-col class="col-12 col-sm-5 py-2">Status</v-col>
-      <v-col class="py-2"   :class="{'error--text font-weight-bold': (taskDetails.relationshipStatus===TaskRelationshipStatusEnum.REJECTED) }"
-          >{{ statusLabel }}
-          </v-col>
+      <v-col class="col-12 col-sm-5 py-2">
+        Status
+      </v-col>
+      <v-col
+        class="py-2"
+        :class="{'error--text font-weight-bold': (taskDetails.relationshipStatus===TaskRelationshipStatusEnum.REJECTED) }"
+      >
+        {{ statusLabel }}
+      </v-col>
     </v-row>
     <v-row v-if="isAccountOnHold">
-      <v-col class="col-12 col-sm-5 py-2">Reason(s)</v-col>
+      <v-col class="col-12 col-sm-5 py-2">
+        Reason(s)
+      </v-col>
       <v-col class="py-2">
         <ul class="remark-display pl-0">
-          <li v-for="(remark, index) in accountOnHoldRemarks"
-          :key="index" class="pb-1">
-            <span class="font-weight-bold" :data-test="getIndexedTag('text-number', index)"> {{ formatNumberToTwoPlaces(index+1) }}. </span>
-            <span class="pl-1" :data-test="getIndexedTag('text-remark', index)"> {{ remark }} </span>
+          <li
+            v-for="(remark, index) in accountOnHoldRemarks"
+            :key="index"
+            class="pb-1"
+          >
+            <span
+              class="font-weight-bold"
+              :data-test="getIndexedTag('text-number', index)"
+            > {{ formatNumberToTwoPlaces(index+1) }}. </span>
+            <span
+              class="pl-1"
+              :data-test="getIndexedTag('text-remark', index)"
+            > {{ remark }} </span>
           </li>
         </ul>
       </v-col>
@@ -24,14 +42,21 @@
         <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIVE">Approved By</span>
         <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.REJECTED">Rejected By</span>
       </v-col>
-      <v-col class="py-2" v-if="!isPendingReviewPage">
-        {{ taskDetails.modifiedBy }}<br/>
+      <v-col
+        v-if="!isPendingReviewPage"
+        class="py-2"
+      >
+        {{ taskDetails.modifiedBy }}<br>
         {{ formatDate(taskDetails.modified) }}
       </v-col>
     </v-row>
     <v-row>
-      <v-col class="col-12 col-sm-5 py-2">Created On</v-col>
-      <v-col class="py-2">{{ formatDate(taskDetails.created) }}</v-col>
+      <v-col class="col-12 col-sm-5 py-2">
+        Created On
+      </v-col>
+      <v-col class="py-2">
+        {{ formatDate(taskDetails.created) }}
+      </v-col>
     </v-row>
   </div>
 </template>
@@ -60,7 +85,7 @@ export default class AccountStatusTab extends Vue {
       case TaskRelationshipStatus.REJECTED:
         return 'Rejected'
       case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
-        // Eg, If the task pertaining to the BCEID account review is on hold then we display the status as "on hold" else "pending"
+        // Eg, If the task for BCEID account review is on hold then we display the status as "on hold" else "pending"
         return this.isAccountOnHold ? 'On Hold' : 'Pending'
       default:
         return ''

@@ -19,7 +19,6 @@ document.body.setAttribute('data-app', 'true')
 
 describe('GovmAccountSetupView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(async () => {
     const localVue = createLocalVue()

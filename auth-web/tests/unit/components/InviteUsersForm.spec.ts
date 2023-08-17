@@ -81,13 +81,6 @@ describe('InviteUsersForm.vue', () => {
       }
     }
 
-    const invitationModule = {
-      namespaced: true,
-      state: {
-        invitations: []
-      }
-    }
-
     store = new Vuex.Store({
       strict: false,
       modules: {

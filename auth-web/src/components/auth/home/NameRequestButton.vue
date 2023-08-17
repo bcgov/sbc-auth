@@ -28,7 +28,7 @@ export default defineComponent({
       default: false
     }
   },
-  setup (props) {
+  setup () {
     // open Name Request in current tab to retain current account and user
     const goToNameRequest = (): void => {
       if (LaunchDarklyService.getFlag(LDFlags.LinkToNewNameRequestApp)) {

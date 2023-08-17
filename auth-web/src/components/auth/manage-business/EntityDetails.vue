@@ -7,14 +7,27 @@
     :location="{top: true}"
   >
     <div class="alert-content">
-      <span v-if="showAlertHeader" class="alert-header" :style="{ 'font-weight': 'bold' }">
+      <span
+        v-if="showAlertHeader"
+        class="alert-header"
+        :style="{ 'font-weight': 'bold' }"
+      >
         {{ alertHeader }}
       </span>
-      <div v-if="alertMessages && alertMessages.length == 1" class="alert-content">
+      <div
+        v-if="alertMessages && alertMessages.length == 1"
+        class="alert-content"
+      >
         {{ alertMessages[0].message }}
       </div>
-      <ul v-else class="alert-content">
-        <li v-for="message, i in alertMessages" :key="i">
+      <ul
+        v-else
+        class="alert-content"
+      >
+        <li
+          v-for="message, i in alertMessages"
+          :key="i"
+        >
           {{ message.message }}
         </li>
       </ul>
@@ -48,7 +61,9 @@ export default defineComponent({
     const generateMessage = (status: string): { message: string, colour: string, priority: number } => {
       switch (status) {
         case EntityAlertTypes.PROCESSING:
-          return { message: 'This name request is still processing, it may take up to 10 minutes.', colour: '#1669BB', priority: 5 }
+          return { message: 'This name request is still processing, it may take up to 10 minutes.',
+            colour: '#1669BB',
+            priority: 5 }
         case EntityAlertTypes.FROZEN:
           return { message: 'This business is frozen', colour: '#F8661A', priority: 4 }
         case EntityAlertTypes.BADSTANDING:
@@ -58,7 +73,9 @@ export default defineComponent({
         case EntityAlertTypes.DISSOLUTION:
           return { message: 'This business is in the process of being dissolved', colour: '#D3272C', priority: 1 }
         case EntityAlertTypes.EXPIRED:
-          return { message: 'This incorporation application is no longer valid; the name request is expired.', colour: '#D3272C', priority: 5 }
+          return { message: 'This incorporation application is no longer valid; the name request is expired.',
+            colour: '#D3272C',
+            priority: 5 }
         default:
           return null
       }

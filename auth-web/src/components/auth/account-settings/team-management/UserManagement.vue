@@ -1,57 +1,82 @@
 <template>
   <div>
     <header class="view-header align-center mt-n1 mb-7">
-      <h2 class="view-header__title">Team Members</h2>
+      <h2 class="view-header__title">
+        Team Members
+      </h2>
       <v-btn
+        v-can:INVITE_MEMBERS.hide
         large
         color="primary"
         class="ml-auto"
-        v-can:INVITE_MEMBERS.hide @click="showInviteUsersModal()"
-        data-test="invite-people-button">
-        <v-icon small class="ml-n2">mdi-plus</v-icon>
+        data-test="invite-people-button"
+        @click="showInviteUsersModal()"
+      >
+        <v-icon
+          small
+          class="ml-n2"
+        >
+          mdi-plus
+        </v-icon>
         <span>Invite Team Members</span>
       </v-btn>
     </header>
 
-    <SearchFilterInput class="mb-4"
+    <SearchFilterInput
+      class="mb-4"
       :filterParams="searchFilter"
       :filteredRecordsCount="filteredMembersCount"
       @filter-texts="setAppliedFilterValue"
-    ></SearchFilterInput>
+    />
 
     <!-- Tab Navigation -->
-    <v-tabs class="mb-8" v-model="tab" background-color="transparent">
-      <v-tab data-test="active-tab">Active</v-tab>
-      <v-tab data-test="pending-approval-tab" v-can:INVITE_MEMBERS.hide>
+    <v-tabs
+      v-model="tab"
+      class="mb-8"
+      background-color="transparent"
+    >
+      <v-tab data-test="active-tab">
+        Active
+      </v-tab>
+      <v-tab
+        v-can:INVITE_MEMBERS.hide
+        data-test="pending-approval-tab"
+      >
         <v-badge
           inline
           color="primary"
           :content="pendingApprovalCount"
-          :value="pendingApprovalCount">
+          :value="pendingApprovalCount"
+        >
           Pending Approval
         </v-badge>
       </v-tab>
-      <v-tab data-test="invitations-tab" v-can:INVITE_MEMBERS.hide>Invitations</v-tab>
+      <v-tab
+        v-can:INVITE_MEMBERS.hide
+        data-test="invitations-tab"
+      >
+        Invitations
+      </v-tab>
     </v-tabs>
 
     <!-- Tab Contents -->
     <v-tabs-items v-model="tab">
       <v-tab-item>
         <MemberDataTable
+          :userNamefilterText="appliedFilterValue"
           @confirm-remove-member="showConfirmRemoveModal($event, $refs.confirmActionDialog)"
           @confirm-change-role="showConfirmChangeRoleModal($event, $refs.confirmActionDialogWithQuestion)"
           @confirm-leave-team="showConfirmLeaveTeamModal($refs.confirmActionDialog)"
           @confirm-dissolve-team="showConfirmDissolveModal($refs.confirmActionDialog)"
           @single-owner-error="showSingleOwnerErrorModal($refs.errorDialog)"
-          :userNamefilterText="appliedFilterValue"
           @filtered-members-count="filteredTeamMembersCount"
         />
       </v-tab-item>
       <v-tab-item>
         <PendingMemberDataTable
+          :userNamefilterText="appliedFilterValue"
           @confirm-approve-member="showConfirmApproveModal($event)"
           @confirm-deny-member="showConfirmRemoveModal($event, $refs.confirmActionDialog)"
-          :userNamefilterText="appliedFilterValue"
           @filtered-members-count="filteredPendingMembersCount"
         />
       </v-tab-item>
@@ -73,11 +98,14 @@
       :is-scrollable="true"
       max-width="640"
     >
-      <template v-slot:title>
+      <template #title>
         Invite Team Members
       </template>
-      <template v-slot:text>
-        <InviteUsersForm @invites-complete="showSuccessModal()" @cancel="cancelInviteUsersModal()" />
+      <template #text>
+        <InviteUsersForm
+          @invites-complete="showSuccessModal()"
+          @cancel="cancelInviteUsersModal()"
+        />
       </template>
     </ModalDialog>
 
@@ -89,7 +117,7 @@
       dialog-class="notify-dialog"
       max-width="480"
     >
-      <template v-slot:icon>
+      <template #icon>
         <v-icon
           large
           :color="primaryActionType"
@@ -97,7 +125,7 @@
           mdi-alert-circle-outline
         </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           :color="primaryActionType"
@@ -124,7 +152,7 @@
       dialog-class="notify-dialog"
       max-width="480"
     >
-      <template v-slot:icon>
+      <template #icon>
         <v-icon
           large
           :color="primaryActionType"
@@ -132,7 +160,7 @@
           mdi-information-outline
         </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           :color="primaryActionType"
@@ -157,7 +185,7 @@
       :text="successText"
       dialog-class="notify-dialog"
       max-width="600"
-    ></ModalDialog>
+    />
 
     <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -167,7 +195,7 @@
       dialog-class="notify-dialog"
       max-width="480"
     >
-      <template v-slot:icon>
+      <template #icon>
         <v-icon
           large
           color="primary"
@@ -175,7 +203,7 @@
           mdi-alert-circle-outline
         </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="primary"
@@ -192,7 +220,7 @@
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { LoginSource, Pages, SearchFilterCodes } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
+import { Member, MembershipStatus } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'

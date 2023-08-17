@@ -2,8 +2,12 @@
   <section id="testimonials-container">
     <v-container class="quote-container">
       <div>
-        <p class="quote-text">{{quotes[quoteIndex].text}}</p>
-        <p class="quote-author">&ndash; {{quotes[quoteIndex].author}}</p>
+        <p class="quote-text">
+          {{ quotes[quoteIndex].text }}
+        </p>
+        <p class="quote-author">
+          &ndash; {{ quotes[quoteIndex].author }}
+        </p>
       </div>
     </v-container>
   </section>

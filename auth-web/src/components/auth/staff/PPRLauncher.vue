@@ -1,12 +1,26 @@
 <template>
-  <v-card class="product-container" :href="pprUrl">
-    <v-row align="center" no-gutters>
+  <v-card
+    class="product-container"
+    :href="pprUrl"
+  >
+    <v-row
+      align="center"
+      no-gutters
+    >
       <v-col cols="auto">
-        <img class="product-img" :src="getImgUrl(img)" />
+        <img
+          class="product-img"
+          :src="getImgUrl(img)"
+        >
       </v-col>
-      <v-col class="product-info" align-self="baseline">
+      <v-col
+        class="product-info"
+        align-self="baseline"
+      >
         <h2>{{ title }}</h2>
-        <p class="mt-5 mb-0">{{ text }}</p>
+        <p class="mt-5 mb-0">
+          {{ text }}
+        </p>
         <v-btn class="primary product-info__btn px-5">
           Open
           <v-icon>mdi-chevron-right</v-icon>

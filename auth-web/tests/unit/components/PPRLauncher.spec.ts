@@ -26,7 +26,7 @@ describe('PPRLauncher.vue', () => {
   }
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-  let userModule = {
+  const userModule = {
     namespaced: true,
     state: {
       currentUser: {

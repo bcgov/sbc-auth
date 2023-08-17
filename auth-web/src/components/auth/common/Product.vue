@@ -1,62 +1,88 @@
 <template>
   <div>
     <template>
-
       <v-card
+        v-if="!productDetails.hidden"
         outlined
         hover
         class="product-card py-8 px-5 mb-4 elevation-1"
         :class="[ {'processing-card' : isSelected}]"
         :data-test="`div-product-${productDetails.code}`"
-        v-if="!productDetails.hidden"
       >
         <div>
           <header class="d-flex align-center">
-            <div class="pr-8" v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct" data-test="div-decision-not-made-product">
+            <div
+              v-if="hasDecisionNotBeenMade && !isBasicAccountAndPremiumProduct"
+              class="pr-8"
+              data-test="div-decision-not-made-product"
+            >
               <v-checkbox
+                :key="Math.random()"
+                v-model="productSelected"
                 class="product-check-box ma-0 pa-0"
                 hide-details
-                v-model="productSelected"
                 :data-test="`check-product-${productDetails.code}`"
                 @change="selecThisProduct"
-                :key="Math.random()"
               >
-                <template v-slot:label>
+                <template #label>
                   <div class="ml-2">
-                    <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
-                      {{productDetails.description}}
-                  <v-tooltip
-                    v-if="productPremTooltipText(productDetails.code)"
-                    class="pa-2"
-                    content-class="tooltip"
-                    color="grey darken-4"
-                    max-width="350px"
-                    top
-                  >
-                    <template v-slot:activator="{ on }">
-                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
-                        (<span class="underline-dotted">requires Premium Account</span>)
-                      </span>
-                    </template>
-                    <div class="py-3">
-                      <span>{{ productPremTooltipText(productDetails.code) }}</span>
-                    </div>
-                  </v-tooltip>
-                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
-                  <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
+                    <h3
+                      class="title font-weight-bold product-title mt-n1"
+                      :data-test="productDetails.code"
+                    >
+                      {{ productDetails.description }}
+                      <v-tooltip
+                        v-if="productPremTooltipText(productDetails.code)"
+                        class="pa-2"
+                        content-class="tooltip"
+                        color="grey darken-4"
+                        max-width="350px"
+                        top
+                      >
+                        <template #activator="{ on }">
+                          <span
+                            v-if="productDetails.premiumOnly"
+                            class="product-title-info"
+                            v-on="on"
+                          >
+                            (<span class="underline-dotted">requires Premium Account</span>)
+                          </span>
+                        </template>
+                        <div class="py-3">
+                          <span>{{ productPremTooltipText(productDetails.code) }}</span>
+                        </div>
+                      </v-tooltip>
+                      <span
+                        v-else-if="productDetails.premiumOnly"
+                        class="product-title-info"
+                      > (requires Premium Account)</span>
+                      <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
                     </h3>
-                    <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"/>
+                    <p
+                      v-if="$te(productLabel.subTitle)"
+                      v-html="$t(productLabel.subTitle)"
+                    />
                   </div>
-              </template>
+                </template>
               </v-checkbox>
             </div>
-            <div class="d-flex align-center pr-8" data-test="div-decision-made-product" v-else>
-              <v-icon :color="productLabel.decisionMadeColorCode" class="mr-2">
+            <div
+              v-else
+              class="d-flex align-center pr-8"
+              data-test="div-decision-made-product"
+            >
+              <v-icon
+                :color="productLabel.decisionMadeColorCode"
+                class="mr-2"
+              >
                 {{ productLabel.decisionMadeIcon }}
               </v-icon>
               <div class="ml-2 label-color">
-                <h3 class="title font-weight-bold product-title mt-n1" :data-test="productDetails.code">
-                  {{productDetails.description}}
+                <h3
+                  class="title font-weight-bold product-title mt-n1"
+                  :data-test="productDetails.code"
+                >
+                  {{ productDetails.description }}
                   <v-tooltip
                     v-if="productPremTooltipText(productDetails.code)"
                     class="pa-2"
@@ -65,8 +91,12 @@
                     max-width="350px"
                     top
                   >
-                    <template v-slot:activator="{ on }">
-                      <span v-if="productDetails.premiumOnly" class="product-title-info" v-on="on">
+                    <template #activator="{ on }">
+                      <span
+                        v-if="productDetails.premiumOnly"
+                        class="product-title-info"
+                        v-on="on"
+                      >
                         (<span class="underline-dotted">requires Premium Account</span>)
                       </span>
                     </template>
@@ -74,10 +104,16 @@
                       <span>{{ productPremTooltipText(productDetails.code) }}</span>
                     </div>
                   </v-tooltip>
-                  <span v-else-if="productDetails.premiumOnly" class="product-title-info"> (requires Premium Account)</span>
+                  <span
+                    v-else-if="productDetails.premiumOnly"
+                    class="product-title-info"
+                  > (requires Premium Account)</span>
                   <span class="product-title-badge ml-2 mt-n2"> {{ productBadge(productDetails.code) }}</span>
                 </h3>
-                <p v-if="$te(productLabel.subTitle)" v-html="$t(productLabel.subTitle)"  />
+                <p
+                  v-if="$te(productLabel.subTitle)"
+                  v-html="$t(productLabel.subTitle)"
+                />
               </div>
             </div>
             <v-btn
@@ -91,42 +127,58 @@
               text
               @click="expand()"
             >
-
-              <span v-if="isexpandedView" :data-test="`span-readless-${productDetails.code}`">Read Less<v-icon meduim color="primary">mdi-chevron-up</v-icon></span>
-              <span :data-test="`span-readmore-${productDetails.code}`" v-else>Read More<v-icon meduim color="primary">mdi-chevron-down</v-icon></span>
+              <span
+                v-if="isexpandedView"
+                :data-test="`span-readless-${productDetails.code}`"
+              >Read Less<v-icon
+                meduim
+                color="primary"
+              >mdi-chevron-up</v-icon></span>
+              <span
+                v-else
+                :data-test="`span-readmore-${productDetails.code}`"
+              >Read More<v-icon
+                meduim
+                color="primary"
+              >mdi-chevron-down</v-icon></span>
             </v-btn>
           </header>
 
           <div class="product-card-contents ml-9">
             <v-expand-transition>
-              <div v-if="isexpandedView" :data-test="`div-expanded-product-${productDetails.code}`">
-                <p v-if="$te(productLabel.details)"  v-html="$t(productLabel.details)"  class="mb-0"/>
+              <div
+                v-if="isexpandedView"
+                :data-test="`div-expanded-product-${productDetails.code}`"
+              >
+                <p
+                  v-if="$te(productLabel.details)"
+                  class="mb-0"
+                  v-html="$t(productLabel.details)"
+                />
                 <component
+                  :is="productFooter.component"
                   v-if="isTOSNeeded"
                   :key="productFooter.id"
-                  :is="productFooter.component"
                   v-bind="productFooter.props"
-                  v-on="productFooter.events"
                   :ref="productFooter.ref"
                   v-display-mode="hasDecisionNotBeenMade ? false : viewOnly"
+                  v-on="productFooter.events"
                 />
                 <div v-if="showProductFee">
-                  <v-divider class="my-6"></v-divider>
+                  <v-divider class="my-6" />
                   <!-- This links to ProductFeeViewEdit. -->
-                  <ProductFee :orgProduct="orgProduct"
-                  :orgProductFeeCodes="orgProductFeeCodes"
-                  @save:saveProductFee="saveProductFee"
-                  :isProductActionLoading="isProductActionLoading"
-                  :isProductActionCompleted="isProductActionCompleted"
+                  <ProductFee
+                    :orgProduct="orgProduct"
+                    :orgProductFeeCodes="orgProductFeeCodes"
+                    :isProductActionLoading="isProductActionLoading"
+                    :isProductActionCompleted="isProductActionCompleted"
+                    @save:saveProductFee="saveProductFee"
                   />
                 </div>
               </div>
-
             </v-expand-transition>
           </div>
-          <div>
-
-          </div>
+          <div />
         </div>
       </v-card>
     </template>
@@ -272,9 +324,10 @@ export default class Product extends Mixins(AccountMixin) {
     let forceRemove = false
     // expand if tos needed
     // as per new requirment, show expanded when user tries to click checkbox and not accepted TOS.
-    // need to collaps on uncheck. Since both are using same function emitFromTos will be true when click happend from TOS check box. then no need to collaps
+    // need to collapse on uncheck. Since both are using same function emitFromTos will be true when
+    // click happend from TOS check box. then no need to collapse
     if (this.isTOSNeeded && !this.termsAccepted) {
-      if (!emitFromTos) { // expand and collaps on click if click is not coming from TOS
+      if (!emitFromTos) { // expand and collapse on click if click is not coming from TOS
         this.expand()
       }
       this.productSelected = false

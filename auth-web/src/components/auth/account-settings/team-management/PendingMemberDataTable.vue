@@ -9,10 +9,10 @@
     :custom-sort="customSortPending"
     :no-data-text="$t('noPendingApprovalLabel')"
   >
-    <template v-slot:loading>
+    <template #loading>
       Loading...
     </template>
-    <template v-slot:[`item.name`]="{ item }">
+    <template #[`item.name`]="{ item }">
       <div
         class="user-name font-weight-bold"
         :data-test="getIndexedTag('pending-user-name', item.index)"
@@ -20,13 +20,13 @@
         {{ item.user.firstname }} {{ item.user.lastname }}
       </div>
       <div
-        :data-test="getIndexedTag('pending-email', item.index)"
         v-if="item.user.contacts && item.user.contacts.length > 0"
+        :data-test="getIndexedTag('pending-email', item.index)"
       >
         {{ item.user.contacts[0].email }}
       </div>
     </template>
-    <template v-slot:[`item.action`]="{ item }">
+    <template #[`item.action`]="{ item }">
       <v-btn
         icon
         class="mr-1"
@@ -52,8 +52,9 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import { Member } from '@/models/Organization'
+import { mapState } from 'vuex'
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
 
 @Component({
@@ -62,9 +63,9 @@ import moment from 'moment'
   }
 })
 export default class PendingMemberDataTable extends Vue {
-  @Prop({ default: '' }) private userNamefilterText: string
-  private readonly pendingOrgMembers!: Member[]
-  private readonly headerPendingMembers = [
+  @Prop({ default: '' }) userNamefilterText: string
+  readonly pendingOrgMembers!: Member[]
+  readonly headerPendingMembers = [
     {
       text: 'Team Member',
       align: 'left',
@@ -79,11 +80,11 @@ export default class PendingMemberDataTable extends Vue {
     }
   ]
 
-  private getIndexedTag (tag, index): string {
+  getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
-  private get indexedPendingMembers () {
+  get indexedPendingMembers () {
     let pendingMembers = []
     if (this.userNamefilterText) {
       // filter if the filter by username prop is available
@@ -106,11 +107,11 @@ export default class PendingMemberDataTable extends Vue {
   }
 
   @Emit()
-  private filteredMembersCount (count: number) {
+  filteredMembersCount (count: number) {
     return count
   }
 
-  private customSortPending (items, index, isDescending) {
+  customSortPending (items, index, isDescending) {
     const isDesc = isDescending.length > 0 && isDescending[0]
     items.sort((a, b) => {
       if (isDesc) {
@@ -123,10 +124,10 @@ export default class PendingMemberDataTable extends Vue {
   }
 
   @Emit()
-  private confirmApproveMember (member: Member) {}
+  confirmApproveMember () {}
 
   @Emit()
-  private confirmDenyMember (member: Member) {}
+  confirmDenyMember () {}
 }
 </script>
 

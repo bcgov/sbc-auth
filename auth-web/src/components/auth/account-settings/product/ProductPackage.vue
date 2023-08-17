@@ -1,55 +1,78 @@
 <template>
-  <v-container class="view-container"
-  v-can:EDIT_REQUEST_PRODUCT_PACKAGE.disable.card
+  <v-container
+    v-can:EDIT_REQUEST_PRODUCT_PACKAGE.disable.card
+    class="view-container"
   >
-
     <div class="view-header flex-column mb-6">
-      <h2 class="view-header__title" data-test="account-settings-title">
+      <h2
+        class="view-header__title"
+        data-test="account-settings-title"
+      >
         Products and Services
       </h2>
       <p class="mt-3 payment-page-sub">
         Request additional products or services you wish to access through your account.
       </p>
-      <h4 class="mt-3 payment-page-sub">Select Additional Product(s)</h4>
+      <h4 class="mt-3 payment-page-sub">
+        Select Additional Product(s)
+      </h4>
     </div>
-     <template v-if="isLoading">
-      <div v-if="isLoading" class="loading-inner-container">
-          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
-        </div>
+    <template v-if="isLoading">
+      <div
+        v-if="isLoading"
+        class="loading-inner-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
+      </div>
     </template>
     <template v-else>
       <template v-if="productList && productList.length > 0">
-        <div v-for="product in productList" :key="product.code">
-          <Product v-if="!product.parentCode"
+        <div
+          v-for="product in productList"
+          :key="product.code"
+        >
+          <Product
+            v-if="!product.parentCode"
             :productDetails="product"
-            @set-selected-product="setSelectedProduct"
             :userName="currentUser.fullName"
             :orgName="currentOrganization.name"
-            :isexpandedView ="product.code === expandedProductCode"
-            @toggle-product-details="toggleProductDetails"
+            :isexpandedView="product.code === expandedProductCode"
             :isSelected="currentSelectedProducts.includes(product.code)"
             :isAccountSettingsView="true"
             :isBasicAccount="currentOrganization.orgType === AccountEnum.BASIC"
             :orgProduct="orgProductDetails(product)"
             :orgProductFeeCodes="orgProductFeeCodes"
-            @save:saveProductFee="saveProductFee"
             :canManageProductFee="canManageAccounts"
             :isProductActionLoading="isProductActionLoading"
             :isProductActionCompleted="isProductActionCompleted"
-          ></Product>
+            @set-selected-product="setSelectedProduct"
+            @toggle-product-details="toggleProductDetails"
+            @save:saveProductFee="saveProductFee"
+          />
         </div>
         <div class="align-right-container">
-          <p data-test="text-submit-request-error-message" class="text-submit-request-error-message" v-show="submitRequestValidationError"> {{ submitRequestValidationError }} </p>
+          <p
+            v-show="submitRequestValidationError"
+            data-test="text-submit-request-error-message"
+            class="text-submit-request-error-message"
+          >
+            {{ submitRequestValidationError }}
+          </p>
         </div>
-        <v-divider class="mb-5"></v-divider>
+        <v-divider class="mb-5" />
         <div class="align-right-container">
           <v-btn
-          large
-          class="submit-request-button"
-          color="primary"
-          aria-label="Submit Request"
-          data-test="btn-product-submit-request"
-          @click="submitProductRequest()"
+            large
+            class="submit-request-button"
+            color="primary"
+            aria-label="Submit Request"
+            data-test="btn-product-submit-request"
+            @click="submitProductRequest()"
           >
             <span>Submit Request</span>
           </v-btn>
@@ -60,7 +83,7 @@
       </template>
     </template>
 
-        <!-- Alert / Request Confirm Dialog -->
+    <!-- Alert / Request Confirm Dialog -->
     <ModalDialog
       ref="confirmDialog"
       :title="dialogTitle"
@@ -68,11 +91,16 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="primary
-        ">{{dialogIcon}}</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="primary
+        "
+        >
+          {{ dialogIcon }}
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="primary"
@@ -89,7 +117,7 @@
 <script lang="ts">
 import { AccessType, Account, ProductStatus, Role } from '@/util/constants'
 import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
-import { Component, Mixins, Vue } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'

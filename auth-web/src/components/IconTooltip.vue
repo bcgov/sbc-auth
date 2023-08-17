@@ -1,14 +1,20 @@
-<template >
+<template>
   <v-tooltip v-bind="location">
-    <template v-slot:activator="{ on }">
-      <v-icon :color="colour" v-on="on" :style="iconStyling">{{ icon }}</v-icon>
+    <template #activator="{ on }">
+      <v-icon
+        :color="colour"
+        :style="iconStyling"
+        v-on="on"
+      >
+        {{ icon }}
+      </v-icon>
     </template>
     <div
       class="py-2"
       :class="{'top-tooltip': location.top, 'bottom-tooltip': location.bottom}"
       :style="{ 'max-width': maxWidth }"
     >
-      <slot></slot>
+      <slot />
     </div>
   </v-tooltip>
 </template>
@@ -27,7 +33,7 @@ export default defineComponent({
     },
     location: {
       type: Object,
-      default (rawProps) {
+      default () {
         return { bottom: true }
       }
     }

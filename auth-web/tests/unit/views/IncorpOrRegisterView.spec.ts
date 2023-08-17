@@ -124,7 +124,7 @@ describe('IncorpOrRegisterView.vue', () => {
     expect(wrapper.find('#expPnlContent1').text()).toContain('The name(s) and address(es) of the proprietor')
     expect(wrapper.find('#expPnlContent2').text()).toContain('Office addresses, director names and addresses, ' +
       'share structure')
-    expect(wrapper.find('#expPnlContent3').text()).toContain('Office addresses, director names and addresses, rules of ' +
-      'the association')
+    expect(wrapper.find('#expPnlContent3').text())
+      .toContain('Office addresses, director names and addresses, rules of the association')
   })
 })

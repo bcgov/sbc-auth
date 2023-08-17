@@ -31,7 +31,7 @@ Vue.use(Search, { store, i18n })
  * The server side configs are necessary for app to work , since they are reference in templates and all
  *  Two ways , either reload Vue after we get the settings or load vue after we get the configs..going for second
  */
-ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
+ConfigHelper.saveConfigToSessionStorage().then(async () => {
   // Initializing Launch Darkly services
   await LaunchDarklyService.init(ConfigHelper.getLdClientId());
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components

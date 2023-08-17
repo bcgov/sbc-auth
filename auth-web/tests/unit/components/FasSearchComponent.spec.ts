@@ -46,6 +46,7 @@ describe('FasSearchComponent.vue', () => {
     expect(wrapper.vm).toBeTruthy()
     // It should display the receipt number, and the no data message at the very least.
     expect(wrapper.find('.header-receiptNumber').text()).toBe('Receipt Number')
-    expect(wrapper.find('.no-data').text()).toBe('Search routing slips by entering one of the value above. Click on "columns to show" to add or get rid of additional values.')
+    expect(wrapper.find('.no-data').text()).toBe('Search routing slips by entering one of the value above.' +
+      ' Click on "columns to show" to add or get rid of additional values.')
   })
 })

@@ -1,32 +1,37 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column mb-6">
-      <h2 class="view-header__title" data-test="account-settings-title">
+      <h2
+        class="view-header__title"
+        data-test="account-settings-title"
+      >
         Authentication
       </h2>
       <v-alert
         class="mt-10"
         icon="mdi-information-outline"
-        type="info">
+        type="info"
+      >
         Changing your authentication method will only affect new users invited to this account. Authentication for administrators and existing users will not be affected.
       </v-alert>
     </div>
     <account-login-option-picker
       @auth-type-selected="setLoginOption"
-    >
-    </account-login-option-picker>
-    <v-divider class="mt-6"></v-divider>
+    />
+    <v-divider class="mt-6" />
     <div class="form__btns d-flex">
       <v-btn
         large
         class="save-btn"
-        v-bind:class="{ disabled: isBtnSaved }"
+        :class="{ disabled: isBtnSaved }"
         :color="isBtnSaved ? 'success' : 'primary'"
         :disabled="disableSaveBtn"
         @click="submit()"
       >
         <v-expand-x-transition>
-          <v-icon v-show="isBtnSaved">mdi-check</v-icon>
+          <v-icon v-show="isBtnSaved">
+            mdi-check
+          </v-icon>
         </v-expand-x-transition>
         <span class="save-btn__label">{{ (isBtnSaved) ? 'Saved' : 'Save' }}</span>
       </v-btn>

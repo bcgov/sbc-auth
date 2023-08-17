@@ -1,4 +1,4 @@
-import { Wrapper, createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import OrgModule from '@/store/modules/org'
 import OrgService from '../../../src/services/org.services'
@@ -128,7 +128,8 @@ const roleInfoList = [
     'displayName': 'Account Administrator',
     'displayOrder': 3,
     'icon': 'mdi-shield-account-outline',
-    'label': 'Submit searches and filings, add / remove businesses, add / remove team members, access financial statements, update payment methods',
+    'label': 'Submit searches and filings, add / remove businesses, add / remove team members,' +
+      ' access financial statements, update payment methods',
     'name': 'ADMIN'
   }
 ]

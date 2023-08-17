@@ -1,5 +1,5 @@
 <template>
-  <sbc-signout :redirect-url="redirectbackUrl"></sbc-signout>
+  <sbc-signout :redirect-url="redirectbackUrl" />
 </template>
 
 <script lang="ts">

@@ -200,7 +200,8 @@ export default class ConfigHelper {
   }
 
   static accountSettingsRoute () {
-    return `/account/${JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}').id || 0}/settings`
+    const currentAccountJson = ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount) || '{}'
+    return `/account/${JSON.parse(currentAccountJson).id || 0}/settings`
   }
 
   static paymentsAllowedPerAccountType () {

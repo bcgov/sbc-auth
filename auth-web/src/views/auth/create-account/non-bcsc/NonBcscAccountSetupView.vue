@@ -1,16 +1,20 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column">
-      <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-      <p class="mt-3 mb-0">Manage account settings, team members, and view account transactions</p>
+      <h1 class="view-header__title">
+        {{ $t('createBCRegistriesAccount') }}
+      </h1>
+      <p class="mt-3 mb-0">
+        Manage account settings, team members, and view account transactions
+      </p>
     </div>
     <v-card flat>
       <Stepper
-        :stepper-configuration="accountStepperConfig"
-        @final-step-action="verifyAndCreateAccount"
-        :isLoading="isLoading"
         ref="stepper"
-      ></Stepper>
+        :stepper-configuration="accountStepperConfig"
+        :isLoading="isLoading"
+        @final-step-action="verifyAndCreateAccount"
+      />
     </v-card>
     <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -20,10 +24,15 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="error"
@@ -128,8 +137,8 @@ export default class NonBcscAccountSetupView extends Vue {
   private readonly currentOrganization!: Organization
   private readonly userProfile!: User
 
-  private errorTitle = 'Account creation failed'
-  private errorText = ''
+  errorTitle = 'Account creation failed'
+  errorText = ''
   private isLoading: boolean = false
   private readOnly = false
   private isAffidavitAlreadyApproved = false

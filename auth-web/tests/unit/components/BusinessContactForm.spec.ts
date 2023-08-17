@@ -1,6 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import BusinessModule from '@/store/modules/business'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'

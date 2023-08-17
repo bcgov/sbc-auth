@@ -1,31 +1,55 @@
 <template>
   <v-container>
     <header class="view-header mb-9">
-      <h2 class="view-header__title">Account Info</h2>
+      <h2 class="view-header__title">
+        Account Info
+      </h2>
     </header>
     <div>
       <v-form ref="editAccountForm">
-        <v-alert type="error" class="mb-6" v-show="errorMessage">
+        <v-alert
+          v-show="errorMessage"
+          type="error"
+          class="mb-6"
+        >
           {{ errorMessage }}
         </v-alert>
 
         <div v-show="!anonAccount">
           <div class="nv-list-item mb-6">
-            <div class="name font-weight-bold" id="accountNumber">
+            <div
+              id="accountNumber"
+              class="name font-weight-bold"
+            >
               Account Number
             </div>
-            <div class="value" aria-labelledby="accountNumber">
-              <div class="value__title" data-test="div-account-number">
+            <div
+              class="value"
+              aria-labelledby="accountNumber"
+            >
+              <div
+                class="value__title"
+                data-test="div-account-number"
+              >
                 {{ currentOrganization.id }}
               </div>
             </div>
           </div>
-          <div v-if="isStaff" class="nv-list-item mb-10">
-            <div class="name font-weight-bold" id="accountStatusStaff">
+          <div
+            v-if="isStaff"
+            class="nv-list-item mb-10"
+          >
+            <div
+              id="accountStatusStaff"
+              class="name font-weight-bold"
+            >
               Account Status
             </div>
             <div class="value-column">
-              <div class="value" aria-labelledby="accountStatusStaff">
+              <div
+                class="value"
+                aria-labelledby="accountStatusStaff"
+              >
                 <v-chip
                   small
                   label
@@ -37,13 +61,13 @@
                 </v-chip>
               </div>
               <v-btn
+                v-if="isSuspendButtonVisible"
                 large
                 aria-label="Suspend Account"
                 title="Suspend Account"
                 class="suspend-account-btn mx-1 mb-3"
-                @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
                 data-test="btn-suspend-account"
-                v-if="isSuspendButtonVisible"
+                @click="showSuspendAccountDialog(currentOrganization.orgStatus)"
               >
                 {{
                   isAccountStatusActive
@@ -54,11 +78,17 @@
             </div>
           </div>
           <div class="nv-list-item mb-0">
-            <div class="name font-weight-bold" id="accountType">
+            <div
+              id="accountType"
+              class="name font-weight-bold"
+            >
               Account Type
             </div>
             <div class="value-column">
-              <div class="value" aria-labelledby="accountType">
+              <div
+                class="value"
+                aria-labelledby="accountType"
+              >
                 <div class="value__title">
                   {{ accountType }}
                 </div>
@@ -72,28 +102,42 @@
             :canChangeAccessType="canChangeAccessType"
             @update:viewOnlyMode="viewOnlyMode"
             @update:updateAndSaveAccessTypeDetails="updateAndSaveAccessTypeDetails"
-          ></AccountAccessType>
+          />
           <div
-            class="nv-list-item mb-6"
             v-if="currentOrganization.bcolAccountDetails"
+            class="nv-list-item mb-6"
           >
-            <div class="name mt-3 font-weight-bold" id="accountName">
+            <div
+              id="accountName"
+              class="name mt-3 font-weight-bold"
+            >
               Linked BC Online Account Details
             </div>
             <div class="value">
               <LinkedBCOLBanner
                 :bcolAccountName="currentOrganization.bcolAccountName"
                 :bcolAccountDetails="currentOrganization.bcolAccountDetails"
-              ></LinkedBCOLBanner>
+              />
             </div>
           </div>
-          <v-divider class="my-6"></v-divider>
+          <v-divider class="my-6" />
         </div>
 
-        <div class="nv-list-item mb-10" v-if="isAdminContactViewable">
-          <div class="name" id="adminContact">Account Contact</div>
-          <div class="value" aria-labelledby="adminContact">
-            <OrgAdminContact></OrgAdminContact>
+        <div
+          v-if="isAdminContactViewable"
+          class="nv-list-item mb-10"
+        >
+          <div
+            id="adminContact"
+            class="name"
+          >
+            Account Contact
+          </div>
+          <div
+            class="value"
+            aria-labelledby="adminContact"
+          >
+            <OrgAdminContact />
           </div>
         </div>
 
@@ -109,31 +153,31 @@
 
         <template v-if="baseAddress">
           <div v-can:VIEW_ADDRESS.hide>
-            <v-divider class="mt-3 mb-5"></v-divider>
+            <v-divider class="mt-3 mb-5" />
             <!-- TODO: can use v-can instead of v-if if all user with change permisson have view also -->
             <AccountMailingAddress
               ref="mailingAddress"
               :baseAddress="baseAddress"
+              :viewOnlyMode="isAddressViewOnly"
               @update:address="updateAddress"
               @valid="checkBaseAddressValidity"
               @update:updateDetails="updateDetails"
               @update:resetAddress="resetAddress"
-              :viewOnlyMode="isAddressViewOnly"
               @update:viewOnlyMode="viewOnlyMode"
             />
-        </div>
+          </div>
         </template>
         <div>
-          <v-divider class="mt-3 mb-10"></v-divider>
+          <v-divider class="mt-3 mb-10" />
           <div class="form__btns">
             <v-btn
+              v-can:DEACTIVATE_ACCOUNT.hide
               text
               color="primary"
               class="deactivate-btn font-weight-bold"
-              @click="learnMoreDialog = true"
               data-test="deactivate-btn"
               to="/account-deactivate"
-              v-can:DEACTIVATE_ACCOUNT.hide
+              @click="learnMoreDialog = true"
             >
               Deactivate Account
             </v-btn>
@@ -151,13 +195,25 @@
       :isPersistent="true"
       data-test="modal-suspend-account"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="px-10">{{ dialogText }}<br /></p>
-        <v-form ref="suspensionReasonForm" id="suspensionReasonForm">
+      <template #text>
+        <p class="px-10">
+          {{ dialogText }}<br>
+        </p>
+        <v-form
+          id="suspensionReasonForm"
+          ref="suspensionReasonForm"
+        >
           <v-select
+            v-if="isAccountStatusActive"
+            v-model="selectedSuspensionReasonCode"
             class="px-10"
             filled
             label="Reason for Suspension"
@@ -166,13 +222,11 @@
             :items="suspensionReasonCodes"
             item-text="desc"
             item-value="code"
-            v-model="selectedSuspensionReasonCode"
-            v-if="isAccountStatusActive"
             data-test="select-suspend-account-reason"
           />
         </v-form>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           class="font-weight-bold white--text btn-dialog"
@@ -186,8 +240,8 @@
           large
           depressed
           class="btn-dialog"
-          @click="closeSuspendAccountDialog()"
           data-test="btn-cancel-suspend-dialog"
+          @click="closeSuspendAccountDialog()"
         >
           Cancel
         </v-btn>
@@ -203,17 +257,22 @@
       :isPersistent="true"
       data-test="modal-suspension-complete"
     >
-      <template v-slot:icon>
-        <v-icon large color="primary">mdi-check</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="primary"
+        >
+          mdi-check
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           depressed
           class="font-weight-bold white--text btn-dialog"
-          @click="closeSuspensionCompleteDialog()"
           data-test="btn-suspend-confirm-dialog"
           color="primary"
+          @click="closeSuspensionCompleteDialog()"
         >
           OK
         </v-btn>

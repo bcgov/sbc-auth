@@ -1,71 +1,93 @@
 <template>
   <div>
     <ModalDialog
+      ref="accessRequest"
       max-width="643"
       :isPersistent="true"
-      ref="accessRequest"
       icon="mdi-check"
       data-test="dialog-access-request"
       dialog-class="notify-dialog"
     >
-
-      <template v-slot:icon>
-        <v-icon large :color="getModalData.color">{{getModalData.icon}}</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          :color="getModalData.color"
+        >
+          {{ getModalData.icon }}
+        </v-icon>
       </template>
-      <template v-slot:title>
-        <span class="font-weight-bold text-size mb-1" data-test="dialog-header"> {{ getModalData.title }} </span>
+      <template #title>
+        <span
+          class="font-weight-bold text-size mb-1"
+          data-test="dialog-header"
+        > {{ getModalData.title }} </span>
       </template>
-      <template v-slot:text>
+      <template #text>
         <div class="mx-8">
-          <p class="mb-4 text-color sub-text-size text-justify" v-html="getModalData.text" data-test="p-modal-text"></p>
-          <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isOnHoldModal">
+          <p
+            class="mb-4 text-color sub-text-size text-justify"
+            data-test="p-modal-text"
+            v-html="getModalData.text"
+          />
+          <v-form
+            v-if="isOnHoldModal"
+            ref="rejectForm"
+            lazy-validation
+            class="reject-form"
+            data-test="reject-form"
+          >
             <v-row justify="center">
-              <v-col cols="6" class="pa-0">
+              <v-col
+                cols="6"
+                class="pa-0"
+              >
                 <v-radio-group
                   v-model="accountToBeOnholdOrRejected"
                   :rules="accountToBeOnholdOrRejectedRules"
                   data-test="radio-group-hold-or-reject"
                   class="mt-0"
                 >
-                  <v-row dense class="d-flex flex-column align-items-center">
+                  <v-row
+                    dense
+                    class="d-flex flex-column align-items-center"
+                  >
                     <v-col>
                       <v-radio
-                        label="Reject Account"
                         :key="OnholdOrRejectCode.REJECTED"
+                        label="Reject Account"
                         :value="OnholdOrRejectCode.REJECTED"
                         data-test="radio-reject"
-                      >
-                      </v-radio>
+                      />
                     </v-col>
                     <v-col>
                       <v-radio
-                        label="On Hold"
                         :key="OnholdOrRejectCode.ONHOLD"
+                        label="On Hold"
                         :value="OnholdOrRejectCode.ONHOLD"
                         data-test="radio-on-hold"
-                      ></v-radio>
+                      />
                     </v-col>
                   </v-row>
-                  <template v-slot:message="{ message }">
+                  <template #message="{ message }">
                     <span class="error-size"> {{ message }} </span>
                   </template>
                 </v-radio-group>
               </v-col>
             </v-row>
             <v-select
+              v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
+              v-model="onholdReasons"
               filled
               label="Reason(s) why account is on hold "
               :items="onholdReasonCodes"
               item-text="desc"
               item-value="desc"
-              v-model="onholdReasons"
               data-test="hold-reason-type"
               class="my-0"
               :rules="onholdReasonRules"
               multiple
-              v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
             >
-              <template v-slot:selection="{ item, index }">
+              <template #selection="{ item, index }">
                 <span v-if="index === 0">{{ item.desc }}</span>
                 <span
                   v-if="index === 1"
@@ -75,51 +97,87 @@
                 </span>
               </template>
             </v-select>
-
           </v-form>
-          <v-form ref="rejectForm" lazy-validation class="reject-form" data-test="reject-form" v-if="isMoveToPendingModal">
+          <v-form
+            v-if="isMoveToPendingModal"
+            ref="rejectForm"
+            lazy-validation
+            class="reject-form"
+            data-test="reject-form"
+          >
             <v-row justify="start">
-              <v-col cols="6" class="pa-0">
-                <v-row dense class="d-flex flex-column align-items-center">
-                  <v-checkbox class="mt-0 ml-4" @change="toggleReason('Request was rejected in error')">
-                    <template v-slot:label>
+              <v-col
+                cols="6"
+                class="pa-0"
+              >
+                <v-row
+                  dense
+                  class="d-flex flex-column align-items-center"
+                >
+                  <v-checkbox
+                    class="mt-0 ml-4"
+                    @change="toggleReason('Request was rejected in error')"
+                  >
+                    <template #label>
                       Request was rejected in error
                     </template>
                   </v-checkbox>
                 </v-row>
-                <v-row dense class="d-flex flex-column align-items-start">
+                <v-row
+                  dense
+                  class="d-flex flex-column align-items-start"
+                >
                   <v-checkbox class="mt-0 ml-4">
-                    <template v-slot:label>
+                    <template #label>
                       Other reason
                     </template>
                   </v-checkbox>
                 </v-row>
               </v-col>
             </v-row>
-            <v-row dense class="d-flex" justify="end">
-              <v-col cols="11" class="pa-0">
+            <v-row
+              dense
+              class="d-flex"
+              justify="end"
+            >
+              <v-col
+                cols="11"
+                class="pa-0"
+              >
                 <v-text-field
+                  v-model="otherReasonText"
                   filled
                   label="Reason will be displayed in the email sent to user"
                   req
                   persistent-hint
                   full-width
                   :counter="50"
-                  v-model="otherReasonText"
-                >
-                </v-text-field>
+                />
               </v-col>
             </v-row>
           </v-form>
         </div>
       </template>
-      <template v-slot:actions>
-        <v-btn large :color="getModalData.color" @click="callAction()"
+      <template #actions>
+        <v-btn
+          large
+          :color="getModalData.color"
           class="font-weight-bold px-4"
           :loading="isSaving"
           data-test="btn-access-request"
-        >{{getModalData.btnLabel}}</v-btn>
-        <v-btn large outlined color="primary" @click="close()" data-test="btn-close-access-request-dialog">Cancel</v-btn>
+          @click="callAction()"
+        >
+          {{ getModalData.btnLabel }}
+        </v-btn>
+        <v-btn
+          large
+          outlined
+          color="primary"
+          data-test="btn-close-access-request-dialog"
+          @click="close()"
+        >
+          Cancel
+        </v-btn>
       </template>
     </ModalDialog>
 
@@ -132,13 +190,21 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="primary">mdi-check</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="primary"
+        >
+          mdi-check
+        </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="mx-5" v-html="getConfirmModalData.text"></p>
+      <template #text>
+        <p
+          class="mx-5"
+          v-html="getConfirmModalData.text"
+        />
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="primary"
@@ -149,7 +215,6 @@
         </v-btn>
       </template>
     </ModalDialog>
-
   </div>
 </template>
 
@@ -344,9 +409,9 @@ export default defineComponent({
           : `Account creation request has been rejected`
       } else if (props.isOnHoldModal || props.isMoveToPendingModal) {
         title = 'Request is On Hold'
-
         text =
-          'An email has been sent to the user presenting the reason why the account is on hold, and a link to resolve the issue.'
+          'An email has been sent to the user presenting the reason why the account is on hold, ' +
+          'and a link to resolve the issue.'
       }
       return { title, text }
     })
