@@ -18,7 +18,7 @@
         >
           <transition name="slide-fade">
             <v-data-table
-              v-model="tableDataOptions"
+              :options.sync="tableDataOptions"
               class="user-list"
               :headers="headerAccounts"
               :items="staffTasks"
