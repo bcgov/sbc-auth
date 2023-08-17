@@ -37,7 +37,7 @@
       <v-card-actions v-if="showActions">
         <slot name="actions">
           <v-btn large color="success" @click="close()" data-test="dialog-ok-button">
-            <span>OK</span>
+            <span>Close</span>
           </v-btn>
         </slot>
       </v-card-actions>
@@ -83,6 +83,25 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
+  .v-dialog {
+    background: red;
+    > .v-card {
+      > div {
+        &:nth-of-type(1) {
+          padding: 40px 40px 0 40px;
+        }
+        &:nth-of-type(2) {
+          padding: 16px 40px 0 40px;
+        }
+        &:nth-of-type(3) {
+          padding: 40px 40px 40px 40px;
+          ::v-deep button {
+            padding: 0 20px;
+          }
+        }
+      }
+    }
+  }
   .notify-dialog {
     background: red;
   }

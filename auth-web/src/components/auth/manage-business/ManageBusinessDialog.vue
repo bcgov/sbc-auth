@@ -44,7 +44,7 @@
 
             <v-card class="mx-auto" flat>
               <v-list class="mr-2">
-                <v-list-group v-if="!isBusinessLegalTypeSPorGP" id="passcode-group" class="top-of-list" eager v-model="passcodeOption">
+                <v-list-group v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp" id="passcode-group" class="top-of-list" eager v-model="passcodeOption">
                   <template v-slot:activator>
                     <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
                   </template>
@@ -102,20 +102,20 @@
                     />
                 </v-list-group>
 
-                <v-list-group v-model="emailOption">
+                <v-list-group v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeSPorGP" v-model="emailOption">
                   <template v-slot:activator>
                     <v-list-item-title>
-                      Confirm authorization using your registered office email address
-                      <div class="subtitle"> (If you forgot or don't have a business {{passwordText}})</div>
+                      Confirm authorization using your {{isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp ? 'registered office' : isBusinessLegalTypeSPorGP ? 'business' : ''}} email address
+                      <div v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp" class="subtitle"> (If you forgot or don't have a business {{passwordText}})</div>
                     </v-list-item-title>
                   </template>
                   <div class="list-body">
                     <div>
-                      An email will be sent to the registered office contact email of the business:
+                      An email will be sent to the {{ isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp ? 'registered office' : isBusinessLegalTypeSPorGP ? 'business' : ''}} contact email of the business:
                     </div>
                     <div><b>{{businessContactEmail}}</b></div>
                     <div class="mt-1 mr-1 mb-4">
-                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.!
+                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
                     </div>
                   </div>
                 </v-list-group>
@@ -268,6 +268,14 @@ export default defineComponent({
 
     const isBusinessLegalTypeSPorGP = computed(() => {
       return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
+    })
+
+    const isBusinessLegalTypeCorporation = computed(() => {
+      return props.businessLegalType === CorpTypes.BC_COMPANY
+    })
+
+    const isBusinessLegalTypeCoOp = computed(() => {
+      return props.businessLegalType === CorpTypes.COOP
     })
 
     const enableBusinessNrSearch = computed(() => {
@@ -525,6 +533,8 @@ export default defineComponent({
       authorizationLabel,
       authorizationMaxLength,
       isBusinessLegalTypeSPorGP,
+      isBusinessLegalTypeCorporation,
+      isBusinessLegalTypeCoOp,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
       isCooperative,
@@ -556,155 +566,172 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-
-#help-button {
-  color: var(--v-primary-base) !important;
-  .v-icon {
-    transform: translate(0, -2px) !important;
-    color: var(--v-primary-base) !important;
-  }
-}
-.list-body {
-  color:#313132;
-}
-
-.v-tooltip__content {
-  background-color: RGBA(73, 80, 87, 0.95) !important;
-  color: white !important;
-  border-radius: 4px;
-  font-size: 12px !important;
-  line-height: 18px !important;
-  padding: 15px !important;
-  letter-spacing: 0;
-  max-width: 270px !important;
-}
-
-.v-tooltip__content:after {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  right: 100% !important;
-  margin-top: -10px !important;
-  border-top: 10px solid transparent !important;
-  border-bottom: 10px solid transparent !important;
-  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
-}
-
-.top-tooltip:after {
-  top: 100% !important;
-  left: 45% !important;
-  margin-top: 0 !important;
-  border-right: 10px solid transparent !important;
-  border-left: 10px solid transparent !important;
-  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
-}
-
-.add-business-unordered-list {
-  list-style: none;
-  padding-left: 1rem;
-
-  li {
-    margin-left: 1.5rem;
-
-    &::before {
-      content: "\2022";
-      display: inline-block;
-      width: 1.5em;
-      color: $gray9;
-      margin-left: -1.5em;
+  .v-dialog {
+    > .v-card {
+      > div {
+        &:nth-of-type(1) {
+          padding: 40px 40px 0 40px;
+        }
+        &:nth-of-type(2) {
+          padding: 16px 40px 0 40px;
+        }
+        &:nth-of-type(3) {
+          padding: 40px 40px 40px 40px;
+          button {
+            padding: 0 20px;
+          }
+        }
+      }
     }
   }
-}
 
-.underline-dotted {
-  border-bottom: dotted;
-  border-bottom-width: 2px;
-}
-
-dl {
-  line-height: 2rem;
-}
-
-// pair up terms and definitions
-dt {
-  float: left;
-  clear: left;
-}
-
-.form__btns {
-  display: flex;
-  justify-content: flex-end;
-
-  .v-btn + .v-btn {
-    margin-left: 0.5rem;
-  }
-
-  #cancel-button,
-  #add-button {
-    min-width: 80px !important;
-  }
-
-  // override disabled button color
-  .v-btn[disabled]:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
-    color: white !important;
-    background-color: $app-blue !important;
-    opacity: 0.4;
-  }
-}
-
-// remove whitespace below error message
-.authorization {
-  ::v-deep .v-text-field__details {
-    margin-bottom: 0 !important;
-  }
-}
-
-::v-deep {
-
-.v-list-group{
-  border-bottom: 1px solid rgb(228, 228, 228);
-  &.top-of-list{
-    border-top: 1px solid rgb(228, 228, 228);
-  }
-  .item-content{
-    color: #000 !important;
-  }
-}
-
-.v-list-item{
-  background: $BCgovInputBG;
-  height: 4rem !important;
-  margin: 0 !important;
-}
-
-.v-list-item--link>
-.v-list-item__title{
-  font-weight: 300 !important;
-  margin-left:-1rem !important;
-  color: var(--v-primary-base) !important;
-  .subtitle {
-    line-height: 1.5rem;
-    font-size: 9pt;
+  #help-button {
     color: var(--v-primary-base) !important;
-    font-weight: normal;
+    .v-icon {
+      transform: translate(0, -2px) !important;
+      color: var(--v-primary-base) !important;
+    }
   }
-}
-
-.v-list-item--active>
-.v-list-item__title{
-  font-weight: 600 !important;
-  margin-left:-1rem !important;
-  color: #000 !important;
-  .subtitle {
-    line-height: 1.5rem;
-    font-size: 9pt;
-    color: #000 !important;
-    font-weight: normal;
+  .list-body {
+    color:#313132;
   }
-}
 
-.v-list-item__content{
-  color: #000 !important;
-}
-}
+  .v-tooltip__content {
+    background-color: RGBA(73, 80, 87, 0.95) !important;
+    color: white !important;
+    border-radius: 4px;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    padding: 15px !important;
+    letter-spacing: 0;
+    max-width: 270px !important;
+  }
+
+  .v-tooltip__content:after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 100% !important;
+    margin-top: -10px !important;
+    border-top: 10px solid transparent !important;
+    border-bottom: 10px solid transparent !important;
+    border-right: 8px solid RGBA(73, 80, 87, .95) !important;
+  }
+
+  .top-tooltip:after {
+    top: 100% !important;
+    left: 45% !important;
+    margin-top: 0 !important;
+    border-right: 10px solid transparent !important;
+    border-left: 10px solid transparent !important;
+    border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
+  }
+
+  .add-business-unordered-list {
+    list-style: none;
+    padding-left: 1rem;
+
+    li {
+      margin-left: 1.5rem;
+
+      &::before {
+        content: "\2022";
+        display: inline-block;
+        width: 1.5em;
+        color: $gray9;
+        margin-left: -1.5em;
+      }
+    }
+  }
+
+  .underline-dotted {
+    border-bottom: dotted;
+    border-bottom-width: 2px;
+  }
+
+  dl {
+    line-height: 2rem;
+  }
+
+  // pair up terms and definitions
+  dt {
+    float: left;
+    clear: left;
+  }
+
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
+
+    .v-btn + .v-btn {
+      margin-left: 0.5rem;
+    }
+
+    #cancel-button,
+    #add-button {
+      min-width: 80px !important;
+    }
+
+    // override disabled button color
+    .v-btn[disabled]:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+      color: white !important;
+      background-color: $app-blue !important;
+      opacity: 0.4;
+    }
+  }
+
+  // remove whitespace below error message
+  .authorization {
+    ::v-deep .v-text-field__details {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  ::v-deep {
+    .v-list-group{
+      border-bottom: 1px solid rgb(228, 228, 228);
+      &.top-of-list{
+        border-top: 1px solid rgb(228, 228, 228);
+      }
+      .item-content{
+        color: #000 !important;
+      }
+    }
+
+    .v-list-item{
+      background: $BCgovInputBG;
+      height: 4rem !important;
+      margin: 0 !important;
+    }
+
+    .v-list-item--link>
+    .v-list-item__title {
+      font-weight: 300 !important;
+      margin-left:-1rem !important;
+      color: var(--v-primary-base) !important;
+      .subtitle {
+        line-height: 1.5rem;
+        font-size: 9pt;
+        color: var(--v-primary-base) !important;
+        font-weight: normal;
+      }
+    }
+
+    .v-list-item--active>
+    .v-list-item__title {
+      font-weight: 600 !important;
+      margin-left:-1rem !important;
+      color: #000 !important;
+      .subtitle {
+        line-height: 1.5rem;
+        font-size: 9pt;
+        color: #000 !important;
+        font-weight: normal;
+      }
+    }
+
+    .v-list-item__content{
+      color: #000 !important;
+    }
+  }
 </style>

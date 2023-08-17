@@ -2,7 +2,7 @@
   <component :is="componentType" v-model="isDialogOpen" v-if="isDialogOpen" max-width="45rem">
     <v-card>
       <v-card-title>
-        <h2>Need Assistance?</h2>
+        <h2>Need Help?</h2>
       </v-card-title>
       <v-card-text>
         <p class="mb-7" v-html="helpDialogBlurb" />
@@ -32,7 +32,7 @@
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn large color="primary" @click="close()">OK</v-btn>
+        <v-btn large color="primary" @click="close()">Close</v-btn>
       </v-card-actions>
     </v-card>
   </component>
@@ -65,3 +65,23 @@ export default class HelpDialog extends Vue {
   }
 }
 </script>
+
+
+<style lang="scss" scoped>
+  .v-card {
+    > div {
+      &:nth-of-type(1) {
+        padding: 40px 40px 0 40px;
+      }
+      &:nth-of-type(2) {
+        padding: 16px 40px 0 40px;
+      }
+      &:nth-of-type(3) {
+        padding: 40px 40px 40px 40px;
+        button {
+          padding: 0 20px;
+        }
+      }
+    }
+  }
+</style>

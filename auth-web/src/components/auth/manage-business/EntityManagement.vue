@@ -256,7 +256,7 @@
           <v-icon large color="error">mdi-alert-circle-outline</v-icon>
         </template>
         <template v-slot:actions>
-          <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+          <v-btn large color="primary" @click="close()" data-test="dialog-ok-button">Close</v-btn>
         </template>
       </ModalDialog>
 
@@ -296,7 +296,7 @@
           <p><v-icon small>mdi-email</v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a></p>
         </template>
         <template v-slot:actions>
-          <v-btn large color="primary" @click="closeBusinessUnavailableDialog()" data-test="dialog-ok-button">OK</v-btn>
+          <v-btn large color="primary" @click="closeBusinessUnavailableDialog()" data-test="dialog-ok-button">Close</v-btn>
         </template>
       </ModalDialog>
 
@@ -313,7 +313,7 @@
           <v-icon large color="primary">mdi-check</v-icon>
         </template>
         <template v-slot:actions>
-          <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">OK</v-btn>
+          <v-btn large color="primary" @click="removedBusinessSuccessClose()" data-test="removed-business-success-button">Close</v-btn>
         </template>
       </ModalDialog>
        <!-- Message for successfully adding business or name request -->
