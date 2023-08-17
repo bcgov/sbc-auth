@@ -206,13 +206,10 @@
 <script lang="ts">
 import { CorpTypes, LDFlags } from '@/util/constants'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
-import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
-import BusinessLookup from './BusinessLookup.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
-import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'

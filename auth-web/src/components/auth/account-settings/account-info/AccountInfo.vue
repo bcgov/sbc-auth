@@ -286,8 +286,7 @@ import {
   AccountStatus,
   Pages,
   Permission,
-  Role,
-  SessionStorageKeys
+  Role
 } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
 import {
@@ -302,10 +301,8 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import { Code } from '@/models/Code'
-import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'

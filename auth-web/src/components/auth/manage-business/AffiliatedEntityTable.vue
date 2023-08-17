@@ -145,123 +145,69 @@
         </template>
 
         <!-- Status -->
-        <template #item-slot-Status="{ item }">
+        <template v-slot:item-slot-Status="{ item }">
           <span>{{ status(item) }}</span>
-          <EntityDetails
-            v-if="isExpired(item) ||
-              isFrozed(item) ||
-              isBadstanding(item) ||
-              isDissolution(item) "
-            icon="mdi-alert"
-            :showAlertHeader="true"
-            :details="getDetails(item)"
-          />
-          <EntityDetails
-            v-if="isProcessing(status(item))"
-            icon="mdi-information-outline"
-            :details="[EntityAlertTypes.PROCESSING]"
-          />
+          <EntityDetails v-if="isExpired(item) ||
+                        isFrozed(item) ||
+                        isBadstanding(item) ||
+                        isDissolution(item) "
+                        icon="mdi-alert"
+                        :showAlertHeader="true"
+                        :details="getDetails(item)"/>
+          <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
         </template>
 
-        <!-- Actions -->
-        <template #item-slot-Actions="{ item, index }">
-          <div
-            :id="`action-menu-${index}`"
-            class="new-actions mx-auto"
-          >
-            <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
-            <span class="open-action">
-              <v-tooltip
-                top
-                content-class="top-tooltip"
-                :disabled="disableTooltip(item)"
+      <!-- Actions -->
+      <template v-slot:item-slot-Actions="{ item, index }">
+        <div class="new-actions mx-auto" :id="`action-menu-${index}`">
+          <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
+          <span class="open-action">
+            <v-tooltip top content-class="top-tooltip" :disabled="disableTooltip(item)">
+              <template v-slot:activator="{on}">
+                <v-btn
+                  small
+                  color="primary"
+                  min-width="5rem"
+                  min-height="2rem"
+                  class="open-action-btn"
+                  v-on="on"
+                  @click="action(item)"
+                >
+                  {{ getPrimaryAction(item) }}
+                  <v-icon class='external-icon pl-1' v-if="isOpenExternal(item)" small>mdi-open-in-new</v-icon>
+                </v-btn>
+              </template>
+              <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
+            </v-tooltip>
+            <!-- More Actions Menu -->
+            <span class="more-actions">
+              <v-menu
+                :attach="`#action-menu-${index}`"
+                v-model="dropdown[index]"
               >
-                <template #activator="{on}">
+                <template v-slot:activator="{ on }">
                   <v-btn
                     small
                     color="primary"
-                    min-width="5rem"
                     min-height="2rem"
-                    class="open-action-btn"
+                    class="more-actions-btn"
                     v-on="on"
-                    @click="action(item)"
                   >
-                    {{ getPrimaryAction(item) }}
-                    <v-icon
-                      v-if="isOpenExternal(item)"
-                      class="external-icon pl-1"
-                      small
-                    >mdi-open-in-new</v-icon>
+                    <v-icon>{{dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
                   </v-btn>
                 </template>
-                <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
-              </v-tooltip>
-              <!-- More Actions Menu -->
-              <span class="more-actions">
-                <v-menu
-                  v-model="dropdown[index]"
-                  :attach="`#action-menu-${index}`"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      small
-                      color="primary"
-                      min-height="2rem"
-                      class="more-actions-btn"
-                      v-on="on"
-                    >
-                      <v-icon>{{ dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
-                      <v-list-item
-                        v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
-                        v-can:REMOVE_BUSINESS.disable
-                        class="actions-dropdown_item my-1"
-                        data-test="remove-button"
-                        @click="removeBusiness(item)"
-                      >
-                        <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                          <v-icon small>mdi-delete-forever</v-icon>
-                          <span class="pl-1">Delete {{ tempDescription(item) }}</span>
-                        </v-list-item-subtitle>
-                        <v-list-item-subtitle v-else>
-                          <v-icon small>mdi-delete</v-icon>
-                          <span class="pl-1">Remove From Table</span>
-                        </v-list-item-subtitle>
-                      </v-list-item>
-                      <v-list-item
-                        v-else
-                        class="actions-dropdown_item my-1"
-                        @click="openNewAffiliationInvite(item)"
-                      >
-                        <v-list-item-subtitle>
-                          <v-icon small>mdi-file-certificate-outline</v-icon>
-                          <span class="pl-1">New Request</span>
-                        </v-list-item-subtitle>
-                      </v-list-item>
-                    </template>
+                <v-list>
+                  <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
                     <v-list-item
-                      v-if="showOpenButton(item)"
-                      class="actions-dropdown_item my-1"
-                      data-test="use-name-request-button"
-                      @click="goToNameRequest(item.nameRequest)"
-                    >
-                      <v-list-item-subtitle>
-                        <v-icon small>mdi-format-list-bulleted-square</v-icon>
-                        <span class="pl-1">Open Name Request</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                    <v-list-item
-                      v-if="showRemoveButton(item)"
+                      v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
                       class="actions-dropdown_item my-1"
                       data-test="remove-button"
+                      v-can:REMOVE_BUSINESS.disable
                       @click="removeBusiness(item)"
                     >
                       <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
                         <v-icon small>mdi-delete-forever</v-icon>
-                        <span class="pl-1">Delete {{ tempDescription(item) }}</span>
+                        <span class="pl-1">Delete {{tempDescription(item)}}</span>
                       </v-list-item-subtitle>
                       <v-list-item-subtitle v-else>
                         <v-icon small>mdi-delete</v-icon>
@@ -269,18 +215,55 @@
                       </v-list-item-subtitle>
                     </v-list-item>
                     <v-list-item
-                      v-if="showAmalgamateShortForm(item)"
+                      v-else
                       class="actions-dropdown_item my-1"
-                      data-test="use-name-request-button"
+                      @click="openNewAffiliationInvite(item)"
                     >
                       <v-list-item-subtitle>
-                        <v-icon small>mdi-checkbox-multiple-blank-outline</v-icon>
-                        <span class="pl-1">Amalgamate Now (Short Form)</span>
+                        <v-icon small>mdi-file-certificate-outline</v-icon>
+                        <span class="pl-1">New Request</span>
                       </v-list-item-subtitle>
                     </v-list-item>
-                  </v-list>
-                </v-menu>
-              </span>
+                  </template>
+                  <v-list-item
+                    v-if="showOpenButton(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="use-name-request-button"
+                    @click="goToNameRequest(item.nameRequest)"
+                  >
+                    <v-list-item-subtitle>
+                      <v-icon small>mdi-format-list-bulleted-square</v-icon>
+                      <span class="pl-1">Open Name Request</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    v-if="showRemoveButton(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="remove-button"
+                    @click="removeBusiness(item)"
+                  >
+                    <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+                      <v-icon small>mdi-delete-forever</v-icon>
+                      <span class="pl-1">Delete {{tempDescription(item)}}</span>
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-else>
+                      <v-icon small>mdi-delete</v-icon>
+                      <span class="pl-1">Remove From Table</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                  <v-list-item
+                    v-if="showAmalgamateShortForm(item)"
+                    class="actions-dropdown_item my-1"
+                    data-test="use-name-request-button"
+                  >
+                    <v-list-item-subtitle>
+                      <v-icon small>mdi-checkbox-multiple-blank-outline</v-icon>
+                      <span class="pl-1">Amalgamate Now (Short Form)</span>
+                    </v-list-item-subtitle>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </span>
             </span>
           </div>
         </template>
@@ -304,7 +287,7 @@ import {
 } from '@/util/constants'
 import { Business, NameRequest, Names } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Ref, SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { SetupContext, computed, defineComponent, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
@@ -679,12 +662,14 @@ export default defineComponent({
       return affiliations.results.some(business => businessIdentifier === business.businessIdentifier)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const goToAmalgamate = (item: Business): void => {
       // For now, go to COLIN with external link + icon + matching hover text
       goToCorpOnline()
     }
 
     // Continue In
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const goToRelocate = (item: Business): void => {
       goToCorpOnline()
     }
@@ -796,6 +781,7 @@ export default defineComponent({
       return false
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const showAmalgamateShortForm = (item: Business): boolean => {
       // reserve for changes in the future
       return false
