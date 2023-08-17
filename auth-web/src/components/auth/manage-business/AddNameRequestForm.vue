@@ -9,20 +9,49 @@
           Name Request Number and Applicant Phone Number or Email Address
         </legend>
         <div class="d-flex align-items-center">
-          <div class="font-weight-bold mr-2">Requested Name(s):</div>
+          <div class="font-weight-bold mr-2">
+            Requested Name(s):
+          </div>
           <div>
-            <div v-for='(name, i) in requestNames' :key='`nrName: ${i}`' class='pb-1 names-block d-flex align-items-center'>
-              <v-icon v-if='isRejectedName(name)' color='red' class='names-text pr-1' small>mdi-close</v-icon>
-              <v-icon v-else-if='isApprovedName(name)' color='green' class='names-text pr-1' small>mdi-check</v-icon>
-              <v-icon v-else color='transparent' class='names-text pr-1' small>mdi-close</v-icon><!-- spacer icon -->
-              <span class='names-text font-weight-bold'>{{ name.name }}</span>
+            <div
+              v-for="(name, i) in requestNames"
+              :key="`nrName: ${i}`"
+              class="pb-1 names-block d-flex align-items-center"
+            >
+              <v-icon
+                v-if="isRejectedName(name)"
+                color="red"
+                class="names-text pr-1"
+                small
+              >
+                mdi-close
+              </v-icon>
+              <v-icon
+                v-else-if="isApprovedName(name)"
+                color="green"
+                class="names-text pr-1"
+                small
+              >
+                mdi-check
+              </v-icon>
+              <v-icon
+                v-else
+                color="transparent"
+                class="names-text pr-1"
+                small
+              >
+                mdi-close
+              </v-icon><!-- spacer icon -->
+              <span class="names-text font-weight-bold">{{ name.name }}</span>
             </div>
           </div>
         </div>
-        <div class="font-weight-bold mr-2 float-left">Name Request Number:</div>
-        <div>{{businessIdentifier}}</div><br>
+        <div class="font-weight-bold mr-2 float-left">
+          Name Request Number:
+        </div>
+        <div>{{ businessIdentifier }}</div><br>
         <div class="my-4">
-            Enter either the applicant phone number OR applicant email that were used when the name was requested:
+          Enter either the applicant phone number OR applicant email that were used when the name was requested:
         </div>
         <v-text-field
           :key="nrNumberKey"

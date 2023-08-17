@@ -1,8 +1,13 @@
 <template>
   <div>
-    <v-row class="mx-0 mt-n4">Find an existing incorporated or registered business or Name Request to manage it:</v-row>
+    <v-row class="mx-0 mt-n4">
+      Find an existing incorporated or registered business or Name Request to manage it:
+    </v-row>
     <v-row class="mx-0 mt-n2">
-      <v-radio-group v-model="searchType" row>
+      <v-radio-group
+        v-model="searchType"
+        row
+      >
         <v-radio
           label="Incorporated or Registered business"
           value="Incorporated"
@@ -13,25 +18,38 @@
         />
       </v-radio-group>
     </v-row>
-    <v-row class="mx-n4 mt-n12" :key="clearSearch">
+    <v-row
+      :key="clearSearch"
+      class="mx-n4 mt-n12"
+    >
       <v-col cols="6">
-        <v-form v-if="searchType=='Incorporated'" ref="addBusinessForm" lazy-validation class="mt-6">
+        <v-form
+          v-if="searchType=='Incorporated'"
+          ref="addBusinessForm"
+          lazy-validation
+          class="mt-6"
+        >
           <template>
             <!-- Search for business identifier or name -->
             <!-- NB: use v-if to re-mount component between instances -->
             <BusinessLookup
+              :key="businessLookupKey"
               :lookupType="lookupType.BUSINESS"
               @business="businessEvent"
-              :key="businessLookupKey"
             />
           </template>
         </v-form>
-        <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
+        <v-form
+          v-else
+          ref="addNameRequestForm"
+          lazy-validation
+          class="mt-6"
+        >
           <template>
             <BusinessLookup
+              :key="businessLookupKey"
               :lookupType="lookupType.NR"
               @nameRequest="nameRequestEvent"
-              :key="businessLookupKey"
             />
           </template>
         </v-form>
@@ -68,7 +86,7 @@
       max-width="640"
       data-test-tag="add-name-request"
     >
-      <template v-slot:text>
+      <template #text>
         <AddNameRequestForm
           class="mt-6"
           :businessIdentifier="businessIdentifier"

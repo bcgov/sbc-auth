@@ -42,8 +42,9 @@
       </template>
 
       <template
-      v-if="lookupType === LookupType.BUSINESS"
-      #item="{ item }">
+        v-if="lookupType === LookupType.BUSINESS"
+        #item="{ item }"
+      >
         <v-row class="business-lookup-result pt-1">
           <v-col
             cols="2"
@@ -68,17 +69,40 @@
           </v-col>
         </v-row>
       </template>
-      <template v-else v-slot:item="{ item }">
+      <template
+        v-else
+        #item="{ item }"
+      >
         <v-row class="business-lookup-result pt-1">
-          <v-col cols="2" class="result-identifier">{{item.nrNum}}</v-col>
-          <v-col cols="8" class="result-name">
-            <div v-for="(name, index) in item.names" :key="index">
+          <v-col
+            cols="2"
+            class="result-identifier"
+          >
+            {{ item.nrNum }}
+          </v-col>
+          <v-col
+            cols="8"
+            class="result-name"
+          >
+            <div
+              v-for="(name, index) in item.names"
+              :key="index"
+            >
               {{ name }}
             </div>
           </v-col>
-          <v-col cols="2" class="result-action">
-            <span v-if="item.disabled" class="added">Added</span>
-            <span v-else class="select">Select</span>
+          <v-col
+            cols="2"
+            class="result-action"
+          >
+            <span
+              v-if="item.disabled"
+              class="added"
+            >Added</span>
+            <span
+              v-else
+              class="select"
+            >Select</span>
           </v-col>
         </v-row>
       </template>
