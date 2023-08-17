@@ -1,8 +1,13 @@
 <template>
   <div class="add-namerequest-form">
-    <v-form ref="addNRForm" lazy-validation>
+    <v-form
+      ref="addNRForm"
+      lazy-validation
+    >
       <fieldset>
-        <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
+        <legend hidden>
+          Name Request Number and Applicant Phone Number or Email Address
+        </legend>
         <div class="d-flex align-items-center">
           <div class="font-weight-bold mr-2">Requested Name(s):</div>
           <div>
@@ -20,28 +25,33 @@
             Enter either the applicant phone number OR applicant email that were used when the name was requested:
         </div>
         <v-text-field
-          filled persistent-hint
+          :key="nrNumberKey"
+          filled
+          persistent-hint
           label="Enter the Applicant Phone Number"
           hint="Example: 555-555-5555"
           :rules="applicantPhoneNumberRules"
-          v-model="applicantPhoneNumber"
           type="tel"
           data-test="applicant-phone-number"
         />
-        <div class="font-weight-bold ml-3 mb-2">or</div>
+        <div class="font-weight-bold ml-3 mb-2">
+          or
+        </div>
         <v-text-field
-          filled persistent-hint
+          v-model="applicantEmail"
+          filled
+          persistent-hint
           label="Enter the Applicant Email Address"
           hint="Example: name@email.com"
           :rules="applicantEmailRules"
-          v-model="applicantEmail"
           data-test="applicant-email"
         />
       </fieldset>
 
       <div class="form__btns mt-8">
         <v-btn
-          large text
+          large
+          text
           class="pl-2 pr-2 mr-auto"
           data-test="forgot-button"
           @click.stop="openHelp()"
@@ -50,14 +60,17 @@
           <span>I lost or forgot my Name Request (NR) Number</span>
         </v-btn>
         <v-btn
-          large outlined color="primary"
+          large
+          outlined
+          color="primary"
           data-test="cancel-button"
           @click="resetForm('close-add-nr-modal')"
         >
           <span>Cancel</span>
         </v-btn>
         <v-btn
-          large color="primary"
+          large
+          color="primary"
           data-test="add-button"
           max-width="100"
           :disabled="!isFormValid()"
@@ -70,8 +83,8 @@
     </v-form>
 
     <HelpDialog
-      :helpDialogBlurb="helpDialogBlurb"
       ref="helpDialog"
+      :helpDialogBlurb="helpDialogBlurb"
     />
   </div>
 </template>

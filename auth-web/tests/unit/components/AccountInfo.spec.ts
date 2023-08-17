@@ -184,7 +184,8 @@ describe('AccountInfo.vue', () => {
     })
     let statusColor = wrapper.vm.getStatusColor(store.state.org.currentOrganization.orgStatus)
     expect(statusColor).toBe('green')
-    let getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(store.state.org.currentOrganization.orgStatus)
+    let getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(
+      store.state.org.currentOrganization.orgStatus)
     expect(getDialogStatusButtonColor).toBe('error')
 
     store.commit('org/setCurrentOrganization')

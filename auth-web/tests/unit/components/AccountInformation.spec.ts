@@ -10,7 +10,6 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-// @ts-ignore
 Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -29,7 +28,11 @@ describe('AccountInformation.vue basic tests', () => {
   }
 
   const updateForGovnReview = async () => {
-    const params = { accessType: AccessType.GOVN, orgType: OrgAccountTypes.GOVN, statusCode: AccountStatus.PENDING_STAFF_REVIEW }
+    const params = {
+      accessType: AccessType.GOVN,
+      orgType: OrgAccountTypes.GOVN,
+      statusCode: AccountStatus.PENDING_STAFF_REVIEW
+    }
     wrapper.setProps({
       accountUnderReview: getTestOrg(params),
       isGovnReview: true

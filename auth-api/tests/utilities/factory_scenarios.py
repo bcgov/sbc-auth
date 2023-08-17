@@ -102,7 +102,8 @@ class TestJwtClaims(dict, Enum):
                 'account_holder',
                 'gov_account_user'
             ]
-        }
+        },
+        'loginSource': LoginSource.IDIR.value
     }
 
     public_bceid_user = {
@@ -194,7 +195,8 @@ class TestJwtClaims(dict, Enum):
                 'staff',
                 'edit'
             ]
-        }
+        },
+        'loginSource': LoginSource.STAFF.value
     }
 
     staff_manage_business = {
@@ -210,7 +212,8 @@ class TestJwtClaims(dict, Enum):
                 'edit',
                 'manage_business'
             ]
-        }
+        },
+        'loginSource': LoginSource.STAFF.value
     }
 
     staff_view_accounts_role = {
@@ -225,7 +228,8 @@ class TestJwtClaims(dict, Enum):
                 'staff',
                 'view_accounts'
             ]
-        }
+        },
+        'loginSource': LoginSource.STAFF.value
     }
 
     staff_manage_accounts_role = {
@@ -241,7 +245,8 @@ class TestJwtClaims(dict, Enum):
                 'view_accounts',
                 'manage_accounts'
             ]
-        }
+        },
+        'loginSource': LoginSource.STAFF.value
     }
 
     staff_admin_role = {
@@ -260,7 +265,8 @@ class TestJwtClaims(dict, Enum):
         },
         'roles': [
             'staff', 'edit', 'create_accounts'
-        ]
+        ],
+        'loginSource': LoginSource.STAFF.value
     }
 
     staff_admin_dir_search_role = {
@@ -281,7 +287,8 @@ class TestJwtClaims(dict, Enum):
         'roles': [
             'staff',
             'create_accounts'
-        ]
+        ],
+        'loginSource': LoginSource.STAFF.value
     }
 
     bcol_admin_role = {

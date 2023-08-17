@@ -7,41 +7,48 @@
     content-class="resubmit-request-dialog"
   >
     <v-card flat>
-      <v-card-title id="dialog-title">Modify Request</v-card-title>
-      <v-divider></v-divider>
+      <v-card-title id="dialog-title">
+        Modify Request
+      </v-card-title>
+      <v-divider />
       <v-card-text class="pt-1 pb-1">
         <v-textarea
+          id="resubmit-request-textarea"
           ref="requestTextarea"
           filled
           outlined
           no-resize
           hide-details
-          id="resubmit-request-textarea"
           :value="xmlData"
           spellcheck="false"
           @input="emitInput($event)"
         />
       </v-card-text>
-      <v-divider></v-divider>
+      <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <div class="form__btns">
           <v-btn
+            id="dialog-resubmit-button"
             large
             color="primary"
-            id="dialog-resubmit-button"
             :disabled="submitActive"
             :loading="submitActive"
             @click.native="resubmit()"
-          >Resubmit</v-btn>
+          >
+            Resubmit
+          </v-btn>
           <v-btn
-            large depressed
             id="dialog-cancel-button"
+            large
+            depressed
             class="ml-2"
             :disabled="submitActive"
             :loading="submitActive"
             @click.native="emitClose()"
-          >Cancel</v-btn>
+          >
+            Cancel
+          </v-btn>
         </div>
       </v-card-actions>
     </v-card>
@@ -52,6 +59,7 @@
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const BusinessModule = namespace('business')
 
 @Component({})

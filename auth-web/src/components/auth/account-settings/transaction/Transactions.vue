@@ -1,29 +1,45 @@
 <template>
   <v-container class="transaction-container">
-    <header v-if="title" class="view-header align-center mb-5 ml-4">
-      <h2 class="view-header__title">{{ title }}</h2>
+    <header
+      v-if="title"
+      class="view-header align-center mb-5 ml-4"
+    >
+      <h2 class="view-header__title">
+        {{ title }}
+      </h2>
     </header>
     <section v-if="showCredit && credit !== 0">
-      <v-divider class="mb-8"></v-divider>
-      <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{credit.toFixed(2)}}</h2>
-      <p class="credit-details mt-1">You have a credit of ${{credit.toFixed(2)}} on this account.</p>
-      <v-divider class="mb-8 mt-8"></v-divider>
+      <v-divider class="mb-8" />
+      <h2>Account Credit: <span class="cad-credit ml-4">CAD</span> ${{ credit.toFixed(2) }}</h2>
+      <p class="credit-details mt-1">
+        You have a credit of ${{ credit.toFixed(2) }} on this account.
+      </p>
+      <v-divider class="mb-8 mt-8" />
     </section>
     <section>
-      <v-row justify="end" no-gutters>
+      <v-row
+        justify="end"
+        no-gutters
+      >
         <v-col v-if="showExport">
           <v-btn
             large
             color="primary"
             class="font-weight-bold ml-4"
             :loading="isLoading"
-            @click="exportCSV()"
             :disabled="isLoading"
             data-test="btn-export-csv"
-          >Export CSV</v-btn>
+            @click="exportCSV()"
+          >
+            Export CSV
+          </v-btn>
         </v-col>
-        <v-col align-self="end" cols="auto">
+        <v-col
+          align-self="end"
+          cols="auto"
+        >
           <v-select
+            v-model="headersSelected"
             class="column-selections"
             dense
             filled
@@ -39,15 +55,21 @@
             multiple
             return-object
             style="width: 200px;"
-            v-model="headersSelected"
           >
-            <template v-slot:selection="{ index }">
-              <span v-if="index === 0" class="columns-to-show">Columns to show</span>
+            <template #selection="{ index }">
+              <span
+                v-if="index === 0"
+                class="columns-to-show"
+              >Columns to show</span>
             </template>
           </v-select>
         </v-col>
       </v-row>
-      <TransactionsDataTable class="mt-4" :extended="extended" :headers="sortedHeaders" />
+      <TransactionsDataTable
+        class="mt-4"
+        :extended="extended"
+        :headers="sortedHeaders"
+      />
     </section>
     <!-- export csv error -->
     <ModalDialog
@@ -57,11 +79,22 @@
       :text="csvErrorDialogText"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="primary">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="primary"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="primary" @click="csvErrorDialog.close()">OK</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          @click="csvErrorDialog.close()"
+        >
+          OK
+        </v-btn>
       </template>
     </ModalDialog>
   </v-container>
@@ -157,7 +190,7 @@ export default defineComponent({
     }
 
     const initUser = () => {
-      if (isTransactionsAllowed) getPaymentDetails()
+      if (isTransactionsAllowed.value) getPaymentDetails()
       else {
         // if the account switing happening when the user is already in the transaction page,
         // redirect to account info if its a basic account

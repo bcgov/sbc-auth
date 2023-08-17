@@ -5,7 +5,6 @@ import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
 
-// @ts-ignore
 Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 

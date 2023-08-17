@@ -384,8 +384,10 @@ class Invitation:
         if invitation.invitation_status_code == 'EXPIRED':
             raise BusinessException(Error.EXPIRED_INVITATION, None)
 
-        if (login_source := user_from_context.login_source) is not None:  # bcros comes with out token
-            if invitation.login_source != login_source:
+        login_source = user_from_context.login_source
+
+        if invitation.login_source == LoginSource.STAFF.value:  # Ensure STAFF login source for STAFF invitations
+            if login_source is None or invitation.login_source != login_source:
                 raise BusinessException(Error.INVALID_USER_CREDENTIALS, None)
 
         if add_membership:
@@ -421,6 +423,7 @@ class Invitation:
                 except BusinessException as exception:
                     current_app.logger.error('<send_notification_to_admin failed', exception.message)
 
+        invitation.login_source = login_source  # Update login source to the source when accepted
         invitation.accepted_date = datetime.now()
         invitation.invitation_status = InvitationStatusModel.get_status_by_code('ACCEPTED')
         invitation.save()

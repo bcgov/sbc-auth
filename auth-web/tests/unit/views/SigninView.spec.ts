@@ -30,7 +30,7 @@ describe('Signin.vue', () => {
       }
     })
 
-    let vuetify = new Vuetify({})
+    const vuetify = new Vuetify({})
 
     wrapper = shallowMount(Signin, {
       store,

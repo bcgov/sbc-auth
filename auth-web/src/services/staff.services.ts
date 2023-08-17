@@ -15,7 +15,7 @@ export default class StaffService {
   }
 
   static async getStaffOrgs (status?: string): Promise<AxiosResponse<Organizations>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     // params.append('access_type', 'REGULAR_BCEID,EXTRA_PROVINCIAL')
     if (status) {
       params.append('status', status)
@@ -23,12 +23,13 @@ export default class StaffService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs`, { params })
   }
 
-  public static async addProducts (orgIdentifier: number, productsRequestBody: ProductsRequestBody): Promise<AxiosResponse<Products>> {
+  public static async addProducts (orgIdentifier: number, productsRequestBody: ProductsRequestBody):
+    Promise<AxiosResponse<Products>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`, productsRequestBody)
   }
 
   static async searchOrgs (orgFilter?: OrgFilterParams): Promise<AxiosResponse<OrgList>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     for (const key in orgFilter) {
       if (!orgFilter[key]) {
         continue

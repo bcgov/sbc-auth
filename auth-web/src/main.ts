@@ -10,10 +10,11 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 // eslint-disable-next-line sort-imports
 import './routes/componentHooks'
 import Vue from 'vue'
+import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
-import i18n from './plugins/i18n'
+import initializeI18n from './plugins/i18n'
 import router from './routes/index'
 import store from './store'
 import vuetify from './plugins/vuetify'
@@ -25,13 +26,15 @@ import { LDFlags } from '@/util/constants'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
+const i18n = initializeI18n(Vue)
 Vue.use(Search, { store, i18n })
+Vue.use(VueSanitize)
 
 /**
  * The server side configs are necessary for app to work , since they are reference in templates and all
  *  Two ways , either reload Vue after we get the settings or load vue after we get the configs..going for second
  */
-ConfigHelper.saveConfigToSessionStorage().then(async (data) => {
+ConfigHelper.saveConfigToSessionStorage().then(async () => {
   // Initializing Launch Darkly services
   await LaunchDarklyService.init(ConfigHelper.getLdClientId());
   // addressCompleteKey is for canada post address lookup, which is to be used in sbc-common-components

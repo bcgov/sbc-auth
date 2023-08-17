@@ -1,52 +1,64 @@
 <template>
   <section v-if="accountFeesDTO && accountFeesDTO.length">
-    <h2 class="mb-5">{{`${tabNumber !== null ?  `${tabNumber}. ` : ''}${title}`}}</h2>
-    <p class="mb-9">{{ $t('productFeeSubTitle') }}</p>
-    <v-form ref="productFeeForm" id="productFeeForm">
-      <div v-for="(accountFee, index) in accountFeesDTO" v-bind:key="index">
-        <h3 class="title font-weight-bold mt-n1">{{ displayProductName(accountFee.product) }}</h3>
+    <h2 class="mb-5">
+      {{ `${tabNumber !== null ? `${tabNumber}. ` : ''}${title}` }}
+    </h2>
+    <p class="mb-9">
+      {{ $t('productFeeSubTitle') }}
+    </p>
+    <v-form
+      id="productFeeForm"
+      ref="productFeeForm"
+    >
+      <div
+        v-for="(accountFee, index) in accountFeesDTO"
+        :key="index"
+      >
+        <h3 class="title font-weight-bold mt-n1">
+          {{ displayProductName(accountFee.product) }}
+        </h3>
         <v-row>
-            <v-col
+          <v-col
             cols="6"
-            >
-              <v-select
+          >
+            <v-select
+              v-model="accountFee.applyFilingFees"
               filled
               label="Statutory fee"
               item-text="text"
               item-value="value"
               :items="applyFilingFeesValues"
               :rules="applyFilingFeesRules"
-              v-model="accountFee.applyFilingFees"
-              @change="selectChange"
               :data-test="getIndexedTag('select-apply-filing-fees', index)"
               req
               :disabled="!canSelect"
-              />
-            </v-col>
-            <v-col
+              @change="selectChange"
+            />
+          </v-col>
+          <v-col
             cols="6"
-            >
-              <v-select
+          >
+            <v-select
+              v-model="accountFee.serviceFeeCode"
               filled
               label="Service fee"
               :rules="serviceFeeCodeRules"
               :items="getOrgProductFeeCodesForProduct(accountFee.product)"
               item-text="amount"
               item-value="code"
-              v-model="accountFee.serviceFeeCode"
-              @change="selectChange"
               :data-test="getIndexedTag('select-service-fee-code', index)"
               req
               :disabled="!canSelect"
-              >
-                <template slot="selection" slot-scope="data">
-                  $ {{ data.item.amount.toFixed(2) }}
-                </template>
-                <template slot="item" slot-scope="data">
-                  {{ displayProductFee(data.item.amount) }}
-                </template>
-              </v-select>
-            </v-col>
+              @change="selectChange"
+            >
+              <template #selection="data">
+                $ {{ data.item.amount.toFixed(2) }}
+              </template>
+              <template #item="data">
+                {{ displayProductFee(data.item.amount) }}
+              </template>
+            </v-select>
+          </v-col>
         </v-row>
       </div>
     </v-form>
@@ -67,7 +79,6 @@ interface ProductFeeState {
 
 export default defineComponent({
   name: 'ProductFee',
-  emits: ['emit-product-fee-change'],
   props: {
     tabNumber: {
       type: Number,
@@ -79,6 +90,7 @@ export default defineComponent({
     },
     canSelect: Boolean
   },
+  emits: ['emit-product-fee-change'],
   setup (props, { emit }) {
     const store = useStore()
     const orgState = store.state.org as OrgModule

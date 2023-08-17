@@ -3,8 +3,16 @@
     <v-form ref="editAccountForm">
       <v-card elevation="0">
         <div class="account-label">
-          <div class="nav-list-title font-weight-bold" data-test="title">Account Details</div>
-          <div v-if="isLoading" class="loading-inner-container loading-center">
+          <div
+            class="nav-list-title font-weight-bold"
+            data-test="title"
+          >
+            Account Details
+          </div>
+          <div
+            v-if="isLoading"
+            class="loading-inner-container loading-center"
+          >
             <v-progress-circular
               size="50"
               width="5"
@@ -13,23 +21,32 @@
             />
           </div>
 
-          <div class="details" v-else>
-            <div v-if="viewOnlyMode" class="view-only">
+          <div
+            v-else
+            class="details"
+          >
+            <div
+              v-if="viewOnlyMode"
+              class="view-only"
+            >
               <div class="with-change-icon">
                 <div>
                   <span class="font-weight-bold">Account Name:</span>
                   {{ orgName }}
                 </div>
                 <div
-                  v-can:CHANGE_ORG_NAME.hide
                   v-if="nameChangeAllowed && viewOnlyMode"
+                  v-can:CHANGE_ORG_NAME.hide
                 >
                   <span
                     class="primary--text cursor-pointer"
-                    @click="emitViewOnly({ component: 'account', mode: false })"
                     data-test="btn-edit"
+                    @click="emitViewOnly({ component: 'account', mode: false })"
                   >
-                    <v-icon color="primary" size="20"> mdi-pencil</v-icon>
+                    <v-icon
+                      color="primary"
+                      size="20"
+                    > mdi-pencil</v-icon>
                     Change
                   </span>
                 </div>
@@ -52,14 +69,13 @@
             <div v-else>
               <account-business-type
                 :saving="false"
+                :isEditAccount="true"
                 @update:org-business-type="updateOrgBusinessType"
                 @valid="updateIsOrgBusinessTypeValid($event)"
-                :isEditAccount="true"
-              >
-              </account-business-type>
+              />
 
               <v-card-actions class="pt-1 pr-0">
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <v-btn
                   large
                   class="save-btn px-9"
@@ -77,10 +93,11 @@
                   class="ml-2 px-9"
                   color="primary"
                   aria-label="Cancel Account Information"
-                  @click="emitViewOnly({ component: 'account', mode: true})"
                   data-test="reset-button"
-                  >Cancel</v-btn
+                  @click="emitViewOnly({ component: 'account', mode: true})"
                 >
+                  Cancel
+                </v-btn>
               </v-card-actions>
             </div>
           </div>

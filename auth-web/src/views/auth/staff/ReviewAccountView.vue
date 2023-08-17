@@ -2,8 +2,16 @@
   <v-container class="view-container pt-0">
     <!-- Loading status -->
     <v-fade-transition>
-      <div class="loading-container" v-if="isLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
     </v-fade-transition>
 
@@ -11,47 +19,81 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-            <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
-              <v-icon small color="primary" class="mr-1">mdi-arrow-left</v-icon>
-              <span>Back to Staff Dashboard</span>
-            </router-link>
+          <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
+            <v-icon
+              small
+              color="primary"
+              class="mr-1"
+            >
+              mdi-arrow-left
+            </v-icon>
+            <span>Back to Staff Dashboard</span>
+          </router-link>
         </div>
       </nav>
       <div class="view-header flex-column">
-        <h1 class="view-header__title">{{title}}</h1>
-        <p class="mt-2 mb-0">Review and verify details for this account.</p>
+        <h1 class="view-header__title">
+          {{ title }}
+        </h1>
+        <p class="mt-2 mb-0">
+          Review and verify details for this account.
+        </p>
       </div>
-      <v-card class="mt-8" flat>
+      <v-card
+        class="mt-8"
+        flat
+      >
         <v-row class="mr-0 ml-0">
-
           <!-- Components list will come here -->
           <v-col class="main-col col-12 col-md-8 pa-6 pa-md-8">
             <template v-for="(component, idx) in componentList">
               <component
-                :key="component.id"
                 :is="component.component"
+                :key="component.id"
                 v-bind="component.props"
-                v-on="component.events"
                 :ref="component.ref"
+                v-on="component.events"
               />
 
-              <v-divider class="mt-11 mb-8" :key="`divider-${component.id}`"  v-if="idx !== componentList.length-1"></v-divider>
+              <v-divider
+                v-if="idx !== componentList.length-1"
+                :key="`divider-${component.id}`"
+                class="mt-11 mb-8"
+              />
             </template>
 
             <template v-if="canSelect">
-              <v-divider class="mt-11 mb-8" ></v-divider>
-              <div class="form-btns d-flex justify-end" >
-
+              <v-divider class="mt-11 mb-8" />
+              <div class="form-btns d-flex justify-end">
                 <div v-display-mode="!canEdit ? viewOnly : false ">
-                  <v-btn large color="primary" class="font-weight-bold mr-2 select-button" @click="openModal()" >
+                  <v-btn
+                    large
+                    color="primary"
+                    class="font-weight-bold mr-2 select-button"
+                    @click="openModal()"
+                  >
                     <span v-if="isTaskRejected">Re-Approve</span>
                     <span v-else>Approve</span>
                   </v-btn>
-                  <v-btn v-if="!isTaskRejected" large outlined color="primary" class="font-weight-bold white--text select-button" @click="openModal(true)"  >
+                  <v-btn
+                    v-if="!isTaskRejected"
+                    large
+                    outlined
+                    color="primary"
+                    class="font-weight-bold white--text select-button"
+                    @click="openModal(true)"
+                  >
                     <span v-if="isAffidavitReview && !isTaskOnHold">Reject/On Hold</span>
                     <span v-else>Reject</span>
                   </v-btn>
-                  <v-btn v-else large outlined color="primary" class="font-weight-bold white--text select-button" @click="openModal(false, false, false, true)"  >
+                  <v-btn
+                    v-else
+                    large
+                    outlined
+                    color="primary"
+                    class="font-weight-bold white--text select-button"
+                    @click="openModal(false, false, false, true)"
+                  >
                     <span>Move to pending</span>
                   </v-btn>
                 </div>
@@ -61,12 +103,15 @@
 
           <!-- Account Status Column -->
           <v-col class="col-12 col-md-4 pl-0 pt-8 pr-8 d-flex">
-            <v-divider vertical class="mb-0 mr-8"></v-divider>
-            <div class="flex-grow-1">
-            <AccountStatusTab
-              :taskDetails="task"
-              :isPendingReviewPage="isPendingReviewPage"
+            <v-divider
+              vertical
+              class="mb-0 mr-8"
             />
+            <div class="flex-grow-1">
+              <AccountStatusTab
+                :taskDetails="task"
+                :isPendingReviewPage="isPendingReviewPage"
+              />
             </div>
           </v-col>
         </v-row>
@@ -80,58 +125,54 @@
           :isMoveToPendingModal="isMoveToPendingModal"
           :isSaving="isSaving"
           :orgName="accountUnderReview.name"
-          @approve-reject-action="saveSelection"
-          @after-confirm-action="goBack()"
           :accountType="taskRelationshipType"
           :taskName="task.type"
           :onholdReasonCodes="onholdReasonCodes"
-          />
-
+          @approve-reject-action="saveSelection"
+          @after-confirm-action="goBack()"
+        />
       </v-card>
     </div>
   </v-container>
 </template>
 
 <script lang="ts">
-import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
-import { AccountFee, GLInfo, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
+import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pages,
+  TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
+import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
 // import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
 import { AccountInformation } from '@/components/auth/staff/review-task'
 import AccountStatusTab from '@/components/auth/staff/review-task/AccountStatus.vue'
-import { Address } from '@/models/address'
-import { AffidavitInformation } from '@/models/affidavit'
 import AgreementInformation from '@/components/auth/staff/review-task/AgreementInformation.vue'
 import { Code } from '@/models/Code'
-import Component from 'vue-class-component'
 import { Contact } from '@/models/contact'
 import DocumentService from '@/services/document.services'
 import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffidavit.vue'
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
-import { Prop } from 'vue-property-decorator'
 import StaffModuleStore from '@/store/modules/staff'
 import { Task } from '@/models/Task'
-import { User } from '@/models/user'
 
 import { getModule } from 'vuex-module-decorators'
 import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   name: 'ReviewAccountView',
-  props: {
-    orgId: String
-  },
   components: {
     AccessRequestModal,
     AccountStatusTab
   },
+  props: {
+    orgId: String
+  },
   setup (props) {
     const store = useStore()
     const instance = getCurrentInstance()
+    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
     const _staffStore = getModule(StaffModuleStore, store)
     const isLoading: Ref<boolean> = ref(true)
     const isSaving: Ref<boolean> = ref(false)
@@ -270,7 +311,8 @@ export default defineComponent({
     })
 
     const accountNotaryContact = (): Contact => {
-      return accountUnderReviewAffidavitInfo.value?.contacts?.length > 0 && accountUnderReviewAffidavitInfo.value?.contacts[0]
+      return accountUnderReviewAffidavitInfo.value?.contacts?.length > 0 &&
+        accountUnderReviewAffidavitInfo.value?.contacts[0]
     }
 
     const productFeeChange = (isFormValid): void => {
@@ -279,7 +321,8 @@ export default defineComponent({
 
     const canEdit = () => {
       return task.value.status === TaskStatus.OPEN || isTaskOnHold.value ||
-        (task.value.status === TaskStatus.COMPLETED && task.value.relationshipStatus === TaskRelationshipStatus.REJECTED)
+        (task.value.status === TaskStatus.COMPLETED &&
+          task.value.relationshipStatus === TaskRelationshipStatus.REJECTED)
     }
 
     const formattedComponent = (tabNumber, id, component, props, event = null, ref = null) => {
@@ -304,7 +347,8 @@ export default defineComponent({
     }
 
     const compDownloadAffidavit = (tabNumber = 1) => {
-      let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.'
+      let subTitle = 'Download the notarized affidavit associated with this account to verify the account creators ' +
+        'identity and associated information.'
       if (accountUnderReviewAffidavitInfo.value?.status === AffidavitStatus.APPROVED) {
         subTitle = 'Download the notarized affidavit associated with this account that has been reviewed and approved.'
       }
@@ -404,8 +448,8 @@ export default defineComponent({
 
     /*
       5 types of Tasks:
-      1. New BCeId Account creation -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
-      2. Product request access -> TaskType.PRODUCT and taskRelationshipType === TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
+      1. New BCeId Account -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
+      2. Product request -> TaskType.PRODUCT and TaskRelationshipType.PRODUCT and PRODUCT_REVIEW action
       3. GovM review -> TaskType.GOVM and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
       4. BCeId admin review -> TaskType.BCeID Admin and TaskRelationshipType.USER and ACCOUNT_REVIEW action
       5. GovN review -> 1. Bcsc flow: TaskType.GOVN_REVIEW and TaskRelationshipType.ORG and ACCOUNT_REVIEW action
@@ -564,7 +608,11 @@ export default defineComponent({
 
       try {
         if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
-          const success = await updateOrganizationAccessType({ accessType: accountInfoAccessType.value as string, orgId: accountUnderReview.value.id, syncOrg: false })
+          const success = await updateOrganizationAccessType({
+            accessType: accountInfoAccessType.value as string,
+            orgId: accountUnderReview.value.id,
+            syncOrg: false
+          })
           if (!success) throw new Error('Error updating account access type prevented review completion.')
         }
         if (isApprove) {

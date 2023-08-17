@@ -1,16 +1,23 @@
 
 <template>
-  <v-container class="view-container" data-test="div-account-setup-container">
+  <v-container
+    class="view-container"
+    data-test="div-account-setup-container"
+  >
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Create a Ministry Account</h1>
-      <p class="mt-3 mb-0">Create an account to access products and services offered by BC Registries and Online Services</p>
+      <h1 class="view-header__title">
+        Create a Ministry Account
+      </h1>
+      <p class="mt-3 mb-0">
+        Create an account to access products and services offered by BC Registries and Online Services
+      </p>
     </div>
     <v-card flat>
       <Stepper
         :stepper-configuration="stepperConfig"
         :isLoading="isLoading"
         @final-step-action="createAccount"
-      ></Stepper>
+      />
     </v-card>
     <!-- Alert Dialog (Error) -->
     <ModalDialog
@@ -21,10 +28,15 @@
       max-width="640"
       data-test="modal-account-setup-error"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="error"

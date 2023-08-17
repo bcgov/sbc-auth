@@ -1,11 +1,30 @@
 <template>
   <div>
-    <date-picker v-show="showDatePicker" :reset="dateRangeReset" ref="datePicker" class="date-picker" @submit="updateDateRange($event)" />
-    <div v-if="extended" class="section-heading pa-4">
+    <date-picker
+      v-show="showDatePicker"
+      ref="datePicker"
+      :reset="dateRangeReset"
+      class="date-picker"
+      @submit="updateDateRange($event)"
+    />
+    <div
+      v-if="extended"
+      class="section-heading pa-4"
+    >
       <h3>
-        <v-icon color="primary" style="margin-top: -2px;">mdi-format-list-bulleted</v-icon>
+        <v-icon
+          color="primary"
+          style="margin-top: -2px;"
+        >
+          mdi-format-list-bulleted
+        </v-icon>
         Transactions
-        <v-progress-circular v-if="transactions.loading" color="primary" indeterminate size="20" />
+        <v-progress-circular
+          v-if="transactions.loading"
+          color="primary"
+          indeterminate
+          size="20"
+        />
         <span v-else>({{ transactions.totalResults }})</span>
       </h3>
     </div>
@@ -22,7 +41,7 @@
       :totalItems="transactions.totalResults"
       @update-table-options="tableDataOptions = $event"
     >
-      <template v-slot:header-filter-slot-actions>
+      <template #header-filter-slot-actions>
         <v-btn
           v-if="transactions.filters.isActive"
           class="clear-btn mx-auto mt-auto"
@@ -31,18 +50,20 @@
           @click="clearFilters()"
         >
           Clear Filters
-          <v-icon class="ml-1 mt-1">mdi-close</v-icon>
+          <v-icon class="ml-1 mt-1">
+            mdi-close
+          </v-icon>
         </v-btn>
       </template>
       <!-- header title slots -->
-      <template v-slot:header-title-slot-statusCode="{ header }">
+      <template #header-title-slot-statusCode="{ header }">
         {{ header.value }}
         <icon-tooltip icon="mdi-information-outline">
           <div v-html="getStatusCodeHelpText()" />
         </icon-tooltip>
       </template>
       <!-- header filter slots -->
-      <template v-slot:header-filter-slot-createdOn>
+      <template #header-filter-slot-createdOn>
         <div @click="scrollToDatePicker()">
           <v-text-field
             class="base-table__header__filter__textbox date-filter"
@@ -58,19 +79,26 @@
         </div>
       </template>
       <!-- item slots -->
-      <template v-slot:item-slot-lineItemsAndDetails="{ item }">
-        <b v-for="lineItem, i in item.lineItems" :key="lineItem.description + i" class="dark-text">
+      <template #item-slot-lineItemsAndDetails="{ item }">
+        <b
+          v-for="lineItem, i in item.lineItems"
+          :key="lineItem.description + i"
+          class="dark-text"
+        >
           {{ lineItem.description }}
-        </b><br/>
-        <span v-for="detail, i in item.details" :key="detail.label + i">
+        </b><br>
+        <span
+          v-for="detail, i in item.details"
+          :key="detail.label + i"
+        >
           {{ detail.label }} {{ detail.value }}
-        </span><br/>
+        </span><br>
       </template>
-      <template v-slot:item-slot-total="{ item }">
+      <template #item-slot-total="{ item }">
         <span v-if="item.statusCode === InvoiceStatus.CANCELLED">$0.00</span>
         <span v-else>{{ '$' + item.total.toFixed(2) }}</span>
       </template>
-      <template v-slot:item-slot-statusCode="{ item }">
+      <template #item-slot-statusCode="{ item }">
         <v-row no-gutters>
           <v-col cols="auto">
             <v-icon
@@ -81,10 +109,16 @@
               mdi-check
             </v-icon>
             <b>{{ invoiceStatusDisplay[item.statusCode] }}</b>
-            <br/>
-            <span v-if="item.updatedOn" v-html="displayDate(item.updatedOn)" />
+            <br>
+            <span
+              v-if="item.updatedOn"
+              v-html="displayDate(item.updatedOn)"
+            />
           </v-col>
-          <v-col class="pl-2" align-self="center">
+          <v-col
+            class="pl-2"
+            align-self="center"
+          >
             <icon-tooltip
               v-if="[InvoiceStatus.REFUND_REQUESTED, InvoiceStatus.REFUNDED].includes(item.statusCode)"
               icon="mdi-information-outline"

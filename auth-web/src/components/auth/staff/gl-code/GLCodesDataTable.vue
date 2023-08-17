@@ -8,13 +8,13 @@
       :no-data-text="$t('noGLCodeList')"
       :loading="isDataLoading"
     >
-      <template v-slot:loading>
+      <template #loading>
         Loading...
       </template>
-      <template v-slot:[`item.updatedOn`]="{ item }">
-        {{formatDate(item.updatedOn)}}
+      <template #[`item.updatedOn`]="{ item }">
+        {{ formatDate(item.updatedOn) }}
       </template>
-      <template v-slot:[`item.action`]="{ item }">
+      <template #[`item.action`]="{ item }">
         <div class="btn-inline">
           <v-btn
             outlined
@@ -31,19 +31,18 @@
     <GLCodeDetailsModal
       ref="glcodeDetailsModal"
       @refresh-glcode-table="refreshTable"
-    >
-    </GLCodeDetailsModal>
+    />
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { GLCode } from '@/models/Staff'
 import GLCodeDetailsModal from '@/components/auth/staff/gl-code/GLCodeDetailsModal.vue'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
+import { mapActions } from 'vuex'
 
 @Component({
   components: {

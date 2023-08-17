@@ -2,8 +2,12 @@
   <v-container>
     <div class="view-container">
       <article>
-        <h1 class="mb-5">Already On a Team</h1>
-        <p class="intro-text">You cannot accept this invitation, because you already have membership on a team</p>
+        <h1 class="mb-5">
+          Already On a Team
+        </h1>
+        <p class="intro-text">
+          You cannot accept this invitation, because you already have membership on a team
+        </p>
         <v-card class="profile-card">
           <v-container>
             <v-card-text>
@@ -18,10 +22,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { Organization } from '@/models/Organization'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {

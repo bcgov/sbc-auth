@@ -16,7 +16,7 @@ import { setupIntersectionObserverMock } from '../util/helper-functions'
 Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 
 const vuetify = new Vuetify({})
 

@@ -1,70 +1,93 @@
 <template>
-  <v-form ref="form" lazy-validation data-test="form-profile">
-
+  <v-form
+    ref="form"
+    lazy-validation
+    data-test="form-profile"
+  >
     <div class="view-header flex-column mb-6">
-    <p class="mb-9" v-if="isStepperView">To access our digitial registries services, select multiple product and services you require.</p>
-
+      <p
+        v-if="isStepperView"
+        class="mb-9"
+      >
+        To access our digitial registries services, select multiple product and services you require.
+      </p>
     </div>
     <template v-if="isLoading">
       <div class="loading-inner-container">
-          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
-        </div>
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
+      </div>
     </template>
     <template v-else>
       <template v-if="productList && productList.length > 0">
-        <div v-for="product in productList" :key="product.code" v-display-mode>
-          <Product v-if="!product.parentCode"
+        <div
+          v-for="product in productList"
+          :key="product.code"
+          v-display-mode
+        >
+          <Product
+            v-if="!product.parentCode"
             :productDetails="product"
+            :isexpandedView="product.code === expandedProductCode"
+            :isSelected="currentSelectedProducts.includes(product.code)"
             @set-selected-product="setSelectedProduct"
             @toggle-product-details="toggleProductDetails"
-            :isexpandedView ="product.code === expandedProductCode"
-            :isSelected="currentSelectedProducts.includes(product.code)"
-          ></Product>
+          />
         </div>
       </template>
       <template v-else>
         <div>No Products are available...</div>
       </template>
     </template>
-    <v-divider class="mt-7 mb-10"></v-divider>
+    <v-divider class="mt-7 mb-10" />
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
         <v-btn
+          v-if="isStepperView && !noBackButton"
           large
           depressed
-          v-if="isStepperView && !noBackButton"
           color="default"
-          @click="goBack"
           data-test="btn-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
 
         <v-btn
+          v-if="isStepperView"
           large
           color="primary"
           class="save-continue-button mr-3"
-          @click="next"
-          v-if="isStepperView"
           data-test="next-button"
           :disabled="!isFormValid"
+          @click="next"
         >
-          <span >
+          <span>
             Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
-
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="isStepperView"
           :isEmit="true"
           @click-confirm="cancel"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
-
   </v-form>
 </template>
 

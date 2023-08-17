@@ -1,11 +1,10 @@
-import Axios from 'axios'
 import { Contact } from '../../../src/models/contact'
 import { User } from '../../../src/models/user'
 import UserService from '../../../src/services/user.services'
 
 vi.mock('../../../src/services/user.services')
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }
@@ -34,17 +33,15 @@ const spyGetContacts = vi.spyOn(UserService, 'getContacts')
 const spyUpdateContact = vi.spyOn(UserService, 'updateContact')
 const spyGetOrganizations = vi.spyOn(UserService, 'getOrganizations')
 const spyUpdateUserTerms = vi.spyOn(UserService, 'updateUserTerms')
-const spyDeactivateUser = vi.spyOn(UserService, 'deactivateUser')
-const spyDeleteAnonymousUser = vi.spyOn(UserService, 'deleteAnonymousUser')
-const spyGetMembership = vi.spyOn(UserService, 'getMembership')
-const spyCreateUsers = vi.spyOn(UserService, 'createUsers')
-const spyCreateUserProfile = vi.spyOn(UserService, 'createUserProfile')
+vi.spyOn(UserService, 'deactivateUser')
+vi.spyOn(UserService, 'deleteAnonymousUser')
+vi.spyOn(UserService, 'getMembership')
+vi.spyOn(UserService, 'createUsers')
+vi.spyOn(UserService, 'createUserProfile')
 
 describe('Get user profile', () => {
-  const results = []
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
     vi.clearAllMocks()
   })
 
@@ -80,7 +77,9 @@ describe('Get user profile', () => {
   })
 
   it('should call update user terms ', () => {
-    UserService.updateUserTerms(mockReturnUser.username, mockReturnUser.userTerms.termsOfUseAcceptedVersion, mockReturnUser.userTerms.isTermsOfUseAccepted)
-    expect(spyUpdateUserTerms).toBeCalledWith(mockReturnUser.username, mockReturnUser.userTerms.termsOfUseAcceptedVersion, mockReturnUser.userTerms.isTermsOfUseAccepted)
+    UserService.updateUserTerms(mockReturnUser.username, mockReturnUser.userTerms.termsOfUseAcceptedVersion,
+      mockReturnUser.userTerms.isTermsOfUseAccepted)
+    expect(spyUpdateUserTerms).toBeCalledWith(mockReturnUser.username,
+      mockReturnUser.userTerms.termsOfUseAcceptedVersion, mockReturnUser.userTerms.isTermsOfUseAccepted)
   })
 })

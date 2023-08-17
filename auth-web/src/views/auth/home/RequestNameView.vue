@@ -2,17 +2,38 @@
   <v-container id="request-name-info-container">
     <v-row>
       <!-- Info Column -->
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <h2>Request a Name or Use a Numbered Company</h2>
-        <v-list-item class="list-item" v-for="(item, index) in bulletPoints" :key="index" >
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+        <v-list-item
+          v-for="(item, index) in bulletPoints"
+          :key="index"
+          class="list-item"
+        >
+          <v-icon
+            size="8"
+            class="list-item-bullet mt-5"
+          >
+            mdi-square
+          </v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              {{item.text}}
+              {{ item.text }}
             </v-list-item-subtitle>
             <div v-if="index=== 1">
-              <v-list-item class="list-item" v-for="(subItem, subIndex) in subBulletPoints" :key="subIndex">
-                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+              <v-list-item
+                v-for="(subItem, subIndex) in subBulletPoints"
+                :key="subIndex"
+                class="list-item"
+              >
+                <v-icon
+                  size="8"
+                  class="list-item-bullet mt-5"
+                >
+                  mdi-square
+                </v-icon>
                 <v-list-item-content>
                   <v-list-item-subtitle class="list-item-text">
                     {{ subItem.text }}
@@ -23,7 +44,12 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item class="list-item">
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon
+            size="8"
+            class="list-item-bullet mt-5"
+          >
+            mdi-square
+          </v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
               You can choose to incorporate a <numbered-company-tooltip />
@@ -33,18 +59,27 @@
         </v-list-item>
         <!-- Panel Btns -->
         <div class="request-name-info-btns mt-5">
-          <NameRequestButton class="mr-2" :isInverse="true"/>
-          <LearnMoreButton :redirect-url="learnMoreUrl"/>
+          <NameRequestButton
+            class="mr-2"
+            :isInverse="true"
+          />
+          <LearnMoreButton :redirect-url="learnMoreUrl" />
         </div>
         <p class="mt-5">
           Have an existing Name Request?
-          <a class="status-link" @click="goToNameRequestExisting()">
+          <a
+            class="status-link"
+            @click="goToNameRequestExisting()"
+          >
             Check your Name Request Status
           </a>
         </p>
       </v-col>
       <!-- Image Column -->
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <v-img
           src="../../../assets/img/Step2_NameRequest_x2.png"
           aspect-ratio="1.2"
@@ -75,12 +110,14 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   }
 })
 export default class RequestNameView extends Vue {
-  private readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
-  private bulletPoints: Array<any> = [
+  readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
+    'managing-a-business/permits-licences/businesses-incorporated-companies/approval-business-name'
+  bulletPoints: Array<any> = [
     { text: 'You can choose to have a name or use the incorporation number as the name of the business.' },
-    { text: 'If you choose to have a name for your business, create a unique name that ensures the public is not confused or mislead by similar corporate names.' }
+    { text: 'If you choose to have a name for your business, create a unique name that ensures the public is ' +
+      'not confused or mislead by similar corporate names.' }
   ]
-  private subBulletPoints: Array<any> = [
+  subBulletPoints: Array<any> = [
     { text: 'Submit your name choices for examination by the Business Registry.' },
     { text: 'If your name is approved, you can use it to register or incorporate your business.' }
   ]

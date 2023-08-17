@@ -11,7 +11,7 @@ export default class TaskService {
   }
 
   public static async fetchTasks (taskFilter?: TaskFilterParams): Promise<AxiosResponse<TaskList>> {
-    let params = new URLSearchParams()
+    const params = new URLSearchParams()
     if (taskFilter.relationshipStatus) {
       params.append('relationshipStatus', taskFilter.relationshipStatus)
     }
@@ -46,11 +46,13 @@ export default class TaskService {
 
   static async approvePendingTask (task:any): Promise<AxiosResponse> {
     const taskId = task.id
-    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.ACTIVE })
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
+      { relationshipStatus: TaskRelationshipStatus.ACTIVE })
   }
 
   static async rejectPendingTask (taskId:any): Promise<AxiosResponse> {
-    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`, { relationshipStatus: TaskRelationshipStatus.REJECTED })
+    return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
+      { relationshipStatus: TaskRelationshipStatus.REJECTED })
   }
 
   static async onHoldPendingTask (taskId, remarks:string[]): Promise<AxiosResponse> {

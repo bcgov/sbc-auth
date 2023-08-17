@@ -1,68 +1,79 @@
 <template>
   <div data-test="div-stepper-payment-method-selector">
     <p class="payment-page-sub mb-9">
-      {{pageSubTitle}}
+      {{ pageSubTitle }}
     </p>
     <PaymentMethods
+      v-display-mode
       :currentOrgType="currentOrganizationType"
       :currentOrganization="currentOrganization"
       :currentSelectedPaymentMethod="currentOrgPaymentType"
+      :isInitialTOSAccepted="readOnly"
+      :isInitialAcknowledged="readOnly"
       @payment-method-selected="setSelectedPayment"
       @is-pad-valid="setPADValid"
       @emit-bcol-info="setBcolInfo"
-      :isInitialTOSAccepted="readOnly"
-      :isInitialAcknowledged="readOnly"
-      v-display-mode
-    ></PaymentMethods>
+    />
     <v-slide-y-transition>
-        <div class="pb-2" v-show="errorMessage">
-          <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
-            {{errorMessage}}
-          </v-alert>
-        </div>
+      <div
+        v-show="errorMessage"
+        class="pb-2"
+      >
+        <v-alert
+          type="error"
+          icon="mdi-alert-circle-outline"
+          data-test="alert-bcol-error"
+        >
+          {{ errorMessage }}
+        </v-alert>
+      </div>
     </v-slide-y-transition>
-    <v-divider class="my-10"></v-divider>
-     <v-row>
+    <v-divider class="my-10" />
+    <v-row>
       <v-col class="py-0 d-inline-flex">
         <v-btn
           large
           depressed
           color="default"
-          @click="goBack"
           data-test="btn-stepper-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           class="save-continue-button mr-2 font-weight-bold"
-          @click="save"
           data-test="save-button"
           :disabled="!isEnableCreateBtn"
+          @click="save"
         >
-        <!-- need to show submit button on review payment -->
-         {{ readOnly ? 'Submit' : 'Create Account'}}
+          <!-- need to show submit button on review payment -->
+          {{ readOnly ? 'Submit' : 'Create Account' }}
         </v-btn>
         <ConfirmCancelButton
-          showConfirmPopup="true"
           v-if="!readOnly"
-        ></ConfirmCancelButton>
+          showConfirmPopup="true"
+        />
       </v-col>
     </v-row>
   </div>
 </template>
 
 <script lang="ts">
-import { Account, PaymentTypes } from '@/util/constants'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
-
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { PaymentTypes } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { namespace } from 'vuex-class'
 

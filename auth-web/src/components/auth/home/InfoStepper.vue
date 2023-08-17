@@ -2,28 +2,40 @@
   <div>
     <v-container id="step-buttons-container">
       <template v-for="(step, index) in steps">
-        <div class="step" :key="index"  @click="goTo(step)" v-on:keyup.tab="goTo(step)">
+        <div
+          :key="index"
+          class="step"
+          @click="goTo(step)"
+          @keyup.tab="goTo(step)"
+        >
           <v-btn
+            :id="step.id"
             fab
             outlined
-            :id=step.id
             :ripple="false"
             color="#1A5A96"
             class="step__icon"
             :class="{ 'filled': isCurrentStep(step) }"
-            >
-            <span class="step-number">{{step.step}}</span>
+          >
+            <span class="step-number">{{ step.step }}</span>
           </v-btn>
-          <div class="step__label" :class="{ 'selected': isCurrentStep(step) }">
-            {{step.text}}
+          <div
+            class="step__label"
+            :class="{ 'selected': isCurrentStep(step) }"
+          >
+            {{ step.text }}
           </div>
-          <span :class="{ 'arrow-down': isCurrentStep(step) }"></span>
+          <span :class="{ 'arrow-down': isCurrentStep(step) }" />
         </div>
       </template>
     </v-container>
     <!-- Next Step Button -->
     <div class="next-step-wrapper">
-      <span class="next-step-btn" :class="{ 'hide-next-btn': hideBtn }" @click="nextStep()">
+      <span
+        class="next-step-btn"
+        :class="{ 'hide-next-btn': hideBtn }"
+        @click="nextStep()"
+      >
         <u>Next Step</u><v-icon color="#1A5A96">mdi-menu-right</v-icon>
       </span>
     </div>

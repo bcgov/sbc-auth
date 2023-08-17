@@ -1,5 +1,5 @@
 import { Account, PaymentTypes } from '@/util/constants'
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import OrgModule from '@/store/modules/org'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import Vue from 'vue'

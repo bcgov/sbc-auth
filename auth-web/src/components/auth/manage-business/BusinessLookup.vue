@@ -2,11 +2,11 @@
   <!-- once in Summary state, need to re-mount to reuse this component -->
   <div id="business-lookup">
     <v-autocomplete
+      v-model="searchField"
       :hide-no-data="state != States.NO_RESULTS"
       :items="searchResults"
       :loading="state === States.SEARCHING"
       :name="Math.random()"
-      :search-input.sync="searchField"
       :clearable="state !== States.INITIAL && state !== States.SEARCHING"
       :append-icon="state === States.INITIAL ? 'mdi-magnify':''"
       autocomplete="chrome-off"
@@ -22,7 +22,7 @@
       @input="onItemSelected"
       @keydown.enter.native.prevent
     >
-      <template v-slot:append>
+      <template #append>
         <v-progress-circular
           v-if="state === States.SEARCHING"
           color="primary"
@@ -32,7 +32,7 @@
         />
       </template>
 
-      <template v-slot:no-data>
+      <template #no-data>
         <p class="pl-5 font-weight-bold">
           No active B.C. business found
         </p>
@@ -41,13 +41,30 @@
         </p>
       </template>
 
-      <template v-if="lookupType === LookupType.BUSINESS" v-slot:item="{ item }">
+      <template
+      v-if="lookupType === LookupType.BUSINESS"
+      #item="{ item }">
         <v-row class="business-lookup-result pt-1">
-          <v-col cols="2" class="result-identifier">{{item.identifier}}</v-col>
-          <v-col cols="8" class="result-name">{{item.name}}</v-col>
-          <v-col cols="2" class="result-action">
-            <span v-if="item.disabled" class="added">Added</span>
-            <span v-else class="select">Select</span>
+          <v-col
+            cols="2"
+            class="result-identifier"
+          >
+            {{ item.identifier }}
+          </v-col>
+          <v-col
+            cols="8"
+            class="result-name"
+          >
+            {{ item.name }}
+          </v-col>
+          <v-col
+            cols="2"
+            class="result-action"
+          >
+            <span
+              v-if="item.disabled"
+              class="added"
+            >Added</span>
           </v-col>
         </v-row>
       </template>

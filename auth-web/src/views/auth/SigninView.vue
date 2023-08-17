@@ -4,23 +4,19 @@
     :in-auth="true"
     :redirect-url-login-fail="redirectUrlLoginFail"
     @sync-user-profile-ready="authenticationComplete"
-  ></sbc-signin>
+  />
 </template>
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { IdpHint, Pages, SessionStorageKeys } from '@/util/constants'
-import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations } from 'vuex'
-import { AccountSettings } from '@/models/account-settings'
+import { mapActions, mapMutations } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import OrgModule from '@/store/modules/org'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
-import { User } from '@/models/user'
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   methods: {
@@ -49,7 +45,8 @@ export default class Signin extends Mixins(NextPageMixin) {
           if (this.redirectUrl.startsWith('/')) {
             this.redirectTo(this.redirectUrl)
           } else {
-            this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl) ? this.redirectUrl : `/${this.redirectUrl}`))
+            this.redirectTo(decodeURIComponent(CommonUtils.isUrl(this.redirectUrl)
+              ? this.redirectUrl : `/${this.redirectUrl}`))
           }
         } else {
           this.redirectTo(this.getNextPageUrl())

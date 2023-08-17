@@ -10,7 +10,7 @@ import Vuex from 'vuex'
 import i18n from '@/plugins/i18n'
 
 Vue.use(Vuetify)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
