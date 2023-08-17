@@ -3,8 +3,16 @@
     <v-form ref="accountAccessTypeForm">
       <v-card elevation="0">
         <div class="account-label">
-          <div class="nav-list-title font-weight-bold pl-3" data-test="title">Access Type</div>
-          <div v-if="isLoading" class="loading-inner-container loading-center">
+          <div
+            class="nav-list-title font-weight-bold pl-3"
+            data-test="title"
+          >
+            Access Type
+          </div>
+          <div
+            v-if="isLoading"
+            class="loading-inner-container loading-center"
+          >
             <v-progress-circular
               size="50"
               width="5"
@@ -13,8 +21,14 @@
             />
           </div>
 
-          <div class="details" v-else>
-            <div v-if="viewOnlyMode" class="view-only">
+          <div
+            v-else
+            class="details"
+          >
+            <div
+              v-if="viewOnlyMode"
+              class="view-only"
+            >
               <div class="with-change-icon">
                 <div>
                   <span data-test="txt-selected-access-type">{{ getAccessTypeText }}</span>
@@ -24,15 +38,18 @@
                 >
                   <span
                     class="primary--text cursor-pointer"
+                    data-test="btn-edit"
                     @click="
                       $emit('update:viewOnlyMode', {
                         component: 'accessType',
                         mode: false
                       })
                     "
-                    data-test="btn-edit"
                   >
-                    <v-icon color="primary" size="20"> mdi-pencil</v-icon>
+                    <v-icon
+                      color="primary"
+                      size="20"
+                    > mdi-pencil</v-icon>
                     Change
                   </span>
                 </div>
@@ -46,28 +63,39 @@
                 :rules="[selectedAccessTypeRules]"
               >
                 <v-radio
-                label="Regular Access"
-                :key="AccessType.REGULAR"
-                :value="AccessType.REGULAR"
-                data-test="radio-regular-access"
-                ></v-radio>
+                  :key="AccessType.REGULAR"
+                  label="Regular Access"
+                  :value="AccessType.REGULAR"
+                  data-test="radio-regular-access"
+                />
                 <v-radio
-                label="Government agency (other than BC provincial)"
-                :key="AccessType.GOVN"
-                :value="AccessType.GOVN"
-                data-test="radio-govn"
-                ></v-radio>
+                  :key="AccessType.GOVN"
+                  label="Government agency (other than BC provincial)"
+                  :value="AccessType.GOVN"
+                  data-test="radio-govn"
+                />
               </v-radio-group>
-               <div class="d-flex pb-3" v-if="!isPad">
-                      <v-icon size="30" color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
-                      <span class="error-text">{{ $t('accountAccessTypeUpdateWarning') }}</span>
-                    </div>
+              <div
+                v-if="!isPad"
+                class="d-flex pb-3"
+              >
+                <v-icon
+                  size="30"
+                  color="error"
+                  class="mt-1 mr-4"
+                >
+                  mdi-alert-circle-outline
+                </v-icon>
+                <span class="error-text">{{ $t('accountAccessTypeUpdateWarning') }}</span>
+              </div>
 
               <v-card-actions class="px-0 pt-0">
                 <v-row>
-                  <v-col cols="12" class="form__btns py-0 d-inline-flex">
-
-                    <v-spacer></v-spacer>
+                  <v-col
+                    cols="12"
+                    class="form__btns py-0 d-inline-flex"
+                  >
+                    <v-spacer />
                     <v-btn
                       large
                       class="save-btn px-9"
@@ -85,9 +113,11 @@
                       class="ml-2 px-9"
                       color="primary"
                       aria-label="Cancel Account Access Type"
-                      @click="cancelEdit()"
                       data-test="reset-button"
-                      >Cancel</v-btn>
+                      @click="cancelEdit()"
+                    >
+                      Cancel
+                    </v-btn>
                   </v-col>
                 </v-row>
               </v-card-actions>

@@ -23,7 +23,6 @@ document.body.setAttribute('data-app', 'true')
 
 describe('StaffDashboardView tests', () => {
   let wrapper: Wrapper<any>
-  let sandbox: any
 
   const config = {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',

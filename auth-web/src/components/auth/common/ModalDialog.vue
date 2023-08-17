@@ -1,19 +1,27 @@
 <template>
   <v-dialog
+    v-model="isOpen"
     :persistent="isPersistent"
     :fullscreen="fullscreenOnMobile"
     :scrollable="isScrollable"
     :content-class="dialogClass"
     :max-width="maxWidth"
-    v-model="isOpen"
     @keydown.esc="close()"
   >
     <v-card>
       <!-- title -->
       <v-card-title data-test="dialog-header">
         <!-- optional check icon -->
-        <slot v-if="showIcon" name="icon">
-          <v-icon large color="success">mdi-check</v-icon>
+        <slot
+          v-if="showIcon"
+          name="icon"
+        >
+          <v-icon
+            large
+            color="success"
+          >
+            mdi-check
+          </v-icon>
         </slot>
 
         <span class="modal-dialog-title">
@@ -21,7 +29,11 @@
         </span>
 
         <!-- optional close button -->
-        <v-btn v-if="showCloseIcon" icon @click="close()">
+        <v-btn
+          v-if="showCloseIcon"
+          icon
+          @click="close()"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
@@ -36,7 +48,12 @@
       <!-- actions -->
       <v-card-actions v-if="showActions">
         <slot name="actions">
-          <v-btn large color="success" @click="close()" data-test="dialog-ok-button">
+          <v-btn
+            large
+            color="success"
+            data-test="dialog-ok-button"
+            @click="close()"
+          >
             <span>OK</span>
           </v-btn>
         </slot>

@@ -1,20 +1,17 @@
 // You can declare a mixin as the same style as components.
 <script lang="ts">
 import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization, PendingUserRecord, UpdateMemberPayload } from '@/models/Organization'
-import MemberDataTable, { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
+import { Component, Vue } from 'vue-property-decorator'
+import { Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
-import { Business } from '@/models/business'
+import { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
-import { Invitation } from '@/models/Invitation'
-import InvitationsDataTable from '@/components/auth/account-settings/team-management/InvitationsDataTable.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import OrgModule from '@/store/modules/org'
-import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
 import UserModule from '@/store/modules/user'
 import { getModule } from 'vuex-module-decorators'
 
@@ -71,13 +68,15 @@ export default class TeamManagementMixin extends Vue {
     this.modal = confirmActionDialog
     if (member.membershipStatus === MembershipStatus.Pending) {
       this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
-      this.confirmActionText = `Deny account access to <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong?`
+      this.confirmActionText =
+        `Deny account access to <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong>?`
       this.confirmHandler = this.deny
       this.primaryActionText = 'Deny'
       this.primaryActionType = 'error'
     } else {
       this.confirmActionTitle = this.$t('confirmRemoveMemberTitle').toString()
-      this.confirmActionText = `Remove team member <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong> from this account?`
+      this.confirmActionText =
+        `Remove team member <strong>${member?.user?.firstname} ${member?.user?.lastname}</strong> from this account?`
       this.confirmHandler = this.removeMember
       this.primaryActionText = 'Remove'
       this.primaryActionType = 'error'

@@ -6,7 +6,8 @@ import {
   CreateNRAffiliationRequestBody
 } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload, NameRequest, PasscodeResetLoad } from '@/models/business'
+import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload,
+  PasscodeResetLoad } from '@/models/business'
 import {
   CorpTypes,
   FilingTypes,
@@ -118,9 +119,9 @@ export default class BusinessModule extends VuexModule {
         return [] as []
       })
 
-    let affiliatedEntities: Business[] = []
+    const affiliatedEntities: Business[] = []
 
-    entityResponse.forEach((resp, i) => {
+    entityResponse.forEach((resp) => {
       const entity: Business = {
         businessIdentifier: resp.identifier,
         ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
@@ -180,7 +181,8 @@ export default class BusinessModule extends VuexModule {
         const isToOrgAndPending = affiliationInviteInfo.toOrg.id === this.currentOrganization.id &&
           affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
         const isAccepted = affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
-        const business = affiliatedEntities.find(business => business.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
+        const business = affiliatedEntities.find(
+          business => business.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
 
         if (business && (isToOrgAndPending || isFromOrg)) {
           business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInviteInfo])
@@ -443,9 +445,9 @@ export default class BusinessModule extends VuexModule {
   public async removeBusiness (payload: RemoveBusinessPayload) {
     // If the business is a new registration then remove the business filing from legal-db
     if (payload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
-      let filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
+      const filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
       if (filingResponse && filingResponse.data && filingResponse.status === 200) {
-        let filingId = filingResponse?.data?.filing?.header?.filingId
+        const filingId = filingResponse?.data?.filing?.header?.filingId
         // If there is a filing delete it which will delete the affiliation, else delete the affiliation
         if (filingId) {
           await BusinessService.deleteBusinessFiling(payload.business.businessIdentifier, filingId)
@@ -463,7 +465,7 @@ export default class BusinessModule extends VuexModule {
 
   @Action({ commit: 'setCurrentBusiness', rawError: true })
   public async saveContact (contact: Contact) {
-    let currentBusiness: Business = this.context.state['currentBusiness']
+    const currentBusiness: Business = this.context.state['currentBusiness']
     let response = null
     if (!currentBusiness.contacts || currentBusiness.contacts.length === 0) {
       response = await BusinessService.addContact(currentBusiness, contact)

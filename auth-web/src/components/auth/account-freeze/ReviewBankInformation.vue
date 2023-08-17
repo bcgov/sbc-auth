@@ -6,28 +6,31 @@ import { AccessType } from '@/util/constants'
     </p>
 
     <v-alert
+      v-if="errorText"
       type="error"
       class="mb-11"
-      v-if="errorText"
     >
-      <div v-html="errorText"></div>
+      <div v-html="errorText" />
     </v-alert>
 
     <v-row class="mb-12">
-      <v-col md="10" class="py-0">
+      <v-col
+        md="10"
+        class="py-0"
+      >
         <PADInfoForm
+          :key="refreshPAD"
           :padInformation="padInfo"
-          @is-pre-auth-debit-form-valid="isPADValid"
-          @emit-pre-auth-debit-info="getPADInfo"
           :isAcknowledgeNeeded="false"
           :isTOSNeeded="false"
-          :key="refreshPAD"
-          @is-pad-info-touched="isPadInfoTouched"
           :clearOnEdit="true"
-        ></PADInfoForm>
+          @is-pre-auth-debit-form-valid="isPADValid"
+          @emit-pre-auth-debit-info="getPADInfo"
+          @is-pad-info-touched="isPadInfoTouched"
+        />
       </v-col>
     </v-row>
-    <v-divider></v-divider>
+    <v-divider />
     <v-row>
       <v-col
         cols="12"
@@ -37,23 +40,30 @@ import { AccessType } from '@/util/constants'
           large
           depressed
           color="default"
-          @click="goBack"
           data-test="btn-reviewbank-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span data-test="back">Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
-          @click="goNext"
           :disabled="!padValid"
           :loading="isLoading"
           data-test="btn-reviewbank-next"
+          @click="goNext"
         >
           <span data-test="next">Next</span>
-          <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          <v-icon class="ml-2">
+            mdi-arrow-right
+          </v-icon>
         </v-btn>
       </v-col>
     </v-row>
@@ -61,9 +71,9 @@ import { AccessType } from '@/util/constants'
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import { CreateRequestBody, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { PaymentTypes } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'

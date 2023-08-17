@@ -1,21 +1,22 @@
 <template>
   <div v-if="inviteError">
-    <interim-landing :summary="$t('errorOccurredTitle')" :description="$t('invitationProcessingErrorMsg')" iconColor="error" icon="mdi-alert-circle-outline">
-    </interim-landing>
+    <interim-landing
+      :summary="$t('errorOccurredTitle')"
+      :description="$t('invitationProcessingErrorMsg')"
+      iconColor="error"
+      icon="mdi-alert-circle-outline"
+    />
   </div>
 </template>
 
 <script lang="ts">
 
-import { AccessType, IdpHint, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
+import { AccessType, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
+import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
-import ConfigHelper from '@/util/config-helper'
-import { Contact } from '@/models/contact'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
-import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { User } from '@/models/user'
 

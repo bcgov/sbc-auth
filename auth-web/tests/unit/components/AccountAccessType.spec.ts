@@ -104,7 +104,8 @@ describe('AccountAccessType.vue', () => {
     })
 
     expect(wrapper.find('[data-test="title"]').text()).toBe('Access Type')
-    expect(wrapper.find('[data-test="txt-selected-access-type"]').text()).toBe('Government agency (other than BC provincial)')
+    expect(wrapper.find('[data-test="txt-selected-access-type"]').text())
+      .toBe('Government agency (other than BC provincial)')
     expect(wrapper.find('[data-test="btn-edit"]').exists()).toBeFalsy()
   })
 

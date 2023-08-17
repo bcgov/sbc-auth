@@ -1,14 +1,22 @@
 <template>
   <div>
     <v-fade-transition>
-      <div v-if="isLoading" class="loading-container">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isLoading"
+        />
       </div>
     </v-fade-transition>
     <v-dialog
+      v-model="isSettingsModalOpen"
       :persistent="enableSaveBtn"
       max-width="640"
-      v-model="isSettingsModalOpen"
     >
       <v-card v-can:CHANGE_STATEMENT_SETTINGS.disable.card>
         <v-card-title>
@@ -18,9 +26,9 @@
             icon
             aria-label="Close Dialog"
             title="Close Dialog"
-            @click="closeSettings"
             :disabled="false"
             style="pointer-events: auto;"
+            @click="closeSettings"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -30,7 +38,9 @@
           <!-- Statement Frequency-->
           <fieldset class="mb-5">
             <legend>Statement Period</legend>
-            <div class="mt-2">Set how often statements are generated for this account.</div>
+            <div class="mt-2">
+              Set how often statements are generated for this account.
+            </div>
             <v-radio-group
               v-model="frequencySelected"
               @change="frequencyChanged"
@@ -40,9 +50,12 @@
                 :key="frequency.frequency"
                 :value="frequency.frequency"
               >
-                <template v-slot:label>
-                  <span>{{capitalizeLabel(frequency.frequency)}}</span>
-                  <span v-if="showFrequencyChangeDate(frequency)" class="ml-1"> - Frequency will change starting {{formatDate(frequency.startDate)}}</span>
+                <template #label>
+                  <span>{{ capitalizeLabel(frequency.frequency) }}</span>
+                  <span
+                    v-if="showFrequencyChangeDate(frequency)"
+                    class="ml-1"
+                  > - Frequency will change starting {{ formatDate(frequency.startDate) }}</span>
                 </template>
               </v-radio>
             </v-radio-group>
@@ -52,31 +65,36 @@
           <fieldset class="mb-5">
             <legend>Statement Notifications</legend>
             <v-checkbox
-              class="mt-2 mb-0"
               v-model="sendStatementNotifications"
-              @change="toggleStatementNotification"
+              class="mt-2 mb-0"
               label="Send email notifications when account statements are available"
-            ></v-checkbox>
+              @change="toggleStatementNotification"
+            />
           </fieldset>
 
           <!-- Notification Recipients -->
           <v-expand-transition>
             <fieldset v-if="sendStatementNotifications">
-              <legend class="mb-4">Notification Recipients</legend>
+              <legend class="mb-4">
+                Notification Recipients
+              </legend>
 
               <!-- Recipient List -->
               <v-expand-transition>
                 <div v-if="emailRecipientList.length">
-                  <v-divider></v-divider>
+                  <v-divider />
                   <v-simple-table>
-                    <template v-slot:default>
+                    <template #default>
                       <tbody>
-                        <tr v-for="item in emailRecipientList" :key="item.authUserId">
+                        <tr
+                          v-for="item in emailRecipientList"
+                          :key="item.authUserId"
+                        >
                           <td>
-                            {{item.firstname}} {{item.lastname}}
+                            {{ item.firstname }} {{ item.lastname }}
                           </td>
                           <td>
-                            {{item.email}}
+                            {{ item.email }}
                           </td>
                           <td class="text-right">
                             <v-btn
@@ -98,10 +116,10 @@
 
               <!-- Recipient Input -->
               <v-autocomplete
+                v-model="emailRecipientInput"
                 filled
                 hide-details
                 label="Team Member Name"
-                v-model="emailRecipientInput"
                 :items="recipientAutoCompleteList"
                 no-data-text="No team members available"
                 item-text="name"
@@ -109,9 +127,9 @@
                 :menu-props="{ closeOnContentClick: true }"
                 @update:list-index="selectFromListUsingKey"
               >
-                <template v-slot:item="{ item }">
+                <template #item="{ item }">
                   <v-list-item-content @click="addEmailReceipient(item)">
-                    <v-list-item-title v-text="item.name"></v-list-item-title>
+                    <v-list-item-title v-text="item.name" />
                   </v-list-item-content>
                 </template>
               </v-autocomplete>
@@ -120,28 +138,28 @@
 
           <!-- Alert -->
           <v-alert
+            v-if="errorMessage"
             text
             dense
             class="mb-0"
             type="error"
-            v-if="errorMessage"
           >
-            {{errorMessage}}
+            {{ errorMessage }}
           </v-alert>
         </v-card-text>
 
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
+            v-can:CHANGE_STATEMENT_SETTINGS.disable
             large
             color="primary"
             width="90"
             aria-label="Save Settings"
             title="Save Statement Settings"
-            @click="updateSettings"
             :disabled="!enableSaveBtn"
             :loading="isSaving"
-            v-can:CHANGE_STATEMENT_SETTINGS.disable
+            @click="updateSettings"
           >
             Save
           </v-btn>
@@ -160,11 +178,11 @@
       </v-card>
     </v-dialog>
     <v-snackbar
+      v-model="showStatementNotification"
       bottom
       multi-line
       :timeout="6000"
       class="mb-6"
-      v-model="showStatementNotification"
     >
       Statement Settings updated
       <v-btn
@@ -172,7 +190,8 @@
         icon
         aria-label="Close Notification"
         title="Close Notification Message"
-        @click="showStatementNotification = false">
+        @click="showStatementNotification = false"
+      >
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </v-snackbar>
@@ -180,11 +199,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
 
 @Component({

@@ -12,30 +12,46 @@ import { AccessType } from '@/util/constants'
     >
       <v-card-text class="py-2 px-6">
         <v-row>
-          <v-col cols="9">Suspended from</v-col>
-          <v-col class="text-end">{{suspendedDate}}</v-col>
+          <v-col cols="9">
+            Suspended from
+          </v-col>
+          <v-col class="text-end">
+            {{ suspendedDate }}
+          </v-col>
         </v-row>
-        <v-divider class="my-2"></v-divider>
+        <v-divider class="my-2" />
         <v-row>
           <v-col cols="9">
             <div>Dishonored Bank Instrument Fee</div>
-            <div class="font-italic">As per PAD terms, you are charged $30 dishonored bank fee for every failed payment</div>
+            <div class="font-italic">
+              As per PAD terms, you are charged $30 dishonored bank fee for every failed payment
+            </div>
           </v-col>
-          <v-col class="text-end">${{nsfFee.toFixed(2)}}</v-col>
+          <v-col class="text-end">
+            ${{ nsfFee.toFixed(2) }}
+          </v-col>
         </v-row>
         <v-row>
-          <v-col cols="9">Total Transactions</v-col>
-          <v-col class="text-end">${{totalTransactionAmount.toFixed(2)}}</v-col>
+          <v-col cols="9">
+            Total Transactions
+          </v-col>
+          <v-col class="text-end">
+            ${{ totalTransactionAmount.toFixed(2) }}
+          </v-col>
         </v-row>
-        <v-divider class="my-2"></v-divider>
+        <v-divider class="my-2" />
         <v-row class="font-weight-bold">
-          <v-col cols="9">Total Amount Due</v-col>
-          <v-col class="text-end">${{totalAmountToPay.toFixed(2)}}</v-col>
+          <v-col cols="9">
+            Total Amount Due
+          </v-col>
+          <v-col class="text-end">
+            ${{ totalAmountToPay.toFixed(2) }}
+          </v-col>
         </v-row>
       </v-card-text>
     </v-card>
 
-    <v-divider></v-divider>
+    <v-divider />
     <v-row>
       <v-col
         cols="12"
@@ -47,17 +63,21 @@ import { AccessType } from '@/util/constants'
           color="primary"
           @click="downloadTransactionPDF"
         >
-          <v-icon class="ml-n2">mdi-download</v-icon>
+          <v-icon class="ml-n2">
+            mdi-download
+          </v-icon>
           <span>Download Transaction Invoice (PDF)</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           @click="goNext"
         >
           <span>Next</span>
-          <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          <v-icon class="ml-2">
+            mdi-arrow-right
+          </v-icon>
         </v-btn>
       </v-col>
     </v-row>
@@ -65,8 +85,8 @@ import { AccessType } from '@/util/constants'
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { Component, Mixins } from 'vue-property-decorator'
+import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import OrgModule from '@/store/modules/org'

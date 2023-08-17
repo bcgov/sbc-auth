@@ -1,6 +1,6 @@
 <template>
-    <div class="observer" />
-  </template>
+  <div class="observer" />
+</template>
 
 <script>
 export default {
@@ -17,7 +17,7 @@ export default {
     }, options)
     this.observer?.observe(this.$el) // eslint-disable-line no-unused-expressions
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.observer?.disconnect() // eslint-disable-line no-unused-expressions
   }
 }

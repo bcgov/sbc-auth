@@ -1,12 +1,30 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <v-col cols="12" sm="6" class="text-center">
-        <v-icon size="42" color="grey darken-3" class="mb-6">mdi-check</v-icon>
-        <h1 class="mb-5">{{$t('extraProdOrgSuccessTitle')}}</h1>
-        <p class="mb-9">{{$t('pendingAffidvitReviewMessage', descriptionParams)}}</p>
+      <v-col
+        cols="12"
+        sm="6"
+        class="text-center"
+      >
+        <v-icon
+          size="42"
+          color="grey darken-3"
+          class="mb-6"
+        >
+          mdi-check
+        </v-icon>
+        <h1 class="mb-5">
+          {{ $t('extraProdOrgSuccessTitle') }}
+        </h1>
+        <p class="mb-9">
+          {{ $t('pendingAffidvitReviewMessage', descriptionParams) }}
+        </p>
         <div>
-          <v-btn large color="primary" @click="goTo('home')">
+          <v-btn
+            large
+            color="primary"
+            @click="goTo('home')"
+          >
             <strong>BC Registries Home</strong>
           </v-btn>
         </div>

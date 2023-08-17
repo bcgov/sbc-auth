@@ -1,10 +1,13 @@
 <template>
-  <div  data-test="div-stepper-container" >
-    <p class="mb-7" >There is no cost to create a BC Registries account. You only pay for the services and products you purchase.</p>
-     <v-row v-display-mode>
+  <div data-test="div-stepper-container">
+    <p class="mb-7">
+      There is no cost to create a BC Registries account. You only pay for the services and products you purchase.
+    </p>
+    <v-row v-display-mode>
       <v-col
         class="d-flex align-stretch"
-        sm="12" md="6"
+        sm="12"
+        md="6"
       >
         <v-card
           class="account-card pa-8 elevation-2"
@@ -12,9 +15,9 @@
           flat
           outlined
           hover
-          @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
           data-test="div-stepper-basic"
           :disabled="isCurrentProductsPremiumOnly"
+          @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type">
             <div class="account-type__title">
@@ -34,26 +37,36 @@
           </div>
 
           <!-- State Button (Create Account) -->
-          <div class="mt-10" >
-            <v-btn large block depressed color="primary" class="font-weight-bold"
+          <div class="mt-10">
+            <v-btn
+              large
+              block
+              depressed
+              color="primary"
+              class="font-weight-bold"
               data-test="btn-stepper-basic-select"
               :outlined="selectedAccountType != ACCOUNT_TYPE.BASIC"
-              @click="selectAccountType(ACCOUNT_TYPE.BASIC)">
-              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT'}}
+              @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
+            >
+              {{ selectedAccountType == ACCOUNT_TYPE.BASIC ? 'SELECTED' : 'SELECT' }}
             </v-btn>
           </div>
-
         </v-card>
       </v-col>
       <v-col
         class="d-flex align-stretch"
-        sm="12" md="6"
+        sm="12"
+        md="6"
       >
         <v-badge color>
-          <span slot="badge" data-test="badge-account-premium" v-if="isCurrentProductsPremiumOnly">
+          <span
+            v-if="isCurrentProductsPremiumOnly"
+            slot="badge"
+            data-test="badge-account-premium"
+          >
             <v-chip
-            class="premium-badge-chip"
-            label
+              class="premium-badge-chip"
+              label
             >
               <span>A Premium Account type is required based on the services you have selected.</span>
             </v-chip>
@@ -64,8 +77,8 @@
             flat
             outlined
             hover
-            @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
             data-test="div-stepper-premium"
+            @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
           >
             <div class="account-type">
               <div class="account-type__title">
@@ -80,27 +93,38 @@
               <ul class="account-type__details">
                 <li>Unlimited transactions</li>
                 <li>Unlimited team members</li>
-                <li>Pay by pre-authorized debit or <a href="https://www.bconline.gov.bc.ca/" target="_blank" rel="noopener noreferrer">BC Online deposit account</a></li>
+                <li>
+                  Pay by pre-authorized debit or <a
+                    href="https://www.bconline.gov.bc.ca/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >BC Online deposit account</a>
+                </li>
                 <li>Financial Statements</li>
               </ul>
             </div>
 
             <!-- State Button (Create Account) -->
-            <div class="mt-10" >
-              <v-btn large block depressed color="primary" class="font-weight-bold"
-              data-test="btn-stepper-premium-select"
-              :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
-              @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)">
-                  {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
+            <div class="mt-10">
+              <v-btn
+                large
+                block
+                depressed
+                color="primary"
+                class="font-weight-bold"
+                data-test="btn-stepper-premium-select"
+                :outlined="selectedAccountType != ACCOUNT_TYPE.PREMIUM"
+                @click="selectAccountType(ACCOUNT_TYPE.PREMIUM)"
+              >
+                {{ selectedAccountType == ACCOUNT_TYPE.PREMIUM ? 'SELECTED' : 'SELECT' }}
               </v-btn>
             </div>
-
           </v-card>
         </v-badge>
       </v-col>
     </v-row>
 
-    <v-divider class="mt-4 mb-10"></v-divider>
+    <v-divider class="mt-4 mb-10" />
 
     <v-row>
       <v-col
@@ -108,28 +132,38 @@
         class="form__btns py-0"
       >
         <v-btn
-        large
-        depressed
-        color="default"
-        @click="goBack"
-        data-test="btn-back">
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+          large
+          depressed
+          color="default"
+          data-test="btn-back"
+          @click="goBack"
+        >
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
-        <v-btn large
-        color="primary"
-        class="mr-3"
-        @click="goNext"
-        :disabled='!canContinue'
-        data-test="btn-stepper-next">
+        <v-spacer />
+        <v-btn
+          large
+          color="primary"
+          class="mr-3"
+          :disabled="!canContinue"
+          data-test="btn-stepper-next"
+          @click="goNext"
+        >
           <span>Next</span>
-          <v-icon class="ml-2">mdi-arrow-right</v-icon>
+          <v-icon class="ml-2">
+            mdi-arrow-right
+          </v-icon>
         </v-btn>
         <ConfirmCancelButton
           :showConfirmPopup="false"
           :target-route="cancelUrl"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
   </div>
@@ -172,7 +206,8 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   @OrgModule.Mutation('setCurrentOrganizationType') private setCurrentOrganizationType!: (orgType: string) => void
   @OrgModule.Mutation('resetCurrentOrganisation') private resetCurrentOrganisation!: () => void
   @OrgModule.Mutation('setAccessType') private setAccessType!: (accessType: string) => void
-  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
+  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount')
+  private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   private async mounted () {
     // first time to the page , start afresh..this is Create New account flow

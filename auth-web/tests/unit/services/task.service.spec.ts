@@ -1,7 +1,7 @@
 import { Task } from '@/models/Task'
 import TaskService from '../../../src/services/task.services'
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.pathfinder.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.silver.devops.gov.bc.ca/api/v1'
 }
@@ -20,28 +20,27 @@ const mockTask: Task[] = [{
   'type': 'Wills Registry'
 }]
 
-vi.doMock('axios', () => {
-  return {
-    create: () => {
-      return {
-        get: () => {
-          return mockTask
-        },
-        put: () => {
-          return mockTask
-        },
-        interceptors: {
-          request: { eject: vi.fn(), use: vi.fn() },
-          response: { eject: vi.fn(), use: vi.fn() }
-        }
-      }
-    }
-  }
-})
-
 describe('Task service', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
+    vi.doMock('axios', () => {
+      return {
+        create: () => {
+          return {
+            get: () => {
+              return mockTask
+            },
+            put: () => {
+              return mockTask
+            },
+            interceptors: {
+              request: { eject: vi.fn(), use: vi.fn() },
+              response: { eject: vi.fn(), use: vi.fn() }
+            }
+          }
+        }
+      }
+    })
   })
 
   it('call getTaskById() for task Details ', () => {

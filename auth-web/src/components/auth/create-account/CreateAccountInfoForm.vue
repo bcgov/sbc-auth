@@ -1,14 +1,23 @@
 <template>
-  <v-form ref="createAccountInfoForm" lazy-validation>
-    <account-create-premium v-if="isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-create-premium>
-    <account-create-basic v-if="!isPremium()" :stepForward="stepForward" :stepBack="stepBack"></account-create-basic>
+  <v-form
+    ref="createAccountInfoForm"
+    lazy-validation
+  >
+    <account-create-premium
+      v-if="isPremium()"
+      :stepForward="stepForward"
+      :stepBack="stepBack"
+    />
+    <account-create-basic
+      v-if="!isPremium()"
+      :stepForward="stepForward"
+      :stepBack="stepBack"
+    />
   </v-form>
 </template>
 
 <script lang="ts">
-
-import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import { CreateRequestBody, Member, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { Account } from '@/util/constants'
@@ -55,7 +64,7 @@ export default class CreateAccountInfoForm extends Mixins(Steppable) {
     return !!this.username && !!this.password
   }
 
-  private isPremium () {
+  isPremium () {
     return this.currentOrganization.orgType === Account.PREMIUM
   }
 

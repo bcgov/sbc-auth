@@ -17,7 +17,7 @@ import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 Vue.use(Vuex)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -204,7 +204,9 @@ describe('AffiliatedEntityTable.vue', () => {
     const entityDetails = wrapper.findComponent(EntityDetails)
     expect(entityDetails.exists()).toBeTruthy()
     if (entityDetails.element.parentElement === itemRows.at(5).element) {
-      expect(entityDetails.props('details')).toEqual(expect.arrayContaining([EntityAlertTypes.FROZEN, EntityAlertTypes.BADSTANDING]))
+      expect(entityDetails.props('details')).toEqual(
+        expect.arrayContaining([EntityAlertTypes.FROZEN, EntityAlertTypes.BADSTANDING])
+      )
     }
     expect(wrapper.find('.mdi-alert').exists()).toBeTruthy()
 
@@ -295,7 +297,8 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(wrapper.findAll('#affiliationInvitesStatus').at(0).text()).toBe(textSingle)
 
     const firstAccMulti = allWithInvites[1].affiliationInvites.sort()[0]
-    const textMulti = `Request for Authorization to manage from: ${firstAccMulti.fromOrg.name} and ${allWithInvites[1].affiliationInvites.length - 1} other account(s)`
+    const textMulti = `Request for Authorization to manage from: ${firstAccMulti.fromOrg.name} ` +
+      `and ${allWithInvites[1].affiliationInvites.length - 1} other account(s)`
     expect(wrapper.findAll('#affiliationInvitesStatus').at(1).text()).toBe(textMulti)
 
     // verify elements with invitations are on top

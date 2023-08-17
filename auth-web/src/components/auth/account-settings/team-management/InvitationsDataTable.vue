@@ -8,28 +8,26 @@
     :hide-default-footer="indexedInvitations.length <= 5"
     :no-data-text="$t('noPendingInvitesLabel')"
   >
-    <template v-slot:[`item.recipientEmail`]="{ item }" >
-      <span :data-test="getIndexedTag('invitation-email', item.index)"
-      >
+    <template #[`item.recipientEmail`]="{ item }">
+      <span :data-test="getIndexedTag('invitation-email', item.index)">
         {{ item.recipientEmail }}
       </span>
     </template>
-    <template v-slot:[`item.sentDate`]="{ item }">
+    <template #[`item.sentDate`]="{ item }">
       <span
         :data-test="getIndexedTag('invitation-sent', item.index)"
       >
         {{ formatDate (item.sentDate, 'MMMM DD, YYYY') }}
       </span>
     </template>
-    <template v-slot:[`item.expiresOn`]="{ item }">
+    <template #[`item.expiresOn`]="{ item }">
       <span
         :data-test="getIndexedTag('invitation-expires', item.index)"
       >
         {{ formatDate (item.expiresOn, 'MMMM DD, YYYY') }}
       </span>
     </template>
-    <template v-slot:[`item.action`]="{ item }">
-
+    <template #[`item.action`]="{ item }">
       <!-- Resend Invitation -->
       <v-btn
         icon
@@ -52,7 +50,6 @@
       >
         <v-icon>mdi-trash-can-outline</v-icon>
       </v-btn>
-
     </template>
   </v-data-table>
 </template>
@@ -70,7 +67,7 @@ import { mapState } from 'vuex'
 })
 export default class InvitationsDataTable extends Vue {
   private readonly pendingOrgInvitations!: Invitation[]
-  private readonly headerInvitations = [
+  readonly headerInvitations = [
     {
       text: 'Email',
       align: 'left',
@@ -97,13 +94,13 @@ export default class InvitationsDataTable extends Vue {
     }
   ]
 
-  private formatDate = CommonUtils.formatDisplayDate
+  formatDate = CommonUtils.formatDisplayDate
 
-  private getIndexedTag (tag, index): string {
+  getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
-  private get indexedInvitations () {
+  get indexedInvitations () {
     return this.pendingOrgInvitations.map((item, index) => ({
       index,
       ...item
@@ -111,10 +108,10 @@ export default class InvitationsDataTable extends Vue {
   }
 
   @Emit()
-  private confirmRemoveInvite (invititation: Invitation) {}
+  confirmRemoveInvite () {}
 
   @Emit()
-  private resend (invitation: Invitation) {}
+  resend () {}
 }
 </script>
 

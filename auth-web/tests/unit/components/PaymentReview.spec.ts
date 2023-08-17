@@ -1,5 +1,4 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import { Account } from '@/util/constants'
 import OrgModule from '@/store/modules/org'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'

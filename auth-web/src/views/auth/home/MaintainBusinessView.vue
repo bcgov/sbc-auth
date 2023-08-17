@@ -2,20 +2,44 @@
   <v-container id="maintain-info-container">
     <v-row>
       <!-- Info Column -->
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <h2>Manage and Maintain Your Business</h2>
-        <v-list class="py-0 my-4" color="transparent">
-          <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index">
-            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+        <v-list
+          class="py-0 my-4"
+          color="transparent"
+        >
+          <v-list-item
+            v-for="(item, index) in bulletPointList"
+            :key="index"
+            class="list-item"
+          >
+            <v-icon
+              size="8"
+              class="list-item-bullet mt-5"
+            >
+              mdi-square
+            </v-icon>
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
-                {{item.text}}
+                {{ item.text }}
               </v-list-item-subtitle>
-              <v-list-item class="list-item list-item-sub" v-for="(item, index) in item.subText" :key="`sub-${index}`">
-                <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+              <v-list-item
+                v-for="(item, index) in item.subText"
+                :key="`sub-${index}`"
+                class="list-item list-item-sub"
+              >
+                <v-icon
+                  size="8"
+                  class="list-item-bullet mt-5"
+                >
+                  mdi-square
+                </v-icon>
                 <v-list-item-content>
                   <v-list-item-subtitle class="list-item-text">
-                    {{item.text}}
+                    {{ item.text }}
                   </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
@@ -24,28 +48,54 @@
         </v-list>
         <!-- Panel Btns -->
         <div class="incorporate-btns">
-          <v-btn large color="bcgovblue" class="cta-btn font-weight-bold mr-2 white--text business-btn"
-            @click="emitRedirectManage()">
+          <v-btn
+            large
+            color="bcgovblue"
+            class="cta-btn font-weight-bold mr-2 white--text business-btn"
+            @click="emitRedirectManage()"
+          >
             Manage my Business
           </v-btn>
-          <LearnMoreButton isWide=true :redirect-url="learnMoreUrl"/>
+          <LearnMoreButton
+            isWide="true"
+            :redirect-url="learnMoreUrl"
+          />
           <div class="d-flex mt-8">
             <span class="body-1">New to BC Registries?</span>
-            <router-link class="ml-2 body-1 font-weight-bold"
+            <router-link
+              class="ml-2 body-1 font-weight-bold"
               to="/choose-authentication-method"
-            >Create a BC Registries Account
+            >
+              Create a BC Registries Account
             </router-link>
           </div>
-          <p v-if="!userProfile" class="mt-5">
-            <v-menu top offset-y v-model="contactUsPopover" :close-on-content-click="false" attach="#maintain-info-container">
+          <p
+            v-if="!userProfile"
+            class="mt-5"
+          >
+            <v-menu
+              v-model="contactUsPopover"
+              top
+              offset-y
+              :close-on-content-click="false"
+              attach="#maintain-info-container"
+            >
               <v-card class="contact-popover">
-                <v-list class="pa-5" max-width="30rem">
+                <v-list
+                  class="pa-5"
+                  max-width="30rem"
+                >
                   <v-list-item class="pb-3">
                     <v-list-item-title class="popover-title mt-5 font-weight-bold">
                       Don't have a Passcode for your Cooperative<br>Association?
                     </v-list-item-title>
                     <v-list-item-action class="mt-0">
-                      <v-icon @click="contactUsPopover = false" color="bcgovblueLink">mdi-close</v-icon>
+                      <v-icon
+                        color="bcgovblueLink"
+                        @click="contactUsPopover = false"
+                      >
+                        mdi-close
+                      </v-icon>
                     </v-list-item-action>
                   </v-list-item>
                   <v-list-item>
@@ -74,14 +124,22 @@
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
-                      <v-list-item-subtitle class="font-weight-bold">{{ $t('labelHoursOfOperation') }}</v-list-item-subtitle>
-                      <v-list-item-subtitle class="my-1">{{ $t('hoursOfOperation') }}</v-list-item-subtitle>
+                      <v-list-item-subtitle class="font-weight-bold">
+                        {{ $t('labelHoursOfOperation') }}
+                      </v-list-item-subtitle>
+                      <v-list-item-subtitle class="my-1">
+                        {{ $t('hoursOfOperation') }}
+                      </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
                   <v-list-item>
                     <v-list-item-content>
                       <v-list-item-subtitle>
-                        <a :href="faqUrl" rel="noopener noreferrer" target="_blank">
+                        <a
+                          :href="faqUrl"
+                          rel="noopener noreferrer"
+                          target="_blank"
+                        >
                           Frequently Asked Questions
                         </a>
                       </v-list-item-subtitle>
@@ -94,9 +152,19 @@
         </div>
       </v-col>
       <!-- Image Column -->
-      <v-col cols="12" md="6">
-        <a :href="learnMoreUrl" target="_blank">
-          <v-img src="../../../assets/img/Step4_Maintain_x2.png" aspect-ratio="1.2" contain></v-img>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <a
+          :href="learnMoreUrl"
+          target="_blank"
+        >
+          <v-img
+            src="../../../assets/img/Step4_Maintain_x2.png"
+            aspect-ratio="1.2"
+            contain
+          />
         </a>
       </v-col>
     </v-row>
@@ -118,12 +186,12 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   }
 })
 export default class MaintainBusinessView extends Vue {
-  private contactUsPopover = false
-  private readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card'
-  protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
+  contactUsPopover = false
+  readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card'
+  readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
-  private readonly bulletPointsBEN: Array<any> = [
+  readonly bulletPointsBEN: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
       'business up to date with the Registry.' },
     { text: 'By managing your business through your BC Registry account you can:',
@@ -137,7 +205,7 @@ export default class MaintainBusinessView extends Vue {
   ]
 
   // Use this when feature flag 'EnableBcCccUlc' no longer used. Change name and refrences accordingly.
-  private readonly bulletPointsIA: Array<any> = [
+  readonly bulletPointsIA: Array<any> = [
     { text: 'Once your business is incorporated or registered you are required to keep information about your ' +
       'business up to date with the Registry.' },
     { text: 'You can manage your business information using your BC Registries account:',
@@ -151,9 +219,9 @@ export default class MaintainBusinessView extends Vue {
   ]
 
   @Prop()
-  private userProfile: User
+  readonly userProfile: User
 
-  private emitRedirectManage () {
+  emitRedirectManage () {
     if (this.userProfile) {
       this.emitManageBusinesses()
     } else {
@@ -162,13 +230,13 @@ export default class MaintainBusinessView extends Vue {
   }
 
   @Emit('login')
-  private emitLogin () {}
+  emitLogin () {}
 
   @Emit('account-dialog')
-  private emitAccountDialog () {}
+  emitAccountDialog () {}
 
   @Emit('manage-businesses')
-  private emitManageBusinesses () {}
+  emitManageBusinesses () {}
 
   get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false

@@ -1,8 +1,14 @@
-  <template>
+<template>
   <div>
     <v-form class="fas-search account-active-search">
-      <v-row dense class="row-margin">
-        <v-col sm="12" cols="6">
+      <v-row
+        dense
+        class="row-margin"
+      >
+        <v-col
+          sm="12"
+          cols="6"
+        >
           <transition name="slide-fade">
             <v-data-table
               :headers="headerAccounts"
@@ -21,31 +27,31 @@
               @update:items-per-page="saveItemsPerPage"
             >
               <!-- Loading -->
-              <template v-slot:loading>
+              <template #loading>
                 <div
                   class="py-8 loading-datatable"
-                  >
+                >
                   Loading items...
                 </div>
               </template>
 
               <!-- No data -->
-              <template v-slot:no-data>
+              <template #no-data>
                 <div
                   class="py-8 no-data"
-                  v-html='noDataMessage'
+                  v-html="noDataMessage"
                 />
               </template>
 
               <!-- Headers (two rows) -->
-              <template v-slot:header="{}">
+              <template #header="{}">
                 <thead class="v-data-table-header">
                   <!-- First row has titles. -->
                   <tr class="header-row-1">
                     <th
                       v-for="(header, i) in headerAccounts"
-                      :scope="i"
                       :key="getIndexedTag('find-header-row', i)"
+                      :scope="i"
                       class="font-weight-bold"
                     >
                       {{ header.text }}
@@ -56,38 +62,43 @@
                   <tr class="header-row-2 mt-2 px-2">
                     <th
                       v-for="(header, i) in headerAccounts"
-                      :scope="i"
                       :key="getIndexedTag('find-header-row2', i)"
+                      :scope="i"
                     >
                       <v-text-field
                         v-if="!['orgType','action'].includes(header.value)"
                         :id="header.value"
-                        input type="search"
+                        v-model.trim="searchParams[header.value]"
+                        input
+                        type="search"
                         autocomplete="off"
                         class="text-input-style"
                         filled
                         :placeholder="header.text"
-                        v-model.trim="searchParams[header.value]"
                         dense
                         hide-details="auto"
                       />
 
-                      <div v-else-if="['orgType'].includes(header.value)" class="mt-0">
-                          <v-select
-                            :items="accountTypes"
-                            v-model="searchParams[header.value]"
-                            filled
-                            item-text="description"
-                            item-value="code"
-                            return-object
-                            data-test="select-status"
-                            v-bind="$attrs"
-                            v-on="$listeners"
-                            hide-details="auto"
-                          />
+                      <div
+                        v-else-if="['orgType'].includes(header.value)"
+                        class="mt-0"
+                      >
+                        <v-select
+                          v-model="searchParams[header.value]"
+                          :items="accountTypes"
+                          filled
+                          item-text="description"
+                          item-value="code"
+                          return-object
+                          data-test="select-status"
+                          v-bind="$attrs"
+                          hide-details="auto"
+                          v-on="$listeners"
+                        />
                       </div>
 
-                      <v-btn v-else-if="searchParamsExist && header.value === 'action'"
+                      <v-btn
+                        v-else-if="searchParamsExist && header.value === 'action'"
                         outlined
                         color="primary"
                         class="action-btn clear-filter-button"
@@ -95,7 +106,10 @@
                       >
                         <span class="clear-filter cursor-pointer">
                           Clear Filters
-                          <v-icon small color="primary">mdi-close</v-icon>
+                          <v-icon
+                            small
+                            color="primary"
+                          >mdi-close</v-icon>
                         </span>
                       </v-btn>
                     </th>
@@ -103,22 +117,22 @@
                 </thead>
               </template>
 
-              <template v-slot:[`item.orgType`]="{ item }">
-                  {{getAccountTypeFromOrgAndAccessType(item)}}
+              <template #[`item.orgType`]="{ item }">
+                {{ getAccountTypeFromOrgAndAccessType(item) }}
               </template>
-              <template v-slot:[`item.decisionMadeBy`]="{ item }">
-                  {{item.decisionMadeBy ? item.decisionMadeBy : 'N/A'}}
+              <template #[`item.decisionMadeBy`]="{ item }">
+                {{ item.decisionMadeBy ? item.decisionMadeBy : 'N/A' }}
               </template>
 
-               <!-- Item Actions -->
-              <template v-slot:[`item.action`]="{ item }">
+              <!-- Item Actions -->
+              <template #[`item.action`]="{ item }">
                 <div class="actions text-right">
                   <span class="open-action">
                     <v-btn
                       color="primary"
                       class="open-action-btn"
-                      @click="view(item)"
                       :data-test="getIndexedTag('view-account-button', item.id)"
+                      @click="view(item)"
                     >
                       View
                     </v-btn>
@@ -127,17 +141,17 @@
                   <!-- More Actions Menu -->
                   <span class="more-actions">
                     <v-menu
-                      offset-y
-                      nudge-left=212
                       v-model="dropdown[item.id]"
+                      offset-y
+                      nudge-left="212"
                     >
-                      <template v-slot:activator="{ on }">
+                      <template #activator="{ on }">
                         <v-btn
                           color="primary"
                           class="more-actions-btn"
                           v-on="on"
                         >
-                          <v-icon>{{dropdown[item.id] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
+                          <v-icon>{{ dropdown[item.id] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
                         </v-btn>
                       </template>
                       <v-list>
@@ -148,7 +162,7 @@
                           </v-list-item-subtitle>
                         </v-list-item>
                         <v-list-item @click="view(item)">
-                           <v-list-item-subtitle>
+                          <v-list-item-subtitle>
                             <v-icon style="font-size: 14px">mdi-account</v-icon>
                             <span class="pl-2">Manage Account</span>
                           </v-list-item-subtitle>
@@ -371,18 +385,18 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   // Used to go from OrgType -> OrgAccountTypes
   protected getAccountTypeFromOrgAndAccessType (org:Organization): any {
     const entries = Object.entries(this.accountTypeMap)
-    const byAccessTypeAndOrgType = entries.find(([key, value]) =>
+    const byAccessTypeAndOrgType = entries.find(([, value]) =>
       value?.accessType?.includes(org.accessType) &&
                                                   value?.orgType === org.orgType)
     if (byAccessTypeAndOrgType) {
       return byAccessTypeAndOrgType[0]
     }
-    const byAccessType = entries.find(([key, value]) =>
+    const byAccessType = entries.find(([, value]) =>
       value?.accessType?.includes(org.accessType))
     if (byAccessType) {
       return byAccessType[0]
     }
-    const byOrgType = entries.find(([key, value]) =>
+    const byOrgType = entries.find(([, value]) =>
       value?.orgType === org.orgType)
     if (byOrgType) {
       return byOrgType[0]

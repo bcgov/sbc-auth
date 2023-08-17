@@ -4,10 +4,10 @@
       hide-details
       :value="isCertified"
       :rules="[(v) => !!v]"
-      @change="emitIsCertified($event)"
       class="certify-checkbox mt-0 pt-0"
+      @change="emitIsCertified($event)"
     >
-      <template slot="label">
+      <template #label>
         <span>
           <strong>{{ trimmedCertifiedBy || "[Legal Name]" }}</strong> certifies that
           they have relevant knowledge of the {{ entity }} and is authorized to act
@@ -42,7 +42,7 @@ export default class Certify extends Vue {
 
   /** Emits an event to update the Is Certified prop. */
   @Emit('update:isCertified')
-  protected emitIsCertified (isCertified: boolean): void {}
+  protected emitIsCertified (): void {}
 }
 </script>
 

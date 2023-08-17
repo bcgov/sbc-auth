@@ -149,7 +149,7 @@ export default class StaffModule extends VuexModule {
       if (addressResponse) {
         this.context.commit('setAccountUnderReviewAddress', addressResponse)
       }
-      // Incase it is BCeIdAdmin request flow, then we need to get the requesting admin details rather than current account admin
+      // If BCeIdAdmin request flow, get the requesting admin details rather than current account admin
       if (syncAccountPayload.isBCeIDAdminReview) {
         const user = syncAccountPayload.relatedBCeIDUser
         this.context.commit('setAccountUnderReviewAdmin', user)

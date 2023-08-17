@@ -17,10 +17,13 @@
     :hide-default-footer="pageHide ? true : false"
   >
     <!-- Headers (two rows) -->
-    <template v-slot:header>
+    <template #header>
       <thead class="base-table__header">
         <!-- First row has titles. -->
-        <slot name="header-title-slot" :headers="headers">
+        <slot
+          name="header-title-slot"
+          :headers="headers"
+        >
           <tr :style="{ 'background-color': headerBg }">
             <th
               v-for="header, i in headers"
@@ -28,31 +31,40 @@
               :class="[header.class, 'base-table__header__title']"
               :style="header.minWidth ? { 'min-width': header.minWidth, 'max-width': header.minWidth } : {'width': header.width}"
             >
-              <slot :name="'header-title-slot-' + header.col" :header="header">
+              <slot
+                :name="'header-title-slot-' + header.col"
+                :header="header"
+              >
                 <span v-html="header.value" />
               </slot>
             </th>
           </tr>
         </slot>
         <!-- Second row has filters. -->
-        <slot name="header-filter-slot" :headers="headers">
+        <slot
+          name="header-filter-slot"
+          :headers="headers"
+        >
           <tr :style="{ 'background-color': headerBg }">
             <th
               v-for="header in headers"
               :key="header.col"
               :class="[header.class, 'base-table__header__filter pb-5']"
             >
-            <slot :name="'header-filter-slot-' + header.col" :header="header"></slot>
-            <header-filter
-              :filtering="filtering"
-              :filters="filters"
-              :header="header"
-              :setFiltering="setFiltering"
-              :sortedItems="setItems"
-              :updateFilter="updateFilter"
-              :headers="headers"
-              :setSortedItems="setSortedItems"
-            ></header-filter>
+              <slot
+                :name="'header-filter-slot-' + header.col"
+                :header="header"
+              />
+              <header-filter
+                :filtering="filtering"
+                :filters="filters"
+                :header="header"
+                :setFiltering="setFiltering"
+                :sortedItems="setItems"
+                :updateFilter="updateFilter"
+                :headers="headers"
+                :setSortedItems="setSortedItems"
+              />
             </th>
           </tr>
         </slot>
@@ -60,23 +72,32 @@
     </template>
 
     <!-- Items -->
-    <template v-slot:item="{ item, index }">
+    <template #item="{ item, index }">
       <tr
         :key="index"
         :class="index==highlightIndex ? highlightClass :'base-table__item-row'"
       >
         <td
-          v-for="header in headers" :key="'item-' + header.col"
+          v-for="header in headers"
+          :key="'item-' + header.col"
           :class="[header.itemClass, 'base-table__item-cell']"
         >
-          <slot :header="header" :item="item" :index="index" :name="'item-slot-' + header.col">
-            <span v-if="header.itemFn" v-html="header.itemFn(item)" />
+          <slot
+            :header="header"
+            :item="item"
+            :index="index"
+            :name="'item-slot-' + header.col"
+          >
+            <span
+              v-if="header.itemFn"
+              v-html="header.itemFn(item)"
+            />
             <span v-else>{{ item[header.col] }}</span>
           </slot>
         </td>
       </tr>
     </template>
-    <template v-slot:[`body.append`]>
+    <template #[`body.append`]>
       <tr v-if="pageHide && !reachedEnd">
         <td :colspan="headers.length">
           <table-observer @intersect="getNext()" />
@@ -85,13 +106,19 @@
     </template>
 
     <!-- Loading -->
-    <template v-slot:loading>
-      <div class="py-8 base-table__text" v-html="loadingText" />
+    <template #loading>
+      <div
+        class="py-8 base-table__text"
+        v-html="loadingText"
+      />
     </template>
 
     <!-- No data -->
-    <template v-slot:no-data>
-      <div class="py-8 base-table__text" v-html="noDataText" />
+    <template #no-data>
+      <div
+        class="py-8 base-table__text"
+        v-html="noDataText"
+      />
     </template>
   </v-data-table>
 </template>
@@ -111,13 +138,12 @@ interface BaseTableStateI {
   headers: BaseTableHeaderI[],
   sortedItems: object[],
   tableDataOptions: DataOptions,
-  visibleItems: Object[]
+  visibleItems: object[]
 }
 
 export default defineComponent({
-  components: { HeaderFilter, TableObserver },
   name: 'BaseVDataTable',
-  emits: ['update-table-options'],
+  components: { HeaderFilter, TableObserver },
   props: {
     clearFiltersTrigger: { default: 1 },
     headerBg: { default: 'white' },
@@ -137,6 +163,7 @@ export default defineComponent({
     highlightIndex: { default: -1 },
     highlightClass: { type: String }
   },
+  emits: ['update-table-options'],
   setup (props, { emit }) {
     // reactive vars
     const state = (reactive({

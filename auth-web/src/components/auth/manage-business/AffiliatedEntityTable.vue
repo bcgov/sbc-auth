@@ -42,67 +42,120 @@
         :pageHide="true"
         :fixedHeader="true"
         :highlight-index="highlightIndex"
-        highlight-class='base-table__item-row-green'
+        highlight-class="base-table__item-row-green"
       >
-      <template v-slot:header-filter-slot-Actions>
-        <v-btn
-          v-if="affiliations.filters.isActive"
-          class="clear-btn mx-auto mt-auto"
-          color="primary"
-          outlined
-          @click="clearFilters()"
-        >
-          Clear Filters
-          <v-icon class="ml-1 mt-1">mdi-close</v-icon>
-        </v-btn>
-      </template>
-      <!-- Name Request Name(s) / Business Name -->
-      <template v-slot:item-slot-Name="{ item }">
-        <span>
-          <b v-if='isNameRequest(item)' class='col-wide gray-9'>
-            <b v-for='(name, i) in item.nameRequest.names' :key='`nrName: ${i}`' class='pb-1 names-block'>
-              <v-icon v-if='isRejectedName(name)' color='red' class='names-text pr-1' small>mdi-close</v-icon>
-              <v-icon v-if='isApprovedName(name)' color='green' class='names-text pr-1' small>mdi-check</v-icon>
-              <div class='names-text font-weight-bold'>{{ name.name }}</div>
+        <template #header-filter-slot-Actions>
+          <v-btn
+            v-if="affiliations.filters.isActive"
+            class="clear-btn mx-auto mt-auto"
+            color="primary"
+            outlined
+            @click="clearFilters()"
+          >
+            Clear Filters
+            <v-icon class="ml-1 mt-1">
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </template>
+        <!-- Name Request Name(s) / Business Name -->
+        <template #item-slot-Name="{ item }">
+          <span>
+            <b
+              v-if="isNameRequest(item)"
+              class="col-wide gray-9"
+            >
+              <b
+                v-for="(name, i) in item.nameRequest.names"
+                :key="`nrName: ${i}`"
+                class="pb-1 names-block"
+              >
+                <v-icon
+                  v-if="isRejectedName(name)"
+                  color="red"
+                  class="names-text pr-1"
+                  small
+                >mdi-close</v-icon>
+                <v-icon
+                  v-if="isApprovedName(name)"
+                  color="green"
+                  class="names-text pr-1"
+                  small
+                >mdi-check</v-icon>
+                <div class="names-text font-weight-bold">{{ name.name }}</div>
+              </b>
             </b>
-          </b>
-          <b v-else class='col-wide gray-9 font-weight-bold'>{{ name(item) }}</b>
-        </span>
+            <b
+              v-else
+              class="col-wide gray-9 font-weight-bold"
+            >{{ name(item) }}</b>
+          </span>
 
-        <span v-if="!!item.affiliationInvites" id="affiliationInvitesStatus">
-          <p style="font-size: 12px" >
-            <v-icon x-small color='primary'>mdi-account-cog</v-icon>
-            <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
-          </p>
-        </span>
+          <span
+            v-if="!!item.affiliationInvites"
+            id="affiliationInvitesStatus"
+          >
+            <p style="font-size: 12px">
+              <v-icon
+                x-small
+                color="primary"
+              >mdi-account-cog</v-icon>
+              <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
+            </p>
+          </span>
+        </template>
 
-      </template>
+        <!-- Number -->
+        <template #item-slot-Number="{ item }">
+          <span>{{ number(item) }}</span>
+        </template>
 
-      <!-- Number -->
-      <template v-slot:item-slot-Number="{ item }">
-        <span>{{ number(item) }}</span>
-      </template>
+        <!-- Type -->
+        <template #item-slot-Type="{ item }">
+          <div class="gray-9 font-weight-bold d-inline-block">
+            {{ type(item) }}
+          </div>
+          <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
+          <div
+            v-if="enableNameRequestType && isNameRequest(item)"
+            class="gray-9 font-weight-bold d-inline-block ml-1"
+          >
+            {{ nameRequestType(item) }}
+          </div>
+          <div>{{ typeDescription(item) }}</div>
+        </template>
 
-      <!-- Type -->
-      <template v-slot:item-slot-Type="{ item }">
-        <div class="gray-9 font-weight-bold d-inline-block">{{ type(item) }}</div>
-        <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
-        <div v-if="enableNameRequestType && isNameRequest(item)" class="gray-9 font-weight-bold d-inline-block ml-1">{{ nameRequestType(item) }}</div>
-        <div>{{ typeDescription(item) }}</div>
-      </template>
+        <!-- Status -->
+        <template #item-slot-Status="{ item }">
+          <span>{{ status(item) }}</span>
+          <EntityDetails
+            v-if="isExpired(item) ||
+              isFrozed(item) ||
+              isBadstanding(item) ||
+              isDissolution(item) "
+            icon="mdi-alert"
+            :showAlertHeader="true"
+            :details="getDetails(item)"
+          />
+          <EntityDetails
+            v-if="isProcessing(status(item))"
+            icon="mdi-information-outline"
+            :details="[EntityAlertTypes.PROCESSING]"
+          />
+        </template>
 
-      <!-- Status -->
-      <template v-slot:item-slot-Status="{ item }">
-        <span>{{ status(item) }}</span>
-        <EntityDetails v-if="isExpired(item) ||
-                      isFrozed(item) ||
-                      isBadstanding(item) ||
-                      isDissolution(item) "
-                      icon="mdi-alert"
-                      :showAlertHeader="true"
-                      :details="getDetails(item)"/>
-        <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
-      </template>
+        <!-- Status -->
+        <template v-slot:item-slot-Status="{ item }">
+          <span>{{ status(item) }}</span>
+          <EntityDetails v-if="isExpired(item) ||
+                        isFrozed(item) ||
+                        isBadstanding(item) ||
+                        isDissolution(item) "
+                        icon="mdi-alert"
+                        :showAlertHeader="true"
+                        :details="getDetails(item)"/>
+          <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
+        </template>
 
       <!-- Actions -->
       <template v-slot:item-slot-Actions="{ item, index }">
@@ -211,10 +264,9 @@
                 </v-list>
               </v-menu>
             </span>
-          </span>
-        </div>
-      </template>
-
+            </span>
+          </div>
+        </template>
       </base-v-data-table>
     </v-card>
   </div>
@@ -460,7 +512,7 @@ export default defineComponent({
         return ''
       }
     }
-    const openNewAffiliationInvite = (business: Business) => {
+    const openNewAffiliationInvite = () => {
       // todo: open modal when modal is created
       // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
       alert('not implemented')

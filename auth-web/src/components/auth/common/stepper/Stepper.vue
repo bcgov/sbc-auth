@@ -1,39 +1,64 @@
 <template>
-  <v-stepper class="stepper d-flex elevation-0" v-model="currentStepNumber" data-test="div-account-setup-stepper">
+  <v-stepper
+    v-model="currentStepNumber"
+    class="stepper d-flex elevation-0"
+    data-test="div-account-setup-stepper"
+  >
     <v-container
       class="stepper-nav pa-10 pr-0"
-      v-bind:class="stepperColor"
+      :class="stepperColor"
     >
       <template v-for="step in steps">
         <v-stepper-step
-          class="pa-3"
           :key="`${getStepIndex(step)}-step`"
+          class="pa-3"
           :complete="currentStepNumber > getStepIndex(step)"
           :step="getStepIndex(step)"
           :data-test="`${getStepIndex(step)}-step`"
-        >{{ getStepName(step) }}</v-stepper-step>
+        >
+          {{ getStepName(step) }}
+        </v-stepper-step>
         <v-divider
+          v-if="step !== steps"
+          :key="`${getStepIndex(step)}-divider`"
           vertical
           class="step-divider mt-n1 mb-n1"
-          :key="`${getStepIndex(step)}-divider`"
-          v-if="step !== steps">
-        </v-divider>
+        />
       </template>
     </v-container>
-    <v-divider vertical class="my-10"></v-divider>
+    <v-divider
+      vertical
+      class="my-10"
+    />
     <v-container class="stepper-content pa-12">
       <v-fade-transition>
-        <div v-if="isLoading" class="loading-container">
-          <v-progress-circular size="50" width="5" color="primary" :indeterminate="isLoading"/>
+        <div
+          v-if="isLoading"
+          class="loading-container"
+        >
+          <v-progress-circular
+            size="50"
+            width="5"
+            color="primary"
+            :indeterminate="isLoading"
+          />
         </div>
       </v-fade-transition>
-      <div v-for="step in steps" :key="getStepIndex(step)" class="flex-grow">
+      <div
+        v-for="step in steps"
+        :key="getStepIndex(step)"
+        class="flex-grow"
+      >
         <template v-if="getStepIndex(step) === currentStepNumber">
-          <div class="stepper-content__count mb-1 text--secondary">Step {{currentStepNumber}} of {{steps.length}}</div>
-          <h2 class="stepper-content__title mb-3">{{getStepTitle(step)}}</h2>
+          <div class="stepper-content__count mb-1 text--secondary">
+            Step {{ currentStepNumber }} of {{ steps.length }}
+          </div>
+          <h2 class="stepper-content__title mb-3">
+            {{ getStepTitle(step) }}
+          </h2>
           <component
-            class="pa-0"
             :is="currentStep.component"
+            class="pa-0"
             v-bind="getPropsForStep(step)"
             keep-alive
             @final-step-action="emitFinalStepAction"
@@ -68,11 +93,11 @@ export default class Stepper extends Vue {
   @Prop({ default: '/business' }) redirectWhenDone!: string
   @Prop({ default: false }) isLoading!: boolean
   @Prop({ default: '' }) stepperColor!: string
-  private steps: StepConfiguration[]
-  private currentStepNumber = 1
-  private useAlternateStep = false
+  steps: StepConfiguration[]
+  currentStepNumber = 1
+  useAlternateStep = false
 
-  private get defaultSteps (): Array<StepConfiguration> {
+  get defaultSteps (): Array<StepConfiguration> {
     return [
       {
         title: 'Step 1',
@@ -95,28 +120,28 @@ export default class Stepper extends Vue {
     ]
   }
 
-  private get currentStep (): StepConfiguration {
+  get currentStep (): StepConfiguration {
     const current = this.steps.find(step => this.getStepIndex(step) === this.currentStepNumber)
     return this.useAlternateStep ? current.alternate : current
   }
 
-  private getStepTitle (step: StepConfiguration) {
+  getStepTitle (step: StepConfiguration) {
     return this.useAlternateStep && this.currentStepNumber === this.getStepIndex(step) ? step.alternate?.title : step.title
   }
 
-  private getStepName (step: StepConfiguration) {
+  getStepName (step: StepConfiguration) {
     return this.useAlternateStep && this.currentStepNumber === this.getStepIndex(step) ? step.alternate?.stepName : step.stepName
   }
 
-  private getPropsForStep (step: StepConfiguration): Record<string, any> {
+  getPropsForStep (step: StepConfiguration): Record<string, any> {
     return { ...step.componentProps, stepForward: this.stepForward, stepBack: this.stepBack, jumpToStep: this.jumpToStep }
   }
 
-  private getStepIndex (step: StepConfiguration): number {
+  getStepIndex (step: StepConfiguration): number {
     return this.steps.indexOf(step) + 1
   }
 
-  private stepForward (useAlternateStep = false) {
+  stepForward (useAlternateStep = false) {
     if (this.currentStepNumber >= this.steps.length) {
       this.$router.push(this.redirectWhenDone)
     } else {
@@ -125,12 +150,12 @@ export default class Stepper extends Vue {
     }
   }
 
-  private stepBack (useAlternateStep = false) {
+  stepBack (useAlternateStep = false) {
     this.currentStepNumber = Math.max(1, this.currentStepNumber - 1)
     this.useAlternateStep = useAlternateStep && !!this.steps[this.currentStepNumber - 1].alternate
   }
 
-  private jumpToStep (index: number, useAlternateStep = false) {
+  jumpToStep (index: number, useAlternateStep = false) {
     if (index > 0 && index <= this.steps.length) {
       this.useAlternateStep = useAlternateStep && !!this.steps[index].alternate
       this.currentStepNumber = index
@@ -142,7 +167,7 @@ export default class Stepper extends Vue {
   }
 
   @Emit('final-step-action')
-  private emitFinalStepAction (stepperData) {
+  emitFinalStepAction (stepperData) {
     return stepperData
   }
 }

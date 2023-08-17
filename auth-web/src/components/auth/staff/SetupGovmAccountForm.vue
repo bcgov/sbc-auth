@@ -3,93 +3,120 @@
     <v-form ref="setupGovmAccountForm">
       <!-- Name of Account -->
       <v-row>
-        <v-col cols="12" class="pb-0 mb-2">
-          <h4 class="mb-2">Enter Ministry Information for this account</h4>
+        <v-col
+          cols="12"
+          class="pb-0 mb-2"
+        >
+          <h4 class="mb-2">
+            Enter Ministry Information for this account
+          </h4>
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12" class="">
+        <v-col
+          cols="12"
+          class=""
+        >
           <v-text-field
+            v-model.trim="ministryName"
             filled
             label="Ministry Name"
-            v-model.trim="ministryName"
             :rules="ministryNameRules"
             persistent-hint
             :disabled="saving"
             data-test="input-ministry-name"
-          >
-          </v-text-field>
+          />
         </v-col>
-        <v-col cols="12" class="">
+        <v-col
+          cols="12"
+          class=""
+        >
           <v-text-field
+            v-model.trim="branchName"
             filled
             label="Branch/Division (if applicable)"
-            v-model.trim="branchName"
             persistent-hint
             :disabled="saving"
             data-test="input-branch-name"
-          >
-          </v-text-field>
+          />
         </v-col>
       </v-row>
       <!-- Email/Confirm Email -->
       <v-row>
-        <v-col cols="12" class="pb-0">
-          <h4 class="mb-2">Account Admin Contact</h4>
-          <p class="mb-6">Enter the email address of the ministry's employee. An email will be sent this user
-to verify and activate this account. This user will be the admin of this account.</p>
+        <v-col
+          cols="12"
+          class="pb-0"
+        >
+          <h4 class="mb-2">
+            Account Admin Contact
+          </h4>
+          <p class="mb-6">
+            Enter the email address of the ministry's employee. An email will be sent this user
+            to verify and activate this account. This user will be the admin of this account.
+          </p>
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
+        <v-col
+          cols="12"
+          class="pt-0 pb-0"
+        >
           <v-text-field
+            v-model.trim="email"
             filled
             label="Email Address"
-            v-model.trim="email"
             :rules="emailRules"
             persistent-hint
             :disabled="saving"
             data-test="input-email-address"
-          >
-          </v-text-field>
+          />
         </v-col>
       </v-row>
       <v-row>
-        <v-col cols="12" class="pt-0 pb-0">
+        <v-col
+          cols="12"
+          class="pt-0 pb-0"
+        >
           <v-text-field
+            v-model.trim="emailConfirm"
             filled
             label="Confirm Email Address"
-            v-model.trim="emailConfirm"
             :rules="emailRules"
             persistent-hint
             :error-messages="emailMatchError()"
             :disabled="saving"
             data-test="input-confirm-email-address"
-          >
-          </v-text-field>
+          />
         </v-col>
       </v-row>
 
       <v-row>
-        <v-col cols="12" class="form__btns pb-0">
+        <v-col
+          cols="12"
+          class="form__btns pb-0"
+        >
           <v-btn
             large
             color="primary"
             class="mr-2 submit-form-btn"
             :loading="saving"
             :disabled="!isFormValid() || saving"
-            @click="save"
             data-test="save-button"
-          >Send Invite</v-btn>
+            @click="save"
+          >
+            Send Invite
+          </v-btn>
           <v-btn
             large
             depressed
             class="cancel-btn"
             color="default"
             :disable="saving"
-            @click="cancel"
             data-test="cancel-button"
-          >Cancel</v-btn>
+            @click="cancel"
+          >
+            Cancel
+          </v-btn>
         </v-col>
       </v-row>
     </v-form>
@@ -101,11 +128,23 @@ to verify and activate this account. This user will be the admin of this account
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="close()" data-test="dialog-ok-button">OK</v-btn>
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          data-test="dialog-ok-button"
+          @click="close()"
+        >
+          OK
+        </v-btn>
       </template>
     </ModalDialog>
   </div>

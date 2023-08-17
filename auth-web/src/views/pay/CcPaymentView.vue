@@ -1,14 +1,36 @@
 <template>
   <div id="app">
     <v-container>
-      <v-layout row justify-center align-center>
-        <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
-        <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentPrepareMsg') }}</div>
-        <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{ errorMessage }}</div>
-        <sbc-system-error v-on:continue-event="goToUrl(returnUrl)" v-if="showErrorModal && errorMessage"
-                          title="Payment Failed" primaryButtonTitle="Continue to Account Page"
-                          :description="errorMessage"></sbc-system-error>
-      </v-layout>
+      <v-row
+        justify="center"
+        align="center"
+      >
+        <v-progress-circular
+          v-if="!errorMessage"
+          color="primary"
+          :size="50"
+          indeterminate
+        />
+        <div
+          v-if="!errorMessage"
+          class="loading-msg"
+        >
+          {{ $t('paymentPrepareMsg') }}
+        </div>
+        <div
+          v-if="errorMessage && !showErrorModal"
+          class="loading-msg"
+        >
+          {{ errorMessage }}
+        </div>
+        <sbc-system-error
+          v-if="showErrorModal && errorMessage"
+          title="Payment Failed"
+          primaryButtonTitle="Continue to Account Page"
+          :description="errorMessage"
+          @continue-event="goToUrl(returnUrl)"
+        />
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -43,7 +65,8 @@ export default class CcPaymentView extends Vue {
       })
       .catch(error => {
         this.errorMessage = this.$t('payFailedMessage').toString()
-        if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
+        if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
+          // Transaction is already completed. Show as a modal.
           this.goToUrl(this.redirectUrlFixed)
         } else {
           this.showErrorModal = true

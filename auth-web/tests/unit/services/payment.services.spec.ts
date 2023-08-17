@@ -1,19 +1,16 @@
-import Axios from 'axios'
 import PaymentServices from '../../../src/services/payment.services'
 
 vi.mock('../../../src/services/payment.services')
 
-var mockob = {
+const mockob = {
   'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'AUTH_API_URL': 'https://auth-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
   'VUE_APP_FLAVOR': 'post-mvp'
 }
 
 describe('create a transaction', () => {
-  const results = []
   beforeAll(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
-    // @ts-ignore
     vi.clearAllMocks()
   })
 

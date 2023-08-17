@@ -26,9 +26,9 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   if (!accountId) {
     return
   }
-  let behaviour = binding.modifiers.disable ? 'disable' : 'hide'
+  const behaviour = binding.modifiers.disable ? 'disable' : 'hide'
   // to handle special elements like v-card etc
-  let isCard = !!binding.modifiers.card
+  const isCard = !!binding.modifiers.card
   const requestedAction = binding.arg
   const permissions:string[] = (store.state as any)?.org?.permissions
   const customeEl = el as CustomHTMLElement
@@ -71,6 +71,7 @@ function commentNode (el: HTMLElement, vnode: VNode) {
   vnode.data.directives = undefined
 
   if (vnode.componentInstance) {
+    /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
     // @ts-ignore
     vnode.componentInstance.$el = comment
   }
