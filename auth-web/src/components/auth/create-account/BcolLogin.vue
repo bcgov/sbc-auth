@@ -1,58 +1,88 @@
 <template>
-  <v-form ref="form" lazy-validation  data-test="form-bcol-login">
+  <v-form
+    ref="form"
+    lazy-validation
+    data-test="form-bcol-login"
+  >
     <fieldset>
       <legend class="mb-3">
         BC Online Prime Contact Details
-        <v-tooltip bottom color="grey darken-4">
-          <template v-slot:activator="{ on }">
-            <v-icon color="grey darken-4" v-on="on" tabindex="0">mdi-help-circle-outline</v-icon>
+        <v-tooltip
+          bottom
+          color="grey darken-4"
+        >
+          <template #activator="{ on }">
+            <v-icon
+              color="grey darken-4"
+              tabindex="0"
+              v-on="on"
+            >
+              mdi-help-circle-outline
+            </v-icon>
           </template>
-          <div class="bcol-tooltip__msg py-2">BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.</div>
+          <div class="bcol-tooltip__msg py-2">
+            BC Online Prime Contacts are users who have authority to manage account settings for a BC Online Account.
+          </div>
         </v-tooltip>
       </legend>
       <v-slide-y-transition>
-        <div class="pb-2" v-show="errorMessage">
-          <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
-            {{errorMessage}}
+        <div
+          v-show="errorMessage"
+          class="pb-2"
+        >
+          <v-alert
+            type="error"
+            icon="mdi-alert-circle-outline"
+            data-test="alert-bcol-error"
+          >
+            {{ errorMessage }}
           </v-alert>
         </div>
       </v-slide-y-transition>
       <v-row>
-        <v-col :cols="hideLinkBtn ? 6 : 4 " class="py-0 pr-0">
+        <v-col
+          :cols="hideLinkBtn ? 6 : 4 "
+          class="py-0 pr-0"
+        >
           <v-text-field
+            v-model.trim="username"
             dense
             filled
             label="User ID"
-            v-model.trim="username"
             :rules="usernameRules"
             req
             data-test="input-user-id"
-          >
-          </v-text-field>
+          />
         </v-col>
-        <v-col :cols="hideLinkBtn?6:4" class="py-0 pr-0">
+        <v-col
+          :cols="hideLinkBtn?6:4"
+          class="py-0 pr-0"
+        >
           <v-text-field
+            v-model.trim="password"
             dense
             filled
             label="Password"
             type="password"
-            v-model.trim="password"
             req
             :rules="passwordRules"
             data-test="input-user-password"
-          >
-          </v-text-field>
+          />
         </v-col>
-        <v-col cols="4" class="py-0" v-if="!hideLinkBtn">
+        <v-col
+          v-if="!hideLinkBtn"
+          cols="4"
+          class="py-0"
+        >
           <v-btn
             large
             depressed
             color="primary"
             class="link-account-btn"
-            @click="linkAccounts()"
             data-test="dialog-save-button"
             :loading="isLoading"
-            :disabled='!isFormValid() || isLoading'
+            :disabled="!isFormValid() || isLoading"
+            @click="linkAccounts()"
           >
             Link Account
           </v-btn>
@@ -73,11 +103,11 @@ const OrgModule = namespace('org')
   name: 'BcolLogin'
 })
 export default class BcolLogin extends Vue {
-  private username: string = ''
-  private password: string = ''
-  private errorMessage: string = ''
-  private isLoading: boolean = false
-  @Prop({ default: false }) hideLinkBtn: boolean
+  username: string = ''
+  password: string = ''
+  errorMessage: string = ''
+  isLoading: boolean = false
+  @Prop({ default: false }) readonly hideLinkBtn: boolean
   @OrgModule.Action('validateBcolAccount')
   private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
@@ -95,14 +125,14 @@ export default class BcolLogin extends Vue {
     this.emitBcolInfo()
   }
 
-  private isFormValid (): boolean {
+  isFormValid (): boolean {
     return !!this.username && !!this.password
   }
-  private usernameRules = [
+  usernameRules = [
     v => !!v || 'Username is required'
   ]
 
-  private passwordRules = [
+  passwordRules = [
     value => !!value || 'Password is required',
     value => (value?.trim().length <= 8) || 'Use only first 8 characters for password'
   ]
@@ -111,7 +141,7 @@ export default class BcolLogin extends Vue {
     form: HTMLFormElement
   }
 
-  private async linkAccounts () {
+  async linkAccounts () {
     this.isLoading = true
     this.errorMessage = ''
     // Validate form, and then create an team with this user a member

@@ -1,8 +1,16 @@
 <template>
   <v-card elevation="0">
-    <div class="account-label" v-can:VIEW_ADDRESS.disable>
+    <div
+      v-can:VIEW_ADDRESS.disable
+      class="account-label"
+    >
       <!-- template warpper is required here inorder to keep the placement of divs correctly(to resolve flickering issue when updating the address) -->
-      <div class="nav-list-title font-weight-bold" data-test="title">Mailing Address</div>
+      <div
+        class="nav-list-title font-weight-bold"
+        data-test="title"
+      >
+        Mailing Address
+      </div>
 
       <template v-if="baseAddress">
         <div class="details">
@@ -17,19 +25,28 @@
                 @valid="checkBaseAddressValidity"
               />
             </div>
-            <div v-can:CHANGE_ADDRESS.hide v-if="viewOnlyMode">
+            <div
+              v-if="viewOnlyMode"
+              v-can:CHANGE_ADDRESS.hide
+            >
               <span
                 class="primary--text cursor-pointer"
-                @click="$emit('update:viewOnlyMode', {component:'address',mode:false })"
                 data-test="btn-edit"
+                @click="$emit('update:viewOnlyMode', {component:'address',mode:false })"
               >
-                <v-icon color="primary" size="20"> mdi-pencil</v-icon>
+                <v-icon
+                  color="primary"
+                  size="20"
+                > mdi-pencil</v-icon>
                 Change
               </span>
             </div>
           </div>
-          <v-card-actions class="pt-1 pr-0" v-if="!viewOnlyMode">
-            <v-spacer></v-spacer>
+          <v-card-actions
+            v-if="!viewOnlyMode"
+            class="pt-1 pr-0"
+          >
+            <v-spacer />
             <v-btn
               large
               class="save-btn px-9"
@@ -47,11 +64,12 @@
               class="ml-2 px-9"
               color="primary"
               aria-label="Cancel"
-              @click="$emit('update:viewOnlyMode', {component:'address',mode:true }); $emit('update:resetAddress')"
-
               data-test="cancel-button"
-              >Cancel</v-btn
+
+              @click="$emit('update:viewOnlyMode', {component:'address',mode:true }); $emit('update:resetAddress')"
             >
+              Cancel
+            </v-btn>
           </v-card-actions>
         </div>
       </template>

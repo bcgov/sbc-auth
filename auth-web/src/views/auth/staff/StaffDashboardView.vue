@@ -1,28 +1,71 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column">
-      <h1 class="view-header__title">Staff Dashboard</h1>
+      <h1 class="view-header__title">
+        Staff Dashboard
+      </h1>
       <p class="mt-3 mb-0">
         Search for businesses and manage BC Registries accounts
       </p>
     </div>
 
-    <v-row class="ma-0 mb-4" no-gutters>
-      <v-col class="pr-2" cols="6">
-        <v-card class="srch-card" flat style="height: 100%;">
+    <v-row
+      class="ma-0 mb-4"
+      no-gutters
+    >
+      <v-col
+        class="pr-2"
+        cols="6"
+      >
+        <v-card
+          class="srch-card"
+          flat
+          style="height: 100%;"
+        >
           <div>
             <h2>Business Registry</h2>
-            <v-row class="mt-4" no-gutters>
-              <v-col class="mr-5" cols="auto">
-                <v-btn class="srch-card__link px-0" color="primary" :ripple="false" small text @click="goToManageBusiness()">
+            <v-row
+              class="mt-4"
+              no-gutters
+            >
+              <v-col
+                class="mr-5"
+                cols="auto"
+              >
+                <v-btn
+                  class="srch-card__link px-0"
+                  color="primary"
+                  :ripple="false"
+                  small
+                  text
+                  @click="goToManageBusiness()"
+                >
                   My Staff Business Registry
-                  <v-icon class="ml-1" size="20">mdi-chevron-right-circle-outline</v-icon>
+                  <v-icon
+                    class="ml-1"
+                    size="20"
+                  >
+                    mdi-chevron-right-circle-outline
+                  </v-icon>
                 </v-btn>
               </v-col>
               <v-col>
-                <v-btn class="srch-card__link px-0" color="primary" :href="registrySearchUrl" :ripple="false" small target="blank" text>
+                <v-btn
+                  class="srch-card__link px-0"
+                  color="primary"
+                  :href="registrySearchUrl"
+                  :ripple="false"
+                  small
+                  target="blank"
+                  text
+                >
                   Business Search
-                  <v-icon class="ml-1" size="20">mdi-chevron-right-circle-outline</v-icon>
+                  <v-icon
+                    class="ml-1"
+                    size="20"
+                  >
+                    mdi-chevron-right-circle-outline
+                  </v-icon>
                 </v-btn>
               </v-col>
             </v-row>
@@ -33,23 +76,33 @@
 
           <v-expand-transition>
             <div v-show="errorMessage">
-              <v-alert type="error" icon="mdi-alert-circle" class="mb-0"
-                >{{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
+              <v-alert
+                type="error"
+                icon="mdi-alert-circle"
+                class="mb-0"
+              >
+                {{ errorMessage }} <strong>{{ searchedBusinessNumber }}</strong>
               </v-alert>
             </div>
           </v-expand-transition>
 
-          <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
+          <v-form
+            ref="searchBusinessForm"
+            @submit.prevent="search"
+          >
             <v-row no-gutters>
               <v-col>
                 <v-text-field
-                  filled dense req persistent-hint
+                  id="txtBusinessNumber"
+                  v-model="businessIdentifier"
+                  filled
+                  dense
+                  req
+                  persistent-hint
                   label="Incorporation Number or Registration Number"
                   hint="Example: BC1234567, CP1234567 or FM1234567"
-                  @blur="formatBusinessIdentifier()"
                   :rules="businessIdentifierRules"
-                  v-model="businessIdentifier"
-                  id="txtBusinessNumber"
+                  @blur="formatBusinessIdentifier()"
                 />
               </v-col>
               <v-col cols="auto">
@@ -66,34 +119,51 @@
               </v-col>
             </v-row>
           </v-form>
-
-          <template>
-            <IncorporationSearchResultView
-              :isVisible="canViewIncorporationSearchResult"
-              :affiliatedOrg="affiliatedOrg"
-            ></IncorporationSearchResultView>
-          </template>
+          <IncorporationSearchResultView
+            :isVisible="canViewIncorporationSearchResult"
+            :affiliatedOrg="affiliatedOrg"
+          />
         </v-card>
       </v-col>
-      <v-col class="pl-2" cols="6">
+      <v-col
+        class="pl-2"
+        cols="6"
+      >
         <PPRLauncher />
       </v-col>
     </v-row>
 
     <!-- Director search -->
-    <v-card flat class="mb-4 pa-8" v-if="canViewAccounts">
-      <StaffAccountManagement></StaffAccountManagement>
+    <v-card
+      v-if="canViewAccounts"
+      flat
+      class="mb-4 pa-8"
+    >
+      <StaffAccountManagement />
     </v-card>
 
     <!-- GL Codes -->
-    <v-card flat class="mb-4 pa-8" v-if="canViewGLCodes">
+    <v-card
+      v-if="canViewGLCodes"
+      flat
+      class="mb-4 pa-8"
+    >
       <GLCodesListView />
     </v-card>
 
     <!-- Transactions -->
-    <base-v-expansion-panel v-if="canViewAllTransactions" class="mb-4" title="Transaction Records">
-      <template v-slot:content>
-        <Transactions class="mt-5 pa-0 pr-2" :extended="true" :showCredit="false" :showExport="false" />
+    <base-v-expansion-panel
+      v-if="canViewAllTransactions"
+      class="mb-4"
+      title="Transaction Records"
+    >
+      <template #content>
+        <Transactions
+          class="mt-5 pa-0 pr-2"
+          :extended="true"
+          :showCredit="false"
+          :showExport="false"
+        />
       </template>
     </base-v-expansion-panel>
 
@@ -105,8 +175,8 @@
       style="z-index: 0;"
       class="mb-4"
     >
-      <template v-slot:content>
-        <fas-search-component :isLibraryMode="true"/>
+      <template #content>
+        <fas-search-component :isLibraryMode="true" />
       </template>
     </base-v-expansion-panel>
 
@@ -116,7 +186,7 @@
       info="Please contact #registries-ops to add or remove email addresses from the safe list."
       title="Safe Email List (DEV/TEST)"
     >
-      <template v-slot:content>
+      <template #content>
         <SafeEmailView />
       </template>
     </base-v-expansion-panel>

@@ -16,209 +16,248 @@
         </v-btn>
       </v-card-title>
       <v-card-text>
-
-        <v-tabs v-model="tab" class="mb-7">
+        <v-tabs
+          v-model="tab"
+          class="mb-7"
+        >
           <v-tab>Details</v-tab>
           <v-tab>Associated Filing Types</v-tab>
         </v-tabs>
 
         <v-tabs-items v-model="tab">
           <v-tab-item>
-
             <div class="pt-4">
+              <!-- Effective Dates -->
+              <fieldset>
+                <legend>Effective Dates</legend>
+                <v-row>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
+                  >
+                    <v-menu
+                      v-model="startDatePicker"
+                      :close-on-content-click="false"
+                      transition="scale-transition"
+                      offset-y
+                      max-width="290px"
+                      min-width="290px"
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="startDateFormatted"
+                          label="Start Date"
+                          filled
+                          hide-details
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        />
+                      </template>
+                      <v-date-picker
+                        v-model="glcodeDetails.startDate"
+                        no-title
+                        @input="startDatePicker = false"
+                      />
+                    </v-menu>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
+                  >
+                    <v-menu
+                      v-model="endDatePicker"
+                      :close-on-content-click="false"
+                      transition="scale-transition"
+                      offset-y
+                      max-width="290px"
+                      min-width="290px"
+                    >
+                      <template #activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="endDateFormatted"
+                          label="End Date"
+                          filled
+                          hide-details
+                          readonly
+                          v-bind="attrs"
+                          v-on="on"
+                        />
+                      </template>
+                      <v-date-picker
+                        v-model="glcodeDetails.endDate"
+                        no-title
+                        @input="endDatePicker = false"
+                      />
+                    </v-menu>
+                  </v-col>
+                </v-row>
+              </fieldset>
 
-            <!-- Effective Dates -->
-            <fieldset>
-              <legend>Effective Dates</legend>
-              <v-row>
-                <v-col cols="12" sm="6" class="col">
-                  <v-menu
-                    v-model="startDatePicker"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
+              <!-- General Information -->
+              <fieldset class="mt-6">
+                <legend>General Information</legend>
+                <v-row>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="startDateFormatted"
-                        label="Start Date"
-                        filled
-                        hide-details
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="glcodeDetails.startDate"
-                      no-title
-                      @input="startDatePicker = false"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-menu
-                    v-model="endDatePicker"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                    max-width="290px"
-                    min-width="290px"
+                    <v-text-field
+                      v-model="glcodeDetails.client"
+                      filled
+                      hide-details
+                      label="Client Number"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-text-field
-                        v-model="endDateFormatted"
-                        label="End Date"
-                        filled
-                        hide-details
-                        readonly
-                        v-bind="attrs"
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="glcodeDetails.endDate"
-                      no-title
-                      @input="endDatePicker = false"
-                    ></v-date-picker>
-                  </v-menu>
-                </v-col>
-              </v-row>
-            </fieldset>
+                    <v-text-field
+                      v-model="glcodeDetails.responsibilityCentre"
+                      filled
+                      hide-details
+                      label="Responsibility Center"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
+                  >
+                    <v-text-field
+                      v-model="glcodeDetails.serviceLine"
+                      filled
+                      hide-details
+                      label="Service Line"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
+                  >
+                    <v-text-field
+                      v-model="glcodeDetails.stob"
+                      filled
+                      hide-details
+                      label="STOB (Standard Object of Expense)"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
+                  >
+                    <v-text-field
+                      v-model="glcodeDetails.projectCode"
+                      filled
+                      hide-details
+                      label="Project Code"
+                    />
+                  </v-col>
+                </v-row>
+              </fieldset>
 
-            <!-- General Information -->
-            <fieldset class="mt-6">
-              <legend>General Information</legend>
-              <v-row>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Client Number"
-                    v-model="glcodeDetails.client"
+              <!-- Service Fee Information -->
+              <fieldset
+                v-if="glcodeDetails.serviceFee"
+                class="mt-6"
+              >
+                <legend>
+                  Service Fee Information
+                </legend>
+                <v-row>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Responsibility Center"
-                    v-model="glcodeDetails.responsibilityCentre"
+                    <v-text-field
+                      v-model="glcodeDetails.serviceFee.client"
+                      filled
+                      hide-details
+                      label="Client Number"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Service Line"
-                    v-model="glcodeDetails.serviceLine"
+                    <v-text-field
+                      v-model="glcodeDetails.serviceFee.responsibilityCentre"
+                      filled
+                      hide-details
+                      label="Responsibility Center"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="STOB (Standard Object of Expense)"
-                    v-model="glcodeDetails.stob"
+                    <v-text-field
+                      v-model="glcodeDetails.serviceFee.serviceLine"
+                      filled
+                      hide-details
+                      label="Service Line"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Project Code"
-                    v-model="glcodeDetails.projectCode"
+                    <v-text-field
+                      v-model="glcodeDetails.serviceFee.stob"
+                      filled
+                      hide-details
+                      label="STOB (Standard Object of Expense)"
+                    />
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="6"
+                    class="col"
                   >
-                  </v-text-field>
-                </v-col>
-              </v-row>
-            </fieldset>
-
-            <!-- Service Fee Information -->
-            <fieldset class="mt-6" v-if="glcodeDetails.serviceFee">
-              <legend>
-                Service Fee Information
-              </legend>
-              <v-row>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Client Number"
-                    v-model="glcodeDetails.serviceFee.client"
-                  >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Responsibility Center"
-                    v-model="glcodeDetails.serviceFee.responsibilityCentre"
-                  >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Service Line"
-                    v-model="glcodeDetails.serviceFee.serviceLine"
-                  >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="STOB (Standard Object of Expense)"
-                    v-model="glcodeDetails.serviceFee.stob"
-                  >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6" class="col">
-                  <v-text-field
-                    filled
-                    hide-details
-                    label="Project Code"
-                    v-model="glcodeDetails.serviceFee.projectCode"
-                  >
-                  </v-text-field>
-                </v-col>
-              </v-row>
-            </fieldset>
-
+                    <v-text-field
+                      v-model="glcodeDetails.serviceFee.projectCode"
+                      filled
+                      hide-details
+                      label="Project Code"
+                    />
+                  </v-col>
+                </v-row>
+              </fieldset>
             </div>
 
-            <v-divider class="mt-6 mb-8"></v-divider>
+            <v-divider class="mt-6 mb-8" />
 
             <div class="d-flex">
-              <v-spacer></v-spacer>
+              <v-spacer />
               <v-btn
                 large
                 color="primary"
                 class="font-weight-bold mr-2"
-                @click="save"
                 width="100"
+                @click="save"
               >
                 Save
               </v-btn>
               <v-btn
                 large
                 depressed
-                @click="close"
                 width="100"
+                @click="close"
               >
                 Cancel
               </v-btn>
             </div>
-
           </v-tab-item>
           <v-tab-item>
             <v-data-table
@@ -226,22 +265,20 @@
               :items="filingTypes"
               item-key="feeScheduleId"
               hide-default-footer
-            >
-            </v-data-table>
+            />
           </v-tab-item>
         </v-tabs-items>
-
       </v-card-text>
     </v-card>
   </v-dialog>
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Vue } from 'vue-property-decorator'
 import { FilingType, GLCode } from '@/models/Staff'
-import { mapActions, mapState } from 'vuex'
 import StaffModule from '@/store/modules/staff'
 import { getModule } from 'vuex-module-decorators'
+import { mapActions } from 'vuex'
 import moment from 'moment'
 
 @Component({

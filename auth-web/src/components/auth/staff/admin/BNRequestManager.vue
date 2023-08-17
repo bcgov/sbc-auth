@@ -1,12 +1,15 @@
 <template>
-  <v-card flat id="bn-request-manager">
+  <v-card
+    id="bn-request-manager"
+    flat
+  >
     <ResubmitRequestDialog
       v-if="requestDetails && resubmitRequestDialog"
       :dialog="resubmitRequestDialog"
       :xmlData="requestDetails.request"
-      @resubmit="resubmitRequest($event)"
-      @close="hideResubmitRequestDialog($event)"
       attach="#bn-request-manager"
+      @resubmit="resubmitRequest($event)"
+      @close="hideResubmitRequestDialog()"
     />
     <v-dialog
       v-if="requestDetails && responseDialog"
@@ -16,27 +19,30 @@
     >
       <v-card>
         <v-card-title>BN Hub Response</v-card-title>
-        <v-divider></v-divider>
+        <v-divider />
         <v-card-text class="pt-1 pb-1">
           <v-textarea
+            id="response-textarea"
             ref="textarea"
             auto-grow
             outlined
             readonly
             hide-details
-            id="response-textarea"
             :value="requestDetails.response"
           />
         </v-card-text>
-        <v-divider></v-divider>
+        <v-divider />
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
-            large depressed
             id="response-cancel-button"
+            large
+            depressed
             class="ml-2"
             @click="responseDialog = false"
-          >Close</v-btn>
+          >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -52,20 +58,51 @@
       disable-pagination
       hide-default-footer
     >
-      <template v-slot:item="{ item, index }">
+      <template #item="{ item, index }">
         <tr>
           <td>{{ requestTypeText(item.requestType) }}</td>
           <td>
-            <v-icon v-if="item.isProcessed" color="green" class="names-text pr-1" small>mdi-check</v-icon>
-            <v-icon v-else color="red" class="names-text pr-1" small>mdi-close</v-icon>
+            <v-icon
+              v-if="item.isProcessed"
+              color="green"
+              class="names-text pr-1"
+              small
+            >
+              mdi-check
+            </v-icon>
+            <v-icon
+              v-else
+              color="red"
+              class="names-text pr-1"
+              small
+            >
+              mdi-close
+            </v-icon>
           </td>
           <td>
-            <v-icon v-if="item.isAdmin" color="green" class="names-text pr-1" small>mdi-check</v-icon>
-            <v-icon v-else color="red" class="names-text pr-1" small>mdi-close</v-icon>
+            <v-icon
+              v-if="item.isAdmin"
+              color="green"
+              class="names-text pr-1"
+              small
+            >
+              mdi-check
+            </v-icon>
+            <v-icon
+              v-else
+              color="red"
+              class="names-text pr-1"
+              small
+            >
+              mdi-close
+            </v-icon>
           </td>
           <td>{{ formatDate(item.creationDate) }}</td>
           <td class="action-cell">
-            <div class="actions" :id="`action-menu-${index}`">
+            <div
+              :id="`action-menu-${index}`"
+              class="actions"
+            >
               <v-btn
                 small
                 color="primary"
@@ -109,7 +146,7 @@ const BusinessModule = namespace('business')
 })
 export default class BNRequestManager extends Vue {
   @BusinessModule.Action('getBNRequests')
-  private readonly getBNRequests!: (businessIdentifier: string) => Promise<RequestTracker[]>
+  readonly getBNRequests!: (businessIdentifier: string) => Promise<RequestTracker[]>
 
   @BusinessModule.Action('getRequestTracker')
   private readonly getRequestTracker!: (requestTrackerId: number) => Promise<RequestTracker>
@@ -119,7 +156,7 @@ export default class BNRequestManager extends Vue {
 
   @Prop({ default: undefined }) businessIdentifier: string
 
-  protected readonly headers = [
+  readonly headers = [
     { text: 'Request Type', align: 'start', value: 'requestType', sortable: false, show: true },
     { text: 'Processed', value: 'isProcessed', sortable: false, show: true },
     { text: 'Admin Request', value: 'isAdmin', sortable: false, show: true },
@@ -127,17 +164,17 @@ export default class BNRequestManager extends Vue {
     { text: 'Actions', align: 'end', value: 'action', sortable: false, show: true }
   ]
 
-  protected bnRequests: RequestTracker[] = []
-  protected requestDetails: RequestTracker = null
-  protected resubmitRequestDialog = false
-  protected responseDialog = false
+  bnRequests: RequestTracker[] = []
+  requestDetails: RequestTracker = null
+  resubmitRequestDialog = false
+  responseDialog = false
 
   @Watch('businessIdentifier', { deep: true, immediate: true })
   async businessIdentifierChange () {
     this.bnRequests = await this.getBNRequests(this.businessIdentifier)
   }
 
-  private requestTypeText (requestType: string) {
+  requestTypeText (requestType: string) {
     switch (requestType) {
       case RequestTrackerType.InformCRA:
         return 'CreateProgramAccountRequest'
@@ -152,26 +189,26 @@ export default class BNRequestManager extends Vue {
     }
   }
 
-  private formatDate (date: string) {
+  formatDate (date: string) {
     return date ? date.substring(0, 10) : ''
   }
 
-  private async showReponseDialog (item: RequestTracker): Promise<void> {
+  async showReponseDialog (item: RequestTracker): Promise<void> {
     this.requestDetails = await this.getRequestTracker(item.id)
     this.responseDialog = true
   }
 
-  private async showResubmitRequestDialog (item: RequestTracker): Promise<void> {
+  async showResubmitRequestDialog (item: RequestTracker): Promise<void> {
     this.requestDetails = await this.getRequestTracker(item.id)
     this.resubmitRequestDialog = true
   }
 
-  private async hideResubmitRequestDialog (): Promise<void> {
+  async hideResubmitRequestDialog (): Promise<void> {
     this.resubmitRequestDialog = false
     this.requestDetails = null
   }
 
-  private async resubmitRequest (xmlData): Promise<void> {
+  async resubmitRequest (xmlData): Promise<void> {
     const queued = await this.resubmitBNRequest({
       businessIdentifier: this.businessIdentifier,
       requestType: this.requestDetails.requestType,

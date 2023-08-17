@@ -1,6 +1,9 @@
 <template>
   <div class="value__title">
-    <div v-for="(member, index) in getActiveAdmins" v-bind:key="index">
+    <div
+      v-for="(member, index) in getActiveAdmins"
+      :key="index"
+    >
       <div v-if="!anonAccount">
         <div>
           {{ member.user.firstname }} {{ member.user.lastname }}
@@ -22,13 +25,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import {
   Member,
-  MembershipStatus,
   MembershipType,
-  Organization,
-  RoleInfo
+  Organization
 } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import { AccessType } from '@/util/constants'

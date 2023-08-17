@@ -15,18 +15,35 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:text>
-        <p class="pb-1">{{subText}}</p>
+      <template #text>
+        <p class="pb-1">
+          {{ subText }}
+        </p>
       </template>
-      <template v-slot:actions>
-        <v-btn large color="error" @click="confirmDialogResponse(true)" data-test="accept-button">
-          {{confirmBtnText}}
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          data-test="accept-button"
+          @click="confirmDialogResponse(true)"
+        >
+          {{ confirmBtnText }}
         </v-btn>
-        <v-btn large color="default" @click="confirmDialogResponse(false)" data-test="reject-button">
-          {{rejectBtnText}}
+        <v-btn
+          large
+          color="default"
+          data-test="reject-button"
+          @click="confirmDialogResponse(false)"
+        >
+          {{ rejectBtnText }}
         </v-btn>
       </template>
     </ModalDialog>
@@ -37,7 +54,6 @@
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
-import { mapActions } from 'vuex'
 import { namespace } from 'vuex-class'
 
 const OrgModule = namespace('org')

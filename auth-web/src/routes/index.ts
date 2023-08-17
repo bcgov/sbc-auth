@@ -1,7 +1,6 @@
 /* eslint-disable no-console */
 import {
   ALLOWED_URIS_FOR_PENDING_ORGS,
-  AccessType,
   Account,
   AccountStatus,
   LoginSource,
@@ -10,11 +9,10 @@ import {
   Role, SessionStorageKeys
 } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
-import Router, { Route } from 'vue-router'
 import { AccountSettings } from '@/models/account-settings'
-import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
+import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
@@ -71,7 +69,6 @@ router.beforeEach(async (to, from, next) => {
   }
 
   function proceed () {
-    const userContact: Contact = (store.state as any)?.user?.userContact
     const userProfile: User = (store.state as any)?.user?.userProfile
     const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
     const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
@@ -128,7 +125,7 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.path === `/${Pages.ACCOUNT_FREEZE}`) {
-      console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')
+      console.log('[NG] Redirecting user to Account Freeze message since the account is temporarly suspended.')
       // checking for access page
       if (permissions.some(code => code !== Permission.MAKE_PAYMENT)) {
         return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
@@ -136,10 +133,11 @@ router.beforeEach(async (to, from, next) => {
     }
     // need to check for govm account also. so we are checking roles
     if (to.matched.some(record => record.meta.requiresActiveAccount) &&
-        (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID || currentUser.roles.includes(Role.GOVMAccountUser))) {
+        (currentUser.loginSource === LoginSource.BCSC || currentUser.loginSource === LoginSource.BCEID ||
+          currentUser.roles.includes(Role.GOVMAccountUser))) {
       // if (currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED) {
       if ([AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED].some(status => status === currentOrganization?.statusCode)) {
-        console.log('[Navigation Guard] Redirecting user to Account Freeze message since the account is temporarly suspended.')
+        console.log('[NG] Redirecting user to Account Freeze message since the account is temporarly suspended.')
         if (permissions.some(code => code === Permission.MAKE_PAYMENT)) {
           return next({ path: `/${Pages.ACCOUNT_FREEZE_UNLOCK}` })
         } else {
@@ -147,16 +145,19 @@ router.beforeEach(async (to, from, next) => {
         }
       } else if (currentOrganization?.statusCode === AccountStatus.PENDING_STAFF_REVIEW) {
         const substringCheck = (element:string) => to.path.indexOf(element) > -1
-        let isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
+        const isAllowedUrl = ALLOWED_URIS_FOR_PENDING_ORGS.findIndex(substringCheck) > -1
         if (!isAllowedUrl) {
-          console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
-          return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}/true` }) // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+          console.log('[NG] Redirecting user to PENDING_APPROVAL since user has pending affidavits')
+          // TODO put the account name back once its avaialable ;may be needs a fix in sbc-common
+          return next(
+            { path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}/true` })
         }
-      } else if (currentAccountSettings && [MembershipStatus.PendingStaffReview, MembershipStatus.Pending].includes(currentMembership?.membershipStatus)) {
-        console.log('[Navigation Guard] Redirecting user to PENDING_APPROVAL/PENDING_STAFF_REVIEW since users membership status is pending')
+      } else if (currentAccountSettings && [MembershipStatus.PendingStaffReview, MembershipStatus.Pending]
+        .includes(currentMembership?.membershipStatus)) {
+        console.log('[NG] Redirecting user to PENDING_APPROVAL/STAFF_REVIEW since users membership status is pending')
         return next({ path: `/${Pages.PENDING_APPROVAL}/${encodeURIComponent(btoa(currentAccountSettings?.label))}` })
       } else if (!currentOrganization || currentMembership?.membershipStatus !== MembershipStatus.Active) {
-        console.log('[Navigation Guard] Redirecting user to Create Account since users nerither has account nor an active status')
+        console.log('[NG] Redirecting user to Create Account since users nerither has account nor an active status')
         switch (currentUser?.loginSource) {
           case LoginSource.BCSC:
             return next({ path: `/${Pages.CREATE_ACCOUNT}` })

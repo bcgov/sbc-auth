@@ -1,6 +1,10 @@
 <!-- Copied from PPR. Move into sbc-common or bcrs-shared after vue 3 upgrade -->
 <template>
-  <v-card class="date-selection registration-date" elevation="6" ref="datePicker">
+  <v-card
+    ref="datePicker"
+    class="date-selection registration-date"
+    elevation="6"
+  >
     <v-row no-gutters>
       <v-col
         class="picker-title"
@@ -20,23 +24,26 @@
     <v-row>
       <v-col cols="6">
         <v-date-picker
-          color="primary"
           :key="'start' + datePickerKey"
-          :max="endDate ? endDate : today"
           v-model="startDate"
+          color="primary"
+          :max="endDate ? endDate : today"
         />
       </v-col>
       <v-col cols="6">
         <v-date-picker
-          color="primary"
           :key="'end' + datePickerKey"
+          v-model="endDate"
+          color="primary"
           :min="startDate ? startDate : null"
           :max="today"
-          v-model="endDate"
         />
       </v-col>
     </v-row>
-    <v-row no-gutters justify="end">
+    <v-row
+      no-gutters
+      justify="end"
+    >
       <v-col cols="auto pr-4">
         <v-btn
           class="date-selection-btn bold"

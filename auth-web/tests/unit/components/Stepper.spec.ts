@@ -1,4 +1,4 @@
-import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { createLocalVue, mount } from '@vue/test-utils'
 import Stepper from '@/components/auth/common/stepper/Stepper.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'

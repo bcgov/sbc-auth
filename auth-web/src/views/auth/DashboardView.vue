@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-view">
     <article>
-      <router-view></router-view>
+      <router-view />
     </article>
   </div>
 </template>

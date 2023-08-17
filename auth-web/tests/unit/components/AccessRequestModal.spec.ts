@@ -2,21 +2,16 @@ import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
-import MockI18n from '../test-utils/test-data/MockI18n'
 import { OnholdOrRejectCode } from '@/util/constants'
 
 import Vue from 'vue'
 import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import initialize from '@/plugins/i18n'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
-
-const en = {
-  onHoldOrRejectModalText: 'i8n onHoldOrRejectModalText'
-}
-const i18n = MockI18n.mock(en)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -49,7 +44,7 @@ describe('AccessRequestModal.vue', () => {
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(VueCompositionAPI)
-    localVue.use(i18n)
+    const i18n = initialize(localVue)
     localVue.use(Vuex)
 
     const store = new Vuex.Store({
@@ -57,14 +52,16 @@ describe('AccessRequestModal.vue', () => {
 
     })
 
-    const $t = (onHoldOrRejectModalText: string) =>
-      'To place account on hold, please choose a reason. An email will be sent to the user to resolve the issue. Or choose "Reject Account"'
+    const $t = () =>
+      `To place account on hold, please choose a reason. An email will be sent to the user to 
+      resolve the issue. Or choose "Reject Account"`
 
     wrapperFactory = (propsData) => {
       return mount(AccessRequestModal, {
         localVue,
         store,
         vuetify,
+        i18n,
         propsData: {
           ...propsData
         },

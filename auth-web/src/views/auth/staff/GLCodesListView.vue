@@ -1,12 +1,18 @@
 <template>
   <v-container class="pa-0">
     <header class="view-header mb-8">
-      <h2 class="view-header__title">General Ledger Codes</h2>
+      <h2 class="view-header__title">
+        General Ledger Codes
+      </h2>
     </header>
     <!-- The below code is for filter, can be enabled once filter story is available -->
-    <div class="filter-bar d-flex mb-8" v-if="false">
+    <div
+      v-if="false"
+      class="filter-bar d-flex mb-8"
+    >
       <div class="client-search-filter d-inline-flex search-input-with-btn">
         <v-text-field
+          v-model="clientSearch"
           dense
           filled
           single-line
@@ -15,8 +21,7 @@
           class="client-search-field"
           label="Client"
           prepend-inner-icon="mdi-magnify"
-          v-model="clientSearch"
-        ></v-text-field>
+        />
         <v-btn
           color="primary"
           class="client-search-apply-btn"
@@ -24,24 +29,40 @@
           large
           :disabled="!clientSearch"
           @click="applyClientSearchFilter"
-        >Apply</v-btn>
+        >
+          Apply
+        </v-btn>
       </div>
     </div>
-    <div class="filter-results" :class="{ 'active' : clientSearchProp.length }">
+    <div
+      class="filter-results"
+      :class="{ 'active' : clientSearchProp.length }"
+    >
       <div class="d-flex align-center mb-8">
-        <div class="filter-results-label py-2 mr-7" v-if="clientSearchProp.length">{{totalGLRecordCount}} {{totalGLRecordCount === 1 ? 'record' : 'records'}} found</div>
-        <v-chip close label color="info"
+        <div
+          v-if="clientSearchProp.length"
+          class="filter-results-label py-2 mr-7"
+        >
+          {{ totalGLRecordCount }} {{ totalGLRecordCount === 1 ? 'record' : 'records' }} found
+        </div>
+        <v-chip
+          v-for="filter in clientSearchProp"
+          :key="filter"
+          close
+          label
+          color="info"
           class="mr-2 filter-chip"
           close-icon="mdi-window-close"
           height="36"
-          v-for="filter in clientSearchProp"
-          :key="filter"
           @click:close="clearFilter(filter)"
         >
-          {{filter}}
+          {{ filter }}
         </v-chip>
-        <v-btn outlined color="primary" class="px-2"
+        <v-btn
           v-if="clientSearchProp.length"
+          outlined
+          color="primary"
+          class="px-2"
           @click="clearFilter('', true)"
         >
           Clear all filters
@@ -49,14 +70,14 @@
       </div>
     </div>
     <GLCodesDataTable
-      :clientSearch="clientSearchProp"
       :key="updateGLCodeTableCounter"
-    ></GLCodesDataTable>
+      :clientSearch="clientSearchProp"
+    />
   </v-container>
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import GLCodesDataTable from '@/components/auth/staff/gl-code/GLCodesDataTable.vue'
 
 @Component({

@@ -1,13 +1,13 @@
 <template>
   <div id="add-business-dialog">
     <HelpDialog
-      :helpDialogBlurb="helpDialogBlurb"
       ref="helpDialog"
+      :helpDialogBlurb="helpDialogBlurb"
     />
 
     <v-dialog
-      attach="#entity-management"
       v-model="dialog"
+      attach="#entity-management"
       persistent
       scrollable
       max-width="50rem"
@@ -23,14 +23,25 @@
           <p>
             Add an existing business to your list by providing the following required pieces of information:
           </p>
-          <v-tooltip top nudge-bottom="80" content-class="top-tooltip">
-            <template v-slot:activator="{ on, attrs }">
+          <v-tooltip
+            top
+            nudge-bottom="80"
+            content-class="top-tooltip"
+          >
+            <template #activator="{ on, attrs }">
               <ul class="add-business-unordered-list">
                 <li>For <strong>cooperatives</strong>, enter the incorporation number and the passcode.</li>
                 <li>For <strong>benefit companies</strong>, enter the incorporation number and the password.</li>
-                <li>For <strong>sole proprietorships and general partnerships</strong>, enter the registration
-                  number and either <span v-bind="attrs" v-on="on" activator class="underline-dotted">the name
-                  of the proprietor or a partner</span>.</li>
+                <li>
+                  For <strong>sole proprietorships and general partnerships</strong>, enter the registration
+                  number and either <span
+                    v-bind="attrs"
+                    activator
+                    class="underline-dotted"
+                    v-on="on"
+                  >the name
+                    of the proprietor or a partner</span>.
+                </li>
               </ul>
             </template>
             <span>
@@ -39,7 +50,11 @@
             </span>
           </v-tooltip>
 
-          <v-form ref="addBusinessForm" lazy-validation class="mt-6">
+          <v-form
+            ref="addBusinessForm"
+            lazy-validation
+            class="mt-6"
+          >
             <template v-if="enableBusinessNrSearch">
               <!-- Search for business identifier or name -->
               <!-- NB: use v-if to re-mount component between instances -->
@@ -50,11 +65,15 @@
 
               <template v-if="businessIdentifier">
                 <dl>
-                  <dt class="font-weight-bold mr-2">Business Name:</dt>
-                  <dd>{{businessName}}</dd>
+                  <dt class="font-weight-bold mr-2">
+                    Business Name:
+                  </dt>
+                  <dd>{{ businessName }}</dd>
 
-                  <dt class="font-weight-bold mr-2">Incorporation Number:</dt>
-                  <dd>{{businessIdentifier}}</dd>
+                  <dt class="font-weight-bold mr-2">
+                    Incorporation Number:
+                  </dt>
+                  <dd>{{ businessIdentifier }}</dd>
                 </dl>
               </template>
             </template>
@@ -62,15 +81,18 @@
             <template v-else>
               <!-- Business Identifier -->
               <v-text-field
-                filled req persistent-hint validate-on-blur
+                v-model="businessIdentifier"
+                filled
+                req
+                persistent-hint
+                validate-on-blur
                 label="Incorporation Number or Registration Number"
                 hint="Example: BC1234567, CP1234567 or FM1234567"
                 :rules="businessIdentifierRules"
-                v-model="businessIdentifier"
-                @blur="formatBusinessIdentifier()"
                 class="business-identifier mb-n2"
                 aria-label="Incorporation Number and Password or Passcode"
                 autofocus
+                @blur="formatBusinessIdentifier()"
               />
             </template>
 
@@ -79,13 +101,13 @@
               <v-expand-transition>
                 <v-text-field
                   v-if="isBusinessIdentifierValid"
+                  v-model="passcode"
                   filled
                   :label="passcodeLabel"
                   :hint="passcodeHint"
                   persistent-hint
                   :rules="passcodeRules"
                   :maxlength="passcodeMaxLength"
-                  v-model="passcode"
                   autocomplete="off"
                   class="passcode mt-6 mb-n2"
                   :aria-label="passcodeLabel"
@@ -94,16 +116,21 @@
 
               <!-- Authorization Name -->
               <v-expand-transition>
-                <section v-if="isBusinessIdentifierValid && showAuthorization" class="mt-6">
-                  <header class="font-weight-bold">Authorization</header>
+                <section
+                  v-if="isBusinessIdentifierValid && showAuthorization"
+                  class="mt-6"
+                >
+                  <header class="font-weight-bold">
+                    Authorization
+                  </header>
                   <v-text-field
+                    v-model="authorizationName"
                     filled
                     persistent-hint
                     :label="authorizationLabel"
                     :rules="authorizationRules"
                     :maxlength="authorizationMaxLength"
                     :aria-label="authorizationLabel"
-                    v-model="authorizationName"
                     autocomplete="off"
                     class="authorization mt-4 pb-1"
                     hide-details="auto"
@@ -117,25 +144,31 @@
                   v-if="isBusinessIdentifierValid && isFirm"
                   :certifiedBy="certifiedBy"
                   entity="registered entity"
-                  @update:isCertified="isCertified = $event"
                   class="certify"
                   :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4' : 'mt-6'"
+                  @update:isCertified="isCertified = $event"
                 />
               </v-expand-transition>
 
               <!-- Folio Number -->
               <v-expand-transition>
-                <section v-if="isBusinessIdentifierValid" class="mt-6">
-                  <header class="font-weight-bold">Folio / Reference Number</header>
+                <section
+                  v-if="isBusinessIdentifierValid"
+                  class="mt-6"
+                >
+                  <header class="font-weight-bold">
+                    Folio / Reference Number
+                  </header>
                   <p class="mt-4 mb-0">
                     If you file forms for a number of companies, you may want to enter a
                     folio or reference number to help you keep track of your transactions.
                   </p>
                   <v-text-field
-                    filled hide-details
+                    v-model="folioNumber"
+                    filled
+                    hide-details
                     label="Folio or Reference Number (Optional)"
                     :maxlength="50"
-                    v-model="folioNumber"
                     class="folio-number mt-6"
                     aria-label="Folio or Reference Number (Optional)"
                   />
@@ -148,24 +181,28 @@
         <v-card-actions class="form__btns">
           <v-btn
             v-if="isBusinessIdentifierValid && !isFirm"
-            large text
-            class="pl-2 pr-2 mr-auto"
             id="forgot-button"
+            large
+            text
+            class="pl-2 pr-2 mr-auto"
             @click.stop="openHelp()"
           >
             <v-icon>mdi-help-circle-outline</v-icon>
-            <span>{{forgotButtonText}}</span>
+            <span>{{ forgotButtonText }}</span>
           </v-btn>
           <v-btn
-            large outlined color="primary"
             id="cancel-button"
+            large
+            outlined
+            color="primary"
             @click="resetForm(true)"
           >
             <span>Cancel</span>
           </v-btn>
           <v-btn
-            large color="primary"
             id="add-button"
+            large
+            color="primary"
             :loading="isLoading"
             @click="add()"
           >
@@ -174,7 +211,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </div>
 </template>
 

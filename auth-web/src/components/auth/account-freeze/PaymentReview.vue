@@ -6,7 +6,9 @@ import { AccessType } from '@/util/constants'
     </p>
     <v-row>
       <v-col>
-        <h4 class="mb-3">Payment Method</h4>
+        <h4 class="mb-3">
+          Payment Method
+        </h4>
         <v-card
           outlined
           flat
@@ -25,17 +27,17 @@ import { AccessType } from '@/util/constants'
     <v-row class="mb-12">
       <v-col>
         <v-checkbox
+          v-model="isAcknowledged"
           color="primary"
           class="auth-checkbox align-checkbox-label--top"
-          v-model="isAcknowledged"
         >
-          <template v-slot:label>
+          <template #label>
             I understand that this is a one time use credit card and will cover future transactions with pre-authorized debit.
           </template>
         </v-checkbox>
       </v-col>
     </v-row>
-    <v-divider></v-divider>
+    <v-divider />
     <v-row>
       <v-col
         cols="12"
@@ -47,16 +49,21 @@ import { AccessType } from '@/util/constants'
           color="default"
           @click="goBack"
         >
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
-          @click="proceedToPayment"
           class="proceed-btn font-weight-bold"
           :disabled="!isAcknowledged"
+          @click="proceedToPayment"
         >
           Proceed
         </v-btn>

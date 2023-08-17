@@ -1,7 +1,10 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column mb-6">
-      <h2 class="view-header__title" data-test="account-settings-title">
+      <h2
+        class="view-header__title"
+        data-test="account-settings-title"
+      >
         Payment Methods
       </h2>
       <p class="mt-3 payment-page-sub">
@@ -16,48 +19,58 @@
       :currentSelectedPaymentMethod="selectedPaymentMethod"
       :isChangeView="true"
       :isAcknowledgeNeeded="isAcknowledgeNeeded"
+      isTouchedUpdate="true"
+      :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
+      :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
       @payment-method-selected="setSelectedPayment"
       @get-PAD-info="getPADInfo"
       @emit-bcol-info="setBcolInfo"
       @is-pad-valid="isPADValid"
-      isTouchedUpdate="true"
-      :isInitialTOSAccepted="isTOSandAcknowledgeCompleted"
-      :isInitialAcknowledged="isTOSandAcknowledgeCompleted"
-    ></PaymentMethods>
+    />
     <v-slide-y-transition>
-      <div class="pb-2" v-show="errorMessage">
-        <v-alert type="error" icon="mdi-alert-circle-outline" data-test="alert-bcol-error">
-          {{errorMessage}}
+      <div
+        v-show="errorMessage"
+        class="pb-2"
+      >
+        <v-alert
+          type="error"
+          icon="mdi-alert-circle-outline"
+          data-test="alert-bcol-error"
+        >
+          {{ errorMessage }}
         </v-alert>
       </div>
     </v-slide-y-transition>
-    <v-divider class="my-10"></v-divider>
+    <v-divider class="my-10" />
     <div class="form__btns d-flex">
       <v-btn
+        v-can:CHANGE_PAYMENT_METHOD.disable
         large
         class="save-btn"
-        v-bind:class="{ 'disabled': isBtnSaved }"
+        :class="{ 'disabled': isBtnSaved }"
         :color="isBtnSaved ? 'success' : 'primary'"
         :disabled="isDisableSaveBtn"
-        v-can:CHANGE_PAYMENT_METHOD.disable
-        @click="save"
         :loading="isLoading"
+        @click="save"
       >
         <v-expand-x-transition>
-          <v-icon v-show="isBtnSaved">mdi-check</v-icon>
+          <v-icon v-show="isBtnSaved">
+            mdi-check
+          </v-icon>
         </v-expand-x-transition>
         <span class="save-btn__label">{{ (isBtnSaved) ? 'Saved' : 'Save' }}</span>
       </v-btn>
       <v-btn
         large
         depressed
-        @click="cancel"
         data-test="cancel-button"
         class="cancel-button ml-2"
-      > Cancel
+        @click="cancel"
+      >
+        Cancel
       </v-btn>
     </div>
-        <!-- Alert Dialog (Error) -->
+    <!-- Alert Dialog (Error) -->
     <ModalDialog
       ref="errorDialog"
       :title="errorTitle"
@@ -65,10 +78,15 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="primary"
@@ -84,8 +102,8 @@
 
 <script lang="ts">
 import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
-import { CreateRequestBody, Member, MembershipType, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
+import { Component, Emit, Mixins } from 'vue-property-decorator'
+import { CreateRequestBody, Member, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Address } from '@/models/address'

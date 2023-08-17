@@ -1,24 +1,33 @@
 <template>
   <div>
-    <p data-test="inviteUserFormText">{{ inviteUserFormText }}</p>
-    <v-form ref="form" class="mt-9">
+    <p data-test="inviteUserFormText">
+      {{ inviteUserFormText }}
+    </p>
+    <v-form
+      ref="form"
+      class="mt-9"
+    >
       <div class="invite-list">
         <transition-group name="slide-y-transition">
-          <div class="d-flex" v-for="(invite, index) in invitations" v-bind:key="index + 1">
+          <div
+            v-for="(invite, index) in invitations"
+            :key="index + 1"
+            class="d-flex"
+          >
             <v-text-field
+              v-model="invitations[index].emailAddress"
               dense
               filled
               label="Email Address"
-              v-model="invitations[index].emailAddress"
               :rules="emailRules"
               :data-test="getIndexedTag('email-address', index)"
-            ></v-text-field>
+            />
 
             <v-overflow-btn
+              v-model="invitations[index].selectedRole.name"
               filled
               hide-details
               class="select-role-btn ml-2"
-              v-model="invitations[index].selectedRole.name"
               item-text="name"
               item-value="name"
               menu-props="dense"
@@ -26,15 +35,14 @@
               :value="availableRoles[0]"
               :data-test="getIndexedTag('role-selector', index)"
             >
-              <template v-slot:selection="{ item }">
+              <template #selection="{ item }">
                 {{ item.displayName }}
               </template>
 
-              <template v-slot:item="{ item }">
+              <template #item="{ item }">
                 <div class="role-menu-item">
                   <v-list-item-icon>
-                  <v-icon v-text="item.icon" />
-
+                    <v-icon v-text="item.icon" />
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title>{{ item.displayName }}</v-list-item-title>
@@ -42,32 +50,48 @@
                   </v-list-item-content>
                 </div>
               </template>
-
             </v-overflow-btn>
 
-            <v-btn icon class="mt-3 ml-1"
-              @click="removeEmail(index)">
+            <v-btn
+              icon
+              class="mt-3 ml-1"
+              @click="removeEmail(index)"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
         </transition-group>
       </div>
-      <v-btn text small color="primary" class="pr-3 pl-1"
-        @click="addEmail()" data-test="add-another-button">
+      <v-btn
+        text
+        small
+        color="primary"
+        class="pr-3 pl-1"
+        data-test="add-another-button"
+        @click="addEmail()"
+      >
         <v-icon>mdi-plus-box</v-icon>
         <span>Add Another</span>
       </v-btn>
       <div class="form__btns">
-        <v-btn large depressed color="primary"
-          @click="sendInvites"
+        <v-btn
+          large
+          depressed
+          color="primary"
           :loading="loading"
           :disabled="loading || !isFormValid()"
           data-test="send-invites-button"
+          @click="sendInvites"
         >
           <span>Send Invites</span>
         </v-btn>
-        <v-btn large depressed class="ml-2" data-test="cancel-button"
-          @click="cancel">
+        <v-btn
+          large
+          depressed
+          class="ml-2"
+          data-test="cancel-button"
+          @click="cancel"
+        >
           <span>Cancel</span>
         </v-btn>
       </div>
@@ -76,13 +100,11 @@
 </template>
 
 <script lang="ts">
-import { AccessType, LoginSource } from '@/util/constants'
-import { Component, Emit, Vue } from 'vue-property-decorator'
-import { Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
+import { Component, Emit } from 'vue-property-decorator'
+import { MembershipType, RoleInfo } from '@/models/Organization'
 import { mapActions, mapMutations, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import OrgModule from '@/store/modules/org'
 import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
 import { getModule } from 'vuex-module-decorators'

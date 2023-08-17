@@ -125,7 +125,8 @@ export function getRoutes (): RouteConfig[] {
   const accountSettings = () => import('../views/auth/AccountSettings.vue')
   const accountInfo = () => import('../components/auth/account-settings/account-info/AccountInfo.vue')
   const teamManagement = () => import('../components/auth/account-settings/team-management/TeamManagement.vue')
-  const accountLoginOption = () => import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
+  const accountLoginOption = () =>
+    import('../components/auth/account-settings/login-options/AccountSettingsLoginOption.vue')
   const accountPaymentOption = () => import('../components/auth/account-settings/payment/AccountPaymentMethods.vue')
   const transaction = () => import('../components/auth/account-settings/transaction/Transactions.vue')
   const statements = () => import('../components/auth/account-settings/statement/Statements.vue')

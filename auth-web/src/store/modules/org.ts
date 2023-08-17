@@ -748,34 +748,30 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async createUsers (addUserBody: AddUsersToOrgBody) {
-    try {
-      const response = await UserService.createUsers(addUserBody)
-      if (!response || !response.data || ![200, 201, 207].includes(response.status) || !response.data?.users) {
-        throw new Error('Unable to create users')
-      } else {
-        let users = response.data.users
-        let successUsers: BulkUsersSuccess[] = []
-        let failedUsers: BulkUsersFailed[] = []
-        users.forEach((user) => {
-          if (user.httpStatus === 201) {
-            const password = (addUserBody.users.find(({ username }) => username === user.firstname))?.password
-            successUsers.push({
-              username: user.firstname,
-              password: password
-            })
-          } else {
-            failedUsers.push({
-              username: user.username,
-              error: user.error
-            })
-          }
-        })
-        this.context.commit('setCreatedUsers', successUsers)
-        this.context.commit('setFailedUsers', failedUsers)
-        await this.context.dispatch('syncActiveOrgMembers')
-      }
-    } catch (exception) {
-      throw exception
+    const response = await UserService.createUsers(addUserBody)
+    if (!response || !response.data || ![200, 201, 207].includes(response.status) || !response.data?.users) {
+      throw new Error('Unable to create users')
+    } else {
+      const users = response.data.users
+      const successUsers: BulkUsersSuccess[] = []
+      const failedUsers: BulkUsersFailed[] = []
+      users.forEach((user) => {
+        if (user.httpStatus === 201) {
+          const password = (addUserBody.users.find(({ username }) => username === user.firstname))?.password
+          successUsers.push({
+            username: user.firstname,
+            password: password
+          })
+        } else {
+          failedUsers.push({
+            username: user.username,
+            error: user.error
+          })
+        }
+      })
+      this.context.commit('setCreatedUsers', successUsers)
+      this.context.commit('setFailedUsers', failedUsers)
+      await this.context.dispatch('syncActiveOrgMembers')
     }
   }
 
@@ -796,7 +792,8 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async getStatement (statementParams) {
-    const response = await PaymentService.getStatement(this.context.state['currentOrganization'].id, statementParams.statementId, statementParams.type)
+    const response = await PaymentService.getStatement(
+      this.context.state['currentOrganization'].id, statementParams.statementId, statementParams.type)
     return response || {}
   }
 
@@ -808,7 +805,8 @@ export default class OrgModule extends VuexModule {
 
   @Action({ rawError: true })
   public async updateStatementSettings (statementFrequency) {
-    const response = await PaymentService.updateStatementSettings(this.context.state['currentOrganization'].id, statementFrequency)
+    const response = await PaymentService.updateStatementSettings(
+      this.context.state['currentOrganization'].id, statementFrequency)
     return response?.data || {}
   }
 
@@ -829,7 +827,8 @@ export default class OrgModule extends VuexModule {
     const id = orgId || this.context.state['currentOrganization'].id
     // TODO can refator for performance improvment check on Transactions page getPaymentDetails method for sample code
     const response = await OrgService.getOrgPayments(id)
-    let paymentType = response?.data?.futurePaymentMethod ? response?.data?.futurePaymentMethod : response?.data?.paymentMethod || undefined
+    let paymentType = response?.data?.futurePaymentMethod
+      ? response?.data?.futurePaymentMethod : response?.data?.paymentMethod || undefined
     paymentType = (paymentType === PaymentTypes.DIRECT_PAY) ? PaymentTypes.CREDIT_CARD : paymentType
     this.context.commit('setCurrentOrganizationPaymentType', paymentType)
     // setting padinfo for showing details

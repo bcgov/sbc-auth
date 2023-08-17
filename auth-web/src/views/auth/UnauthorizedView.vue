@@ -1,14 +1,42 @@
 <template>
   <v-container class="view-container">
     <v-row justify="center">
-      <v-col cols="12" lg="8" class="text-center">
-        <v-icon size="48" color="error" class="mb-6">mdi-lock-outline</v-icon>
-        <h1>{{$t('notAuthorized')}}</h1>
-        <p class="mt-8 mb-10">{{ errorMessage }}</p>
+      <v-col
+        cols="12"
+        lg="8"
+        class="text-center"
+      >
+        <v-icon
+          size="48"
+          color="error"
+          class="mb-6"
+        >
+          mdi-lock-outline
+        </v-icon>
+        <h1>{{ $t('notAuthorized') }}</h1>
+        <p class="mt-8 mb-10">
+          {{ errorMessage }}
+        </p>
         <div class="btns">
-          <v-btn large link color="primary" href="./">Go to Homepage</v-btn>
-          <v-btn large outlined link color="primary" class="ml-1" href="mailto:SBC_ITOperationsSupport@gov.bc.ca?subject=BC Registries Application Support Request"
-            v-if="isStaff">Contact Support</v-btn>
+          <v-btn
+            large
+            link
+            color="primary"
+            href="./"
+          >
+            Go to Homepage
+          </v-btn>
+          <v-btn
+            v-if="isStaff"
+            large
+            outlined
+            link
+            color="primary"
+            class="ml-1"
+            href="mailto:SBC_ITOperationsSupport@gov.bc.ca?subject=BC Registries Application Support Request"
+          >
+            Contact Support
+          </v-btn>
         </div>
       </v-col>
     </v-row>
@@ -16,9 +44,9 @@
 </template>
 
 <script lang="ts">
-import { IdpHint, LoginSource, Role } from '@/util/constants'
 import { Component } from 'vue-property-decorator'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { Role } from '@/util/constants'
 import Vue from 'vue'
 import { mapState } from 'vuex'
 

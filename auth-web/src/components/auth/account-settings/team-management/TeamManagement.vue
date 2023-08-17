@@ -2,10 +2,10 @@
   <v-container class="team-mgmt-container">
     <UserManagement
       v-if="!isAnonymousAccount()"
-     ></UserManagement>
+    />
     <AnonymousUserManagement
-        v-if="isAnonymousAccount()"
-    ></AnonymousUserManagement>
+      v-if="isAnonymousAccount()"
+    />
   </v-container>
 </template>
 

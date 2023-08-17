@@ -1,64 +1,86 @@
 <template>
-  <v-form ref="form"  data-test="form-govm-contact">
-    <p class="mb-9">Enter the IDIR email address of the ministry's employee.
-        An email will be sent this user to verify and activate this account. This user will be the admin of this account.</p>
-    <v-row >
-      <v-col cols="12" class="py-0 mb-4">
+  <v-form
+    ref="form"
+    data-test="form-govm-contact"
+  >
+    <p class="mb-9">
+      Enter the IDIR email address of the ministry's employee.
+      An email will be sent this user to verify and activate this account. This user will be the admin of this account.
+    </p>
+    <v-row>
+      <v-col
+        cols="12"
+        class="py-0 mb-4"
+      >
         <h4
           class="mb-1"
-        >Account Admin Contact</h4>
+        >
+          Account Admin Contact
+        </h4>
       </v-col>
     </v-row>
     <!-- Email Address -->
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="emailAddress"
           filled
           label="Email Address"
           req
           persistent-hint
-          v-model="emailAddress"
           data-test="email"
           readonly
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
     <v-row>
-      <v-col cols="12" class="pt-0 pb-0">
+      <v-col
+        cols="12"
+        class="pt-0 pb-0"
+      >
         <v-text-field
+          v-model="confirmedEmailAddress"
           filled
           label="Confirm Email Address"
           req
           persistent-hint
-          v-model="confirmedEmailAddress"
           data-test="confirm-email"
           readonly
-        >
-        </v-text-field>
+        />
       </v-col>
     </v-row>
-    <v-divider class="mt-7 mb-10"></v-divider>
+    <v-divider class="mt-7 mb-10" />
 
     <v-row>
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
         <v-btn
           large
           depressed
           color="default"
-          @click="goBack"
           data-test="btn-back"
+          @click="goBack"
         >
-          <v-icon left class="mr-2">mdi-arrow-left</v-icon>
+          <v-icon
+            left
+            class="mr-2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           class="save-continue-button mr-3"
-          @click="createAccount"
           data-test="next-button"
+          @click="createAccount"
         >
           <span>
             Create Account
@@ -68,16 +90,15 @@
           :showConfirmPopup="true"
           :isEmit="true"
           @click-confirm="cancel"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
-
   </v-form>
 </template>
 
 <script lang="ts">
 
-import { Component, Emit, Mixins, Prop, Vue } from 'vue-property-decorator'
+import { Component, Emit, Mixins } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'

@@ -1,13 +1,33 @@
 <template>
-  <v-card id="administrative-bn" class="pa-8" flat>
+  <v-card
+    id="administrative-bn"
+    class="pa-8"
+    flat
+  >
     <div class="view-header flex-column">
       <v-row no-gutters>
-        <v-col col="6">
-          <h2 class="view-header__title">Administrative BN</h2>
+        <v-col class="col">
+          <h2 class="view-header__title">
+            Administrative BN
+          </h2>
         </v-col>
-        <v-col col="6" class="pr-0" align="right">
-          <v-btn link color="primary" v-if="businessDetails" @click="resetSearch()">Search another Business</v-btn>
-          <v-btn link class="ml-2" v-if="businessDetails" @click="reload()">Reload</v-btn>
+        <v-col class="pr-0 col align">
+          <v-btn
+            v-if="businessDetails"
+            link
+            color="primary"
+            @click="resetSearch()"
+          >
+            Search another Business
+          </v-btn>
+          <v-btn
+            v-if="businessDetails"
+            link
+            class="ml-2"
+            @click="reload()"
+          >
+            Reload
+          </v-btn>
         </v-col>
       </v-row>
     </div>
@@ -18,21 +38,28 @@
       </p>
 
       <v-alert
-        type="error" icon="mdi-alert-circle" class="mb-0"
         v-if="errorMessage"
+        type="error"
+        icon="mdi-alert-circle"
+        class="mb-0"
       >
         {{ errorMessage }} <strong>{{ searchedBusinessIdentifier }}</strong>
       </v-alert>
 
-      <v-form ref="searchBusinessForm" v-on:submit.prevent="search">
+      <v-form
+        ref="searchBusinessForm"
+        @submit.prevent="search"
+      >
         <v-text-field
-          filled dense persistent-hint
+          id="txtBusinessNumber"
+          v-model="businessIdentifier"
+          filled
+          dense
+          persistent-hint
           label="Incorporation Number or Registration Number"
           hint="Example: BC1234567, CP1234567 or FM1234567"
-          @blur="formatBusinessIdentifier()"
           :rules="businessIdentifierRules"
-          v-model="businessIdentifier"
-          id="txtBusinessNumber"
+          @blur="formatBusinessIdentifier()"
         />
         <v-btn
           color="primary"
@@ -49,25 +76,40 @@
     <template v-else>
       <div class="business-details">
         <v-row no-gutters>
-          <v-col cols="4" class="pr-4">
+          <v-col
+            cols="4"
+            class="pr-4"
+          >
             <strong>Business Name</strong>
           </v-col>
           <v-col cols="5">
             {{ businessDetails.legalName }}
           </v-col>
-          <v-col cols="3" align="right">
+          <v-col
+            class="align"
+            cols="3"
+          >
             <v-btn
-              small text color="primary"
+              small
+              text
+              color="primary"
               @click="downloadBusinessSummary(businessDetails.identifier)"
               v-on="on"
             >
-              <img src="@/assets/img/business_summary_icon.svg" alt="" class="pa-1">
+              <img
+                src="@/assets/img/business_summary_icon.svg"
+                alt=""
+                class="pa-1"
+              >
               <span class="font-13 ml-1">Business Summary</span>
             </v-btn>
           </v-col>
         </v-row>
         <v-row no-gutters>
-          <v-col cols="4" class="pr-4">
+          <v-col
+            cols="4"
+            class="pr-4"
+          >
             <strong>Incorporation Number or Registration Number</strong>
           </v-col>
           <v-col cols="8">
@@ -75,7 +117,10 @@
           </v-col>
         </v-row>
         <v-row no-gutters>
-          <v-col cols="4" class="pr-4">
+          <v-col
+            cols="4"
+            class="pr-4"
+          >
             <strong>Business Number (BN9/BN15)</strong>
           </v-col>
           <v-col cols="8">
@@ -85,34 +130,41 @@
       </div>
 
       <div class="mt-10">
-        <v-alert type="error" icon="mdi-alert-circle" class="mb-0" v-if="submitBNRequestErrorMessage">
+        <v-alert
+          v-if="submitBNRequestErrorMessage"
+          type="error"
+          icon="mdi-alert-circle"
+          class="mb-0"
+        >
           {{ submitBNRequestErrorMessage }}
         </v-alert>
-        <v-alert type="success" v-if="requestQueued">
+        <v-alert
+          v-if="requestQueued"
+          type="success"
+        >
           BN request queued.
         </v-alert>
 
         <v-form
           ref="submitBNRequestForm"
-          v-on:submit.prevent="submitBNRequest"
+          @submit.prevent="submitBNRequest"
         >
           <v-checkbox
             v-model="requestCRA"
             class="mt-0 pt-0"
             label="Request CRA to assign a Program Account (BN15)"
             :disabled="!canRequestNewBN()"
-          >
-          </v-checkbox>
+          />
           <!-- Business Number -->
           <v-text-field
+            v-model="businessNumber"
+            v-mask="['#########']"
             dense
             filled
             persistent-hint
             class="business-number"
             label="Business Number (Optional)"
             hint="First 9 digits of the CRA Business Number"
-            v-model="businessNumber"
-            v-mask="['#########']"
             :rules="businessNumberRules"
             :disabled="!requestCRA"
           />
@@ -130,7 +182,10 @@
       </div>
 
       <v-row no-gutters>
-        <v-col cols="12" class="mt-10">
+        <v-col
+          cols="12"
+          class="mt-10"
+        >
           <BNRequestManager
             :businessIdentifier="businessDetails.identifier"
           />

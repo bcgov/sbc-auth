@@ -2,69 +2,115 @@
   <v-container id="incorporate-info-container">
     <v-row>
       <!-- Info Column -->
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <h2>Register or Incorporate</h2>
-        <v-list class="py-0 mt-4 mb-6" color="transparent">
+        <v-list
+          class="py-0 mt-4 mb-6"
+          color="transparent"
+        >
           <v-list-item class="list-item">
-            <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+            <v-icon
+              size="8"
+              class="list-item-bullet mt-5"
+            >
+              mdi-square
+            </v-icon>
             <v-list-item-content>
               <v-list-item-subtitle class="list-item-text">
                 Once your Name Request is approved, visit
-                <a class="body-1 font-weight-bold my-registry-text" @click="emitRedirectManage()">
+                <a
+                  class="body-1 font-weight-bold my-registry-text"
+                  @click="emitRedirectManage()"
+                >
                   My Business Registry</a>
                 page and use the Name Request Number to:
               </v-list-item-subtitle>
-              <template>
-                <v-list-item class="list-item" v-for="(item, index) in bulletPointList" :key="index" >
-                  <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
-                  <v-list-item-content>
-                    <v-list-item-subtitle class="list-item-text">
-                      {{item.text}}
-                    </v-list-item-subtitle>
-                  </v-list-item-content>
-                </v-list-item>
-              </template>
+              <v-list-item
+                v-for="(item, index) in bulletPointList"
+                :key="index"
+                class="list-item"
+              >
+                <v-icon
+                  size="8"
+                  class="list-item-bullet mt-5"
+                >
+                  mdi-square
+                </v-icon>
+                <v-list-item-content>
+                  <v-list-item-subtitle class="list-item-text">
+                    {{ item.text }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
             </v-list-item-content>
           </v-list-item>
-          <div class="pb-3">To register or incorporate, you will be asked for the following information:</div>
+          <div class="pb-3">
+            To register or incorporate, you will be asked for the following information:
+          </div>
 
           <!-- enableBcCccUlc feature flag-->
           <template v-if="enableBcCccUlc">
-            <v-expansion-panels flat tile accordion>
+            <v-expansion-panels
+              flat
+              tile
+              accordion
+            >
               <v-expansion-panel class="incorp-expansion-panels">
                 <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                  <template v-slot:actions>
-                    <v-icon color="primary" class="incorp-icon">
+                  <template #actions>
+                    <v-icon
+                      color="primary"
+                      class="incorp-icon"
+                    >
                       $expand
                     </v-icon>
                   </template>
                   Sole Proprietorship, DBA, and General Partnership
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                  <span id="expPnlContent1" class="list-item-text py-3">
+                  <span
+                    id="expPnlContent1"
+                    class="list-item-text py-3"
+                  >
                     The name(s) and address(es) of the proprietor or partner(s).</span>
                 </v-expansion-panel-content>
               </v-expansion-panel>
-              <v-tooltip top max-width="450px" light content-class="tooltip">
-                <template v-slot:activator="{ on }">
+              <v-tooltip
+                top
+                max-width="450px"
+                light
+                content-class="tooltip"
+              >
+                <template #activator="{ on }">
                   <v-expansion-panel class="incorp-expansion-panels">
                     <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                      <template v-slot:actions>
+                      <template #actions>
                         <v-icon color="primary">
                           $expand
                         </v-icon>
                       </template>
-                      <span class="tooltip-text" v-on="on">B.C. Based Company</span>
+                      <span
+                        class="tooltip-text"
+                        v-on="on"
+                      >B.C. Based Company</span>
                     </v-expansion-panel-header>
                     <v-expansion-panel-content>
-                      <span id="expPnlContent2" class="list-item-text py-3">
+                      <span
+                        id="expPnlContent2"
+                        class="list-item-text py-3"
+                      >
                         Office addresses, director names and addresses, share structure and articles.</span>
                     </v-expansion-panel-content>
                   </v-expansion-panel>
                 </template>
                 <v-card class="tooltip-content">
                   <div>
-                    <h3 class="mb-3">B.C. Based Company</h3>
+                    <h3 class="mb-3">
+                      B.C. Based Company
+                    </h3>
                     <span>You can incorporate the following B.C. based company types: Limited Company, Unlimited
                       Liability Company, Benefit Company, and Community Contribution Company.</span>
                   </div>
@@ -72,7 +118,7 @@
               </v-tooltip>
               <v-expansion-panel class="incorp-expansion-panels">
                 <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                  <template v-slot:actions>
+                  <template #actions>
                     <v-icon color="primary">
                       $expand
                     </v-icon>
@@ -80,7 +126,10 @@
                   Cooperative Association
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                  <span id="expPnlContent3" class="list-item-text py-3">
+                  <span
+                    id="expPnlContent3"
+                    class="list-item-text py-3"
+                  >
                     Office addresses, director names and addresses, rules of the association
                     and memorandum.</span>
                 </v-expansion-panel-content>
@@ -88,10 +137,18 @@
             </v-expansion-panels>
           </template>
           <template v-else>
-            <v-expansion-panels flat tile accordion>
-              <v-expansion-panel v-for="(item, index) in expansionPanels" :key="index" class="incorp-expansion-panels">
+            <v-expansion-panels
+              flat
+              tile
+              accordion
+            >
+              <v-expansion-panel
+                v-for="(item, index) in expansionPanels"
+                :key="index"
+                class="incorp-expansion-panels"
+              >
                 <v-expansion-panel-header class="incorp-expansion-header font-weight-bold">
-                  <template v-slot:actions>
+                  <template #actions>
                     <v-icon color="primary">
                       $expand
                     </v-icon>
@@ -99,40 +156,61 @@
                   {{ item.text }}
                 </v-expansion-panel-header>
                 <v-expansion-panel-content>
-                    <v-list-item-content>
-                      <v-list-item class="list-item" v-for="(subItem, subIndex) in item.items" :key="subIndex">
-                        <v-list-item-content>
-                          <v-list-item-subtitle class="list-item-text py-3">
-                            {{subItem.text}}
-                          </v-list-item-subtitle>
-                        </v-list-item-content>
-                      </v-list-item>
-                    </v-list-item-content>
+                  <v-list-item-content>
+                    <v-list-item
+                      v-for="(subItem, subIndex) in item.items"
+                      :key="subIndex"
+                      class="list-item"
+                    >
+                      <v-list-item-content>
+                        <v-list-item-subtitle class="list-item-text py-3">
+                          {{ subItem.text }}
+                        </v-list-item-subtitle>
+                      </v-list-item-content>
+                    </v-list-item>
+                  </v-list-item-content>
                 </v-expansion-panel-content>
               </v-expansion-panel>
             </v-expansion-panels>
           </template>
         </v-list>
         <!-- Panel Btns -->
-        <template>
-          <v-btn large color="bcgovblue" class="cta-btn font-weight-bold mr-2 white--text registry-btn"
-            @click="emitRedirectManage()">
-            Go to My Business Registry
-          </v-btn>
-        </template>
-        <LearnMoreButton isWide=true :redirect-url="learnMoreUrl"/>
+        <v-btn
+          large
+          color="bcgovblue"
+          class="cta-btn font-weight-bold mr-2 white--text registry-btn"
+          @click="emitRedirectManage()"
+        >
+          Go to My Business Registry
+        </v-btn>
+        <LearnMoreButton
+          isWide="true"
+          :redirect-url="learnMoreUrl"
+        />
         <div class="d-flex mt-8">
           <span class="body-1">New to BC Registries?</span>
-          <router-link class="ml-2 body-1 font-weight-bold"
+          <router-link
+            class="ml-2 body-1 font-weight-bold"
             to="/choose-authentication-method"
-          >Create a BC Registries Account
+          >
+            Create a BC Registries Account
           </router-link>
         </div>
       </v-col>
       <!-- Image Column -->
-      <v-col cols="12" md="6">
-        <a :href="learnMoreUrl" target="_blank">
-          <v-img src="../../../assets/img/Step3_Incorporate_x2.png" aspect-ratio="1.2" contain></v-img>
+      <v-col
+        cols="12"
+        md="6"
+      >
+        <a
+          :href="learnMoreUrl"
+          target="_blank"
+        >
+          <v-img
+            src="../../../assets/img/Step3_Incorporate_x2.png"
+            aspect-ratio="1.2"
+            contain
+          />
         </a>
       </v-col>
     </v-row>
@@ -171,7 +249,7 @@ export default class IncorpOrRegisterView extends Vue {
   ]
 
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
-  private readonly expansionPanels: Array<any> = [
+  readonly expansionPanels: Array<any> = [
     { text: 'Sole Proprietorship, DBA, and General Partnership',
       items: [
         { text: 'The name(s) and address(es) of the proprietor or partner(s).' }
@@ -190,9 +268,9 @@ export default class IncorpOrRegisterView extends Vue {
   ]
 
   @Prop()
-  private userProfile: User
+  readonly userProfile: User
 
-  private emitRedirectManage () {
+  emitRedirectManage () {
     if (this.userProfile) {
       this.emitManageBusinesses()
     } else {
@@ -201,13 +279,13 @@ export default class IncorpOrRegisterView extends Vue {
   }
 
   @Emit('login')
-  private emitLogin (): void {}
+  emitLogin (): void {}
 
   @Emit('account-dialog')
-  private emitAccountDialog (): void {}
+  emitAccountDialog (): void {}
 
   @Emit('manage-businesses')
-  private emitManageBusinesses (): void {}
+  emitManageBusinesses (): void {}
 
   get enableBcCccUlc (): boolean {
     return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false

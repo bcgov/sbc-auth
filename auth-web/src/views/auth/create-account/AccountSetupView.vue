@@ -1,22 +1,37 @@
 <template>
-  <v-container class="view-container" data-test="div-account-setup-container">
+  <v-container
+    class="view-container"
+    data-test="div-account-setup-container"
+  >
     <!-- Loading status -->
     <v-fade-transition>
-      <div class="loading-container" v-if="isCurrentUserSettingLoading">
-        <v-progress-circular size="50" width="5" color="primary" :indeterminate="isCurrentUserSettingLoading"/>
+      <div
+        v-if="isCurrentUserSettingLoading"
+        class="loading-container"
+      >
+        <v-progress-circular
+          size="50"
+          width="5"
+          color="primary"
+          :indeterminate="isCurrentUserSettingLoading"
+        />
       </div>
     </v-fade-transition>
     <template v-if="!isCurrentUserSettingLoading">
       <div class="view-header flex-column">
-        <h1 class="view-header__title">{{$t('createBCRegistriesAccount')}}</h1>
-        <p class="mt-3 mb-0">Create an account to access BC Registries products and services.</p>
+        <h1 class="view-header__title">
+          {{ $t('createBCRegistriesAccount') }}
+        </h1>
+        <p class="mt-3 mb-0">
+          Create an account to access BC Registries products and services.
+        </p>
       </div>
       <v-card flat>
         <Stepper
           :stepper-configuration="stepperConfig"
           :isLoading="isLoading"
           @final-step-action="verifyAndCreateAccount"
-        ></Stepper>
+        />
       </v-card>
       <!-- Alert Dialog (Error) -->
       <ModalDialog
@@ -27,10 +42,15 @@
         max-width="640"
         data-test="modal-account-setup-error"
       >
-        <template v-slot:icon>
-          <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+        <template #icon>
+          <v-icon
+            large
+            color="error"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
         </template>
-        <template v-slot:actions>
+        <template #actions>
           <v-btn
             large
             color="error"
@@ -47,7 +67,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { LDFlags, Pages, PaymentTypes, SessionStorageKeys } from '@/util/constants'
+import { LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
 import { mapActions, mapState } from 'vuex'

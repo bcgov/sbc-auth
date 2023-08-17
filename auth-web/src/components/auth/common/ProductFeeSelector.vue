@@ -1,42 +1,51 @@
 <template>
-
-  <v-form ref="productFeeForm" id="productFeeForm" class="fee-form">
-    <v-row >
-      <v-col cols="6" class="pt-0">
+  <v-form
+    id="productFeeForm"
+    ref="productFeeForm"
+    class="fee-form"
+  >
+    <v-row>
+      <v-col
+        cols="6"
+        class="pt-0"
+      >
         <v-select
+          v-model="applyFilingFees"
           filled
           label="Statutory fee"
           item-text="text"
           item-value="value"
           :items="applyFilingFeesValues"
           :rules="applyFilingFeesRules"
-          v-model="applyFilingFees"
-          @change="selectChange"
           :data-test="getIndexedTag('select-apply-filing-fees', index)"
           req
           :disabled="!canSelect"
           class="fee-form"
+          @change="selectChange"
         />
       </v-col>
-      <v-col cols="6" class="pt-0">
+      <v-col
+        cols="6"
+        class="pt-0"
+      >
         <v-select
+          v-model="serviceFeeCode"
           filled
           label="Service fee"
           :rules="serviceFeeCodeRules"
           :items="orgProductFeeCodes"
           item-text="amount"
           item-value="code"
-          v-model="serviceFeeCode"
-          @change="selectChange"
           :data-test="getIndexedTag('select-service-fee-code', index)"
           req
           :disabled="!canSelect"
           class="fee-form"
+          @change="selectChange"
         >
-          <template slot="selection" slot-scope="data">
+          <template #selection="data">
             $ {{ data.item.amount.toFixed(2) }}
           </template>
-          <template slot="item" slot-scope="data">
+          <template #item="data">
             {{ displayProductFee(data.item.amount) }}
           </template>
         </v-select>

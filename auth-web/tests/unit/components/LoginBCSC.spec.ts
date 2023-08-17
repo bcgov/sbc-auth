@@ -6,7 +6,6 @@ import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-// @ts-ignore
 Vue.use(VueCompositionAPI)
 Vue.use(VueRouter)
 Vue.use(Vuetify)

@@ -9,7 +9,6 @@ Vue.use(Vuetify)
 document.body.setAttribute('data-app', 'true')
 
 describe('ProductFeeViewEdit.vue', () => {
-  let wrapper: any
   const vuetify = new Vuetify({})
   const localVue = createLocalVue()
 
@@ -18,7 +17,7 @@ describe('ProductFeeViewEdit.vue', () => {
   const orgProduct =
     { 'applyFilingFees': true, 'id': 45, 'product': 'BUSINESS', 'serviceFeeCode': 'TRF01' }
 
-  wrapper = shallowMount(ProductFee, {
+  const wrapper = shallowMount(ProductFee, {
     localVue,
     vuetify,
     propsData: {

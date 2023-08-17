@@ -25,8 +25,8 @@ document.body.setAttribute('data-app', 'true')
 
 describe('AccountAuthorizationRequest tests', () => {
   let wrapper: Wrapper<any>
-  let sandbox: any = sinon.createSandbox()
-  let localVue: VueConstructor<Vue> = createLocalVue()
+  const sandbox: any = sinon.createSandbox()
+  const localVue: VueConstructor<Vue> = createLocalVue()
 
   function _getWrapper (businessIdentifier: string, businessName: string, orgsDetailsExample) {
     const get = sandbox.stub(axios, 'get')
@@ -89,12 +89,15 @@ describe('AccountAuthorizationRequest tests', () => {
 
     // verify that account is selected and selector disabled
     expect(wrapper.find('#account-authorization-request-request-account-select').attributes().disabled).toBeDefined()
-    expect(wrapper.find('.v-select__selection--comma').text()).toBe(orgsDetailsByAffiliationSingleItemResponse.orgsDetails[0].name)
-    expect(wrapper.findAll('.v-list-item__title').length === orgsDetailsByAffiliationSingleItemResponse.orgsDetails.length)
+    expect(wrapper.find('.v-select__selection--comma').text())
+      .toBe(orgsDetailsByAffiliationSingleItemResponse.orgsDetails[0].name)
+    expect(wrapper.findAll('.v-list-item__title').length ===
+      orgsDetailsByAffiliationSingleItemResponse.orgsDetails.length)
   })
 
   it('renders enabled select with no preselected item, when multiple affiliated accounts found', async () => {
-    wrapper = _getWrapper('CP0001847', 'Multiple affiliations business  BC Ltd.', orgsDetailsByAffiliationMultipleItemsResponse)
+    wrapper = _getWrapper('CP0001847', 'Multiple affiliations business  BC Ltd.',
+      orgsDetailsByAffiliationMultipleItemsResponse)
 
     await flushPromises()
 
@@ -105,6 +108,7 @@ describe('AccountAuthorizationRequest tests', () => {
 
     // verify that account is selected and selector disabled
     expect(wrapper.find('#account-authorization-request-request-account-select').attributes().disabled).toBeUndefined()
-    expect(wrapper.findAll('.v-list-item__title').length === orgsDetailsByAffiliationMultipleItemsResponse.orgsDetails.length)
+    expect(wrapper.findAll('.v-list-item__title').length ===
+      orgsDetailsByAffiliationMultipleItemsResponse.orgsDetails.length)
   })
 })
