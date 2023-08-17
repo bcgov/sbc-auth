@@ -12,12 +12,12 @@ import can from '@/directives/can'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n)
+Vue.use(VueI18n, { bridge: true })
 Vue.directive('can', can)
 
 const vuetify = new Vuetify({})
 
-jest.mock('../../../src/services/bcol.services')
+vi.mock('../../../src/services/bcol.services')
 
 const membersList = [{
   'id': 2909,
@@ -142,7 +142,7 @@ describe('MemberDataTable.vue', () => {
     PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -152,7 +152,7 @@ describe('MemberDataTable.vue', () => {
 
     const router = new VueRouter()
 
-    OrgService.getOrgMembers = jest.fn().mockResolvedValue({
+    OrgService.getOrgMembers = vi.fn().mockResolvedValue({
       data: {
         members: membersList
       }
@@ -171,12 +171,12 @@ describe('MemberDataTable.vue', () => {
         }]
       },
       actions: {
-        createInvitation: jest.fn(),
-        resendInvitation: jest.fn()
+        createInvitation: vi.fn(),
+        resendInvitation: vi.fn()
       },
       mutations: {
-        resetInvitations: jest.fn(),
-        setCurrentMembership: jest.fn()
+        resetInvitations: vi.fn(),
+        setCurrentMembership: vi.fn()
       },
       getters: OrgModule.getters
     }
@@ -187,7 +187,7 @@ describe('MemberDataTable.vue', () => {
         roleInfos: roleInfoList
       },
       actions: {
-        getRoleInfo: jest.fn()
+        getRoleInfo: vi.fn()
       },
       getters: UserModule.getters
     }
@@ -211,8 +211,8 @@ describe('MemberDataTable.vue', () => {
       mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
   afterAll(() => {
     wrapper.destroy()

@@ -6,9 +6,11 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { install } from 'vue-demi'
 
 Vue.use(VueRouter)
 Vue.use(Vuetify)
+
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 const en = {
@@ -18,20 +20,21 @@ const en = {
   deactivateMemberRemovalTitle: 'i8n deactivateMemberRemovalTitle',
   padRemovalTitle: 'i8n padRemovalTitle'
 }
-const i18n = MockI18n.mock(en)
 
 function assertElements (wrapper: any) {
-  expect(wrapper.text()).toContain(en.deactivateMemberRemovalTitle)
-  expect(wrapper.text()).toContain(en.businessRemovalTitle)
-  expect(wrapper.text()).toContain(en.deactivateMemberRemovalDesc)
-  expect(wrapper.text()).toContain(en.businessRemovalDesc)
+  expect(wrapper.text()).toContain(en.deactivateMemberRemovalTitle.replace('i8n ', ''))
+  expect(wrapper.text()).toContain(en.businessRemovalTitle.replace('i8n ', ''))
+  expect(wrapper.text()).toContain(en.deactivateMemberRemovalDesc.replace('i8n ', ''))
+  expect(wrapper.text()).toContain(en.businessRemovalDesc.replace('i8n ', ''))
 }
 
 describe('Deactivated card.vue', () => {
   let wrapper: any
   const localVue = createLocalVue()
   localVue.use(Vuex)
-  localVue.use(i18n)
+  install(localVue)
+  const i18n = MockI18n.mock(en)
+  localVue.use(i18n as any, { bridge: true })
 
   afterEach(() => {
     wrapper.destroy()
@@ -86,7 +89,7 @@ describe('Deactivated card.vue', () => {
 
     expect(wrapper.props('type')).toBe(Account.PREMIUM)
     assertElements(wrapper)
-    expect(wrapper.text()).toContain(en.padRemovalTitle) // this is only for premium orgs
+    expect(wrapper.text()).toContain(en.padRemovalTitle.replace('i8n ', '')) // this is only for premium orgs
   })
   it('assert subtitle for a basic org', async () => {
     wrapper = mount(DeactivateCard, {

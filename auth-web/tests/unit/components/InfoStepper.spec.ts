@@ -1,13 +1,10 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
@@ -47,8 +44,8 @@ describe('InfoStepper.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

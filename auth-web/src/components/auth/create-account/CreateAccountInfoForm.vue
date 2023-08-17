@@ -33,35 +33,35 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class CreateAccountInfoForm extends Mixins(Steppable) {
-    private orgStore = getModule(OrgModule, this.$store)
-    private username = ''
-    private password = ''
-    private errorMessage: string = ''
-    private saving = false
-    private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
-    private readonly syncMembership!: (orgId: number) => Promise<Member>
-    private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-    private readonly currentOrganization!: Organization
-    private readonly currentUser!: KCUserProfile
+  private orgStore = getModule(OrgModule, this.$store)
+  private username = ''
+  private password = ''
+  private errorMessage: string = ''
+  private saving = false
+  private readonly createOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  private readonly syncMembership!: (orgId: number) => Promise<Member>
+  private readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  private readonly currentOrganization!: Organization
+  private readonly currentUser!: KCUserProfile
 
-    $refs: {
+  $refs: {
       createAccountInfoForm: HTMLFormElement
     }
 
-    private readonly teamNameRules = [
-      v => !!v || 'An account name is required']
+  private readonly teamNameRules = [
+    v => !!v || 'An account name is required']
 
-    private isFormValid (): boolean {
-      return !!this.username && !!this.password
-    }
+  private isFormValid (): boolean {
+    return !!this.username && !!this.password
+  }
 
-    private isPremium () {
-      return this.currentOrganization.orgType === Account.PREMIUM
-    }
+  private isPremium () {
+    return this.currentOrganization.orgType === Account.PREMIUM
+  }
 
-    private redirectToNext (organization?: Organization) {
-      this.$router.push({ path: `/account/${organization.id}/` })
-    }
+  private redirectToNext (organization?: Organization) {
+    this.$router.push({ path: `/account/${organization.id}/` })
+  }
 }
 </script>
 

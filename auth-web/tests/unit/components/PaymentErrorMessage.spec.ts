@@ -37,8 +37,8 @@ describe('PaymentErrorMessage.vue', () => {
       mocks: { $t }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

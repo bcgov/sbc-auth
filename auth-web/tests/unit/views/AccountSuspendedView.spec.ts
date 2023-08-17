@@ -1,5 +1,4 @@
-import { createLocalVue, mount } from '@vue/test-utils'
-
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountSuspendedView from '@/views/auth/account-freeze/AccountSuspendedView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -25,16 +24,16 @@ describe('AccountSuspendedView.vue', () => {
   let userModule: any
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
-    wrapper = mount(AccountSuspendedView, {
+    wrapper = shallowMount(AccountSuspendedView, {
       localVue,
       router,
       vuetify,
@@ -61,8 +60,9 @@ describe('AccountSuspendedView.vue', () => {
     wrapper.setProps({ isAdmin: true })
     await flushPromises()
     expect(wrapper.find('h1').text()).toBe('Account Suspended')
-    expect(wrapper.find('[data-test="div-is-admin"]').text()).toContain('Your account is suspended. For more information,')
-    expect(wrapper.find('[data-test="div-is-admin"]').text()).toContain('please contact the BC Online Partnership Office at: Email: bconline@gov.bc.ca Telephone: 1-800-663-6102')
+    const divAdminText = wrapper.find('[data-test="div-is-admin"]').text()
+    expect(divAdminText).toContain('Your account is suspended. For more information,')
+    expect(divAdminText).toContain('please contact the BC Online Partnership Office at:Email: bconline@gov.bc.caTelephone: 1-800-663-6102')
     expect(wrapper.find('[data-test="div-is-user"]').exists()).toBeFalsy()
   })
 })

@@ -2,17 +2,18 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { Task, TaskFilterParams } from '@/models/Task'
 import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import TaskService from '@/services/task.services'
+import store from '..'
 
-@Module({ namespaced: true })
+@Module({ namespaced: true, store, name: 'task', dynamic: true })
 export default class TaskModule extends VuexModule {
-    currentTask: Task
-    pendingTasksCount: number = null
-    rejectedTasksCount: number = null
+  currentTask: Task
+  pendingTasksCount: number = null
+  rejectedTasksCount: number = null
 
     @Mutation
-    public setCurrentTask (task: Task) {
-      this.currentTask = task
-    }
+  public setCurrentTask (task: Task) {
+    this.currentTask = task
+  }
 
     @Mutation
     public setPendingTasksCount (pendingTasksCount: number) {

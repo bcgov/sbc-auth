@@ -25,7 +25,7 @@ describe('PasscodeResetOptionsModal.vue', () => {
     const MyStub = {
       template: '<div />'
     }
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
@@ -61,8 +61,8 @@ describe('PasscodeResetOptionsModal.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 
@@ -72,7 +72,7 @@ describe('PasscodeResetOptionsModal.vue', () => {
 
   it('Donot reset passcode emits remove-business event', () => {
     wrapper.vm.isResetPasscode = false
-    const spy = jest.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
+    const spy = vi.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
 
     wrapper.vm.confirmPasscodeResetOptions()
     expect(spy).toBeCalled()
@@ -94,11 +94,11 @@ describe('PasscodeResetOptionsModal.vue', () => {
     wrapper.vm.emailAddress = emailValue
     wrapper.vm.confirmedEmailAddress = emailValue
 
-    const stub = jest.fn().mockImplementation(() => {
+    const stub = vi.fn().mockImplementation(() => {
       return true
     })
     wrapper.setMethods({ isFormValid: stub })
-    const spy = jest.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
+    const spy = vi.spyOn(wrapper.vm, 'confirmPasscodeResetOptions')
 
     wrapper.vm.confirmPasscodeResetOptions()
     expect(spy).toBeCalled()

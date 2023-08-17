@@ -121,8 +121,7 @@ describe('AccountInformation.vue basic tests', () => {
     // click change
     wrapper.find('.access-type button').trigger('click')
     await Vue.nextTick()
-    // click regular
-    wrapper.findAll('.access-type__radio-grp input').at(0).trigger('click')
+    await wrapper.setData({ selectedAccessType: AccessType.REGULAR })
     await flushPromises()
     const radioOptions = wrapper.findAll('.access-type__radio-grp .v-radio')
     expect(radioOptions.at(0).attributes()['class']).toContain('v-item--active')

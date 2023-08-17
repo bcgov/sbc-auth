@@ -20,7 +20,7 @@ describe('UserProfileForm.vue', () => {
 
   let userModule: any
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
@@ -34,7 +34,7 @@ describe('UserProfileForm.vue', () => {
         }
       },
       actions: {
-        getUserProfile: jest.fn()
+        getUserProfile: vi.fn()
       }
     }
 
@@ -56,8 +56,8 @@ describe('UserProfileForm.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

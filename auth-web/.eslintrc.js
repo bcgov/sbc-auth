@@ -1,7 +1,7 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    es2021: true
   },
   'extends': [
     'plugin:vue/essential',
@@ -16,7 +16,11 @@ module.exports = {
     'no-use-before-define': 'off',
     '@typescript-eslint/no-use-before-define': ['error', { 'functions': false, 'classes': true, 'variables': true }],
     'no-unused-expressions': 'off',
-    '@typescript-eslint/no-unused-expressions': ['error', { 'allowShortCircuit': true, 'allowTernary': true }]
+    '@typescript-eslint/no-unused-expressions': ['error', { 'allowShortCircuit': true, 'allowTernary': true }],
+    'vue/multi-word-component-names': ['error', { 'ignores': ['Transactions'] }],
+    // Not ideal but shallowOnly option isn't working for this, so leaving it off for now.
+    // https://eslint.vuejs.org/rules/no-mutating-props.html
+    'vue/no-mutating-props': 'off'
   },
   parserOptions: {
     parser: '@typescript-eslint/parser',

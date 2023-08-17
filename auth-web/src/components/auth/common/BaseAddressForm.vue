@@ -1,5 +1,5 @@
 <template>
-  <base-address
+  <BaseAddress
     ref="baseAddress"
     :editing="editing"
     :schema="schema"
@@ -12,7 +12,7 @@
 <script lang="ts">
 import { Address, BaseAddressModel } from '@/models/address'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import BaseAddress from 'sbc-common-components/src/components/BaseAddress.vue'
+import BaseAddress from '@bcrs-shared-components/base-address/BaseAddress.vue'
 import CommonUtils from '@/util/common-util'
 
 @Component({

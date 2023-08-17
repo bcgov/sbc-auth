@@ -43,8 +43,8 @@ describe('ProductTOS.vue', () => {
     }
     wrapper = wrapperFactory(props)
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {

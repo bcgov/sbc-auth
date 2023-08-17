@@ -4,14 +4,11 @@ import HomeView from '@/views/auth/home/HomeView.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
 
@@ -28,7 +25,7 @@ describe('HomeView.vue', () => {
   let userModule: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
     localVue.use(VueRouter)
@@ -43,7 +40,7 @@ describe('HomeView.vue', () => {
         }
       },
       actions: {
-        getUserProfile: jest.fn()
+        getUserProfile: vi.fn()
       }
     }
 
@@ -54,8 +51,8 @@ describe('HomeView.vue', () => {
         }
       },
       actions: {
-        syncOrganizations: jest.fn(),
-        syncCurrentOrganization: jest.fn()
+        syncOrganizations: vi.fn(),
+        syncCurrentOrganization: vi.fn()
       }
     }
 
@@ -80,8 +77,8 @@ describe('HomeView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

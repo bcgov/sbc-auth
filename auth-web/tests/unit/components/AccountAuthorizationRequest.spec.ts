@@ -46,7 +46,7 @@ describe('AccountAuthorizationRequest tests', () => {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',
     PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   afterEach(() => {
     wrapper.destroy()

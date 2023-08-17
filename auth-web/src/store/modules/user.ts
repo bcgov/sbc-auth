@@ -12,6 +12,7 @@ import { RoleInfo } from '@/models/Organization'
 import { SessionStorageKeys } from '@/util/constants'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
+import store from '..'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -20,7 +21,9 @@ export interface UserTerms {
 
 @Module({
   name: 'user',
-  namespaced: true
+  namespaced: true,
+  store,
+  dynamic: true
 })
 export default class UserModule extends VuexModule {
   currentUser: KCUserProfile = undefined
