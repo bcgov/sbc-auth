@@ -569,13 +569,11 @@ export default defineComponent({
   .v-dialog {
     > .v-card {
       > div {
-        &:nth-of-type(1) {
+          padding: 16px 40px 0 40px;
+        &:first-of-type {
           padding: 40px 40px 0 40px;
         }
-        &:nth-of-type(2) {
-          padding: 16px 40px 0 40px;
-        }
-        &:nth-of-type(3) {
+        &:last-of-type {
           padding: 40px 40px 40px 40px;
           button {
             padding: 0 20px;
