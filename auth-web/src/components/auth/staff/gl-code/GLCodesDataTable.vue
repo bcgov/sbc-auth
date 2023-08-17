@@ -60,7 +60,7 @@ export default class GLCodesDataTable extends Vue {
   @Prop({ default: '' }) private folioFilter: string
   private readonly getGLCodeList!: () => GLCode[]
 
-  private glCodeList: GLCode[] = [];
+  private glCodeList: GLCode[] = []
   private formatDate = CommonUtils.formatDisplayDate
   private isDataLoading = false
 

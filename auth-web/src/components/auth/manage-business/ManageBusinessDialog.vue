@@ -59,7 +59,7 @@
                       :maxlength="passcodeMaxLength"
                       v-model="passcode"
                       autocomplete="off"
-                      type="password"
+                      type="input"
                       class="passcode mt-0 mb-2"
                       :aria-label="passcodeLabel"
                     />
@@ -196,7 +196,6 @@ import { useStore } from 'vuex-composition-helpers'
 export default defineComponent({
   components: {
     AuthorizationEmailSent,
-    BusinessLookup,
     Certify,
     HelpDialog
   },
@@ -335,7 +334,7 @@ export default defineComponent({
       }
       if (isCooperative.value) {
         return [
-          (v) => !!v || 'Passcode is required',
+          (v) => !!v || 'Passcode is required, enter the passcode you have setup in Corporate Online',
           (v) => CommonUtils.validateCooperativePasscode(v) || 'Passcode must be exactly 9 digits'
         ]
       }
@@ -346,7 +345,7 @@ export default defineComponent({
     })
 
     const passwordText = computed(() => {
-      return (isCooperative.value ? 'passcode' : 'password')
+      return (isCooperative.value ? 'Passcode' : 'password')
     })
 
     const helpDialogBlurb = computed(() => {
@@ -364,8 +363,6 @@ export default defineComponent({
       let isValid = false
       if (isBusinessLegalTypeSPorGP.value) {
         isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
-      } else if (props.isStaffOrSbcStaff && !!businessIdentifier.value) {
-        isValid = true
       } else {
         isValid =
           !!businessIdentifier.value &&
@@ -395,7 +392,8 @@ export default defineComponent({
       nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
-      addBusinessForm.value.resetValidation()
+      // staff workflow, doesn't have this function defined
+      addBusinessForm.value?.resetValidation()
       isLoading.value = false
       if (emitCancel) {
         emit('on-cancel')

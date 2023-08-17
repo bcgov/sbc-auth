@@ -1,3 +1,4 @@
+import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import Vue from 'vue'
@@ -25,11 +26,11 @@ describe('ReviewAccountView.vue', () => {
   localVue.use(Vuex)
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const taskModule = {
       namespaced: true,
       state: {
@@ -37,7 +38,7 @@ describe('ReviewAccountView.vue', () => {
         }
       },
       actions: {
-        getTaskById: jest.fn(() => {
+        getTaskById: vi.fn(() => {
           return {
             'accountId': 2628,
             'created': '2021-04-19T16:21:28.989168+00:00',
@@ -124,8 +125,8 @@ describe('ReviewAccountView.vue', () => {
         }
       },
       actions: {
-        syncOrganizations: jest.fn(),
-        syncCurrentOrganization: jest.fn()
+        syncOrganizations: vi.fn(),
+        syncCurrentOrganization: vi.fn()
       }
     }
 

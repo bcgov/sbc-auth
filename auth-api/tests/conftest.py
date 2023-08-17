@@ -271,14 +271,15 @@ def business_mock(monkeypatch):
             {
                 'identifier': 'CP0002103',
                 'legalName': 'BarFoo, Inc.',
-                'legalType': 'CP'
+                'legalType': 'CP',
+                'state': 'ACTIVE',
             },
             {
 
                 'identifier': 'CP0002104',
                 'legalName': 'BarFooMeToo, Inc.',
-                'legalType': 'CP'
-
+                'legalType': 'CP',
+                'state': 'ACTIVE',
             }
         ]
 

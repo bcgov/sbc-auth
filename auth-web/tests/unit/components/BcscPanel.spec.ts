@@ -2,13 +2,10 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
-// @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
@@ -42,8 +39,8 @@ describe('BcscPanel.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

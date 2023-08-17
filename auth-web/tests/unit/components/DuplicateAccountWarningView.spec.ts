@@ -52,9 +52,9 @@ describe('DuplicateAccountWarningView.vue', () => {
         }
       },
       actions: {
-        addOrgSettings: jest.fn(),
-        syncOrganization: jest.fn(),
-        getOrgAdminContact: jest.fn().mockImplementation(scalar => {
+        addOrgSettings: vi.fn(),
+        syncOrganization: vi.fn(),
+        getOrgAdminContact: vi.fn().mockImplementation(scalar => {
           return { city: 'Halifax',
             country: 'CA',
             created: '2021-05-14T23:53:58.711541',
@@ -77,8 +77,8 @@ describe('DuplicateAccountWarningView.vue', () => {
         user: userModule
       }
     })
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -138,7 +138,7 @@ describe('DuplicateAccountWarningView.vue', () => {
     })
     await Vue.nextTick()
     await Vue.nextTick()
-    const stub = jest.fn()
+    const stub = vi.fn()
     wrapper.setMethods({ navigateToRedirectUrl: stub })
     wrapper.find("[data-test='goto-access-account-button']").trigger('click')
     expect(wrapper.vm.navigateToRedirectUrl).toBeCalled()

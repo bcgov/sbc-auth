@@ -26,7 +26,7 @@ describe('Transactions tests', () => {
     AUTH_API_URL: 'https://localhost:8080/api/v1/app',
     PAY_API_URL: 'https://pay-api.gov.bc.ca/api/v1'
   }
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(config)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(async () => {
     const localVue = createLocalVue()
@@ -38,7 +38,7 @@ describe('Transactions tests', () => {
         currentOrganization: { id: 123 },
         currentMembership: { membershipTypeCode: MembershipType.Admin }
       },
-      actions: { getOrgPayments: jest.fn(() => { return { credit: 0 } }) }
+      actions: { getOrgPayments: vi.fn(() => { return { credit: 0 } }) }
     }
     const store = new Vuex.Store({ strict: false, modules: { org: orgModule } })
 

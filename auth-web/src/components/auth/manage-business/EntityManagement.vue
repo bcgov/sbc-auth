@@ -144,7 +144,7 @@
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
-        @add-success="showAddSuccessModal()"
+        @add-success="showAddSuccessModal"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
@@ -162,6 +162,7 @@
       <AffiliatedEntityTable
         :loading="isLoading"
         @remove-business="showConfirmationOptionsModal($event)"
+        @remove-affiliation-invitation="removeAffiliationInvitation()"
         :highlight-index="highlightIndex"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
       />
@@ -586,7 +587,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showInvalidCodeModal (label: string) {
     this.showManageBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
-    this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
+    this.dialogText = `Unable to add the business. The provided ${label.toLowerCase()} is invalid.`
     this.$refs.errorDialog.open()
   }
 
@@ -667,6 +668,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showAddNRModal () {
     this.dialogTitle = 'Add an Existing Name Request'
     this.$refs.addNRDialog.open()
+  }
+
+  async removeAffiliationInvitation () {
+    await this.syncBusinesses()
   }
 
   showConfirmationOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {

@@ -25,7 +25,7 @@ describe('AccountFreezeUnlockView.vue', () => {
   let userModule: any
 
   beforeEach(() => {
-    sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
+    sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
@@ -35,7 +35,7 @@ describe('AccountFreezeUnlockView.vue', () => {
         userProfile: {}
       },
       actions: {
-        getUserProfile: jest.fn()
+        getUserProfile: vi.fn()
       }
     }
 
@@ -47,7 +47,7 @@ describe('AccountFreezeUnlockView.vue', () => {
         }
       },
       actions: {
-        calculateFailedInvoices: jest.fn(() => {
+        calculateFailedInvoices: vi.fn(() => {
           return {
             totalTransactionAmount: 10,
             totalAmountToPay: 20
@@ -80,8 +80,8 @@ describe('AccountFreezeUnlockView.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

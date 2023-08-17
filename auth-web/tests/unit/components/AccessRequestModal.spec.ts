@@ -1,3 +1,4 @@
+import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
@@ -5,6 +6,7 @@ import MockI18n from '../test-utils/test-data/MockI18n'
 import { OnholdOrRejectCode } from '@/util/constants'
 
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 
@@ -46,6 +48,7 @@ describe('AccessRequestModal.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
+    localVue.use(VueCompositionAPI)
     localVue.use(i18n)
     localVue.use(Vuex)
 
@@ -74,8 +77,8 @@ describe('AccessRequestModal.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

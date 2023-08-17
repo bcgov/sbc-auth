@@ -52,7 +52,7 @@ const OrgModule = namespace('org')
 
 @Component({})
 export default class ActivityLogs extends Mixins(AccountChangeMixin) {
-  @Prop({ default: '' }) private orgId: number;
+  @Prop({ default: '' }) private orgId: number
   @OrgModule.State('currentOrganization') public currentOrganization!: Organization
   @OrgModule.State('currentMembership') public currentMembership!: Member
   @ActivityLogModule.State('currentOrgActivity') public currentOrgActivity!: ActivityLog

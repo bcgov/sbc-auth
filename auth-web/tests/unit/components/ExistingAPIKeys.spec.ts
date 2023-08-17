@@ -41,7 +41,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
     const orgModule = {
       namespaced: true,
       actions: {
-        getOrgApiKeys: jest.fn(() => {
+        getOrgApiKeys: vi.fn(() => {
           return apikeyList
         })
       },
@@ -84,8 +84,8 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 
@@ -109,7 +109,7 @@ describe('Account settings ExistingAPIKeys.vue', () => {
 
   it('Should open Confirmation modal on revoke button click', async () => {
     await wrapper.vm.loadApiKeys()
-    const stub = jest.fn(() => consumerKey)
+    const stub = vi.fn(() => consumerKey)
     wrapper.setMethods({ confirmationModal: stub })
 
     wrapper.find('[data-test="confirm-button-key1"]').trigger('click')

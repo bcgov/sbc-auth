@@ -35,8 +35,8 @@ describe('AccountMailingAddress.vue', () => {
         ]
       },
       actions: {
-        getBusinessSizeCodes: jest.fn(),
-        getBusinessTypeCodes: jest.fn()
+        getBusinessSizeCodes: vi.fn(),
+        getBusinessTypeCodes: vi.fn()
       }
     }
 
@@ -70,8 +70,8 @@ describe('AccountMailingAddress.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

@@ -52,8 +52,8 @@ describe('AccountBusinessType.vue', () => {
         codes: codesModule
       }
     })
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -105,7 +105,7 @@ describe('AccountBusinessType.vue', () => {
       mocks: { $t
       }
     })
-    await wrapper.setData({ isLoading: false })
+    await wrapper.setData({ isLoading: false, isBusinessAccount: true })
     wrapper.find("[data-test='radio-business-account-type']").trigger('click')
     await flushPromises()
     expect(wrapper.find("[data-test='input-branch-name']").isVisible()).toBeTruthy()

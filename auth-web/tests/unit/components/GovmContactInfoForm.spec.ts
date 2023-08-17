@@ -26,7 +26,7 @@ describe('GovmContactInfoForm.vue', () => {
       namespaced: true,
       state: {},
       actions: {
-        getUserProfile: jest.fn()
+        getUserProfile: vi.fn()
       }
 
     }
@@ -56,8 +56,8 @@ describe('GovmContactInfoForm.vue', () => {
   })
 
   afterEach(() => {
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
     wrapper.destroy()
   })
 

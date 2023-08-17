@@ -27,8 +27,8 @@ describe('Stepper.vue', () => {
       vuetify
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   afterEach(() => {
@@ -66,9 +66,9 @@ describe('Stepper.vue', () => {
   it('is gets step props', () => {
     const firstStep = wrapper.vm.defaultSteps[0]
     const stepProp = {
-      stepForward: jest.fn(),
-      stepBack: jest.fn(),
-      jumpToStep: jest.fn()
+      stepForward: vi.fn(),
+      stepBack: vi.fn(),
+      jumpToStep: vi.fn()
     }
     const props = Object.keys(wrapper.vm.getPropsForStep(firstStep))
     expect(props.length).toBe(Object.keys(stepProp).length)

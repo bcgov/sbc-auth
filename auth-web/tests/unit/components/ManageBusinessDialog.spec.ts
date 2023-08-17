@@ -3,13 +3,11 @@ import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
 // @ts-ignore
-Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 
 const vuetify = new Vuetify({})
@@ -121,9 +119,9 @@ testCaseList.forEach(test => {
 
         },
         action: {
-          addBusiness: jest.fn(),
-          updateBusinessName: jest.fn(),
-          updateFolioNumber: jest.fn()
+          addBusiness: vi.fn(),
+          updateBusinessName: vi.fn(),
+          updateFolioNumber: vi.fn()
         }
       }
 

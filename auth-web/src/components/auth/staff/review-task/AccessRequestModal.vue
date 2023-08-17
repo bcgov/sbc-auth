@@ -213,7 +213,6 @@ export default defineComponent({
     const accessRequest: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accessRequestConfirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const rejectForm: Ref<HTMLFormElement> = ref(null)
-    const onholdReasonCodes: Ref<Code[]> = ref(props.onholdReasonCodes)
     const otherReasonText: Ref<string> = ref('')
 
     const onholdReasonRules = [
@@ -383,7 +382,6 @@ export default defineComponent({
       closeConfirm,
       getConfirmModalData,
       getModalData,
-      onholdReasonCodes,
       onholdReasonRules,
       onholdReasons,
       onConfirmCloseClick,

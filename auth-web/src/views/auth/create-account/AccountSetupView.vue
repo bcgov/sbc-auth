@@ -122,8 +122,8 @@ export default class AccountSetupView extends Vue {
   private errorText = ''
   private isLoading: boolean = false
   private isCurrentUserSettingLoading: boolean = false
-  @Prop({ default: '' }) redirectToUrl !: string;
-  @Prop({ default: false }) skipConfirmation !: boolean;
+  @Prop({ default: '' }) redirectToUrl !: string
+  @Prop({ default: false }) skipConfirmation !: boolean
 
   @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
   @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>

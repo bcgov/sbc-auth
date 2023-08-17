@@ -21,7 +21,7 @@ describe('BusinessProfileView.vue', () => {
     'VUE_APP_FLAVOR': 'post-mvp'
   }
 
-  sessionStorage.__STORE__['AUTH_API_CONFIG'] = JSON.stringify(ob)
+  sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
@@ -33,7 +33,7 @@ describe('BusinessProfileView.vue', () => {
         }
       },
       actions: {
-        loadBusiness: jest.fn()
+        loadBusiness: vi.fn()
       }
     }
     const store = new Vuex.Store({
@@ -53,8 +53,8 @@ describe('BusinessProfileView.vue', () => {
       }
     })
 
-    jest.resetModules()
-    jest.clearAllMocks()
+    vi.resetModules()
+    vi.clearAllMocks()
   })
 
   it('is a Vue instance', () => {
