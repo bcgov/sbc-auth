@@ -13,13 +13,13 @@
       class="mt-5 mb-n2"
       filled
       hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
-      item-text="name"
-      item-value="identifier"
-      label="Business Name or Incorporation/Registration Number"
+      :item-text="lookupType === LookupType.NR ? 'nrNum' : 'name'"
+      :item-value="lookupType === LookupType.NR ? 'nrNum' : 'identifier'"
+      label="My business name, incorporation, or registration number"
       no-filter
       persistent-hint
       return-object
-      @input="onItemSelected($event)"
+      @input="onItemSelected"
       @keydown.enter.native.prevent
     >
       <template v-slot:append>
@@ -41,10 +41,24 @@
         </p>
       </template>
 
-      <template v-slot:item="{ item }">
+      <template v-if="lookupType === LookupType.BUSINESS" v-slot:item="{ item }">
         <v-row class="business-lookup-result pt-1">
           <v-col cols="2" class="result-identifier">{{item.identifier}}</v-col>
           <v-col cols="8" class="result-name">{{item.name}}</v-col>
+          <v-col cols="2" class="result-action">
+            <span v-if="item.disabled" class="added">Added</span>
+            <span v-else class="select">Select</span>
+          </v-col>
+        </v-row>
+      </template>
+      <template v-else v-slot:item="{ item }">
+        <v-row class="business-lookup-result pt-1">
+          <v-col cols="2" class="result-identifier">{{item.nrNum}}</v-col>
+          <v-col cols="8" class="result-name">
+            <div v-for="(name, index) in item.names" :key="index">
+              {{ name }}
+            </div>
+          </v-col>
           <v-col cols="2" class="result-action">
             <span v-if="item.disabled" class="added">Added</span>
             <span v-else class="select">Select</span>
@@ -56,14 +70,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Watch } from 'vue-property-decorator'
-import { Ref, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from '@vue/composition-api'
+import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
+import { Ref, defineComponent, ref, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
-import { Debounce } from 'vue-debounce-decorator'
-import Vue from 'vue'
+import NameRequestLookupServices from '@/services/name-request-lookup.services'
 import _ from 'lodash'
-import { namespace } from 'vuex-class'
 import { useStore } from 'vuex-composition-helpers'
 
 enum States {
@@ -81,16 +93,24 @@ enum States {
 // @Component({})
 export default defineComponent({
   name: 'BusinessLookup',
-  props: {},
+  props: {
+    lookupType: { type: String, default: LookupType.BUSINESS }
+  },
   setup (props, { emit }) {
     // local variables
-    const searchField = ref('')
-    const searchResults: Ref<BusinessLookupResultIF[]> = ref([])
     const state = ref(States.INITIAL)
+    const searchField = ref('')
+    const searchResults: Ref<BusinessLookupResultIF[] | NameRequestLookupResultIF[]> = ref([])
+    if (props.lookupType === LookupType.NR) {
+      searchResults.value = [] as NameRequestLookupResultIF[]
+    } else {
+      searchResults.value = [] as BusinessLookupResultIF[]
+    }
 
     // store
     const store = useStore()
     const isAffiliated = (businessIdentifier: string) => store.dispatch('business/isAffiliated', businessIdentifier)
+    const isAffiliatedNR = (nrNum: string) => store.dispatch('business/isAffiliatedNR', nrNum)
 
     const onSearchFieldChanged = _.debounce(async () => {
       // safety check
@@ -99,11 +119,20 @@ export default defineComponent({
       } else if (searchField.value && searchField.value?.length > 2) {
         state.value = States.SEARCHING
         const searchStatus = null // search all (ACTIVE + HISTORICAL)
-        searchResults.value = await BusinessLookupServices.search(searchField.value, searchStatus).catch(() => [])
 
+        // Use appropriate service based on lookupType
+        if (props.lookupType === LookupType.NR) {
+          searchResults.value = await NameRequestLookupServices.search(searchField.value).catch(() => [])
+        } else {
+          searchResults.value = await BusinessLookupServices.search(searchField.value, searchStatus).catch(() => [])
+        }
         // enable or disable items according to whether they have already been added
         for (const result of searchResults.value) {
-          result.disabled = await isAffiliated(result.identifier)
+          if (props.lookupType === LookupType.NR && 'nrNum' in result) {
+            result.disabled = await isAffiliatedNR(result.nrNum)
+          } else if ('identifier' in result) {
+            result.disabled = await isAffiliated(result.identifier)
+          }
         }
 
         // display appropriate section
@@ -118,7 +147,13 @@ export default defineComponent({
     watch(searchField, onSearchFieldChanged)
 
     const onItemSelected = (input: BusinessLookupResultIF) => {
-      emit('business', input)
+      if (input) {
+        emit(props.lookupType, input)
+      } else {
+        // Clear button was clicked
+        searchResults.value = []
+        state.value = States.INITIAL
+      }
     }
 
     return {
@@ -126,7 +161,8 @@ export default defineComponent({
       searchResults,
       state,
       onItemSelected,
-      States
+      States,
+      LookupType
     }
   }
 })
