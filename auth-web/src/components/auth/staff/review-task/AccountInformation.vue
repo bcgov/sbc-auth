@@ -70,8 +70,8 @@
           <li>{{ accountUnderReviewAddress.street }}</li>
           <li>
             {{ accountUnderReviewAddress.city }}
-             {{ accountUnderReviewAddress.region }}
-             {{ accountUnderReviewAddress.postalCode }}
+            {{ accountUnderReviewAddress.region }}
+            {{ accountUnderReviewAddress.postalCode }}
           </li>
           <li>{{ accountUnderReviewAddress.country }}</li>
         </ul>
