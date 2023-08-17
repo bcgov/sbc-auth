@@ -15,7 +15,6 @@ document.body.setAttribute('data-app', 'true')
 
 describe('RestrictedProductView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(() => {
     const localVue = createLocalVue()
@@ -26,7 +25,7 @@ describe('RestrictedProductView.vue', () => {
       router,
       vuetify,
       mocks: {
-        $t: (mock) => 'Restricted Access'
+        $t: () => 'Restricted Access'
       }
     })
   })

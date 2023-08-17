@@ -2,38 +2,45 @@
 <template>
   <div>
     <p>Enter a username, temporary password and select a role for each team member you want to add to this account.</p>
-     <PasswordRequirementAlert/>
+    <PasswordRequirementAlert />
     <h4>Team Members</h4>
 
-    <v-form ref="form" class="mt-3">
+    <v-form
+      ref="form"
+      class="mt-3"
+    >
       <ul class="invite-list">
         <transition-group name="slide-y-transition">
-          <li class="d-flex mb-1" v-for="(user, index) in users" v-bind:key="index + 1">
+          <li
+            v-for="(user, index) in users"
+            :key="index + 1"
+            class="d-flex mb-1"
+          >
             <v-text-field
+              v-model="user.username"
               filled
               label="Username"
-              v-model="user.username"
               persistent-hint
               :hint="inputHints.username"
               :rules="userNameRules"
               :data-test="getIndexedTag('username', index)"
-            ></v-text-field>
+            />
 
             <v-text-field
+              v-model="user.password"
               filled
               label="Temporary Password"
               class="ml-2"
-              v-model="user.password"
               persistent-hint
               :hint="inputHints.password"
               :rules="passwordRules"
               :data-test="getIndexedTag('password', index)"
-            ></v-text-field>
+            />
 
             <v-overflow-btn
+              v-model="user.selectedRole.name"
               filled
               class="select-role-btn ml-2"
-              v-model="user.selectedRole.name"
               item-text="name"
               item-value="name"
               :items="availableRoles"
@@ -41,11 +48,11 @@
               :data-test="getIndexedTag('role-selector', index)"
               menu-props="dense"
             >
-              <template v-slot:selection="{ item }">
+              <template #selection="{ item }">
                 {{ item.displayName }}
               </template>
 
-              <template v-slot:item="{ item }">
+              <template #item="{ item }">
                 <div class="role-container">
                   <v-list-item-icon>
                     <v-icon v-text="item.icon" />
@@ -56,32 +63,47 @@
                   </v-list-item-content>
                 </div>
               </template>
-
             </v-overflow-btn>
 
-            <v-btn icon class="mt-3 ml-1"
-              @click="removeUser(index)">
+            <v-btn
+              icon
+              class="mt-3 ml-1"
+              @click="removeUser(index)"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </li>
         </transition-group>
       </ul>
-      <v-btn text small color="primary"
-        @click="addUser()" data-test="add-another-button">
+      <v-btn
+        text
+        small
+        color="primary"
+        data-test="add-another-button"
+        @click="addUser()"
+      >
         <v-icon>mdi-plus-box</v-icon>
         <span>Add Another</span>
       </v-btn>
       <div class="form__btns">
-        <v-btn large depressed color="primary"
-                @click="addUsers"
-                :loading="loading"
-                :disabled="loading || !isFormValid()"
-                data-test="add-users-button"
+        <v-btn
+          large
+          depressed
+          color="primary"
+          :loading="loading"
+          :disabled="loading || !isFormValid()"
+          data-test="add-users-button"
+          @click="addUsers"
         >
           <span>Add</span>
         </v-btn>
-        <v-btn large depressed class="ml-2" data-test="cancel-button"
-          @click="cancel">
+        <v-btn
+          large
+          depressed
+          class="ml-2"
+          data-test="cancel-button"
+          @click="cancel"
+        >
           <span>Cancel</span>
         </v-btn>
       </div>
@@ -92,12 +114,11 @@
 <script lang="ts">
 import { AddUserBody, AddUsersToOrgBody, Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
-import { Invitation } from '@/models/Invitation'
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import OrgModule from '@/store/modules/org'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
-import { getModule } from 'vuex-module-decorators'
 
 @Component({
   components: {
@@ -113,12 +134,12 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AddUsersForm extends Vue {
-  private loading = false
-  private readonly currentOrganization!: Organization
-  private readonly currentMembership!: Member
-  private readonly createUsers!: (AddUsersToOrgBody) => Promise<void>
+  loading = false
+  readonly currentOrganization!: Organization
+  readonly currentMembership!: Member
+  readonly createUsers!: (data: AddUsersToOrgBody) => Promise<void>
 
-  private inputHints = {
+  inputHints = {
     username: 'Minimum 8 characters',
     password: 'See requirements above'
   }
@@ -127,47 +148,47 @@ export default class AddUsersForm extends Vue {
     form: HTMLFormElement
   }
 
-  private get availableRoles () {
+  get availableRoles () {
     if (this.currentMembership.membershipTypeCode !== MembershipType.Admin) {
       return this.roleInfos.filter(role => role.name !== 'Admin')
     }
     return this.roleInfos
   }
 
-  private users: AddUserBody[] = []
+  users: AddUserBody[] = []
 
   // Get the description from UX team
-  private readonly roleInfos!: RoleInfo[]
-  private userNameRules = [
+  readonly roleInfos!: RoleInfo[]
+  userNameRules = [
     value => this.validateUserName(value) || this.inputHints.username
   ]
 
-  private passwordRules = [
+  passwordRules = [
     value => CommonUtils.validatePasswordRules(value) || `Invalid Password`
   ]
 
-  private getIndexedTag (tag, index): string {
+  getIndexedTag (tag, index): string {
     return `${tag}-${index}`
   }
 
-  private created () {
+  created () {
     this.resetForm()
   }
 
-  private getDefaultRow (): AddUserBody {
+  getDefaultRow (): AddUserBody {
     return { username: '', password: '', selectedRole: { ...this.roleInfos[0] }, membershipType: this.roleInfos[0].name }
   }
 
-  private validateUserName (value) {
+  validateUserName (value) {
     return (value?.trim().length >= 8)
   }
 
-  private hasDuplicates (): boolean {
+  hasDuplicates (): boolean {
     const users = this.users.filter(user => user.username)
     return new Set(users.map(user => user.username.toLowerCase())).size !== users.length
   }
 
-  private isFormValid (): boolean {
+  isFormValid (): boolean {
     let isValid: boolean = false
     for (let user of this.users) {
       // check for rows which have values and then check the validity of the inputs
@@ -179,15 +200,15 @@ export default class AddUsersForm extends Vue {
     return isValid && !this.hasDuplicates()
   }
 
-  private removeUser (index: number) {
+  removeUser (index: number) {
     this.users.splice(index, 1)
   }
 
-  private addUser () {
+  addUser () {
     this.users.push(this.getDefaultRow())
   }
 
-  private resetForm () {
+  resetForm () {
     this.$refs.form?.reset()
     /** the form reset and data initialization happens at the same cycle which causes issues
     like false validation notifications and initializing the role selector
@@ -200,7 +221,7 @@ export default class AddUsersForm extends Vue {
     })
   }
 
-  private async addUsers () {
+  async addUsers () {
     if (this.isFormValid()) {
       // set loading state
       this.loading = true
@@ -225,12 +246,12 @@ export default class AddUsersForm extends Vue {
   }
 
   @Emit()
-  private addUsersComplete () {
+  addUsersComplete () {
     this.loading = false
   }
 
   @Emit()
-  private cancel () {
+  cancel () {
     this.resetForm()
   }
 }

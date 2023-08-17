@@ -4,7 +4,6 @@ import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import { nextTick } from 'vue/types/umd'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})

@@ -1,8 +1,7 @@
-import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
+import { createLocalVue, shallowMount } from '@vue/test-utils'
 
 import { AccountStatus } from '@/util/constants'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
-import OrgModule from '@/store/modules/org'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'

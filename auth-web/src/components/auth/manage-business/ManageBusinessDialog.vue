@@ -1,9 +1,8 @@
 <template>
   <div id="manage-business-dialog">
-
     <v-dialog
-      attach="#entity-management"
       v-model="isDialogVisible"
+      attach="#entity-management"
       persistent
       scrollable
       max-width="50rem"
@@ -11,9 +10,9 @@
       @keydown.esc="resetForm(true)"
     >
       <HelpDialog
+        ref="helpDialog"
         :helpDialogBlurb="helpDialogBlurb"
         :inline="true"
-        ref="helpDialog"
       />
 
       <AuthorizationEmailSent
@@ -29,36 +28,52 @@
         </v-card-title>
 
         <v-card-text>
-          <v-form ref="addBusinessForm" lazy-validation class="mt-0">
+          <v-form
+            ref="addBusinessForm"
+            lazy-validation
+            class="mt-0"
+          >
             <template>
-              <div class="font-weight-bold mr-2 float-left">Business Name:</div>
-              <div>{{businessName}}</div>
+              <div class="font-weight-bold mr-2 float-left">
+                Business Name:
+              </div>
+              <div>{{ businessName }}</div>
 
-              <div class="font-weight-bold mr-2 float-left">Incorporation Number:</div>
-              <div>{{businessIdentifier}}</div>
+              <div class="font-weight-bold mr-2 float-left">
+                Incorporation Number:
+              </div>
+              <div>{{ businessIdentifier }}</div>
 
               <div class="my-2">
                 You must be authorized to manage this business. You can be authorized in one of the following ways:
               </div>
             </template>
 
-            <v-card class="mx-auto" flat>
+            <v-card
+              class="mx-auto"
+              flat
+            >
               <v-list class="mr-2">
-
-                <v-list-group v-if="!isBusinessLegalTypeSPorGP" id="passcode-group" class="top-of-list" eager v-model="passcodeOption">
-                  <template v-slot:activator>
-                    <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
+                <v-list-group
+                  v-if="!isBusinessLegalTypeSPorGP"
+                  id="passcode-group"
+                  v-model="passcodeOption"
+                  class="top-of-list"
+                  eager
+                >
+                  <template #activator>
+                    <v-list-item-title>Use the business {{ passwordText }}</v-list-item-title>
                   </template>
                   <div class="item-content">
                     <v-text-field
                       v-if="isBusinessIdentifierValid"
+                      v-model="passcode"
                       filled
                       :label="passcodeLabel"
                       :hint="passcodeHint"
                       persistent-hint
                       :rules="passcodeRules"
                       :maxlength="passcodeMaxLength"
-                      v-model="passcode"
                       autocomplete="off"
                       type="input"
                       class="passcode mt-0 mb-2"
@@ -68,53 +83,60 @@
                       v-if="isBusinessIdentifierValid && isFirm"
                       :certifiedBy="certifiedBy"
                       entity="registered entity"
-                      @update:isCertified="isCertified = $event"
                       class="certify"
                       :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
+                      @update:isCertified="isCertified = $event"
                     />
                   </div>
                 </v-list-group>
 
-                <v-list-group v-if="isBusinessLegalTypeSPorGP" id="proprietor-partner-name-group" class="top-of-list" v-model="nameOption">
-                  <template v-slot:activator>
+                <v-list-group
+                  v-if="isBusinessLegalTypeSPorGP"
+                  id="proprietor-partner-name-group"
+                  v-model="nameOption"
+                  class="top-of-list"
+                >
+                  <template #activator>
                     <v-list-item-title>
                       Use the name of a proprietor or partner
                     </v-list-item-title>
                   </template>
                   <div class="item-content">
                     <v-text-field
+                      v-model="proprietorPartnerName"
                       filled
                       label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                       hint="Name as it appears on the Business Summary or the Statement of Registration"
                       persistent-hint
                       :rules="proprietorPartnerNameRules"
-                      v-model="proprietorPartnerName"
                       maxlength="150"
                       autocomplete="off"
                       aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                     />
                   </div>
-                    <Certify
-                      :certifiedBy="certifiedBy"
-                      entity="registered entity"
-                      @update:isCertified="isCertified = $event"
-                      class="certify"
-                      :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
-                    />
+                  <Certify
+                    :certifiedBy="certifiedBy"
+                    entity="registered entity"
+                    class="certify"
+                    :class="(isBusinessIdentifierValid && showAuthorization) ? 'mt-4 mb-5' : 'mt-6 mb-5'"
+                    @update:isCertified="isCertified = $event"
+                  />
                 </v-list-group>
 
                 <v-list-group v-model="emailOption">
-                  <template v-slot:activator>
+                  <template #activator>
                     <v-list-item-title>
                       Confirm authorization using your registered office email address
-                      <div class="subtitle"> (If you forgot or don't have a business {{passwordText}})</div>
+                      <div class="subtitle">
+                        (If you forgot or don't have a business {{ passwordText }})
+                      </div>
                     </v-list-item-title>
                   </template>
                   <div class="list-body">
                     <div>
                       An email will be sent to the registered office contact email of the business:
                     </div>
-                    <div><b>{{businessContactEmail}}</b></div>
+                    <div><b>{{ businessContactEmail }}</b></div>
                     <div class="mt-1 mr-1 mb-4">
                       To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
                     </div>
@@ -122,8 +144,8 @@
                 </v-list-group>
 
                 <template v-if="enableDelegationFeature">
-                  <v-list-group  v-model="requestAuthBusinessOption">
-                    <template v-slot:activator>
+                  <v-list-group v-model="requestAuthBusinessOption">
+                    <template #activator>
                       <v-list-item-title>Request authorization from the business</v-list-item-title>
                     </template>
                     <div class="list-body">
@@ -131,8 +153,11 @@
                     </div>
                   </v-list-group>
 
-                  <v-list-group v-if="enableDelegationFeature" v-model="requestAuthRegistryOption">
-                    <template v-slot:activator>
+                  <v-list-group
+                    v-if="enableDelegationFeature"
+                    v-model="requestAuthRegistryOption"
+                  >
+                    <template #activator>
                       <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
                     </template>
                     <div class="list-body">
@@ -140,32 +165,33 @@
                     </div>
                   </v-list-group>
                 </template>
-
               </v-list>
             </v-card>
-
           </v-form>
         </v-card-text>
 
         <v-card-actions class="form__btns">
           <span
-            @click.stop="openHelp()"
-            class="pl-2 pr-2 mr-auto"
             id="help-button"
+            class="pl-2 pr-2 mr-auto"
+            @click.stop="openHelp()"
           >
             <v-icon>mdi-help-circle-outline</v-icon>
             Help
           </span>
           <v-btn
-            large outlined color="primary"
             id="cancel-button"
+            large
+            outlined
+            color="primary"
             @click="resetForm(true)"
           >
             <span>Cancel</span>
           </v-btn>
           <v-btn
-            large color="primary"
             id="add-button"
+            large
+            color="primary"
             :loading="isLoading"
             @click="manageBusiness()"
           >
@@ -174,20 +200,16 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
   </div>
 </template>
 
 <script lang="ts">
 import { CorpTypes, LDFlags } from '@/util/constants'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
-import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
-import BusinessLookup from './BusinessLookup.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
-import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'

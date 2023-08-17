@@ -1,8 +1,14 @@
 <template>
-  <v-container class="view-container" data-test="div-account-setup-container">
+  <v-container
+    class="view-container"
+    data-test="div-account-setup-container"
+  >
     <!-- Loading status -->
     <v-fade-transition>
-      <div class="loading-container" v-if="isLoading">
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
         <v-progress-circular
           size="50"
           width="5"
@@ -13,13 +19,11 @@
     </v-fade-transition>
     <template v-if="!isLoading">
       <component
-        :key="displayComponent.id"
         :is="displayComponent.component"
+        :key="displayComponent.id"
         v-bind="displayComponent.props"
         v-on="displayComponent.events"
-
       />
-
     </template>
   </v-container>
 </template>

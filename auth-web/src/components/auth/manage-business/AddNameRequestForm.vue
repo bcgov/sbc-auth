@@ -1,47 +1,86 @@
 <template>
   <div class="add-namerequest-form">
-    <v-form ref="addNRForm" lazy-validation>
+    <v-form
+      ref="addNRForm"
+      lazy-validation
+    >
       <fieldset>
-        <legend hidden>Name Request Number and Applicant Phone Number or Email Address</legend>
+        <legend hidden>
+          Name Request Number and Applicant Phone Number or Email Address
+        </legend>
         <div class="d-flex align-items-center">
-          <div class="font-weight-bold mr-2">Requested Name(s):</div>
+          <div class="font-weight-bold mr-2">
+            Requested Name(s):
+          </div>
           <div>
-            <div v-for='(name, i) in requestNames' :key='`nrName: ${i}`' class='pb-1 names-block d-flex align-items-center'>
-              <v-icon v-if='isRejectedName(name)' color='red' class='names-text pr-1' small>mdi-close</v-icon>
-              <v-icon v-else-if='isApprovedName(name)' color='green' class='names-text pr-1' small>mdi-check</v-icon>
-              <v-icon v-else color='transparent' class='names-text pr-1' small>mdi-close</v-icon><!-- spacer icon -->
-              <span class='names-text font-weight-bold'>{{ name.name }}</span>
+            <div
+              v-for="(name, i) in requestNames"
+              :key="`nrName: ${i}`"
+              class="pb-1 names-block d-flex align-items-center"
+            >
+              <v-icon
+                v-if="isRejectedName(name)"
+                color="red"
+                class="names-text pr-1"
+                small
+              >
+                mdi-close
+              </v-icon>
+              <v-icon
+                v-else-if="isApprovedName(name)"
+                color="green"
+                class="names-text pr-1"
+                small
+              >
+                mdi-check
+              </v-icon>
+              <v-icon
+                v-else
+                color="transparent"
+                class="names-text pr-1"
+                small
+              >
+                mdi-close
+              </v-icon><!-- spacer icon -->
+              <span class="names-text font-weight-bold">{{ name.name }}</span>
             </div>
           </div>
         </div>
-        <div class="font-weight-bold mr-2 float-left">Name Request Number:</div>
-        <div>{{businessIdentifier}}</div><br>
+        <div class="font-weight-bold mr-2 float-left">
+          Name Request Number:
+        </div>
+        <div>{{ businessIdentifier }}</div><br>
         <div class="my-4">
-            Enter either the applicant phone number OR applicant email that were used when the name was requested:
+          Enter either the applicant phone number OR applicant email that were used when the name was requested:
         </div>
         <v-text-field
-          filled persistent-hint
+          :key="nrNumberKey"
+          filled
+          persistent-hint
           label="Enter the Applicant Phone Number"
           hint="Example: 555-555-5555"
           :rules="applicantPhoneNumberRules"
-          v-model="applicantPhoneNumber"
           type="tel"
           data-test="applicant-phone-number"
         />
-        <div class="font-weight-bold ml-3 mb-2">or</div>
+        <div class="font-weight-bold ml-3 mb-2">
+          or
+        </div>
         <v-text-field
-          filled persistent-hint
+          v-model="applicantEmail"
+          filled
+          persistent-hint
           label="Enter the Applicant Email Address"
           hint="Example: name@email.com"
           :rules="applicantEmailRules"
-          v-model="applicantEmail"
           data-test="applicant-email"
         />
       </fieldset>
 
       <div class="form__btns mt-8">
         <v-btn
-          large text
+          large
+          text
           class="pl-2 pr-2 mr-auto"
           data-test="forgot-button"
           @click.stop="openHelp()"
@@ -50,14 +89,17 @@
           <span>I lost or forgot my Name Request (NR) Number</span>
         </v-btn>
         <v-btn
-          large outlined color="primary"
+          large
+          outlined
+          color="primary"
           data-test="cancel-button"
           @click="resetForm('close-add-nr-modal')"
         >
           <span>Cancel</span>
         </v-btn>
         <v-btn
-          large color="primary"
+          large
+          color="primary"
           data-test="add-button"
           max-width="100"
           :disabled="!isFormValid()"
@@ -70,8 +112,8 @@
     </v-form>
 
     <HelpDialog
-      :helpDialogBlurb="helpDialogBlurb"
       ref="helpDialog"
+      :helpDialogBlurb="helpDialogBlurb"
     />
   </div>
 </template>
@@ -86,7 +128,6 @@ import { Names } from '@/models/business'
 import { NrState } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
-import { readonly } from '@vue/composition-api'
 
 @Component({
   components: {

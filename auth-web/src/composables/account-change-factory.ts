@@ -5,14 +5,14 @@ export const useAccountChangeHandler = () => {
   const unregisterHandler: Ref<() => void> = ref(null)
   const setAccountChangedHandler = (handler: () => any) => {
     const store = useStore()
-    unregisterHandler.value = store.subscribe((mutation, state) => {
+    unregisterHandler.value = store.subscribe((mutation) => {
       if (mutation.type === 'org/setCurrentOrganization') {
         handler()
       }
     })
   }
   const beforeDestroy = () => {
-    unregisterHandler && unregisterHandler.value()
+    unregisterHandler.value && unregisterHandler.value()
   }
 
   return {

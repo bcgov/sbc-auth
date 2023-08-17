@@ -1,49 +1,77 @@
 <template>
   <div data-test="div-payment-view">
-    <v-container v-if="showLoading" data-test="div-payment-view-loading">
-      <v-layout row flex-column justify-center align-center class="py-12 loading-progressbar">
+    <v-container
+      v-if="showLoading"
+      data-test="div-payment-view-loading"
+    >
+      <v-row
+        justify="center"
+        align="center"
+        class="py-12 loading-progressbar flex-column"
+      >
         <v-progress-circular
           color="primary"
           :size="80"
           :width="5"
           indeterminate
           class="mt-12"
-        ></v-progress-circular>
-        <div class="loading-msg">{{ showdownloadLoading ? $t('paymentDownloadMsg')  : $t('paymentPrepareMsg') }}</div>
-      </v-layout>
+        />
+        <div class="loading-msg">
+          {{ showdownloadLoading ? $t('paymentDownloadMsg') : $t('paymentPrepareMsg') }}
+        </div>
+      </v-row>
     </v-container>
     <div v-else>
-      <v-container v-if="errorMessage" data-test="div-payment-view-error">
-        <v-layout row justify-center align-center>
+      <v-container
+        v-if="errorMessage"
+        data-test="div-payment-view-error"
+      >
+        <v-row
+          justify="center"
+          align="center"
+        >
           <SbcSystemError
-            v-on:continue-event="goToUrl(returnUrl)"
             v-if="showErrorModal"
             title="Payment Failed"
             primaryButtonTitle="Continue to Filing"
-            :description="errorMessage">
-          </SbcSystemError>
-          <div class="mt-12" v-else>
+            :description="errorMessage"
+            @continue-event="goToUrl(returnUrl)"
+          />
+          <div
+            v-else
+            class="mt-12"
+          >
             <div class="text-center mb-4">
-              <v-icon color="error" size="30">mdi-alert-outline</v-icon>
+              <v-icon
+                color="error"
+                size="30"
+              >
+                mdi-alert-outline
+              </v-icon>
             </div>
-            <h4>{{errorMessage}}</h4>
+            <h4>{{ errorMessage }}</h4>
           </div>
-        </v-layout>
+        </v-row>
       </v-container>
       <v-container
+        v-if="showOnlineBanking"
         data-test="div-payment-view-container"
         class="view-container"
-        v-if="showOnlineBanking">
+      >
         <div class="payment-view-content">
-          <h1 class="mb-1">Make a payment</h1>
-          <p class="mb-8">Please find your balance and payment details below.</p>
+          <h1 class="mb-1">
+            Make a payment
+          </h1>
+          <p class="mb-8">
+            Please find your balance and payment details below.
+          </p>
           <PaymentCard
             :paymentCardData="paymentCardData"
+            :showPayWithOnlyCC="showPayWithOnlyCC"
             @complete-online-banking="completeOBPayment"
             @pay-with-credit-card="payNow"
             @download-invoice="downloadInvoice"
-            :showPayWithOnlyCC="showPayWithOnlyCC"
-          ></PaymentCard>
+          />
         </div>
       </v-container>
     </div>
@@ -126,7 +154,8 @@ export default class PaymentView extends Vue {
 
             this.showLoading = false
             this.showOnlineBanking = true
-            this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed // if isOnlineBankingAllowed is true, allowed show CC as only payment type
+            // if isOnlineBankingAllowed is true, allowed show CC as only payment type
+            this.showPayWithOnlyCC = !invoice?.isOnlineBankingAllowed
           }
         } catch (error) {
           // eslint-disable-next-line no-console
@@ -214,7 +243,8 @@ export default class PaymentView extends Vue {
   private doHandleError (error) {
     this.showLoading = false
     this.errorMessage = this.$t('payFailedMessage').toString()
-    if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') { // Transaction is already completed.Show as a modal.
+    if (error.response.data && error.response.data.type === 'INVALID_TRANSACTION') {
+      // Transaction is already completed. Show as a modal.
       this.goToUrl(this.redirectUrlFixed)
     } else {
       this.showErrorModal = true

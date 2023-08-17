@@ -21,7 +21,7 @@ describe('PasswordReset.vue', () => {
 
     const store = new Vuex.Store({})
     const user:User = { firstname: '', lastname: '', 'username': 'testuser' }
-    wrapperFactory = (propsData) => {
+    wrapperFactory = () => {
       return mount(PasswordReset, {
         localVue,
         store,

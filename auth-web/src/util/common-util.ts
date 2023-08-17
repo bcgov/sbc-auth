@@ -113,7 +113,7 @@ export default class CommonUtils {
       window.navigator.msSaveBlob(blob, fileName)
     } else {
       const blobURL = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob)
-      let tempLink = document.createElement('a')
+      const tempLink = document.createElement('a')
       tempLink.style.display = 'none'
       tempLink.href = blobURL
       tempLink.setAttribute('download', fileName)

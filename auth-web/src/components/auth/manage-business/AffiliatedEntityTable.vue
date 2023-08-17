@@ -11,17 +11,17 @@
           </v-col>
           <v-col class="column-actions">
             <v-select
-              dense multiple
+              v-model="selectedColumns"
+              dense
+              multiple
               class="column-selector pb-2 pr-2"
               background-color="white"
               label="Columns to Show"
-              v-model="selectedColumns"
               :items="columns"
               :menu-props="{ bottom: true, offsetY: true }"
               @change="getHeaders($event)"
             >
-              <template v-slot:selection>
-              </template>
+              <template #selection />
             </v-select>
           </v-col>
         </v-row>
@@ -42,119 +42,207 @@
         :pageHide="true"
         :fixedHeader="true"
         :highlight-index="highlightIndex"
-        highlight-class='base-table__item-row-green'
+        highlight-class="base-table__item-row-green"
       >
-      <template v-slot:header-filter-slot-Actions>
-        <v-btn
-          v-if="affiliations.filters.isActive"
-          class="clear-btn mx-auto mt-auto"
-          color="primary"
-          outlined
-          @click="clearFilters()"
-        >
-          Clear Filters
-          <v-icon class="ml-1 mt-1">mdi-close</v-icon>
-        </v-btn>
-      </template>
-      <!-- Name Request Name(s) / Business Name -->
-      <template v-slot:item-slot-Name="{ item }">
-        <span>
-          <b v-if='isNameRequest(item)' class='col-wide gray-9'>
-            <b v-for='(name, i) in item.nameRequest.names' :key='`nrName: ${i}`' class='pb-1 names-block'>
-              <v-icon v-if='isRejectedName(name)' color='red' class='names-text pr-1' small>mdi-close</v-icon>
-              <v-icon v-if='isApprovedName(name)' color='green' class='names-text pr-1' small>mdi-check</v-icon>
-              <div class='names-text font-weight-bold'>{{ name.name }}</div>
-            </b>
-          </b>
-          <b v-else class='col-wide gray-9 font-weight-bold'>{{ name(item) }}</b>
-        </span>
-
-        <span v-if="!!item.affiliationInvites" id="affiliationInvitesStatus">
-          <p style="font-size: 12px" >
-            <v-icon x-small color='primary'>mdi-account-cog</v-icon>
-            <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
-          </p>
-        </span>
-
-      </template>
-
-      <!-- Number -->
-      <template v-slot:item-slot-Number="{ item }">
-        <span>{{ number(item) }}</span>
-      </template>
-
-      <!-- Type -->
-      <template v-slot:item-slot-Type="{ item }">
-        <div class="gray-9 font-weight-bold d-inline-block">{{ type(item) }}</div>
-        <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
-        <div v-if="enableNameRequestType && isNameRequest(item)" class="gray-9 font-weight-bold d-inline-block ml-1">{{ nameRequestType(item) }}</div>
-        <div>{{ typeDescription(item) }}</div>
-      </template>
-
-      <!-- Status -->
-      <template v-slot:item-slot-Status="{ item }">
-        <span>{{ status(item) }}</span>
-        <EntityDetails v-if="isExpired(item) ||
-                      isFrozed(item) ||
-                      isBadstanding(item) ||
-                      isDissolution(item) "
-                      icon="mdi-alert"
-                      :showAlertHeader="true"
-                      :details="getDetails(item)"/>
-        <EntityDetails v-if="isProcessing(status(item))" icon="mdi-information-outline" :details="[EntityAlertTypes.PROCESSING]"/>
-      </template>
-
-      <!-- Actions -->
-      <template v-slot:item-slot-Actions="{ item, index }">
-        <div class="new-actions mx-auto" :id="`action-menu-${index}`">
-          <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
-          <span class="open-action">
-            <v-tooltip top content-class="top-tooltip" :disabled="disableTooltip(item)">
-              <template v-slot:activator="{on}">
-                <v-btn
-                  small
-                  color="primary"
-                  min-width="5rem"
-                  min-height="2rem"
-                  class="open-action-btn"
-                  v-on="on"
-                  @click="action(item)"
-                >
-                  {{ getPrimaryAction(item) }}
-                  <v-icon class='external-icon pl-1' v-if="isOpenExternal(item)" small>mdi-open-in-new</v-icon>
-                </v-btn>
-              </template>
-              <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
-            </v-tooltip>
-            <!-- More Actions Menu -->
-            <span class="more-actions">
-              <v-menu
-                :attach="`#action-menu-${index}`"
-                v-model="dropdown[index]"
+        <template #header-filter-slot-Actions>
+          <v-btn
+            v-if="affiliations.filters.isActive"
+            class="clear-btn mx-auto mt-auto"
+            color="primary"
+            outlined
+            @click="clearFilters()"
+          >
+            Clear Filters
+            <v-icon class="ml-1 mt-1">
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </template>
+        <!-- Name Request Name(s) / Business Name -->
+        <template #item-slot-Name="{ item }">
+          <span>
+            <b
+              v-if="isNameRequest(item)"
+              class="col-wide gray-9"
+            >
+              <b
+                v-for="(name, i) in item.nameRequest.names"
+                :key="`nrName: ${i}`"
+                class="pb-1 names-block"
               >
-                <template v-slot:activator="{ on }">
+                <v-icon
+                  v-if="isRejectedName(name)"
+                  color="red"
+                  class="names-text pr-1"
+                  small
+                >mdi-close</v-icon>
+                <v-icon
+                  v-if="isApprovedName(name)"
+                  color="green"
+                  class="names-text pr-1"
+                  small
+                >mdi-check</v-icon>
+                <div class="names-text font-weight-bold">{{ name.name }}</div>
+              </b>
+            </b>
+            <b
+              v-else
+              class="col-wide gray-9 font-weight-bold"
+            >{{ name(item) }}</b>
+          </span>
+
+          <span
+            v-if="!!item.affiliationInvites"
+            id="affiliationInvitesStatus"
+          >
+            <p style="font-size: 12px">
+              <v-icon
+                x-small
+                color="primary"
+              >mdi-account-cog</v-icon>
+              <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
+            </p>
+          </span>
+        </template>
+
+        <!-- Number -->
+        <template #item-slot-Number="{ item }">
+          <span>{{ number(item) }}</span>
+        </template>
+
+        <!-- Type -->
+        <template #item-slot-Type="{ item }">
+          <div class="gray-9 font-weight-bold d-inline-block">
+            {{ type(item) }}
+          </div>
+          <!-- Need to keep the NR type separate or else the table filter treats each distinctly. See PR 2389 -->
+          <div
+            v-if="enableNameRequestType && isNameRequest(item)"
+            class="gray-9 font-weight-bold d-inline-block ml-1"
+          >
+            {{ nameRequestType(item) }}
+          </div>
+          <div>{{ typeDescription(item) }}</div>
+        </template>
+
+        <!-- Status -->
+        <template #item-slot-Status="{ item }">
+          <span>{{ status(item) }}</span>
+          <EntityDetails
+            v-if="isExpired(item) ||
+              isFrozed(item) ||
+              isBadstanding(item) ||
+              isDissolution(item) "
+            icon="mdi-alert"
+            :showAlertHeader="true"
+            :details="getDetails(item)"
+          />
+          <EntityDetails
+            v-if="isProcessing(status(item))"
+            icon="mdi-information-outline"
+            :details="[EntityAlertTypes.PROCESSING]"
+          />
+        </template>
+
+        <!-- Actions -->
+        <template #item-slot-Actions="{ item, index }">
+          <div
+            :id="`action-menu-${index}`"
+            class="new-actions mx-auto"
+          >
+            <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
+            <span class="open-action">
+              <v-tooltip
+                top
+                content-class="top-tooltip"
+                :disabled="disableTooltip(item)"
+              >
+                <template #activator="{on}">
                   <v-btn
                     small
                     color="primary"
+                    min-width="5rem"
                     min-height="2rem"
-                    class="more-actions-btn"
+                    class="open-action-btn"
                     v-on="on"
+                    @click="action(item)"
                   >
-                    <v-icon>{{dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down'}}</v-icon>
+                    {{ getPrimaryAction(item) }}
+                    <v-icon
+                      v-if="isOpenExternal(item)"
+                      class="external-icon pl-1"
+                      small
+                    >mdi-open-in-new</v-icon>
                   </v-btn>
                 </template>
-                <v-list>
-                  <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
+                <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
+              </v-tooltip>
+              <!-- More Actions Menu -->
+              <span class="more-actions">
+                <v-menu
+                  v-model="dropdown[index]"
+                  :attach="`#action-menu-${index}`"
+                >
+                  <template #activator="{ on }">
+                    <v-btn
+                      small
+                      color="primary"
+                      min-height="2rem"
+                      class="more-actions-btn"
+                      v-on="on"
+                    >
+                      <v-icon>{{ dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+                    </v-btn>
+                  </template>
+                  <v-list>
+                    <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
+                      <v-list-item
+                        v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
+                        v-can:REMOVE_BUSINESS.disable
+                        class="actions-dropdown_item my-1"
+                        data-test="remove-button"
+                        @click="removeBusiness(item)"
+                      >
+                        <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
+                          <v-icon small>mdi-delete-forever</v-icon>
+                          <span class="pl-1">Delete {{ tempDescription(item) }}</span>
+                        </v-list-item-subtitle>
+                        <v-list-item-subtitle v-else>
+                          <v-icon small>mdi-delete</v-icon>
+                          <span class="pl-1">Remove From Table</span>
+                        </v-list-item-subtitle>
+                      </v-list-item>
+                      <v-list-item
+                        v-else
+                        class="actions-dropdown_item my-1"
+                        @click="openNewAffiliationInvite(item)"
+                      >
+                        <v-list-item-subtitle>
+                          <v-icon small>mdi-file-certificate-outline</v-icon>
+                          <span class="pl-1">New Request</span>
+                        </v-list-item-subtitle>
+                      </v-list-item>
+                    </template>
                     <v-list-item
-                      v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
+                      v-if="showOpenButton(item)"
+                      class="actions-dropdown_item my-1"
+                      data-test="use-name-request-button"
+                      @click="goToNameRequest(item.nameRequest)"
+                    >
+                      <v-list-item-subtitle>
+                        <v-icon small>mdi-format-list-bulleted-square</v-icon>
+                        <span class="pl-1">Open Name Request</span>
+                      </v-list-item-subtitle>
+                    </v-list-item>
+                    <v-list-item
+                      v-if="showRemoveButton(item)"
                       class="actions-dropdown_item my-1"
                       data-test="remove-button"
-                      v-can:REMOVE_BUSINESS.disable
                       @click="removeBusiness(item)"
                     >
                       <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
                         <v-icon small>mdi-delete-forever</v-icon>
-                        <span class="pl-1">Delete {{tempDescription(item)}}</span>
+                        <span class="pl-1">Delete {{ tempDescription(item) }}</span>
                       </v-list-item-subtitle>
                       <v-list-item-subtitle v-else>
                         <v-icon small>mdi-delete</v-icon>
@@ -162,59 +250,21 @@
                       </v-list-item-subtitle>
                     </v-list-item>
                     <v-list-item
-                      v-else
+                      v-if="showAmalgamateShortForm(item)"
                       class="actions-dropdown_item my-1"
-                      @click="openNewAffiliationInvite(item)"
+                      data-test="use-name-request-button"
                     >
                       <v-list-item-subtitle>
-                        <v-icon small>mdi-file-certificate-outline</v-icon>
-                        <span class="pl-1">New Request</span>
+                        <v-icon small>mdi-checkbox-multiple-blank-outline</v-icon>
+                        <span class="pl-1">Amalgamate Now (Short Form)</span>
                       </v-list-item-subtitle>
                     </v-list-item>
-                  </template>
-                  <v-list-item
-                    v-if="showOpenButton(item)"
-                    class="actions-dropdown_item my-1"
-                    data-test="use-name-request-button"
-                    @click="goToNameRequest(item.nameRequest)"
-                  >
-                    <v-list-item-subtitle>
-                      <v-icon small>mdi-format-list-bulleted-square</v-icon>
-                      <span class="pl-1">Open Name Request</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item
-                    v-if="showRemoveButton(item)"
-                    class="actions-dropdown_item my-1"
-                    data-test="remove-button"
-                    @click="removeBusiness(item)"
-                  >
-                    <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                      <v-icon small>mdi-delete-forever</v-icon>
-                      <span class="pl-1">Delete {{tempDescription(item)}}</span>
-                    </v-list-item-subtitle>
-                    <v-list-item-subtitle v-else>
-                      <v-icon small>mdi-delete</v-icon>
-                      <span class="pl-1">Remove From Table</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                  <v-list-item
-                    v-if="showAmalgamateShortForm(item)"
-                    class="actions-dropdown_item my-1"
-                    data-test="use-name-request-button"
-                  >
-                    <v-list-item-subtitle>
-                      <v-icon small>mdi-checkbox-multiple-blank-outline</v-icon>
-                      <span class="pl-1">Amalgamate Now (Short Form)</span>
-                    </v-list-item-subtitle>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+                  </v-list>
+                </v-menu>
+              </span>
             </span>
-          </span>
-        </div>
-      </template>
-
+          </div>
+        </template>
       </base-v-data-table>
     </v-card>
   </div>
@@ -235,7 +285,7 @@ import {
 } from '@/util/constants'
 import { Business, NameRequest, Names } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { Ref, SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { SetupContext, computed, defineComponent, ref } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import DateMixin from '@/components/auth/mixins/DateMixin.vue'
@@ -250,12 +300,12 @@ import { useStore } from 'vuex-composition-helpers'
 export default defineComponent({
   name: 'AffiliatedEntityTable',
   components: { EntityDetails, BaseVDataTable },
+  mixins: [DateMixin],
   props: {
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
   emits: ['add-unknown-error', 'remove-affiliation-invitation'],
-  mixins: [DateMixin],
   setup (props, context: SetupContext) {
     const isloading = false
     const store = useStore()
@@ -460,7 +510,7 @@ export default defineComponent({
         return ''
       }
     }
-    const openNewAffiliationInvite = (business: Business) => {
+    const openNewAffiliationInvite = () => {
       // todo: open modal when modal is created
       // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
       alert('not implemented')
@@ -610,12 +660,14 @@ export default defineComponent({
       return affiliations.results.some(business => businessIdentifier === business.businessIdentifier)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const goToAmalgamate = (item: Business): void => {
       // For now, go to COLIN with external link + icon + matching hover text
       goToCorpOnline()
     }
 
     // Continue In
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const goToRelocate = (item: Business): void => {
       goToCorpOnline()
     }
@@ -727,6 +779,7 @@ export default defineComponent({
       return false
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const showAmalgamateShortForm = (item: Business): boolean => {
       // reserve for changes in the future
       return false

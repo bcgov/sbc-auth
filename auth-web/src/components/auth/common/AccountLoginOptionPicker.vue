@@ -1,61 +1,68 @@
 <template>
- <div>
-  <v-row>
-    <v-col
-      xs="12"
-      sm="6"
-      class="d-flex"
-      v-for="authOption in authOptions"
-      :key="authOption.type"
-    >
-      <v-card
-        flat
-        outlined
-        hover
-        class="account-card elevation-2 pa-8 d-flex flex-column text-center"
-        :class="{ 'active': authType === authOption.type }"
-        @click="selectAuthType(authOption.type)"
-        v-can:CHANGE_AUTH_OPTIONS.disable.card
+  <div>
+    <v-row>
+      <v-col
+        v-for="authOption in authOptions"
+        :key="authOption.type"
+        sm="6"
+        class="d-flex xs"
       >
-        <div class="account-type__icon mb-8">
-          <v-icon color="grey">{{authOption.icon}}</v-icon>
-        </div>
-        <div class="account-type__title font-weight-bold mb-6">
-          {{authOption.title}}
-        </div>
-        <div class="account-type__details mb-10">
-          {{authOption.description}}
-        </div>
-        <div class="account-type__buttons">
-          <v-btn
-            v-if="showLearnMore"
-            large
-            depressed
-            block
-            color="primary"
-            class="font-weight-bold mb-3"
-            outlined
-            @click="selectLearnMore(authOption.type)"
-          >
-            LEARN MORE
-          </v-btn>
-          <v-btn
-            large
-            depressed
-            block
-            color="primary"
-            class="font-weight-bold"
-            :outlined="authType != authOption.type"
-            @click="selectAuthType(authOption.type)"
-          >
-            {{ authType == authOption.type ? 'SELECTED' : 'SELECT' }}
-          </v-btn>
-        </div>
-       </v-card>
+        <v-card
+          v-can:CHANGE_AUTH_OPTIONS.disable.card
+          flat
+          outlined
+          hover
+          class="account-card elevation-2 pa-8 d-flex flex-column text-center"
+          :class="{ 'active': authType === authOption.type }"
+          @click="selectAuthType(authOption.type)"
+        >
+          <div class="account-type__icon mb-8">
+            <v-icon color="grey">
+              {{ authOption.icon }}
+            </v-icon>
+          </div>
+          <div class="account-type__title font-weight-bold mb-6">
+            {{ authOption.title }}
+          </div>
+          <div class="account-type__details mb-10">
+            {{ authOption.description }}
+          </div>
+          <div class="account-type__buttons">
+            <v-btn
+              v-if="showLearnMore"
+              large
+              depressed
+              block
+              color="primary"
+              class="font-weight-bold mb-3"
+              outlined
+              @click="selectLearnMore(authOption.type)"
+            >
+              LEARN MORE
+            </v-btn>
+            <v-btn
+              large
+              depressed
+              block
+              color="primary"
+              class="font-weight-bold"
+              :outlined="authType != authOption.type"
+              @click="selectAuthType(authOption.type)"
+            >
+              {{ authType == authOption.type ? 'SELECTED' : 'SELECT' }}
+            </v-btn>
+          </div>
+        </v-card>
       </v-col>
     </v-row>
-    <LearnMoreBCSC ref="bcscLearnMoreDialog" @bcsc-selected="selectAuthType('BCSC')" />
-    <LearnMoreBCEID ref="bceidLearnMoreDialog" @bceid-selected="selectAuthType('BCEID')" />
+    <LearnMoreBCSC
+      ref="bcscLearnMoreDialog"
+      @bcsc-selected="selectAuthType('BCSC')"
+    />
+    <LearnMoreBCEID
+      ref="bceidLearnMoreDialog"
+      @bceid-selected="selectAuthType('BCEID')"
+    />
   </div>
 </template>
 

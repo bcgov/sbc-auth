@@ -1,6 +1,5 @@
 import {
   Affiliation,
-  AffiliationInvitationStatus,
   AffiliationsResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody
@@ -21,7 +20,6 @@ import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { CorpTypes } from '@/util/constants'
 import { Invitations } from '@/models/Invitation'
 import { axios } from '@/util/http-util'
 
@@ -71,11 +69,13 @@ export default class OrgService {
       { role: updatePayload.role, status: updatePayload.status, notifyUser: updatePayload.notifyUser })
   }
 
-  public static async createOrg (createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
+  public static async createOrg (createRequestBody: CreateOrganizationRequestBody):
+    Promise<AxiosResponse<Organization>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs`, createRequestBody)
   }
 
-  public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody): Promise<AxiosResponse<Organization>> {
+  public static async updateOrg (orgId: number, createRequestBody: CreateOrganizationRequestBody):
+    Promise<AxiosResponse<Organization>> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
@@ -83,15 +83,20 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
   }
 
-  static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
+  static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody):
+    Promise<AxiosResponse<Affiliation>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, affiliation)
   }
 
-  static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody): Promise<AxiosResponse<Affiliation>> {
-    return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations?newBusiness=true`, affiliation)
+  static async createNRAffiliation (orgIdentifier: number, affiliation: CreateNRAffiliationRequestBody):
+    Promise<AxiosResponse<Affiliation>> {
+    const url = `${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations?newBusiness=true`
+    return axios.post(url, affiliation)
   }
 
-  static async removeAffiliation (orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, resetPasscode?: boolean): Promise<AxiosResponse<void>> {
+  static async removeAffiliation (
+    orgIdentifier: number, incorporationNumber: string, passcodeResetEmail?: string, resetPasscode?: boolean
+  ): Promise<AxiosResponse<void>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`,
       { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
   }
@@ -147,7 +152,8 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`)
   }
 
-  public static async addProducts (orgIdentifier: number, productsRequestBody: OrgProductsRequestBody): Promise<AxiosResponse<OrgProduct>> {
+  public static async addProducts (orgIdentifier: number, productsRequestBody: OrgProductsRequestBody):
+    Promise<AxiosResponse<OrgProduct>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/products`, productsRequestBody)
   }
 

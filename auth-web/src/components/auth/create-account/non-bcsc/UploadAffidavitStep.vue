@@ -4,62 +4,77 @@
       This will be reviewed by Registries staff and the account will be approved
       when authenticated.
     </p>
-    <h4 class="my-4">Attach your Notarized Affidavit</h4>
+    <h4 class="my-4">
+      Attach your Notarized Affidavit
+    </h4>
     <FileUploadPreview
       :maxSize="MAX_FILE_SIZE"
-      v-bind:input-file="affidavitDoc"
+      :input-file="affidavitDoc"
       @file-selected="fileSelected"
       @is-file-valid="isFileUploadValidFn"
-    ></FileUploadPreview>
+    />
     <NotaryInformationForm
+      v-if="notaryInformation"
       :input-notary-info="notaryInformation"
+      class="pt-5"
       @notaryinfo-update="updateNotaryInformation"
       @is-form-valid="isNotaryInformationValidFn"
-      class="pt-5"
-      v-if="notaryInformation"
-    ></NotaryInformationForm>
+    />
     <NotaryContactForm
       :input-notary-contact="notaryContact"
+      class="pt-5"
       @notarycontact-update="updateNotaryContact"
       @is-form-valid="isNotaryContactValidFn"
-      class="pt-5"
-    ></NotaryContactForm>
+    />
     <v-alert
+      v-if="errorMessage"
       dense
       text
       type="error"
       class="mt-6"
-      v-if="errorMessage"
     >
-      {{errorMessage}}
+      {{ errorMessage }}
     </v-alert>
     <v-row class="mt-8">
-      <v-col cols="12" class="form__btns py-0 d-inline-flex">
-        <v-btn large depressed color="default" @click="goBack" v-if="!isAffidavitUpload">
-          <v-icon left class="mr-2 ml-n2">mdi-arrow-left</v-icon>
+      <v-col
+        cols="12"
+        class="form__btns py-0 d-inline-flex"
+      >
+        <v-btn
+          v-if="!isAffidavitUpload"
+          large
+          depressed
+          color="default"
+          @click="goBack"
+        >
+          <v-icon
+            left
+            class="mr-2 ml-n2"
+          >
+            mdi-arrow-left
+          </v-icon>
           <span>Back</span>
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           large
           color="primary"
           class="mr-3"
           :loading="saving"
           :disabled="saving || !isNextValid"
-          @click="next"
           data-test="next-button"
+          @click="next"
         >
-          <span
-            >Next
+          <span>Next
             <v-icon class="ml-2">mdi-arrow-right</v-icon>
           </span>
         </v-btn>
         <ConfirmCancelButton
+          v-if="!isAffidavitUpload"
           :disabled="saving"
           :target-route="cancelUrl"
           :showConfirmPopup="true"
-          v-if="!isAffidavitUpload"
-        ></ConfirmCancelButton>
+        />
       </v-col>
     </v-row>
   </div>

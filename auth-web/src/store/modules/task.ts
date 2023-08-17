@@ -33,7 +33,7 @@ export default class TaskModule extends VuexModule {
       }
     }
 
-    // TODO: Add a new API call for fetching counts alone to reduce initial overload - For all calls made in StaffAccountManagement
+    // TODO: Add a new API call for fetching counts to reduce overload - For all calls made in StaffAccountManagement
     @Action({ rawError: true })
     public async syncTasks () {
       let taskFilter: TaskFilterParams = {

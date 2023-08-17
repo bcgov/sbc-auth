@@ -20,7 +20,7 @@ describe('PasswordRequirementAlert.vue', () => {
 
     const store = new Vuex.Store({})
 
-    wrapperFactory = (propsData) => {
+    wrapperFactory = () => {
       return mount(PasswordRequirementAlert, {
         localVue,
         store,

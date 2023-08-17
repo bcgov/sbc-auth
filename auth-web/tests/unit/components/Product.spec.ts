@@ -4,7 +4,6 @@ import { ProductStatus } from '@/util/constants'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import flushPromises from 'flush-promises'
 
 Vue.use(Vuetify)
 
@@ -162,7 +161,12 @@ describe('Product.vue', () => {
   it('premium product should be disabled in basic account settings', async () => {
     pprProduct.subscriptionStatus = ProductStatus.NOT_SUBSCRIBED
     pprProduct.premiumOnly = true
-    wrapper = wrapperFactory({ productDetails: pprProduct, isexpandedView: false, isAccountSettingsView: true, isBasicAccount: true })
+    wrapper = wrapperFactory({
+      productDetails: pprProduct,
+      isexpandedView: false,
+      isAccountSettingsView: true,
+      isBasicAccount: true
+    })
 
     expect(wrapper.find("[data-test='div-decision-made-product']").exists()).toBeTruthy()
     expect(wrapper.find("[data-test='div-decision-not-made-product']").exists()).toBeFalsy()

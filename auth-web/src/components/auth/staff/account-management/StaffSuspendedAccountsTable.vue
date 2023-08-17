@@ -11,26 +11,26 @@
         itemsPerPageOptions: getPaginationOptions
       }"
       :loading="isTableLoading"
-      @update:items-per-page="saveItemsPerPage"
       :server-items-length="totalAccountsCount"
+      @update:items-per-page="saveItemsPerPage"
     >
-      <template v-slot:loading>
+      <template #loading>
         Loading...
       </template>
-      <template v-slot:[`item.statusCode`]="{ item }">
-          {{ getStatusText(item) }}
+      <template #[`item.statusCode`]="{ item }">
+        {{ getStatusText(item) }}
       </template>
-      <template v-slot:[`item.suspendedOn`]="{ item }">
-          {{formatDate(item.suspendedOn)}}
+      <template #[`item.suspendedOn`]="{ item }">
+        {{ formatDate(item.suspendedOn) }}
       </template>
-      <template v-slot:[`item.decisionMadeBy`]="{ item }">
-          {{item.decisionMadeBy ? item.decisionMadeBy : 'N/A'}}
+      <template #[`item.decisionMadeBy`]="{ item }">
+        {{ item.decisionMadeBy ? item.decisionMadeBy : 'N/A' }}
       </template>
-      <template v-slot:[`item.orgType`]="{ item }">
-          {{formatType(item)}}
+      <template #[`item.orgType`]="{ item }">
+        {{ formatType(item) }}
       </template>
-      <template v-slot:[`item.action`]="{ item }">
-         <v-btn
+      <template #[`item.action`]="{ item }">
+        <v-btn
           outlined
           color="primary"
           class="action-btn"
@@ -45,12 +45,11 @@
 </template>
 
 <script lang="ts">
-import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
+import { AccessType, Account, AccountStatus } from '@/util/constants'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgFilterParams, OrgList, Organization } from '@/models/Organization'
 import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
-import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
@@ -123,7 +122,7 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async getAccounts (val, oldVal) {
+  async getAccounts (val) {
     await this.getOrgs(val?.page, val?.itemsPerPage)
   }
 
@@ -138,7 +137,6 @@ export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
 
   private async getOrgs (page: number = 1, pageLimit: number = this.numberOfItems) {
     // set this variable so that the chip is shown
-    const appliedFilterValue = ConfigHelper.getFromSession(SessionStorageKeys.OrgSearchFilter) || ''
     try {
       this.orgFilter = {
         statuses: [AccountStatus.NSF_SUSPENDED, AccountStatus.SUSPENDED],

@@ -21,7 +21,6 @@ const vuetify = new Vuetify({})
 
 describe('AccountSuspendedView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   afterEach(() => {
     vi.resetModules()
@@ -52,7 +51,8 @@ describe('AccountSuspendedView.vue', () => {
 
   it('Validate is-user message', () => {
     expect(wrapper.find('h1').text()).toBe('Account Suspended')
-    expect(wrapper.find('[data-test="div-is-user"]').text()).toBe('Your account is suspended. Please contact the account administrator')
+    expect(wrapper.find('[data-test="div-is-user"]').text()).toBe('Your account is suspended. ' +
+    'Please contact the account administrator')
     expect(wrapper.find('[data-test="div-is-admin"]').exists()).toBeFalsy()
   })
 
@@ -61,8 +61,8 @@ describe('AccountSuspendedView.vue', () => {
     await flushPromises()
     expect(wrapper.find('h1').text()).toBe('Account Suspended')
     const divAdminText = wrapper.find('[data-test="div-is-admin"]').text()
-    expect(divAdminText).toContain('Your account is suspended. For more information,')
-    expect(divAdminText).toContain('please contact the BC Online Partnership Office at:Email: bconline@gov.bc.caTelephone: 1-800-663-6102')
+    expect(divAdminText).toContain('Your account is suspended. For more information, please contact the BC Online ' +
+    'Partnership Office at: Email: bconline@gov.bc.caTelephone: 1-800-663-6102')
     expect(wrapper.find('[data-test="div-is-user"]').exists()).toBeFalsy()
   })
 })

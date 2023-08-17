@@ -1,19 +1,36 @@
 <template>
-  <v-tooltip top max-width="450px" light content-class="tooltip">
-    <template v-slot:activator="{ on }">
-      <span v-on="on" class="tooltip-text" v-if="enableBcCccUlc">Numbered Company</span>
-      <span v-on="on" class="tooltip-text" v-else>Numbered Benefit Company</span>
+  <v-tooltip
+    top
+    max-width="450px"
+    light
+    content-class="tooltip"
+  >
+    <template #activator="{ on }">
+      <span
+        v-if="enableBcCccUlc"
+        class="tooltip-text"
+        v-on="on"
+      >Numbered Company</span>
+      <span
+        v-else
+        class="tooltip-text"
+        v-on="on"
+      >Numbered Benefit Company</span>
     </template>
     <v-card class="tooltip-content">
       <template v-if="enableBcCccUlc">
-        <h3 class="mb-3">Numbered Company</h3>
+        <h3 class="mb-3">
+          Numbered Company
+        </h3>
         <span>A Company can choose to use as its name the incorporation number of the company followed by “B.C. Ltd.”,
           "B.C. Unlimited Liability Company", or "B.C. Community Contribution Company." The incorporation number is
           assigned by the Business Registry after the Incorporation Application is filed and the company is
           incorporated.</span>
       </template>
       <template v-else>
-        <h3 class="mb-3">Numbered Benefit Company</h3>
+        <h3 class="mb-3">
+          Numbered Benefit Company
+        </h3>
         <span>A Benefit Company can choose to use as its name the incorporation number of the company followed by “B.C.
           Ltd.” The incorporation number is assigned by the Business Registry after the Incorporation Application is
           filed and the company is incorporated.</span>
