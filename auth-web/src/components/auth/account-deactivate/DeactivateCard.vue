@@ -38,7 +38,7 @@
 <script lang="ts">
 import { PropType, computed, defineComponent } from '@vue/composition-api'
 import { Account } from '@/util/constants'
-import { useI18n } from 'vue-i18n-bridge'
+import { useI18n } from 'vue-i18n-composable'
 
 export default defineComponent({
   name: 'DeactivateCard',

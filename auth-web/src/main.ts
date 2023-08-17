@@ -14,7 +14,7 @@ import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
-import i18n from './plugins/i18n'
+import initializeI18n from './plugins/i18n'
 import router from './routes/index'
 import store from './store'
 import vuetify from './plugins/vuetify'
@@ -26,6 +26,7 @@ import { LDFlags } from '@/util/constants'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
+const i18n = initializeI18n(Vue)
 Vue.use(Search, { store, i18n })
 Vue.use(VueSanitize)
 

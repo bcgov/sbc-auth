@@ -12,7 +12,7 @@ import can from '@/directives/can'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 Vue.directive('can', can)
 
 const vuetify = new Vuetify({})

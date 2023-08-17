@@ -1,8 +1,7 @@
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import i18n from '@/plugins/i18n'
+import initialize from '@/plugins/i18n'
 import { mount } from '@vue/test-utils'
 import store from '@/store'
 
@@ -10,7 +9,7 @@ import store from '@/store'
 import Search from 'fas-ui'
 
 Vue.use(Vuetify)
-Vue.use(VueI18n, { bridge: true })
+const i18n = initialize(Vue)
 Vue.use(Search, { store, i18n })
 
 describe('FasSearchComponent.vue', () => {

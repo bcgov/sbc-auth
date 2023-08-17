@@ -10,7 +10,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 document.body.setAttribute('data-app', 'true')
 
 vi.mock('../../../src/services/bcol.services')

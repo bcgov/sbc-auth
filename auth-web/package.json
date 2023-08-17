@@ -34,7 +34,7 @@
     "vue-debounce-decorator": "^1.0.1",
     "vue-hotjar": "^1.4.0",
     "vue-i18n": "8.28.2",
-    "vue-i18n-bridge": "^9.2.2",
+    "vue-i18n-composable": "^1.0.0",
     "vue-loader": "^15.9.2",
     "vue-plugin-helper-decorator": "0.0.12",
     "vue-property-decorator": "^9.1.2",
@@ -47,7 +47,6 @@
     "vuex-class": "^0.3.2"
   },
   "devDependencies": {
-    "@intlify/unplugin-vue-i18n": "^0.12.2",
     "@intlify/vue-i18n-loader": "^1.1.0",
     "@types/mime-types": "^2.1.0",
     "@types/vuelidate": "^0.7.13",

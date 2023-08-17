@@ -223,7 +223,7 @@ import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
 import { PropType, Ref, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
 import { Code } from '@/models/Code'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { useI18n } from 'vue-i18n-bridge'
+import { useI18n } from 'vue-i18n-composable'
 
 export default defineComponent({
   name: 'AccessRequestModal',

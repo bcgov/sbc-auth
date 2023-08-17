@@ -16,7 +16,7 @@ import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 Vue.use(Vuex)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"

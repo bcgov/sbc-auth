@@ -2,7 +2,6 @@ import { defineConfig } from 'vite'
 import { createVuePlugin as vue } from 'vite-plugin-vue2'
 import EnvironmentPlugin from 'vite-plugin-environment'
 import postcssNesting from 'postcss-nesting'
-import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 
 import path from 'path'
 import fs from 'fs'
@@ -36,20 +35,13 @@ export default defineConfig({
     EnvironmentPlugin({
       BUILD: 'web' // Fix for Vuelidate, allows process.env with Vite.
     }),
-    postcssNesting,
-    VueI18nPlugin({
-      bridge: true,
-      // Turn this off because we have html in our messages.
-      strictMessage: false
-    })
+    postcssNesting
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
       '~': path.resolve(__dirname, './node_modules'),
       '$assets': path.resolve(__dirname, './src/assets'),
-      // Fix for vue-i18n-bridge unit tests fail - Remove with Vue3
-      'vue-i18n-bridge': path.resolve(__dirname, './node_modules/vue-i18n-bridge/dist/vue-i18n-bridge.runtime.esm-bundler.js'),
       // Fix for bcrs-shared-components unit tests fail
       '@bcrs-shared-components/mixins': path.resolve(__dirname, './node_modules/@bcrs-shared-components/mixins/index.ts'),
       // Fix for module decorator unit tests fail
@@ -77,8 +69,7 @@ export default defineConfig({
     // This needs to be done for FAS-UI and sbc-common-components to work.
     // Otherwise FAS complains about not having Vue.use(VueCompositionAPI)
     // sbc-common-components will fail at login.
-    // vue-demi is included in here otherwise it gets the wrong vue instance.
     // Remove with Vue 3 for most of these.
-    exclude: ['@vue/composition-api', 'sbc-common-components', 'vue-demi']
+    exclude: ['@vue/composition-api', 'sbc-common-components']
   }
 })
