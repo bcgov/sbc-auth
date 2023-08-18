@@ -466,7 +466,8 @@ export default defineComponent({
         try {
           const payload: CreateAffiliationInvitation = {
             fromOrgId: Number(props.orgId),
-            businessIdentifier: businessIdentifier.value
+            businessIdentifier: businessIdentifier.value,
+            toOrgId: null, // Needs to be null, as there currently there is a bug on the backend
           }
           await AffiliationInvitationService.createInvitation(payload)
         } catch (err) {
