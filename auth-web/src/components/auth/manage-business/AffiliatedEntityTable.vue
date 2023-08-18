@@ -616,6 +616,8 @@ export default defineComponent({
           }
           case NrDisplayStates.REJECTED:
           case NrDisplayStates.CONSUMED:
+          case NrDisplayStates.CANCELLED:
+          case NrDisplayStates.REFUND_REQUESTED:
             return 'Remove From Table'
           default:
             return 'Open Name Request'
@@ -754,8 +756,19 @@ export default defineComponent({
       }
     }
 
+    const isShowRemoveAsPrimaryAction = (item: Business): boolean => {
+      if (isNameRequest(item) &&
+       (status(item) === NrDisplayStates.REJECTED ||
+        status(item) === NrDisplayStates.CONSUMED ||
+        status(item) === NrDisplayStates.CANCELLED ||
+        status(item) === NrDisplayStates.REFUND_REQUESTED)) {
+        return true
+      }
+      return false
+    }
+
     const action = (item: Business): void => {
-      if (isNameRequest(item) && (status(item) === NrDisplayStates.REJECTED || status(item) === NrDisplayStates.CONSUMED)) {
+      if (isShowRemoveAsPrimaryAction(item)) {
         removeBusiness(item)
       } else {
         redirect(item)
@@ -763,10 +776,7 @@ export default defineComponent({
     }
 
     const showRemoveButton = (item: Business): boolean => {
-      if (isNameRequest(item) && (status(item) === NrDisplayStates.REJECTED || status(item) === NrDisplayStates.CONSUMED)) {
-        return false
-      }
-      return true
+      return !isShowRemoveAsPrimaryAction(item)
     }
 
     const showOpenButton = (item: Business): boolean => {
