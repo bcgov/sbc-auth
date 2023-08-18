@@ -353,7 +353,7 @@ export default defineComponent({
     })
 
     const passwordText = computed(() => {
-      return (isCooperative.value ? 'Passcode' : 'password')
+      return (isCooperative.value ? 'passcode' : 'password')
     })
 
     const helpDialogBlurb = computed(() => {
@@ -369,7 +369,10 @@ export default defineComponent({
 
     const isFormValid = computed(() => {
       let isValid = false
-      if (isBusinessLegalTypeSPorGP.value) {
+
+      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+        isValid = !!businessIdentifier.value && !!passcode.value
+      } else if (isBusinessLegalTypeSPorGP.value) {
         isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
       } else {
         isValid =
