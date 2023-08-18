@@ -81,18 +81,5 @@ export default class HelpDialog extends Vue {
 </script>
 
 <style lang="scss" scoped>
-  .v-card {
-    > div {
-        padding: 16px 40px 0 40px;
-      &:first-of-type {
-        padding: 40px 40px 0 40px;
-      }
-      &:last-of-type {
-        padding: 40px 40px 40px 40px;
-        button {
-          padding: 0 20px;
-        }
-      }
-    }
-  }
+@import '@/assets/scss/ModalDialog.scss';
 </style>

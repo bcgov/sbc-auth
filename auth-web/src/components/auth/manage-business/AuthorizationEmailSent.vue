@@ -56,22 +56,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-.v-card {
-    > div {
-      &:first-of-type {
-        padding: 40px 40px 0 40px;
-      }
-      &:nth-of-type(2) {
-        padding: 16px 40px 0 40px;
-      }
-      &:last-of-type {
-        padding: 40px 40px 40px 40px;
-        button {
-          padding: 0 20px;
-        }
-      }
-    }
-  }
+@import '@/assets/scss/ModalDialog.scss';
 
 #help-button {
   cursor: pointer;
