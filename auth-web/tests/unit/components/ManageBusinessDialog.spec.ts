@@ -52,7 +52,7 @@ const testCaseList = [
     isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: ''
+    businessLegalType: 'SP'
   },
   {
     description: 'Should render for a FM Staff account',
@@ -63,7 +63,7 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: ''
+    businessLegalType: 'SP'
   },
   {
     description: 'Should render for a FM SBC Staff account',
@@ -74,7 +74,7 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: ''
+    businessLegalType: 'SP'
   },
   {
     description: 'Should render for a SP Entity',
@@ -100,7 +100,7 @@ const testCaseList = [
   },
   {
     description: 'Should render for a BC (Corporation) Entity',
-    businessIdentifier: 'FM1000001',
+    businessIdentifier: 'BC0111236',
     certifyExists: false,
     passcodeExists: false,
     folioNumberExists: false,
@@ -111,7 +111,7 @@ const testCaseList = [
   },
   {
     description: 'Should render for a CP (Co-op) Entity',
-    businessIdentifier: 'FM1000001',
+    businessIdentifier: 'CP0000901',
     certifyExists: false,
     passcodeExists: false,
     folioNumberExists: false,
@@ -177,6 +177,7 @@ describe('ManageBusinessDialog Component', () => {
       const isBusinessLegalTypeCoOp = test.businessLegalType === CorpTypes.COOP
       const isBusinessLegalTypeSoleProprietorship = test.businessLegalType === CorpTypes.SOLE_PROP
       const isBusinessLegalTypePartnership = test.businessLegalType === CorpTypes.PARTNERSHIP
+      const isBusinessLegalTypeFirm = isBusinessLegalTypeSoleProprietorship || isBusinessLegalTypePartnership
 
       wrapper.setData({
         businessIdentifier: test.businessIdentifier,
@@ -213,7 +214,7 @@ describe('ManageBusinessDialog Component', () => {
         expect(wrapper.find('#manage-business-dialog-email-group').exists())
         expect(wrapper.find('#manage-business-dialog-email-group').isVisible()).toBe(true)
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists()).toBeFalsy()
-      } else if (isBusinessLegalTypeSoleProprietorship || isBusinessLegalTypePartnership) {
+      } else if (isBusinessLegalTypeFirm) {
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists())
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').isVisible()).toBe(true)
         expect(wrapper.find('#manage-business-dialog-email-group').exists())

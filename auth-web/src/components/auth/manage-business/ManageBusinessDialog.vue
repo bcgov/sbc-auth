@@ -80,7 +80,7 @@
                       :aria-label="passcodeLabel"
                     />
                     <Certify
-                      v-if="isBusinessIdentifierValid && isFirm"
+                      v-if="isBusinessIdentifierValid && isBusinessLegalTypeFirm"
                       :certifiedBy="certifiedBy"
                       entity="registered entity"
                       class="certify"
@@ -91,7 +91,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="isBusinessLegalTypeSPorGP"
+                  v-if="isBusinessLegalTypeFirm"
                   id="manage-business-dialog-proprietor-partner-name-group"
                   v-model="nameOption"
                   class="top-of-list"
@@ -124,7 +124,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeSPorGP"
+                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm"
                   id="manage-business-dialog-email-group"
                   v-model="emailOption"
                 >
@@ -296,11 +296,11 @@ export default defineComponent({
     const showAuthorizationEmailSentDialog = ref(false)
 
     const computedAddressType = computed(() => {
-      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeSPorGP.value ? 'business' : ''
+      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeFirm.value ? 'business' : ''
     })
 
-    const isBusinessLegalTypeSPorGP = computed(() => {
-      return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
+    const isBusinessLegalTypeFirm = computed(() => {
+      return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP || CommonUtils.isFirmNumber(businessIdentifier.value)
     })
 
     const isBusinessLegalTypeCorporation = computed(() => {
@@ -323,12 +323,8 @@ export default defineComponent({
       return CommonUtils.isCooperativeNumber(businessIdentifier.value)
     })
 
-    const isFirm = computed(() => {
-      return CommonUtils.isFirmNumber(businessIdentifier.value)
-    })
-
     const showAuthorization = computed(() => {
-      return isFirm.value && props.isStaffOrSbcStaff
+      return isBusinessLegalTypeFirm.value && props.isStaffOrSbcStaff
     })
 
     const certifiedBy = computed(() => {
@@ -342,19 +338,19 @@ export default defineComponent({
     })
 
     const passcodeLabel = computed(() => {
-      if (isFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
+      if (isBusinessLegalTypeFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
       if (isCooperative.value) return 'Passcode'
       return 'Password'
     })
 
     const passcodeHint = computed(() => {
-      if (isFirm.value) return 'Name as it appears on the Business Summary or the Statement of Registration'
+      if (isBusinessLegalTypeFirm.value) return 'Name as it appears on the Business Summary or the Statement of Registration'
       if (isCooperative.value) return 'Passcode must be exactly 9 digits'
       return 'Password must be 8 to 15 characters'
     })
 
     const passcodeMaxLength = computed(() => {
-      if (isFirm.value) return 150
+      if (isBusinessLegalTypeFirm.value) return 150
       if (isCooperative.value) return 9
       return 15
     })
@@ -367,7 +363,7 @@ export default defineComponent({
     })
 
     const passcodeRules = computed(() => {
-      if (isFirm.value) {
+      if (isBusinessLegalTypeFirm.value) {
         return [
           (v) => !!v || 'Proprietor or Partner Name is required',
           (v) => v.length <= 150 || 'Maximum 150 characters'
@@ -405,14 +401,14 @@ export default defineComponent({
 
       if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
         isValid = !!businessIdentifier.value && !!passcode.value
-      } else if (isBusinessLegalTypeSPorGP.value) {
+      } else if (isBusinessLegalTypeFirm.value) {
         isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
       } else {
         isValid =
           !!businessIdentifier.value &&
           !!passcode.value &&
-          (!isFirm.value || isCertified.value) &&
-          (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
+          (!isBusinessLegalTypeFirm.value || isCertified.value) &&
+          (!(isBusinessIdentifierValid.value && isBusinessLegalTypeFirm.value) || !!certifiedBy.value) &&
           addBusinessForm.value.validate()
       }
       return isValid
@@ -489,7 +485,7 @@ export default defineComponent({
             businessData = {
               ...businessData,
               certifiedByName: authorizationName.value,
-              passCode: isBusinessLegalTypeSPorGP.value ? proprietorPartnerName.value : passcode.value
+              passCode: isBusinessLegalTypeFirm.value ? proprietorPartnerName.value : passcode.value
             }
           }
           const addResponse = await addBusiness(businessData)
@@ -569,14 +565,13 @@ export default defineComponent({
       authorizationName,
       authorizationLabel,
       authorizationMaxLength,
-      isBusinessLegalTypeSPorGP,
+      isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,
       isBusinessLegalTypeCoOp,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
       isCooperative,
-      isFirm,
       showAuthorization,
       certifiedBy,
       authorizationRules,
