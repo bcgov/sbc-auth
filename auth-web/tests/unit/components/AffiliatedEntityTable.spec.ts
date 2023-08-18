@@ -229,7 +229,7 @@ describe('AffiliatedEntityTable.vue', () => {
       mocks: { $t: () => '' }
     })
 
-    expect(wrapper.find('.table-header').text()).toContain('My List (18)')
+    expect(wrapper.find('.table-header').text()).toContain('My List (20)')
 
     // Wait for the component to render after any state changes
     await wrapper.vm.$nextTick()
