@@ -212,12 +212,14 @@
 <script lang="ts">
 import { CorpTypes, LDFlags } from '@/util/constants'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
 import { useStore } from 'vuex-composition-helpers'
@@ -294,10 +296,6 @@ export default defineComponent({
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
-
-    const computedAddressType = computed(() => {
-      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeFirm.value ? 'business' : ''
-    })
 
     const isBusinessLegalTypeFirm = computed(() => {
       return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
@@ -422,6 +420,10 @@ export default defineComponent({
       return contactInfo.value?.email
     })
 
+    const computedAddressType = computed(() => {
+      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeFirm.value ? 'business' : ''
+    })
+
     // Methods
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
@@ -466,7 +468,7 @@ export default defineComponent({
             fromOrgId: props.orgId,
             businessIdentifier: businessIdentifier.value
           }
-          const createInvitationResponse = await AffiliationInvitationService.createInvitation(payload)
+          await AffiliationInvitationService.createInvitation(payload)
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err)
