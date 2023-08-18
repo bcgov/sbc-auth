@@ -182,6 +182,7 @@
       </div>
 
       <search-business-name-request
+        :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"

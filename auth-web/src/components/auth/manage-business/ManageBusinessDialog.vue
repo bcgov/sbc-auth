@@ -465,7 +465,7 @@ export default defineComponent({
       if (emailOption.value) {
         try {
           const payload: CreateAffiliationInvitation = {
-            fromOrgId: props.orgId,
+            fromOrgId: Number(props.orgId),
             businessIdentifier: businessIdentifier.value
           }
           await AffiliationInvitationService.createInvitation(payload)

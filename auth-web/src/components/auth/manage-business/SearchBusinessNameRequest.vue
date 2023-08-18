@@ -66,6 +66,7 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
+        :orgId="orgId"
         ref="manageBusinessDialog"
         :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
@@ -140,6 +141,7 @@ import { mapActions } from 'vuex'
   }
 })
 export default class SearchBusinessNameRequest extends Vue {
+  @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: false }) readonly isGovStaffAccount: boolean
   @Prop({ default: '' }) readonly userFirstName: string
   @Prop({ default: '' }) readonly userLastName: string
