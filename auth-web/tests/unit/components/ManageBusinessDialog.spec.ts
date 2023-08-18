@@ -7,6 +7,7 @@ import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
+// @ts-ignore
 Vue.use(Vuetify)
 
 const vuetify = new Vuetify({})

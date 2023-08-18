@@ -80,7 +80,6 @@ export default class HelpDialog extends Vue {
 }
 </script>
 
-
 <style lang="scss" scoped>
   .v-card {
     > div {

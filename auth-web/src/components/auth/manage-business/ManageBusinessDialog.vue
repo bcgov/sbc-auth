@@ -55,8 +55,8 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  id="manage-business-dialog-passcode-group"
                   v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                  id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
                   eager
@@ -123,19 +123,25 @@
                   />
                 </v-list-group>
 
-                <v-list-group 
-                id="manage-business-dialog-email-group"
-                v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeSPorGP"
-                v-model="emailOption">
+                <v-list-group
+                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeSPorGP"
+                  id="manage-business-dialog-email-group"
+                  v-model="emailOption"
+                >
                   <template #activator>
                     <v-list-item-title>
-                      Confirm authorization using your {{isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp ? 'registered office' : isBusinessLegalTypeSPorGP ? 'business' : ''}} email address
-                      <div v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp" class="subtitle"> (If you forgot or don't have a business {{passwordText}})</div>
+                      Confirm authorization using your {{ computedAddressType }} email address
+                      <div
+                        v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                        class="subtitle"
+                      >
+                        (If you forgot or don't have a business {{ passwordText }})
+                      </div>
                     </v-list-item-title>
                   </template>
                   <div class="list-body">
                     <div>
-                      An email will be sent to the {{ isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp ? 'registered office' : isBusinessLegalTypeSPorGP ? 'business' : ''}} contact email of the business:
+                      An email will be sent to the {{ computedAddressType }} contact email of the business:
                     </div>
                     <div><b>{{ businessContactEmail }}</b></div>
                     <div class="mt-1 mr-1 mb-4">
@@ -288,6 +294,10 @@ export default defineComponent({
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
+
+    const computedAddressType = computed(() => {
+      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeSPorGP.value ? 'business' : ''
+    })
 
     const isBusinessLegalTypeSPorGP = computed(() => {
       return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
@@ -560,6 +570,7 @@ export default defineComponent({
       authorizationLabel,
       authorizationMaxLength,
       isBusinessLegalTypeSPorGP,
+      computedAddressType,
       isBusinessLegalTypeCorporation,
       isBusinessLegalTypeCoOp,
       enableBusinessNrSearch,
