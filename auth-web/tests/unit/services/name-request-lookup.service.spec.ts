@@ -3,16 +3,12 @@ import { axios } from '@/util/http-util'
 import sinon from 'sinon'
 
 describe('Name Request Lookup Services', () => {
-  afterEach(() => {
-    sinon.restore()
-  })
-
-  it('returns a result when the name request is found', async () => {
+ it('returns a result when the name request is found', async () => {
     const result = {
       'names': [
-        'TEST NAME 1 CORP.',
-        'TEST NAME 2 INC.',
-        'TEST NAME 3 LIMITED'
+        { 'name': 'TEST NAME 1 CORP.', 'status': 'Accepted'},
+        { 'name': 'TEST NAME 2 INC.', 'status': 'Rejected'},
+        { 'name': 'TEST NAME 3 LIMITED', 'status': 'Not Examined'}
       ],
       'nrNum': 'NR1752813'
     }
@@ -20,7 +16,14 @@ describe('Name Request Lookup Services', () => {
     const url = NameRequestLookupServices.namexApiUrl + 'requests/search' +
       `?query=${encodeURIComponent('NR 1752813')}`
 
-    sinon.stub(axios, 'get').withArgs(url).returns(
+    const token = 'test_token';
+
+    sinon.stub(axios, 'get').withArgs(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }).returns(
       Promise.resolve({ data: { searchResults: { results: [result] } } })
     )
 
@@ -35,7 +38,14 @@ describe('Name Request Lookup Services', () => {
     const url = NameRequestLookupServices.namexApiUrl + 'requests/search' +
       `?query=${encodeURIComponent('NR 1752814')}`
 
-    sinon.stub(axios, 'get').withArgs(url).returns(
+    const token = 'test_token';
+
+    sinon.stub(axios, 'get').withArgs(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    }).returns(
       Promise.resolve({ data: { searchResults: { results: [] } } })
     )
 

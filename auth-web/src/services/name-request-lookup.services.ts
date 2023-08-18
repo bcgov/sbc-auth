@@ -20,18 +20,20 @@ export default class NameRequestLookupServices {
    * @returns a promise to return the search results
    */
   static async search (query: string): Promise<NameRequestLookupResultIF[]> {
-    console.log(this.namexApiUrl)
     let url = this.namexApiUrl + 'requests/search'
     url += `?query=${encodeURIComponent(query)}`
     url += '&start=0&rows=20'
     const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
 
-    return axios.get(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      }
-    }).then(response => {
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(response)
+
       const results: Array<NameRequestLookupResultIF> = response?.data?.searchResults?.results
       if (!results) {
         throw new Error('Invalid API response')
@@ -41,6 +43,8 @@ export default class NameRequestLookupServices {
         const pattern = /^[A-Z]{1,3}\d{7}$/
         return pattern.test(result.nrNum)
       })
-    })
+    } catch (error) {
+      throw new Error('Error fetching data from API: ' + error.message)
+    }
   }
 }

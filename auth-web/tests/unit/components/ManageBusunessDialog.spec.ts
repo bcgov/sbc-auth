@@ -1,5 +1,5 @@
-import { createLocalVue, mount } from '@vue/test-utils';
-import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue';
+import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
+import { mount } from '@vue/test-utils'
 
 describe('ManageBusinessDialog.vue', () => {
   it('should display "Manage a B.C. Business" at the top of the modal', async () => {
