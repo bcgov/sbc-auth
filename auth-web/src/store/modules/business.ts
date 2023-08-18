@@ -404,6 +404,11 @@ export default class BusinessModule extends VuexModule {
   }
 
   @Action({ rawError: true })
+  public async isAffiliatedNR (nrNum: string): Promise<boolean> {
+    return this.businesses.some(business => business.nrNumber === nrNum)
+  }
+
+  @Action({ rawError: true })
   public async createNumberedBusiness ({ filingType, business }): Promise<void> {
     const filingBody: BusinessRequest = {
       filing: {

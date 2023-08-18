@@ -19,7 +19,7 @@ describe('Business Lookup component', () => {
 
   it('renders the component properly', () => {
     expect(wrapper.find('#business-lookup').exists()).toBe(true)
-    expect(wrapper.find('.v-input__slot').text()).toBe('Business Name or Incorporation/Registration Number')
+    expect(wrapper.find('.v-input__slot').text()).toBe('My business name, incorporation, or registration number')
     expect(wrapper.find('.v-text-field__details').text()).toContain('For example:')
   })
 })
