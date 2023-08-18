@@ -536,6 +536,7 @@ export default defineComponent({
           const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
           contactInfo.value = contact?.data
         } catch (err) {
+          contactInfo.value = ''
           // eslint-disable-next-line no-console
           console.error(err)
         }
