@@ -137,6 +137,7 @@ export default defineComponent({
   props: {
     lookupType: { type: String, default: LookupType.BUSINESS }
   },
+  emits: [''],
   setup (props, { emit }) {
     // local variables
     const state = ref(States.INITIAL)

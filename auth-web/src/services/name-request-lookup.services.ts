@@ -1,6 +1,4 @@
-import ConfigHelper from '@/util/config-helper'
 import { NameRequestLookupResultIF } from '@/models/business-nr-lookup'
-import { SessionStorageKeys } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 /**
@@ -23,16 +21,9 @@ export default class NameRequestLookupServices {
     let url = this.namexApiUrl + 'requests/search'
     url += `?query=${encodeURIComponent(query)}`
     url += '&start=0&rows=20'
-    const token = ConfigHelper.getFromSession(SessionStorageKeys.KeyCloakToken)
 
     try {
-      const response = await axios.get(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      console.log(response)
+      const response = await axios.get(url)
 
       const results: Array<NameRequestLookupResultIF> = response?.data?.searchResults?.results
       if (!results) {
