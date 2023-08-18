@@ -300,7 +300,7 @@ export default defineComponent({
     })
 
     const isBusinessLegalTypeFirm = computed(() => {
-      return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP || CommonUtils.isFirmNumber(businessIdentifier.value)
+      return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
     })
 
     const isBusinessLegalTypeCorporation = computed(() => {
