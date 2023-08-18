@@ -112,7 +112,7 @@
 
 <script lang="ts">
 import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
-import { Ref, defineComponent, ref, watch } from '@vue/composition-api'
+import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import NameRequestLookupServices from '@/services/name-request-lookup.services'
@@ -140,14 +140,13 @@ export default defineComponent({
   emits: [''],
   setup (props, { emit }) {
     // local variables
-    const state = ref(States.INITIAL)
-    const searchField = ref('')
-    const searchResults: Ref<BusinessLookupResultIF[] | NameRequestLookupResultIF[]> = ref([])
-    if (props.lookupType === LookupType.NR) {
-      searchResults.value = [] as NameRequestLookupResultIF[]
-    } else {
-      searchResults.value = [] as BusinessLookupResultIF[]
-    }
+    const states = reactive({
+      state: States.INITIAL,
+      searchField: '',
+      searchResults: (props.lookupType === LookupType.NR)
+        ? [] as NameRequestLookupResultIF[]
+        : [] as BusinessLookupResultIF[]
+    })
 
     // store
     const store = useStore()
@@ -156,20 +155,26 @@ export default defineComponent({
 
     const onSearchFieldChanged = _.debounce(async () => {
       // safety check
-      if (searchField.value && searchField.value?.length < 3) {
-        state.value = States.TYPING
-      } else if (searchField.value && searchField.value?.length > 2) {
-        state.value = States.SEARCHING
+      if (states.searchField && states.searchField?.length < 3) {
+        states.state = States.TYPING
+      } else if (states.searchField && states.searchField?.length > 2) {
+        states.state = States.SEARCHING
         const searchStatus = null // search all (ACTIVE + HISTORICAL)
 
         // Use appropriate service based on lookupType
-        if (props.lookupType === LookupType.NR) {
-          searchResults.value = await NameRequestLookupServices.search(searchField.value).catch(() => [])
-        } else {
-          searchResults.value = await BusinessLookupServices.search(searchField.value, searchStatus).catch(() => [])
+        const searchService = (props.lookupType === LookupType.NR)
+          ? NameRequestLookupServices.search
+          : (query) => BusinessLookupServices.search(query, searchStatus)
+
+        try {
+          states.searchResults = await searchService(states.searchField)
+        } catch (error) {
+          console.error('Error occurred while searching:', error)
+          states.searchResults = []
         }
+
         // enable or disable items according to whether they have already been added
-        for (const result of searchResults.value) {
+        for (const result of states.searchResults) {
           if (props.lookupType === LookupType.NR && 'nrNum' in result) {
             result.disabled = await isAffiliatedNR(result.nrNum)
           } else if ('identifier' in result) {
@@ -178,30 +183,28 @@ export default defineComponent({
         }
 
         // display appropriate section
-        state.value = (searchResults.value.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
+        states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
       } else {
         // reset variables
-        searchResults.value = []
-        state.value = States.INITIAL
+        states.searchResults = []
+        states.state = States.INITIAL
       }
     }, 600)
 
-    watch(searchField, onSearchFieldChanged)
+    watch(() => states.searchField, onSearchFieldChanged)
 
     const onItemSelected = (input: BusinessLookupResultIF) => {
       if (input) {
         emit(props.lookupType, input)
       } else {
         // Clear button was clicked
-        searchResults.value = []
-        state.value = States.INITIAL
+        states.searchResults = []
+        states.state = States.INITIAL
       }
     }
 
     return {
-      searchField,
-      searchResults,
-      state,
+      ...toRefs(states),
       onItemSelected,
       States,
       LookupType
