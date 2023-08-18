@@ -11,7 +11,6 @@
     "lint": "eslint . --ext ts,vue --fix src",
     "lint:nofix": "eslint . --ext ts,vue --no-fix",
     "test:unit": "vitest run",
-    "test:unit2": "vitest D:\\develop\\bcgov\\sbc-auth\\auth-web\\tests\\unit\\components\\ManageBusinessDialog.spec.ts",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
