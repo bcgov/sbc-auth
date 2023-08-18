@@ -112,7 +112,7 @@
 
 <script lang="ts">
 import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
-import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
+import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import NameRequestLookupServices from '@/services/name-request-lookup.services'
@@ -135,9 +135,12 @@ enum States {
 export default defineComponent({
   name: 'BusinessLookup',
   props: {
-    lookupType: { type: String, default: LookupType.BUSINESS }
+    lookupType: {
+      type: String as PropType<LookupType>,
+      default: LookupType.BUSINESS
+    }
   },
-  emits: [''],
+  emits: [LookupType.NR, LookupType.BUSINESS],
   setup (props, { emit }) {
     // local variables
     const states = reactive({
