@@ -124,7 +124,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm"
+                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail"
                   id="manage-business-dialog-email-group"
                   v-model="emailOption"
                 >
