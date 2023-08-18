@@ -44,7 +44,12 @@
 
             <v-card class="mx-auto" flat>
               <v-list class="mr-2">
-                <v-list-group v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp" id="passcode-group" class="top-of-list" eager v-model="passcodeOption">
+                <v-list-group 
+                id="manage-business-dialog-passcode-group"
+                v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                class="top-of-list" 
+                eager 
+                v-model="passcodeOption">
                   <template v-slot:activator>
                     <v-list-item-title>Use the business {{passwordText}}</v-list-item-title>
                   </template>
@@ -74,7 +79,11 @@
                   </div>
                 </v-list-group>
 
-                <v-list-group v-if="isBusinessLegalTypeSPorGP" id="proprietor-partner-name-group" class="top-of-list" v-model="nameOption">
+                <v-list-group
+                id="manage-business-dialog-proprietor-partner-name-group"
+                v-if="isBusinessLegalTypeSPorGP"
+                class="top-of-list"
+                v-model="nameOption">
                   <template v-slot:activator>
                     <v-list-item-title>
                       Use the name of a proprietor or partner
@@ -102,7 +111,10 @@
                     />
                 </v-list-group>
 
-                <v-list-group v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeSPorGP" v-model="emailOption">
+                <v-list-group 
+                id="manage-business-dialog-email-group"
+                v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeSPorGP"
+                v-model="emailOption">
                   <template v-slot:activator>
                     <v-list-item-title>
                       Confirm authorization using your {{isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp ? 'registered office' : isBusinessLegalTypeSPorGP ? 'business' : ''}} email address

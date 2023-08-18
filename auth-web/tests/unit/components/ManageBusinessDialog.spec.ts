@@ -89,7 +89,7 @@ const testCaseList = [
   },
   {
     description: 'Should render for a GP Entity',
-    businessIdentifier: 'FM0000000',
+    businessIdentifier: 'FM1000001',
     certifyExists: false,
     passcodeExists: false,
     folioNumberExists: false,
@@ -97,10 +97,32 @@ const testCaseList = [
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
     businessLegalType: 'GP'
+  },
+  {
+    description: 'Should render for a BC (Corporation) Entity',
+    businessIdentifier: 'FM1000001',
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
+    isStaffOrSbcStaff: true,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+    businessLegalType: 'BC'
+  },
+  {
+    description: 'Should render for a CP (Co-op) Entity',
+    businessIdentifier: 'FM1000001',
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
+    isStaffOrSbcStaff: true,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+    businessLegalType: 'CP'
   }
 ]
-testCaseList.forEach(test => {
-  describe('ManageBusinessDialog Component', () => {
+describe('ManageBusinessDialog Component', () => {
+  testCaseList.forEach(test => {
     let wrapper: Wrapper<any>
 
     beforeAll(() => {
@@ -183,13 +205,32 @@ testCaseList.forEach(test => {
       if (!test.isStaffOrSbcStaff) {
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
       }
-      if (test.businessLegalType === CorpTypes.SOLE_PROP || test.businessLegalType === CorpTypes.PARTNERSHIP) {
-        expect(wrapper.find('#proprietor-partner-name-group').exists())
-        expect(wrapper.find('#proprietor-partner-name-group').isVisible()).toBe(true)
-        expect(wrapper.find('#passcode-group').exists()).toBeFalsy()
+
+      const isCorporation = test.businessLegalType === CorpTypes.BC_COMPANY
+      const isCoOp = test.businessLegalType === CorpTypes.COOP
+      const isSoleProprietorship = test.businessLegalType === CorpTypes.SOLE_PROP
+      const isPartnership = test.businessLegalType === CorpTypes.PARTNERSHIP
+
+      if (isCorporation) {
+        expect(wrapper.find('#manage-business-dialog-passcode-group').exists())
+        expect(wrapper.find('#manage-business-dialog-passcode-group').isVisible()).toBe(true)
+        expect(wrapper.find('#manage-business-dialog-email-group').exists())
+        expect(wrapper.find('#manage-business-dialog-email-group').isVisible()).toBe(true)
+        expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists()).toBeFalsy()
+      }
+      if (isCoOp) {
+        expect(wrapper.find('#manage-business-dialog-passcode-group').exists())
+        expect(wrapper.find('#manage-business-dialog-passcode-group').isVisible()).toBe(true)
+        expect(wrapper.find('#manage-business-dialog-email-group').exists())
+        expect(wrapper.find('#manage-business-dialog-email-group').isVisible()).toBe(true)
+        expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists()).toBeFalsy()
+      }
+      if (isSoleProprietorship || isPartnership) {
+        expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists())
+        expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').isVisible()).toBe(true)
+        expect(wrapper.find('#manage-business-dialog-passcode-group').exists()).toBeFalsy()
       } else {
-        expect(wrapper.find('#proprietor-partner-name-group').exists()).toBeFalsy()
-        expect(wrapper.find('#passcode-group').isVisible()).toBe(true)
+        expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists()).toBeFalsy()
       }
     })
   })
