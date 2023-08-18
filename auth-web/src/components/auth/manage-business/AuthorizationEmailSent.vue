@@ -22,7 +22,7 @@
         color="primary"
         @click="closeAuthEmailSentDialog()"
       >
-        OK
+        Close
       </v-btn>
     </v-card-actions>
   </v-card>
@@ -74,6 +74,7 @@ export default defineComponent({
   }
 
 #help-button {
+  cursor: pointer;
   color: var(--v-primary-base) !important;
   .v-icon {
     transform: translate(0, -2px) !important;
