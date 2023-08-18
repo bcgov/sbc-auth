@@ -1,14 +1,36 @@
 <template>
   <div id="app">
     <v-container>
-      <v-layout row justify-center align-center>
-        <v-progress-circular color="primary" :size="50" indeterminate v-if="!errorMessage"></v-progress-circular>
-        <div class="loading-msg" v-if="!errorMessage"> {{ $t('paymentDoneMsg') }}</div>
-        <div class="loading-msg" v-if="errorMessage && !showErrorModal">{{ errorMessage }}</div>
-        <sbc-system-error v-on:continue-event="goToUrl(returnUrl)" v-if="showErrorModal && errorMessage"
-                          title="Payment Failed" primaryButtonTitle="Continue to Account Page"
-                          :description="errorMessage"></sbc-system-error>
-      </v-layout>
+      <v-row
+        justify="center"
+        align="center"
+      >
+        <v-progress-circular
+          v-if="!errorMessage"
+          color="primary"
+          :size="50"
+          indeterminate
+        />
+        <div
+          v-if="!errorMessage"
+          class="loading-msg"
+        >
+          {{ $t('paymentDoneMsg') }}
+        </div>
+        <div
+          v-if="errorMessage && !showErrorModal"
+          class="loading-msg"
+        >
+          {{ errorMessage }}
+        </div>
+        <sbc-system-error
+          v-if="showErrorModal && errorMessage"
+          title="Payment Failed"
+          primaryButtonTitle="Continue to Account Page"
+          :description="errorMessage"
+          @continue-event="goToUrl(returnUrl)"
+        />
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -50,7 +72,7 @@ export default class CcPaymentReturnView extends Vue {
           this.goToUrl(this.returnUrl)
         }
       })
-      .catch(response => {
+      .catch(() => {
         // technical error..need not to show the modal
         this.showErrorModal = false
         this.errorMessage = this.$t('payFailedMessage').toString()

@@ -12,7 +12,7 @@ Vue.use(VueRouter)
 vi.mock('../../../src/services/payment.services')
 
 describe('PaymentReturnView.vue', () => {
-  var ob = {
+  const ob = {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',
@@ -38,8 +38,8 @@ describe('PaymentReturnView.vue', () => {
   it('service is not invoked when no params are present', () => {
     PaymentServices.updateTransaction = vi.fn().mockResolvedValue({})
 
-    const $t = (payNoParams: string) => 'Incorrect configuration'
-    const wrapper = shallowMount(PaymentReturnView, {
+    const $t = () => 'Incorrect configuration'
+    shallowMount(PaymentReturnView, {
       propsData: { },
       mocks: { $t }
     })

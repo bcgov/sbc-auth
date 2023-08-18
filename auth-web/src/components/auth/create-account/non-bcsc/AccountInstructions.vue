@@ -1,26 +1,36 @@
 <template>
   <v-container class="view-container">
     <div class="view-header flex-column mb-10">
-      <h1 class="view-header__title">How to verify your identity by a notary</h1>
-      <p class="mt-5 mb-3">There are three steps to verifying and protecting your identity when creating a BC Registries account.</p>
+      <h1 class="view-header__title">
+        How to verify your identity by a notary
+      </h1>
+      <p class="mt-5 mb-3">
+        There are three steps to verifying and protecting your identity when creating a BC Registries account.
+      </p>
     </div>
     <v-card
-      class="step-card my-6"
-      flat
       v-for="step in steps"
       :key="step.number"
+      class="step-card my-6"
+      flat
     >
       <v-card-text class="pt-4 pb-4 pb-lg-5 px-6 px-lg-8 d-inline-flex align-center">
-        <v-icon x-large color="blue-grey darken-1" class="step-icon mt-1 mr-12 ml-5">
-          {{step.icon}}
+        <v-icon
+          x-large
+          color="blue-grey darken-1"
+          class="step-icon mt-1 mr-12 ml-5"
+        >
+          {{ step.icon }}
         </v-icon>
         <div>
-          <h2 class="mt-2 mb-4">{{step.number}}.  {{step.stepTitle}}</h2>
-          <div v-html="step.stepDescription"></div>
+          <h2 class="mt-2 mb-4">
+            {{ step.number }}.  {{ step.stepTitle }}
+          </h2>
+          <div v-html="step.stepDescription" />
         </div>
       </v-card-text>
     </v-card>
-    <v-divider class="my-9"></v-divider>
+    <v-divider class="my-9" />
     <div class="d-flex">
       <v-btn
         large
@@ -33,11 +43,11 @@
         </v-icon>
         Back
       </v-btn>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-btn
         large
         color="primary"
-         class="next-btn font-weight-bold"
+        class="next-btn font-weight-bold"
         @click="goToDownload"
       >
         Next: Download Affidavit
@@ -50,12 +60,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator'
 import { Pages } from '@/util/constants'
 
 @Component
 export default class AccountInstructions extends Vue {
-  private readonly steps = [
+  readonly steps = [
     {
       number: 1,
       stepTitle: 'Get an identity affidavit notarized',
@@ -78,12 +88,12 @@ export default class AccountInstructions extends Vue {
     }
   ]
 
-  private goToDownload () {
+  goToDownload () {
     this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}/${Pages.SETUP_ACCOUNT_NON_BCSC_DOWNLOAD}`)
     window.scrollTo(0, 0)
   }
 
-  private goBack () {
+  goBack () {
     this.$router.push(`/${Pages.HOME}`)
     window.scrollTo(0, 0)
   }

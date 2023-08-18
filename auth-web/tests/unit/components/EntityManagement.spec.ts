@@ -12,11 +12,10 @@ import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
-// @ts-ignore
 Vue.use(VueCompositionAPI)
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 
 const vuetify = new Vuetify({})
 

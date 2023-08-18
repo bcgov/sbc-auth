@@ -1,6 +1,10 @@
 <template>
-  <interim-landing :summary="$t('pageNotFoundTitle')" :description="$t('pageNotFoundMsg')" icon="mdi-alert-circle-outline" iconColor="error">
-  </interim-landing>
+  <interim-landing
+    :summary="$t('pageNotFoundTitle')"
+    :description="$t('pageNotFoundMsg')"
+    icon="mdi-alert-circle-outline"
+    iconColor="error"
+  />
 </template>
 
 <script lang="ts">

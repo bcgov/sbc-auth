@@ -8,7 +8,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
-Vue.use(VueI18n, { bridge: true })
+Vue.use(VueI18n)
 
 describe('PPRLauncher.vue', () => {
   let wrapper: Wrapper<any>
@@ -26,7 +26,7 @@ describe('PPRLauncher.vue', () => {
   }
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-  let userModule = {
+  const userModule = {
     namespaced: true,
     state: {
       currentUser: {

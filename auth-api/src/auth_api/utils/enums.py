@@ -239,6 +239,7 @@ class LoginSource(Enum):
     STAFF = 'IDIR'
     BCROS = 'BCROS'
     API_GW = 'API_GW'
+    IDIR = 'IDIR'
 
 
 class ProductCode(Enum):

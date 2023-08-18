@@ -1,18 +1,38 @@
 <template>
   <v-container>
-    <div class="view-container" data-test="setup-govm-account">
+    <div
+      class="view-container"
+      data-test="setup-govm-account"
+    >
       <article>
         <div class="view-header">
-          <v-btn large icon color="secondary" class="mr-2" @click="handleBackButton()" data-test="account-settings-back-button">
-            <v-icon class="font-weight-bold">mdi-arrow-left</v-icon>
+          <v-btn
+            large
+            icon
+            color="secondary"
+            class="mr-2"
+            data-test="account-settings-back-button"
+            @click="handleBackButton()"
+          >
+            <v-icon class="font-weight-bold">
+              mdi-arrow-left
+            </v-icon>
           </v-btn>
           <div>
-            <h1 class="view-header__title">Send Invite to Ministry Account</h1>
-            <p class="mb-0">Enter the ministry name and account admin contact for this account.
-              An email invite will be sent to the account admin's email containing instructions how to create their account.</p>
+            <h1 class="view-header__title">
+              Send Invite to Ministry Account
+            </h1>
+            <p class="mb-0">
+              Enter the ministry name and account admin contact for this account.
+              An email invite will be sent to the account admin's email containing instructions
+              how to create their account.
+            </p>
           </div>
         </div>
-        <v-card class="profile-card py-4 px-6" flat>
+        <v-card
+          class="profile-card py-4 px-6"
+          flat
+        >
           <v-container>
             <v-card-title>Account Details</v-card-title>
             <v-card-text>

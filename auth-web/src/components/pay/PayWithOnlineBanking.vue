@@ -1,17 +1,19 @@
 <template>
   <v-card elevation="0">
     <v-card-text class="heading-info py-7 px-8">
-      <h2 class="mb-2">Balance Due: <span class="ml-2">{{overCredit ? '-': ''}}${{totalBalanceDue.toFixed(2)}}</span></h2>
+      <h2 class="mb-2">
+        Balance Due: <span class="ml-2">{{ overCredit ? '-': '' }}${{ totalBalanceDue.toFixed(2) }}</span>
+      </h2>
       <template v-if="overCredit">
         <p class="mb-6">
-          Transaction will be completed with your account credit.<br />
-          You now have <strong>${{creditBalance.toFixed(2)}} remaining credit</strong> in your account.
+          Transaction will be completed with your account credit.<br>
+          You now have <strong>${{ creditBalance.toFixed(2) }} remaining credit</strong> in your account.
         </p>
       </template>
       <template v-else-if="partialCredit">
         <p class="mb-6">
-          Payment is partially covered with your account credit: ${{credit}}<br />
-          You now have <strong>${{creditBalance.toFixed(2)}} remaining credit</strong> in your account.
+          Payment is partially covered with your account credit: ${{ credit }}<br>
+          You now have <strong>${{ creditBalance.toFixed(2) }} remaining credit</strong> in your account.
         </p>
       </template>
       <template v-else>
@@ -19,39 +21,43 @@
           Transaction will be completed when payment is received in full.
           Online Banking payment methods can expect between <strong>2-5 days</strong> for your payment.
         </p>
-        </template>
-        <template>
-        <div class="mb-1" v-if="!overCredit">
-          <span class="payee-name">
-            <strong>Payee Name:</strong>
-            {{payeeName}}
-          </span>
-          <span>
-            <strong>Account #:</strong>
-            {{cfsAccountId}}
-          </span>
-        </div>
       </template>
+      <div
+        v-if="!overCredit"
+        class="mb-1"
+      >
+        <span class="payee-name">
+          <strong>Payee Name:</strong>
+          {{ payeeName }}
+        </span>
+        <span>
+          <strong>Account #:</strong>
+          {{ cfsAccountId }}
+        </span>
+      </div>
     </v-card-text>
-    <v-card-text class="pt-7 pb-0 px-8" v-if="!overCredit">
-      <template>
-        <h3 class="mb-3">How to pay with online banking:</h3>
-        <ol class="mb-5">
-          <li>Sign in to your financial institution's online banking website or app</li>
-          <li>Go to your financial institution's bill payment page</li>
-          <li>Enter "BC Registries and Online Services" as payee</li>
-          <li>Enter BC Registries and Online Services account number</li>
-          <li>Submit your payment for the balance due</li>
-        </ol>
-      </template>
-      <v-divider class="my-6"></v-divider>
+    <v-card-text
+      v-if="!overCredit"
+      class="pt-7 pb-0 px-8"
+    >
+      <h3 class="mb-3">
+        How to pay with online banking:
+      </h3>
+      <ol class="mb-5">
+        <li>Sign in to your financial institution's online banking website or app</li>
+        <li>Go to your financial institution's bill payment page</li>
+        <li>Enter "BC Registries and Online Services" as payee</li>
+        <li>Enter BC Registries and Online Services account number</li>
+        <li>Submit your payment for the balance due</li>
+      </ol>
+      <v-divider class="my-6" />
     </v-card-text>
   </v-card>
 </template>
 
 <script lang="ts">
 
-import { Component, Emit, Prop, Watch } from 'vue-property-decorator'
+import { Component, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 
 @Component
@@ -68,7 +74,7 @@ export default class PayWithOnlineBanking extends Vue {
   private credit = 0
 
   @Watch('onlineBankingData', { deep: true })
-  async updateonlineBankingData (val, oldVal) {
+  async updateonlineBankingData () {
     this.setData()
   }
 

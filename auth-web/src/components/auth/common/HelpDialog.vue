@@ -1,11 +1,19 @@
 <template>
-  <component :is="componentType" v-model="isDialogOpen" v-if="isDialogOpen" max-width="45rem">
+  <component
+    :is="componentType"
+    v-if="isDialogOpen"
+    v-model="isDialogOpen"
+    max-width="45rem"
+  >
     <v-card>
       <v-card-title>
         <h2>Need Help?</h2>
       </v-card-title>
       <v-card-text>
-        <p class="mb-7" v-html="helpDialogBlurb" />
+        <p
+          class="mb-7"
+          v-html="helpDialogBlurb"
+        />
 
         <ul class="contact-info__list mb-7">
           <li>
@@ -31,8 +39,14 @@
         </p>
       </v-card-text>
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn large color="primary" @click="close()">Close</v-btn>
+        <v-spacer />
+        <v-btn
+          large
+          color="primary"
+          @click="close()"
+        >
+          Close
+        </v-btn>
       </v-card-actions>
     </v-card>
   </component>

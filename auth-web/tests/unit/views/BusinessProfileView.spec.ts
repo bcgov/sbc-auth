@@ -1,8 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import BusinessModule from '@/store/modules/business'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
-import SupportInfoCard from '@/components/SupportInfoCard.vue'
 
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -16,7 +13,7 @@ vi.mock('../../../src/services/bcol.services')
 
 describe('BusinessProfileView.vue', () => {
   let wrapper: Wrapper<BusinessProfileView>
-  var ob = {
+  const ob = {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1',
     'AUTH_API_URL': 'https://auth-api-post-dev.pathfinder.gov.bc.ca/api/v1',
     'LEGAL_API_URL': 'https://legal-api-dev.pathfinder.gov.bc.ca/api/v1',

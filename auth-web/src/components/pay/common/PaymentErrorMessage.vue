@@ -1,15 +1,61 @@
 <template>
-  <v-container class="view-container pay-error" data-test="pay-error">
+  <v-container
+    class="view-container pay-error"
+    data-test="pay-error"
+  >
     <v-row justify="center">
-      <v-col cols="12" lg="8" class="text-center">
-        <v-icon size="35" color="error" class="mb-6">{{error.errorIcon}}</v-icon>
-        <h1 v-html="error.errorTitle"></h1>
-        <p class="mt-8 mb-12" v-html="error.errorMessage"></p>
+      <v-col
+        cols="12"
+        lg="8"
+        class="text-center"
+      >
+        <v-icon
+          size="35"
+          color="error"
+          class="mb-6"
+        >
+          {{ error.errorIcon }}
+        </v-icon>
+        <h1 v-html="error.errorTitle" />
+        <p
+          class="mt-8 mb-12"
+          v-html="error.errorMessage"
+        />
         <div class="btns">
-          <v-btn large link color="primary" :href="backUrl" class="error-btn" data-test="btn-pay-error-tryagain" v-if="error.showOkbtn">Ok</v-btn>
-          <v-btn large link color="primary" @click="tryAgain" class="error-btn" data-test="btn-pay-error-tryagain" v-else>Try Again</v-btn>
-          <v-btn large outlined link color="primary" class="ml-3 error-btn" :href="backUrl"
-            v-if="error.showCancelbtn" data-test="btn-pay-error-cancel">Go Back</v-btn>
+          <v-btn
+            v-if="error.showOkbtn"
+            large
+            link
+            color="primary"
+            :href="backUrl"
+            class="error-btn"
+            data-test="btn-pay-error-tryagain"
+          >
+            Ok
+          </v-btn>
+          <v-btn
+            v-else
+            large
+            link
+            color="primary"
+            class="error-btn"
+            data-test="btn-pay-error-tryagain"
+            @click="tryAgain"
+          >
+            Try Again
+          </v-btn>
+          <v-btn
+            v-if="error.showCancelbtn"
+            large
+            outlined
+            link
+            color="primary"
+            class="ml-3 error-btn"
+            :href="backUrl"
+            data-test="btn-pay-error-cancel"
+          >
+            Go Back
+          </v-btn>
         </div>
       </v-col>
     </v-row>

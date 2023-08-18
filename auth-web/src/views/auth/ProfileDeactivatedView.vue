@@ -1,6 +1,9 @@
 <template>
-  <interim-landing :summary="$t('profileDeactivatedTitle')" :description="$t('profileDeactivatedMsg')" icon="mdi-information-outline">
-  </interim-landing>
+  <interim-landing
+    :summary="$t('profileDeactivatedTitle')"
+    :description="$t('profileDeactivatedMsg')"
+    icon="mdi-information-outline"
+  />
 </template>
 
 <script lang="ts">

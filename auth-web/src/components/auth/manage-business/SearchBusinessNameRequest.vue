@@ -1,8 +1,13 @@
 <template>
   <div>
-    <v-row class="mx-0 mt-n4">Find an existing incorporated or registered business or Name Request to manage it:</v-row>
+    <v-row class="mx-0 mt-n4">
+      Find an existing incorporated or registered business or Name Request to manage it:
+    </v-row>
     <v-row class="mx-0 mt-n2">
-      <v-radio-group v-model="searchType" row>
+      <v-radio-group
+        v-model="searchType"
+        row
+      >
         <v-radio
           label="Incorporated or Registered business"
           value="Incorporated"
@@ -13,27 +18,41 @@
         />
       </v-radio-group>
     </v-row>
-    <v-row class="mx-n4 mt-n12" :key="clearSearch">
+    <v-row
+      :key="clearSearch"
+      class="mx-n4 mt-n12"
+    >
       <v-col cols="6">
-        <v-form v-if="searchType=='Incorporated'" ref="addBusinessForm" lazy-validation class="mt-6">
+        <v-form
+          v-if="searchType=='Incorporated'"
+          ref="addBusinessForm"
+          lazy-validation
+          class="mt-6"
+        >
           <template>
             <!-- Search for business identifier or name -->
             <!-- NB: use v-if to re-mount component between instances -->
             <BusinessLookup
-              @business="businessEvent"
               :key="businessLookupKey"
+              @business="businessEvent"
             />
           </template>
         </v-form>
-        <v-form v-else ref="addNameRequestForm" lazy-validation class="mt-6">
+        <v-form
+          v-else
+          ref="addNameRequestForm"
+          lazy-validation
+          class="mt-6"
+        >
           <template>
             <v-btn
               large
               color="primary"
               class="save-continue-button"
-              @click="businessIdentifier = 'NR1234567'; showAddNRModal()"
               data-test="next-button"
-            > Open Name Request
+              @click="businessIdentifier = 'NR1234567'; showAddNRModal()"
+            >
+              Open Name Request
             </v-btn>
             <!-- TODO 16720: Search for name request to trigger showAddNRModal -->
             <!-- <name-request-lookup
@@ -74,7 +93,7 @@
       max-width="640"
       data-test-tag="add-name-request"
     >
-      <template v-slot:text>
+      <template #text>
         <AddNameRequestForm
           class="mt-6"
           :businessIdentifier="businessIdentifier"
@@ -139,7 +158,7 @@ export default class SearchBusinessNameRequest extends Vue {
     addNRDialog: InstanceType<typeof ModalDialog>
     manageBusinessDialog: InstanceType<typeof ManageBusinessDialog>
   }
-  addBusiness = async (loginPayload: LoginPayload) => {
+  addBusinessToList = async (loginPayload: LoginPayload) => {
     return this.$store.dispatch('business/addBusiness', loginPayload)
   }
   showAddSuccessModal (event) {
@@ -191,7 +210,7 @@ export default class SearchBusinessNameRequest extends Vue {
     if (this.isGovStaffAccount) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
-        await this.addBusiness(businessData)
+        await this.addBusinessToList(businessData)
         this.$emit('add-success', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {

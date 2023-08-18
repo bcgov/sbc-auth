@@ -8,13 +8,18 @@
         of your pre-authorized debit agreement prior to the first deduction.
       </p>
       <p class="mb-10 font-weight-bold">
-        {{padInfoSubtitle}}
+        {{ padInfoSubtitle }}
       </p>
     </template>
     <v-form ref="preAuthDebitForm">
       <section>
         <header class="mb-4 d-flex align-content-center">
-          <div data-test="pad-info-form-title" class="mr-1 font-weight-bold">Banking Information</div>
+          <div
+            data-test="pad-info-form-title"
+            class="mr-1 font-weight-bold"
+          >
+            Banking Information
+          </div>
           <v-btn
             small
             icon
@@ -31,7 +36,9 @@
           >
             <v-card class="bank-info-dialog-content">
               <v-card-title>
-                <h2 class="title font-weight-bold">How to locate your account information</h2>
+                <h2 class="title font-weight-bold">
+                  How to locate your account information
+                </h2>
                 <v-btn
                   icon
                   @click="bankInfoDialog = false"
@@ -40,7 +47,10 @@
                 </v-btn>
               </v-card-title>
               <v-card-text>
-                <v-img src="../../../assets/img/cheque-sample.jpg" lazy-src></v-img>
+                <v-img
+                  src="../../../assets/img/cheque-sample.jpg"
+                  lazy-src
+                />
                 <ol class="my-4">
                   <li>Cheque number - not required</li>
                   <li>Transit (branch) number - 5 digits</li>
@@ -52,68 +62,85 @@
           </v-dialog>
         </header>
         <v-row class="bank-information">
-          <v-col cols="6" class="py-0">
+          <v-col
+            cols="6"
+            class="py-0"
+          >
             <v-text-field
+              v-model="transitNumber"
+              v-mask="'#####'"
               label="Transit Number"
               filled
               hint="5 digits"
               persistent-hint
               :rules="transitNumberRules"
-              v-model="transitNumber"
-              v-mask="'#####'"
               data-test="input-transitNumber"
-            ></v-text-field>
+            />
           </v-col>
-          <v-col cols="6" class="py-0">
+          <v-col
+            cols="6"
+            class="py-0"
+          >
             <v-text-field
+              v-model="institutionNumber"
+              v-mask="'###'"
               label="Institution Number"
               filled
               hint="3 digits"
               persistent-hint
               :rules="institutionNumberRules"
-              v-model="institutionNumber"
-              v-mask="'###'"
               data-test="input-institutionNumber"
-            ></v-text-field>
+            />
           </v-col>
-          <v-col cols="12" class="py-0">
+          <v-col
+            cols="12"
+            class="py-0"
+          >
             <v-text-field
+              v-model="accountNumber"
+              v-mask="accountMask"
               label="Account Number"
               filled
               hint="7 to 12 digits"
               persistent-hint
               :rules="accountNumberRules"
-              v-model="accountNumber"
               data-test="input-accountNumber"
-              v-mask="accountMask">
-            ></v-text-field>
+            >
+              >
+            </v-text-field>
           </v-col>
         </v-row>
-        <v-row v-if="isAcknowledgeNeeded" class="acknowledge-needed">
+        <v-row
+          v-if="isAcknowledgeNeeded"
+          class="acknowledge-needed"
+        >
           <v-col class="pt-2 pl-6 pb-0">
             <v-checkbox
+              v-model="isAcknowledged"
               hide-details
               class="align-checkbox-label--top"
-              v-model="isAcknowledged"
-              @change="emitPreAuthDebitInfo"
               data-test="check-isAcknowledged"
+              @change="emitPreAuthDebitInfo"
             >
-              <template v-slot:label>
-                {{acknowledgementLabel}}
+              <template #label>
+                {{ acknowledgementLabel }}
               </template>
             </v-checkbox>
           </v-col>
         </v-row>
-        <v-row v-if="isTOSNeeded" class="tos-needed">
+        <v-row
+          v-if="isTOSNeeded"
+          class="tos-needed"
+        >
           <v-col class="pt-6 pl-6">
             <div class="terms-container">
               <TermsOfUseDialog
                 :isAlreadyAccepted="isTOSAccepted"
-                @terms-acceptance-status="updateTermsAccepted($event)"
                 :tosType="'termsofuse_pad'"
                 :tosHeading="'Business Pre-Authorized Debit Terms and Conditions Agreement BC Registries and Online Services'"
                 :tosCheckBoxLabelAppend="'of the Business Pre-Authorized Debit Terms and Conditions for BC Registry Services'"
-              ></TermsOfUseDialog>
+                @terms-acceptance-status="updateTermsAccepted($event)"
+              />
             </div>
           </v-col>
         </v-row>
@@ -149,7 +176,6 @@ export default defineComponent({
   name: 'PADInfoForm',
   components: { TermsOfUseDialog },
   directives: { mask },
-  emits: ['emit-pre-auth-debit-info', 'is-pre-auth-debit-form-valid', 'is-pad-info-touched'],
   props: {
     isAcknowledgeNeeded: { type: Boolean, default: true },
     isChangeView: { type: Boolean, default: false },
@@ -158,6 +184,7 @@ export default defineComponent({
     isTOSNeeded: { type: Boolean, default: true },
     padInformation: { default: () => { return {} as PADInfo } }
   },
+  emits: ['emit-pre-auth-debit-info', 'is-pre-auth-debit-form-valid', 'is-pad-info-touched'],
   setup (props, { emit }) {
     // refs
     const preAuthDebitForm = ref(null) as HTMLFormElement
@@ -236,7 +263,7 @@ export default defineComponent({
     }
 
     // watch bank info
-    watch(() => [state.accountNumber, state.institutionNumber, state.transitNumber], (oldVal, newVal) => {
+    watch(() => [state.accountNumber, state.institutionNumber, state.transitNumber], () => {
       // only trigger after component has initialized (values are updated in mounted)
       if (state.ready) {
         // must reaccept tos after changing bank info

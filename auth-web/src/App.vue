@@ -1,61 +1,70 @@
 <template>
   <v-app id="app">
-    <div class="header-group" ref="headerGroup">
+    <div
+      ref="headerGroup"
+      class="header-group"
+    >
       <sbc-loader :show="showLoading" />
       <sbc-header
-        class="flex-column"
         :key="$store.state.refreshKey"
+        ref="header"
+        class="flex-column"
         :in-auth="true"
         :show-product-selector="false"
         :show-login-menu="showLoginMenu"
+        :redirect-on-logout="logoutUrl"
         @account-switch-started="startAccountSwitch"
         @account-switch-completed="completeAccountSwitch"
         @hook:mounted="setup"
-        ref="header" :redirect-on-logout="logoutUrl">
-        <template v-slot:login-button-text>
+      >
+        <template #login-button-text>
           Log in with BC Services Card
         </template>
       </sbc-header>
       <v-snackbar
+        v-model="showNotification"
         bottom
         color="primary"
         class="mb-6"
-        v-model="showNotification"
         :timeout="toastTimeout"
       >
-        <span v-html="notificationText"></span>
+        <span v-html="notificationText" />
         <v-btn
           dark
           icon
           color="default"
           aria-label="Close Notification"
           title="Close Notification"
-          @click="showNotification = false">
+          @click="showNotification = false"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-snackbar>
-      <BreadCrumb v-if="showNavigationBar" :breadcrumbs="breadcrumbs" />
+      <BreadCrumb
+        v-if="showNavigationBar"
+        :breadcrumbs="breadcrumbs"
+      />
 
       <!-- Alert banner -->
       <v-alert
-        tile dense
+        v-if="bannerText"
+        tile
+        dense
         type="warning"
         class="mb-0 text-center colour-dk-text"
-        v-if="bannerText"
         v-html="bannerText"
       />
     </div>
     <div class="app-body">
       <router-view />
     </div>
-    <sbc-footer :aboutText='aboutText'></sbc-footer>
+    <sbc-footer :aboutText="aboutText" />
   </v-app>
 </template>
 
 <script lang="ts">
-import { AccessType, LDFlags, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins } from 'vue-property-decorator'
-import { MembershipStatus, Organization } from '@/models/Organization'
+import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
 import ActvityLogModule from '@/store/modules/activityLog'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'

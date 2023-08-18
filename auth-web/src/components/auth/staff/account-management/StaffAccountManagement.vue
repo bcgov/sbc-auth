@@ -1,77 +1,106 @@
 <template>
   <v-container class="pa-0">
     <header class="view-header align-center justify-space-between mt-n1 mb-4">
-      <h2 class="view-header__title">Account Management</h2>
+      <h2 class="view-header__title">
+        Account Management
+      </h2>
       <div class="view-header__actions">
-        <v-btn large
+        <v-btn
+          v-if="canCreateAccounts"
+          large
           color="primary"
           class="font-weight-bold"
-          v-if="canCreateAccounts"
           @click="openCreateAccount"
         >
-          <v-icon small class="mr-1">mdi-plus</v-icon>Create Account
+          <v-icon
+            small
+            class="mr-1"
+          >
+            mdi-plus
+          </v-icon>Create Account
         </v-btn>
       </div>
     </header>
     <!-- Tab Navigation -->
     <v-tabs
+      v-model="tab"
       background-color="transparent"
       class="mb-9"
-      v-model="tab"
-      @change="tabChange">
-      <v-tab data-test="active-tab" :to=pagesEnum.STAFF_DASHBOARD_ACTIVE
-        v-if="canViewAccounts">Active</v-tab>
+      @change="tabChange"
+    >
+      <v-tab
+        v-if="canViewAccounts"
+        data-test="active-tab"
+        :to="pagesEnum.STAFF_DASHBOARD_ACTIVE"
+      >
+        Active
+      </v-tab>
 
       <template v-if="canCreateAccounts">
-        <v-tab data-test="invitations-tab" :to=pagesEnum.STAFF_DASHBOARD_INVITATIONS>
+        <v-tab
+          data-test="invitations-tab"
+          :to="pagesEnum.STAFF_DASHBOARD_INVITATIONS"
+        >
           <v-badge
             inline
             color="primary"
             :content="pendingInvitationsCount"
-            :value="pendingInvitationsCount">
+            :value="pendingInvitationsCount"
+          >
             Invitations
           </v-badge>
         </v-tab>
       </template>
 
       <template v-if="canManageAccounts">
-        <v-tab data-test="pending-review-tab" :to=pagesEnum.STAFF_DASHBOARD_REVIEW>
+        <v-tab
+          data-test="pending-review-tab"
+          :to="pagesEnum.STAFF_DASHBOARD_REVIEW"
+        >
           <v-badge
             inline
             color="primary"
             :content="pendingTasksCount"
-            :value="pendingTasksCount">
+            :value="pendingTasksCount"
+          >
             Pending Review
           </v-badge>
         </v-tab>
-        <v-tab data-test="rejected-tab" :to=pagesEnum.STAFF_DASHBOARD_REJECTED>
+        <v-tab
+          data-test="rejected-tab"
+          :to="pagesEnum.STAFF_DASHBOARD_REJECTED"
+        >
           <v-badge
             inline
             color="primary"
             :content="rejectedTasksCount"
-            :value="rejectedTasksCount">
+            :value="rejectedTasksCount"
+          >
             Rejected
           </v-badge>
         </v-tab>
       </template>
 
       <template v-if="canSuspendAccounts">
-        <v-tab data-test="suspended-tab" :to=pagesEnum.STAFF_DASHBOARD_SUSPENDED>
+        <v-tab
+          data-test="suspended-tab"
+          :to="pagesEnum.STAFF_DASHBOARD_SUSPENDED"
+        >
           <v-badge
             inline
             color="primary"
             :content="suspendedReviewCount"
-            :value="suspendedReviewCount">
+            :value="suspendedReviewCount"
+          >
             Suspended
           </v-badge>
         </v-tab>
       </template>
-
     </v-tabs>
 
     <!-- Tab Contents -->
     <v-tabs-items v-model="tab">
-        <router-view></router-view>
+      <router-view />
     </v-tabs-items>
     <StaffCreateAccountModal ref="staffCreateAccountDialog" />
   </v-container>
@@ -79,7 +108,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { LDFlags, Pages, Role, StaffCreateAccountsTypes } from '@/util/constants'
+import { LDFlags, Pages, Role } from '@/util/constants'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import { Code } from '@/models/Code'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'

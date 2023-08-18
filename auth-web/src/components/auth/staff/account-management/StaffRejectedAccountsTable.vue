@@ -1,72 +1,160 @@
 <template>
   <v-container class="pa-0">
-    <DatePicker v-show="showDatePicker" ref="datePicker" @submit="updateDateRange($event)"
-    :setEndDate="searchParams.endDate" :setStartDate="searchParams.startDate"/>
+    <DatePicker
+      v-show="showDatePicker"
+      ref="datePicker"
+      :setEndDate="searchParams.endDate"
+      :setStartDate="searchParams.startDate"
+      @submit="updateDateRange($event)"
+    />
     <v-form class="fas-search account-rejected-search">
-      <v-row dense class="row-margin">
-        <v-col sm="12" cols="6">
+      <v-row
+        dense
+        class="row-margin"
+      >
+        <v-col
+          sm="12"
+          cols="6"
+        >
           <transition name="slide-fade">
-            <v-data-table class="user-list" :headers="headerAccounts" :items="rejectedTasks"
-              :items-per-page.sync="tableDataOptions.itemsPerPage" :custom-sort="columnSort"
-              :no-data-text="$t('noActiveAccountsLabel')" :footer-props="{
+            <v-data-table
+              :options.sync="tableDataOptions"
+              :items-per-page.sync="tableDataOptions.itemsPerPage"
+              class="user-list"
+              :headers="headerAccounts"
+              :items="rejectedTasks"
+              :custom-sort="columnSort"
+              :no-data-text="$t('noActiveAccountsLabel')"
+              :footer-props="{
                 itemsPerPageOptions: getPaginationOptions
-              }" :options.sync="tableDataOptions" @update:items-per-page="saveItemsPerPage"
-              :server-items-length="totalRejectedTasks" hide-default-header fixed-header>
-              <template v-slot:loading>
+              }"
+              :server-items-length="totalRejectedTasks"
+              hide-default-header
+              fixed-header
+              @update:items-per-page="saveItemsPerPage"
+            >
+              <template #loading>
                 Loading...
               </template>
 
-              <template v-slot:header="{}">
+              <template #header="{}">
                 <thead class="v-data-table-header">
                   <tr class="header-row-1">
-                    <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row', i)"
-                      class="font-weight-bold">
+                    <th
+                      v-for="(header, i) in headerAccounts"
+                      :key="getIndexedTag('find-header-row', i)"
+                      :scope="i"
+                      class="font-weight-bold"
+                    >
                       {{ header.text }}
                     </th>
                   </tr>
 
-                  <tr class="header-row-2 header-row-2-no-padding" id="header-filter-row">
-                    <th v-for="(header, i) in headerAccounts" :scope="i" :key="getIndexedTag('find-header-row2', i)">
-                      <v-text-field v-if="!['status', 'action', 'dateSubmitted', 'type'].includes(header.value)"
-                        :id="header.value" input type="search" autocomplete="off" class="text-input-style" filled
-                        :placeholder="header.text" v-model.trim="searchParams[header.value]" dense
-                        hide-details="auto" />
+                  <tr
+                    id="header-filter-row"
+                    class="header-row-2 header-row-2-no-padding"
+                  >
+                    <th
+                      v-for="(header, i) in headerAccounts"
+                      :key="getIndexedTag('find-header-row2', i)"
+                      :scope="i"
+                    >
+                      <v-text-field
+                        v-if="!['status', 'action', 'dateSubmitted', 'type'].includes(header.value)"
+                        :id="header.value"
+                        v-model.trim="searchParams[header.value]"
+                        input
+                        type="search"
+                        autocomplete="off"
+                        class="text-input-style"
+                        filled
+                        :placeholder="header.text"
+                        dense
+                        hide-details="auto"
+                      />
 
-                      <div v-else-if="['status'].includes(header.value)" class="mt-0">
-                        <v-select :items="statuses" v-model="searchParams[header.value]" filled item-text="text"
-                          item-value="code" data-test="select-status" v-bind="$attrs" v-on="$listeners"
-                          hide-details="auto" :menu-props="{ bottom: true, offsetY: true }" />
+                      <div
+                        v-else-if="['status'].includes(header.value)"
+                        class="mt-0"
+                      >
+                        <v-select
+                          v-model="searchParams[header.value]"
+                          :items="statuses"
+                          filled
+                          item-text="text"
+                          item-value="code"
+                          data-test="select-status"
+                          v-bind="$attrs"
+                          hide-details="auto"
+                          :menu-props="{ bottom: true, offsetY: true }"
+                          v-on="$listeners"
+                        />
                       </div>
 
-                      <div v-else-if="['type'].includes(header.value)" class="mt-0">
-                        <v-select :items="accountTypes" v-model="searchParams[header.value]" filled v-bind="$attrs"
-                          v-on="$listeners" hide-details="auto" item-text="desc" item-value="val"
-                          :menu-props="{ bottom: true, offsetY: true }" class="account-type-list" />
+                      <div
+                        v-else-if="['type'].includes(header.value)"
+                        class="mt-0"
+                      >
+                        <v-select
+                          v-model="searchParams[header.value]"
+                          :items="accountTypes"
+                          filled
+                          v-bind="$attrs"
+                          hide-details="auto"
+                          item-text="desc"
+                          item-value="val"
+                          :menu-props="{ bottom: true, offsetY: true }"
+                          class="account-type-list"
+                          v-on="$listeners"
+                        />
                       </div>
 
-                      <div v-else-if="['dateSubmitted'].includes(header.value)" @click="showDatePicker = true"
-                        class="mt-0 pt-5">
-                        <v-text-field class="text-input-style" append-icon="mdi-calendar" dense filled
-                          hide-details="true" :placeholder="header.text" v-model="dateTxt" />
+                      <div
+                        v-else-if="['dateSubmitted'].includes(header.value)"
+                        class="mt-0 pt-5"
+                        @click="showDatePicker = true"
+                      >
+                        <v-text-field
+                          v-model="dateTxt"
+                          class="text-input-style"
+                          append-icon="mdi-calendar"
+                          dense
+                          filled
+                          hide-details="true"
+                          :placeholder="header.text"
+                        />
                       </div>
 
-                      <v-btn v-else-if="searchParamsExist && header.value === 'action'" outlined color="primary"
-                        class="action-btn clear-filter-button" @click="clearSearchParams()">
+                      <v-btn
+                        v-else-if="searchParamsExist && header.value === 'action'"
+                        outlined
+                        color="primary"
+                        class="action-btn clear-filter-button"
+                        @click="clearSearchParams()"
+                      >
                         <span class="clear-filter cursor-pointer">
                           Clear Filters
-                          <v-icon small color="primary">mdi-close</v-icon>
+                          <v-icon
+                            small
+                            color="primary"
+                          >mdi-close</v-icon>
                         </span>
                       </v-btn>
                     </th>
                   </tr>
                 </thead>
               </template>
-              <template v-slot:[`item.dateSubmitted`]="{ item }">
+              <template #[`item.dateSubmitted`]="{ item }">
                 {{ formatDate(item.dateSubmitted, 'MMM DD, YYYY') }}
               </template>
-              <template v-slot:[`item.action`]="{ item }">
-                <v-btn outlined color="primary" class="action-btn"
-                  :data-test="getIndexedTag('reset-password-button', item.id)" @click="view(item)">
+              <template #[`item.action`]="{ item }">
+                <v-btn
+                  outlined
+                  color="primary"
+                  class="action-btn"
+                  :data-test="getIndexedTag('reset-password-button', item.id)"
+                  @click="view(item)"
+                >
                   View
                 </v-btn>
               </template>
@@ -199,7 +287,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
   }
 
   @Watch('tableDataOptions', { deep: true })
-  async getStaffTasks (val, oldVal) {
+  async getStaffTasks (val) {
     await this.searchStaffTasks(val?.page, val?.itemsPerPage)
   }
 
@@ -210,7 +298,7 @@ export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) 
   async mounted () {
     await this.getProducts()
     if (this.products) {
-      this.products.forEach((element, index, array) => {
+      this.products.forEach((element) => {
         this.accountTypes.push({ desc: `Access Request (${element.desc})`, val: element.desc })
       })
     }

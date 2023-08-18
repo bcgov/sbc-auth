@@ -6,33 +6,69 @@
     </p>
     <v-row class="mt-5">
       <!-- Image Column -->
-      <v-col cols="12" md="6" class="bcsc-info-col">
+      <v-col
+        cols="12"
+        md="6"
+        class="bcsc-info-col"
+      >
         <h2>It's Secure</h2>
-        <v-list-item class="list-item" v-for="(item, index) in secureBulletPoints" :key="`List-1-${index}`" >
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+        <v-list-item
+          v-for="(item, index) in secureBulletPoints"
+          :key="`List-1-${index}`"
+          class="list-item"
+        >
+          <v-icon
+            size="8"
+            class="list-item-bullet mt-5"
+          >
+            mdi-square
+          </v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              {{item.text}}
+              {{ item.text }}
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
       </v-col>
       <!-- Info Column -->
-      <v-col cols="12" md="6" class="bcsc-info-col">
+      <v-col
+        cols="12"
+        md="6"
+        class="bcsc-info-col"
+      >
         <h2>It's Quick and Easy</h2>
         <v-list-item class="list-item">
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+          <v-icon
+            size="8"
+            class="list-item-bullet mt-5"
+          >
+            mdi-square
+          </v-icon>
           <v-list-item-content>
-            <v-list-item-subtitle class="list-item-text">It normally takes about 5 minutes to
-              <a :href="cardSetUpUrl" class="link" target="_blank">set up a mobile card</a>
+            <v-list-item-subtitle class="list-item-text">
+              It normally takes about 5 minutes to
+              <a
+                :href="cardSetUpUrl"
+                class="link"
+                target="_blank"
+              >set up a mobile card</a>
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item class="list-item" v-for="(item, index) in easeBulletPoints" :key="`List-2-${index}`" >
-          <v-icon size="8" class="list-item-bullet mt-5">mdi-square</v-icon>
+        <v-list-item
+          v-for="(item, index) in easeBulletPoints"
+          :key="`List-2-${index}`"
+          class="list-item"
+        >
+          <v-icon
+            size="8"
+            class="list-item-bullet mt-5"
+          >
+            mdi-square
+          </v-icon>
           <v-list-item-content>
             <v-list-item-subtitle class="list-item-text">
-              {{item.text}}
+              {{ item.text }}
             </v-list-item-subtitle>
           </v-list-item-content>
         </v-list-item>
@@ -41,8 +77,12 @@
     <!-- Panel Btns -->
     <div class="mt-10">
       <template v-if="!user">
-        <v-btn large color="bcgovblue" class="cta-btn font-weight-bold white--text mr-2 px-7"
-          to="/choose-authentication-method">
+        <v-btn
+          large
+          color="bcgovblue"
+          class="cta-btn font-weight-bold white--text mr-2 px-7"
+          to="/choose-authentication-method"
+        >
           Create a BC Registries Account
         </v-btn>
       </template>
@@ -64,16 +104,18 @@ export default defineComponent({
   props: {
     user: Object as PropType<User>
   },
-  setup (props) {
+  setup () {
     const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'
     const secureBulletPoints = [
-      { text: 'A mobile card is a representation of your BC Services Card on your mobile device. It\'s used to prove who you are when you log in to access government services online.' },
+      { text: `A mobile card is a representation of your BC Services Card on your mobile device. ` +
+        `It's used to prove who you are when you log in to access government services online.` },
       { text: 'Only your name and a unique identifier is stored on the mobile device.' }
     ]
 
     const easeBulletPoints = [
-      { text: 'You can verify your identity by video right from your mobile device. You don\'t need to go in person unless you can\'t verify by video.' }
+      { text: `You can verify your identity by video right from your mobile device. ` +
+        `You don't need to go in person unless you can't verify by video.` }
     ]
 
     return {

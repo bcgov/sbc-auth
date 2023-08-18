@@ -1,6 +1,8 @@
 <template>
-  <interim-landing :summary="$t('leaveTeamTitle')" :description="$t('leaveTeamMsg')">
-  </interim-landing>
+  <interim-landing
+    :summary="$t('leaveTeamTitle')"
+    :description="$t('leaveTeamMsg')"
+  />
 </template>
 
 <script lang="ts">

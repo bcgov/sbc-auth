@@ -1,16 +1,28 @@
 <template>
   <div>
     <article>
-      <header class="hero-banner d-flex align-center" :class="{'auth': userProfile}">
+      <header
+        class="hero-banner d-flex align-center"
+        :class="{'auth': userProfile}"
+      >
         <v-container>
           <h1>Start a B.C. based Business and <br>keep Business Records up to date</h1>
-          <p class="mt-7 mb-10">The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
-            and organizations in British Columbia.</p>
+          <p class="mt-7 mb-10">
+            The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
+            and organizations in British Columbia.
+          </p>
           <div class="hero-banner__cta-btns mb-2">
             <!-- Authenticated -->
-            <div v-if="userProfile" class="cta-btns-authenticated">
-              <v-btn large color="bcgovblue" class="cta-btn-auth font-weight-bold white--text mr-4"
-                     @click="goToManageBusinesses()">
+            <div
+              v-if="userProfile"
+              class="cta-btns-authenticated"
+            >
+              <v-btn
+                large
+                color="bcgovblue"
+                class="cta-btn-auth font-weight-bold white--text mr-4"
+                @click="goToManageBusinesses()"
+              >
                 Manage my Business
               </v-btn>
               <NameRequestButton :isWide="true" />
@@ -25,16 +37,19 @@
                   width="330"
                   transition="slide-y-transition"
                 >
-                  <template v-slot:activator="{ on }">
+                  <template #activator="{ on }">
                     <v-btn
+                      id="loginBtn"
                       large
                       color="bcgovblue"
                       class="mr-4 font-weight-bold white--text"
                       aria-label="log in"
-                      id="loginBtn"
-                      v-on="on">
+                      v-on="on"
+                    >
                       <span>Log in to my BC Registries Account</span>
-                      <v-icon class="mr-n1 ml-2">mdi-menu-down</v-icon>
+                      <v-icon class="mr-n1 ml-2">
+                        mdi-menu-down
+                      </v-icon>
                     </v-btn>
                   </template>
                   <sbc-auth-menu />
@@ -43,18 +58,37 @@
               </div>
               <div class="d-flex mt-8">
                 <span class="body-1">New to BC Registries?</span>
-                <router-link class="ml-2 body-1 font-weight-bold"
+                <router-link
+                  class="ml-2 body-1 font-weight-bold"
                   to="/choose-authentication-method"
-                >Create a BC Registries Account
+                >
+                  Create a BC Registries Account
                 </router-link>
               </div>
             </div>
           </div>
-          <v-dialog v-model="accountDialog" max-width="640">
+          <v-dialog
+            v-model="accountDialog"
+            max-width="640"
+          >
             <LoginBCSC>
-              <template v-slot:actions>
-                <v-btn large color="primary" class="login-btn" @click="login()">Log in</v-btn>
-                <v-btn large depressed color="default" @click="accountDialog = false">Cancel</v-btn>
+              <template #actions>
+                <v-btn
+                  large
+                  color="primary"
+                  class="login-btn"
+                  @click="login()"
+                >
+                  Log in
+                </v-btn>
+                <v-btn
+                  large
+                  depressed
+                  color="default"
+                  @click="accountDialog = false"
+                >
+                  Cancel
+                </v-btn>
               </template>
             </LoginBCSC>
           </v-dialog>
@@ -66,18 +100,21 @@
           <InfoStepper />
           <transition
             name="slide-x-transition"
-            mode="out-in">
+            mode="out-in"
+          >
             <router-view
               :userProfile="userProfile"
               @login="login()"
               @account-dialog="accountDialog = true"
-              @manage-businesses="goToManageBusinesses()"/>
+              @manage-businesses="goToManageBusinesses()"
+            />
           </transition>
         </v-container>
       </div>
       <TestimonialQuotes />
       <div class="bcsc-container py-6">
-        <BcscPanel class="my-10"
+        <BcscPanel
+          class="my-10"
           :user="userProfile"
           @login="login()"
           @account-dialog="accountDialog = true"
@@ -86,22 +123,43 @@
       <div class="contact-info-container">
         <v-container>
           <v-row>
-            <v-col cols="12" md="7">
-              <h3 class="mb-6">Need more information?</h3>
-              <p class="mb-4">To learn more about Cooperative Associations in British Columbia, please
-                <a :href="coopAssocUrl" target="_blank" rel="noopener noreferrer">
+            <v-col
+              cols="12"
+              md="7"
+            >
+              <h3 class="mb-6">
+                Need more information?
+              </h3>
+              <p class="mb-4">
+                To learn more about Cooperative Associations in British Columbia, please
+                <a
+                  :href="coopAssocUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   visit the Cooperative Associations information page
                 </a>.
               </p>
-              <a class="link-w-icon" href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/business-registry-faq"
-                 target="_blank" rel="noopener noreferrer">
+              <a
+                class="link-w-icon"
+                href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/business-registry-faq"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <span>Business Registry Frequently Asked Questions</span>
               </a>
             </v-col>
 
-            <v-col cols="12" md="5">
-              <h3 class="mb-6">Contact Us</h3>
-              <p class="mb-5">For support or questions about this application, contact us at:</p>
+            <v-col
+              cols="12"
+              md="5"
+            >
+              <h3 class="mb-6">
+                Contact Us
+              </h3>
+              <p class="mb-5">
+                For support or questions about this application, contact us at:
+              </p>
               <ul class="contact-info__list mb-5">
                 <li>
                   <span>{{ $t('labelTollFree') }}</span>
@@ -130,7 +188,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { IdpHint, LoginSource, Pages } from '@/util/constants'
+import { LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
 import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
@@ -171,7 +229,8 @@ export default class HomeView extends Vue {
   private accountDialog = false
   private isDirSearchUser: boolean = false
   private readonly resetCurrentOrganisation!: () => void
-  private readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
+  private readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
+  'managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
   }

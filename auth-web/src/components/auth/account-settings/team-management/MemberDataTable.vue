@@ -1,220 +1,232 @@
 <template>
   <div>
-  <v-data-table
-    v-if="roleInfos"
-    :headers="headerMembers"
-    :items="indexedOrgMembers"
-    :items-per-page="5"
-    :hide-default-footer="indexedOrgMembers.length <= 5"
-    :custom-sort="customSortActive"
-    class="member-data-table"
-    :no-data-text="$t('noActiveUsersLabel')"
-  >
-    <template v-slot:loading>
-      Loading...
-    </template>
+    <v-data-table
+      v-if="roleInfos"
+      :headers="headerMembers"
+      :items="indexedOrgMembers"
+      :items-per-page="5"
+      :hide-default-footer="indexedOrgMembers.length <= 5"
+      :custom-sort="customSortActive"
+      class="member-data-table"
+      :no-data-text="$t('noActiveUsersLabel')"
+    >
+      <template #loading>
+        Loading...
+      </template>
 
-    <!-- Name Column Template -->
-    <template v-slot:[`item.name`]="{ item }">
-      <div
-        class="user-name font-weight-bold"
-        :data-test="getIndexedTag('user-name', item.index)"
+      <!-- Name Column Template -->
+      <template #[`item.name`]="{ item }">
+        <div
+          class="user-name font-weight-bold"
+          :data-test="getIndexedTag('user-name', item.index)"
         >
           {{ item.user.firstname }} {{ item.user.lastname }}
-      </div>
-      <div
-        :data-test="getIndexedTag('business-id', item.index)"
-        class="contact-email"
-        v-if="item.user.contacts && item.user.contacts.length > 0"
+        </div>
+        <div
+          v-if="item.user.contacts && item.user.contacts.length > 0"
+          :data-test="getIndexedTag('business-id', item.index)"
+          class="contact-email"
         >
           {{ item.user.contacts[0].email }}
-      </div>
-    </template>
+        </div>
+      </template>
 
-    <!-- Authentication Column Template .Show it only for BCSC/BCEID -->
-    <template
-      v-slot:[`item.authentication`]="{ item }"
-      v-if="isRegularAccount()"
-    >
-      <div :data-test="getIndexedTag('last-active', item.index)">
-        <div v-if="item.user.loginSource ===loginSourceEnum.BCEID "> {{item.user.username}} </div>
-        <div v-if="item.user.loginSource ===loginSourceEnum.BCSC "> BCServicesCard </div>
-        <div v-else></div>
-      </div>
-    </template>
+      <!-- Authentication Column Template .Show it only for BCSC/BCEID -->
+      <template
+        v-if="isRegularAccount()"
+        #[`item.authentication`]="{ item }"
+      >
+        <div :data-test="getIndexedTag('last-active', item.index)">
+          <div v-if="item.user.loginSource ===loginSourceEnum.BCEID ">
+            {{ item.user.username }}
+          </div>
+          <div v-if="item.user.loginSource ===loginSourceEnum.BCSC ">
+            BCServicesCard
+          </div>
+          <div v-else />
+        </div>
+      </template>
 
-    <!-- Role Column Template -->
-    <template v-slot:[`item.role`]="{ item }">
-      <v-menu
-        transition="slide-y-transition">
-        <template v-slot:activator="{ on }">
-          <v-btn
-            text
-            class="ml-n4 pr-2"
-            aria-label="Select User Role"
-            v-on="on"
-            :disabled="!canChangeRole(item)"
-            :data-test="getIndexedTag('role-selector', item.index)"
-          >
-            {{ item.roleDisplayName }}
-            <v-icon depressed>mdi-menu-down</v-icon>
-          </v-btn>
-        </template>
-        <v-list dense class="role-list" role="user role list">
-          <v-item-group>
-            <v-list-item
-              class="py-1"
-              v-for="(role, index) in roleInfos"
-              :key="index"
-              @click="
-                item.membershipTypeCode.toUpperCase() !==
-                role.name.toUpperCase()
-                  ? confirmChangeRole(item, role.name)
-                  : ''
-              "
-              :disabled="!isRoleEnabled(role, item)"
-              v-bind:class="{
-                'primary--text v-item--active v-list-item--active':
-                  item.membershipTypeCode.toUpperCase() ===
-                  role.name.toUpperCase()
-              }"
+      <!-- Role Column Template -->
+      <template #[`item.role`]="{ item }">
+        <v-menu
+          transition="slide-y-transition"
+        >
+          <template #activator="{ on }">
+            <v-btn
+              text
+              class="ml-n4 pr-2"
+              aria-label="Select User Role"
+              :disabled="!canChangeRole(item)"
+              :data-test="getIndexedTag('role-selector', item.index)"
+              v-on="on"
             >
-              <v-list-item-icon>
-                <v-icon v-text="role.icon" />
-              </v-list-item-icon>
-              <v-list-item-content>
-                <v-list-item-title
-                  class="user-role-name"
-                  v-text="role.displayName"
-                >
-                </v-list-item-title>
-                <v-list-item-subtitle
-                  class="user-role-desc"
-                  v-text="role.label"
-                >
-                </v-list-item-subtitle>
-                <v-divider></v-divider>
-              </v-list-item-content>
-            </v-list-item>
-          </v-item-group>
-        </v-list>
-      </v-menu>
-    </template>
+              {{ item.roleDisplayName }}
+              <v-icon depressed>
+                mdi-menu-down
+              </v-icon>
+            </v-btn>
+          </template>
+          <v-list
+            dense
+            class="role-list"
+            role="user role list"
+          >
+            <v-item-group>
+              <v-list-item
+                v-for="(role, index) in roleInfos"
+                :key="index"
+                class="py-1"
+                :disabled="!isRoleEnabled(role, item)"
+                :class="{
+                  'primary--text v-item--active v-list-item--active':
+                    item.membershipTypeCode.toUpperCase() ===
+                    role.name.toUpperCase()
+                }"
+                @click="
+                  item.membershipTypeCode.toUpperCase() !==
+                    role.name.toUpperCase()
+                    ? confirmChangeRole(item, role.name)
+                    : ''
+                "
+              >
+                <v-list-item-icon>
+                  <v-icon v-text="role.icon" />
+                </v-list-item-icon>
+                <v-list-item-content>
+                  <v-list-item-title
+                    class="user-role-name"
+                    v-text="role.displayName"
+                  />
+                  <v-list-item-subtitle
+                    class="user-role-desc"
+                    v-text="role.label"
+                  />
+                  <v-divider />
+                </v-list-item-content>
+              </v-list-item>
+            </v-item-group>
+          </v-list>
+        </v-menu>
+      </template>
 
-    <!-- Date Column Template -->
-    <template
-      v-slot:[`item.lastActive`]="{ item }"
+      <!-- Date Column Template -->
+      <template
+        #[`item.lastActive`]="{ item }"
+      >
+        <div :data-test="getIndexedTag('last-active', item.index)">
+          {{ formatDate(item.user.modified, 'MMMM DD, YYYY') }}
+        </div>
+      </template>
+
+      <!-- Actions Column Template -->
+      <template #[`item.action`]="{ item }">
+        <!-- Reset Authenticator -->
+        <v-btn
+          v-show="canResetAuthenticator(item)"
+          v-can:RESET_OTP.hide
+          icon
+          class="mr-1"
+          aria-label="Reset Authenticator"
+          title="Reset Authenticator"
+          @click="showResetAuthenticatorDialog(item)"
+        >
+          <v-icon>mdi-lock-reset</v-icon>
+        </v-btn>
+
+        <!-- Reset Password -->
+        <v-btn
+          v-show="anonAccount"
+          v-can:RESET_PASSWORD.hide
+          icon
+          class="mr-1"
+          aria-label="Reset User Password"
+          title="Reset User Password"
+          :data-test="getIndexedTag('reset-password-button', item.index)"
+          @click="resetPassword(item)"
+        >
+          <v-icon>mdi-lock-reset</v-icon>
+        </v-btn>
+
+        <!-- Remove User -->
+        <v-btn
+          v-show="canRemove(item)"
+          icon
+          aria-label="Remove Team Member"
+          title="Remove Team Member"
+          :data-test="getIndexedTag('remove-user-button', item.index)"
+          @click="confirmRemoveMember(item)"
+        >
+          <v-icon>mdi-trash-can-outline</v-icon>
+        </v-btn>
+
+        <!-- Leave Account -->
+        <v-btn
+          v-show="canLeave(item)"
+          icon
+          aria-label="Leave Account"
+          title="Leave Account"
+          :data-test="getIndexedTag('leave-team-button', item.index)"
+          @click="confirmLeaveTeam(item)"
+        >
+          <v-icon>mdi-trash-can-outline</v-icon>
+        </v-btn>
+      </template>
+    </v-data-table>
+
+    <v-snackbar
+      v-model="showResetSnackBar"
+      bottom
+      color="primary"
+      class="mb-6"
+      :timeout="SNACKBAR_TIMEOUT"
     >
-      <div :data-test="getIndexedTag('last-active', item.index)">
-        {{ formatDate(item.user.modified, 'MMMM DD, YYYY') }}
-      </div>
-    </template>
-
-    <!-- Actions Column Template -->
-    <template v-slot:[`item.action`]="{ item }">
-
-      <!-- Reset Authenticator -->
+      Authenticator reset for {{ selectedUsername() }}
       <v-btn
         icon
-        class="mr-1"
-        aria-label="Reset Authenticator"
-        title="Reset Authenticator"
-        v-can:RESET_OTP.hide
-        v-show="canResetAuthenticator(item)"
-        @click="showResetAuthenticatorDialog(item)">
-        <v-icon>mdi-lock-reset</v-icon>
-      </v-btn>
-
-      <!-- Reset Password -->
-      <v-btn
-        icon
-        class="mr-1"
-        aria-label="Reset User Password"
-        title="Reset User Password"
-        v-can:RESET_PASSWORD.hide
-        v-show="anonAccount"
-        :data-test="getIndexedTag('reset-password-button', item.index)"
-        @click="resetPassword(item)"
+        dark
+        aria-label="Close Notification"
+        title="Close Notification"
+        @click="showResetSnackBar = false"
       >
-        <v-icon>mdi-lock-reset</v-icon>
+        <v-icon>mdi-close</v-icon>
       </v-btn>
+    </v-snackbar>
 
-      <!-- Remove User -->
-      <v-btn
-        icon
-        aria-label="Remove Team Member"
-        title="Remove Team Member"
-        v-show="canRemove(item)"
-        :data-test="getIndexedTag('remove-user-button', item.index)"
-        @click="confirmRemoveMember(item)"
-      >
-        <v-icon>mdi-trash-can-outline</v-icon>
-      </v-btn>
-
-      <!-- Leave Account -->
-      <v-btn
-        icon
-        aria-label="Leave Account"
-        title="Leave Account"
-        v-show="canLeave(item)"
-        :data-test="getIndexedTag('leave-team-button', item.index)"
-        @click="confirmLeaveTeam(item)"
-      >
-        <v-icon>mdi-trash-can-outline</v-icon>
-      </v-btn>
-
-    </template>
-  </v-data-table>
-
-  <v-snackbar
-    bottom
-    color="primary"
-    class="mb-6"
-    v-model="showResetSnackBar"
-    :timeout="SNACKBAR_TIMEOUT"
-  >
-    Authenticator reset for {{selectedUsername()}}
-    <v-btn
-      icon
-      dark
-      aria-label="Close Notification"
-      title="Close Notification"
-      @click="showResetSnackBar = false"
+    <ModalDialog
+      ref="resetAuthenticatorDialog"
+      icon="mdi-check"
+      title="Reset Authenticator"
+      text="Resetting this team members authenticator will require them to log in and enter a new one-time password in their authenticator app."
+      dialog-class="notify-dialog"
+      max-width="600"
     >
-      <v-icon>mdi-close</v-icon>
-    </v-btn>
-  </v-snackbar>
-
-  <ModalDialog
-    ref="resetAuthenticatorDialog"
-    icon="mdi-check"
-    title="Reset Authenticator"
-    text="Resetting this team members authenticator will require them to log in and enter a new one-time password in their authenticator app."
-    dialog-class="notify-dialog"
-    max-width="600"
-  >
-    <template v-slot:icon>
-      <v-icon large color="error">mdi-alert-circle-outline</v-icon>
-    </template>
-    <template v-slot:actions>
-      <v-btn
-        large
-        color="error"
-        class="font-weight-bold"
-        @click="resetAuthenticator()"
-      >
-        Reset
-      </v-btn>
-      <v-btn
-        large
-        depressed
-        @click="closeResetAuthDialog()"
-      >
-        Cancel
-      </v-btn>
-    </template>
-  </ModalDialog>
-
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          color="error"
+          class="font-weight-bold"
+          @click="resetAuthenticator()"
+        >
+          Reset
+        </v-btn>
+        <v-btn
+          large
+          depressed
+          @click="closeResetAuthDialog()"
+        >
+          Cancel
+        </v-btn>
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -514,7 +526,7 @@ export default class MemberDataTable extends Vue {
   }
 
   @Emit()
-  private confirmRemoveMember (member: Member) {}
+  private confirmRemoveMember () {}
 
   @Emit()
   private resetPassword (member: Member) {

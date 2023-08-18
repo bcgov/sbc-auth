@@ -1,14 +1,25 @@
 <template>
-  <v-container class="view-container" v-if="isAccountStatusNsfSuspended">
+  <v-container
+    v-if="isAccountStatusNsfSuspended"
+    class="view-container"
+  >
     <div class="view-header">
       <div class="view-header__icon">
-        <v-icon large color="error" class="mt-1 mr-4">mdi-alert-circle-outline</v-icon>
+        <v-icon
+          large
+          color="error"
+          class="mt-1 mr-4"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </div>
       <div>
         <h1 class="view-header__title">
           This account has been temporarily suspended
         </h1>
-        <p class="mt-3 mb-0">To unlock your account, please complete the following steps.</p>
+        <p class="mt-3 mb-0">
+          To unlock your account, please complete the following steps.
+        </p>
       </div>
     </div>
     <v-card flat>
@@ -17,7 +28,7 @@
         :isLoading="isLoading"
         :stepperColor="'error'"
         @final-step-action="unlockAccount"
-      ></Stepper>
+      />
     </v-card>
 
     <!-- Alert Dialog (Error) -->
@@ -28,10 +39,15 @@
       dialog-class="notify-dialog"
       max-width="640"
     >
-      <template v-slot:icon>
-        <v-icon large color="error">mdi-alert-circle-outline</v-icon>
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
       </template>
-      <template v-slot:actions>
+      <template #actions>
         <v-btn
           large
           color="error"
@@ -43,8 +59,11 @@
       </template>
     </ModalDialog>
   </v-container>
-  <v-container class="view-container" v-else>
-    <AccountSuspendedView :isAdmin="true"></AccountSuspendedView>
+  <v-container
+    v-else
+    class="view-container"
+  >
+    <AccountSuspendedView :isAdmin="true" />
   </v-container>
 </template>
 
