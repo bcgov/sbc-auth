@@ -18,20 +18,21 @@ export default class NameRequestLookupServices {
    * @returns a promise to return the search results
    */
   static async search (query: string): Promise<NameRequestLookupResultIF[]> {
-    let url = this.namexApiUrl + 'requests/search'
+    let url = NameRequestLookupServices.namexApiUrl + 'requests/search'
     url += `?query=${encodeURIComponent(query)}`
     url += '&start=0&rows=20'
 
     try {
       const response = await axios.get(url)
 
-      const results: Array<NameRequestLookupResultIF> = response?.data?.searchResults?.results
+      const results: Array<NameRequestLookupResultIF> = response?.data
+
       if (!results) {
         throw new Error('Invalid API response')
       }
 
       return results.filter(result => {
-        const pattern = /^[A-Z]{1,3}\d{7}$/
+        const pattern = /^NR \d{7}$/
         return pattern.test(result.nrNum)
       })
     } catch (error) {

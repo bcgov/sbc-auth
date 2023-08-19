@@ -360,6 +360,8 @@ export default class BusinessModule extends VuexModule {
   public async searchBusinessIndex (identifier: string): Promise<number> {
     return this.businesses.findIndex(business => business.businessIdentifier === identifier)
   }
+
+  @Action({ rawError: true })
   public async searchNRIndex (identifier: string): Promise<number> {
     return this.businesses.findIndex(business => business.nrNumber === identifier)
   }
