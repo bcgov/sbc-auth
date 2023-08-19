@@ -76,29 +76,30 @@
       />
     </template>
     <!-- Add Name Request Dialog -->
-    <ModalDialog
-      ref="addNRDialog"
-      :showNRDialog="showNRDialog"
-      :is-persistent="true"
-      title="Manage a Name Request"
-      :show-icon="false"
-      :show-actions="false"
-      max-width="640"
-      data-test-tag="add-name-request"
-    >
-      <template #text>
-        <AddNameRequestForm
-          class="mt-6"
-          :businessIdentifier="businessIdentifier"
-          :requestNames="requestNames"
-          @close-add-nr-modal="cancelAddNameRequest()"
-          @add-success="showAddSuccessModalNR"
-          @add-failed-show-msg="showNRErrorModal()"
-          @add-failed-no-nr="showNRNotFoundModal()"
-          @add-unknown-error="showUnknownErrorModal('nr')"
-        />
-      </template>
-    </ModalDialog>
+    <template v-if="isEnableBusinessNrSearch">
+      <ModalDialog
+        ref="addNRDialog"
+        :showNRDialog="showNRDialog"
+        :is-persistent="true"
+        title="Manage a Name Request"
+        :show-icon="false"
+        :show-actions="false"
+        max-width="640"
+        data-test-tag="add-name-request"
+      >
+        <template #text>
+          <AddNameRequestForm
+            :businessIdentifier="businessIdentifier"
+            :requestNames="nrNames"
+            @close-add-nr-modal="cancelAddNameRequest()"
+            @add-success-nr="showAddSuccessModalNR"
+            @add-failed-show-msg="showNRErrorModal()"
+            @add-failed-no-nr="showNRNotFoundModal()"
+            @add-unknown-error="showUnknownErrorModal('nr')"
+          />
+        </template>
+      </ModalDialog>
+    </template>
   </div>
 </template>
 
@@ -144,7 +145,6 @@ export default class SearchBusinessNameRequest extends Vue {
   businessIdentifier = '' // aka incorporation number or registration number
   businessLegalType = ''
   clearSearch = 0
-  requestNames = [{ 'name': 'Hello', 'state': 'REJECTED' }, { 'name': 'Hello2', 'state': 'APPROVED' }] // names in a name request
   showManageBusinessDialog = false
   showNRDialog = false
   businessLookupKey = 0 // force re-mount of BusinessLookup component
@@ -183,9 +183,10 @@ export default class SearchBusinessNameRequest extends Vue {
     this.$refs.addNRDialog.close()
     this.$emit('on-cancel-nr')
   }
-  showAddSuccessModalNR () {
+  showAddSuccessModalNR (event) {
+    this.clearSearch++
     this.$refs.addNRDialog.close()
-    this.$emit('add-success-nr')
+    this.$emit('add-success-nr', event)
   }
   showNRErrorModal () {
     this.$refs.addNRDialog.close()
