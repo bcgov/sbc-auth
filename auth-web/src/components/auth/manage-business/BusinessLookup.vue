@@ -13,13 +13,13 @@
       class="mt-5 mb-n2"
       filled
       hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
-      item-text="name"
-      item-value="identifier"
-      label="Business Name or Incorporation/Registration Number"
+      :item-text="lookupType === LookupType.NR ? 'nrNum' : 'name'"
+      :item-value="lookupType === LookupType.NR ? 'nrNum' : 'identifier'"
+      label="My business name, incorporation, or registration number"
       no-filter
       persistent-hint
       return-object
-      @input="onItemSelected($event)"
+      @input="onItemSelected"
       @keydown.enter.native.prevent
     >
       <template #append>
@@ -41,7 +41,10 @@
         </p>
       </template>
 
-      <template #item="{ item }">
+      <template
+        v-if="lookupType === LookupType.BUSINESS"
+        #item="{ item }"
+      >
         <v-row class="business-lookup-result pt-1">
           <v-col
             cols="2"
@@ -63,6 +66,39 @@
               v-if="item.disabled"
               class="added"
             >Added</span>
+          </v-col>
+        </v-row>
+      </template>
+      <template
+        v-else
+        #item="{ item }"
+      >
+        <v-row class="business-lookup-result pt-1">
+          <v-col
+            cols="2"
+            class="result-identifier"
+          >
+            {{ item.nrNum }}
+          </v-col>
+          <v-col
+            cols="8"
+            class="result-name"
+          >
+            <div
+              v-for="(name, index) in item.names"
+              :key="index"
+            >
+              {{ name }}
+            </div>
+          </v-col>
+          <v-col
+            cols="2"
+            class="result-action"
+          >
+            <span
+              v-if="item.disabled"
+              class="added"
+            >Added</span>
             <span
               v-else
               class="select"
@@ -75,14 +111,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Watch } from 'vue-property-decorator'
+import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-lookup'
+import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
-import { Debounce } from 'vue-debounce-decorator'
-import Vue from 'vue'
-import { namespace } from 'vuex-class'
-
-const BusinessModule = namespace('business')
+import NameRequestLookupServices from '@/services/name-request-lookup.services'
+import _ from 'lodash'
+import { useStore } from 'vuex-composition-helpers'
 
 enum States {
   INITIAL = 'initial',
@@ -96,61 +131,89 @@ enum States {
 /*
  * See PPR's BusinessSearchAutocomplete.vue for a Composition API example.
  */
-@Component({})
-export default class BusinessLookup extends Vue {
-  // enum for template
-  readonly States = States
+// @Component({})
+export default defineComponent({
+  name: 'BusinessLookup',
+  props: {
+    lookupType: {
+      type: String as PropType<LookupType>,
+      default: LookupType.BUSINESS
+    }
+  },
+  emits: [LookupType.NR, LookupType.BUSINESS],
+  setup (props, { emit }) {
+    // local variables
+    const states = reactive({
+      state: States.INITIAL,
+      searchField: '',
+      searchResults: (props.lookupType === LookupType.NR)
+        ? [] as NameRequestLookupResultIF[]
+        : [] as BusinessLookupResultIF[]
+    })
 
-  // action from business module
-  @BusinessModule.Action('isAffiliated')
-  private readonly isAffiliated!: (identifier: string) => Promise<boolean>
+    // store
+    const store = useStore()
+    const isAffiliated = (businessIdentifier: string) => store.dispatch('business/isAffiliated', businessIdentifier)
+    const isAffiliatedNR = (nrNum: string) => store.dispatch('business/isAffiliatedNR', nrNum)
 
-  /** V-model for search field. */
-  searchField = ''
+    const onSearchFieldChanged = _.debounce(async () => {
+      // safety check
+      if (states.searchField && states.searchField?.length < 3) {
+        states.state = States.TYPING
+      } else if (states.searchField && states.searchField?.length > 2) {
+        states.state = States.SEARCHING
+        const searchStatus = null // search all (ACTIVE + HISTORICAL)
 
-  /** Results from business lookup API. */
-  searchResults = [] as Array<BusinessLookupResultIF>
+        // Use appropriate service based on lookupType
+        const searchService = (props.lookupType === LookupType.NR)
+          ? NameRequestLookupServices.search
+          : (query) => BusinessLookupServices.search(query, searchStatus)
 
-  /** State of this component. */
-  state = States.INITIAL
+        try {
+          states.searchResults = await searchService(states.searchField)
+        } catch (error) {
+          console.error('Error occurred while searching:', error)
+          states.searchResults = []
+        }
 
-  /** Called when searchField property has changed. */
-  @Watch('searchField')
-  @Debounce(600)
-  private async onSearchFieldChanged (): Promise<void> {
-    // safety check
-    if (this.searchField && this.searchField?.length < 3) {
-      this.state = States.TYPING
-    } else if (this.searchField && this.searchField?.length > 2) {
-      this.state = States.SEARCHING
-      const searchStatus = null // search all (ACTIVE + HISTORICAL)
-      this.searchResults = await BusinessLookupServices.search(this.searchField, searchStatus).catch(() => [])
+        // enable or disable items according to whether they have already been added
+        for (const result of states.searchResults) {
+          if (props.lookupType === LookupType.NR && 'nrNum' in result) {
+            result.disabled = await isAffiliatedNR(result.nrNum)
+          } else if ('identifier' in result) {
+            result.disabled = await isAffiliated(result.identifier)
+          }
+        }
 
-      // enable or disable items according to whether they have already been added
-      for (const result of this.searchResults) {
-        result.disabled = await this.isAffiliated(result.identifier)
+        // display appropriate section
+        states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
+      } else {
+        // reset variables
+        states.searchResults = []
+        states.state = States.INITIAL
       }
+    }, 600)
 
-      // display appropriate section
-      this.state = (this.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
-    } else {
-      // reset variables
-      this.searchResults = []
-      this.state = States.INITIAL
+    watch(() => states.searchField, onSearchFieldChanged)
+
+    const onItemSelected = (input: BusinessLookupResultIF) => {
+      if (input) {
+        emit(props.lookupType, input)
+      } else {
+        // Clear button was clicked
+        states.searchResults = []
+        states.state = States.INITIAL
+      }
+    }
+
+    return {
+      ...toRefs(states),
+      onItemSelected,
+      States,
+      LookupType
     }
   }
-
-  /** When an item has been selected, emits event with business object. */
-  @Emit('business')
-  onItemSelected (input: BusinessLookupResultIF): void {
-    // safety check
-    if (input) {
-      // change to summary state
-      this.state = States.SUMMARY
-    }
-    // event data is automatically returned
-  }
-}
+})
 </script>
 
 <style lang="scss" scoped>

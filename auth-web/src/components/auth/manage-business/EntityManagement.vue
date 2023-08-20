@@ -183,6 +183,7 @@
 
       <search-business-name-request
         :orgId="orgId"
+        v-if="isEnableBusinessNrSearch"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -194,12 +195,70 @@
         @business-already-added="showBusinessAlreadyAdded($event)"
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
-        @add-name-request-dialog="showAddNRModal()"
         @on-cancel-nr="cancelAddNameRequest()"
         @add-success-nr="showAddSuccessModalNR"
         @add-nr-error="showNRErrorModal()"
         @add-failed-no-nr="showNRNotFoundModal()"
+        @show-add-old-nr-modal="showAddNRModal()"
       />
+
+      <template v-if="!isEnableBusinessNrSearch">
+        <!-- Add Existing Name Request or Business Button-->
+        <v-menu
+          v-model="addAffiliationDropdown"
+        >
+          <template #activator="{ on: onExistingMenu }">
+            <v-tooltip
+              top
+              content-class="top-tooltip"
+            >
+              <template #activator="{ on: onExistingTooltip }">
+                <v-btn
+                  id="add-existing-btn"
+                  class="mt-2 mr-4 mb-4"
+                  color="primary"
+                  dark
+                  large
+                  v-on="{ ...onExistingMenu, ...onExistingTooltip }"
+                  @click="addAffiliationDropdown = !addAffiliationDropdown"
+                >
+                  <v-icon>mdi-plus</v-icon>
+                  <span><strong>Add an Existing Business or Name Request</strong></span>
+                  <v-icon class="ml-2 mr-n2">
+                    {{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
+                  </v-icon>
+                </v-btn>
+              </template>
+              <span>
+                To view and manage existing businesses and Name Requests,
+                you can manually add them to your table.
+              </span>
+            </v-tooltip>
+          </template>
+          <v-list>
+            <v-list-item>
+              <v-list-item-title class="d-inline-flex">
+                <v-icon>mdi-plus</v-icon>
+                <div class="ml-1 mt-1 add-existing-title">
+                  Add an Existing...
+                </div>
+              </v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              class="add-existing-item"
+              @click="showAddBusinessModal()"
+            >
+              Business
+            </v-list-item>
+            <v-list-item
+              class="add-existing-item"
+              @click="showAddNRModal()"
+            >
+              Name Request
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </template>
 
       <AffiliatedEntityTable
         :loading="isLoading"
@@ -232,7 +291,7 @@
         @business-already-added="showBusinessAlreadyAdded($event)"
       />
 
-      <!-- Add Name Request Dialog -->
+      <!-- Add Name Request Dialog -- only for BusinessNrSearch -->
       <ModalDialog
         ref="addNRDialog"
         :is-persistent="true"
@@ -458,7 +517,7 @@ import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
+import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestFormOld.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
@@ -521,6 +580,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
+  private addAffiliationDropdown: boolean = false
   private incorporateNumberedDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
@@ -777,7 +837,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     } else if (type === 'nr') {
       this.$refs.addNRDialog.close()
       this.dialogTitle = 'Error Adding Existing Name Request'
-      this.dialogText = 'An error occurred adding your name request. Please try again.'
+      this.dialogText = 'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
     }
     this.$refs.errorDialog.open()
   }
@@ -922,6 +982,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   closeBusinessUnavailableDialog () {
     this.$refs.businessUnavailableDialog.close()
+  }
+
+  get isEnableBusinessNrSearch (): boolean {
+    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
   }
 }
 </script>

@@ -360,6 +360,8 @@ export default class BusinessModule extends VuexModule {
   public async searchBusinessIndex (identifier: string): Promise<number> {
     return this.businesses.findIndex(business => business.businessIdentifier === identifier)
   }
+
+  @Action({ rawError: true })
   public async searchNRIndex (identifier: string): Promise<number> {
     return this.businesses.findIndex(business => business.nrNumber === identifier)
   }
@@ -401,6 +403,11 @@ export default class BusinessModule extends VuexModule {
   @Action({ rawError: true })
   public async isAffiliated (identifier: string): Promise<boolean> {
     return this.businesses.some(business => business.businessIdentifier === identifier)
+  }
+
+  @Action({ rawError: true })
+  public async isAffiliatedNR (nrNum: string): Promise<boolean> {
+    return this.businesses.some(business => business.nrNumber === nrNum)
   }
 
   @Action({ rawError: true })
