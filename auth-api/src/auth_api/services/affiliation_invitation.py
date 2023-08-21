@@ -108,9 +108,10 @@ class AffiliationInvitation:
             from_org = AffiliationInvitationData.OrgDetails(
                 **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
                                                      affiliation_invitation_dict['from_org']))
-            to_org = AffiliationInvitationData.OrgDetails(
-                **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
-                                                     affiliation_invitation_dict['to_org']))
+            if to_org := affiliation_invitation_dict.get('to_org'):
+                to_org = AffiliationInvitationData.OrgDetails(
+                    **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
+                                                         affiliation_invitation_dict['to_org']))
 
             business_entity = next(
                 (business_entity for business_entity in business_entities if
