@@ -131,6 +131,7 @@ class TitleType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'Your Account Creation Request is On hold '
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
+    AFFILIATION_INVITATION = 'Invitation to Join an Account at Business Registry'
     AFFILIATION_INVITATION_REQUEST = 'You have been authorized to manage the business.'
     AFFILIATION_INVITATION_REQUEST_AUTHORIZATION = 'You have been authorized to manage the business.'
 
