@@ -181,6 +181,14 @@
         </div>
       </div>
 
+      <div class="mb-15">
+        <ExpandableHelp>
+          <template #content>
+            <StartNewBusinessHelp />
+          </template>
+        </ExpandableHelp>
+      </div>
+
       <search-business-name-request
         v-if="isEnableBusinessNrSearch"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
@@ -521,6 +529,8 @@ import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedE
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import ConfigHelper from '@/util/config-helper'
+import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
+import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -539,7 +549,9 @@ const BusinessModule = namespace('business')
     AffiliatedEntityTable,
     ModalDialog,
     PasscodeResetOptionsModal,
-    SearchBusinessNameRequest
+    SearchBusinessNameRequest,
+    StartNewBusinessHelp,
+    ExpandableHelp
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
@@ -1047,7 +1059,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   justify-content: space-between;
 
   h1 {
-    margin-bottom: -10px;
+    margin-bottom: -30px;
   }
 
   .subtitle {
