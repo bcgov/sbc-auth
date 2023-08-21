@@ -1,5 +1,11 @@
 <template>
   <div id="manage-business-dialog">
+    <AuthorizationEmailSentDialog
+      :isVisible="!showHelp && showAuthorizationEmailSentDialog"
+      :email="businessContactEmail"
+      @open-help="openHelp"
+      @close-dialog="onAuthorizationEmailSentClose"
+    />
     <v-dialog
       v-model="isDialogVisible"
       attach="#entity-management"
@@ -13,13 +19,6 @@
         ref="helpDialog"
         :helpDialogBlurb="helpDialogBlurb"
         :inline="true"
-      />
-
-      <AuthorizationEmailSent
-        v-if="!showHelp && showAuthorizationEmailSentDialog"
-        :email="businessContactEmail"
-        @open-help="openHelp"
-        @close-dialog="onAuthorizationEmailSentClose"
       />
 
       <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog">
@@ -75,7 +74,7 @@
                       :rules="passcodeRules"
                       :maxlength="passcodeMaxLength"
                       autocomplete="off"
-                      type="input"
+                      type="password"
                       class="passcode mt-0 mb-2"
                       :aria-label="passcodeLabel"
                     />
@@ -213,7 +212,8 @@
 import { CorpTypes, LDFlags } from '@/util/constants'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
-import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
+import { AffiliationInvitationStatus } from '@/models/affiliation'
+import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
@@ -226,7 +226,7 @@ import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   components: {
-    AuthorizationEmailSent,
+    AuthorizationEmailSentDialog,
     Certify,
     HelpDialog
   },
@@ -469,7 +469,10 @@ export default defineComponent({
             businessIdentifier: businessIdentifier.value,
             toOrgId: null, // Needs to be null, as there currently there is a bug on the backend
           }
-          await AffiliationInvitationService.createInvitation(payload)
+          const affiliationInvitation = await AffiliationInvitationService.createInvitation(payload)
+          if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {
+            emit('affiliation-invitation-pending', affiliationInvitation.data.businessIdentifier)
+          }
         } catch (err) {
           // eslint-disable-next-line no-console
           console.log(err)

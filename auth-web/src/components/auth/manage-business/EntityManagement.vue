@@ -282,6 +282,7 @@
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
         @add-success="showAddSuccessModal"
+        @affiliation-invitation-pending="showAuthorizationEmailSentDialogPending"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
@@ -289,6 +290,13 @@
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
         @business-already-added="showBusinessAlreadyAdded($event)"
+      />
+      
+      <AuthorizationEmailSentDialog
+        :isVisible="showAuthorizationEmailSentDialog"
+        :email="businessContactEmail"
+        @open-help="openHelp"
+        @close-dialog="onAuthorizationEmailSentClose"
       />
 
       <!-- Add Name Request Dialog -- only for BusinessNrSearch -->
@@ -363,6 +371,12 @@
         </template>
       </ModalDialog>
 
+      <HelpDialog
+        ref="helpDialog"
+        :helpDialogBlurb="helpDialogBlurb"
+        :inline="true"
+      />
+
       <!-- Error Dialog -->
       <ModalDialog
         ref="errorDialog"
@@ -422,6 +436,7 @@
             large
             color="primary"
             data-test="dialog-ok-button"
+            @click="resendAffiliationInvitation()"
           >
             Re-send Authorization Email
           </v-btn>
@@ -511,7 +526,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
@@ -521,8 +536,12 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
+import BusinessService from '@/services/business.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import ConfigHelper from '@/util/config-helper'
+import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -540,8 +559,10 @@ const BusinessModule = namespace('business')
     AddNameRequestForm,
     AffiliatedEntityTable,
     ModalDialog,
+    HelpDialog,
     PasscodeResetOptionsModal,
-    SearchBusinessNameRequest
+    SearchBusinessNameRequest,
+    AuthorizationEmailSentDialog
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
@@ -574,6 +595,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
   showManageBusinessDialog = false
+  showAuthorizationEmailSentDialog = false
+  businessContactEmail = ''
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
@@ -632,6 +655,43 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.parseUrlAndAddAffiliation()
   }
 
+  
+  @Watch('showAuthorizationEmailSentDialog')
+    async AutoCompleteIsActive (val: boolean) {
+      console.log(val)
+    }
+
+  helpDialogBlurb = async () => {
+      return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+        'please contact us at:'
+  }
+
+  openHelp = async () => {
+    this.$refs.helpDialog.open()
+  }
+
+  onAuthorizationEmailSentClose = async () => {
+    this.showAuthorizationEmailSentDialog = false;
+  }
+
+  resendAffiliationInvitation = async () => {
+    try {
+      const payload: CreateAffiliationInvitation = {
+        fromOrgId: Number(this.orgId),
+        businessIdentifier: this.base64OrgName,
+        // toOrgId: null // Needs to be null, as there currently there is a bug on the backend
+      }
+      await AffiliationInvitationService.createInvitation(payload)
+      const contact = await BusinessService.getMaskedContacts(this.businessIdentifier)
+      this.businessContactEmail = contact?.data?.email
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err)
+    } finally {
+      this.showAuthorizationEmailSentDialog = true;
+    }
+  }
+
   // Function to parse the URL and extract the parameters, used for magic link email
   parseUrlAndAddAffiliation = async () => {
     if (!this.$route.meta.checkMagicLink) {
@@ -642,6 +702,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     const legalName = atob(this.base64OrgName)
     const identifier = token.businessIdentifier
     const invitationId = token.id
+    this.businessIdentifier = token.businessIdentifier
     try {
       const invitation = await AffiliationInvitationService.getInvitationbyId(invitationId)
 
@@ -669,7 +730,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
       // 5. Adding magic link success
       if (response.status === 200) {
-        this.showAddSuccessModalbyEmail(identifier)
+        this.showAddSuccessModalByEmail(identifier)
         return
       }
 
@@ -738,10 +799,20 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }, 4000)
   }
 
-  async showAddSuccessModalbyEmail (businessIdentifier: string) {
+  async showAddSuccessModalByEmail (businessIdentifier: string) {
     await this.syncBusinesses()
     this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
     this.snackbarText = 'You can now manage ' + businessIdentifier + '.'
+    this.showSnackbar = true
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
+  async showAuthorizationEmailSentDialogPending (businessIdentifier: string) {
+    await this.syncBusinesses()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.snackbarText = 'Confirmation email sent, pending authorization.'
     this.showSnackbar = true
     setTimeout(() => {
       this.highlightIndex = -1

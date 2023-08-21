@@ -7,7 +7,7 @@
   >
     <v-card>
       <v-card-title>
-        <h2>Need Help?</h2>
+        <h1>Need Help?</h1>
       </v-card-title>
       <v-card-text>
         <p
