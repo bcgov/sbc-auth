@@ -182,8 +182,8 @@
       </div>
 
       <search-business-name-request
-        :orgId="orgId"
         v-if="isEnableBusinessNrSearch"
+        :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -291,7 +291,7 @@
         @on-business-identifier="businessIdentifier = $event"
         @business-already-added="showBusinessAlreadyAdded($event)"
       />
-      
+
       <AuthorizationEmailSentDialog
         :isVisible="showAuthorizationEmailSentDialog"
         :email="businessContactEmail"
@@ -536,9 +536,9 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
 import BusinessService from '@/services/business.services'
-import { AffiliationInvitationStatus } from '@/models/affiliation'
 import ConfigHelper from '@/util/config-helper'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
@@ -655,14 +655,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.parseUrlAndAddAffiliation()
   }
 
-  
   @Watch('showAuthorizationEmailSentDialog')
-    async AutoCompleteIsActive (val: boolean) {
-      console.log(val)
-    }
+  async AutoCompleteIsActive (val: boolean) {
+    console.log(val)
+  }
 
   helpDialogBlurb = async () => {
-      return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+    return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
         'please contact us at:'
   }
 
@@ -671,14 +670,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   onAuthorizationEmailSentClose = async () => {
-    this.showAuthorizationEmailSentDialog = false;
+    this.showAuthorizationEmailSentDialog = false
   }
 
   resendAffiliationInvitation = async () => {
     try {
       const payload: CreateAffiliationInvitation = {
         fromOrgId: Number(this.orgId),
-        businessIdentifier: this.base64OrgName,
+        businessIdentifier: this.base64OrgName
         // toOrgId: null // Needs to be null, as there currently there is a bug on the backend
       }
       await AffiliationInvitationService.createInvitation(payload)
@@ -688,7 +687,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       // eslint-disable-next-line no-console
       console.log(err)
     } finally {
-      this.showAuthorizationEmailSentDialog = true;
+      this.showAuthorizationEmailSentDialog = true
     }
   }
 

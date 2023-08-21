@@ -49,7 +49,7 @@ export default defineComponent({
     isVisible: {
       type: Boolean,
       default: false
-    },
+    }
   },
   setup (props, { emit }) {
     const openHelp = () => {

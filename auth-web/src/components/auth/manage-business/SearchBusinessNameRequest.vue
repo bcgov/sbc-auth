@@ -58,8 +58,8 @@
 
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
-        :orgId="orgId"
         ref="manageBusinessDialog"
+        :orgId="orgId"
         :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
