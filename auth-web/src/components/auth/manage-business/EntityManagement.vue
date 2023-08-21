@@ -200,6 +200,7 @@
         @add-nr-error="showNRErrorModal()"
         @add-failed-no-nr="showNRNotFoundModal()"
         @show-add-old-nr-modal="showAddNRModal()"
+        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
       />
 
       <template v-if="!isEnableBusinessNrSearch">
@@ -266,6 +267,7 @@
         @remove-business="showConfirmationOptionsModal($event)"
         @remove-affiliation-invitation="removeAffiliationInvitation()"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
+        @resend-affiliation-invitation="resendAffiliationInvitation($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -275,9 +277,9 @@
       />
 
       <!-- Add an Existing Business Dialog -->
-      <ManageBusinessDialog
+      <!-- <ManageBusinessDialog
         :orgId="orgId"
-        :showDialog="showManageBusinessDialog"
+        :showBusinessDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -290,10 +292,10 @@
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
         @business-already-added="showBusinessAlreadyAdded($event)"
-      />
+      /> -->
 
       <AuthorizationEmailSentDialog
-        :isVisible="showAuthorizationEmailSentDialog"
+        :isVisible="isAuthorizationEmailSentDialogVisible"
         :email="businessContactEmail"
         @open-help="openHelp"
         @close-dialog="onAuthorizationEmailSentClose"
@@ -595,7 +597,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
   showManageBusinessDialog = false
-  showAuthorizationEmailSentDialog = false
+  isAuthorizationEmailSentDialogVisible = false
   businessContactEmail = ''
   snackbarText: string = null
   showSnackbar = false
@@ -655,11 +657,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.parseUrlAndAddAffiliation()
   }
 
-  @Watch('showAuthorizationEmailSentDialog')
-  async AutoCompleteIsActive (val: boolean) {
-    console.log(val)
-  }
-
   helpDialogBlurb = async () => {
     return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
         'please contact us at:'
@@ -669,25 +666,26 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.helpDialog.open()
   }
 
-  onAuthorizationEmailSentClose = async () => {
-    this.showAuthorizationEmailSentDialog = false
-  }
-
-  resendAffiliationInvitation = async () => {
+  resendAffiliationInvitation = async (event) => {
+    let fromOrgId = Number(this.orgId)
+    let businessIdentifier = this.base64OrgName
+    if (event?.affiliationInvites[0].status === "PENDING") {
+      fromOrgId = event?.affiliationInvites[0].fromOrg.id
+      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
     try {
       const payload: CreateAffiliationInvitation = {
-        fromOrgId: Number(this.orgId),
-        businessIdentifier: this.base64OrgName
-        // toOrgId: null // Needs to be null, as there currently there is a bug on the backend
+        fromOrgId: fromOrgId,
+        businessIdentifier: businessIdentifier
       }
       await AffiliationInvitationService.createInvitation(payload)
-      const contact = await BusinessService.getMaskedContacts(this.businessIdentifier)
+      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
       this.businessContactEmail = contact?.data?.email
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log(err)
     } finally {
-      this.showAuthorizationEmailSentDialog = true
+      this.isAuthorizationEmailSentDialogVisible = true
     }
   }
 
@@ -830,6 +828,15 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
     this.showSnackbar = true
     this.highlightIndex = nameRequestIndexResponse
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
+  async onAuthorizationEmailSentClose (businessIdentifier: string) {
+    await this.syncBusinesses()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.isAuthorizationEmailSentDialogVisible = false
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
