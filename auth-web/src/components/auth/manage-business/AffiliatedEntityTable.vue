@@ -527,7 +527,7 @@ export default defineComponent({
         // outgoing request for access
         switch (affiliationInviteInfos[0].status) {
           case AffiliationInvitationStatus.Pending:
-            statusText = 'Request sent, pending authorization'
+            statusText = 'Confirmation email sent, pending authorization'
             break
           case AffiliationInvitationStatus.Accepted:
             statusText = '<strong>Authorized</strong> - you can now manage this business.'
@@ -606,6 +606,9 @@ export default defineComponent({
     }
 
     const getPrimaryAction = (item: Business): string => {
+      if (item.affiliationInvites[0].status === 'PENDING') {
+        return 'Resend Email'
+      }
       if (isTemporaryBusiness(item)) {
         return 'Resume Draft'
       } else if (isNameRequest(item)) {
@@ -768,6 +771,10 @@ export default defineComponent({
     }
 
     const action = (item: Business): void => {
+      if (item.affiliationInvites[0].status === 'PENDING') {
+        context.emit('resend-affiliation-invitation', item)
+        return
+      }
       if (isShowRemoveAsPrimaryAction(item)) {
         removeBusiness(item)
       } else {
