@@ -606,7 +606,7 @@ export default defineComponent({
     }
 
     const getPrimaryAction = (item: Business): string => {
-      if (item.affiliationInvites[0].status === 'PENDING') {
+      if (item?.affiliationInvites?.[0]?.status === 'PENDING') {
         return 'Resend Email'
       }
       if (isTemporaryBusiness(item)) {
@@ -771,7 +771,7 @@ export default defineComponent({
     }
 
     const action = (item: Business): void => {
-      if (item.affiliationInvites[0].status === 'PENDING') {
+      if (item?.affiliationInvites?.[0]?.status === 'PENDING') {
         context.emit('resend-affiliation-invitation', item)
         return
       }
