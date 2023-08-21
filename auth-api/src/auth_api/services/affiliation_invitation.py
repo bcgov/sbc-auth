@@ -108,9 +108,10 @@ class AffiliationInvitation:
             from_org = AffiliationInvitationData.OrgDetails(
                 **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
                                                      affiliation_invitation_dict['from_org']))
-            to_org = AffiliationInvitationData.OrgDetails(
-                **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
-                                                     affiliation_invitation_dict['to_org']))
+            if to_org := affiliation_invitation_dict.get('to_org'):
+                to_org = AffiliationInvitationData.OrgDetails(
+                    **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
+                                                         affiliation_invitation_dict['to_org']))
 
             business_entity = next(
                 (business_entity for business_entity in business_entities if
@@ -208,7 +209,7 @@ class AffiliationInvitation:
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
-        to_org_id = affiliation_invitation_info['toOrgId']
+        to_org_id = affiliation_invitation_info.get('toOrgId')
         business_identifier = affiliation_invitation_info['businessIdentifier']
         affiliation_invitation_type = AffiliationInvitationType.from_value(affiliation_invitation_info.get('type'))
 
