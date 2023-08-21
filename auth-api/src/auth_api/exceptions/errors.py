@@ -43,6 +43,9 @@ class Error(Enum):
                                            http_status.HTTP_400_BAD_REQUEST
     FAILED_AFFILIATION_INVITATION = 'Failed to dispatch the affiliation invitation', \
                                     http_status.HTTP_500_INTERNAL_SERVER_ERROR
+    AFFILIATION_INVITATION_BUSINESS_NOT_FOUND = 'The business specified for the affiliation ' \
+                                                'invitation could not be found.', \
+                                                http_status.HTTP_400_BAD_REQUEST
     FAILED_INVITATION = 'Failed to dispatch the invitation', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     FAILED_NOTIFICATION = 'Failed to dispatch the notification', http_status.HTTP_500_INTERNAL_SERVER_ERROR
     DELETE_FAILED_ONLY_OWNER = 'Cannot delete as user is the only Account Administrator of some teams', \

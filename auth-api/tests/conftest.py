@@ -24,6 +24,7 @@ from stan.aio.client import Client as Stan
 
 from auth_api import create_app, setup_jwt_manager
 from auth_api.auth import jwt as _jwt
+from auth_api.exceptions import BusinessException, Error
 from auth_api.models import db as _db
 
 
@@ -251,6 +252,17 @@ def keycloak_mock(monkeypatch):
                         lambda *args, **kwargs: None)
     monkeypatch.setattr('auth_api.services.keycloak.KeycloakService.add_or_remove_product_keycloak_groups',
                         lambda *args, **kwargs: None)
+
+
+@pytest.fixture()
+def business_exception_mock(monkeypatch):
+    """Mock get business call exceotion."""
+
+    def get_business(business_identifier, token):
+        raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None)
+
+    monkeypatch.setattr('auth_api.services.affiliation_invitation.AffiliationInvitation._get_business_details',
+                        get_business)
 
 
 @pytest.fixture()
