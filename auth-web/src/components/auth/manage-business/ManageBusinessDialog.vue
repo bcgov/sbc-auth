@@ -444,7 +444,7 @@ export default defineComponent({
 
     const onAuthorizationEmailSentClose = () => {
       showAuthorizationEmailSentDialog.value = false
-      emit('on-cancel')
+      emit('on-authorization-email-sent-close', businessIdentifier.value)
     }
 
     const handleException = (exception) => {
