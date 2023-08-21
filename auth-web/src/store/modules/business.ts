@@ -178,11 +178,11 @@ export default class BusinessModule extends VuexModule {
 
       for (const affiliationInviteInfo of pendingAffiliationInvitations) {
         const isFromOrg = affiliationInviteInfo.fromOrg.id === this.currentOrganization.id
-        const isToOrgAndPending = affiliationInviteInfo.toOrg.id === this.currentOrganization.id &&
+        const isToOrgAndPending = affiliationInviteInfo?.toOrg?.id === this.currentOrganization.id &&
           affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
         const isAccepted = affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
         const business = affiliatedEntities.find(
-          business => business.businessIdentifier === affiliationInviteInfo.entity.businessIdentifier)
+          business => business.businessIdentifier === affiliationInviteInfo.entity?.businessIdentifier)
 
         if (business && (isToOrgAndPending || isFromOrg)) {
           business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInviteInfo])
