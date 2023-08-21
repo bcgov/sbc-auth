@@ -560,6 +560,50 @@ export const moreBusinesses: Business[] = [
       corpNum: 'corpNum'
     },
     nrNumber: 'NR 1234567'
+  },
+  // BEN Name Request - Cancelled
+  {
+    businessIdentifier: 'NR 4045474',
+    corpType: { code: CorpTypes.NAME_REQUEST },
+    name: 'BEN NAME REQUEST - CANCELLED',
+    nameRequest: {
+      legalType: CorpTypes.BENEFIT_COMPANY,
+      names: [{
+        name: 'BEN NAME REQUEST - CANCELLED',
+        decision_text: 'Decision text',
+        name_type_cd: 'Name type code',
+        designation: 'Designation',
+        state: 'State'
+      }],
+      nrNumber: 'NR 4045474',
+      state: 'CANCELLED',
+      expirationDate: null,
+      requestActionCd: 'CHG',
+      corpNum: 'corpNum'
+    },
+    status: 'CANCELLED'
+  },
+  // BEN Name Request - Cancelled, Refund Requested
+  {
+    businessIdentifier: 'NR 4045475',
+    corpType: { code: CorpTypes.NAME_REQUEST },
+    name: 'BEN NAME REQUEST - CANCELLED, REFUND',
+    nameRequest: {
+      legalType: CorpTypes.BENEFIT_COMPANY,
+      names: [{
+        name: 'BEN NAME REQUEST - CANCELLED, REFUND',
+        decision_text: 'Decision text',
+        name_type_cd: 'Name type code',
+        designation: 'Designation',
+        state: 'State'
+      }],
+      nrNumber: 'NR 4045475',
+      state: 'REFUND_REQUESTED',
+      expirationDate: null,
+      requestActionCd: 'CHG',
+      corpNum: 'corpNum'
+    },
+    status: 'REFUND_REQUESTED'
   }
 ]
 
@@ -652,6 +696,16 @@ export const actions = [
   {
     'primary': 'Resume Draft',
     'secondary': ['Delete Registration'],
+    'external': false
+  },
+  {
+    'primary': 'Remove From Table',
+    'secondary': ['Open Name Request'],
+    'external': false
+  },
+  {
+    'primary': 'Remove From Table',
+    'secondary': ['Open Name Request'],
     'external': false
   }
 ]

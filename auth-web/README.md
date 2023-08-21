@@ -9,8 +9,8 @@
 BC Registries authentication and authorization interface.
 
 ## Prerequisites
-- Node.js (> v13.6.x)
-- [Vue Cli](https://cli.vuejs.org/)
+- Node.js (> v16.15.x)
+- [VITE v4.4.9](https://vitejs.dev/)
 
 ## Development setup
 
@@ -22,7 +22,7 @@ BC Registries authentication and authorization interface.
 ## Running the environment in development mode
 Run the following command on the root(auth-web) folder:
 ```
-npm run serve
+npm run dev
 ```
 
 ### Run your tests
