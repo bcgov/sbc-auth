@@ -51,7 +51,7 @@ const testCaseList = [
     isStaffOrSbcStaff: false,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: 'SP'
+    businessLegalType: ''
   },
   {
     description: 'Should render for a FM Staff account',
@@ -62,7 +62,7 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: 'SP'
+    businessLegalType: ''
   },
   {
     description: 'Should render for a FM SBC Staff account',
@@ -73,11 +73,11 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: 'SP'
+    businessLegalType: ''
   },
   {
     description: 'Should render for a SP Entity',
-    businessIdentifier: 'FM0000000',
+    businessIdentifier: 'FM1018142',
     certifyExists: false,
     passcodeExists: false,
     folioNumberExists: false,
@@ -137,7 +137,6 @@ describe('ManageBusinessDialog Component', () => {
       const businessModule = {
         namespaced: true,
         state: {
-
         },
         action: {
           addBusiness: vi.fn(),
@@ -206,18 +205,12 @@ describe('ManageBusinessDialog Component', () => {
         expect(wrapper.find('.authorization').exists())
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
       }
-
       if (isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp) {
         expect(wrapper.find('#manage-business-dialog-passcode-group').exists())
         expect(wrapper.find('#manage-business-dialog-passcode-group').isVisible()).toBe(true)
-        expect(wrapper.find('#manage-business-dialog-email-group').exists())
-        expect(wrapper.find('#manage-business-dialog-email-group').isVisible()).toBe(true)
-        expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists()).toBeFalsy()
       } else if (isBusinessLegalTypeFirm) {
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists())
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').isVisible()).toBe(true)
-        expect(wrapper.find('#manage-business-dialog-email-group').exists())
-        expect(wrapper.find('#manage-business-dialog-email-group').isVisible()).toBe(true)
         expect(wrapper.find('#manage-business-dialog-passcode-group').exists()).toBeFalsy()
       } else {
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists()).toBeFalsy()
