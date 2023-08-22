@@ -12,7 +12,8 @@
         icon="mdi-information-outline"
         type="info"
       >
-        Changing your authentication method will only affect new users invited to this account. Authentication for administrators and existing users will not be affected.
+        Changing your authentication method will only affect new users invited to this account.
+        Authentication for administrators and existing users will not be affected.
       </v-alert>
     </div>
     <account-login-option-picker

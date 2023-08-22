@@ -91,7 +91,7 @@ export default class AccountMailingAddress extends Vue {
   @Prop({ default: null }) baseAddress: any
   @Prop({ default: true }) viewOnlyMode: boolean
 
-  public baseAddressSchema: {} = addressSchema
+  public baseAddressSchema = addressSchema
 
   $refs: {
     mailingAddress: HTMLFormElement

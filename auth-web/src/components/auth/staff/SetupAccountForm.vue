@@ -38,7 +38,8 @@
             Account Admin Contact
           </h4>
           <p class="mb-6">
-            Enter the email address of the user who will be managing this account. An email will be sent to this user to verify and activate this account
+            Enter the email address of the user who will be managing this account. An email will be sent to this user
+            to verify and activate this account
           </p>
         </v-col>
       </v-row>

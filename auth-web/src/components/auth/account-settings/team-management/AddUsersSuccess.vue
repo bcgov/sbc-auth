@@ -18,7 +18,11 @@
       <p v-if="action=='resetpassword'">
         A new temporary password has been created for user <strong>{{ createdUsers[0].username |filterLoginSource }}</strong>
       </p>
-      <p>You will need to provide Team Members with their <strong>Username</strong>, <strong>Temporary Password</strong> and the <strong>Login Address</strong> to access this account.</p>
+      <p>
+        You will need to provide Team Members with their
+        <strong>Username</strong>, <strong>Temporary Password</strong> and the <strong>Login Address</strong>
+        to access this account.
+      </p>
     </div>
 
     <div class="mb-3">

@@ -103,7 +103,7 @@ router.beforeEach(async (to, from, next) => {
             break
           case LoginSource.BCSC:
           case LoginSource.BCROS:
-          case LoginSource.BCEID:
+          case LoginSource.BCEID: {
             // eslint-disable-next-line no-console
             console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
             // if there's redirectUri in query string, keep existing redirectUri, otherwise use current location
@@ -116,6 +116,7 @@ router.beforeEach(async (to, from, next) => {
               path: `/${Pages.USER_PROFILE_TERMS}`,
               query: { redirectUri: `${uriRedirectTo}` }
             })
+          }
           default:
             return next({
               path: '/'

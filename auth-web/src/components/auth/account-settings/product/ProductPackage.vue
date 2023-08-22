@@ -259,7 +259,8 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
 
         // show confirm modal
         this.dialogTitle = 'Access Requested'
-        this.dialogText = 'Request has been submitted. Account will immediately have access to the requested product and service unless staff review is required.'
+        this.dialogText = 'Request has been submitted. Account will immediately have access to the requested ' +
+          'product and service unless staff review is required.'
         this.dialogIcon = 'mdi-check'
         this.$refs.confirmDialog.open()
       }

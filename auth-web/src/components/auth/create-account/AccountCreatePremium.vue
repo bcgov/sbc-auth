@@ -205,7 +205,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   orgNameReadOnly = true
   static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
 
-  baseAddressSchema: {} = addressSchema
+  baseAddressSchema = addressSchema
 
   readonly orgNameRules = [v => !!v || 'An account name is required']
 
