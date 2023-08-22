@@ -8,6 +8,7 @@ Vue.use(Vuex)
 
 const debug = import.meta.env.NODE_ENV !== 'production'
 
+// Remove with Vue 3.
 const storeOptions: StoreOptions<RootState> = {
   strict: debug,
   state: () => ({

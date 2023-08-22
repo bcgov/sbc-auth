@@ -139,8 +139,8 @@ import { useOrgStore } from '@/store/org'
   components: { AccountBusinessTypePicker }
 })
 export default class UpdateAccountView extends Vue {
-  @State(useOrgStore, 'currentOrganization') currentOrganization!: Organization
-  @Action(useOrgStore, 'updateOrg') private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  @State(useOrgStore) currentOrganization!: Organization
+  @Action(useOrgStore) private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   errorMessage: string = ''
   isBusinessAccount = null
   canSubmit = false

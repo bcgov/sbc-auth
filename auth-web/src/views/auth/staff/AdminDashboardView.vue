@@ -35,7 +35,7 @@ import { useUserStore } from '@/store/user'
   }
 })
 export default class AdminDashboardView extends Vue {
-  @State(useUserStore, 'currentUser') currentUser!: KCUserProfile
+  @State(useUserStore) currentUser!: KCUserProfile
 
   get canEditBn (): boolean {
     return this.currentUser.roles.includes(Role.BnEdit) || this.currentUser.roles.includes(Role.AdminEdit)

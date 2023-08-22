@@ -202,10 +202,10 @@ export default class AccountBusinessType extends Vue {
   @Prop({ default: false }) orgNameReadOnly: boolean
   @Prop({ default: false }) isEditAccount: boolean // hide some details for update account
 
-  @State(useOrgStore, 'currentOrganization') public currentOrganization!: Organization
+  @State(useOrgStore) public currentOrganization!: Organization
 
-  @Action(useCodesStore, 'getBusinessSizeCodes') private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @Action(useCodesStore, 'getBusinessTypeCodes') private readonly getBusinessTypeCodes!: () => Promise<Code[]>
+  @Action(useCodesStore) private readonly getBusinessSizeCodes!: () => Promise<Code[]>
+  @Action(useCodesStore) private readonly getBusinessTypeCodes!: () => Promise<Code[]>
   @State(useCodesStore) private readonly businessSizeCodes!: Code[]
   @State(useCodesStore) private readonly businessTypeCodes!: Code[]
 

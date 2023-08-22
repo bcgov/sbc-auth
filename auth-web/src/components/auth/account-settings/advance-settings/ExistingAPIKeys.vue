@@ -142,7 +142,7 @@ import { useOrgStore } from '@/store/org'
   }
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
-  @State(useOrgStore, 'currentOrganization') readonly currentOrganization!: Organization
+  @State(useOrgStore) readonly currentOrganization!: Organization
   @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
   @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
 

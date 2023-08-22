@@ -77,12 +77,12 @@ import { useOrgStore } from '@/store/org'
   }
 })
 export default class IncorporationSearchResultView extends Vue {
-  @State(useOrgStore, 'currentOrganization') readonly currentOrganization!: Organization
+  @State(useOrgStore) readonly currentOrganization!: Organization
   @Action(useOrgStore) readonly addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
   @Action(useOrgStore) readonly syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
   @Action(useOrgStore) readonly syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
   @Action(useOrgStore) readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
-  @State(useBusinessStore, 'currentBusiness') currentBusiness!: Business
+  @State(useBusinessStore) currentBusiness!: Business
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization

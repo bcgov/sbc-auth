@@ -331,32 +331,23 @@ export default class AccountInfo extends Mixins(
   AccountMixin
 ) {
   @State(useCodesStore) private suspensionReasonCodes!: Code[]
-  @State(useOrgStore, 'currentMembership') public currentMembership!: Organization
-  @State(useOrgStore, 'currentOrgAddress') public currentOrgAddress!: Address
-  @State(useOrgStore, 'permissions') public permissions!: string[]
-  @State(useOrgStore, 'currentOrgPaymentType') public currentOrgPaymentType!: string
-  @State(useUserStore, 'currentUser') public currentUser!: KCUserProfile
+  @State(useOrgStore) public currentMembership!: Organization
+  @State(useOrgStore) public currentOrgAddress!: Address
+  @State(useOrgStore) public permissions!: string[]
+  @State(useOrgStore) public currentOrgPaymentType!: string
+  @State(useUserStore) public currentUser!: KCUserProfile
 
-  @Getter(useOrgStore, 'isBusinessAccount') public isBusinessAccount!: boolean
-  @Action(useOrgStore, 'setCurrentOrganizationAddress')
-  public setCurrentOrganizationAddress!: (address: Address) => void
+  @Getter(useOrgStore) public isBusinessAccount!: boolean
+  @Action(useOrgStore) public setCurrentOrganizationAddress!: (address: Address) => void
 
-  @Action(useOrgStore, 'updateOrg') public updateOrg!: (
-    requestBody: CreateRequestBody
-  ) => Promise<Organization>
+  @Action(useOrgStore) public updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
 
-  @Action(useOrgStore, 'syncAddress') syncAddress!: () => Address
-  @Action(useOrgStore, 'getOrgPayments') getOrgPayments!: () => any
-  @Action(useOrgStore, 'updateOrganizationAccessType') updateOrganizationAccessType!: (
-    accessType: string
-  ) => Promise<Organization>
+  @Action(useOrgStore) syncAddress!: () => Address
+  @Action(useOrgStore) getOrgPayments!: () => any
+  @Action(useOrgStore) updateOrganizationAccessType!: (accessType: string) => Promise<Organization>
 
-  @Action(useOrgStore, 'syncOrganization') syncOrganization!: (
-    currentAccount: number
-  ) => Promise<Organization>
-  @Action(useOrgStore, 'suspendOrganization') suspendOrganization!: (
-    selectedSuspensionReasonCode: string
-  ) => Promise<Organization>
+  @Action(useOrgStore) syncOrganization!: (currentAccount: number) => Promise<Organization>
+  @Action(useOrgStore) suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
 
   private dialogTitle: string = ''
   private dialogText: string = ''

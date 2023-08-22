@@ -220,14 +220,9 @@ export default class AdministrativeBN extends Vue {
     submitBNRequestForm: HTMLFormElement
   }
 
-  @Action(useBusinessStore, 'searchBusiness')
-  readonly searchBusiness!: (businessIdentifier: string) => Promise<LearBusiness>
-
-  @Action(useBusinessStore, 'createBNRequest')
-  readonly createBNRequest!: (request: BNRequest) => Promise<any>
-
-  @Action(useBusinessStore, 'downloadBusinessSummary')
-  readonly downloadBusinessSummary!: (businessIdentifier: string) => Promise<void>
+  @Action(useBusinessStore) readonly searchBusiness!: (businessIdentifier: string) => Promise<LearBusiness>
+  @Action(useBusinessStore) readonly createBNRequest!: (request: BNRequest) => Promise<any>
+  @Action(useBusinessStore) readonly downloadBusinessSummary!: (businessIdentifier: string) => Promise<void>
 
   // local variables
   businessIdentifier = ''
