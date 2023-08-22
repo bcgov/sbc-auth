@@ -189,7 +189,7 @@ export default defineComponent({
     // refs
     const preAuthDebitForm = ref(null) as HTMLFormElement
     const orgStore = useOrgStore()
-    const currentOrgPADInfo = computed(() => orgStore.state.currentOrgPADInfo)
+    const currentOrgPADInfo = computed(() => orgStore.currentOrgPADInfo)
 
     // static vars
     const accountMask = CommonUtils.accountMask()

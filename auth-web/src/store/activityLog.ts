@@ -1,7 +1,7 @@
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
+import { reactive, toRefs } from '@vue/composition-api'
 import ActivityService from '@/services/activityLog.services'
 import { defineStore } from 'pinia'
-import { reactive } from '@vue/composition-api'
 
 export const useActivityStore = defineStore('activity', () => {
   const state = reactive({
@@ -22,7 +22,7 @@ export const useActivityStore = defineStore('activity', () => {
   }
 
   return {
-    state,
+    ...toRefs(state),
     getActivityLog
   }
 })

@@ -7,7 +7,7 @@ import { useOrgStore } from '@/store/org'
 
 export const useAccount = () => {
   const orgStore = useOrgStore()
-  const currentOrganization = computed(() => orgStore.state.currentOrganization as Organization)
+  const currentOrganization = computed(() => orgStore.currentOrganization as Organization)
 
   const getAccountFromSession = (): AccountSettings => {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))

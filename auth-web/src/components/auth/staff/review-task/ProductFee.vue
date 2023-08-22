@@ -92,9 +92,9 @@ export default defineComponent({
   emits: ['emit-product-fee-change'],
   setup (props, { emit }) {
     const orgStore = useOrgStore()
-    const orgProductFeeCodes = computed<OrgProductFeeCode[]>(() => orgStore.state.orgProductFeeCodes)
-    const orgProducts = computed<OrgProduct[]>(() => orgStore.state.productList)
-    const accountFees = computed<AccountFee[]>(() => orgStore.state.currentAccountFees)
+    const orgProductFeeCodes = computed<OrgProductFeeCode[]>(() => orgStore.orgProductFeeCodes)
+    const orgProducts = computed<OrgProduct[]>(() => orgStore.productList)
+    const accountFees = computed<AccountFee[]>(() => orgStore.currentAccountFees)
     const setCurrentAccountFees = (accountFees: AccountFee[]) => {
       orgStore.setCurrentAccountFees(accountFees)
     }

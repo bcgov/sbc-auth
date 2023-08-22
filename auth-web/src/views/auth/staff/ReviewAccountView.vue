@@ -195,23 +195,23 @@ export default defineComponent({
     const taskStore = useTaskStore()
 
     const accountUnderReview = computed(() => {
-      return staffStore.state.accountUnderReview
+      return staffStore.accountUnderReview
     })
 
     const accountUnderReviewAdmin = computed(() => {
-      return staffStore.state.accountUnderReviewAdmin
+      return staffStore.accountUnderReviewAdmin
     })
 
     const accountUnderReviewAddress = computed(() => {
-      return staffStore.state.accountUnderReviewAddress
+      return staffStore.accountUnderReviewAddress
     })
 
     const accountUnderReviewAdminContact = computed(() => {
-      return staffStore.state.accountUnderReviewAdminContact
+      return staffStore.accountUnderReviewAdminContact
     })
 
     const accountUnderReviewAffidavitInfo = computed(() => {
-      return staffStore.state.accountUnderReviewAffidavitInfo
+      return staffStore.accountUnderReviewAffidavitInfo
     })
 
     const accountNotaryName = computed(() => {
@@ -219,11 +219,11 @@ export default defineComponent({
     })
 
     const currentOrgGLInfo = computed(() => {
-      return orgStore.state.currentOrgGLInfo
+      return orgStore.currentOrgGLInfo
     })
 
     const onholdReasonCodes = computed(() => {
-      return codesStore.state.onholdReasonCodes
+      return codesStore.onholdReasonCodes
     })
 
     const isTaskOnHold = computed(() => {
@@ -613,25 +613,13 @@ export default defineComponent({
       showAccountInfoValidations,
       accessRequest,
       productFeeRef,
-      getTaskById,
       accountUnderReview,
       accountUnderReviewAdmin,
       accountUnderReviewAddress,
       accountUnderReviewAdminContact,
       accountUnderReviewAffidavitInfo,
       accountNotaryName,
-      syncTaskUnderReview,
-      rejectorOnHoldAccountUnderReview,
-      fetchCurrentOrganizationGLInfo,
       currentOrgGLInfo,
-      fetchOrgProductFeeCodes,
-      getOrgProducts,
-      createAccountFees,
-      syncCurrentAccountFees,
-      resetCurrentAccountFees,
-      updateOrganizationAccessType,
-      getOnholdReasonCodes,
-      onholdReasonCodes,
       isTaskOnHold,
       isTaskRejected,
       canSelect,

@@ -24,7 +24,7 @@ const affiliations = (reactive({
 
 export const useAffiliations = () => {
   const businessStore = useBusinessStore()
-  const businesses = computed(() => businessStore.state.businesses)
+  const businesses = computed(() => businessStore.businesses)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
 
   /** Returns true if the affiliation is a Name Request. */

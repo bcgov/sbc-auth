@@ -310,7 +310,7 @@ export default defineComponent({
       isTemporaryBusiness } = useAffiliations()
     const businessStore = useBusinessStore()
     const orgStore = useOrgStore()
-    const currentOrganization = computed(() => orgStore.state.currentOrganization)
+    const currentOrganization = computed(() => orgStore.currentOrganization)
 
     /** V-model for dropdown menus. */
     const dropdown: Array<boolean> = []
@@ -468,7 +468,7 @@ export default defineComponent({
     }
 
     const isCurrentOrganization = (orgId: number) => {
-      return orgId === orgStore.state.currentOrganization.id
+      return orgId === orgStore.currentOrganization.id
     }
 
     const actionHandler = (business: Business) => {

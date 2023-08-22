@@ -1,8 +1,8 @@
 import { Task, TaskFilterParams } from '@/models/Task'
 import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
+import { reactive, toRefs } from '@vue/composition-api'
 import TaskService from '@/services/task.services'
 import { defineStore } from 'pinia'
-import { reactive } from '@vue/composition-api'
 
 export const useTaskStore = defineStore('task', () => {
   const state = reactive({
@@ -56,7 +56,7 @@ export const useTaskStore = defineStore('task', () => {
   }
 
   return {
-    state,
+    ...toRefs(state),
     fetchTasks,
     getTaskById,
     syncTasks

@@ -125,9 +125,9 @@ export default defineComponent({
   },
   setup (props, { root }) {
     const orgStore = useOrgStore()
-    const currentOrgPaymentDetails = computed(() => orgStore.state.currentOrgPaymentDetails)
-    const currentOrganization = computed(() => orgStore.state.currentOrganization)
-    const currentMembership = computed(() => orgStore.state.currentMembership)
+    const currentOrgPaymentDetails = computed(() => orgStore.currentOrgPaymentDetails)
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentMembership = computed(() => orgStore.currentMembership)
 
     const csvErrorDialog: Ref<ModalDialog> = ref(null)
     const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'

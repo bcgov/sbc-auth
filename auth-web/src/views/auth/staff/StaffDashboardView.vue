@@ -243,8 +243,8 @@ export default defineComponent({
     const businessStore = useBusinessStore()
     const orgStore = useOrgStore()
     const userStore = useUserStore()
-    const currentOrganization = computed(() => orgStore.state.currentOrganization)
-    const currentUser = computed(() => userStore.state.currentUser)
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentUser = computed(() => userStore.currentUser)
 
     const businessIdentifierRules = [
       v => !!v || 'Incorporation Number or Registration Number is required',

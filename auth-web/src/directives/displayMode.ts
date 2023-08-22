@@ -28,7 +28,7 @@ const displayMode: DirectiveOptions = {
 function checkViewOnlyMode (binding: DirectiveBinding, el: HTMLElement) {
   const directiveValue = binding.value
 
-  const vModeStoreValue:string = useOrgStore().state.vDisplayModeValue
+  const vModeStoreValue:string = useOrgStore().vDisplayModeValue
   const customeEl = el as CustomHTMLElement
   let viewOnly = false
   if (directiveValue) {

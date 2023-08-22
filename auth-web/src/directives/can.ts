@@ -30,7 +30,7 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   // to handle special elements like v-card etc
   const isCard = !!binding.modifiers.card
   const requestedAction = binding.arg
-  const permissions:string[] = useOrgStore().state.permissions
+  const permissions:string[] = useOrgStore().permissions
   const customeEl = el as CustomHTMLElement
   const okayToAccess = permissions.indexOf(requestedAction) >= 0
   // if not okay , hide or disable

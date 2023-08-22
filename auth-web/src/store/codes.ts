@@ -1,7 +1,7 @@
+import { reactive, toRefs } from '@vue/composition-api'
 import { Code } from '@/models/Code'
 import CodesService from '@/services/codes.service'
 import { defineStore } from 'pinia'
-import { reactive } from '@vue/composition-api'
 
 export const useCodesStore = defineStore('codes', () => {
   const businessSizeCodeTable = 'business_size_codes'
@@ -54,7 +54,7 @@ export const useCodesStore = defineStore('codes', () => {
   }
 
   return {
-    state,
+    ...toRefs(state),
     businessSizeCodeTable,
     businessTypeCodeTable,
     getBusinessSizeCodes,

@@ -20,7 +20,7 @@ import {
   SessionStorageKeys
 } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
-import { computed, reactive } from '@vue/composition-api'
+import { computed, reactive, toRefs } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -37,7 +37,7 @@ export const useBusinessStore = defineStore('business', () => {
 
   // Grabs from Org store.
   const currentOrganization = computed<Organization>(() => {
-    return useOrgStore().state.currentOrganization
+    return useOrgStore().currentOrganization
   })
 
   /* Internal function to build the business object. */
@@ -455,7 +455,7 @@ export const useBusinessStore = defineStore('business', () => {
   }
 
   return {
-    state,
+    ...toRefs(state),
     currentOrganization,
     syncBusinesses,
     loadBusiness,

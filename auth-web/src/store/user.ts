@@ -1,7 +1,7 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
-import { computed, reactive } from '@vue/composition-api'
+import { computed, reactive, toRefs } from '@vue/composition-api'
 
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
@@ -12,7 +12,7 @@ import { RoleInfo } from '@/models/Organization'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
 import { defineStore } from 'pinia'
-import { getVuexStore } from '.'
+import store from '.'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -238,7 +238,7 @@ export const useUserStore = defineStore('user', () => {
     saveUserTerms,
     setUserProfile,
     syncUserProfile,
-    state,
+    ...toRefs(state),
     termsOfUseVersion,
     updateCurrentUserTerms,
     updateUserContact,
@@ -251,7 +251,7 @@ export const useUserStore = defineStore('user', () => {
 @Module({
   name: 'user',
   namespaced: true,
-  store: getVuexStore(),
+  store: store,
   dynamic: true
 })
 export class UserModule extends VuexModule {

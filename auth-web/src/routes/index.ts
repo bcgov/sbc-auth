@@ -16,7 +16,7 @@ import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
-import { getVuexStore } from '@/store'
+import store from '@/store'
 import { useOrgStore } from '@/store/org'
 import { useUserStore } from '@/store/user'
 
@@ -56,33 +56,29 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
-  const store = getVuexStore()
-  const orgStore = useOrgStore()
-  const userStore = useUserStore()
   // Enforce navigation guards are checked before navigating anywhere else
-  // If store is not ready, we place a watch on it, then proceed when ready
-  // Remove Vuex with Vue3 upgrade.
+  // Remove Vuex with Vue3 upgrade. - Will be replaced by Pinia onAction.
   if (store.getters.loading) {
-    store.watch(
-      (state, getters) => getters.loading,
-      value => {
-        if (value === false) {
-          debugger
-          proceed()
+    await new Promise(resolve => {
+      const unsubscribeFn = store.subscribe(mutation => {
+        if (mutation.type === 'loadComplete') {
+          unsubscribeFn()
+          resolve(null)
         }
       })
-  } else {
-    debugger
-    proceed()
+    })
   }
+  proceed()
 
   function proceed () {
-    const userProfile: User = userStore.state.userProfile
-    const currentAccountSettings: AccountSettings = orgStore.state.currentAccountSettings
-    const currentOrganization: Organization = orgStore.state.currentOrganization
-    const currentMembership: Member = orgStore.state.currentMembership
-    const currentUser: KCUserProfile = userStore.state.currentUser
-    const permissions: string[] = orgStore.state.permissions
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const userProfile: User = userStore.userProfile
+    const currentAccountSettings: AccountSettings = orgStore.currentAccountSettings
+    const currentOrganization: Organization = orgStore.currentOrganization
+    const currentMembership: Member = orgStore.currentMembership
+    const currentUser: KCUserProfile = userStore.currentUser
+    const permissions: string[] = orgStore.permissions
     if (to.path === `/${Pages.LOGIN}` && currentUser) {
       // If the user came back from login page and is already logged in
       // redirect to redirect path
@@ -91,9 +87,9 @@ router.beforeEach(async (to, from, next) => {
       })
     } else {
       if (to.matched.some(record => record.meta.isPremiumOnly)) {
-        const currentOrganization: Organization = orgStore.state.currentOrganization
-        const currentMembership: Member = orgStore.state.currentMembership
-        const currentUser: KCUserProfile = userStore.state.currentUser
+        const currentOrganization: Organization = orgStore.currentOrganization
+        const currentMembership: Member = orgStore.currentMembership
+        const currentUser: KCUserProfile = userStore.currentUser
         // redirect to unauthorized page if the account selected is not Premium
         if (!(currentOrganization?.orgType === Account.PREMIUM &&
           [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode)) &&

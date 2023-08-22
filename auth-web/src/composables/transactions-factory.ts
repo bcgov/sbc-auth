@@ -1,9 +1,7 @@
 import { LDFlags, Role } from '@/util/constants'
 import { Transaction, TransactionFilterParams, TransactionState } from '@/models/transaction'
 import { computed, reactive, ref } from '@vue/composition-api'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { Organization } from '@/models/Organization'
 import PaymentService from '@/services/payment.services'
 import debounce from 'lodash/throttle'
 import { useOrgStore } from '@/store/org'
@@ -29,8 +27,8 @@ const transactions = (reactive({
 export const useTransactions = () => {
   const orgStore = useOrgStore()
   const userStore = useUserStore()
-  const currentOrganization = computed(() => orgStore.state.currentOrganization as Organization)
-  const currentUser = computed(() => userStore.state.currentUser as KCUserProfile)
+  const currentOrganization = computed(() => orgStore.currentOrganization)
+  const currentUser = computed(() => userStore.currentUser)
   const viewAll = ref(false)
   const setViewAll = (val: boolean) => {
     if (val) {

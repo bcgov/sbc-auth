@@ -38,7 +38,7 @@ import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { CreateRequestBody as CreateInvitationRequestBody, Invitation } from '@/models/Invitation'
 import { Products, ProductsRequestBody } from '@/models/Staff'
 import { StatementFilterParams, StatementNotificationSettings, StatementSettings } from '@/models/statement'
-import { computed, reactive } from '@vue/composition-api'
+import { computed, reactive, toRefs } from '@vue/composition-api'
 import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import { AutoCompleteResponse } from '@/models/AutoComplete'
@@ -916,7 +916,7 @@ export const useOrgStore = defineStore('org', () => {
 
   // Check if user has any accounts, if any, default the first returned value as the selected org.
   async function setCurrentOrganizationFromUserAccountSettings (): Promise<void> {
-    const response = await UserService.getUserAccountSettings(userStore.state.userProfile?.keycloakGuid)
+    const response = await UserService.getUserAccountSettings(userStore.userProfile?.keycloakGuid)
     if (response?.data) {
       // filter by account type and default first returned value as the current organization
       const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
@@ -961,7 +961,7 @@ export const useOrgStore = defineStore('org', () => {
   }
 
   return {
-    state,
+    ...toRefs(state),
     isPremiumAccount,
     needMissingBusinessDetailsRedirect,
     canEditBusinessInfo,

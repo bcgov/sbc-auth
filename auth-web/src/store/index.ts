@@ -28,14 +28,7 @@ const storeOptions: StoreOptions<RootState> = {
   }
 }
 
-/**
- * Configures and returns Vuex Store. - We still need this for sbc-common-components.
- */
-export function getVuexStore () {
-  Vue.use(Vuex)
-
-  return new Vuex.Store<RootState>(storeOptions)
-}
+export default new Vuex.Store<RootState>(storeOptions)
 
 /**
  * Configures and returns Pinia Store.

@@ -136,8 +136,8 @@ export default defineComponent({
     // refs
     const editAccountForm = ref(null as HTMLFormElement)
     const codeStore = useCodesStore()
-    const businessSizeCodes = computed(() => codeStore.state.businessSizeCodes)
-    const businessTypeCodes = computed(() => codeStore.state.businessTypeCodes)
+    const businessSizeCodes = computed(() => codeStore.businessSizeCodes)
+    const businessTypeCodes = computed(() => codeStore.businessTypeCodes)
 
     const localVars = (reactive({
       orgName: '',

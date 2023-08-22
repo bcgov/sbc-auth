@@ -2,8 +2,7 @@ import { AccountStatus, AffidavitStatus, TaskAction, TaskRelationshipStatus, Tas
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { SyncAccountPayload, Task } from '@/models/Task'
-import { computed, reactive } from '@vue/composition-api'
-
+import { computed, reactive, toRefs } from '@vue/composition-api'
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
 import { Contact } from '@/models/contact'
@@ -274,7 +273,7 @@ export const useStaffStore = defineStore('staff', () => {
     rejectorOnHoldAccountUnderReview,
     resendPendingOrgInvitation,
     searchOrgs,
-    state,
+    ...toRefs(state),
     suspendedReviewCount,
     syncTaskUnderReview,
     syncAccountAffidavit,
