@@ -22,6 +22,7 @@ import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockS
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
+import { Base64 } from 'js-base64'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -247,7 +248,7 @@ export function getRoutes (): RouteConfig[] {
       props: route => {
         try {
           const base64Token = route.params.base64Token
-          const decodedToken = atob(base64Token) // Decode the Base64 token
+          const decodedToken = Base64.decode(base64Token) // Decode the Base64 token
           const orgId = JSON.parse(decodedToken).fromOrgId // Extract the orgId from the decoded token
 
           return {

@@ -520,6 +520,7 @@ import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
+import { Base64 } from 'js-base64'
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
@@ -624,20 +625,20 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         }
       }
     }
+    const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
+    const token = JSON.parse(decodedToken)
+    const legalName = Base64.decode(this.base64OrgName)
 
     this.setAccountChangedHandler(this.setup)
     this.setup()
-    this.parseUrlAndAddAffiliation()
+    this.parseUrlAndAddAffiliation(token, legalName)
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
-  parseUrlAndAddAffiliation = async () => {
+  parseUrlAndAddAffiliation = async (token: any, legalName: string) => {
     if (!this.$route.meta.checkMagicLink) {
       return
     }
-    const decodedToken = atob(this.base64Token) // Decode the Base64 token
-    const token = JSON.parse(decodedToken)
-    const legalName = atob(this.base64OrgName)
     const identifier = token.businessIdentifier
     const invitationId = token.id
     try {
