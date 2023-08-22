@@ -114,7 +114,7 @@ import { useUserStore } from '@/store/user'
     ])
   },
   methods: {
-    ...mapActions(useOrgStore, ['setCurrentOrganization', 'setOrgName']), //TODO: FIX?
+    ...mapActions(useOrgStore, ['setCurrentOrganization', 'setOrgName']), // TODO: FIX?
     ...mapActions(useUserStore, [
       'uploadPendingDocsToStorage', 'setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc'
     ])
@@ -122,8 +122,6 @@ import { useUserStore } from '@/store/user'
 })
 export default class UploadAffidavitStep extends Mixins(Steppable) {
   @Prop({ default: false }) isAffidavitUpload: boolean
-  private orgStore = getModule(OrgModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
   saving: boolean = false
   private MAX_FILE_SIZE = 10000 // 10 MB in KB

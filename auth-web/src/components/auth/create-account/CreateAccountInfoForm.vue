@@ -25,7 +25,6 @@ import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBa
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { getModule } from 'vuex-module-decorators'
 import { useOrgStore } from '@/store/org'
 import { useUserStore } from '@/store/user'
 

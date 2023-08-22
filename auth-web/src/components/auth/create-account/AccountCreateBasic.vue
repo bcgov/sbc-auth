@@ -87,7 +87,6 @@ import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vu
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
 import { useOrgStore } from '@/store/org'
 import { useUserStore } from '@/store/user'
 

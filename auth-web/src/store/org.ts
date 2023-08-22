@@ -466,7 +466,7 @@ export const useOrgStore = defineStore('org', () => {
   async function createInvitation (invitation: CreateInvitationRequestBody) {
     try {
       const response = await InvitationService.createInvitation(invitation)
-      if (!response || !response.data || response.status !== 201) {
+      if (!response?.data || response.status !== 201) {
         throw new Error('Unable to create invitation')
       }
       state.sentInvitations.push(response.data)
@@ -568,7 +568,7 @@ export const useOrgStore = defineStore('org', () => {
 
   async function syncActiveOrgMembers () {
     const response = await OrgService.getOrgMembers(state.currentOrganization.id, 'ACTIVE')
-    const result = response.data && response.data.members ? response.data.members : []
+    const result = response?.data?.members || []
     state.activeOrgMembers = result
     return result
   }
@@ -588,14 +588,14 @@ export const useOrgStore = defineStore('org', () => {
 
   async function syncPendingOrgMembers () {
     const response = await OrgService.getOrgMembers(state.currentOrganization.id, 'PENDING_APPROVAL')
-    const result = response.data && response.data.members ? response.data.members : []
+    const result = response?.data?.members || []
     state.pendingOrgMembers = result
     return result
   }
 
   async function syncPendingOrgInvitations () {
     const response = await OrgService.getOrgInvitations(state.currentOrganization.id, 'PENDING')
-    const result = response.data && response.data.invitations ? response.data.invitations : []
+    const result = response?.data?.invitations || []
     state.pendingOrgInvitations = result
     return result
   }
@@ -607,7 +607,7 @@ export const useOrgStore = defineStore('org', () => {
 
   async function createUsers (addUserBody: AddUsersToOrgBody) {
     const response = await UserService.createUsers(addUserBody)
-    if (!response || !response.data || ![200, 201, 207].includes(response.status) || !response.data?.users) {
+    if (!response?.data || ![200, 201, 207].includes(response.status) || !response.data?.users) {
       throw new Error('Unable to create users')
     } else {
       const users = response.data.users

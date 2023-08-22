@@ -114,7 +114,7 @@ export default class CommonUtils {
       // the URL has been freed."
       window.navigator.msSaveBlob(blob, fileName)
     } else {
-      const blobURL = (window.URL && window.URL.createObjectURL)
+      const blobURL = window.URL?.createObjectURL
         ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob)
       const tempLink = document.createElement('a')
       tempLink.style.display = 'none'

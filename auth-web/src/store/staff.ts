@@ -126,7 +126,7 @@ export const useStaffStore = defineStore('staff', () => {
 
   async function syncAccountAffidavit (task: Task): Promise<void> {
     const taskUserGuid = task?.user?.keycloakGuid
-    let status = task.relationshipStatus
+    let status
 
     switch (task.relationshipStatus) {
       case TaskRelationshipStatus.PENDING_STAFF_REVIEW:

@@ -116,14 +116,14 @@ export const useUserStore = defineStore('user', () => {
 
   async function syncUserProfile () {
     const userResponse = await UserService.getUserProfile('@me')
-    if (userResponse && userResponse.data) {
+    if (userResponse?.data) {
       // Refresh token to get the new token with additional roles
       await KeyCloakService.refreshToken(true)
       state.userProfile = userResponse.data
     }
 
     const contactResponse = await UserService.getContacts()
-    if (contactResponse && contactResponse.data && (contactResponse.status === 200)) {
+    if (contactResponse?.data && (contactResponse.status === 200)) {
       let firstContact: Contact
       if (contactResponse.data.contacts.length > 0) {
         firstContact = contactResponse.data.contacts[0]
