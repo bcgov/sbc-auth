@@ -179,15 +179,14 @@
 
 <script lang="ts">
 import { Account, LDFlags } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
 import { Code } from '@/models/Code'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const CodesModule = namespace('codes')
+import { useCodesStore } from '@/store/codes'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
@@ -203,12 +202,12 @@ export default class AccountBusinessType extends Vue {
   @Prop({ default: false }) orgNameReadOnly: boolean
   @Prop({ default: false }) isEditAccount: boolean // hide some details for update account
 
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
+  @State(useOrgStore, 'currentOrganization') public currentOrganization!: Organization
 
-  @CodesModule.Action('getBusinessSizeCodes') private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @CodesModule.Action('getBusinessTypeCodes') private readonly getBusinessTypeCodes!: () => Promise<Code[]>
-  @CodesModule.State('businessSizeCodes') private readonly businessSizeCodes!: Code[]
-  @CodesModule.State('businessTypeCodes') private readonly businessTypeCodes!: Code[]
+  @Action(useCodesStore, 'getBusinessSizeCodes') private readonly getBusinessSizeCodes!: () => Promise<Code[]>
+  @Action(useCodesStore, 'getBusinessTypeCodes') private readonly getBusinessTypeCodes!: () => Promise<Code[]>
+  @State(useCodesStore) private readonly businessSizeCodes!: Code[]
+  @State(useCodesStore) private readonly businessTypeCodes!: Code[]
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''

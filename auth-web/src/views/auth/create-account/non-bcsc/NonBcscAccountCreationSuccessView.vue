@@ -39,18 +39,19 @@ import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   }
 })
 export default class NonBcscAccountCreationSuccessView extends Vue {
-  protected readonly currentOrganization!: Organization
-  private readonly descriptionParams: any = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
+  readonly currentOrganization!: Organization
+  readonly descriptionParams: any = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
 
-  private goTo (page) {
+  goTo (page) {
     switch (page) {
       case 'home': this.$router.push('/')
         break

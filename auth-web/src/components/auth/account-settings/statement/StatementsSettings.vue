@@ -202,14 +202,15 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementListItem, StatementNotificationSettings, StatementRecipient, StatementSettings } from '@/models/statement'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'fetchStatementSettings',
       'getStatementRecipients',
       'updateStatementSettings',
@@ -218,7 +219,7 @@ import moment from 'moment'
     ])
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'statementSettings',
       'currentStatementNotificationSettings',
       'activeOrgMembers',

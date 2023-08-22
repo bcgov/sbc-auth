@@ -140,13 +140,12 @@
 import { BulkUsersFailed, BulkUsersSuccess } from '@/models/Organization'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import OrgModule from '@/store/modules/org'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'createdUsers',
       'failedUsers'
     ])

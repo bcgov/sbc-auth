@@ -65,13 +65,10 @@
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import ActvityLogModule from '@/store/modules/activityLog'
+import { mapActions, mapState } from 'pinia'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
-import BusinessModule from './store/modules/business'
-import CodesModule from './store/modules/codes'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
@@ -80,15 +77,14 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from './store/modules/org'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import StaffModule from '@/store/modules/staff'
-import TaskModule from '@/store/modules/task'
-import UserModule from './store/modules/user'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { getModule } from 'vuex-module-decorators'
+import { mapGetters } from 'vuex'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -98,28 +94,21 @@ import { getModule } from 'vuex-module-decorators'
     SbcLoader
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentAccountSettings',
       'permissions'
     ]),
-    ...mapState('user', ['currentUser']),
+    ...mapState(useUserStore, ['currentUser']),
     ...mapGetters('auth', ['isAuthenticated'])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization']),
-    ...mapActions('user', ['loadUserInfo'])
+    ...mapActions(useOrgStore, ['setCurrentOrganization']),
+    ...mapActions(useUserStore, ['loadUserInfo'])
   }
 })
 export default class App extends Mixins(NextPageMixin) {
-  // Remove these with Pinia and Vue3.
-  private activityModule = getModule(ActvityLogModule, this.$store)
+  // Remove these with sbc-common-components and Vue3 upgrade.
   private authModule = getModule(AuthModule, this.$store)
-  private businessStore = getModule(BusinessModule, this.$store)
-  private codesStore = getModule(CodesModule, this.$store)
-  private orgStore = getModule(OrgModule, this.$store)
-  private taskStore = getModule(TaskModule, this.$store)
-  private staffStore = getModule(StaffModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
   private showNotification = false
   private notificationText = ''
@@ -217,6 +206,7 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
+    // Auth store, still exists in sbc-common-components v2, uses pinia in Vue3 version.
     this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 

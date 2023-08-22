@@ -361,13 +361,11 @@
 
 import { AccessType, Account, LDFlags, LoginSource, Pages, Role } from '@/util/constants'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
-import { Member, Organization } from '@/models/Organization'
 import { User, UserProfileData } from '@/models/user'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Contact } from '@/models/contact'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
@@ -376,6 +374,8 @@ import UserService from '@/services/user.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import configHelper from '@/util/config-helper'
 import { mask } from 'vue-the-mask'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -386,34 +386,33 @@ import { mask } from 'vue-the-mask'
     mask
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapState('user', [
+    ...mapState(useOrgStore, ['currentOrganization']),
+    ...mapState(useUserStore, [
       'userProfileData'
     ])
   },
   methods: {
-    ...mapMutations('user', ['setUserProfileData', 'setUserProfile']),
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'createUserContact',
         'updateUserContact',
         'getUserProfile',
         'createAffidavit',
-        'updateUserFirstAndLastName'
+        'updateUserFirstAndLastName',
+        'setUserProfileData',
+        'setUserProfile'
       ]),
-    ...mapActions('org', ['syncMembership', 'syncOrganization'])
+    ...mapActions(useOrgStore, ['syncMembership', 'syncOrganization'])
   }
 })
 export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     @Prop({ default: false }) isAffidavitUpload: boolean
+    @Prop() token: string
     private readonly createUserContact!: (contact?: Contact) => Contact
     private readonly updateUserContact!: (contact?: Contact) => Contact
     private readonly getUserProfile!: (identifer: string) => User
     private readonly updateUserFirstAndLastName!: (user?: User) => Contact
     private readonly setUserProfileData!: (userProfile: UserProfileData | undefined) => void
-    private readonly setUserProfile!: (userProfile: User | undefined) => void
-
-    private readonly createAffidavit!: () => User
     private firstName = ''
     private lastName = ''
     private emailAddress = ''
@@ -424,15 +423,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     private editing = false
     private deactivateProfileDialog = false
     private isDeactivating = false
-    @Prop() token: string
-    readonly currentOrganization!: Organization
     readonly userProfileData!: UserProfileData
-    readonly syncMembership!: (orgId: number) => Promise<Member>
-    readonly syncOrganization!: (orgId: number) => Promise<Organization>
     private readonly ACCOUNT_TYPE = Account
     private isTester: boolean = false
     private isReseting = false
-    readonly currentUser!: KCUserProfile
 
     // this prop is used for conditionally using this form in both account stepper and edit profile pages
     @Prop({ default: false }) isStepperView: boolean
@@ -503,9 +497,6 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
       let user: any = {}
       // clear user profile data
       if (!this.clearForm) {
-        // await this.setUserProfileData(undefined)
-        // await this.setUserProfile(undefined)
-
         if (this.userProfileData) {
           user = this.userProfileData
         } else {

@@ -1,4 +1,5 @@
 import '@/composition-api-setup' // ensure this happens before any imports trigger use of composition-api
+import { createPinia, setActivePinia } from 'pinia'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import VueTheMask from 'vue-the-mask'
@@ -9,3 +10,5 @@ Vue.use(VueTheMask)
 Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.directive('can', can)
+
+setActivePinia(createPinia())

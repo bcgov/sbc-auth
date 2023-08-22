@@ -58,11 +58,12 @@
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['pendingOrgInvitations'])
+    ...mapState(useOrgStore, ['pendingOrgInvitations'])
   }
 })
 export default class InvitationsDataTable extends Vue {

@@ -51,7 +51,7 @@ import { AccessType, DisplayModeValues, LDFlags, PaymentTypes, SessionStorageKey
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, OrgPaymentDetails, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
@@ -68,6 +68,8 @@ import SelectProductService from '@/components/auth/create-account/SelectProduct
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -82,22 +84,18 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
     PremiumChooser
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userContact',
       'userProfile'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrgPaymentType',
       'currentOrganization'
     ])
 
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationType',
-      'setViewOnlyMode'
-    ]),
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'createUserContact',
         'updateUserContact',
@@ -105,14 +103,16 @@ import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vu
         'createAffidavit',
         'updateUserFirstAndLastName'
       ]),
-    ...mapActions('org',
+    ...mapActions(useOrgStore,
       [
         'createOrg',
         'validatePADInfo',
         'syncMembership',
         'syncOrganization',
         'syncAddress',
-        'getOrgPayments'
+        'getOrgPayments',
+        'setCurrentOrganizationType',
+        'setViewOnlyMode'
       ])
   }
 })

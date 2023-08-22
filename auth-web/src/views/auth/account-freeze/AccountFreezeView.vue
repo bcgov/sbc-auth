@@ -40,14 +40,15 @@ import { AccountStatus } from '@/util/constants'
 import AccountSuspendedView from './AccountSuspendedView.vue'
 import CommonUtils from '@/util/common-util'
 import { Organization } from '@/models/Organization'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
     AccountSuspendedView
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {

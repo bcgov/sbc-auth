@@ -40,22 +40,20 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { GLCode } from '@/models/Staff'
 import GLCodeDetailsModal from '@/components/auth/staff/gl-code/GLCodeDetailsModal.vue'
-import StaffModule from '@/store/modules/staff'
-import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useStaffStore } from '@/store/staff'
 
 @Component({
   components: {
     GLCodeDetailsModal
   },
   methods: {
-    ...mapActions('staff', [
+    ...mapActions(useStaffStore, [
       'getGLCodeList'
     ])
   }
 })
 export default class GLCodesDataTable extends Vue {
-  private staffStore = getModule(StaffModule, this.$store)
   @Prop({ default: '' }) private folioFilter: string
   private readonly getGLCodeList!: () => GLCode[]
 

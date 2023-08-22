@@ -185,7 +185,7 @@
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { SessionStorageKeys, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -194,6 +194,7 @@ import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { ProductCode } from '@/models/Staff'
 import moment from 'moment'
 import { namespace } from 'vuex-class'
+import { useStaffStore } from '@/store/modules/staff'
 
 const TaskModule = namespace('task')
 
@@ -202,10 +203,10 @@ const TaskModule = namespace('task')
     DatePicker
   },
   computed: {
-    ...mapState('staff', ['products'])
+    ...mapState(useStaffStore, ['products'])
   },
   methods: {
-    ...mapActions('staff', ['getProducts'])
+    ...mapActions(useStaffStore, ['getProducts'])
   }
 })
 export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {

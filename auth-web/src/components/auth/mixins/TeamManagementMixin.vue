@@ -3,42 +3,38 @@
 import { AccessType, LoginSource, SessionStorageKeys } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization, UpdateMemberPayload } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { ChangeRolePayload } from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
 import { EventBus } from '@/event-bus'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import OrgModule from '@/store/modules/org'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
     ModalDialog
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentMembership',
       'currentOrganization'
     ]),
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'currentUser'
     ])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'updateMember',
       'leaveTeam',
-      'dissolveTeam',
       'deleteUser'
     ])
   }
 })
 export default class TeamManagementMixin extends Vue {
-  private userStore = getModule(UserModule, this.$store)
   protected successTitle: string = ''
   protected successText: string = ''
   protected errorTitle: string = ''
@@ -182,7 +178,6 @@ export default class TeamManagementMixin extends Vue {
   }
 
   protected async dissolve () {
-    await this.dissolveTeam()
     await this.leaveTeam(this.currentMembership.id)
     this.modal.close()
     this.$store.commit('updateHeader')

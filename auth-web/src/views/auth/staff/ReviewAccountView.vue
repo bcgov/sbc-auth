@@ -141,7 +141,6 @@ import { AccessType, AffidavitStatus, DisplayModeValues, OnholdOrRejectCode, Pag
   TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskType } from '@/util/constants'
 import { AccountFee, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { Ref, computed, defineComponent, getCurrentInstance, onMounted, ref } from '@vue/composition-api'
-// import { mapActions, mapGetters, mapState } from 'vuex'
 import AccessRequestModal from '@/components/auth/staff/review-task/AccessRequestModal.vue'
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
 import { AccountInformation } from '@/components/auth/staff/review-task'
@@ -154,10 +153,8 @@ import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffid
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
-import StaffModuleStore from '@/store/modules/staff'
 import { Task } from '@/models/Task'
 
-import { getModule } from 'vuex-module-decorators'
 import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
@@ -167,13 +164,14 @@ export default defineComponent({
     AccountStatusTab
   },
   props: {
-    orgId: String
+    orgId: {
+      type: String,
+      default: null
+    }
   },
   setup (props) {
     const store = useStore()
     const instance = getCurrentInstance()
-    /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-    const _staffStore = getModule(StaffModuleStore, store)
     const isLoading: Ref<boolean> = ref(true)
     const isSaving: Ref<boolean> = ref(false)
     const pagesEnum = Pages
@@ -258,7 +256,7 @@ export default defineComponent({
     }
 
     const resetCurrentAccountFees = (): void => {
-      store.commit('org/resetCurrentAccountFees')
+      store.commit('org/setCurrentAccountFees', [])
     }
 
     const updateOrganizationAccessType = async ({ accessType, orgId, syncOrg }): Promise<boolean> => {

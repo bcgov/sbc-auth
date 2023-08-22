@@ -53,13 +53,14 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member } from '@/models/Organization'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['pendingOrgMembers'])
+    ...mapState(useOrgStore, ['pendingOrgMembers'])
   }
 })
 export default class PendingMemberDataTable extends Vue {

@@ -41,26 +41,27 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountLoginOptionPicker from '@/components/auth/common/AccountLoginOptionPicker.vue'
 import { LoginSource } from '@/util/constants'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
     AccountLoginOptionPicker
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'memberLoginOption'
     ])
   },
   methods: {
-    ...mapActions('org', [
-      'updateLoginOption'
-    ]),
-    ...mapMutations('org', ['setMemberLoginOption'])
+    ...mapActions(useOrgStore, [
+      'updateLoginOption',
+      'setMemberLoginOption'
+    ])
   }
 })
 export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixin) {

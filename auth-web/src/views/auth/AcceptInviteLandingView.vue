@@ -87,21 +87,20 @@
 
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { LoginSource, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import BceidInviteLanding from '@/components/auth/BceidInviteLanding.vue'
 import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding.vue'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
-import OrgModule from '@/store/modules/org'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['invalidInvitationToken', 'tokenError'])
+    ...mapState(useOrgStore, ['invalidInvitationToken', 'tokenError'])
   },
   methods: {
-    ...mapActions('org', ['validateInvitationToken'])
+    ...mapActions(useOrgStore, ['validateInvitationToken'])
   },
   components: {
     BceidInviteLanding,
@@ -110,7 +109,6 @@ import { getModule } from 'vuex-module-decorators'
   }
 })
 export default class AcceptInviteLandingView extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
   private readonly validateInvitationToken!: (token: string) => EmptyResponse
   private readonly invalidInvitationToken!: boolean
   private readonly tokenError!: boolean

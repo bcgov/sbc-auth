@@ -48,11 +48,12 @@ import { Component } from 'vue-property-decorator'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/store/user'
 
 @Component({
   computed: {
-    ...mapState('user', ['currentUser'])
+    ...mapState(useUserStore, ['currentUser'])
   }
 })
 export default class UnauthorizedView extends Vue {

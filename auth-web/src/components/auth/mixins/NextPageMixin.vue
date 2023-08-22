@@ -2,34 +2,31 @@
 <script lang="ts">
 import { AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import Component from 'vue-class-component'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-import OrgModule from '@/store/modules/org'
 import { User } from '@/models/user'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   computed: {
-    ...mapState('user', ['currentUser', 'userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions']),
-    ...mapGetters('org', ['needMissingBusinessDetailsRedirect'])
+    ...mapState(useUserStore, ['currentUser', 'userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState(useOrgStore, ['currentOrganization', 'currentMembership', 'currentAccountSettings', 'permissions',
+      'needMissingBusinessDetailsRedirect'])
   },
   methods: {
-    ...mapActions('user', ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
-    ...mapActions('org', ['syncOrganization', 'syncMembership', 'resetCurrentOrganization']),
-    ...mapMutations('org', ['setCurrentAccountSettings'])
+    ...mapActions(useUserStore, ['loadUserInfo', 'syncUserProfile', 'getUserProfile']),
+    ...mapActions(useOrgStore, ['syncOrganization', 'syncMembership', 'resetCurrentOrganization',
+      'setCurrentAccountSettings'])
   }
 })
 export default class NextPageMixin extends Vue {
-  private userStore = getModule(UserModule, this.$store)
-  private orgStore = getModule(OrgModule, this.$store)
   protected readonly currentUser!: KCUserProfile
   protected readonly userProfile!: User
   protected readonly userContact!: Contact
@@ -79,7 +76,7 @@ export default class NextPageMixin extends Vue {
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bcrosNextStep = `/${Pages.USER_PROFILE_TERMS}`
         } else if (this.currentOrganization && this.currentMembership.membershipStatus === MembershipStatus.Active) {
-          if ((this.currentMembership.membershipTypeCode === MembershipType.Admin) || (this.currentMembership.membershipTypeCode === MembershipType.Coordinator)) {
+          if ([MembershipType.Coordinator, MembershipType.Admin].includes(this.currentMembership.membershipTypeCode)) {
             bcrosNextStep = `/${Pages.MAIN}/${this.currentOrganization.id}/settings/team-members`
           } else {
             bcrosNextStep = ConfigHelper.getDirectorSearchURL()

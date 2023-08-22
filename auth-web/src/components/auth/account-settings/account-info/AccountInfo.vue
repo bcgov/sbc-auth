@@ -289,6 +289,7 @@ import {
   Role,
   SessionStorageKeys
 } from '@/util/constants'
+import { Action, Getter, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -310,12 +311,9 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
-
-import { namespace } from 'vuex-class'
-
-const CodesModule = namespace('codes')
-const OrgModule = namespace('org')
-const userModule = namespace('user')
+import { useCodesStore } from '@/store/codes'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -332,32 +330,31 @@ export default class AccountInfo extends Mixins(
   AccountChangeMixin,
   AccountMixin
 ) {
-  @CodesModule.State('suspensionReasonCodes')
-  private suspensionReasonCodes!: Code[]
-  @OrgModule.State('currentMembership') public currentMembership!: Organization
-  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
-  @OrgModule.State('permissions') public permissions!: string[]
-  @OrgModule.State('currentOrgPaymentType') public currentOrgPaymentType!: string
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
+  @State(useCodesStore) private suspensionReasonCodes!: Code[]
+  @State(useOrgStore, 'currentMembership') public currentMembership!: Organization
+  @State(useOrgStore, 'currentOrgAddress') public currentOrgAddress!: Address
+  @State(useOrgStore, 'permissions') public permissions!: string[]
+  @State(useOrgStore, 'currentOrgPaymentType') public currentOrgPaymentType!: string
+  @State(useUserStore, 'currentUser') public currentUser!: KCUserProfile
 
-  @OrgModule.Getter('isBusinessAccount') public isBusinessAccount!: boolean
-  @OrgModule.Mutation('setCurrentOrganizationAddress')
+  @Getter(useOrgStore, 'isBusinessAccount') public isBusinessAccount!: boolean
+  @Action(useOrgStore, 'setCurrentOrganizationAddress')
   public setCurrentOrganizationAddress!: (address: Address) => void
 
-  @OrgModule.Action('updateOrg') public updateOrg!: (
+  @Action(useOrgStore, 'updateOrg') public updateOrg!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
 
-  @OrgModule.Action('syncAddress') syncAddress!: () => Address
-  @OrgModule.Action('getOrgPayments') getOrgPayments!: () => any
-  @OrgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!: (
+  @Action(useOrgStore, 'syncAddress') syncAddress!: () => Address
+  @Action(useOrgStore, 'getOrgPayments') getOrgPayments!: () => any
+  @Action(useOrgStore, 'updateOrganizationAccessType') updateOrganizationAccessType!: (
     accessType: string
   ) => Promise<Organization>
 
-  @OrgModule.Action('syncOrganization') syncOrganization!: (
+  @Action(useOrgStore, 'syncOrganization') syncOrganization!: (
     currentAccount: number
   ) => Promise<Organization>
-  @OrgModule.Action('suspendOrganization') suspendOrganization!: (
+  @Action(useOrgStore, 'suspendOrganization') suspendOrganization!: (
     selectedSuspensionReasonCode: string
   ) => Promise<Organization>
 
@@ -409,7 +406,8 @@ export default class AccountInfo extends Mixins(
         this.isCompleteAccountInfo = false
         this.errorMessage = this.isAddressEditable
           ? 'Your account info is incomplete. Please enter your address in order to proceed.'
-          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
+          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator ' +
+            'entered the missing information for this account.'
         this.$refs.editAccountForm?.validate() // validate form fields and show error message
         // SBTODO create a method in child comp
         this.$refs.mailingAddress?.triggerValidate() // validate form fields and show error message for address component from sbc-common-comp

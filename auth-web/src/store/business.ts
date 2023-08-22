@@ -1,9 +1,9 @@
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import {
   AffiliationInvitationStatus,
   AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
-  CreateNRAffiliationRequestBody
+  CreateNRAffiliationRequestBody,
+  NameRequestResponse
 } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload,
@@ -20,42 +20,28 @@ import {
   SessionStorageKeys
 } from '@/util/constants'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
+import { computed, reactive } from '@vue/composition-api'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { NameRequestResponse } from './../../models/affiliation'
 import OrgService from '@/services/org.services'
-import store from '..'
+import { defineStore } from 'pinia'
+import { useOrgStore } from './org'
 
-@Module({
-  name: 'business',
-  namespaced: true,
-  dynamic: true,
-  store
-})
-export default class BusinessModule extends VuexModule {
-  currentBusiness: Business = undefined
-  businesses: Business[] = []
+export const useBusinessStore = defineStore('business', () => {
+  const state = reactive({
+    currentBusiness: undefined as Business,
+    businesses: [] as Business[]
+  })
 
-  private get currentOrganization (): Organization {
-    return this.context.rootState.org.currentOrganization
-  }
-
-  @Mutation
-  public setCurrentBusiness (business: Business) {
-    ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, business?.businessIdentifier)
-    this.currentBusiness = business
-  }
-
-  @Mutation
-  public setBusinesses (businesses: Business[]) {
-    this.businesses = [...businesses]
-  }
+  // Grabs from Org store.
+  const currentOrganization = computed<Organization>(() => {
+    return useOrgStore().state.currentOrganization
+  })
 
   /** This is the function that fetches and updates data for all NRs. */
-  @Action({ rawError: true })
-  public async syncBusinesses (): Promise<void> {
+  async function syncBusinesses (): Promise<void> {
     const enableBcCccUlc = LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
 
     /** Returns True if NR is approved. */
@@ -98,16 +84,16 @@ export default class BusinessModule extends VuexModule {
     }
 
     // initialize store
-    this.setBusinesses([])
+    state.businesses = []
 
     // get current organization
-    if (!this.currentOrganization) {
+    if (!currentOrganization.value) {
       console.log('Invalid organization') // eslint-disable-line no-console
       return
     }
 
     // get affiliated entities for this organization
-    const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatiatedEntities(this.currentOrganization.id)
+    const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatiatedEntities(currentOrganization.value.id)
       .then(response => {
         if (response?.data?.entities && response?.status === 200) {
           return response.data.entities
@@ -166,7 +152,7 @@ export default class BusinessModule extends VuexModule {
     })
 
     if (LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) { // featureFlagIt
-      const resp = await OrgService.getAffiliationInvitations(this.currentOrganization.id)
+      const resp = await OrgService.getAffiliationInvitations(currentOrganization.value.id)
         .catch(err => {
           console.log(err) // eslint-disable-line no-console
           return null
@@ -175,8 +161,8 @@ export default class BusinessModule extends VuexModule {
       const pendingAffiliationInvitations = resp?.data?.affiliationInvitations || []
 
       for (const affiliationInviteInfo of pendingAffiliationInvitations) {
-        const isFromOrg = affiliationInviteInfo.fromOrg.id === this.currentOrganization.id
-        const isToOrgAndPending = affiliationInviteInfo.toOrg.id === this.currentOrganization.id &&
+        const isFromOrg = affiliationInviteInfo.fromOrg.id === currentOrganization.value.id
+        const isToOrgAndPending = affiliationInviteInfo.toOrg.id === currentOrganization.value.id &&
           affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
         const isAccepted = affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
         const business = affiliatedEntities.find(
@@ -207,20 +193,20 @@ export default class BusinessModule extends VuexModule {
     }
 
     // update store with initial results
-    this.setBusinesses(affiliatedEntities)
+    state.businesses = [...affiliatedEntities]
   }
 
-  @Action({ commit: 'setCurrentBusiness', rawError: true })
-  public async loadBusiness () {
+  async function loadBusiness () {
     const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     const response = await BusinessService.getBusiness(businessIdentifier)
     if (response && response.data && response.status === 200) {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data.businessIdentifier)
+      state.currentBusiness = response.data
       return response.data
     }
   }
 
-  @Action({ rawError: true })
-  public async addBusiness (payload: LoginPayload) {
+  async function addBusiness (payload: LoginPayload) {
     const requestBody: CreateAffiliationRequestBody = {
       businessIdentifier: payload.businessIdentifier,
       certifiedByName: payload.certifiedByName,
@@ -228,11 +214,10 @@ export default class BusinessModule extends VuexModule {
     }
 
     // Create an affiliation between implicit org and requested business
-    return OrgService.createAffiliation(this.currentOrganization.id, requestBody)
+    return OrgService.createAffiliation(currentOrganization.value.id, requestBody)
   }
 
-  @Action({ rawError: true })
-  public async updateBusinessName (businessNumber: string) {
+  async function updateBusinessName (businessNumber: string) {
     try {
       const businessResponse = await BusinessService.searchBusiness(businessNumber)
       if ((businessResponse?.status === 200) && businessResponse?.data?.business?.legalName) {
@@ -248,21 +233,19 @@ export default class BusinessModule extends VuexModule {
     } catch (error) {
       // delete the created affiliation if the update failed for avoiding orphan records
       // unable to do these from backend, since it causes a circular dependency
-      await OrgService.removeAffiliation(this.currentOrganization.id, businessNumber, undefined, false)
+      await OrgService.removeAffiliation(currentOrganization.value.id, businessNumber, undefined, false)
       return {
         errorMsg: 'Cannot add business due to some technical reasons'
       }
     }
   }
 
-  @Action({ rawError: true })
-  public async addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
+  async function addNameRequest (requestBody: CreateNRAffiliationRequestBody) {
     // Create an affiliation between implicit org and requested business
-    return OrgService.createNRAffiliation(this.currentOrganization.id, requestBody)
+    return OrgService.createNRAffiliation(currentOrganization.value.id, requestBody)
   }
 
-  @Action({ rawError: true })
-  public async createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
+  async function createNamedBusiness ({ filingType, business }: { filingType: FilingTypes, business: Business}) {
     let filingBody: BusinessRequest = null
 
     // add in Business Type for SP
@@ -283,7 +266,7 @@ export default class BusinessModule extends VuexModule {
               legalType: business.nameRequest.legalType
             },
             header: {
-              accountId: this.currentOrganization.id,
+              accountId: currentOrganization.value.id,
               name: filingType
             },
             incorporationApplication: {
@@ -306,7 +289,7 @@ export default class BusinessModule extends VuexModule {
         filingBody = {
           filing: {
             header: {
-              accountId: this.currentOrganization.id,
+              accountId: currentOrganization.value.id,
               name: filingType
             },
             registration: {
@@ -335,7 +318,7 @@ export default class BusinessModule extends VuexModule {
 
     // delete the created affiliation if the update failed for avoiding orphan records
     // unable to do this from backend, since it causes a circular dependency
-    const orgIdentifier = this.currentOrganization.id
+    const orgIdentifier = currentOrganization.value.id
     const incorporationNumber = business.businessIdentifier
     await OrgService.removeAffiliation(orgIdentifier, incorporationNumber, undefined, false)
 
@@ -343,8 +326,7 @@ export default class BusinessModule extends VuexModule {
   }
 
   // Following searchBusiness will search data from legal-api.
-  @Action({ rawError: true })
-  public async searchBusiness (businessIdentifier: string): Promise<LearBusiness> {
+  async function searchBusiness (businessIdentifier: string): Promise<LearBusiness> {
     const response = await BusinessService.searchBusiness(businessIdentifier).catch(() => null)
     if (response?.status === 200 && response?.data?.business?.legalName) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
@@ -354,18 +336,15 @@ export default class BusinessModule extends VuexModule {
     }
   }
 
-  @Action({ rawError: true })
-  public async searchBusinessIndex (identifier: string): Promise<number> {
-    return this.businesses.findIndex(business => business.businessIdentifier === identifier)
+  async function searchBusinessIndex (identifier: string): Promise<number> {
+    return state.businesses.findIndex(business => business.businessIdentifier === identifier)
   }
 
-  @Action({ rawError: true })
-  public async createBNRequest (request: BNRequest): Promise<any> {
+  async function createBNRequest (request: BNRequest): Promise<any> {
     return BusinessService.createBNRequest(request)
   }
 
-  @Action({ rawError: true })
-  public async getBNRequests (businessIdentifier: string): Promise<RequestTracker[]> {
+  async function getBNRequests (businessIdentifier: string): Promise<RequestTracker[]> {
     const response = await BusinessService.getBNRequests(businessIdentifier).catch(() => null)
     if (response?.status === 200) {
       return response.data.requestTrackers
@@ -373,19 +352,16 @@ export default class BusinessModule extends VuexModule {
     return []
   }
 
-  @Action({ rawError: true })
-  public async downloadBusinessSummary (businessIdentifier: string): Promise<void> {
+  async function downloadBusinessSummary (businessIdentifier: string): Promise<void> {
     await BusinessService.fetchBusinessSummary(businessIdentifier).catch(() => null)
   }
 
-  @Action({ rawError: true })
-  public async resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<any> {
+  async function resubmitBNRequest (resubmitRequest: ResubmitBNRequest): Promise<any> {
     const response = await BusinessService.resubmitBNRequest(resubmitRequest).catch(() => null)
     return response?.status === 200
   }
 
-  @Action({ rawError: true })
-  public async getRequestTracker (requestTrackerId: number): Promise<RequestTracker> {
+  async function getRequestTracker (requestTrackerId: number): Promise<RequestTracker> {
     const response = await BusinessService.getRequestTracker(requestTrackerId).catch(() => null)
     if (response?.status === 200) {
       return response.data
@@ -393,20 +369,18 @@ export default class BusinessModule extends VuexModule {
     return null
   }
 
-  @Action({ rawError: true })
-  public async isAffiliated (identifier: string): Promise<boolean> {
-    return this.businesses.some(business => business.businessIdentifier === identifier)
+  async function isAffiliated (identifier: string): Promise<boolean> {
+    return state.businesses.some(business => business.businessIdentifier === identifier)
   }
 
-  @Action({ rawError: true })
-  public async createNumberedBusiness ({ filingType, business }): Promise<void> {
+  async function createNumberedBusiness ({ filingType, business }): Promise<void> {
     const filingBody: BusinessRequest = {
       filing: {
         business: {
           legalType: business.nameRequest.legalType
         },
         header: {
-          accountId: this.currentOrganization.id,
+          accountId: currentOrganization.value.id,
           name: filingType
         },
         incorporationApplication: {
@@ -436,8 +410,7 @@ export default class BusinessModule extends VuexModule {
     }
   }
 
-  @Action({ rawError: true })
-  public async removeBusiness (payload: RemoveBusinessPayload) {
+  async function removeBusiness (payload: RemoveBusinessPayload) {
     // If the business is a new registration then remove the business filing from legal-db
     if (payload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
       const filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
@@ -458,9 +431,8 @@ export default class BusinessModule extends VuexModule {
     }
   }
 
-  @Action({ commit: 'setCurrentBusiness', rawError: true })
-  public async saveContact (contact: Contact) {
-    const currentBusiness: Business = this.context.state['currentBusiness']
+  async function saveContact (contact: Contact) {
+    const currentBusiness: Business = state.currentBusiness
     let response = null
     if (!currentBusiness.contacts || currentBusiness.contacts.length === 0) {
       response = await BusinessService.addContact(currentBusiness, contact)
@@ -468,23 +440,47 @@ export default class BusinessModule extends VuexModule {
       response = await BusinessService.updateContact(currentBusiness, contact)
     }
     if (response && response.data && (response.status === 200 || response.status === 201)) {
+      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data?.businessIdentifier)
+      state.currentBusiness = response.data
       return response.data
     }
   }
 
-  @Action({ rawError: true })
-  public async updateFolioNumber (folioNumberload: FolioNumberload) {
+  async function updateFolioNumber (folioNumberload: FolioNumberload) {
     await BusinessService.updateFolioNumber(folioNumberload)
   }
 
-  @Action({ rawError: true })
-  public resetCurrentBusiness (): void {
-    this.context.commit('setCurrentBusiness', undefined)
+  function resetCurrentBusiness (): void {
+    state.currentBusiness = undefined
     ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
   }
 
-  @Action({ rawError: true })
-  public async resetBusinessPasscode (passCodeResetLoad: PasscodeResetLoad) {
+  async function resetBusinessPasscode (passCodeResetLoad: PasscodeResetLoad) {
     await BusinessService.resetBusinessPasscode(passCodeResetLoad)
   }
-}
+
+  return {
+    state,
+    currentOrganization,
+    syncBusinesses,
+    loadBusiness,
+    addBusiness,
+    updateBusinessName,
+    addNameRequest,
+    createNamedBusiness,
+    searchBusiness,
+    searchBusinessIndex,
+    createBNRequest,
+    getBNRequests,
+    downloadBusinessSummary,
+    resubmitBNRequest,
+    getRequestTracker,
+    isAffiliated,
+    createNumberedBusiness,
+    removeBusiness,
+    saveContact,
+    updateFolioNumber,
+    resetCurrentBusiness,
+    resetBusinessPasscode
+  }
+})

@@ -1,6 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
@@ -25,22 +24,10 @@ describe('AccountOverview.vue', () => {
 
     const vuetify = new Vuetify({})
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {}
-      },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
-    }
-
+    // Remove with Vue 3.
     const store = new Vuex.Store({
       state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
+      strict: false
     })
 
     wrapper = mount(AccountOverview, {

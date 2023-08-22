@@ -114,23 +114,23 @@
 <script lang="ts">
 import { AddUserBody, AddUsersToOrgBody, Member, MembershipType, Organization, RoleInfo } from '@/models/Organization'
 import { Component, Emit, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import OrgModule from '@/store/modules/org'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
     PasswordRequirementAlert
   },
   computed: {
-    ...mapState('org', ['currentOrganization', 'currentMembership']),
-    ...mapState('user', ['roleInfos'])
+    ...mapState(useOrgStore, ['currentOrganization', 'currentMembership']),
+    ...mapState(useUserStore, ['roleInfos'])
   },
   methods: {
     // ...mapMutations('org', ['resetInvitations']),
-    ...mapActions('org', ['createUsers'])
+    ...mapActions(useOrgStore, ['createUsers'])
   }
 })
 export default class AddUsersForm extends Vue {

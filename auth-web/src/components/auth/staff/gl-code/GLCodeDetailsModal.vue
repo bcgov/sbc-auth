@@ -276,14 +276,13 @@
 <script lang="ts">
 import { Component, Emit, Vue } from 'vue-property-decorator'
 import { FilingType, GLCode } from '@/models/Staff'
-import StaffModule from '@/store/modules/staff'
-import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
 import moment from 'moment'
+import { useStaffStore } from '@/store/staff'
 
 @Component({
   methods: {
-    ...mapActions('staff', [
+    ...mapActions(useStaffStore, [
       'getGLCodeFiling',
       'updateGLCodeFiling',
       'getGLCode'
@@ -291,16 +290,15 @@ import moment from 'moment'
   }
 })
 export default class GLCodeDetailsModal extends Vue {
-  private staffStore = getModule(StaffModule, this.$store)
-  private readonly getGLCodeFiling!: (distributionCodeId: number) => FilingType[]
-  private readonly updateGLCodeFiling!: (glcodeFilingData: GLCode) => any
-  private readonly getGLCode!: (distributionCodeId: number) => GLCode
-  private isOpen = false
-  private glcodeDetails: GLCode = {} as GLCode
-  private filingTypes: FilingType[] = []
-  private tab = null
-  private startDatePicker: boolean = false
-  private endDatePicker: boolean = false
+  readonly getGLCodeFiling!: (distributionCodeId: number) => FilingType[]
+  readonly updateGLCodeFiling!: (glcodeFilingData: GLCode) => any
+  readonly getGLCode!: (distributionCodeId: number) => GLCode
+  isOpen = false
+  glcodeDetails: GLCode = {} as GLCode
+  filingTypes: FilingType[] = []
+  tab = null
+  startDatePicker: boolean = false
+  endDatePicker: boolean = false
 
   public async open (selectedData: GLCode) {
     if (selectedData?.distributionCodeId) {
@@ -316,7 +314,7 @@ export default class GLCodeDetailsModal extends Vue {
     }
   }
 
-  private readonly filingTypeHeaders = [
+  readonly filingTypeHeaders = [
     {
       text: 'Corporation Type',
       align: 'left',
@@ -331,21 +329,21 @@ export default class GLCodeDetailsModal extends Vue {
     }
   ]
 
-  public close () {
+  close () {
     this.glcodeDetails = {} as GLCode
     this.filingTypes = []
     this.isOpen = false
   }
 
-  private get startDateFormatted () {
+  get startDateFormatted () {
     return this.glcodeDetails?.startDate ? moment(this.glcodeDetails.startDate).format('MM-DD-YYYY') : ''
   }
 
-  private get endDateFormatted () {
+  get endDateFormatted () {
     return this.glcodeDetails?.endDate ? moment(this.glcodeDetails.endDate).format('MM-DD-YYYY') : ''
   }
 
-  private async save () {
+  async save () {
     // removing null key-values to aviod error from backend
     for (const key in this.glcodeDetails) {
       if (this.glcodeDetails[key] === null) {

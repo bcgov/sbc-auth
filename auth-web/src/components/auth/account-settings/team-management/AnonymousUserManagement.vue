@@ -291,7 +291,7 @@ import {
   Member
 } from '@/models/Organization'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AddUsersForm from '@/components/auth/account-settings/team-management/AddUsersForm.vue'
 import AddUsersSuccess from '@/components/auth/account-settings/team-management/AddUsersSuccess.vue'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
@@ -302,6 +302,7 @@ import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 import { User } from '@/models/user'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
@@ -313,10 +314,10 @@ import { User } from '@/models/user'
     SearchFilterInput
   },
   computed: {
-    ...mapState('org', ['createdUsers', 'failedUsers'])
+    ...mapState(useOrgStore, ['createdUsers', 'failedUsers'])
   },
   methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
+    ...mapActions(useOrgStore, ['syncActiveOrgMembers'])
   }
 })
 export default class AnonymousUserManagement extends Mixins(

@@ -92,7 +92,7 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
 import { Event } from '@/models/event'
@@ -101,18 +101,19 @@ import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
+import { useStaffStore } from '@/store/staff'
 
 @Component({
   components: {
     ModalDialog
   },
   computed: {
-    ...mapState('staff', [
+    ...mapState(useStaffStore, [
       'pendingInvitationOrgs'
     ])
   },
   methods: {
-    ...mapActions('staff', [
+    ...mapActions(useStaffStore, [
       'resendPendingOrgInvitation',
       'syncPendingInvitationOrgs',
       'deleteOrg'

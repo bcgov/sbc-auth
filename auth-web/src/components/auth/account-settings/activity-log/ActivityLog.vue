@@ -46,24 +46,22 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { ActivityLog, ActivityLogFilterParams } from '@/models/activityLog'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-
-import { namespace } from 'vuex-class'
-
-const ActivityLogModule = namespace('activity')
-const OrgModule = namespace('org')
+import { useActivityStore } from '@/store/activityLog'
+import { useOrgStore } from '@/store/org'
 
 @Component({})
 export default class ActivityLogs extends Mixins(AccountChangeMixin) {
   @Prop({ default: '' }) private orgId: number
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @OrgModule.State('currentMembership') public currentMembership!: Member
-  @ActivityLogModule.State('currentOrgActivity') public currentOrgActivity!: ActivityLog
-  @ActivityLogModule.Action('getActivityLog') public getActivityLog!:(filterParams:ActivityLogFilterParams) =>Promise<ActivityLog>
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useOrgStore) public currentMembership!: Member
+  @State(useActivityStore) public currentOrgActivity!: ActivityLog
+  @Action(useActivityStore) public getActivityLog!:(filterParams:ActivityLogFilterParams) =>Promise<ActivityLog>
 
   private readonly ITEMS_PER_PAGE = 5
   private readonly PAGINATION_COUNTER_STEP = 4

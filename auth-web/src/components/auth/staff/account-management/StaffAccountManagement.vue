@@ -107,22 +107,23 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { LDFlags, Pages, Role } from '@/util/constants'
-import { mapActions, mapGetters, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { Code } from '@/models/Code'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import StaffCreateAccountModal from '@/components/auth/staff/account-management/StaffCreateAccountModal.vue'
-import StaffModule from '@/store/modules/staff'
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
-
-import { getModule } from 'vuex-module-decorators'
-import { namespace } from 'vuex-class'
+import { useCodesStore } from '@/store/codes'
+import { useStaffStore } from '@/store/staff'
+import { useTaskStore } from '@/store/task'
+import { useUserStore } from '@/store/user'
 
 enum TAB_CODE {
     Active = 'active-tab',
@@ -131,9 +132,6 @@ enum TAB_CODE {
     Invitations = 'invitations-tab',
     Suspended = 'suspended-tab'
 }
-
-const CodesModule = namespace('codes')
-const TaskModule = namespace('task')
 
 @Component({
   components: {
@@ -144,30 +142,29 @@ const TaskModule = namespace('task')
     StaffCreateAccountModal
   },
   methods: {
-    ...mapActions('staff', [
+    ...mapActions(useStaffStore, [
       'syncPendingInvitationOrgs',
       'syncSuspendedStaffOrgs'
     ])
   },
   computed: {
-    ...mapState('user', ['currentUser']),
-    ...mapGetters('staff', [
+    ...mapState(useUserStore, ['currentUser']),
+    ...mapState(useStaffStore, [
       'pendingInvitationsCount',
       'suspendedReviewCount'
     ])
   }
 })
 export default class StaffAccountManagement extends Vue {
-  private staffStore = getModule(StaffModule, this.$store)
   private tab = 0
   private readonly currentUser!: KCUserProfile
   private readonly syncRejectedStaffOrgs!: () => Organization[]
   private readonly syncPendingInvitationOrgs!: () => Organization[]
   private readonly syncSuspendedStaffOrgs!: () => Organization[]
-  @CodesModule.Action('getCodes') private getCodes!: () => Promise<Code[]>
-  @TaskModule.Action('syncTasks') private syncTasks!: () => Promise<void>
-  @TaskModule.State('pendingTasksCount') private pendingTasksCount: number
-  @TaskModule.State('rejectedTasksCount') private rejectedTasksCount: number
+  @Action(useCodesStore) readonly getCodes!: () => Promise<Code[]>
+  @Action(useTaskStore) readonly syncTasks!: () => Promise<void>
+  @State(useTaskStore) private pendingTasksCount: number
+  @State(useTaskStore) private rejectedTasksCount: number
 
   private readonly pendingInvitationsCount!: number
   private readonly suspendedReviewCount!: number

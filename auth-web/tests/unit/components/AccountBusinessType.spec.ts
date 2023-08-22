@@ -1,8 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
-import { Account } from '@/util/constants'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
-import CodesModule from '@/store/modules/codes'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -16,8 +14,6 @@ Vue.use(VueRouter)
 document.body.setAttribute('data-app', 'true')
 
 describe('AccountBusinessType.vue', () => {
-  let orgModule: any
-  let codesModule: any
   let wrapper: any
   let store: any
   const localVue = createLocalVue()
@@ -26,32 +22,6 @@ describe('AccountBusinessType.vue', () => {
   const vuetify = new Vuetify({})
 
   beforeEach(() => {
-    codesModule = {
-      namespaced: true,
-      state: {
-      },
-      actions: CodesModule.actions,
-      mutations: CodesModule.mutations,
-      getters: CodesModule.getters
-    }
-
-    orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: '',
-          orgType: Account.BASIC
-        }
-      }
-    }
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        codes: codesModule
-      }
-    })
     vi.resetModules()
     vi.clearAllMocks()
   })
@@ -63,7 +33,6 @@ describe('AccountBusinessType.vue', () => {
   it('is a Vue instance', () => {
     const $t = () => ''
     wrapper = mount(AccountBusinessType, {
-      store,
       localVue,
       vuetify,
       propsData: {

@@ -190,7 +190,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
-import { mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
@@ -200,7 +200,8 @@ import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import { User } from '@/models/user'
-
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 @Component({
   name: 'Home',
   components: {
@@ -212,11 +213,11 @@ import { User } from '@/models/user'
     TestimonialQuotes
   },
   computed: {
-    ...mapState('user', ['userProfile', 'currentUser']),
-    ...mapState('org', ['currentAccountSettings', 'currentMembership'])
+    ...mapState(useUserStore, ['userProfile', 'currentUser']),
+    ...mapState(useOrgStore, ['currentAccountSettings', 'currentMembership'])
   },
   methods: {
-    ...mapMutations('org', ['resetCurrentOrganisation'])
+    ...mapActions(useOrgStore, ['resetCurrentOrganisation'])
   }
 })
 export default class HomeView extends Vue {

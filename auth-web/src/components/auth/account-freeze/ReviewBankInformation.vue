@@ -73,22 +73,23 @@ import { AccessType } from '@/util/constants'
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
 import { CreateRequestBody, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { PaymentTypes } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
     PADInfoForm
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization'
     ])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'getOrgPayments',
       'updateOrg',
       'validatePADInfo'

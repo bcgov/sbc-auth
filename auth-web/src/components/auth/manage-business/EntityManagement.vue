@@ -436,7 +436,7 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
@@ -449,6 +449,9 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { useBusinessStore } from '@/store/business'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -459,12 +462,12 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
     PasscodeResetOptionsModal
   },
   computed: {
-    ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState(useOrgStore, ['currentOrgAddress', 'currentAccountSettings']),
+    ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions('business', ['searchBusinessIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions('org', ['syncAddress'])
+    ...mapActions(useBusinessStore, ['searchBusinessIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions(useOrgStore, ['syncAddress'])
   }
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {

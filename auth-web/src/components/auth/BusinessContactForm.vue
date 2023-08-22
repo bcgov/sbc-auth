@@ -109,24 +109,24 @@
 <script lang="ts">
 import { Business, FolioNumberload } from '@/models/business'
 import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import BusinessModule from '@/store/modules/business'
+import { mapActions, mapState } from 'pinia'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
 import { mask } from 'vue-the-mask'
+import { useBusinessStore } from '@/store/business'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   directives: {
     mask
   },
   computed: {
-    ...mapState('business', ['currentBusiness']),
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useBusinessStore, ['currentBusiness']),
+    ...mapState(useOrgStore, ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', ['saveContact', 'updateFolioNumber'])
+    ...mapActions(useBusinessStore, ['saveContact', 'updateFolioNumber'])
   }
 })
 export default class BusinessContactForm extends Vue {
@@ -193,7 +193,10 @@ export default class BusinessContactForm extends Vue {
         phoneExtension: this.extension
       }
       await this.saveContact(contact)
-      await this.updateFolioNumber({ businessIdentifier: this.currentBusiness.businessIdentifier.trim().toUpperCase(), folioNumber: this.folioNumber })
+      await this.updateFolioNumber({
+        businessIdentifier: this.currentBusiness.businessIdentifier.trim().toUpperCase(),
+        folioNumber: this.folioNumber
+      })
       this.redirectToNext()
     }
   }

@@ -70,10 +70,11 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import { LDFlags, PaymentTypes, SessionStorageKeys } from '@/util/constants'
 import { Member, Organization, PADInfoValidation } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
+import { Action } from 'pinia-class'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
@@ -85,8 +86,9 @@ import SelectProductService from '@/components/auth/create-account/SelectProduct
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { namespace } from 'vuex-class'
-
-const UserModule = namespace('user')
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
+// This will be taken out with Vue3.
 const AuthModule = namespace('auth')
 
 @Component({
@@ -103,15 +105,15 @@ const AuthModule = namespace('auth')
     PremiumChooser
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userContact'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrgPaymentType'
     ])
   },
   methods: {
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'createUserContact',
         'updateUserContact',
@@ -119,7 +121,7 @@ const AuthModule = namespace('auth')
         'createAffidavit',
         'updateUserFirstAndLastName'
       ]),
-    ...mapActions('org',
+    ...mapActions(useOrgStore,
       [
         'createOrg',
         'validatePADInfo',
@@ -145,8 +147,8 @@ export default class AccountSetupView extends Vue {
   @Prop({ default: '' }) redirectToUrl !: string
   @Prop({ default: false }) skipConfirmation !: boolean
 
-  @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
-  @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
+  @AuthModule.Getter('isAuthenticated') readonly isAuthenticated!: boolean
+  @Action(useUserStore) readonly getUserAccountSettings!: () => Promise<any>
 
   $refs: {
     errorDialog: ModalDialog
@@ -257,6 +259,7 @@ export default class AccountSetupView extends Vue {
       await this.syncMembership(organization.id)
       // remove GOVN accoutn type from session
       ConfigHelper.removeFromSession(SessionStorageKeys.GOVN_USER)
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       this.$router.push('/setup-account-success')
     } catch (err) {
@@ -296,7 +299,7 @@ export default class AccountSetupView extends Vue {
     }
   }
 
-  private closeError () {
+  closeError () {
     this.$refs.errorDialog.close()
   }
 }

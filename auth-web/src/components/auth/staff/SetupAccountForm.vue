@@ -173,28 +173,25 @@ import { AccessType, Pages } from '@/util/constants'
 import { AccountType, ProductCode, Products, ProductsRequestBody } from '@/models/Staff'
 import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import OrgModule from '@/store/modules/org'
-import StaffModule from '@/store/modules/staff'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/store/org'
+import { useStaffStore } from '@/store/staff'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapState('staff', ['products', 'accountTypes'])
+    ...mapState(useOrgStore, ['currentOrganization']),
+    ...mapState(useStaffStore, ['products', 'accountTypes'])
   },
   methods: {
-    ...mapActions('org', ['createOrgByStaff', 'addProductsToOrg', 'createInvitation']),
-    ...mapActions('staff', ['getProducts', 'getAccountTypes'])
+    ...mapActions(useOrgStore, ['createOrgByStaff', 'addProductsToOrg', 'createInvitation']),
+    ...mapActions(useStaffStore, ['getProducts', 'getAccountTypes'])
   },
   components: {
     ModalDialog
   }
 })
 export default class SetupAccountForm extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
-  private staffStore = getModule(StaffModule, this.$store)
   private accountName: string = ''
   private accountType: string = ''
   private errorMessage: string = ''

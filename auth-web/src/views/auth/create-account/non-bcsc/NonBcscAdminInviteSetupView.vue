@@ -51,13 +51,12 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import { namespace } from 'vuex-class'
-
-const UserModule = namespace('user')
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -68,7 +67,7 @@ const UserModule = namespace('user')
 export default class NonBcscAdminInviteSetupView extends Mixins(NextPageMixin) {
   @Prop({ default: undefined }) private readonly orgId: number // org id used for bceid re-upload
   @Prop() token: string
-  @UserModule.Action('createAffidavit') private createAffidavit!: () => User
+  @Action(useUserStore) private createAffidavit!: () => User
 
   currentStep: number = 1
 

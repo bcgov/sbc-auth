@@ -31,18 +31,19 @@ import {
   MembershipType,
   Organization
 } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { AccessType } from '@/util/constants'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'activeOrgMembers',
       'currentOrganization'
     ])
   },
   methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
+    ...mapActions(useOrgStore, ['syncActiveOrgMembers'])
   }
 
 })

@@ -1,8 +1,8 @@
 import { AccountStatus, AffidavitStatus, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskType } from '@/util/constants'
 import { AccountType, GLCode, ProductCode } from '@/models/Staff'
-import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { MembershipType, OrgFilterParams, Organization } from '@/models/Organization'
 import { SyncAccountPayload, Task } from '@/models/Task'
+import { computed, reactive } from '@vue/composition-api'
 
 import { Address } from '@/models/address'
 import { AffidavitInformation } from '@/models/affidavit'
@@ -15,158 +15,89 @@ import StaffService from '@/services/staff.services'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import UserService from '@/services/user.services'
-import store from '..'
+import { defineStore } from 'pinia'
 
-@Module({
-  name: 'staff',
-  namespaced: true,
-  store,
-  dynamic: true
-})
-export default class StaffModule extends VuexModule {
-  products: ProductCode[] = []
-  accountTypes: AccountType[] = []
-  activeStaffOrgs: Organization[] = []
-  pendingStaffOrgs: Organization[] = []
-  rejectedStaffOrgs: Organization[] = []
-  suspendedStaffOrgs: Organization[] = []
-  pendingInvitationOrgs: Organization[] = []
-  accountUnderReview: Organization
-  accountUnderReviewAddress: Address
-  accountUnderReviewAdmin: User
-  accountUnderReviewAdminContact: Contact
-  accountUnderReviewAffidavitInfo: AffidavitInformation
-  suspendedReviewTotal: number = 0
+export const useStaffStore = defineStore('staff', () => {
+  const state = reactive({
+    accountTypes: [] as AccountType[],
+    accountUnderReview: {} as Organization,
+    accountUnderReviewAddress: {} as Address,
+    accountUnderReviewAdmin: {} as User,
+    accountUnderReviewAdminContact: {} as Contact,
+    accountUnderReviewAffidavitInfo: {} as AffidavitInformation,
+    activeStaffOrgs: [] as Organization[],
+    pendingInvitationOrgs: [] as Organization[],
+    pendingStaffOrgs: [] as Organization[],
+    products: [] as ProductCode[],
+    rejectedStaffOrgs: [] as Organization[],
+    suspendedReviewTotal: 0,
+    suspendedStaffOrgs: [] as Organization[]
+  })
 
-  public get accountNotaryName (): string {
-    return this.accountUnderReviewAffidavitInfo?.issuer || '-'
-  }
+  const accountNotaryName = computed<string>(() => {
+    return state.accountUnderReviewAffidavitInfo?.issuer || '-'
+  })
 
-  public get accountNotaryContact (): Contact {
-    return this.accountUnderReviewAffidavitInfo?.contacts?.length > 0 && this.accountUnderReviewAffidavitInfo?.contacts[0]
-  }
+  const accountNotaryContact = computed<Contact>(() => {
+    return state.accountUnderReviewAffidavitInfo?.contacts?.length > 0 &&
+      state.accountUnderReviewAffidavitInfo?.contacts[0]
+  })
 
-  public get rejectedReviewCount (): number {
-    return this.rejectedStaffOrgs?.length || 0
-  }
+  const rejectedReviewCount = computed<number>(() => {
+    return state.rejectedStaffOrgs?.length || 0
+  })
 
-  public get pendingInvitationsCount (): number {
-    return this.pendingInvitationOrgs?.length || 0
-  }
+  const pendingInvitationsCount = computed<number>(() => {
+    return state.pendingInvitationOrgs?.length || 0
+  })
 
-  public get suspendedReviewCount (): number {
-    return this.suspendedReviewTotal || 0
-  }
+  const suspendedReviewCount = computed<number>(() => {
+    return state.suspendedReviewTotal || 0
+  })
 
-  @Mutation
-  public setProducts (products: ProductCode[]) {
-    this.products = products
-  }
-
-  @Mutation
-  public setAccountTypes (accountType: AccountType[]) {
-    this.accountTypes = accountType
-  }
-
-  @Mutation
-  public setActiveStaffOrgs (activeOrgs: Organization[]) {
-    this.activeStaffOrgs = activeOrgs
-  }
-
-  @Mutation
-  public setPendingStaffOrgs (pendingOrgs: Organization[]) {
-    this.pendingStaffOrgs = pendingOrgs
-  }
-
-  @Mutation
-  public setRejectedStaffOrgs (rejectedOrgs: Organization[]) {
-    this.rejectedStaffOrgs = rejectedOrgs
-  }
-
-  @Mutation
-  public setSuspendedStaffOrgs (suspendedOrgs: Organization[]) {
-    this.suspendedStaffOrgs = suspendedOrgs
-  }
-
-  @Mutation
-  public setPendingInvitationOrgs (pendingInvitationOrgs: Organization[]) {
-    this.pendingInvitationOrgs = pendingInvitationOrgs
-  }
-
-  @Mutation
-  public setAccountUnderReview (account: Organization) {
-    this.accountUnderReview = account
-  }
-
-  @Mutation
-  public setAccountUnderReviewAddress (address: Address) {
-    this.accountUnderReviewAddress = address
-  }
-
-  @Mutation
-  public setAccountUnderReviewAdmin (admin: User) {
-    this.accountUnderReviewAdmin = admin
-  }
-
-  @Mutation
-  public setAccountUnderReviewAffidavitInfo (affidavitInfo: AffidavitInformation) {
-    this.accountUnderReviewAffidavitInfo = affidavitInfo
-  }
-
-  @Mutation
-  public setAccountUnderReviewAdminContact (contact: Contact) {
-    this.accountUnderReviewAdminContact = contact
-  }
-
-  @Mutation
-  public setSuspendedReviewCount (count: number) {
-    this.suspendedReviewTotal = count
-  }
-
-  @Action({ commit: 'setProducts', rawError: true })
-  public async getProducts (): Promise<ProductCode[]> {
+  async function getProducts (): Promise<ProductCode[]> {
     const response = await StaffService.getProducts()
     if (response && response.data && response.status === 200) {
+      state.products = response.data
       return response.data
     }
   }
 
-  @Action({ commit: 'setAccountTypes', rawError: true })
-  public async getAccountTypes (): Promise<AccountType[]> {
+  async function getAccountTypes (): Promise<AccountType[]> {
     const response = await StaffService.getAccountTypes()
     if (response && response.data && response.status === 200) {
+      state.accountTypes = response.data
       return response.data
     }
   }
 
-  @Action({ rawError: true })
-  public async syncAccountUnderReview (syncAccountPayload: SyncAccountPayload): Promise<void> {
+  async function syncAccountUnderReview (syncAccountPayload: SyncAccountPayload): Promise<void> {
     const accountResponse = await OrgService.getOrganization(syncAccountPayload.organizationIdentifier)
     if (accountResponse?.data && accountResponse?.status === 200) {
-      this.context.commit('setAccountUnderReview', accountResponse.data)
+      state.accountUnderReview = accountResponse.data
 
       const addressResponse = await OrgService.getContactForOrg(syncAccountPayload.organizationIdentifier)
       if (addressResponse) {
-        this.context.commit('setAccountUnderReviewAddress', addressResponse)
+        state.accountUnderReviewAddress = addressResponse
       }
       // If BCeIdAdmin request flow, get the requesting admin details rather than current account admin
       if (syncAccountPayload.isBCeIDAdminReview) {
         const user = syncAccountPayload.relatedBCeIDUser
-        this.context.commit('setAccountUnderReviewAdmin', user)
+        state.accountUnderReviewAdmin = user
         if (user.contacts && user.contacts.length > 0) {
-          this.context.commit('setAccountUnderReviewAdminContact', user.contacts[0])
+          state.accountUnderReviewAdminContact = user.contacts[0]
         }
       } else {
         const accountMembersResponse = await OrgService.getOrgMembers(syncAccountPayload.organizationIdentifier, 'ACTIVE')
         if (accountMembersResponse?.data && accountMembersResponse?.status === 200) {
           const admin = accountMembersResponse.data.members.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
           if (admin) {
-            this.context.commit('setAccountUnderReviewAdmin', admin)
+            state.accountUnderReviewAdmin = admin
             const adminContactResponse = await UserService.getUserProfile(admin.username)
             if (adminContactResponse?.data && adminContactResponse?.status === 200) {
               const contact = adminContactResponse?.data?.contacts?.length > 0 && adminContactResponse?.data?.contacts[0]
               if (contact) {
-                this.context.commit('setAccountUnderReviewAdminContact', contact)
+                state.accountUnderReviewAdminContact = contact
               }
             }
           }
@@ -175,8 +106,7 @@ export default class StaffModule extends VuexModule {
     }
   }
 
-  @Action({ rawError: true })
-  public async syncTaskUnderReview (task:Task): Promise<void> {
+  async function syncTaskUnderReview (task:Task): Promise<void> {
     const taskRelationshipType = task.relationshipType
     const taskRelationshipId = task.relationshipId
     const taskAccountId = task.accountId
@@ -188,14 +118,13 @@ export default class StaffModule extends VuexModule {
       isBCeIDAdminReview: task.type === TaskType.BCEID_ADMIN_REVIEW,
       relatedBCeIDUser: task.user
     }
-    await this.context.dispatch('syncAccountUnderReview', syncAccountPayload)
+    await syncAccountUnderReview(syncAccountPayload)
     if (taskAction === TaskAction.AFFIDAVIT_REVIEW) {
-      await this.context.dispatch('syncAccountAffidavit', task)
+      await syncAccountAffidavit(task)
     }
   }
 
-  @Action({ rawError: true })
-  public async syncAccountAffidavit (task: Task): Promise<void> {
+  async function syncAccountAffidavit (task: Task): Promise<void> {
     const taskUserGuid = task?.user?.keycloakGuid
     let status = task.relationshipStatus
 
@@ -213,21 +142,19 @@ export default class StaffModule extends VuexModule {
 
     const affidavitResponse = await UserService.getAffidavitInfo(taskUserGuid, status)
     if (affidavitResponse?.data && affidavitResponse?.status === 200) {
-      this.context.commit('setAccountUnderReviewAffidavitInfo', affidavitResponse.data)
+      state.accountUnderReviewAffidavitInfo = affidavitResponse.data
     }
   }
 
-  @Action({ rawError: true })
-  public async approveAccountUnderReview (task:Task) {
+  async function approveAccountUnderReview (task:Task) {
     if (task) {
       const response = await TaskService.approvePendingTask(task)
       const newTask = response.data || task
-      await this.context.dispatch('syncTaskUnderReview', newTask)
+      await syncTaskUnderReview(newTask)
     }
   }
 
-  @Action({ rawError: true })
-  public async rejectorOnHoldAccountUnderReview ({ task, isRejecting, remarks }) {
+  async function rejectorOnHoldAccountUnderReview ({ task, isRejecting, remarks }) {
     if (task) {
       const taskId = task.id
       let newTask = null
@@ -238,36 +165,37 @@ export default class StaffModule extends VuexModule {
         const response = await TaskService.onHoldPendingTask(taskId, remarks)
         newTask = response.data || task
       }
-
-      await this.context.dispatch('syncTaskUnderReview', newTask)
+      await syncTaskUnderReview(newTask)
     }
   }
 
-  @Action({ commit: 'setActiveStaffOrgs', rawError: true })
-  public async syncActiveStaffOrgs () {
+  async function syncActiveStaffOrgs () {
     const response = await StaffService.getStaffOrgs(AccountStatus.ACTIVE)
+    state.activeStaffOrgs = response?.data?.orgs || []
     return response?.data?.orgs || []
   }
 
-  @Action({ commit: 'setPendingStaffOrgs', rawError: true })
-  public async syncPendingStaffOrgs () {
-    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_STAFF_REVIEW)
-    return response?.data?.orgs || []
+  async function syncPendingInvitationOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_ACTIVATION)
+    const result = response?.data?.orgs || []
+    state.pendingInvitationOrgs = result
+    return result
   }
 
-  @Action({ commit: 'setRejectedStaffOrgs', rawError: true })
-  public async syncRejectedStaffOrgs () {
+  async function syncRejectedStaffOrgs () {
     const response = await StaffService.getStaffOrgs(AccountStatus.REJECTED)
+    state.rejectedStaffOrgs = response?.data?.orgs || []
     return response?.data?.orgs || []
   }
-  @Action({ commit: 'setSuspendedStaffOrgs', rawError: true })
-  public async syncSuspendedStaffOrgs () {
+
+  async function syncSuspendedStaffOrgs () {
     const response:any = await StaffService.getStaffOrgs(AccountStatus.NSF_SUSPENDED)
-    this.context.commit('setSuspendedReviewCount', response?.data?.total)
+    state.suspendedReviewTotal = response?.data?.total
+    state.pendingInvitationOrgs = response?.data?.orgs || []
     return response?.data?.orgs || []
   }
-  @Action({ rawError: true })
-  public async searchOrgs (filterParams: OrgFilterParams) {
+
+  async function searchOrgs (filterParams: OrgFilterParams) {
     const response = await StaffService.searchOrgs(filterParams)
     if (response?.data) {
       return {
@@ -280,19 +208,17 @@ export default class StaffModule extends VuexModule {
     return {}
   }
 
-  @Action({ commit: 'setPendingInvitationOrgs', rawError: true })
-  public async syncPendingInvitationOrgs () {
-    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_ACTIVATION)
+  async function syncPendingStaffOrgs () {
+    const response = await StaffService.getStaffOrgs(AccountStatus.PENDING_STAFF_REVIEW)
+    state.pendingStaffOrgs = response?.data?.orgs || []
     return response?.data?.orgs || []
   }
 
-  @Action({ rawError: true })
-  public async resendPendingOrgInvitation (invitation: Invitation) {
+  async function resendPendingOrgInvitation (invitation: Invitation) {
     return InvitationService.resendInvitation(invitation)
   }
 
-  @Action({ rawError: true })
-  public async deleteOrg (org: Organization) {
+  async function deleteOrg (org: Organization) {
     const invResponse = await InvitationService.deleteInvitation(org.invitations[0].id)
     if (!invResponse || invResponse.status !== 200 || !invResponse.data) {
       throw Error('Unable to delete invitation')
@@ -303,26 +229,22 @@ export default class StaffModule extends VuexModule {
     }
   }
 
-  @Action({ rawError: true })
-  public async getGLCodeList () {
+  async function getGLCodeList () {
     const response = await PaymentService.getGLCodeList()
     return response?.data?.items || []
   }
 
-  @Action({ rawError: true })
-  public async getGLCodeFiling (distributionCodeId: number) {
+  async function getGLCodeFiling (distributionCodeId: number) {
     const response = await PaymentService.getGLCodeFiling(distributionCodeId)
     return response?.data?.items || []
   }
 
-  @Action({ rawError: true })
-  public async getGLCode (distributionCodeId: number) {
+  async function getGLCode (distributionCodeId: number) {
     const response = await PaymentService.getGLCode(distributionCodeId)
     return response?.data || {}
   }
 
-  @Action({ rawError: true })
-  public async updateGLCodeFiling (glcodeFilingData: GLCode) {
+  async function updateGLCodeFiling (glcodeFilingData: GLCode) {
     // Update service fee information first, and then the main GL code.
     let serviceFeeGlCode : number = null
     if (glcodeFilingData.serviceFee) {
@@ -333,4 +255,32 @@ export default class StaffModule extends VuexModule {
     const response = await PaymentService.updateGLCodeFiling(glcodeFilingData)
     return response?.data || {}
   }
-}
+
+  return {
+    accountNotaryContact,
+    accountNotaryName,
+    approveAccountUnderReview,
+    deleteOrg,
+    getAccountTypes,
+    getGLCode,
+    getGLCodeList,
+    getGLCodeFiling,
+    getProducts,
+    pendingInvitationsCount,
+    rejectedReviewCount,
+    rejectorOnHoldAccountUnderReview,
+    resendPendingOrgInvitation,
+    searchOrgs,
+    state,
+    suspendedReviewCount,
+    syncTaskUnderReview,
+    syncAccountAffidavit,
+    syncAccountUnderReview,
+    syncActiveStaffOrgs,
+    syncPendingInvitationOrgs,
+    syncRejectedStaffOrgs,
+    syncSuspendedStaffOrgs,
+    syncPendingStaffOrgs,
+    updateGLCodeFiling
+  }
+})

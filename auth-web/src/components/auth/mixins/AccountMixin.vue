@@ -6,14 +6,16 @@ import Component from 'vue-class-component'
 import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 @Component({
   name: 'AccountMixin',
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'currentUser'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentMembership'
     ])

@@ -102,12 +102,13 @@
 <script lang="ts">
 import { Component, Emit } from 'vue-property-decorator'
 import { MembershipType, RoleInfo } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
-import OrgModule from '@/store/modules/org'
 import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
 import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 interface InvitationInfo {
   emailAddress: string
@@ -117,12 +118,11 @@ interface InvitationInfo {
 
 @Component({
   computed: {
-    ...mapState('org', ['pendingOrgInvitations']),
-    ...mapState('user', ['roleInfos'])
+    ...mapState(useOrgStore, ['pendingOrgInvitations']),
+    ...mapState(useUserStore, ['roleInfos'])
   },
   methods: {
-    ...mapMutations('org', ['resetInvitations']),
-    ...mapActions('org', ['createInvitation', 'resendInvitation'])
+    ...mapActions(useOrgStore, ['createInvitation', 'resendInvitation', 'resetInvitations'])
   }
 })
 export default class InviteUsersForm extends TeamManagementMixin {

@@ -1,3 +1,4 @@
+import { PiniaVuePlugin, createPinia } from 'pinia'
 import Vuex, { StoreOptions } from 'vuex'
 
 import { RootState } from './types'
@@ -26,4 +27,20 @@ const storeOptions: StoreOptions<RootState> = {
   }
 }
 
-export default new Vuex.Store<RootState>(storeOptions)
+/**
+ * Configures and returns Vuex Store. - We still need this for sbc-common-components.
+ */
+export function getVuexStore () {
+  Vue.use(Vuex)
+
+  return new Vuex.Store<RootState>(storeOptions)
+}
+
+/**
+ * Configures and returns Pinia Store.
+ */
+export function getPiniaStore () {
+  Vue.use(PiniaVuePlugin)
+
+  return createPinia()
+}
