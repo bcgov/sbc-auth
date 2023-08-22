@@ -247,13 +247,13 @@ export function getRoutes (): RouteConfig[] {
       component: EntityManagement,
       props: route => {
         try {
-          const base64Token = route.params.base64Token
+          const base64Token = route.params.base64Token.split('.')[0]
           const decodedToken = Base64.decode(base64Token)
           const orgId = JSON.parse(decodedToken).fromOrgId
 
           return {
             orgId: orgId,
-            base64Token: route.params.base64Token,
+            base64Token: base64Token,
             base64OrgName: route.params.base64OrgName
           }
         } catch (error) {
