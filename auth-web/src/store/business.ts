@@ -40,6 +40,25 @@ export const useBusinessStore = defineStore('business', () => {
     return useOrgStore().state.currentOrganization
   })
 
+  function buildBusinessObject (resp: AffiliationResponse): Business {
+    return {
+      businessIdentifier: resp.identifier,
+      ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
+      ...(resp.legalName && { name: resp.legalName }),
+      ...(resp.contacts && { contacts: resp.contacts }),
+      ...((resp.draftType || resp.legalType) && { corpType: { code: resp.draftType || resp.legalType } }),
+      ...(resp.legalType && { corpSubType: { code: resp.legalType } }),
+      ...(resp.folioNumber && { folioNumber: resp.folioNumber }),
+      ...(resp.lastModified && { lastModified: resp.lastModified }),
+      ...(resp.modified && { modified: resp.modified }),
+      ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
+      ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
+      ...(resp.adminFreeze !== undefined ? { adminFreeze: resp.adminFreeze } : { adminFreeze: false }),
+      ...(resp.goodStanding !== undefined ? { goodStanding: resp.goodStanding } : { goodStanding: true }),
+      ...(resp.state && { status: resp.state })
+    }
+  }
+
   /** This is the function that fetches and updates data for all NRs. */
   async function syncBusinesses (): Promise<void> {
     const enableBcCccUlc = LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
@@ -83,10 +102,8 @@ export const useBusinessStore = defineStore('business', () => {
       return nr.target
     }
 
-    // initialize store
     state.businesses = []
 
-    // get current organization
     if (!currentOrganization.value) {
       console.log('Invalid organization') // eslint-disable-line no-console
       return
@@ -108,22 +125,7 @@ export const useBusinessStore = defineStore('business', () => {
     const affiliatedEntities: Business[] = []
 
     entityResponse.forEach((resp) => {
-      const entity: Business = {
-        businessIdentifier: resp.identifier,
-        ...(resp.businessNumber && { businessNumber: resp.businessNumber }),
-        ...(resp.legalName && { name: resp.legalName }),
-        ...(resp.contacts && { contacts: resp.contacts }),
-        ...((resp.draftType || resp.legalType) && { corpType: { code: resp.draftType || resp.legalType } }),
-        ...(resp.legalType && { corpSubType: { code: resp.legalType } }),
-        ...(resp.folioNumber && { folioNumber: resp.folioNumber }),
-        ...(resp.lastModified && { lastModified: resp.lastModified }),
-        ...(resp.modified && { modified: resp.modified }),
-        ...(resp.modifiedBy && { modifiedBy: resp.modifiedBy }),
-        ...(resp.nrNumber && { nrNumber: resp.nrNumber }),
-        ...(resp.adminFreeze !== undefined ? { adminFreeze: resp.adminFreeze } : { adminFreeze: false }),
-        ...(resp.goodStanding !== undefined ? { goodStanding: resp.goodStanding } : { goodStanding: true }),
-        ...(resp.state && { status: resp.state })
-      }
+      const entity: Business = buildBusinessObject(resp)
       if (resp.nameRequest) {
         const nr = resp.nameRequest
         if (!entity.nrNumber && nr.nrNum) {
@@ -406,7 +408,8 @@ export const useBusinessStore = defineStore('business', () => {
       window.location.href = decodeURIComponent(redirectURL)
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log(error) // ToDo: Handle error: Redirect back to Homeview? Feedback required here
+      console.log(error)
+      // ToDo: Handle error: Redirect back to Homeview? Feedback required here
     }
   }
 

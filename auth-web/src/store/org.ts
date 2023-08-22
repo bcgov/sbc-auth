@@ -925,7 +925,7 @@ export const useOrgStore = defineStore('org', () => {
     if (response?.data) {
       // filter by account type and default first returned value as the current organization
       const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
-      if (orgs && orgs.length) {
+      if (orgs?.length) {
         const orgId = +orgs[0].id
         // sync org and add to session
         await syncOrganization(orgId)
