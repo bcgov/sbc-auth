@@ -92,7 +92,6 @@ import NotaryContactForm from '@/components/auth/create-account/non-bcsc/NotaryC
 import NotaryInformationForm from '@/components/auth/create-account/non-bcsc/NotaryInformationForm.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { getModule } from 'vuex-module-decorators'
 import { useOrgStore } from '@/store/org'
 import { useUserStore } from '@/store/user'
 
@@ -114,7 +113,7 @@ import { useUserStore } from '@/store/user'
     ])
   },
   methods: {
-    ...mapActions(useOrgStore, ['setCurrentOrganization', 'setOrgName']), // TODO: FIX?
+    ...mapActions(useOrgStore, ['setCurrentOrganization']),
     ...mapActions(useUserStore, [
       'uploadPendingDocsToStorage', 'setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc'
     ])

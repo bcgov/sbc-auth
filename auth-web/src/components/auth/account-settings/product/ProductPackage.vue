@@ -117,15 +117,14 @@
 <script lang="ts">
 import { AccessType, Account, ProductStatus, Role } from '@/util/constants'
 import { AccountFee, OrgProduct, OrgProductCode, OrgProductFeeCode, OrgProductsRequestBody, Organization } from '@/models/Organization'
+import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Product from '@/components/auth/common/Product.vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const userModule = namespace('user')
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -134,19 +133,19 @@ const userModule = namespace('user')
   }
 })
 export default class ProductPackage extends Mixins(AccountChangeMixin) {
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
-  @OrgModule.State('productList') public productList!: OrgProduct[]
-  @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useUserStore) public currentUser!: KCUserProfile
+  @State(useOrgStore) public productList!: OrgProduct[]
+  @State(useOrgStore) public currentSelectedProducts!: []
 
-  @OrgModule.Mutation('resetCurrentSelectedProducts') public resetCurrentSelectedProducts!:() => void
+  @Action(useOrgStore) public resetCurrentSelectedProducts!:() => void
 
-  @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
-  @OrgModule.Action('addOrgProducts') public addOrgProducts!:(product:OrgProductsRequestBody) =>Promise<OrgProduct>
-  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
-  @OrgModule.Action('syncCurrentAccountFees') public syncCurrentAccountFees!:(accoundId:number) =>Promise<AccountFee[]>
-  @OrgModule.Action('fetchOrgProductFeeCodes') public fetchOrgProductFeeCodes!:() =>Promise<OrgProductFeeCode>
-  @OrgModule.Action('updateAccountFees') public updateAccountFees!:(accountFee) =>Promise<any>
+  @Action(useOrgStore) public getOrgProducts!:(orgId: number) => Promise<OrgProduct>
+  @Action(useOrgStore) public addOrgProducts!:(product:OrgProductsRequestBody) => Promise<OrgProduct>
+  @Action(useOrgStore) public addToCurrentSelectedProducts!:(productCode:any) => Promise<void>
+  @Action(useOrgStore) public syncCurrentAccountFees!:(accoundId:number) => Promise<AccountFee[]>
+  @Action(useOrgStore) public fetchOrgProductFeeCodes!:() => Promise<OrgProductFeeCode>
+  @Action(useOrgStore) public updateAccountFees!:(accountFee) => Promise<any>
 
   public isBtnSaved = false
   public disableSaveBtn = false

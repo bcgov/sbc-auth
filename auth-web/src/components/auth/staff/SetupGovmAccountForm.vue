@@ -154,11 +154,10 @@
 import { AccessType, Account, Pages } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
+import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
@@ -166,11 +165,11 @@ const OrgModule = namespace('org')
   }
 })
 export default class SetupAccountForm extends Vue {
-  @OrgModule.Action('createOrgByStaff') private createOrgByStaff!: (
+  @Action(useOrgStore) private createOrgByStaff!: (
     requestBody: CreateRequestBody
   ) => Promise<Organization>
 
-  @OrgModule.Action('createInvitation') private createInvitation!: (Invitation) => Promise<void>
+  @Action(useOrgStore) private createInvitation!: (Invitation) => Promise<void>
 
   public ministryName: string = ''
   public branchName: string = ''
@@ -192,11 +191,11 @@ export default class SetupAccountForm extends Vue {
     v => !!v || 'A ministry name is required'
   ]
 
-  private emailMatchError () {
+  emailMatchError () {
     return (this.email === this.emailConfirm) ? null : 'Email Address does not match'
   }
 
-  private isFormValid (): boolean {
+  isFormValid (): boolean {
     return !!this.ministryName &&
       !this.emailMatchError() &&
       this.$refs.setupGovmAccountForm.validate()

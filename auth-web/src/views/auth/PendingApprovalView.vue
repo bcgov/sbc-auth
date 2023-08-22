@@ -33,6 +33,7 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
 import ConfigHelper from '@/util/config-helper'
@@ -41,22 +42,18 @@ import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import Vue from 'vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const UserModule = namespace('user')
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: { InterimLanding, GovmAccountCreationSuccessView }
 })
 
 export default class PendingApprovalView extends Vue {
-  @OrgModule.State('currentMembership') private currentMembership!: Member
-    @OrgModule.State('currentOrganization')
-  public currentOrganization!: Organization
-  @UserModule.State('currentUser') private currentUser!: KCUserProfile
-
-  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
+  @State(useOrgStore) private currentMembership!: Member
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useUserStore) private currentUser!: KCUserProfile
+  @Action(useOrgStore) private syncMembership!: (orgId: number) => Promise<Member>
 
   private readonly descriptionParams: any = { 'days': ConfigHelper.getAccountApprovalSlaInDays() }
 

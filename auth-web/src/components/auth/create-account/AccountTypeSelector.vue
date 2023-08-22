@@ -170,17 +170,16 @@
 </template>
 
 <script lang="ts">
-
 import { AccessType, Account, LoginSource, SessionStorageKeys } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { namespace } from 'vuex-class'
-const OrgModule = namespace('org')
-const UserModule = namespace('user')
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
   @Component({
     components: {
@@ -192,29 +191,26 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   private selectedAccountType = ''
   @Prop() cancelUrl: string
 
-  @OrgModule.State('isCurrentSelectedProductsPremiumOnly') private isCurrentProductsPremiumOnly!: boolean
+  @State(useOrgStore) private isCurrentSelectedProductsPremiumOnly!: boolean
+  @State(useOrgStore) private currentOrganization!: Organization
+  @State(useOrgStore) private currentOrganizationType!: string
+  @State(useOrgStore) private resetAccountTypeOnSetupAccount!: string
 
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
+  @State(useUserStore) currentUser!: KCUserProfile
 
-  @OrgModule.State('currentOrganizationType') private currentOrganizationType!: string
-  @OrgModule.State('resetAccountTypeOnSetupAccount') private resetAccountTypeOnSetupAccount!: string
-
-  @UserModule.State('currentUser') private currentUser!: KCUserProfile
-
-  @OrgModule.Mutation('setSelectedAccountType') private setSelectedAccountType!: (selectedAccountType: Account) => void
-  @OrgModule.Mutation('setCurrentOrganization') private setCurrentOrganization!: (organization: Organization) => void
-  @OrgModule.Mutation('setCurrentOrganizationType') private setCurrentOrganizationType!: (orgType: string) => void
-  @OrgModule.Mutation('resetCurrentOrganisation') private resetCurrentOrganisation!: () => void
-  @OrgModule.Mutation('setAccessType') private setAccessType!: (accessType: string) => void
-  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount')
-  private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
+  @Action(useOrgStore) setSelectedAccountType!: (selectedAccountType: Account) => void
+  @Action(useOrgStore) setCurrentOrganization!: (organization: Organization) => void
+  @Action(useOrgStore) setCurrentOrganizationType!: (orgType: string) => void
+  @Action(useOrgStore) resetCurrentOrganisation!: () => void
+  @Action(useOrgStore) setAccessType!: (accessType: string) => void
+  @Action(useOrgStore) setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   private async mounted () {
     // first time to the page , start afresh..this is Create New account flow
     this.setCurrentOrganization({ name: '' })
 
     // first time stepper hits step 2 after selecting a premium product/service in step 1
-    if (!this.currentOrganizationType && this.isCurrentProductsPremiumOnly) {
+    if (!this.currentOrganizationType && this.isCurrentSelectedProductsPremiumOnly) {
       this.selectAccountType(this.ACCOUNT_TYPE.PREMIUM)
     } else {
       // come back to step 2 or after selecting basic products/services in step 1
@@ -285,7 +281,10 @@ export default class AccountTypeSelector extends Mixins(Steppable) {
   }
 
   &.active {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                0 3px 1px -2px rgba(0,0,0,.2),
+                0 2px 2px 0 rgba(0,0,0,.14),
+                0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
 }
 

@@ -100,13 +100,12 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Emit } from 'vue-property-decorator'
 import { MembershipType, RoleInfo } from '@/models/Organization'
-import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
-import { getModule } from 'vuex-module-decorators'
 import { useOrgStore } from '@/store/org'
 import { useUserStore } from '@/store/user'
 
@@ -116,23 +115,14 @@ interface InvitationInfo {
   selectedRole?: RoleInfo
 }
 
-@Component({
-  computed: {
-    ...mapState(useOrgStore, ['pendingOrgInvitations']),
-    ...mapState(useUserStore, ['roleInfos'])
-  },
-  methods: {
-    ...mapActions(useOrgStore, ['createInvitation', 'resendInvitation', 'resetInvitations'])
-  }
-})
+@Component({})
 export default class InviteUsersForm extends TeamManagementMixin {
-  private orgStore = getModule(OrgModule, this.$store)
   private loading = false
-  private readonly pendingOrgInvitations!: Invitation[]
-  private readonly resetInvitations!: () => void
-  private readonly createInvitation!: (Invitation) => Promise<void>
-  private readonly resendInvitation!: (Invitation) => Promise<void>
-  private roleInfos!: RoleInfo[]
+  @State(useOrgStore) private readonly pendingOrgInvitations!: Invitation[]
+  @Action(useOrgStore) private readonly resetInvitations!: () => void
+  @Action(useOrgStore) private readonly createInvitation!: (Invitation) => Promise<void>
+  @Action(useOrgStore) private readonly resendInvitation!: (Invitation) => Promise<void>
+  @State(useUserStore) private roleInfos!: RoleInfo[]
 
   $refs: {
     form: HTMLFormElement

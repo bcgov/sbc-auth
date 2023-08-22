@@ -132,12 +132,11 @@
 <script lang="ts">
 import { Component, Prop, Watch } from 'vue-property-decorator'
 import { RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
+import { Action } from 'pinia-class'
 import { RequestTrackerType } from '@/util/constants'
 import ResubmitRequestDialog from '@/components/auth/staff/admin/ResubmitRequestDialog.vue'
 import Vue from 'vue'
-import { namespace } from 'vuex-class'
-
-const BusinessModule = namespace('business')
+import { useBusinessStore } from '@/store/business'
 
 @Component({
   components: {
@@ -145,14 +144,9 @@ const BusinessModule = namespace('business')
   }
 })
 export default class BNRequestManager extends Vue {
-  @BusinessModule.Action('getBNRequests')
-  readonly getBNRequests!: (businessIdentifier: string) => Promise<RequestTracker[]>
-
-  @BusinessModule.Action('getRequestTracker')
-  private readonly getRequestTracker!: (requestTrackerId: number) => Promise<RequestTracker>
-
-  @BusinessModule.Action('resubmitBNRequest')
-  private readonly resubmitBNRequest!: (resubmitBNRequest: ResubmitBNRequest) => Promise<boolean>
+  @Action(useBusinessStore) readonly getBNRequests!: (businessIdentifier: string) => Promise<RequestTracker[]>
+  @Action(useBusinessStore) readonly getRequestTracker!: (requestTrackerId: number) => Promise<RequestTracker>
+  @Action(useBusinessStore) readonly resubmitBNRequest!: (resubmitBNRequest: ResubmitBNRequest) => Promise<boolean>
 
   @Prop({ default: undefined }) businessIdentifier: string
 

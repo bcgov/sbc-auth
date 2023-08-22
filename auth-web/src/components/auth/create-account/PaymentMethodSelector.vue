@@ -68,6 +68,7 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Mixins, Prop } from 'vue-property-decorator'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -75,9 +76,7 @@ import { Organization } from '@/models/Organization'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
 import { PaymentTypes } from '@/util/constants'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {
@@ -89,33 +88,32 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   // need toi show TOS as checked in stepper BCEID re-upload time.
   // show submit button on final stepper to update info, even this page is read only
   @Prop({ default: false }) readOnly: boolean
-  @OrgModule.Action('validateBcolAccount')
-  private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
+  @Action(useOrgStore) readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
-  @OrgModule.State('currentOrganization') private readonly currentOrganization!: Organization
-  @OrgModule.State('currentOrganizationType') private readonly currentOrganizationType!: string
-  @OrgModule.State('currentOrgPaymentType') private readonly currentOrgPaymentType!: string
+  @State(useOrgStore) readonly currentOrganization!: Organization
+  @State(useOrgStore) readonly currentOrganizationType!: string
+  @State(useOrgStore) readonly currentOrgPaymentType!: string
 
-  @OrgModule.Mutation('setCurrentOrganizationPaymentType') private setCurrentOrganizationPaymentType!: (paymentType: string) => void
-  @OrgModule.Mutation('setCurrentOrganizationBcolProfile') private setCurrentOrganizationBcolProfile!: (bcolProfile: BcolProfile) => void
+  @Action(useOrgStore) setCurrentOrganizationPaymentType!: (paymentType: string) => void
+  @Action(useOrgStore) setCurrentOrganizationBcolProfile!: (bcolProfile: BcolProfile) => void
 
-  private selectedPaymentMethod: string = ''
-  private isPADValid: boolean = false
-  private errorMessage: string = ''
+  selectedPaymentMethod: string = ''
+  isPADValid: boolean = false
+  errorMessage: string = ''
 
   private mounted () {
     this.selectedPaymentMethod = this.currentOrgPaymentType
   }
 
-  private goBack () {
+  goBack () {
     this.stepBack()
   }
 
-  private get pageSubTitle () {
+  get pageSubTitle () {
     return 'Select the payment method for this account.'
   }
 
-  private get isEnableCreateBtn () {
+  get isEnableCreateBtn () {
     if (this.selectedPaymentMethod === PaymentTypes.PAD) {
       return this.isPADValid
     } else if (this.selectedPaymentMethod === PaymentTypes.BCOL) {
@@ -125,7 +123,7 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
     }
   }
 
-  private setSelectedPayment (payment) {
+  setSelectedPayment (payment) {
     this.selectedPaymentMethod = payment
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
     if (this.selectedPaymentMethod !== PaymentTypes.BCOL) {
@@ -133,11 +131,11 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
     }
   }
 
-  private setPADValid (isValid) {
+  setPADValid (isValid) {
     this.isPADValid = isValid
   }
 
-  private async save () {
+  async save () {
     this.setCurrentOrganizationPaymentType(this.selectedPaymentMethod)
     if (this.selectedPaymentMethod !== PaymentTypes.BCOL) {
       // It's possible this is already set from being linked, so we need to empty it out.
@@ -167,11 +165,11 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   @Emit('final-step-action')
-  private createAccount () {
+  createAccount () {
   }
 
   @Emit('emit-bcol-info')
-  private setBcolInfo (bcolProfile: BcolProfile) {
+  setBcolInfo (bcolProfile: BcolProfile) {
     this.setCurrentOrganizationBcolProfile(bcolProfile)
   }
 }
@@ -187,7 +185,10 @@ export default class PaymentMethodSelector extends Mixins(Steppable) {
   }
 
   &.selected {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                0 3px 1px -2px rgba(0,0,0,.2),
+                0 2px 2px 0 rgba(0,0,0,.14),
+                0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
 }
 

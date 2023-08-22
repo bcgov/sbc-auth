@@ -234,7 +234,8 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   }
 })
 export default class IncorpOrRegisterView extends Vue {
-  protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
+  protected readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/' +
+    'ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
   readonly bulletPointsBEN: Array<any> = [

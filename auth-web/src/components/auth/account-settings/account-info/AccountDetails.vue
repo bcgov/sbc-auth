@@ -125,13 +125,13 @@ export interface AccountDetailsI {
 export default defineComponent({
   name: 'AccountDetails',
   components: { AccountBusinessType },
-  emits: ['update:updateAndSaveAccountDetails', 'update:viewOnlyMode'],
   props: {
     accountDetails: { default: null as OrgBusinessType },
     isBusinessAccount: { default: true },
     nameChangeAllowed: { default: true },
     viewOnlyMode: { default: true }
   },
+  emits: ['update:updateAndSaveAccountDetails', 'update:viewOnlyMode'],
   setup (props, { emit }) {
     // refs
     const editAccountForm = ref(null as HTMLFormElement)

@@ -97,15 +97,13 @@
 </template>
 
 <script lang="ts">
-
 import { Component, Emit, Mixins } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { User } from '@/models/user'
-
-import { namespace } from 'vuex-class'
-const userModule = namespace('user')
+import { useUserStore } from '@/store/user'
 
 @Component({
   components: {
@@ -113,7 +111,7 @@ const userModule = namespace('user')
   }
 })
 export default class GovmContactInfoForm extends Mixins(NextPageMixin, Steppable) {
-  @userModule.Action('getUserProfile') public getUserProfile!: (identifer: string) => User
+  @Action(useUserStore) public getUserProfile!: (identifer: string) => User
 
   public emailAddress = ''
   public confirmedEmailAddress = ''

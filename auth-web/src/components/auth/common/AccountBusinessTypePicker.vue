@@ -65,6 +65,7 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import {
   Component,
   Emit,
@@ -75,10 +76,8 @@ import {
 import { OrgBusinessType, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Code } from '@/models/Code'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const CodesModule = namespace('codes')
+import { useCodesStore } from '@/store/codes'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   components: {}
@@ -89,33 +88,28 @@ export default class AccountBusinessTypePicker extends Mixins(
   @Prop({ default: null }) errorMessage: string
   @Prop({ default: false }) saving: boolean
 
-  @OrgModule.State('currentOrganization')
-  public currentOrganization!: Organization
+  @State(useOrgStore) public currentOrganization!: Organization
 
-  @CodesModule.Action('getBusinessSizeCodes')
-  private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @CodesModule.Action('getBusinessTypeCodes')
-  private readonly getBusinessTypeCodes!: () => Promise<Code[]>
-  @CodesModule.State('businessSizeCodes')
-  private readonly businessSizeCodes!: Code[]
-  @CodesModule.State('businessTypeCodes')
-  private readonly businessTypeCodes!: Code[]
+  @Action(useCodesStore) readonly getBusinessSizeCodes!: () => Promise<Code[]>
+  @Action(useCodesStore) readonly getBusinessTypeCodes!: () => Promise<Code[]>
+  @State(useCodesStore) readonly businessSizeCodes!: Code[]
+  @State(useCodesStore) readonly businessTypeCodes!: Code[]
 
-  private isLoading = false
+  isLoading = false
 
   $refs: {
     businessType: HTMLFormElement
     businessSize: HTMLFormElement
   }
 
-  private businessType = ''
-  private businessSize = ''
+  businessType = ''
+  businessSize = ''
 
   // Input field rules
-  private readonly orgBusinessTypeRules = [
+  readonly orgBusinessTypeRules = [
     v => !!v || 'A business type is required'
   ]
-  private readonly orgBusinessSizeRules = [
+  readonly orgBusinessSizeRules = [
     v => !!v || 'A business size is required'
   ]
 

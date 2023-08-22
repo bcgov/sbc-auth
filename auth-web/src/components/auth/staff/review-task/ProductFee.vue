@@ -68,9 +68,8 @@
 <script lang="ts">
 import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
-import OrgModule from '@/store/modules/org'
 import { ProductStatus } from '@/util/constants'
-import { useStore } from 'vuex-composition-helpers'
+import { useOrgStore } from '@/store/org'
 
 // FUTURE: remove this in vue 3
 interface ProductFeeState {
@@ -92,13 +91,12 @@ export default defineComponent({
   },
   emits: ['emit-product-fee-change'],
   setup (props, { emit }) {
-    const store = useStore()
-    const orgState = store.state.org as OrgModule
-    const orgProductFeeCodes = computed<OrgProductFeeCode[]>(() => orgState.orgProductFeeCodes)
-    const orgProducts = computed<OrgProduct[]>(() => orgState.productList)
-    const accountFees = computed<AccountFee[]>(() => orgState.currentAccountFees)
+    const orgStore = useOrgStore()
+    const orgProductFeeCodes = computed<OrgProductFeeCode[]>(() => orgStore.state.orgProductFeeCodes)
+    const orgProducts = computed<OrgProduct[]>(() => orgStore.state.productList)
+    const accountFees = computed<AccountFee[]>(() => orgStore.state.currentAccountFees)
     const setCurrentAccountFees = (accountFees: AccountFee[]) => {
-      store.commit('org/setCurrentAccountFees', accountFees)
+      orgStore.setCurrentAccountFees(accountFees)
     }
 
     const state: ProductFeeState = reactive<ProductFeeState>({

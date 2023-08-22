@@ -95,9 +95,8 @@
 <script lang="ts">
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { Action } from 'pinia-class'
+import { useOrgStore } from '@/store/org'
 
 @Component({
   name: 'BcolLogin'
@@ -108,8 +107,7 @@ export default class BcolLogin extends Vue {
   errorMessage: string = ''
   isLoading: boolean = false
   @Prop({ default: false }) readonly hideLinkBtn: boolean
-  @OrgModule.Action('validateBcolAccount')
-  private readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
+  @Action(useOrgStore) readonly validateBcolAccount!: (bcolProfile: BcolProfile) => Promise<BcolAccountDetails>
 
   private async mounted () {
     this.password = ''

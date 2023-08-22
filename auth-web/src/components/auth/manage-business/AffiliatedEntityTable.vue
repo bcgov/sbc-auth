@@ -294,13 +294,13 @@ import { useStore } from 'vuex-composition-helpers'
 export default defineComponent({
   name: 'AffiliatedEntityTable',
   components: { EntityDetails, BaseVDataTable },
+  mixins: [DateMixin], // TODO: This should be fixed.
   props: {
     selectedColumns: { default: [] as string[] },
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
   emits: ['add-unknown-error', 'remove-affiliation-invitation'],
-  mixins: [DateMixin],
   setup (props, context: SetupContext) {
     const isloading = false
     const store = useStore()

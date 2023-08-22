@@ -161,25 +161,25 @@ export default class DateRangeFilter extends Vue {
       this.dateFilterSelected = this.dateFilterRanges[val]
       switch (this.dateFilterSelected?.code) {
         case DATEFILTER_CODES.TODAY:
-          const today = this.formatDatePickerDate(moment())
+          var today = this.formatDatePickerDate(moment())
           this.dateRangeSelected = [today, today]
           this.pickerDate = today.slice(0, -3)
           break
         case DATEFILTER_CODES.YESTERDAY:
-          const yesterday = this.formatDatePickerDate(moment().subtract(1, 'days'))
+          var yesterday = this.formatDatePickerDate(moment().subtract(1, 'days'))
           this.dateRangeSelected = [yesterday, yesterday]
           this.pickerDate = yesterday.slice(0, -3)
           break
         case DATEFILTER_CODES.LASTWEEK:
           // Week should start from  Monday and Ends on Sunday
-          const weekStart = this.formatDatePickerDate(moment().subtract(1, 'weeks').startOf('isoWeek'))
-          const weekEnd = this.formatDatePickerDate(moment().subtract(1, 'weeks').endOf('isoWeek'))
+          var weekStart = this.formatDatePickerDate(moment().subtract(1, 'weeks').startOf('isoWeek'))
+          var weekEnd = this.formatDatePickerDate(moment().subtract(1, 'weeks').endOf('isoWeek'))
           this.dateRangeSelected = [weekStart, weekEnd]
           this.pickerDate = weekStart.slice(0, -3)
           break
         case DATEFILTER_CODES.LASTMONTH:
-          const monthStart = this.formatDatePickerDate(moment().subtract(1, 'months').startOf('month'))
-          const monthEnd = this.formatDatePickerDate(moment().subtract(1, 'months').endOf('month'))
+          var monthStart = this.formatDatePickerDate(moment().subtract(1, 'months').startOf('month'))
+          var monthEnd = this.formatDatePickerDate(moment().subtract(1, 'months').endOf('month'))
           this.dateRangeSelected = [monthStart, monthEnd]
           this.pickerDate = monthStart.slice(0, -3)
           break

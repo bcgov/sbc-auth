@@ -48,22 +48,21 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { AccountStatus } from '@/util/constants'
 import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const CodesModule = namespace('codes')
+import { useCodesStore } from '@/store/codes'
+import { useOrgStore } from '@/store/org'
 
 @Component
 export default class AccountSuspendAlert extends Vue {
-  @OrgModule.Action('calculateFailedInvoices') private calculateFailedInvoices!: () => FailedInvoice
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @CodesModule.State('suspensionReasonCodes') private suspensionReasonCodes!: Code[]
+  @Action(useOrgStore) private calculateFailedInvoices!: () => FailedInvoice
+  @State(useOrgStore) private currentOrganization!: Organization
+  @State(useCodesStore) private suspensionReasonCodes!: Code[]
   private formatDate = CommonUtils.formatDisplayDate
 
   totalTransactionAmount = 0
@@ -71,7 +70,8 @@ export default class AccountSuspendAlert extends Vue {
   totalPaidAmount = 0
 
   get suspendedDate () {
-    return (this.currentOrganization?.suspendedOn) ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
+    return (this.currentOrganization?.suspendedOn)
+      ? this.formatDate(new Date(this.currentOrganization.suspendedOn)) : ''
   }
 
   get isSuspendedForNSF (): boolean {
@@ -83,7 +83,8 @@ export default class AccountSuspendAlert extends Vue {
   }
 
   suspendedReason (): string {
-    return this.suspensionReasonCodes?.find(suspensionReasonCode => suspensionReasonCode?.code === this.currentOrganization?.suspensionReasonCode)?.desc
+    return this.suspensionReasonCodes?.find(suspensionReasonCode =>
+      suspensionReasonCode?.code === this.currentOrganization?.suspensionReasonCode)?.desc
   }
 
   async mounted () {

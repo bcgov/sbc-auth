@@ -203,7 +203,8 @@ export default class NextPageMixin extends Vue {
         this.$router.push(`/${Pages.ACCOUNT_FREEZE}`)
       }
     } else {
-      /** If user is in the account freeze page while switching the account, then need to redirect them to account info page if that account is active.
+      /** If user is in the account freeze page while switching the account,
+       * then need to redirect them to account info page if that account is active.
        * otherwise user will stuck on the account freeze page **/
       if (this.$route.name?.search('account-freeze') > -1) {
         this.anyPendingRedirect = true

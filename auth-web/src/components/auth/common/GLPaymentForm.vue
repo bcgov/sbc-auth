@@ -1,13 +1,11 @@
 <template>
   <div>
-    <template>
-      <p
-        v-if="canSelect"
-        class="mb-9"
-      >
-        General Ledger codes for the account that is issued by the Finance department of the Ministry
-      </p>
-    </template>
+    <p
+      v-if="canSelect"
+      class="mb-9"
+    >
+      General Ledger codes for the account that is issued by the Finance department of the Ministry
+    </p>
     <v-form ref="GlInfoForm">
       <section>
         <header class="mb-4 d-flex align-content-center">
@@ -115,11 +113,11 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { GLInfo } from '@/models/Organization'
 import { mask } from 'vue-the-mask'
-import { namespace } from 'vuex-class'
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/store/org'
 
 @Component({
   directives: {
@@ -127,9 +125,9 @@ const OrgModule = namespace('org')
   }
 })
 export default class GLPaymentForm extends Vue {
-  @OrgModule.State('currentOrgGLInfo') private currentOrgGLInfo!: GLInfo[]
-  @OrgModule.State('currentOrganization') private currentOrganization!: any
-  @OrgModule.Mutation('setCurrentOrganizationGLInfo') private setCurrentOrganizationGLInfo!: (glInfo: GLInfo) => void
+  @State(useOrgStore) private currentOrgGLInfo!: GLInfo[]
+  @State(useOrgStore) private currentOrganization!: any
+  @Action(useOrgStore) private setCurrentOrganizationGLInfo!: (glInfo: GLInfo) => void
 
   @Prop({ default: () => ({} as GLInfo) }) glInformation: any
   @Prop({ default: true }) private canSelect: boolean

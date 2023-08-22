@@ -186,6 +186,7 @@ import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { SessionStorageKeys, TaskRelationshipStatus, TaskRelationshipType, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 import { mapActions, mapState } from 'pinia'
+import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -193,10 +194,8 @@ import { DatePicker } from '@/components'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { ProductCode } from '@/models/Staff'
 import moment from 'moment'
-import { namespace } from 'vuex-class'
-import { useStaffStore } from '@/store/modules/staff'
-
-const TaskModule = namespace('task')
+import { useStaffStore } from '@/store/staff'
+import { useTaskStore } from '@/store/task'
 
 @Component({
   components: {
@@ -210,7 +209,7 @@ const TaskModule = namespace('task')
   }
 })
 export default class StaffPendingAccountsTable extends Mixins(PaginationMixin) {
-  @TaskModule.Action('fetchTasks') private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
+  @Action(useTaskStore) private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
   private staffTasks: Task[] = []
   private taskFilter: TaskFilterParams
   private totalStaffTasks = 0

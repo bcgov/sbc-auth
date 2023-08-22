@@ -118,13 +118,16 @@
           </p>
           <ul>
             <li>
-              <strong>Contact Info</strong> - reuse your account contact information from BC Online for your new premium account
+              <strong>Contact Info</strong> - reuse your account contact information from BC Online for your new
+              premium account
             </li>
             <li>
               <strong>Payment</strong> - the option to select your BC Online deposit account as a payment option
             </li>
             <li>
-              <strong>Reporting</strong> - all transactions done by your team in this new application will appear in your BC Online statement reports, provided you choose your BC Online deposit account as your payment option
+              <strong>Reporting</strong> - all transactions done by your team in this new application will appear in
+              your BC Online statement reports, provided you choose your BC Online deposit account as your
+              payment option
             </li>
           </ul>
           <p>
@@ -136,7 +139,8 @@
             </li>
           </ul>
           <p class="pt-2">
-            Linking a BC Online account, requires an existing BC Online account (3-5 days to setup) and the Prime Contact credentials to complete.
+            Linking a BC Online account, requires an existing BC Online account (3-5 days to setup) and the
+            Prime Contact credentials to complete.
           </p>
           <v-btn
             text
