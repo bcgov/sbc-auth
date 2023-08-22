@@ -653,13 +653,15 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         }
       }
     }
-    const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
-    const token = JSON.parse(decodedToken)
-    const legalName = Base64.decode(this.base64OrgName)
+    if (this.base64Token) {
+      const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
+      const token = JSON.parse(decodedToken)
+      const legalName = Base64.decode(this.base64OrgName)
+      await this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+    }
 
     this.setAccountChangedHandler(this.setup)
     this.setup()
-    this.parseUrlAndAddAffiliation(token, legalName)
   }
 
   helpDialogBlurb = async () => {
@@ -695,7 +697,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
-  parseUrlAndAddAffiliation = async (token: any, legalName: string) => {
+  parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
     if (!this.$route.meta.checkMagicLink) {
       return
     }
@@ -719,7 +721,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       }
 
       // 3. Accept invitation
-      const response = await AffiliationInvitationService.acceptInvitation(invitationId, this.base64Token)
+      const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
 
       // 4. Unauthorized
       if (response.status === 401) {
