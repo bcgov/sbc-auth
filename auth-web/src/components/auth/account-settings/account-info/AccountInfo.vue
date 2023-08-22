@@ -355,7 +355,7 @@ export default class AccountInfo extends Mixins(
   private suspensionCompleteDialogText: string = ''
   private isSuspensionReasonFormValid: boolean = false
   private addressChanged = false
-  private originalAddress: Address // store the original address..do not modify it afterwards
+  private originalAddress: Address = null // store the original address..do not modify it afterwards
 
   private errorMessage: string = ''
 

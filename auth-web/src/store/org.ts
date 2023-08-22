@@ -214,6 +214,10 @@ export const useOrgStore = defineStore('org', () => {
     state.currentOrganization = { ...state.currentOrganization, bcolProfile }
   }
 
+  function resetCurrentSelectedProducts () {
+    state.currentSelectedProducts = []
+  }
+
   async function resetCurrentOrganization (): Promise<void> {
     setCurrentOrganization(undefined)
     state.activeOrgMembers = []
@@ -987,6 +991,7 @@ export const useOrgStore = defineStore('org', () => {
     setViewOnlyMode,
     setCurrentOrganizationBusinessType,
     setCurrentOrganizationBcolProfile,
+    resetCurrentSelectedProducts,
     resetCurrentOrganization,
     syncOrganization,
     suspendOrganization,
