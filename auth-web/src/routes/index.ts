@@ -16,7 +16,7 @@ import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
-import store from '@/store'
+import { getVuexStore } from '@/store'
 
 Vue.use(Router)
 
@@ -54,6 +54,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }
 
+  const store = getVuexStore()
   // Enforce navigation guards are checked before navigating anywhere else
   // If store is not ready, we place a watch on it, then proceed when ready
   if (store.getters.loading) {

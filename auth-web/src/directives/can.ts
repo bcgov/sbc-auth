@@ -3,7 +3,7 @@ import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import { VNode } from 'vue/types'
-import store from '@/store'
+import { useOrgStore } from '@/store/org'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean
@@ -30,7 +30,7 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
   // to handle special elements like v-card etc
   const isCard = !!binding.modifiers.card
   const requestedAction = binding.arg
-  const permissions:string[] = (store.state as any)?.org?.permissions
+  const permissions:string[] = useOrgStore().state.permissions
   const customeEl = el as CustomHTMLElement
   const okayToAccess = permissions.indexOf(requestedAction) >= 0
   // if not okay , hide or disable
@@ -43,8 +43,6 @@ function canAccess (binding: DirectiveBinding, el: HTMLElement, node: VNode) {
       // TODO tab still works.. can tab to the text field and make it work
       customeEl.classList.add('v-card--disabled')
       customeEl.style.pointerEvents = 'none'
-    } else if (behaviour === 'readonly') {
-      customeEl.readOnly = true
     }
   }
 }

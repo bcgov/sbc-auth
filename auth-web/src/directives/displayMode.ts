@@ -1,7 +1,7 @@
 import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { DisplayModeValues } from '@/util/constants'
-import store from '@/store'
+import { useOrgStore } from '@/store/org'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean
@@ -28,7 +28,7 @@ const displayMode: DirectiveOptions = {
 function checkViewOnlyMode (binding: DirectiveBinding, el: HTMLElement) {
   const directiveValue = binding.value
 
-  const vModeStoreValue:string = (store.state as any)?.org?.vDisplayModeValue
+  const vModeStoreValue:string = useOrgStore().state.vDisplayModeValue
   const customeEl = el as CustomHTMLElement
   let viewOnly = false
   if (directiveValue) {
