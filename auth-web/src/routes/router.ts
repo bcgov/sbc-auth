@@ -242,7 +242,7 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
-      path: '/:base64OrgName/affiliationInvitation/acceptToken//:base64Token',
+      path: '/:base64OrgName/affiliationInvitation/acceptToken/:base64Token',
       name: 'account-magic-link',
       component: EntityManagement,
       props: route => {
