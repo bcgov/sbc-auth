@@ -653,46 +653,15 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         }
       }
     }
-    if (this.base64Token) {
-      const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
-      const token = JSON.parse(decodedToken)
-      const legalName = Base64.decode(this.base64OrgName)
-      await this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
-    }
 
     this.setAccountChangedHandler(this.setup)
     this.setup()
-  }
 
-  helpDialogBlurb = async () => {
-    return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
-        'please contact us at:'
-  }
-
-  openHelp = async () => {
-    this.$refs.helpDialog.open()
-  }
-
-  resendAffiliationInvitation = async (event) => {
-    let fromOrgId = Number(this.orgId)
-    let businessIdentifier = this.base64OrgName
-    if (event?.affiliationInvites[0].status === 'PENDING') {
-      fromOrgId = event?.affiliationInvites[0].fromOrg.id
-      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
-    }
-    try {
-      const payload: CreateAffiliationInvitation = {
-        fromOrgId: fromOrgId,
-        businessIdentifier: businessIdentifier
-      }
-      await AffiliationInvitationService.createInvitation(payload)
-      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
-      this.businessContactEmail = contact?.data?.email
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err)
-    } finally {
-      this.isAuthorizationEmailSentDialogVisible = true
+    if (this.base64Token && this.base64OrgName) {
+      const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
+      const token = JSON.parse(decodedToken)
+      const legalName = Base64.decode(this.base64OrgName)
+      this.parseUrlAndAddAffiliation(token, legalName)
     }
   }
 
