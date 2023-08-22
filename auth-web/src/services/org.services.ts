@@ -1,6 +1,6 @@
 import {
   Affiliation,
-  AffiliationsResponse,
+  AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody
 } from '@/models/affiliation'
@@ -79,8 +79,17 @@ export default class OrgService {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
-  static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<AffiliationsResponse>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
+  static async getAffiliatedEntities (orgIdentifier: number): Promise<AffiliationResponse[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
+      if (response?.data?.entities && response?.status === 200) {
+        return response.data.entities
+      } else {
+        throw Error(`Invalid response = ${response}`)
+      }
+    } catch (error) {
+      throw new Error('Error fetching data from API: ' + error.message)
+    }
   }
 
   static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody):
