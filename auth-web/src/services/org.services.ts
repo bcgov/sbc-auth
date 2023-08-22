@@ -106,9 +106,16 @@ export default class OrgService {
   }
 
   static async getAffiliationInvitations (orgIdentifier: number) {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
-      { params: { orgId: orgIdentifier, businessDetails: true } }
-    )
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
+        { params: { orgId: orgIdentifier, businessDetails: true } }
+      )
+      return response.data.affiliationInvitations
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      return null
+    }
   }
 
   // TODO can be remove this since we moved from org to user affidavit
