@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import { createVuePlugin as vue } from 'vite-plugin-vue2'
 import EnvironmentPlugin from 'vite-plugin-environment'
 import postcssNesting from 'postcss-nesting'
+import pluginRewriteAll from 'vite-plugin-rewrite-all'
 
 import path from 'path'
 import fs from 'fs'
@@ -35,7 +36,8 @@ export default defineConfig({
     EnvironmentPlugin({
       BUILD: 'web' // Fix for Vuelidate, allows process.env with Vite.
     }),
-    postcssNesting
+    postcssNesting,
+    pluginRewriteAll()
   ],
   resolve: {
     alias: {
