@@ -40,6 +40,7 @@ export const useBusinessStore = defineStore('business', () => {
     return useOrgStore().state.currentOrganization
   })
 
+  /* Internal function to build the business object. */
   function buildBusinessObject (resp: AffiliationResponse): Business {
     return {
       businessIdentifier: resp.identifier,
@@ -59,6 +60,7 @@ export const useBusinessStore = defineStore('business', () => {
     }
   }
 
+  /* Internal function to build the namerequest object. */
   function buildNameRequestObject (nr: NameRequestResponse) {
     const enableBcCccUlc = LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
 
@@ -116,6 +118,7 @@ export const useBusinessStore = defineStore('business', () => {
     }
   }
 
+  /* Internal function for sorting affiliations / entities by invites. */
   function sortEntitiesByInvites (affiliatedEntities: Business[]): Business[] {
     // bubble the ones with the invitations to the top
     affiliatedEntities?.sort((a, b) => {
