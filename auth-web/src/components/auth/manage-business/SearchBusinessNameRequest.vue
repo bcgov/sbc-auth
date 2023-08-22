@@ -162,7 +162,7 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   showAddSuccessModal (event) {
     this.clearSearch++
-    this.showManageBusinessDialog = false;
+    this.showManageBusinessDialog = false
     this.$emit('add-success', event)
   }
   showInvalidCodeModal (event) {
