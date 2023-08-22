@@ -260,6 +260,33 @@ def test_affiliation_invitation_already_exists(client, jwt, session, keycloak_mo
     assert dictionary['message'] == 'The data you want to insert already exists.'
 
 
+def test_affiliation_invitation_business_not_found(client, jwt, session, keycloak_mock, business_exception_mock,
+                                                   stan_server):
+    """Assert that POSTing with a business identifier not found in LEAR raises the appropriate exception."""
+    headers, from_org_id, to_org_id, business_identifier = setup_affiliation_invitation_data(client,
+                                                                                             jwt,
+                                                                                             session,
+                                                                                             keycloak_mock)
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(
+            from_org_id=from_org_id,
+            to_org_id=to_org_id,
+            business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    rv_invitation = client.post('/api/v1/affiliationInvitations', data=json.dumps(
+        factory_affiliation_invitation(from_org_id=from_org_id,
+                                       to_org_id=to_org_id,
+                                       business_identifier=business_identifier)),
+                                headers=headers, content_type='application/json')
+
+    assert rv_invitation.status_code == http_status.HTTP_400_BAD_REQUEST
+    dictionary = json.loads(rv_invitation.data)
+    assert dictionary['message'] == 'The business specified for the affiliation invitation could not be found.'
+    assert dictionary['code'] == 'AFFILIATION_INVITATION_BUSINESS_NOT_FOUND'
+
+
 def test_affiliation_invitation_already_exists_exclude_to_org(client, jwt, session, keycloak_mock, business_mock,
                                                               stan_server):
     """Assert that POSTing an already existing affiliation invitation returns a 400."""
