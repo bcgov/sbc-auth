@@ -7,7 +7,6 @@ import {
 } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
 import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload,
-  NameRequest,
   PasscodeResetLoad } from '@/models/business'
 import {
   CorpTypes,
@@ -90,16 +89,11 @@ export const useBusinessStore = defineStore('business', () => {
     /** Returns True if NR is approved. */
     const isApproved = (nr: NameRequestResponse): boolean => (nr.stateCd === NrState.APPROVED)
 
-    /** Returns True if NR is approved for incorporation. */
-    const isApprovedForIa = (nr: NameRequestResponse): boolean => (
+    /** Returns True if NR is approved for incorporation or registration. */
+    const isApprovedForIaOrRegistration = (nr: NameRequestResponse): boolean => (
       (isApproved(nr) || isConditionallyApproved(nr)) &&
-      nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION)
-    )
-
-    /** Returns True if NR is approved for registration. */
-    const isApprovedForRegistration = (nr: NameRequestResponse): boolean => (
-      (isApproved(nr) || isConditionallyApproved(nr)) &&
-      nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION)
+      (nr.actions?.some(action => action.filingName === LearFilingTypes.INCORPORATION) ||
+      nr.actions?.some(action => action.filingName === LearFilingTypes.REGISTRATION))
     )
 
     return {
@@ -111,7 +105,7 @@ export const useBusinessStore = defineStore('business', () => {
       state: nr.stateCd,
       applicantEmail: isApplicantsExist(nr) ? nr.applicants[0].emailAddress : null,
       applicantPhone: isApplicantsExist(nr) ? nr.applicants[0].phoneNumber : null,
-      enableIncorporation: isApprovedForIa(nr) || isApprovedForRegistration(nr),
+      enableIncorporation: isApprovedForIaOrRegistration(nr),
       folioNumber: nr.folioNumber,
       target: getTarget(nr),
       entityTypeCd: nr.entityTypeCd,
@@ -120,6 +114,20 @@ export const useBusinessStore = defineStore('business', () => {
       expirationDate: nr.expirationDate,
       applicants: nr.applicants
     }
+  }
+
+  function sortEntitiesByInvites (affiliatedEntities: Business[]): Business[] {
+    // bubble the ones with the invitations to the top
+    affiliatedEntities?.sort((a, b) => {
+      if (a.affiliationInvites && !b.affiliationInvites) {
+        return -1
+      }
+      if (!a.affiliationInvites && b.affiliationInvites) {
+        return 1
+      }
+      return 0
+    })
+    return affiliatedEntities
   }
 
   async function handleAffiliationInvitations (affiliatedEntities: Business[]): Promise<Business[]> {
@@ -145,18 +153,7 @@ export const useBusinessStore = defineStore('business', () => {
       }
     }
 
-    // bubble the ones with the invitations to the top
-    affiliatedEntities?.sort((a, b) => {
-      if (a.affiliationInvites && !b.affiliationInvites) {
-        return -1
-      }
-      if (!a.affiliationInvites && b.affiliationInvites) {
-        return 1
-      }
-      return 0
-    })
-
-    return affiliatedEntities
+    return sortEntitiesByInvites(affiliatedEntities)
   }
 
   /** This is the function that fetches and updates data for all NRs. */
