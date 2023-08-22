@@ -528,7 +528,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
+import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'vuex'
@@ -540,8 +540,8 @@ import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedE
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
-import BusinessService from '@/services/business.services'
 import { Base64 } from 'js-base64'
+import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
@@ -673,7 +673,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   resendAffiliationInvitation = async (event) => {
     let fromOrgId = Number(this.orgId)
     let businessIdentifier = this.base64OrgName
-    if (event?.affiliationInvites[0].status === "PENDING") {
+    if (event?.affiliationInvites[0].status === 'PENDING') {
       fromOrgId = event?.affiliationInvites[0].fromOrg.id
       businessIdentifier = event?.affiliationInvites[0].businessIdentifier
     }
