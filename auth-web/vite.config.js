@@ -3,6 +3,7 @@ import { createVuePlugin as vue } from 'vite-plugin-vue2'
 import EnvironmentPlugin from 'vite-plugin-environment'
 import postcssNesting from 'postcss-nesting'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
+import pluginRewriteAll from 'vite-plugin-rewrite-all'
 
 import path from 'path'
 import fs from 'fs'
@@ -41,7 +42,8 @@ export default defineConfig({
       bridge: true,
       // Turn this off because we have html in our messages.
       strictMessage: false
-    })
+    }),
+    pluginRewriteAll()
   ],
   resolve: {
     alias: {
