@@ -277,7 +277,8 @@
       />
 
       <!-- Add an Existing Business Dialog -->
-      <!-- <ManageBusinessDialog
+      <!-- Used only when !isEnableBusinessNrSearch, can be removed from here once this goes away -->
+      <ManageBusinessDialog
         :orgId="orgId"
         :showBusinessDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
@@ -292,7 +293,7 @@
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
         @business-already-added="showBusinessAlreadyAdded($event)"
-      /> -->
+      />
 
       <AuthorizationEmailSentDialog
         :isVisible="isAuthorizationEmailSentDialogVisible"
