@@ -181,13 +181,15 @@
         </div>
       </div>
 
-      <div class="mb-15">
+      <div>
         <ExpandableHelp>
           <template #content>
             <StartNewBusinessHelp />
           </template>
         </ExpandableHelp>
       </div>
+
+      <v-spacer class="help-spacer" />
 
       <search-business-name-request
         v-if="isEnableBusinessNrSearch"
@@ -1075,6 +1077,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   .v-btn {
     font-weight: 700;
   }
+}
+
+.help-spacer {
+  margin-bottom: 36px;
 }
 
 #add-existing-btn {
