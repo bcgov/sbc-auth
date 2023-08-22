@@ -71,7 +71,7 @@ export default class NextPageMixin extends Vue {
         } else {
           return dashboardUrl
         }
-      case LoginSource.BCROS:
+      case LoginSource.BCROS: {
         let bcrosNextStep = '/'
         if (!this.userProfile?.userTerms?.isTermsOfUseAccepted) {
           bcrosNextStep = `/${Pages.USER_PROFILE_TERMS}`
@@ -84,8 +84,9 @@ export default class NextPageMixin extends Vue {
         }
 
         return bcrosNextStep
+      }
       // case LoginSource.IDIR:
-      case LoginSource.BCSC:
+      case LoginSource.BCSC: {
         let nextStep = '/'
         // Redirect to TOS if no terms accepted
         // for invited users , handle user profile
@@ -105,7 +106,8 @@ export default class NextPageMixin extends Vue {
         }
 
         return nextStep
-      case LoginSource.BCEID:
+      }
+      case LoginSource.BCEID: {
         // if they are in invitation flow [check session storage], take them to
         // Redirect to TOS if no terms accepted
         // for invited users , handle user profile
@@ -143,6 +145,7 @@ export default class NextPageMixin extends Vue {
         }
 
         return `${bceidNextStep}`
+      }
       default:
         return dashboardUrl
     }

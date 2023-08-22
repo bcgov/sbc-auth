@@ -478,7 +478,7 @@ export default defineComponent({
             { ...componentAccountAdministrator(3) },
             { ...componentNotaryInformation(4) }
           ]
-        case TaskType.GOVN_REVIEW:
+        case TaskType.GOVN_REVIEW: {
           let list = []
           if (task.value?.action === TaskAction.ACCOUNT_REVIEW) {
             list = [
@@ -498,6 +498,7 @@ export default defineComponent({
           // if account access type was changed to regular remove the product fee comp
           if (accountInfoAccessType.value === AccessType.REGULAR) list.pop()
           return list
+        }
         default:
           // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
           // Also, we double check by task relationship type
