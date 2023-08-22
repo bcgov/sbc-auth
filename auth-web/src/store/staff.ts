@@ -71,11 +71,27 @@ export const useStaffStore = defineStore('staff', () => {
     }
   }
 
+  async function syncAccountNonBCeIDReview (syncAccountPayload: SyncAccountPayload) {
+    const accountMembersResponse = await OrgService.getOrgMembers(syncAccountPayload.organizationIdentifier, 'ACTIVE')
+    if (accountMembersResponse?.data && accountMembersResponse?.status === 200) {
+      const admin = accountMembersResponse.data.members.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
+      if (admin) {
+        state.accountUnderReviewAdmin = admin
+        const adminContactResponse = await UserService.getUserProfile(admin.username)
+        if (adminContactResponse?.data && adminContactResponse?.status === 200) {
+          const contact = adminContactResponse?.data?.contacts?.length > 0 && adminContactResponse?.data?.contacts[0]
+          if (contact) {
+            state.accountUnderReviewAdminContact = contact
+          }
+        }
+      }
+    }
+  }
+
   async function syncAccountUnderReview (syncAccountPayload: SyncAccountPayload): Promise<void> {
     const accountResponse = await OrgService.getOrganization(syncAccountPayload.organizationIdentifier)
     if (accountResponse?.data && accountResponse?.status === 200) {
       state.accountUnderReview = accountResponse.data
-
       const addressResponse = await OrgService.getContactForOrg(syncAccountPayload.organizationIdentifier)
       if (addressResponse) {
         state.accountUnderReviewAddress = addressResponse
@@ -84,24 +100,11 @@ export const useStaffStore = defineStore('staff', () => {
       if (syncAccountPayload.isBCeIDAdminReview) {
         const user = syncAccountPayload.relatedBCeIDUser
         state.accountUnderReviewAdmin = user
-        if (user.contacts && user.contacts.length > 0) {
+        if (user.contacts?.length > 0) {
           state.accountUnderReviewAdminContact = user.contacts[0]
         }
       } else {
-        const accountMembersResponse = await OrgService.getOrgMembers(syncAccountPayload.organizationIdentifier, 'ACTIVE')
-        if (accountMembersResponse?.data && accountMembersResponse?.status === 200) {
-          const admin = accountMembersResponse.data.members.find(member => member.membershipTypeCode === MembershipType.Admin)?.user
-          if (admin) {
-            state.accountUnderReviewAdmin = admin
-            const adminContactResponse = await UserService.getUserProfile(admin.username)
-            if (adminContactResponse?.data && adminContactResponse?.status === 200) {
-              const contact = adminContactResponse?.data?.contacts?.length > 0 && adminContactResponse?.data?.contacts[0]
-              if (contact) {
-                state.accountUnderReviewAdminContact = contact
-              }
-            }
-          }
-        }
+        await syncAccountNonBCeIDReview(syncAccountPayload)
       }
     }
   }
