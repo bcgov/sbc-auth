@@ -199,7 +199,7 @@ export const useBusinessStore = defineStore('business', () => {
   async function loadBusiness () {
     const businessIdentifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)
     const response = await BusinessService.getBusiness(businessIdentifier)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data.businessIdentifier)
       state.currentBusiness = response.data
       return response.data
@@ -414,7 +414,7 @@ export const useBusinessStore = defineStore('business', () => {
     // If the business is a new registration then remove the business filing from legal-db
     if (payload.business.corpType.code === CorpTypes.INCORPORATION_APPLICATION) {
       const filingResponse = await BusinessService.getFilings(payload.business.businessIdentifier)
-      if (filingResponse && filingResponse.data && filingResponse.status === 200) {
+      if (filingResponse?.data && filingResponse.status === 200) {
         const filingId = filingResponse?.data?.filing?.header?.filingId
         // If there is a filing delete it which will delete the affiliation, else delete the affiliation
         if (filingId) {
@@ -439,7 +439,7 @@ export const useBusinessStore = defineStore('business', () => {
     } else {
       response = await BusinessService.updateContact(currentBusiness, contact)
     }
-    if (response && response.data && (response.status === 200 || response.status === 201)) {
+    if (response?.data && (response.status === 200 || response.status === 201)) {
       ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, response.data?.businessIdentifier)
       state.currentBusiness = response.data
       return response.data

@@ -12,7 +12,7 @@ export const useActivityStore = defineStore('activity', () => {
     const { orgId } = filterParams
     if (orgId) {
       const response = await ActivityService.getActivityListByorgId(orgId, filterParams)
-      if (response && response.data && response.status === 200) {
+      if (response?.data && response.status === 200) {
         state.currentOrgActivity = response.data
         return response.data
       }

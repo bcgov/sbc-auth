@@ -91,7 +91,6 @@ import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { getModule } from 'vuex-module-decorators'
 import { useOrgStore } from '@/store/org'
 
 @Component({

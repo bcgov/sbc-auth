@@ -78,7 +78,7 @@ export const useUserStore = defineStore('user', () => {
 
   async function getUserProfile (identifier: string) {
     const response = await UserService.getUserProfile(identifier)
-    if (response && response.data) {
+    if (response?.data) {
       state.userProfile = response.data
       return response.data
     }
@@ -86,7 +86,7 @@ export const useUserStore = defineStore('user', () => {
 
   async function getRoleInfo ():Promise<RoleInfo[]> {
     const response = await UserService.getRoles()
-    if (response && response.data) {
+    if (response?.data) {
       const result = response.data.sort((a, b) => (a.displayOrder > b.displayOrder) ? 1 : -1)
       state.roleInfos = result
       return result
@@ -140,7 +140,7 @@ export const useUserStore = defineStore('user', () => {
       phoneExtension: userProfile?.phoneExtension
     }
     const response = await UserService.createContact(userContact)
-    if (response && response.data && response.status === 201) {
+    if (response?.data && response.status === 201) {
       state.userContact = response.data
       return response.data
     }
@@ -159,7 +159,7 @@ export const useUserStore = defineStore('user', () => {
       phoneExtension: userProfile?.phoneExtension
     }
     const response = await UserService.updateContact(userContact)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.userContact = response.data
       return response.data
     }
@@ -168,7 +168,7 @@ export const useUserStore = defineStore('user', () => {
   async function updateUserFirstAndLastName (user?: User) {
     const updateUser: any = user || state.userProfileData
     const response = await UserService.updateUserProfile(updateUser.firstname, updateUser.lastname)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.userProfile = response.data
       return response.data
     }
@@ -180,7 +180,7 @@ export const useUserStore = defineStore('user', () => {
 
   async function saveUserTerms () {
     const response = await UserService.updateUserTerms('@me', this.termsOfUseVersion, this.isTermsAccepted)
-    if (response && response.data) {
+    if (response?.data) {
       return response.data
     }
   }
@@ -207,7 +207,7 @@ export const useUserStore = defineStore('user', () => {
 
   async function getUserAccountSettings () {
     const response = await UserService.getUserAccountSettings(this.context.state['userProfile'].keycloakGuid)
-    if (response && response.data) {
+    if (response?.data) {
       // filter by account type and sort by name(label)
       const orgs = response.data.filter(userSettings =>
         (userSettings.type === 'ACCOUNT')).sort((a, b) => a.label.localeCompare(b.label))

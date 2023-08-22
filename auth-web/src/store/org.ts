@@ -501,7 +501,7 @@ export const useOrgStore = defineStore('org', () => {
       const response = await InvitationService.validateToken(token)
       state.invalidInvitationToken = false
       state.tokenError = false
-      return response && response.data ? response.data : undefined
+      return response?.data ? response.data : undefined
     } catch (err) {
       if (err.response.status === 400 || err.response.status === 404) {
         state.tokenError = false
@@ -515,7 +515,7 @@ export const useOrgStore = defineStore('org', () => {
 
   async function acceptInvitation (token: string): Promise<Invitation> {
     const response = await InvitationService.acceptInvitation(token)
-    return response && response.data ? response.data : undefined
+    return response?.data ? response.data : undefined
   }
 
   async function deactivateOrg () {
@@ -789,7 +789,7 @@ export const useOrgStore = defineStore('org', () => {
 
   async function getProductList (): Promise<OrgProduct[]> {
     const response:any = await OrgService.avialbelProducts()
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       const result = response.data
       state.productList = result
       return result
@@ -884,14 +884,14 @@ export const useOrgStore = defineStore('org', () => {
   async function updateAccountFees (accountFee): Promise<any> {
     const { accoundId, accountFees } = accountFee
     const response = await PaymentService.updateAccountFees(accoundId.toString(), accountFees)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       return response.data
     }
   }
 
   async function syncCurrentAccountFees (accoundId:number): Promise<AccountFee[]> {
     const response = await PaymentService.getAccountFees(accoundId.toString())
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       const result = response.data.accountFees
       setCurrentAccountFees(result)
       return result
@@ -922,7 +922,7 @@ export const useOrgStore = defineStore('org', () => {
   // Check if user has any accounts, if any, default the first returned value as the selected org.
   async function setCurrentOrganizationFromUserAccountSettings (): Promise<void> {
     const response = await UserService.getUserAccountSettings(userStore.state.userProfile?.keycloakGuid)
-    if (response && response.data) {
+    if (response?.data) {
       // filter by account type and default first returned value as the current organization
       const orgs = response.data.filter(userSettings => (userSettings.type === 'ACCOUNT'))
       if (orgs && orgs.length) {

@@ -18,7 +18,7 @@ export const useCodesStore = defineStore('codes', () => {
 
   async function getBusinessSizeCodes (): Promise<Code[]> {
     const response = await CodesService.getCodes(this.businessSizeCodeTable)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.businessSizeCodes = response.data
       return response.data
     }
@@ -28,7 +28,7 @@ export const useCodesStore = defineStore('codes', () => {
 
   async function getBusinessTypeCodes (): Promise<Code[]> {
     const response = await CodesService.getCodes(this.businessTypeCodeTable)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       const result = response.data.sort((a, b) => a.desc.localeCompare(b.desc))
       state.businessTypeCodes = result
       return result
@@ -39,7 +39,7 @@ export const useCodesStore = defineStore('codes', () => {
 
   async function getCodes (): Promise<Code[]> {
     const response = await CodesService.getCodes(this.suspensionReasonCodeTable)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.suspensionReasonCodes = response.data
       return response.data
     }
@@ -47,7 +47,7 @@ export const useCodesStore = defineStore('codes', () => {
 
   async function getOnholdReasonCodes (): Promise<Code[]> {
     const response = await CodesService.getCodes(this.onholdReasonCodeTable)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.onholdReasonCodes = response.data
       return response.data
     }

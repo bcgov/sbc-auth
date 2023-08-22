@@ -49,7 +49,7 @@ export const useTaskStore = defineStore('task', () => {
 
   async function getTaskById (taskId:number): Promise<Task> {
     const response = await TaskService.getTaskById(taskId)
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.currentTask = response.data
       return response.data
     }

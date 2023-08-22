@@ -57,7 +57,7 @@ export const useStaffStore = defineStore('staff', () => {
 
   async function getProducts (): Promise<ProductCode[]> {
     const response = await StaffService.getProducts()
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.products = response.data
       return response.data
     }
@@ -65,7 +65,7 @@ export const useStaffStore = defineStore('staff', () => {
 
   async function getAccountTypes (): Promise<AccountType[]> {
     const response = await StaffService.getAccountTypes()
-    if (response && response.data && response.status === 200) {
+    if (response?.data && response.status === 200) {
       state.accountTypes = response.data
       return response.data
     }
