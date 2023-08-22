@@ -625,13 +625,16 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         }
       }
     }
-    const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
-    const token = JSON.parse(decodedToken)
-    const legalName = Base64.decode(this.base64OrgName)
 
     this.setAccountChangedHandler(this.setup)
     this.setup()
-    this.parseUrlAndAddAffiliation(token, legalName)
+
+    if (this.base64Token && this.base64OrgName) {
+      const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
+      const token = JSON.parse(decodedToken)
+      const legalName = Base64.decode(this.base64OrgName)
+      this.parseUrlAndAddAffiliation(token, legalName)
+    }
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
