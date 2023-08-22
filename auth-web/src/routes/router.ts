@@ -248,8 +248,8 @@ export function getRoutes (): RouteConfig[] {
       props: route => {
         try {
           const base64Token = route.params.base64Token
-          const decodedToken = Base64.decode(base64Token) // Decode the Base64 token
-          const orgId = JSON.parse(decodedToken).fromOrgId // Extract the orgId from the decoded token
+          const decodedToken = Base64.decode(base64Token)
+          const orgId = JSON.parse(decodedToken).fromOrgId
 
           return {
             orgId: orgId,
