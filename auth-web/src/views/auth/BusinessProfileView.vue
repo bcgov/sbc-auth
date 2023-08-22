@@ -93,7 +93,6 @@ import { useBusinessStore } from '@/store/business'
   }
 })
 export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
-  // TODO: Set businessType from current business in store
   private businessType = 'cooperative'
   private editing = false
   private isLoading = true

@@ -17,6 +17,8 @@ import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
 import { getVuexStore } from '@/store'
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 Vue.use(Router)
 
@@ -55,27 +57,32 @@ router.beforeEach(async (to, from, next) => {
   }
 
   const store = getVuexStore()
+  const orgStore = useOrgStore()
+  const userStore = useUserStore()
   // Enforce navigation guards are checked before navigating anywhere else
   // If store is not ready, we place a watch on it, then proceed when ready
+  // Remove Vuex with Vue3 upgrade.
   if (store.getters.loading) {
     store.watch(
       (state, getters) => getters.loading,
       value => {
         if (value === false) {
+          debugger
           proceed()
         }
       })
   } else {
+    debugger
     proceed()
   }
 
   function proceed () {
-    const userProfile: User = (store.state as any)?.user?.userProfile
-    const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
-    const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
-    const currentMembership: Member = (store.state as any)?.org?.currentMembership
-    const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
-    const permissions: string[] = (store.state as any)?.org?.permissions
+    const userProfile: User = userStore.state.userProfile
+    const currentAccountSettings: AccountSettings = orgStore.state.currentAccountSettings
+    const currentOrganization: Organization = orgStore.state.currentOrganization
+    const currentMembership: Member = orgStore.state.currentMembership
+    const currentUser: KCUserProfile = userStore.state.currentUser
+    const permissions: string[] = orgStore.state.permissions
     if (to.path === `/${Pages.LOGIN}` && currentUser) {
       // If the user came back from login page and is already logged in
       // redirect to redirect path
@@ -84,9 +91,9 @@ router.beforeEach(async (to, from, next) => {
       })
     } else {
       if (to.matched.some(record => record.meta.isPremiumOnly)) {
-        const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
-        const currentMembership: Member = (store.state as any)?.org?.currentMembership
-        const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
+        const currentOrganization: Organization = orgStore.state.currentOrganization
+        const currentMembership: Member = orgStore.state.currentMembership
+        const currentUser: KCUserProfile = userStore.state.currentUser
         // redirect to unauthorized page if the account selected is not Premium
         if (!(currentOrganization?.orgType === Account.PREMIUM &&
           [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode)) &&
@@ -166,7 +173,7 @@ router.beforeEach(async (to, from, next) => {
           case LoginSource.BCEID:
             return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
         }
-      } else if (store.getters['org/needMissingBusinessDetailsRedirect']) {
+      } else if (orgStore.needMissingBusinessDetailsRedirect) {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }

@@ -93,7 +93,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         } else {
           await this.syncMembership(invitation?.membership[0]?.org?.id)
         }
-        // Remove with Vue3
+        // Remove Vuex with Vue 3
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
       }

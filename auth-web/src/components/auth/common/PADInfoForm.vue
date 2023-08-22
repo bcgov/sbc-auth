@@ -155,7 +155,7 @@ import CommonUtils from '@/util/common-util'
 import { PADInfo } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
-import { useStore } from 'vuex-composition-helpers'
+import { useOrgStore } from '@/store/org'
 
 // FUTURE: remove this in vue 3
 interface PADInfoFormState {
@@ -188,10 +188,8 @@ export default defineComponent({
   setup (props, { emit }) {
     // refs
     const preAuthDebitForm = ref(null) as HTMLFormElement
-    // store stuff
-    const store = useStore()
-    const currentOrgPADInfo = computed(() => store.state.org.currentOrgPADInfo as PADInfo)
-    const setCurrentOrganizationPADInfo = (padInfo: PADInfo) => store.dispatch('org/updatePadInfo', padInfo)
+    const orgStore = useOrgStore()
+    const currentOrgPADInfo = computed(() => orgStore.state.currentOrgPADInfo)
 
     // static vars
     const accountMask = CommonUtils.accountMask()
@@ -256,7 +254,7 @@ export default defineComponent({
         isAcknowledged: state.isAcknowledged
       }
       emitIsPreAuthDebitFormValid()
-      setCurrentOrganizationPADInfo(padInfo)
+      orgStore.setCurrentOrganizationPADInfo(padInfo)
       state.isTouched = true
       emitIsPadInfoTouched()
       emit('emit-pre-auth-debit-info', padInfo)
@@ -286,7 +284,7 @@ export default defineComponent({
       state.institutionNumber = padInfo?.bankInstitutionNumber || ''
       state.transitNumber = padInfo?.bankTransitNumber || ''
       state.isTOSAccepted = props.isInitialTOSAccepted || (padInfo?.isTOSAccepted || false)
-      setCurrentOrganizationPADInfo(padInfo)
+      orgStore.setCurrentOrganizationPADInfo(padInfo)
       await nextTick()
       if (state.isTOSAccepted) emitIsPreAuthDebitFormValid()
       state.ready = true

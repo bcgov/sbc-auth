@@ -4,7 +4,8 @@
       v-can:VIEW_ADDRESS.disable
       class="account-label"
     >
-      <!-- template warpper is required here inorder to keep the placement of divs correctly(to resolve flickering issue when updating the address) -->
+      <!-- template warpper is required here inorder to keep the placement of divs
+            correctly(to resolve flickering issue when updating the address) -->
       <div
         class="nav-list-title font-weight-bold"
         data-test="title"

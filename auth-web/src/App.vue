@@ -110,12 +110,12 @@ export default class App extends Mixins(NextPageMixin) {
   // Remove these with sbc-common-components and Vue3 upgrade.
   private authModule = getModule(AuthModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
-  private showNotification = false
-  private notificationText = ''
-  private showLoading = true
-  private toastType = 'primary'
-  private toastTimeout = 6000
-  private logoutUrl = ''
+  showNotification = false
+  notificationText = ''
+  showLoading = true
+  toastType = 'primary'
+  toastTimeout = 6000
+  logoutUrl = ''
 
   $refs: {
     header: SbcHeader
@@ -157,17 +157,18 @@ export default class App extends Mixins(NextPageMixin) {
     return import.meta.env.ABOUT_TEXT
   }
 
-  private startAccountSwitch () {
+  startAccountSwitch () {
     this.showLoading = true
   }
 
-  private async completeAccountSwitch () {
+  async completeAccountSwitch () {
     await this.syncUser()
     this.showLoading = false
     this.toastType = 'primary'
     this.notificationText = `Switched to account '${this.currentAccountSettings.label}'`
     this.showNotification = true
 
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
 
     this.accountFreezeRedirect()
@@ -179,6 +180,7 @@ export default class App extends Mixins(NextPageMixin) {
     if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
       this.loadUserInfo()
       await this.syncUser()
+      // Remove Vuex with Vue 3
       this.$store.commit('loadComplete')
     }
   }
@@ -206,7 +208,8 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
-    // Auth store, still exists in sbc-common-components v2, uses pinia in Vue3 version.
+    // Auth store, still exists in sbc-common-components v2, uses pinia in Vue 3 version.
+    // Remove Vuex with Vue 3
     this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 
@@ -214,8 +217,9 @@ export default class App extends Mixins(NextPageMixin) {
     this.$root.$off('signin-complete')
   }
 
-  private async setup (isSigninComplete?: boolean) {
+  async setup (isSigninComplete?: boolean) {
     // Header added modules to store so can access mapped actions now
+    // Remove Vuex with Vue 3
     if (this.$store.getters['auth/isAuthenticated']) {
       try {
         if (!isSigninComplete) {
@@ -226,11 +230,14 @@ export default class App extends Mixins(NextPageMixin) {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('App.vue.setup Error: ' + e)
-        this.$store.dispatch('user/reset')
+        const userStore = useUserStore()
+        await userStore.reset()
+        // Remove Vuex with Vue 3
         this.$store.commit('loadComplete')
         this.$router.push('/home')
       }
     }
+    // Remove Vuex with Vue 3
     this.$store.commit('loadComplete')
   }
 }

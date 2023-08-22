@@ -162,6 +162,7 @@ export default class TeamManagementMixin extends Vue {
       memberId: this.memberToBeRemoved.id,
       status: MembershipStatus.Rejected
     })
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     this.modal.close()
   }
@@ -173,6 +174,7 @@ export default class TeamManagementMixin extends Vue {
       await this.leaveTeam(this.currentMembership.id)
     }
     this.modal.close()
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     this.$router.push('/leaveteam')
   }
@@ -180,6 +182,7 @@ export default class TeamManagementMixin extends Vue {
   protected async dissolve () {
     await this.leaveTeam(this.currentMembership.id)
     this.modal.close()
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     const event:Event = { message: 'Dissolved the account', type: 'error', timeout: 1000 }
     EventBus.$emit('show-toast', event)

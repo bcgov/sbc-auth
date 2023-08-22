@@ -84,6 +84,7 @@ export default class NonBcscAdminInviteSetupView extends Mixins(NextPageMixin) {
       if (this.token) {
         this.$router.push('/confirmtoken/' + this.token)
       } else if (this.orgId) {
+        // Remove with Vue 3
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
       }

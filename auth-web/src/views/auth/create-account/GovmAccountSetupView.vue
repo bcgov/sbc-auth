@@ -134,6 +134,7 @@ export default class GovmAccountSetupView extends Vue {
       const organization: any = await this.createGovmOrg() // create govm account
       await this.syncOrganization(organization.id)
       await this.syncMembership(organization.id)
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       this.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
       this.isLoading = false

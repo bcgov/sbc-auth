@@ -272,6 +272,7 @@ export default class AccountDeactivate extends Vue {
     this.$refs.successModal.close()
     await this.setCurrentOrganizationFromUserAccountSettings()
     // Update header
+    // Remove with Vue 3
     await this.$store.commit('updateHeader')
     this.$router.push(`/home`)
   }

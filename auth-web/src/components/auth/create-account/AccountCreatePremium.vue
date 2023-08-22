@@ -213,6 +213,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
   isOrgBusinessTypeValid = false
 
   get isExtraProvUser () {
+    // Remove Vuex with Vue 3
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 

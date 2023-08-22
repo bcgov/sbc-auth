@@ -312,6 +312,7 @@ export default class NonBcscAccountSetupView extends Vue {
         await this.getUserProfile('@me')
       }
 
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       const nextRoute = !this.isAffidavitAlreadyApproved ? '/setup-non-bcsc-account-success' : '/setup-account-success'
       this.$router.push(nextRoute)

@@ -9,6 +9,7 @@ export default class AccountChangeMixin extends Vue {
   protected unregisterHandler: () => void
 
   protected setAccountChangedHandler (handler: () => any) {
+    // TODO: FIX THIS
     this.unregisterHandler = this.$store.subscribe((mutation) => {
       if (mutation.type === 'org/setCurrentOrganization') {
         handler()

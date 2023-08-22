@@ -102,6 +102,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   }
 
   mounted () {
+    // Remove with Vue 3
     this.$store.commit('updateHeader')
     this.isGovmUser = this.isGovmUserLoggedin()
   }

@@ -582,6 +582,7 @@ export default class AccountInfo extends Mixins(
       await this.updateOrg(createRequestBody)
       // FUTURE: change 'staff view other account' flow so it doesn't need to fake load the other account globally
       // if staff updating a user account don't reload header -- causes staff account to get loaded in
+      // Remove Vuex with Vue 3
       if (!(this.isStaff && !this.isStaffAccount)) this.$store.commit('updateHeader')
       this.addressChanged = false
       if (this.baseAddress) {

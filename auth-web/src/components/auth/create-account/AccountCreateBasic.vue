@@ -174,6 +174,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private get isExtraProvUser () {
+    // Remove Vuex with Vue 3
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 

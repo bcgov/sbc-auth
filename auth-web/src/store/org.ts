@@ -400,11 +400,6 @@ export const useOrgStore = defineStore('org', () => {
     return response?.data
   }
 
-  function updatePadInfo (padInfo: PADInfo): PADInfo {
-    state.currentOrgPADInfo = padInfo
-    return padInfo
-  }
-
   async function validatePADInfo (): Promise<PADInfoValidation> {
     const padInfo: PADInfo = { ...state.currentOrgPADInfo }
     delete padInfo.isTOSAccepted
@@ -1001,7 +996,6 @@ export const useOrgStore = defineStore('org', () => {
     updateLoginOption,
     createOrg,
     createGovmOrg,
-    updatePadInfo,
     validatePADInfo,
     addOrgSettings,
     validateBcolAccount,

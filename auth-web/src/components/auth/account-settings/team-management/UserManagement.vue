@@ -393,6 +393,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
       memberId: this.memberToBeApproved.id,
       status: MembershipStatus.Active
     })
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     this.$refs.confirmActionDialog.close()
   }

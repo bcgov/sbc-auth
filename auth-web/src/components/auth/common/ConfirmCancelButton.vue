@@ -94,7 +94,7 @@ export default class ConfirmCancelButton extends Vue {
       if (this.clearCurrentOrg) {
         await this.resetAccountSetupProgress()
         await this.setCurrentOrganizationFromUserAccountSettings()
-        // Update header
+        // Remove in Vue 3
         await this.$store.commit('updateHeader')
       }
       if (this.isEmit) {
