@@ -242,18 +242,20 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
-      path: '/:base64OrgName/affiliationInvitation/acceptToken//:base64Token',
+      path: '/:base64OrgName/affiliationInvitation/acceptToken/:base64Token',
       name: 'account-magic-link',
       component: EntityManagement,
       props: route => {
         try {
-          const base64Token = route.params.base64Token
-          const decodedToken = Base64.decode(base64Token) // Decode the Base64 token
-          const orgId = JSON.parse(decodedToken).fromOrgId // Extract the orgId from the decoded token
+          // The :base64Token consists of a token that is divided into three parts, separated by periods.
+          // we extract the first part of the token for decoding.
+          const base64Token = route.params.base64Token.split('.')[0]
+          const decodedToken = Base64.decode(base64Token)
+          const orgId = JSON.parse(decodedToken).fromOrgId
 
           return {
             orgId: orgId,
-            base64Token: route.params.base64Token,
+            base64Token: base64Token,
             base64OrgName: route.params.base64OrgName
           }
         } catch (error) {
