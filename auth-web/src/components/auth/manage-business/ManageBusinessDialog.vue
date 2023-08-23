@@ -6,6 +6,32 @@
       @open-help="openHelp"
       @close-dialog="onAuthorizationEmailSentClose"
     />
+    <ModalDialog
+      ref="createAffiliationInvitationErrorDialog"
+      title="Error Sending Authorization Email"
+      text="An error occurred sending authorization email. Please try again."
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          data-test="dialog-ok-button"
+          @click="closeCreateAffiliationInvitationErrorDialog()"
+        >
+          Close
+        </v-btn>
+      </template>
+    </ModalDialog>
     <v-dialog
       v-model="isDialogVisible"
       attach="#entity-management"
@@ -210,7 +236,7 @@
 
 <script lang="ts">
 import { CorpTypes, LDFlags } from '@/util/constants'
-import { computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
@@ -221,6 +247,7 @@ import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { StatusCodes } from 'http-status-codes'
 import { useStore } from 'vuex-composition-helpers'
 
@@ -228,7 +255,8 @@ export default defineComponent({
   components: {
     AuthorizationEmailSentDialog,
     Certify,
-    HelpDialog
+    HelpDialog,
+    ModalDialog
   },
   props: {
     orgId: {
@@ -296,6 +324,8 @@ export default defineComponent({
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
+    const showCreateAffiliationInvitationErrorDialog = ref(false)
+    const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
 
     const isBusinessLegalTypeFirm = computed(() => {
       return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
@@ -461,6 +491,11 @@ export default defineComponent({
       }
     }
 
+    const closeCreateAffiliationInvitationErrorDialog = () => {
+      createAffiliationInvitationErrorDialog.value.close()
+      showCreateAffiliationInvitationErrorDialog.value = false
+    }
+
     const manageBusiness = async () => {
       if (emailOption.value) {
         try {
@@ -474,11 +509,11 @@ export default defineComponent({
           if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {
             emit('affiliation-invitation-pending', affiliationInvitation.data.businessIdentifier)
           }
+          showAuthorizationEmailSentDialog.value = true
         } catch (err) {
           // eslint-disable-next-line no-console
-          console.log(err)
-        } finally {
-          showAuthorizationEmailSentDialog.value = true
+          createAffiliationInvitationErrorDialog.value.open()
+          showCreateAffiliationInvitationErrorDialog.value = true
         }
         return
       }
@@ -599,7 +634,10 @@ export default defineComponent({
       businessContactEmail,
       enableDelegationFeature,
       showHelp,
-      showAuthorizationEmailSentDialog
+      showAuthorizationEmailSentDialog,
+      showCreateAffiliationInvitationErrorDialog,
+      createAffiliationInvitationErrorDialog,
+      closeCreateAffiliationInvitationErrorDialog
     }
   }
 })

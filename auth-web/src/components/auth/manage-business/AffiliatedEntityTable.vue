@@ -527,7 +527,7 @@ export default defineComponent({
         // outgoing request for access
         switch (affiliationInviteInfos[0].status) {
           case AffiliationInvitationStatus.Pending:
-            statusText = 'Confirmation email sent, pending authorization'
+            statusText = 'Confirmation email sent, pending authorization.'
             break
           case AffiliationInvitationStatus.Accepted:
             statusText = '<strong>Authorized</strong> - you can now manage this business.'

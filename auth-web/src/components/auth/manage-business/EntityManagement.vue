@@ -584,7 +584,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   // action from business module
   @BusinessModule.Action('isAffiliated')
-  readonly isAffiliated!: (identifier: string) => Promise<boolean>
+  private readonly isAffiliated!: (identifier: string) => Promise<boolean>
 
   // for template
   readonly CorpTypes = CorpTypes
@@ -658,10 +658,57 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.setup()
 
     if (this.base64Token && this.base64OrgName) {
-      const decodedToken = Base64.decode(this.base64Token)
+      const base64TokenObject = this.base64Token.split('.')[0]
+      const decodedToken = Base64.decode(base64TokenObject)
       const token = JSON.parse(decodedToken)
       const legalName = Base64.decode(this.base64OrgName)
-      this.parseUrlAndAddAffiliation(token, legalName)
+      this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+    }
+  }
+
+  // Function to parse the URL and extract the parameters, used for magic link email
+  // parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
+  protected async parseUrlAndAddAffiliation (token: any, legalName: string, base64Token: string) {
+    if (!this.$route.meta.checkMagicLink) {
+      return
+    }
+    const identifier = token.businessIdentifier
+    const invitationId = token.id
+    this.businessIdentifier = token.businessIdentifier
+    try {
+      const invitation = await AffiliationInvitationService.getInvitationById(invitationId)
+
+      // 1. Link expired
+      if (invitation.data.status === AffiliationInvitationStatus.Expired) {
+        this.showLinkExpiredModal(identifier)
+        return
+      }
+
+      // 2. business already added
+      const isAdded = await this.isAffiliated(identifier)
+      if (isAdded) {
+        this.showBusinessAlreadyAdded({ name: legalName, identifier })
+        return
+      }
+
+      // 3. Accept invitation
+      const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
+
+      // 4. Unauthorized
+      if (response.status === 401) {
+        this.showAuthorizationErrorModal()
+        return
+      }
+
+      // 5. Adding magic link success
+      if (response.status === 200) {
+        this.showAddSuccessModalByEmail(identifier)
+        return
+      }
+
+      throw new Error('Magic link error')
+    } catch (error) {
+      this.showMagicLinkErrorModal()
     }
   }
 
@@ -698,50 +745,50 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
-  parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
-    if (!this.$route.meta.checkMagicLink) {
-      return
-    }
-    const identifier = token.businessIdentifier
-    const invitationId = token.id
-    this.businessIdentifier = token.businessIdentifier
-    try {
-      const invitation = await AffiliationInvitationService.getInvitationbyId(invitationId)
+  // parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
+  //   if (!this.$route.meta.checkMagicLink) {
+  //     return
+  //   }
+  //   const identifier = token.businessIdentifier
+  //   const invitationId = token.id
+  //   this.businessIdentifier = token.businessIdentifier
+  //   try {
+  //     const invitation = await AffiliationInvitationService.getInvitationById(invitationId)
 
-      // 1. Link expired
-      if (invitation.data.status === AffiliationInvitationStatus.Expired) {
-        this.showLinkExpiredModal(identifier)
-        return
-      }
+  //     // 1. Link expired
+  //     if (invitation.data.status === AffiliationInvitationStatus.Expired) {
+  //       this.showLinkExpiredModal(identifier)
+  //       return
+  //     }
 
-      // 2. business already added
-      const isAdded = await this.isAffiliated(identifier)
-      if (isAdded) {
-        this.showBusinessAlreadyAdded({ name: legalName, identifier })
-        return
-      }
+  //     // 2. business already added
+  //     const isAdded = await this.isAffiliated(identifier)
+  //     if (isAdded) {
+  //       this.showBusinessAlreadyAdded({ name: legalName, identifier })
+  //       return
+  //     }
 
-      // 3. Accept invitation
-      const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
+  //     // 3. Accept invitation
+  //     const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
 
-      // 4. Unauthorized
-      if (response.status === 401) {
-        this.showAuthorizationErrorModal()
-        return
-      }
+  //     // 4. Unauthorized
+  //     if (response.status === 401) {
+  //       this.showAuthorizationErrorModal()
+  //       return
+  //     }
 
-      // 5. Adding magic link success
-      if (response.status === 200) {
-        this.showAddSuccessModalByEmail(identifier)
-        return
-      }
+  //     // 5. Adding magic link success
+  //     if (response.status === 200) {
+  //       this.showAddSuccessModalByEmail(identifier)
+  //       return
+  //     }
 
-      throw new Error('Magic link error')
-    } catch (error) {
-      // Handle unexpected errors
-      this.showMagicLinkErrorModal()
-    }
-  }
+  //     throw new Error('Magic link error')
+  //   } catch (error) {
+  //     console.log('error', error, this.isAffiliated)
+  //     this.showMagicLinkErrorModal()
+  //   }
+  // }
 
   private async setup (): Promise<void> {
     // ensure syncBusinesses isn't already running
