@@ -1,12 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('UserProfileForm.vue', () => {
   let wrapper: Wrapper<UserProfileForm>
@@ -16,35 +10,13 @@ describe('UserProfileForm.vue', () => {
     'PAY_API_URL': 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
   }
 
-  let userModule: any
-
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     vuetify = new Vuetify()
     const $t = () => 'test'
 
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {
-        }
-      },
-      actions: {
-        getUserProfile: vi.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: userModule
-      }
-    })
-
     wrapper = mount(UserProfileForm, {
-      store,
       localVue,
       vuetify,
       mocks: { $t },

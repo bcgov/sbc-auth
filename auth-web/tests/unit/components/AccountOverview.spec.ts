@@ -1,13 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useOrgStore } from '@/store'
 
 describe('AccountOverview.vue', () => {
   let wrapper: any
@@ -20,18 +15,13 @@ describe('AccountOverview.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
 
-    // Remove with Vue 3.
-    const store = new Vuex.Store({
-      state: {},
-      strict: false
-    })
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = { id: 5 } as any
 
     wrapper = mount(AccountOverview, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable]

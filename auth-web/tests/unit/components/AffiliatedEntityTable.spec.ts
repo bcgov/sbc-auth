@@ -1,23 +1,15 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { useBusinessStore, useOrgStore } from '@/store'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BaseVDataTable } from '@/components/datatable'
 import { EntityAlertTypes } from '@/util/constants'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
-import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { businesses } from './../test-utils/test-data/affiliations'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
-Vue.use(Vuex)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -40,38 +32,10 @@ businesses.sort((a, b) => {
   return 0
 })
 
-const businessModule = {
-  namespaced: true,
-  state: { businesses },
-  action: {
-    addBusiness: vi.fn(),
-    updateBusinessName: vi.fn(),
-    updateFolioNumber: vi.fn()
-  }
-}
-
-const orgModule = {
-  namespaced: true,
-  state: {
-    currentOrganization: {
-      name: 'TestMeOut B.C. LTD.',
-      id: 3113
-    }
-  }
-}
-
 sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
   AUTH_API_URL: 'https://localhost:8080/api/v1/11',
   PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 }))
-
-const store = new Vuex.Store({
-  strict: false,
-  modules: {
-    business: businessModule,
-    org: orgModule
-  }
-})
 
 const vuetify = new Vuetify({})
 
@@ -83,8 +47,15 @@ describe('AffiliatedEntityTable.vue', () => {
 
   beforeEach(async () => {
     const localVue = createLocalVue()
+    const businessStore = useBusinessStore()
+    businessStore.businesses = businesses
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'TestMeOut B.C. LTD.',
+      id: 3113
+    } as any
+
     wrapper = mount(AffiliatedEntityTable, {
-      store,
       localVue,
       vuetify,
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },

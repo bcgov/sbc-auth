@@ -4,7 +4,6 @@ import MaintainBusinessView from '@/views/auth/home/MaintainBusinessView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
 Vue.use(Vuetify)
 const vuetify = new Vuetify({})
@@ -21,16 +20,12 @@ describe('MaintainBusinessView.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-
-    const store = new Vuex.Store({})
 
     wrapperFactory = (propsData) => {
       return mount(MaintainBusinessView, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {

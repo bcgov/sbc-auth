@@ -5,7 +5,7 @@ import { AccountStatus } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useOrgStore } from '@/store'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -22,51 +22,22 @@ document.body.setAttribute('data-app', 'true')
 
 describe('AccountFreezeUnlockView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {}
-      },
-      actions: {
-        getUserProfile: vi.fn()
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      statusCode: AccountStatus.NSF_SUSPENDED
+    } as any
+    orgStore.calculateFailedInvoices = vi.fn(() => {
+      return {
+        totalTransactionAmount: 10,
+        totalAmountToPay: 20
       }
-    }
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          statusCode: AccountStatus.NSF_SUSPENDED
-        }
-      },
-      actions: {
-        calculateFailedInvoices: vi.fn(() => {
-          return {
-            totalTransactionAmount: 10,
-            totalAmountToPay: 20
-          }
-        })
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        user: userModule,
-        org: orgModule
-      }
-    })
+    }) as any
 
     wrapper = mount(AccountFreezeUnlockView, {
-      store,
       localVue,
       router,
       vuetify,

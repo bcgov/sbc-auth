@@ -1,12 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 document.body.setAttribute('data-app', 'true')
 
@@ -15,18 +10,12 @@ describe('InfoStepper.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
 
     const vuetify = new Vuetify({})
     const router = new VueRouter()
 
-    const store = new Vuex.Store({
-      strict: false
-    })
-
     wrapper = mount(InfoStepper, {
-      store,
       router,
       localVue,
       vuetify,

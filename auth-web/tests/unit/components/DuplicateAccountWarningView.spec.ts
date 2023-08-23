@@ -1,82 +1,54 @@
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
-
+import { useOrgStore, useUserStore } from '@/store'
 import { AccountStatus } from '@/util/constants'
 import DuplicateAccountWarningView from '@/views/auth/create-account/DuplicateAccountWarningView.vue'
 import { OrgWithAddress } from '@/models/Organization'
 import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 document.body.setAttribute('data-app', 'true')
 
 describe('DuplicateAccountWarningView.vue', () => {
-  let orgModule: any
-  let userModule: any
   let wrapper: any
   let store: any
   const localVue = createLocalVue()
   localVue.directive('can', can)
-  localVue.use(Vuex)
   const vuetify = new Vuetify({})
 
   beforeEach(() => {
-    userModule = {
-      namespaced: true,
-      state: {
-        currentUserAccountSettings: [
-          {
-            accountStatus: 'ACTIVE',
-            accountType: 'BASIC',
-            id: 2446,
-            label: 'DEV SK OB1',
-            productSettings: '/account/2446/settings/product-settings',
-            type: 'ACCOUNT',
-            urlorigin: 'https://dev.account.bcregistry.gov.bc.ca/',
-            urlpath: '/account/2446/settings'
-          }
-        ]
-      }
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'DEV SK OB1',
+      statusCode: AccountStatus.ACTIVE,
+      orgStatus: AccountStatus.ACTIVE
     }
-    orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'DEV SK OB1',
-          statusCode: AccountStatus.ACTIVE,
-          orgStatus: AccountStatus.ACTIVE
-        }
-      },
-      actions: {
-        addOrgSettings: vi.fn(),
-        syncOrganization: vi.fn(),
-        getOrgAdminContact: vi.fn().mockImplementation(() => {
-          return { city: 'Halifax',
-            country: 'CA',
-            created: '2021-05-14T23:53:58.711541',
-            createdBy: 'BCREGTEST Bena TEST',
-            modified: '2021-05-14T23:53:58.711556',
-            postalCode: 'B3J 3R4',
-            region: 'NS',
-            street: '111-5657 Spring Garden Rd',
-            streetAdditional: ''
-          }
-        })
-      }
-    }
-
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule
+    orgStore.getOrgAdminContact = vi.fn().mockImplementation(() => {
+      return {
+        city: 'Halifax',
+        country: 'CA',
+        created: '2021-05-14T23:53:58.711541',
+        createdBy: 'BCREGTEST Bena TEST',
+        modified: '2021-05-14T23:53:58.711556',
+        postalCode: 'B3J 3R4',
+        region: 'NS',
+        street: '111-5657 Spring Garden Rd',
+        streetAdditional: ''
       }
     })
+    const userStore = useUserStore()
+    userStore.currentUserAccountSettings = [
+      {
+        accountStatus: 'ACTIVE',
+        accountType: 'BASIC',
+        id: 2446,
+        label: 'DEV SK OB1',
+        productSettings: '/account/2446/settings/product-settings',
+        type: 'ACCOUNT',
+        urlorigin: 'https://dev.account.bcregistry.gov.bc.ca/',
+        urlpath: '/account/2446/settings'
+      }
+    ] as any
     vi.resetModules()
     vi.clearAllMocks()
   })
@@ -88,7 +60,6 @@ describe('DuplicateAccountWarningView.vue', () => {
   it('is a Vue instance', () => {
     const $t = () => ''
     wrapper = mount(DuplicateAccountWarningView, {
-      store,
       localVue,
       vuetify,
       stubs: {
@@ -107,7 +78,6 @@ describe('DuplicateAccountWarningView.vue', () => {
       addressLine: '111-5657 Spring Garden Rd Halifax NS B3J 3R4 CA'
     }
     wrapper = shallowMount(DuplicateAccountWarningView, {
-      store,
       localVue,
       vuetify,
       stubs: {

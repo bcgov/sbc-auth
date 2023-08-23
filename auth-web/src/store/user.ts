@@ -12,7 +12,6 @@ import { RoleInfo } from '@/models/Organization'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import UserService from '@/services/user.services'
 import { defineStore } from 'pinia'
-import store from '.'
 
 export interface UserTerms {
   isTermsOfUseAccepted: boolean
@@ -247,18 +246,3 @@ export const useUserStore = defineStore('user', () => {
   }
 })
 
-// Remove with Vue3 - Note this needs to persist until we change sbc-common-components to not call this function.
-@Module({
-  name: 'user',
-  namespaced: true,
-  store: store,
-  dynamic: true
-})
-export class UserModule extends VuexModule {
-  // Note this needs to persist until we change sbc-common-components to not call this function.
-  @Mutation
-  public setUserProfile (userProfile: User | undefined) {
-    const userStore = useUserStore()
-    userStore.setUserProfile(userProfile)
-  }
-}

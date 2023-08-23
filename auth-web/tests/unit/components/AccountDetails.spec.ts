@@ -1,15 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
-
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useCodesStore } from '@/store'
 
 const vuetify = new Vuetify({})
 
@@ -21,36 +14,22 @@ describe('AccountDetails.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.directive('can', can)
-    const codesModule = {
-      namespaced: true,
-      state: {
-        businessSizeCodes: [
-          { code: '0-1', default: true, desc: '1 Employee' },
-          { code: '2-5', default: false, desc: '2-5 Employees' }
-        ],
-        businessTypeCodes: [
-          { code: 'BIZ', default: false, desc: 'GENERAL BUSINESS' }
-        ]
-      },
-      actions: {
-        getBusinessSizeCodes: vi.fn(),
-        getBusinessTypeCodes: vi.fn()
-      }
-    }
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        codes: codesModule
-      }
-    })
-
+    const codesStore = useCodesStore()
+    codesStore.businessSizeCodes = [
+      { code: '0-1', default: true, desc: '1 Employee' },
+      { code: '2-5', default: false, desc: '2-5 Employees' }
+    ]
+    codesStore.businessTypeCodes = [
+      { code: 'BIZ', default: false, desc: 'GENERAL BUSINESS' }
+    ]
+    // Remove in Vue 3
+    codesStore.getBusinessSizeCodes = vi.fn()
+    codesStore.getBusinessTypeCodes = vi.fn()
     wrapperFactory = propsData => {
       return shallowMount(AccountDetails, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData

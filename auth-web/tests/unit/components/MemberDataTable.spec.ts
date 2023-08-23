@@ -1,19 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
+import { useOrgStore, useUserStore } from '@/store'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
-import OrgModule from '@/store/modules/org'
 import OrgService from '../../../src/services/org.services'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
-import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
-Vue.directive('can', can)
 
 const vuetify = new Vuetify({})
 
@@ -135,7 +125,6 @@ const roleInfoList = [
 ]
 
 describe('MemberDataTable.vue', () => {
-  let store
   let wrapper: any
 
   const config = {
@@ -147,7 +136,6 @@ describe('MemberDataTable.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(Vuetify)
     localVue.use(VueRouter)
 
@@ -159,54 +147,23 @@ describe('MemberDataTable.vue', () => {
       }
     })
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        pendingOrgInvitations: [],
-        currentOrganization: {},
-        activeOrgMembers: membersList,
-        currentMembership: [{
-          membershipTypeCode: 'ADMIN',
-          membershipStatus: 'ACTIVE',
-          user: { username: 'test' }
-        }]
-      },
-      actions: {
-        createInvitation: vi.fn(),
-        resendInvitation: vi.fn()
-      },
-      mutations: {
-        resetInvitations: vi.fn(),
-        setCurrentMembership: vi.fn()
-      },
-      getters: OrgModule.getters
-    }
-    const userModule = {
-      namespaced: true,
-      state: {
-        currentUser: { 'userName': 'test' },
-        roleInfos: roleInfoList
-      },
-      actions: {
-        getRoleInfo: vi.fn()
-      },
-      getters: UserModule.getters
-    }
-
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.pendingOrgInvitations = []
+    orgStore.currentOrganization = {} as any
+    orgStore.activeOrgMembers = membersList as any
+    orgStore.currentMembership = [{
+      membershipTypeCode: 'ADMIN',
+      membershipStatus: 'ACTIVE',
+      user: { username: 'test' }
+    }] as any
+    const userStore = useUserStore()
+    userStore.currentUser = { 'userName': 'test' } as any
+    userStore.roleInfos = roleInfoList
 
     const $t = () => {}
 
     wrapper = mount(MemberDataTable, {
       localVue,
-      store,
       router,
       vuetify,
       mocks: { $t }
@@ -248,8 +205,8 @@ describe('MemberDataTable.vue', () => {
       membershipTypeCode: 'USER',
       membershipStatus: 'ACTIVE',
       user: { username: 'test' }
-    }]
-    await store.commit('org/setCurrentMembership', currentMember)
+    }] as any
+    useOrgStore().setCurrentMembership(currentMember)
     const items = wrapper.vm.$el.querySelectorAll('.member-data-table tbody tr')
     expect(items[0].querySelector('[title="Remove Team Member"]').style.display).toBe('')
   })

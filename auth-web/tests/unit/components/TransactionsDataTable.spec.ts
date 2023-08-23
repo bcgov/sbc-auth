@@ -5,16 +5,13 @@ import { DatePicker } from '@/components'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
 import { baseVdataTable } from '../test-utils/test-data/baseVdata'
 import flushPromises from 'flush-promises'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
-
-Vue.use(Vuetify)
-Vue.use(Vuex)
+import { useOrgStore } from '@/store/org'
 
 const vuetify = new Vuetify({})
 
@@ -43,9 +40,8 @@ describe('TransactionsDataTable tests', () => {
 
   beforeEach(async () => {
     const localVue = createLocalVue()
-    // store
-    const orgModule = { namespaced: true, state: { currentOrganization: { id: 123 } } }
-    const store = new Vuex.Store({ strict: false, modules: { org: orgModule } })
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = { id: 123 } as any
 
     // stub get transactions get call
     sandbox = sinon.createSandbox()
@@ -55,7 +51,6 @@ describe('TransactionsDataTable tests', () => {
     wrapper = mount(TransactionsDataTable, {
       localVue,
       vuetify,
-      store,
       propsData: { headers: headers }
     })
     await flushPromises()

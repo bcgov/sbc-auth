@@ -1,10 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
+import { useOrgStore } from '@/store/org'
 
 describe('GLPaymentForm.vue', () => {
   let wrapper: any
@@ -17,37 +14,18 @@ describe('GLPaymentForm.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrgGLInfo: {
-          'clientCode': '123',
-          'responsiblityCenter': '123',
-          'accountNumber': '12345',
-          'standardObject': '1234',
-          'project': '1234'
-        }
-      },
-      actions: {},
-      mutations: {
-        setCurrentOrganizationGLInfo: vi.fn()
-      },
-      getters: {}
-    }
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.currentOrgGLInfo = {
+      'clientCode': '123',
+      'responsiblityCenter': '123',
+      'accountNumber': '12345',
+      'standardObject': '1234',
+      'project': '1234'
+    } as any
 
     wrapper = mount(GLPaymentForm, {
-      store,
       localVue,
       vuetify
     })

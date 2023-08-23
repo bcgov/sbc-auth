@@ -1,5 +1,5 @@
-import '../../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
+import { useCodesStore, useOrgStore, useStaffStore, useTaskStore, useUserStore } from '@/store'
 import { BaseVExpansionPanel } from '@/components'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
@@ -11,15 +11,8 @@ import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(Vuex)
 
 const vuetify = new Vuetify({})
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
 
 describe('StaffDashboardView tests', () => {
   let wrapper: Wrapper<any>
@@ -32,55 +25,30 @@ describe('StaffDashboardView tests', () => {
 
   beforeEach(async () => {
     const localVue = createLocalVue()
-    // store
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrgPaymentDetails: { accountId: 123 },
-        currentOrganization: { id: 123 },
-        currentMembership: { membershipTypeCode: MembershipType.Admin }
-      },
-      actions: { getOrgPayments: vi.fn(() => { return { credit: 0 } }) }
-    }
-    const userModule = {
-      namespaced: true,
-      state: {
-        currentUser: {
-          roles: [Role.FasSearch, Role.Staff, Role.ViewAllTransactions, Role.StaffViewAccounts, Role.ManageGlCodes]
-        }
-      }
-    }
-    const codeModule = {
-      namespaced: true,
-      state: {},
-      actions: { getCodes: vi.fn(() => []) }
-    }
-    const taskModule = {
-      namespaced: true,
-      state: { pendingTasksCount: 0, rejectedTasksCount: 0 },
-      actions: { syncTasks: vi.fn() }
-    }
-    const staffModule = {
-      namespaced: true,
-      state: {
-        pendingInvitationsCount: 0,
-        suspendedReviewCount: 0
-      },
-      actions: {
-        syncPendingInvitationOrgs: vi.fn(() => []),
-        syncSuspendedStaffOrgs: vi.fn(() => [])
-      }
-    }
+    const orgStore = useOrgStore()
+    orgStore.currentOrgPaymentDetails = { accountId: 123 } as any
+    orgStore.currentOrganization = { id: 123 } as any
+    orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: { org: orgModule, user: userModule, code: codeModule, task: taskModule, staff: staffModule }
-    })
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      roles: [Role.FasSearch, Role.Staff, Role.ViewAllTransactions, Role.StaffViewAccounts, Role.ManageGlCodes]
+    } as any
+
+    const codeStore = useCodesStore()
+    codeStore.getCodes = vi.fn(() => []) as any
+
+    const taskStore = useTaskStore()
+    taskStore.pendingTasksCount = 0
+    taskStore.rejectedTasksCount = 0
+
+    const staffStore = useStaffStore()
+    staffStore.pendingInvitationOrgs = []
+    staffStore.suspendedStaffOrgs = []
 
     wrapper = mount(StaffDashboardView, {
       localVue,
       vuetify,
-      store,
       stubs: ['Transactions', 'StaffAccountManagement', 'PPRLauncher', 'GLCodesListView']
     })
   })

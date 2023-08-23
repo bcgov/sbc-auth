@@ -1,12 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -18,15 +15,12 @@ describe('BcscPanel.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-    const store = new Vuex.Store({})
 
     wrapperFactory = (propsData) => {
       return mount(BcscPanel, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {

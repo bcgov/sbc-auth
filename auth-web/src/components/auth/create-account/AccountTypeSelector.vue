@@ -16,7 +16,7 @@
           outlined
           hover
           data-test="div-stepper-basic"
-          :disabled="isCurrentProductsPremiumOnly"
+          :disabled="isCurrentSelectedProductsPremiumOnly"
           @click="selectAccountType(ACCOUNT_TYPE.BASIC)"
         >
           <div class="account-type">
@@ -60,7 +60,7 @@
       >
         <v-badge color>
           <span
-            v-if="isCurrentProductsPremiumOnly"
+            v-if="isCurrentSelectedProductsPremiumOnly"
             slot="badge"
             data-test="badge-account-premium"
           >

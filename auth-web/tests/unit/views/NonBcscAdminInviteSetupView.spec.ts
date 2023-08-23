@@ -1,13 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import NonBcscAdminInviteSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAdminInviteSetupView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useUserStore } from '@/store/user'
 
 const vuetify = new Vuetify({})
 const router = new VueRouter()
@@ -16,27 +11,10 @@ describe('NonBcscAdminInviteSetupView.vue', () => {
   let wrapper: any
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-    const userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {}
-      },
-      actions: {
-        createAffidavit: vi.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        user: userModule
-      }
-    })
-
+    const userStore = useUserStore()
+    userStore.userProfile = {} as any
+    userStore.createAffidavit = vi.fn()
     wrapper = shallowMount(NonBcscAdminInviteSetupView, {
-      store,
       localVue,
       router,
       vuetify

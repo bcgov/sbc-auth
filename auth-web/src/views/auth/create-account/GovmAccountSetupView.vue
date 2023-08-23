@@ -73,7 +73,6 @@ import { useOrgStore } from '@/store/org'
     ModalDialog,
     GovmContactInfoForm
   }
-
 })
 export default class GovmAccountSetupView extends Vue {
   // private readonly createOrg!: () => Promise<Organization>

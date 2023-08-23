@@ -1,12 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import SetupAccountForm from '@/components/auth/staff/SetupAccountForm.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useStaffStore } from '@/store'
 
 describe('SetupAccountForm.vue', () => {
   let wrapper: Wrapper<SetupAccountForm>
@@ -19,59 +14,40 @@ describe('SetupAccountForm.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const staffModule = {
-      namespaced: true,
-      state: {
-        products: [
-          {
-            'code': 'PPR',
-            'default': false,
-            'desc': 'Personal Property Registry'
-          },
-          {
-            'code': 'DIR_SEARCH',
-            'default': false,
-            'desc': 'Director Search'
-          }
-        ],
-        accountTypes: [
-          {
-            'code': 'IMPLICIT',
-            'default': true,
-            'desc': 'Implicit organization for internal user only'
-          },
-          {
-            'code': 'EXPLICIT',
-            'default': false,
-            'desc': 'Explicity named organization that can have multiple members'
-          },
-          {
-            'code': 'PUBLIC',
-            'default': false,
-            'desc': 'PUBLIC'
-          }
-        ]
+    const staffStore = useStaffStore()
+    staffStore.products = [
+      {
+        'code': 'PPR',
+        'default': false,
+        'desc': 'Personal Property Registry'
       },
-      actions: {
-        getProducts: vi.fn(),
-        getAccountTypes: vi.fn()
+      {
+        'code': 'DIR_SEARCH',
+        'default': false,
+        'desc': 'Director Search'
       }
-    }
-
+    ]
+    staffStore.accountTypes = [
+      {
+        'code': 'IMPLICIT',
+        'default': true,
+        'desc': 'Implicit organization for internal user only'
+      },
+      {
+        'code': 'EXPLICIT',
+        'default': false,
+        'desc': 'Explicity named organization that can have multiple members'
+      },
+      {
+        'code': 'PUBLIC',
+        'default': false,
+        'desc': 'PUBLIC'
+      }
+    ]
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        staff: staffModule
-      }
-    })
-
     wrapper = mount(SetupAccountForm, {
-      store,
       localVue,
       vuetify
     })

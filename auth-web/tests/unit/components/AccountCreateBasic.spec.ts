@@ -2,12 +2,11 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
+import { useOrgStore } from '@/store/org'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -19,8 +18,8 @@ describe('AccountCreateBasic.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
+    localVue.use(Vuex)
     const router = new VueRouter()
     sessionStorage[SessionStorageKeys.LaunchDarklyFlags] =
       JSON.stringify({
@@ -28,40 +27,28 @@ describe('AccountCreateBasic.vue', () => {
         'auth-options-learn-more': true,
         'enable-ltd-and-ulc-affiliate': true
       })
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'test org'
-        },
-        currentOrgAddress: {
-        },
-        currentMembership: [{
-          membershipTypeCode: 'OWNER',
-          membershipStatus: 'ACTIVE',
-          user: { username: 'test' } }],
-        pendingOrgMembers: []
-      },
-      actions: {
-      },
-      mutations: {
-        setCurrentOrganizationAddress: vi.fn(),
-        resetInvitations: vi.fn()
-      }
-    }
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'test org'
+    } as any
+    orgStore.currentMembership = [{
+      membershipTypeCode: 'OWNER',
+      membershipStatus: 'ACTIVE',
+      user: { username: 'test' }
+    }] as any
 
+    // Remove with Vue 3 upgrade
+    // We need a store for this one it calls auth/currentLoginSource - which is in sbc-common-components for now.
     const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-      }
+      state: {},
+      strict: false
     })
 
     wrapperFactory = (propsData) => {
       return shallowMount(AccountCreateBasic, {
         localVue,
-        store,
         router,
+        store,
         vuetify,
         propsData: {
           ...propsData

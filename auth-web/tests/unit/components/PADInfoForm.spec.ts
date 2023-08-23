@@ -3,12 +3,11 @@ import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
 import can from '@/directives/can'
 import sinon from 'sinon'
-
-Vue.use(Vuetify)
+import { useOrgStore } from '@/store/org'
+import { useUserStore } from '@/store/user'
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -33,7 +32,6 @@ describe('PADInfoForm.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.directive('can', can)
 
     const vuetify = new Vuetify({})
@@ -43,37 +41,14 @@ describe('PADInfoForm.vue', () => {
     const get = sandbox.stub(axios, 'get')
     get.returns(new Promise(resolve => resolve({ data: null })))
 
-    const userModule = {
-      namespaced: true,
-      state: {
-        userHasToAcceptTOS: false
-      },
-      actions: {
-        getTermsOfUse: vi.fn(() => null)
-      },
-      mutations: {},
-      getters: {}
-    }
+    const userStore = useUserStore()
+    userStore.userHasToAcceptTOS = false
+    userStore.getTermsOfUse = vi.fn(() => null)
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrgPADInfo: { ...startingOrgPADInfo }
-      },
-      actions: { updatePadInfo: vi.fn() }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.currentOrgPADInfo = { ...startingOrgPADInfo }
 
     wrapper = mount(PADInfoForm, {
-      store,
       localVue,
       vuetify,
       propsData: {

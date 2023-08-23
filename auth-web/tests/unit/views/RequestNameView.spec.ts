@@ -2,12 +2,9 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
 import RequestNameView from '@/views/auth/home/RequestNameView.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -24,12 +21,8 @@ describe('RequestNameView.vue', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({})
 
     wrapper = mount(RequestNameView, {
-      store,
       localVue,
       vuetify
     })

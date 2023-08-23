@@ -1,18 +1,12 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, mount } from '@vue/test-utils'
+import { useOrgStore, useUserStore } from '@/store'
 import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
 
 const vuetify = new Vuetify({})
 
@@ -41,50 +35,23 @@ describe('Entity Management Component', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const $t = () => 'test'
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'new org',
-          orgType: 'STAFF'
-        }
-      }
-    }
-    const businessModule = {
-      namespaced: true,
-      state: {
-        businesses: []
 
-      },
-      action: {
-        addBusiness: vi.fn()
-      }
-    }
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'new org',
+      orgType: 'STAFF'
+    } as any
 
-    const userModule: any = {
-      namespaced: true,
-      state: {
-        currentUser: {
-          firstName: 'Nadia',
-          lastName: 'Woodie'
-        }
-      }
-    }
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      firstName: 'Nadia',
+      lastName: 'Woodie'
+    } as any
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        business: businessModule,
-        user: userModule
-      }
-    })
     wrapper = mount(EntityManagement, {
       vuetify,
       localVue,
-      store,
       mocks: { $t },
       computed: {
         enableBcCccUlc () {

@@ -1,12 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
-import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useBusinessStore } from '@/store/business'
 
 describe('BusinessContactForm.vue', () => {
   let wrapper: Wrapper<BusinessContactForm>
@@ -19,38 +13,25 @@ describe('BusinessContactForm.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const businessModule = {
-      namespaced: true,
-      state: {
-        currentBusiness: {
-          businessIdentifier: 'CP0000000',
-          businessNumber: 'CP0000000',
-          contacts: [
-            {
-              created: '2019-12-11T04:03:11.830365+00:00',
-              createdBy: 'TEST',
-              email: 'test@gmail.com',
-              modified: '2019-12-11T04:03:11.830395+00:00',
-              phone: '',
-              phoneExtension: ''
-            }
-          ],
-          folioNumber: '22222222222'
+    const businessStore = useBusinessStore()
+    businessStore.currentBusiness = {
+      businessIdentifier: 'CP0000000',
+      businessNumber: 'CP0000000',
+      contacts: [
+        {
+          created: '2019-12-11T04:03:11.830365+00:00',
+          createdBy: 'TEST',
+          email: 'test@gmail.com',
+          modified: '2019-12-11T04:03:11.830395+00:00',
+          phone: '',
+          phoneExtension: ''
         }
-      }
-    }
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        business: businessModule
-      }
-    })
+      ],
+      folioNumber: '22222222222'
+    } as any
 
     wrapper = mount(BusinessContactForm, {
-      store,
       localVue
     })
 

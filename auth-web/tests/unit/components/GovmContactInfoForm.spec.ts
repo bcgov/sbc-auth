@@ -1,14 +1,9 @@
-
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import GovmContactInfoForm from '@/components/auth/create-account/GovmContactInfoForm.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -20,30 +15,11 @@ describe('GovmContactInfoForm.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
-    const userModule = {
-      namespaced: true,
-      state: {},
-      actions: {
-        getUserProfile: vi.fn()
-      }
-
-    }
-
     const router = new VueRouter()
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: userModule
-      }
-    })
-
     wrapperFactory = (propsData) => {
       return shallowMount(GovmContactInfoForm, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {

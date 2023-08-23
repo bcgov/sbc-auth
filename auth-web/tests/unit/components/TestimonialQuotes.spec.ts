@@ -1,10 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 document.body.setAttribute('data-app', 'true')
 
 describe('TestimonialQuotes.vue', () => {
@@ -12,13 +9,10 @@ describe('TestimonialQuotes.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
-    const store = new Vuex.Store({})
 
     wrapper = mount(TestimonialQuotes, {
-      store,
       localVue,
       vuetify
     })
