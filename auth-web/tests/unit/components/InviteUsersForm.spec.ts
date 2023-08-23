@@ -57,7 +57,6 @@ describe('InviteUsersForm.vue', () => {
       'name': 'COORDINATOR'
     }] as any
 
-
     vi.resetModules()
     vi.clearAllMocks()
   })

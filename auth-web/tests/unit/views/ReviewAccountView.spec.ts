@@ -1,10 +1,9 @@
 import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
+import { useStaffStore, useTaskStore } from '@/store'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useTaskStore } from '@/store/task'
-import { useStaffStore } from '@/store/staff'
 
 const vuetify = new Vuetify({})
 const router = new VueRouter()

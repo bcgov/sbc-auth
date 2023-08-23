@@ -1,5 +1,4 @@
 import { DocumentUpload, User, UserProfileData, UserSettings } from '@/models/user'
-import { Module, Mutation, VuexModule } from 'vuex-module-decorators'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 
@@ -245,4 +244,3 @@ export const useUserStore = defineStore('user', () => {
     uploadPendingDocsToStorage
   }
 })
-
