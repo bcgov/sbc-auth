@@ -606,7 +606,8 @@ export default defineComponent({
     }
 
     const getPrimaryAction = (item: Business): string => {
-      if (item?.affiliationInvites?.[0]?.status === AffiliationInvitationStatus.Pending) {
+      const invitationStatus = item?.affiliationInvites?.[0]?.status
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
         return 'Resend Email'
       }
       if (isTemporaryBusiness(item)) {
@@ -631,6 +632,11 @@ export default defineComponent({
     }
 
     const isOpenExternal = (item: Business): boolean => {
+      const invitationStatus = item?.affiliationInvites?.[0]?.status
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
+        return false
+      }
+
       if (isTemporaryBusiness(item)) {
         return false
       }
@@ -771,7 +777,8 @@ export default defineComponent({
     }
 
     const action = (item: Business): void => {
-      if (item?.affiliationInvites?.[0]?.status === AffiliationInvitationStatus.Pending) {
+      const invitationStatus = item?.affiliationInvites?.[0]?.status
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
         context.emit('resend-affiliation-invitation', item)
         return
       }
