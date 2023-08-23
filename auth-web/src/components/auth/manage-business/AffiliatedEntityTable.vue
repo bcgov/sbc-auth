@@ -771,7 +771,7 @@ export default defineComponent({
     }
 
     const action = (item: Business): void => {
-      if (item?.affiliationInvites?.[0]?.status === 'PENDING') {
+      if (item?.affiliationInvites?.[0]?.status === AffiliationInvitationStatus.Pending) {
         context.emit('resend-affiliation-invitation', item)
         return
       }
