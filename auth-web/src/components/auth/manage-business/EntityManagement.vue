@@ -658,7 +658,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.setup()
 
     if (this.base64Token && this.base64OrgName) {
-      const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
+      const decodedToken = Base64.decode(this.base64Token)
       const token = JSON.parse(decodedToken)
       const legalName = Base64.decode(this.base64OrgName)
       this.parseUrlAndAddAffiliation(token, legalName)
