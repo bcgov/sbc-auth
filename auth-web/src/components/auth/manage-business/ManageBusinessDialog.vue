@@ -425,18 +425,17 @@ export default defineComponent({
 
     const isFormValid = computed(() => {
       let isValid = false
-
+      const hasBusinessIdentifier = !!businessIdentifier.value
+      const hasPasscode = !!passcode.value
       if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
-        isValid = !!businessIdentifier.value && !!passcode.value
+        isValid = hasBusinessIdentifier && hasPasscode
       } else if (isBusinessLegalTypeFirm.value) {
-        isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
+        isValid = hasBusinessIdentifier && !!proprietorPartnerName.value && !!isCertified.value
       } else {
-        isValid =
-          !!businessIdentifier.value &&
-          !!passcode.value &&
-          (!isBusinessLegalTypeFirm.value || isCertified.value) &&
-          (!(isBusinessIdentifierValid.value && isBusinessLegalTypeFirm.value) || !!certifiedBy.value) &&
-          addBusinessForm.value.validate()
+        const isFirmCertified = !isBusinessLegalTypeFirm.value || !!isCertified.value
+        const isIdentifierValidOrFirmCertified = (!(isBusinessIdentifierValid.value && isBusinessLegalTypeFirm.value)) || !!certifiedBy.value
+        const isFormValidated = addBusinessForm.value.validate()
+        isValid = hasBusinessIdentifier && hasPasscode && isFirmCertified && isIdentifierValidOrFirmCertified && isFormValidated
       }
       return isValid
     })
