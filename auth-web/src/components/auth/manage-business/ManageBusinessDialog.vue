@@ -467,7 +467,8 @@ export default defineComponent({
           const payload: CreateAffiliationInvitation = {
             fromOrgId: Number(props.orgId),
             businessIdentifier: businessIdentifier.value,
-            toOrgId: null // Needs to be null, as there currently there is a bug on the backend
+            // toOrgId has to be null, as this is a bug on the backend
+            toOrgId: null
           }
           const affiliationInvitation = await AffiliationInvitationService.createInvitation(payload)
           if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {

@@ -665,6 +665,38 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
+  helpDialogBlurb = async () => {
+    return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+        'please contact us at:'
+  }
+
+  openHelp = async () => {
+    this.$refs.helpDialog.open()
+  }
+
+  resendAffiliationInvitation = async (event) => {
+    let fromOrgId = Number(this.orgId)
+    let businessIdentifier = this.base64OrgName
+    if (event?.affiliationInvites[0].status === "PENDING") {
+      fromOrgId = event?.affiliationInvites[0].fromOrg.id
+      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
+    try {
+      const payload: CreateAffiliationInvitation = {
+        fromOrgId: fromOrgId,
+        businessIdentifier: businessIdentifier
+      }
+      await AffiliationInvitationService.createInvitation(payload)
+      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
+      this.businessContactEmail = contact?.data?.email
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err)
+    } finally {
+      this.isAuthorizationEmailSentDialogVisible = true
+    }
+  }
+
   // Function to parse the URL and extract the parameters, used for magic link email
   parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
     if (!this.$route.meta.checkMagicLink) {

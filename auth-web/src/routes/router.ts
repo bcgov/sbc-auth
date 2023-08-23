@@ -251,7 +251,7 @@ export function getRoutes (): RouteConfig[] {
           // we extract the first part of the token for decoding.
           const base64Token = route.params.base64Token.split('.')[0]
           const decodedToken = Base64.decode(base64Token)
-          const orgId = JSON.parse(decodedToken).fromOrgId
+          const orgId = JSON.parse(decodedToken).fromOrgId.toString()
 
           return {
             orgId: orgId,
