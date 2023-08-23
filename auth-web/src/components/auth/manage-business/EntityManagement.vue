@@ -293,6 +293,7 @@
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
         @business-already-added="showBusinessAlreadyAdded($event)"
+        @show-create-affiliation-invitation-error-dialog="showCreateAffiliationInvitationErrorDialog()"
       />
 
       <AuthorizationEmailSentDialog
@@ -736,59 +737,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       await AffiliationInvitationService.createInvitation(payload)
       const contact = await BusinessService.getMaskedContacts(businessIdentifier)
       this.businessContactEmail = contact?.data?.email
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.log(err)
-    } finally {
       this.isAuthorizationEmailSentDialogVisible = true
+    } catch (err) {
+      this.showCreateAffiliationInvitationErrorDialog()
     }
   }
-
-  // Function to parse the URL and extract the parameters, used for magic link email
-  // parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
-  //   if (!this.$route.meta.checkMagicLink) {
-  //     return
-  //   }
-  //   const identifier = token.businessIdentifier
-  //   const invitationId = token.id
-  //   this.businessIdentifier = token.businessIdentifier
-  //   try {
-  //     const invitation = await AffiliationInvitationService.getInvitationById(invitationId)
-
-  //     // 1. Link expired
-  //     if (invitation.data.status === AffiliationInvitationStatus.Expired) {
-  //       this.showLinkExpiredModal(identifier)
-  //       return
-  //     }
-
-  //     // 2. business already added
-  //     const isAdded = await this.isAffiliated(identifier)
-  //     if (isAdded) {
-  //       this.showBusinessAlreadyAdded({ name: legalName, identifier })
-  //       return
-  //     }
-
-  //     // 3. Accept invitation
-  //     const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
-
-  //     // 4. Unauthorized
-  //     if (response.status === 401) {
-  //       this.showAuthorizationErrorModal()
-  //       return
-  //     }
-
-  //     // 5. Adding magic link success
-  //     if (response.status === 200) {
-  //       this.showAddSuccessModalByEmail(identifier)
-  //       return
-  //     }
-
-  //     throw new Error('Magic link error')
-  //   } catch (error) {
-  //     console.log('error', error, this.isAffiliated)
-  //     this.showMagicLinkErrorModal()
-  //   }
-  // }
 
   private async setup (): Promise<void> {
     // ensure syncBusinesses isn't already running
@@ -940,6 +893,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.dialogTitle = 'Unable to Manage Business'
     this.dialogText =
     'The account that requested authorisation does not match your current account. Please log in as the account that initiated the request.'
+    this.$refs.errorDialog.open()
+  }
+
+  showCreateAffiliationInvitationErrorDialog () {
+    this.dialogTitle = 'Error Sending Authorization Email'
+    this.dialogText = 'An error occurred sending authorization email. Please try again.'
     this.$refs.errorDialog.open()
   }
 

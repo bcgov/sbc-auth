@@ -324,7 +324,6 @@ export default defineComponent({
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
-    const showCreateAffiliationInvitationErrorDialog = ref(false)
     const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
 
     const isBusinessLegalTypeFirm = computed(() => {
@@ -492,11 +491,11 @@ export default defineComponent({
     }
 
     const closeCreateAffiliationInvitationErrorDialog = () => {
-      createAffiliationInvitationErrorDialog.value.close()
-      showCreateAffiliationInvitationErrorDialog.value = false
+      emit('show-create-affiliation-invitation-error-dialog')
     }
 
     const manageBusiness = async () => {
+      // Sending authorization email
       if (emailOption.value) {
         try {
           const payload: CreateAffiliationInvitation = {
@@ -511,17 +510,15 @@ export default defineComponent({
           }
           showAuthorizationEmailSentDialog.value = true
         } catch (err) {
-          // eslint-disable-next-line no-console
           createAffiliationInvitationErrorDialog.value.open()
-          showCreateAffiliationInvitationErrorDialog.value = true
         }
         return
       }
       addBusinessForm.value.validate()
+      // Adding business to the list
       if (isFormValid.value) {
         isLoading.value = true
         try {
-          // try to add business
           let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
           if (!props.isStaffOrSbcStaff) {
             businessData = {
@@ -635,7 +632,6 @@ export default defineComponent({
       enableDelegationFeature,
       showHelp,
       showAuthorizationEmailSentDialog,
-      showCreateAffiliationInvitationErrorDialog,
       createAffiliationInvitationErrorDialog,
       closeCreateAffiliationInvitationErrorDialog
     }
