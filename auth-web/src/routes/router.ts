@@ -247,6 +247,8 @@ export function getRoutes (): RouteConfig[] {
       component: EntityManagement,
       props: route => {
         try {
+          // The :base64Token consists of a token that is divided into three parts, separated by periods.
+          // we extract the first part of the token for decoding.
           const base64Token = route.params.base64Token.split('.')[0]
           const decodedToken = Base64.decode(base64Token)
           const orgId = JSON.parse(decodedToken).fromOrgId
