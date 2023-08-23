@@ -724,7 +724,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   resendAffiliationInvitation = async (event) => {
     let fromOrgId = Number(this.orgId)
     let businessIdentifier = this.base64OrgName
-    if (event?.affiliationInvites[0].status === "PENDING") {
+    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
       fromOrgId = event?.affiliationInvites[0].fromOrg.id
       businessIdentifier = event?.affiliationInvites[0].businessIdentifier
     }

@@ -606,7 +606,7 @@ export default defineComponent({
     }
 
     const getPrimaryAction = (item: Business): string => {
-      if (item?.affiliationInvites?.[0]?.status === 'PENDING') {
+      if (item?.affiliationInvites?.[0]?.status === AffiliationInvitationStatus.Pending) {
         return 'Resend Email'
       }
       if (isTemporaryBusiness(item)) {

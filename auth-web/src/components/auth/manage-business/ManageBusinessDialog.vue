@@ -645,7 +645,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-@import '@/assets/scss/ModalDialog.scss';
+@import '$assets/scss/ModalDialog.scss';
 
   #help-button {
     cursor: pointer;
