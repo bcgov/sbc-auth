@@ -2,10 +2,11 @@ import EnvironmentPlugin from 'vite-plugin-environment'
 import { defineConfig } from 'vite'
 import fs from 'fs'
 import path from 'path'
+import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import postcssNesting from 'postcss-nesting'
 import { createVuePlugin as vue } from 'vite-plugin-vue2'
 
-const packageJson = fs.readFileSync('./package.json')
+const packageJson = fs.readFileSync('./package.json') as unknown as string
 const appName = JSON.parse(packageJson).appName
 const appVersion = JSON.parse(packageJson).version
 const sbcName = JSON.parse(packageJson).sbcName
@@ -51,7 +52,8 @@ export default defineConfig({
     EnvironmentPlugin({
       BUILD: 'web' // Fix for Vuelidate, allows process.env with Vite.
     }),
-    postcssNesting
+    postcssNesting,
+    pluginRewriteAll()
   ],
   resolve: {
     alias: {
