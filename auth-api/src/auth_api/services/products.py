@@ -120,10 +120,7 @@ class Product:
                 # If there is a parent product, add subscription to that to
                 # This is to satisfy any preceding subscriptions required
                 if product_model.parent_code:
-                    Product._subscribe_and_publish_activity(org_id,
-                                                            product_model.parent_code,
-                                                            subscription_status,
-                                                            product_model.description)
+                    Product._update_parent_subscription(org_id, product_model, subscription_status)
 
                 # create a staff review task for this product subscription if pending status
                 if subscription_status == ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value:
@@ -145,6 +142,26 @@ class Product:
             db.session.commit()
 
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
+
+    @staticmethod
+    def _update_parent_subscription(org_id, sub_product_model, subscription_status):
+        parent_code = sub_product_model.parent_code
+        parent_product_model: ProductCodeModel = ProductCodeModel.find_by_code(parent_code)
+        existing_parent_sub = ProductSubscriptionModel \
+            .find_by_org_id_product_code(org_id, parent_code)
+
+        # Parent sub does not exist create it and return
+        if not existing_parent_sub:
+            Product._subscribe_and_publish_activity(org_id,
+                                                    sub_product_model.parent_code,
+                                                    subscription_status,
+                                                    parent_product_model.description)
+            return
+
+        # Parent sub exists and is not active - update the status
+        if existing_parent_sub[0].status_code != ProductSubscriptionStatus.ACTIVE.value:
+            existing_parent_sub[0].status_code = subscription_status
+            existing_parent_sub[0].flush()
 
     @staticmethod
     def _subscribe_and_publish_activity(org_id: int, product_code: str, status_code: str,
@@ -277,15 +294,16 @@ class Product:
                                                            name=product_model.description))
 
         if product_model.parent_code:
-            Product.update_parent_subscription(product_model.parent_code, is_approved, org_id, is_new_transaction)
+            Product.approve_reject_parent_subscription(product_model.parent_code, is_approved, org_id,
+                                                       is_new_transaction)
 
         current_app.logger.debug('>update_task_product ')
 
     @staticmethod
-    def update_parent_subscription(parent_product_code: int, is_approved: bool, org_id: int,
-                                   is_new_transaction: bool = True):
-        """Update Parent Product Subscription."""
-        current_app.logger.debug('<update_task_parent_product ')
+    def approve_reject_parent_subscription(parent_product_code: int, is_approved: bool, org_id: int,
+                                           is_new_transaction: bool = True):
+        """Approve or reject Parent Product Subscription."""
+        current_app.logger.debug('<approve_reject_parent_subscription ')
 
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_org_id_product_code(
             org_id=org_id,
@@ -323,7 +341,7 @@ class Product:
         if is_approved:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                                            name=product_model.description))
-        current_app.logger.debug('>update_task_parent_product ')
+        current_app.logger.debug('>approve_reject_parent_subscription ')
 
     @staticmethod
     def send_approved_product_subscription_notification(receipt_admin_emails, product_name,
