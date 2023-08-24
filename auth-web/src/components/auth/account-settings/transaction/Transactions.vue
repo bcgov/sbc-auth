@@ -193,7 +193,7 @@ export default defineComponent({
       else {
         // if the account switing happening when the user is already in the transaction page,
         // redirect to account info if its a basic account
-        root.$router.push(`/${Pages.MAIN}/currentOrganization.id}/settings/account-info`)
+        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
       }
     }
 

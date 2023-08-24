@@ -17,7 +17,6 @@ import {
 } from '@/models/Organization'
 
 import { Address } from '@/models/address'
-import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
@@ -125,11 +124,6 @@ export default class OrgService {
       console.log(err)
       return null
     }
-  }
-
-  // TODO can be remove this since we moved from org to user affidavit
-  static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/admins/affidavits`)
   }
 
   static async approvePendingOrg (orgIdentifier: number): Promise<AxiosResponse> {

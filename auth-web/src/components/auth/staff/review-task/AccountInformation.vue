@@ -207,7 +207,6 @@ import { Organization } from '@/models/Organization'
 
 export default defineComponent({
   name: 'AccountInformation',
-  emits: ['emit-access-type', 'emit-valid'],
   props: {
     tabNumber: { type: Number, default: null },
     title: { type: String, default: 'Account Information' },
@@ -216,6 +215,7 @@ export default defineComponent({
     isGovnReview: { type: Boolean, default: false },
     showValidations: { type: Boolean, default: false }
   },
+  emits: ['emit-access-type', 'emit-valid'],
   setup (props, { emit }) {
     const changedAccess = ref(false)
 

@@ -120,58 +120,56 @@
             @keyup="onOrgBusinessTypeChange()"
           />
         </v-expand-transition>
-        <template>
-          <v-expand-transition class="business-account-type-details">
-            <v-row
-              v-if="isBusinessAccount"
-              justify="space-between"
-              data-test="business-account-type-details"
+        <v-expand-transition class="business-account-type-details">
+          <v-row
+            v-if="isBusinessAccount"
+            justify="space-between"
+            data-test="business-account-type-details"
+          >
+            <v-col
+              cols="6"
+              class="py-0"
             >
-              <v-col
-                cols="6"
-                class="py-0"
-              >
-                <v-select
-                  ref="businessType"
-                  v-model="businessType"
-                  filled
-                  label="Business Type"
-                  item-text="desc"
-                  item-value="code"
-                  :items="businessTypeCodes"
-                  data-test="select-business-type"
-                  :rules="orgBusinessTypeRules"
-                  :menu-props="{
-                    bottom: true,
-                    offsetY: true
-                  }"
-                  @change="onOrgBusinessTypeChange()"
-                />
-              </v-col>
-              <v-col
-                cols="6"
-                class="py-0"
-              >
-                <v-select
-                  ref="businessSize"
-                  v-model="businessSize"
-                  filled
-                  label="Business Size"
-                  item-text="desc"
-                  item-value="code"
-                  :items="businessSizeCodes"
-                  data-test="select-business-size"
-                  :rules="orgBusinessSizeRules"
-                  :menu-props="{
-                    bottom: true,
-                    offsetY: true
-                  }"
-                  @change="onOrgBusinessTypeChange()"
-                />
-              </v-col>
-            </v-row>
-          </v-expand-transition>
-        </template>
+              <v-select
+                ref="businessType"
+                v-model="businessType"
+                filled
+                label="Business Type"
+                item-text="desc"
+                item-value="code"
+                :items="businessTypeCodes"
+                data-test="select-business-type"
+                :rules="orgBusinessTypeRules"
+                :menu-props="{
+                  bottom: true,
+                  offsetY: true
+                }"
+                @change="onOrgBusinessTypeChange()"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-select
+                ref="businessSize"
+                v-model="businessSize"
+                filled
+                label="Business Size"
+                item-text="desc"
+                item-value="code"
+                :items="businessSizeCodes"
+                data-test="select-business-size"
+                :rules="orgBusinessSizeRules"
+                :menu-props="{
+                  bottom: true,
+                  offsetY: true
+                }"
+                @change="onOrgBusinessTypeChange()"
+              />
+            </v-col>
+          </v-row>
+        </v-expand-transition>
       </v-form>
     </div>
   </v-container>

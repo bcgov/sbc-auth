@@ -282,7 +282,6 @@ import { Business, NameRequest, Names } from '@/models/business'
 import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
-import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import EntityDetails from './EntityDetails.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
@@ -295,7 +294,6 @@ import { useOrgStore } from '@/store/org'
 export default defineComponent({
   name: 'AffiliatedEntityTable',
   components: { EntityDetails, BaseVDataTable },
-  mixins: [DateMixin], // TODO: This should be fixed.
   props: {
     selectedColumns: { default: [] as string[] },
     loading: { default: false },

@@ -128,7 +128,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private orgBusinessTypeLocal: OrgBusinessType = {}
 
-  private baseAddressSchema: {} = addressSchema
+  private baseAddressSchema = addressSchema
   private isOrgBusinessTypeValid = false
   // Org Id variable to store the current organization ID of the invitation IDIR account
   private orgId: number = null

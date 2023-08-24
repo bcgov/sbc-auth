@@ -96,6 +96,41 @@ export const useOrgStore = defineStore('org', () => {
     vDisplayModeValue: ''// DisplayModeValues.VIEW_ONLY
   })
 
+  function $reset () {
+    state.list = [] as Organization[]
+    state.resending = false
+    state.sentInvitations = [] as Invitation[]
+    state.failedInvitations = [] as Invitation[]
+    state.currentAccountSettings = undefined as AccountSettings
+    state.currentOrganization = undefined as Organization
+    state.currentOrgAddress = undefined as Address
+    state.currentOrgPaymentType = undefined as string
+    state.currentOrgPADInfo = undefined as PADInfo
+    state.currentOrganizationType = undefined as string
+    state.currentMembership = undefined as Member
+    state.activeOrgMembers = [] as Member[]
+    state.pendingOrgMembers = [] as Member[]
+    state.pendingOrgInvitations = [] as Invitation[]
+    state.invalidInvitationToken = false
+    state.tokenError = false
+    state.createdUsers = [] as BulkUsersSuccess[]
+    state.failedUsers = [] as BulkUsersFailed[]
+    state.permissions = [] as string[]
+    state.accessType = undefined as string
+    state.memberLoginOption = '' as string
+    state.currentOrgGLInfo = undefined as GLInfo
+    state.productList = [] as OrgProduct[]
+    state.currentSelectedProducts = [] as any
+    state.currentStatementNotificationSettings = {} as StatementNotificationSettings
+    state.statementSettings = {} as StatementSettings
+    state.orgProductFeeCodes = [] as OrgProductFeeCode[]
+    state.currentAccountFees = [] as AccountFee[]
+    state.currentOrgPaymentDetails = null as OrgPaymentDetails
+    state.isCurrentSelectedProductsPremiumOnly = false
+    state.resetAccountTypeOnSetupAccount = false
+    state.vDisplayModeValue = ''
+  }
+
   /** Is True if the current account is premium. */
   const isPremiumAccount = computed<boolean>(() => {
     return state.currentOrganization?.orgType === Account.PREMIUM
@@ -1056,6 +1091,7 @@ export const useOrgStore = defineStore('org', () => {
     setCurrentOrganizationFromUserAccountSettings,
     getOrgApiKeys,
     revokeOrgApiKeys,
-    updateOrganizationAccessType
+    updateOrganizationAccessType,
+    $reset
   }
 })

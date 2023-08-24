@@ -33,6 +33,22 @@ export const useStaffStore = defineStore('staff', () => {
     suspendedStaffOrgs: [] as Organization[]
   })
 
+  function $reset () {
+    state.accountTypes = []
+    state.accountUnderReview = {} as Organization
+    state.accountUnderReviewAddress = {} as Address
+    state.accountUnderReviewAdmin = {} as User
+    state.accountUnderReviewAdminContact = {} as Contact
+    state.accountUnderReviewAffidavitInfo = {} as AffidavitInformation
+    state.activeStaffOrgs = [] as Organization[]
+    state.pendingInvitationOrgs = [] as Organization[]
+    state.pendingStaffOrgs = [] as Organization[]
+    state.products = [] as ProductCode[]
+    state.rejectedStaffOrgs = [] as Organization[]
+    state.suspendedReviewTotal = 0
+    state.suspendedStaffOrgs = [] as Organization[]
+  }
+
   const accountNotaryName = computed<string>(() => {
     return state.accountUnderReviewAffidavitInfo?.issuer || '-'
   })
@@ -283,6 +299,7 @@ export const useStaffStore = defineStore('staff', () => {
     syncRejectedStaffOrgs,
     syncSuspendedStaffOrgs,
     syncPendingStaffOrgs,
-    updateGLCodeFiling
+    updateGLCodeFiling,
+    $reset
   }
 })

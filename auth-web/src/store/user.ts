@@ -34,6 +34,22 @@ export const useUserStore = defineStore('user', () => {
     currentUserAccountSettings: undefined as UserSettings[]
   })
 
+  function $reset () {
+    state.currentUser = undefined as KCUserProfile
+    state.userProfile = undefined as User
+    state.userContact = undefined as Contact
+    state.termsOfUse = undefined as TermsOfUseDocument
+    state.userHasToAcceptTOS = false
+    state.notaryInformation = undefined as NotaryInformation
+    state.notaryContact = undefined as NotaryContact
+    state.affidavitDocId = '' as string
+    state.affidavitDoc = undefined as File
+    state.userProfileData = undefined as UserProfileData
+    state.redirectAfterLoginUrl = '' as string
+    state.roleInfos = undefined as RoleInfo[]
+    state.currentUserAccountSettings = undefined as UserSettings[]
+  }
+
   const termsOfUseVersion = computed(() => state.userProfile?.userTerms?.termsOfUseAcceptedVersion)
   const isTermsAccepted = computed(() => state.userProfile?.userTerms?.isTermsOfUseAccepted)
 
@@ -64,7 +80,7 @@ export const useUserStore = defineStore('user', () => {
     return result
   }
 
-  async function reset () {
+  function reset () {
     state.currentUser = undefined
     state.userProfile = undefined
     state.userContact = undefined
@@ -241,6 +257,7 @@ export const useUserStore = defineStore('user', () => {
     updateCurrentUserTerms,
     updateUserContact,
     updateUserFirstAndLastName,
-    uploadPendingDocsToStorage
+    uploadPendingDocsToStorage,
+    $reset
   }
 })

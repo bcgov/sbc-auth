@@ -21,8 +21,13 @@ export const useActivityStore = defineStore('activity', () => {
     return {}
   }
 
+  function $reset () {
+    state.currentOrgActivity = {} as ActivityLog
+  }
+
   return {
     ...toRefs(state),
-    getActivityLog
+    getActivityLog,
+    $reset
   }
 })

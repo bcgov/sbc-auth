@@ -35,6 +35,11 @@ export const useBusinessStore = defineStore('business', () => {
     businesses: [] as Business[]
   })
 
+  function $reset () {
+    state.currentBusiness = undefined
+    state.businesses = []
+  }
+
   // Grabs from Org store.
   const currentOrganization = computed<Organization>(() => {
     return useOrgStore().currentOrganization
@@ -476,6 +481,7 @@ export const useBusinessStore = defineStore('business', () => {
     saveContact,
     updateFolioNumber,
     resetCurrentBusiness,
-    resetBusinessPasscode
+    resetBusinessPasscode,
+    $reset
   }
 })

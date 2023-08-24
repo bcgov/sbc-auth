@@ -215,13 +215,17 @@ export default defineComponent({
       showPremiumPADInfo: computed((): boolean => props.isChangeView),
       acknowledgementLabel: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
-          : 'I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.'
+          ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory' +
+          ' (3) day confirmation period has ended.'
+          : 'I understand that this account will not be able to perform any transactions until the mandatory' +
+          ' (3) day confirmation period for pre-authorized debit has ended.'
       }),
       padInfoSubtitle: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
-          : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
+          ? 'Services will continue to be billed to the linked BC Online account until the mandatory' +
+          ' (3) day confirmation period has ended.'
+          : 'This account will not be able to perform any transactions until the mandatory' +
+          ' (3) day confirmation period has ended.'
       })
     }) as unknown) as PADInfoFormState
 
@@ -279,7 +283,8 @@ export default defineComponent({
 
     // setup
     onMounted(async () => {
-      const padInfo = (Object.keys(props.padInformation).length) ? props.padInformation : currentOrgPADInfo.value as PADInfo
+      const padInfo = (Object.keys(props.padInformation).length)
+        ? props.padInformation : currentOrgPADInfo.value as PADInfo
       state.accountNumber = padInfo?.bankAccountNumber || ''
       state.institutionNumber = padInfo?.bankInstitutionNumber || ''
       state.transitNumber = padInfo?.bankTransitNumber || ''

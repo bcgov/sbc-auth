@@ -16,6 +16,13 @@ export const useCodesStore = defineStore('codes', () => {
     suspensionReasonCodes: [] as Code[]
   })
 
+  function $reset () {
+    state.businessSizeCodes = []
+    state.businessTypeCodes = []
+    state.onholdReasonCodes = []
+    state.suspensionReasonCodes = []
+  }
+
   async function getBusinessSizeCodes (): Promise<Code[]> {
     const response = await CodesService.getCodes(this.businessSizeCodeTable)
     if (response?.data && response.status === 200) {
@@ -62,6 +69,7 @@ export const useCodesStore = defineStore('codes', () => {
     getCodes,
     getOnholdReasonCodes,
     onholdReasonCodeTable,
-    suspensionReasonCodeTable
+    suspensionReasonCodeTable,
+    $reset
   }
 })

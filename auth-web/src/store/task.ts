@@ -11,6 +11,12 @@ export const useTaskStore = defineStore('task', () => {
     rejectedTasksCount: null as number
   })
 
+  function $reset () {
+    state.currentTask = {} as Task
+    state.pendingTasksCount = null as number
+    state.rejectedTasksCount = null as number
+  }
+
   async function syncTasks () {
     let taskFilter: TaskFilterParams = {
       relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW,
@@ -59,6 +65,7 @@ export const useTaskStore = defineStore('task', () => {
     ...toRefs(state),
     fetchTasks,
     getTaskById,
-    syncTasks
+    syncTasks,
+    $reset
   }
 })
