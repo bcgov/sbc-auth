@@ -159,9 +159,4 @@ li ul ul li:before {
 ul ul li {
   margin-bottom: 5px;
 }
-
-.open-in-new-icon {
-  font-size: 16px;
-}
-
 </style>
