@@ -10,16 +10,17 @@
       <span
         v-if="!helpToggle"
         class="pl-2"
-      >Help with Starting and Managing a Business</span>
+      >{{ helpLabel }}</span>
       <span
         v-else
         class="pl-2"
       >Hide Help</span>
     </div>
+
     <v-expand-transition>
       <div
         v-show="helpToggle"
-        class="help-section pa-4 my-3 mb-8"
+        class="help-section pa-6 my-3 mb-8"
       >
         <slot name="content" />
         <div
@@ -34,38 +35,38 @@
 </template>
 
 <script lang="ts">
-import { ref } from '@vue/composition-api'
+import { Component, Prop } from 'vue-property-decorator'
+import Vue from 'vue'
 
-export default {
-  setup () {
-    const helpToggle = ref(false)
-    return { helpToggle }
-  }
+@Component({})
+export default class ExpandableHelp extends Vue {
+  private helpToggle = false
+
+  @Prop({ default: 'Show Help' }) helpLabel: string
 }
 </script>
 
 <style lang="scss" scoped>
 @import '@/assets/styles/theme.scss';
 
-      .help-btn {
-        cursor: pointer;
-        color: $app-blue;
-        vertical-align: middle;
-      }
+.help-btn {
+  cursor: pointer;
+  color: $app-blue;
+}
 
-      .v-icon {
-        margin-top: -3px;
-      }
+.v-icon {
+  margin-top: -3px;
+}
 
-      .help-section {
-        border-top: 1px dashed $gray6;
-        border-bottom: 1px dashed $gray6;
-      }
+.help-section {
+  border-top: 1px dashed $gray7;
+  border-bottom: 1px dashed $gray7;
+}
 
-      .help-btn.bottom {
-        font-size: $app-blue;
-        text-decoration: underline;
-        display: flex;
-        direction: rtl;
-      }
+.help-btn.bottom {
+  font-size: $app-blue;
+  text-decoration: underline;
+  display: flex;
+  direction: rtl;
+}
 </style>

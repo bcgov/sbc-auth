@@ -182,14 +182,12 @@
       </div>
 
       <div>
-        <ExpandableHelp>
+        <ExpandableHelp helpLabel="Help with Starting and Managing a Business">
           <template #content>
-            <StartNewBusinessHelp />
+            <StartNewBusinessHelp class="help-text" />
           </template>
         </ExpandableHelp>
       </div>
-
-      <v-spacer class="help-spacer" />
 
       <search-business-name-request
         v-if="isEnableBusinessNrSearch"
@@ -532,7 +530,6 @@ import AffiliationInvitationService from '@/services/affiliation-invitation.serv
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import { Base64 } from 'js-base64'
 import ConfigHelper from '@/util/config-helper'
-import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
@@ -540,6 +537,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
+import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { namespace } from 'vuex-class'
 
@@ -547,14 +545,14 @@ const BusinessModule = namespace('business')
 
 @Component({
   components: {
-    ManageBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
+    ExpandableHelp,
+    ManageBusinessDialog,
     ModalDialog,
     PasscodeResetOptionsModal,
     SearchBusinessNameRequest,
-    StartNewBusinessHelp,
-    ExpandableHelp
+    StartNewBusinessHelp
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
@@ -1079,8 +1077,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 }
 
-.help-spacer {
-  margin-bottom: 36px;
+.help-text {
+  max-width: 75%;
+  margin: 0 auto;
 }
 
 #add-existing-btn {
