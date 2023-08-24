@@ -163,7 +163,7 @@
           target="_blank"
         >
           <v-img
-            :src="imageSrc"
+            src="../../../assets/img/Step4_Maintain_x2.png"
             aspect-ratio="1.2"
             contain
           />
@@ -221,8 +221,6 @@ export default class MaintainBusinessView extends Vue {
       ]
     }
   ]
-
-  readonly imageSrc = new URL('@/assets/img/Step4_Maintain_x2.png', import.meta.url).href
 
   @Prop()
   readonly userProfile: User

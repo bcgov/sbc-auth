@@ -48,7 +48,7 @@
               </v-card-title>
               <v-card-text>
                 <v-img
-                  :src="chequeImgSrc"
+                  src="../../../assets/img/cheque-sample.jpg"
                   lazy-src
                 />
                 <ol class="my-4">
@@ -194,8 +194,6 @@ export default defineComponent({
     // static vars
     const accountMask = CommonUtils.accountMask()
 
-    const chequeImgSrc = new URL('@/assets/img/cheque-sample.jpg', import.meta.url).href
-
     const institutionNumberRules = [
       v => !!v || 'Institution Number is required',
       v => (v.length === 3) || 'Institution Number should be 3 digits'
@@ -307,8 +305,7 @@ export default defineComponent({
       updateTermsAccepted,
       emitPreAuthDebitInfo,
       emitIsPreAuthDebitFormValid,
-      emitIsPadInfoTouched,
-      chequeImgSrc
+      emitIsPadInfoTouched
     }
   }
 })

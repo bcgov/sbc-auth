@@ -81,7 +81,7 @@
         md="6"
       >
         <v-img
-          :src="imageSrc"
+          src="../../../assets/img/Step2_NameRequest_x2.png"
           aspect-ratio="1.2"
           contain
           class="cursor-pointer"
@@ -121,8 +121,6 @@ export default class RequestNameView extends Vue {
     { text: 'Submit your name choices for examination by the Business Registry.' },
     { text: 'If your name is approved, you can use it to register or incorporate your business.' }
   ]
-
-  readonly imageSrc = new URL('@/assets/img/Step2_NameRequest_x2.png', import.meta.url).href
 
   // open Name Request in current tab to retain current account and user
   goToNameRequestExisting (): void {
