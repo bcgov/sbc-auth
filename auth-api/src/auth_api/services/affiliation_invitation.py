@@ -108,9 +108,10 @@ class AffiliationInvitation:
             from_org = AffiliationInvitationData.OrgDetails(
                 **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
                                                      affiliation_invitation_dict['from_org']))
-            to_org = AffiliationInvitationData.OrgDetails(
-                **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
-                                                     affiliation_invitation_dict['to_org']))
+            if to_org := affiliation_invitation_dict.get('to_org'):
+                to_org = AffiliationInvitationData.OrgDetails(
+                    **_init_dict_for_dataclass_from_dict(AffiliationInvitationData.OrgDetails,
+                                                         affiliation_invitation_dict['to_org']))
 
             business_entity = next(
                 (business_entity for business_entity in business_entities if
@@ -147,6 +148,12 @@ class AffiliationInvitation:
         if to_org_id and not OrgModel.find_by_org_id(to_org_id):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
+        # Validate business exists in LEAR
+        # Fetch the up-to-date business details from legal API - Business exception raised if failure
+        token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
+                                                      config_secret='ENTITY_SVC_CLIENT_SECRET')
+        business = AffiliationInvitation._get_business_details(business_identifier, token)
+
         # Validate that entity exists
         if not (entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)):
             raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -169,7 +176,7 @@ class AffiliationInvitation:
                                                                          to_org_id=to_org_id,
                                                                          entity_id=entity.identifier):
             raise BusinessException(Error.DATA_ALREADY_EXISTS, None)
-        return entity, from_org
+        return entity, from_org, business
 
     @staticmethod
     def get_invitation_email(affiliation_invitation_type: AffiliationInvitationType,
@@ -208,7 +215,7 @@ class AffiliationInvitation:
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
-        to_org_id = affiliation_invitation_info['toOrgId']
+        to_org_id = affiliation_invitation_info.get('toOrgId')
         business_identifier = affiliation_invitation_info['businessIdentifier']
         affiliation_invitation_type = AffiliationInvitationType.from_value(affiliation_invitation_info.get('type'))
 
@@ -218,7 +225,7 @@ class AffiliationInvitation:
         check_auth(org_id=from_org_id,
                    one_of_roles=(ADMIN, COORDINATOR, STAFF))
 
-        entity, from_org = AffiliationInvitation. \
+        entity, from_org, business = AffiliationInvitation. \
             _validate_prerequisites(business_identifier=business_identifier, from_org_id=from_org_id,
                                     to_org_id=to_org_id, affiliation_invitation_type=affiliation_invitation_type)
 
@@ -258,14 +265,12 @@ class AffiliationInvitation:
         affiliation_invitation.save()
 
         if affiliation_invitation.type != AffiliationInvitationType.PASSCODE.value:
-            # Fetch the up-to-date business details from legal API
-            token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
-                                                          config_secret='ENTITY_SVC_CLIENT_SECRET')
-            business = AffiliationInvitation._get_business_details(business_identifier, token)
-            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
-                                                              business_name=business['business']['legalName'],
-                                                              app_url=f'{invitation_origin}/{context_path}',
-                                                              email_addresses=affiliation_invitation.recipient_email)
+            AffiliationInvitation\
+                .send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
+                                             business_name=business['business']['legalName'],
+                                             app_url=AffiliationInvitation._get_app_url(invitation_origin,
+                                                                                        context_path),
+                                             email_addresses=affiliation_invitation.recipient_email)
         else:
             return AffiliationInvitation.accept_affiliation_invitation(affiliation_invitation.id,
                                                                        user, invitation_origin,
@@ -281,7 +286,7 @@ class AffiliationInvitation:
             get_business_response = RestService.get(get_businesses_url, token=token, skip_404_logging=True)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
-            raise BusinessException(Error.DATA_NOT_FOUND, None) from e
+            raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None) from e
 
         return get_business_response.json()
 
@@ -296,7 +301,7 @@ class AffiliationInvitation:
             get_business_response = RestService.post(get_businesses_url, token=token, data=data)
         except (HTTPError, ServiceUnavailableException) as e:
             current_app.logger.info(e)
-            raise BusinessException(Error.DATA_NOT_FOUND, None) from e
+            raise BusinessException(Error.AFFILIATION_INVITATION_BUSINESS_NOT_FOUND, None) from e
 
         return get_business_response.json()['businessEntities']
 
@@ -328,10 +333,12 @@ class AffiliationInvitation:
             business = AffiliationInvitation._get_business_details(entity.business_identifier,
                                                                    RestService.get_service_account_token())
 
-            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation=invitation,
-                                                              business_name=business['business']['legalName'],
-                                                              app_url=f'{invitation_origin}/{context_path}',
-                                                              email_addresses=invitation.recipient_email)
+            AffiliationInvitation\
+                .send_affiliation_invitation(affiliation_invitation=invitation,
+                                             business_name=business['business']['legalName'],
+                                             app_url=AffiliationInvitation._get_app_url(invitation_origin,
+                                                                                        context_path),
+                                             email_addresses=invitation.recipient_email)
         # Expire invitation
         elif new_status == InvitationStatus.EXPIRED.value:
             invitation = self._model.set_status(InvitationStatus.EXPIRED.value)
@@ -397,10 +404,19 @@ class AffiliationInvitation:
         return AffiliationInvitation(invitation)
 
     @staticmethod
+    def _get_app_url(app_url: str, context_path: str = None) -> str:
+        """Get app url concatenated with context_path if it exists."""
+        full_app_url = app_url
+        if context_path:
+            full_app_url = f'{full_app_url}/{context_path}'
+
+        return full_app_url
+
+    @staticmethod
     def _get_token_confirm_path(app_url, org_name, token, query_params=None):
         """Get the config for different email types."""
         escape_url = escape_wam_friendly_url(org_name)
-        path = f'{escape_url}/affiliationInvitation/acceptToken/'
+        path = f'{escape_url}/affiliationInvitation/acceptToken'
         token_confirm_url = f'{app_url}/{path}/{token}'
 
         if query_params:

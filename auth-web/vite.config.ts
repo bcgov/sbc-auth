@@ -5,6 +5,7 @@ import path from 'path'
 import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import postcssNesting from 'postcss-nesting'
 import { createVuePlugin as vue } from 'vite-plugin-vue2'
+import pluginRewriteAll from 'vite-plugin-rewrite-all'
 
 const packageJson = fs.readFileSync('./package.json') as unknown as string
 const appName = JSON.parse(packageJson).appName

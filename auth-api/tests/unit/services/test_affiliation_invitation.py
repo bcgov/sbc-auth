@@ -31,6 +31,7 @@ from auth_api.models import InvitationStatus as InvitationStatusModel
 from auth_api.models import Org as OrgModel
 from auth_api.models.dataclass import AffiliationInvitationSearch
 from auth_api.services import Affiliation as AffiliationService
+from auth_api.services import AffiliationInvitation
 from auth_api.services import AffiliationInvitation as AffiliationInvitationService
 from auth_api.services import Entity as EntityService
 from auth_api.services import Org as OrgService
@@ -428,7 +429,7 @@ def test_send_affiliation_invitation_magic_link(publish_to_mailer_mock,
         'businessName': business_name,
         'emailAddresses': affiliation_invitation.recipient_email,
         'orgName': affiliation_invitation.from_org.name,
-        'contextUrl': 'None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken//ABCD'
+        'contextUrl': 'None/RnJvbSB0aGUgbW9vbiBpbmMu/affiliationInvitation/acceptToken/ABCD'
     }
 
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitation',
@@ -548,3 +549,15 @@ def test_send_affiliation_invitation_request_refused(publish_to_mailer_mock,
     publish_to_mailer_mock.assert_called_with(notification_type='affiliationInvitationRequestAuthorization',
                                               org_id=affiliation_invitation.from_org.id,
                                               data=expected_data)
+
+
+def test_app_url():
+    """Assert app url generation is correct."""
+    full_url = AffiliationInvitation._get_app_url('https://test.com', 'abc/123')
+    assert full_url == 'https://test.com/abc/123'
+
+    full_url = AffiliationInvitation._get_app_url('https://test.com', '')
+    assert full_url == 'https://test.com'
+
+    full_url = AffiliationInvitation._get_app_url('https://test.com')
+    assert full_url == 'https://test.com'
