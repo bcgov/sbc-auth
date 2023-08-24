@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="start-new-business-help">
     <h3 class="text-center">
       Help with Starting and Managing a Business
     </h3>
@@ -16,7 +16,13 @@
               proprietorship, partnership, or corporation. Each structure has different legal and financial
               implications. <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <a href="https://entity-selection-prod.apps.silver.devops.gov.bc.ca/">
-                Use the Business Structures Wizard to help you decide.</a>
+                Use the Business Structures Wizard to help you decide.</a><v-icon
+                color="primary"
+                class="small-icon mb-1"
+                size="16"
+              >
+                mdi-open-in-new
+              </v-icon>
             </li>
             <li>
               If you want to start a corporation, you also have the choice of using a named or numbered company.
@@ -152,6 +158,10 @@ li ul ul li:before {
 
 ul ul li {
   margin-bottom: 5px;
+}
+
+.open-in-new-icon {
+  font-size: 16px;
 }
 
 </style>
