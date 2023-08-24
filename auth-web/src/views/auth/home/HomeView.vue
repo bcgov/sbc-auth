@@ -6,7 +6,7 @@
         :class="{'auth': userProfile}"
       >
         <v-container>
-          <h1>Cache 3</h1>
+          <h1>Cache 4</h1>
           <h1>Start a B.C. based Business and <br>keep Business Records up to date</h1>
           <p class="mt-7 mb-10">
             The Business Registry manages the creation (incorporation and registration) <br> and listing of businesses
