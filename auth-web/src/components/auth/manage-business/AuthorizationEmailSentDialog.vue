@@ -13,7 +13,10 @@
       </v-card-title>
       <v-card-text>
         <p>An email was sent to <span class="email-address">{{ email }}</span></p>
-        <p>Confirm your access by clicking the link inside. This will add the business to your Business Registry List. The link is valid for 15 minutes.</p>
+        <p>
+          Confirm your access by clicking the link inside. This will add the business to your Business Registry List.
+          The link is valid for 15 minutes.
+        </p>
       </v-card-text>
       <v-card-actions class="form__btns">
         <span

@@ -55,7 +55,7 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, onMounted, onUpdated, reactive, watch } from '@vue/composition-api'
+import { defineComponent, reactive, watch } from '@vue/composition-api'
 import OrgService from '@/services/org.services'
 
 export default defineComponent({
