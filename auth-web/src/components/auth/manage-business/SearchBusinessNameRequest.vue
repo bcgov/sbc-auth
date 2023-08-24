@@ -109,13 +109,12 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import BusinessLookup from './BusinessLookup.vue'
-import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import { LookupType } from '@/models/business-nr-lookup'
-import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { mapActions } from 'vuex'
 
@@ -124,7 +123,6 @@ import { mapActions } from 'vuex'
     ManageBusinessDialog,
     AddNameRequestForm,
     BusinessLookup,
-    Certify,
     HelpDialog,
     ModalDialog
   },

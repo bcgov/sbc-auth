@@ -47,7 +47,7 @@ export default class Certify extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
+@import '@/assets/styles/theme';
 
 // checkbox shows red on error (per its validation)
 // this also set its label color to red

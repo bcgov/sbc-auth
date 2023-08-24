@@ -8,7 +8,7 @@ import {
   orgsDetailsByAffiliationSingleItemResponse
 } from '../test-utils'
 
-import AccountAuthorizationRequest from '@/components/auth/manage-business/AccountAuthorizationRequest.vue'
+import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import { axios } from '@/util/http-util'

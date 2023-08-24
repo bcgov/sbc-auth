@@ -1,11 +1,5 @@
 <template>
   <div id="manage-business-dialog">
-    <AuthorizationEmailSentDialog
-      :isVisible="!showHelp && showAuthorizationEmailSentDialog"
-      :email="businessContactEmail"
-      @open-help="openHelp"
-      @close-dialog="onAuthorizationEmailSentClose"
-    />
     <ModalDialog
       ref="createAffiliationInvitationErrorDialog"
       title="Error Sending Authorization Email"
@@ -47,7 +41,37 @@
         :inline="true"
       />
 
-      <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog">
+      <AuthorizationRequestSentDialog
+        :is-visible="!showHelp && showAuthorizationEmailSentDialog"
+        @open-help="openHelp"
+        @close-dialog="onAuthorizationRequestSentDialogClose"
+      >
+        <template #title>
+          <h1>Authorization Email Sent</h1>
+        </template>
+        <template #content>
+          <p>An email was sent to <span class="email-address">{{ businessContactEmail }}</span></p>
+          <p>
+            Confirm your access by clicking the link inside. This will add the business to your Business Registry List.
+            The link is valid for 15 minutes.
+          </p>
+        </template>
+      </AuthorizationRequestSentDialog>
+
+      <AuthorizationRequestSentDialog
+        :is-visible="!showHelp && showAuthorizationRequestSentDialog"
+        @open-help="openHelp"
+        @close-dialog="onAuthorizationRequestSentDialogClose"
+      >
+        <template #title>
+          Request Sent
+        </template>
+        <template #content>
+          <p>Your authorization request has been sent to contacts of <span class="strong">{{ invitationToAccount.name }}</span>.</p>
+        </template>
+      </AuthorizationRequestSentDialog>
+
+      <v-card v-if="!showHelp && !successDialog">
         <v-card-title data-test="dialog-header">
           <h2>Manage a B.C. Business</h2>
         </v-card-title>
@@ -170,21 +194,27 @@
                     </div>
                     <div><b>{{ businessContactEmail }}</b></div>
                     <div class="mt-1 mr-1 mb-4">
-                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
+                      To confirm your access, please click on the link in the email. This will add the business to your
+                      Business Registry List. The link is valid for 15 minutes.
                     </div>
                   </div>
                 </v-list-group>
 
-                <template v-if="enableDelegationFeature">
-                  <v-list-group v-model="requestAuthBusinessOption">
-                    <template #activator>
-                      <v-list-item-title>Request authorization from the business</v-list-item-title>
-                    </template>
-                    <div class="list-body">
-                      <!-- Placeholder for RTR -->
-                    </div>
-                  </v-list-group>
+                <v-list-group v-model="requestAuthBusinessOption">
+                  <template #activator>
+                    <v-list-item-title>Request authorization from the business</v-list-item-title>
+                  </template>
+                  <div class="list-body">
+                    <AccountAuthorizationRequest
+                      :business-identifier="initialBusinessIdentifier"
+                      :business-name="initialBusinessName"
+                      @change-request-access-message="invitationAdditionalMessage=$event"
+                      @select-account="selectAccount($event)"
+                    />
+                  </div>
+                </v-list-group>
 
+                <template v-if="enableDelegationFeature">
                   <v-list-group
                     v-model="requestAuthRegistryOption"
                   >
@@ -221,6 +251,7 @@
           </v-btn>
           <v-btn
             id="add-button"
+            :disabled="!isManageButtonEnabled"
             large
             color="primary"
             :loading="isLoading"
@@ -237,9 +268,10 @@
 <script lang="ts">
 import { CorpTypes, LDFlags } from '@/util/constants'
 import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
-import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
+import AuthorizationRequestSentDialog from '@/components/auth/manage-business/manage-business-dialog/AuthorizationRequestSentDialog.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
@@ -253,7 +285,8 @@ import { useStore } from 'vuex-composition-helpers'
 
 export default defineComponent({
   components: {
-    AuthorizationEmailSentDialog,
+    AuthorizationRequestSentDialog,
+    AccountAuthorizationRequest,
     Certify,
     HelpDialog,
     ModalDialog
@@ -302,6 +335,15 @@ export default defineComponent({
       return store.dispatch('business/updateBusinessName', businessNumber)
     }
 
+    const invitationToAccount = ref({ 'name': null, 'uuid': null })
+    const invitationAdditionalMessage = ref('')
+    const requestAuthRegistryFormIsValid = ref(false)
+    const selectAccount = (event: { name: string, uuid: string }) => {
+      if (event?.name && event?.uuid) {
+        invitationToAccount.value = event
+        requestAuthRegistryFormIsValid.value = true
+      }
+    }
     // Local variables
     const businessName = ref('')
     const businessIdentifier = ref('') // aka incorporation number of registration number
@@ -325,6 +367,18 @@ export default defineComponent({
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
     const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const showAuthorizationRequestSentDialog = ref(false)
+    const successDialog = computed(() => {
+      return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
+    })
+
+    const isManageButtonEnabled = computed(() => {
+      return (requestAuthBusinessOption.value && requestAuthRegistryFormIsValid.value) ||
+        nameOption.value ||
+        emailOption.value ||
+        passcodeOption.value ||
+        false
+    })
 
     const isBusinessLegalTypeFirm = computed(() => {
       return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
@@ -451,7 +505,8 @@ export default defineComponent({
     })
 
     const computedAddressType = computed(() => {
-      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeFirm.value ? 'business' : ''
+      return isBusinessLegalTypeCorporation.value ||
+      isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeFirm.value ? 'business' : ''
     })
 
     // Methods
@@ -472,7 +527,8 @@ export default defineComponent({
       }
     }
 
-    const onAuthorizationEmailSentClose = () => {
+    const onAuthorizationRequestSentDialogClose = () => {
+      showAuthorizationRequestSentDialog.value = false
       showAuthorizationEmailSentDialog.value = false
       emit('on-authorization-email-sent-close', businessIdentifier.value)
     }
@@ -496,8 +552,28 @@ export default defineComponent({
     }
 
     const manageBusiness = async () => {
-      // Sending authorization email
+      if (requestAuthBusinessOption.value) {
+        try {
+          const payload = {
+            fromOrgId: Number(props.orgId),
+            toOrgUuid: invitationToAccount?.value.uuid,
+            businessIdentifier: businessIdentifier.value,
+            type: 'REQUEST',
+            additionalMessage: invitationAdditionalMessage.value
+          }
+
+          await AffiliationInvitationService.createInvitation(payload)
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.log(err)
+        } finally {
+          showAuthorizationRequestSentDialog.value = true
+        }
+        return
+      }
+
       if (emailOption.value) {
+        // Sending authorization email
         try {
           const payload: CreateAffiliationInvitation = {
             fromOrgId: Number(props.orgId),
@@ -588,6 +664,12 @@ export default defineComponent({
 
     // Return the setup data - These will be removed with script setup.
     return {
+      invitationToAccount,
+      invitationAdditionalMessage,
+      selectAccount,
+      showAuthorizationRequestSentDialog,
+      successDialog,
+      isManageButtonEnabled,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
       emailOption,
@@ -626,7 +708,7 @@ export default defineComponent({
       isFormValid,
       manageBusiness,
       resetForm,
-      onAuthorizationEmailSentClose,
+      onAuthorizationRequestSentDialogClose,
       formatBusinessIdentifier,
       openHelp,
       businessContactEmail,
