@@ -28,7 +28,7 @@
     </div>
 
     <div>
-      <deactivate-card :org-type="orgType" />
+      <deactivate-card :type="orgType" />
     </div>
     <v-card class="mt-5 py-4 px-4">
       <v-card-title class="font-weight-bold">
