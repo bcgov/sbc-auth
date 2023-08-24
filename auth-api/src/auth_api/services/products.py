@@ -159,9 +159,9 @@ class Product:
             return
 
         # Parent sub exists and is not active - update the status
-        if existing_parent_sub[0].status_code != ProductSubscriptionStatus.ACTIVE.value:
-            existing_parent_sub[0].status_code = subscription_status
-            existing_parent_sub[0].flush()
+        if existing_parent_sub.status_code != ProductSubscriptionStatus.ACTIVE.value:
+            existing_parent_sub.status_code = subscription_status
+            existing_parent_sub.flush()
 
     @staticmethod
     def _subscribe_and_publish_activity(org_id: int, product_code: str, status_code: str,
@@ -222,7 +222,7 @@ class Product:
                     ProductSubscriptionModel(org_id=org_id, product_code=product_code,
                                              status_code=ProductSubscriptionStatus.ACTIVE.value).flush()
                 elif subscription and \
-                        (existing_sub := subscription[0]).status_code != ProductSubscriptionStatus.ACTIVE.value:
+                        (existing_sub := subscription).status_code != ProductSubscriptionStatus.ACTIVE.value:
                     existing_sub.status_code = ProductSubscriptionStatus.ACTIVE.value
                     existing_sub.flush()
 
@@ -311,21 +311,21 @@ class Product:
         )
 
         # There is no parent product subscription
-        if len(product_subscription) == 0:
+        if not product_subscription:
             return
 
-        status = product_subscription[0].status_code
+        status = product_subscription.status_code
 
         # Subscription is already Active
         if status == ProductSubscriptionStatus.ACTIVE.value:
             return
 
         if is_approved:
-            product_subscription[0].status_code = ProductSubscriptionStatus.ACTIVE.value
+            product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
         else:
-            product_subscription[0].status_code = ProductSubscriptionStatus.REJECTED.value
+            product_subscription.status_code = ProductSubscriptionStatus.REJECTED.value
 
-        product_subscription[0].flush()
+        product_subscription.flush()
         if is_new_transaction:  # Commit the transaction if it's a new transaction
             db.session.commit()
 

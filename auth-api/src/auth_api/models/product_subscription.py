@@ -47,4 +47,4 @@ class ProductSubscription(VersionedModel):  # pylint: disable=too-few-public-met
         """Find an product subscription instance that matches the provided id."""
         return cls.query.filter(
             and_(ProductSubscription.org_id == org_id, ProductSubscription.product_code == product_code,
-                 ProductSubscription.status_code.in_(valid_statuses))).all()
+                 ProductSubscription.status_code.in_(valid_statuses))).first()
