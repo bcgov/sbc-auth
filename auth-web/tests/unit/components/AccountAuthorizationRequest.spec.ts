@@ -73,8 +73,8 @@ describe('AccountAuthorizationRequest tests', () => {
 
     expect(wrapper.find('#account-authorization-request-request-account-select').exists()).toBe(false)
     expect(wrapper.find('#account-authorization-request-additional-message-textarea').exists()).toBe(false)
-    expect(wrapper.find('h3').exists()).toBe(true)
-    expect(wrapper.find('h3').text()).toContain('No authorizing accounts found')
+    expect(wrapper.find('#no-accounts-found').exists()).toBe(true)
+    expect(wrapper.find('#no-accounts-found').text()).toContain('Email: bcolhelp@gov.bc.ca')
   })
 
   it('renders disabled select with preselected item, when single affiliated account found', async () => {

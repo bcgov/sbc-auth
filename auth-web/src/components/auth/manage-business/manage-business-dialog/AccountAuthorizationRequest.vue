@@ -43,7 +43,7 @@
         @change="$emit('change-request-access-message', componentState.requestAccessMessage)"
       />
     </div>
-    <div v-else>
+    <div v-else id="no-accounts-found">
       <p>An error occurred retrieving the list of authorizing accounts for this business.</p>
       <p>If this error persists, please contact the help desk:</p>
       <p>Service BC Help Desk:</p>
