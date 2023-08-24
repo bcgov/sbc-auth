@@ -59,6 +59,7 @@
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
         ref="manageBusinessDialog"
+        :orgId="orgId"
         :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
@@ -73,6 +74,7 @@
         @add-unknown-error="showUnknownErrorModal('business')"
         @on-cancel="cancelEvent"
         @on-business-identifier="businessIdentifier = $event"
+        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
       />
     </template>
     <!-- Add Name Request Dialog -->
@@ -134,6 +136,7 @@ import { mapActions } from 'vuex'
   }
 })
 export default class SearchBusinessNameRequest extends Vue {
+  @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: false }) readonly isGovStaffAccount: boolean
   @Prop({ default: '' }) readonly userFirstName: string
   @Prop({ default: '' }) readonly userLastName: string
@@ -159,6 +162,7 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   showAddSuccessModal (event) {
     this.clearSearch++
+    this.showManageBusinessDialog = false
     this.$emit('add-success', event)
   }
   showInvalidCodeModal (event) {
@@ -199,6 +203,9 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
+  emitOnAuthorizationEmailSentClose (event) {
+    this.$emit('on-authorization-email-sent-close', event)
+  }
 
   async businessEvent (event: { name: string, identifier: string, legalType: string }) {
     this.businessName = event?.name || ''
@@ -234,6 +241,16 @@ export default class SearchBusinessNameRequest extends Vue {
     this.businessName = ''
     // Force a re-render for our BusinessLookup component - to reset it's state.
     this.businessLookupKey++
+  }
+
+  onAuthorizationEmailSentClose (event) {
+    this.showManageBusinessDialog = false
+    this.showNRDialog = false
+    this.businessIdentifier = ''
+    this.businessLegalType = ''
+    this.businessName = ''
+    this.businessLookupKey++
+    this.emitOnAuthorizationEmailSentClose(event)
   }
 
   get isEnableBusinessNrSearch (): boolean {

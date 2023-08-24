@@ -11,7 +11,7 @@ describe('ManageBusinessDialog.vue', () => {
     const wrapper = mount(ManageBusinessDialog, {
       computed: computedMocks
     })
-    const passwordElement = wrapper.find('[data-test="dialog-header"] span')
+    const passwordElement = wrapper.find('[data-test="dialog-header"] h2')
     expect(passwordElement.text()).toContain('Manage a B.C. Business')
   })
 })
