@@ -10,15 +10,15 @@
       <ol class="bold">
         <li class="mt-8">
           <h4>Decide on a Business Type</h4>
-          <ul class="mt-4 text-align ml-n6">
+          <ul class="mt-4 text-align">
             <li>
               Decide which business structure is the most appropriate for you. A few options are: a sole
               proprietorship, partnership, or corporation. Each structure has different legal and financial
-              implications. <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              implications.
               <a href="https://entity-selection-prod.apps.silver.devops.gov.bc.ca/">
                 Use the Business Structures Wizard to help you decide.</a><v-icon
                 color="primary"
-                class="small-icon mb-1"
+                class="mb-1"
                 size="16"
               >
                 mdi-open-in-new
@@ -36,8 +36,8 @@
 
         <li class="mt-10">
           <h4>Request a Business Name or Use a Numbered Company</h4>
-          <ul class="mt-4 ml-2 ml-n6 text-align">
-            <h4 class="mb-5">
+          <ul class="mt-4 text-align">
+            <h4 class="mb-5 ml-n6">
               Request a Business Name
             </h4>
             <li>
@@ -58,13 +58,13 @@
             <li>
               If you do not see your Name Request in your table (e.g. if you submitted your Name Request without
               being logged into your BC Registries account), you can add your Name Request manually by looking up
-              your business name or your NR &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number.
+              your business name or your NR number.
             </li>
             <li>
               You can track the approval status of your Name Request from your table on this screen by clicking the
               <strong>"Open Name Request"</strong> button next to your Name Request.
             </li>
-            <h4 class="my-5">
+            <h4 class="my-5 ml-n6">
               Use a Numbered Company
             </h4>
             <li>
@@ -75,7 +75,7 @@
         </li>
         <li class="mt-10">
           <h4>Incorporate or Register Your Business</h4>
-          <ul class="mt-4 ml-2 ml-n6 text-align">
+          <ul class="mt-4 text-align">
             <li>
               For named businesses, once your Name Request has been approved and added to your table on
               this screen, you must select the <strong>"Register Now"</strong> button beside the name to begin
@@ -93,7 +93,7 @@
 
         <li class="mt-10">
           <h4>Manage and Maintain Your Business</h4>
-          <ul class="mt-4 ml-2 ml-n6 text-align">
+          <ul class="mt-4 text-align">
             <li>
               Once your business is incorporated or registered you are required to keep information about your
               business up to date with the Business Registry.
@@ -129,31 +129,21 @@ ol.bold li::marker {
   font-weight: bold;
   font-size: $px-16 !important;
   color: $gray9;
-  margin:5px 20px 5px 0px;
-}
-
-ul {
-  list-style-type: none;
 }
 
 ul li {
+  list-style: none;
   margin-bottom: 10px;
+  margin-left: -6px;
 }
 
 ul li::before {
   content: "•";
   font-style:bold;
   line-height: 1em;
-  margin:5px 20px 10px 0px;
-}
-
-li ul li:before {
-  float: left;
-}
-
-li ul ul li:before {
-  float: none;
-  margin-bottom: 50px;
+  margin-top: 5px;
+  margin-left: -20px;
+  position: absolute;
 }
 
 ul ul li {

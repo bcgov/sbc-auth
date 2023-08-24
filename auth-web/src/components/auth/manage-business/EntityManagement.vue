@@ -181,7 +181,10 @@
         </div>
       </div>
 
-      <ExpandableHelp helpLabel="Help with Starting and Managing a Business">
+      <ExpandableHelp
+        class="mb-9"
+        helpLabel="Help with Starting and Managing a Business"
+      >
         <template #content>
           <StartNewBusinessHelp class="help-text" />
         </template>
