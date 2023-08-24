@@ -86,12 +86,11 @@ import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Invoice } from '@/models/invoice'
-import OrgModule from '@/store/modules/org'
 import { OrgPaymentDetails } from '@/models/Organization'
 import PaymentCard from '@/components/pay/PaymentCard.vue'
 import SbcSystemError from 'sbc-common-components/src/components/SbcSystemError.vue'
-import { getModule } from 'vuex-module-decorators'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -99,7 +98,7 @@ import { mapActions } from 'vuex'
     PaymentCard
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'createTransaction',
       'getOrgPayments',
       'getInvoice',
@@ -109,7 +108,6 @@ import { mapActions } from 'vuex'
   }
 })
 export default class PaymentView extends Vue {
-  private orgStore = getModule(OrgModule, this.$store)
   @Prop({ default: '' }) paymentId: string
   @Prop({ default: '' }) redirectUrl: string
   private readonly createTransaction!: (transactionData) => any

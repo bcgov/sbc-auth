@@ -99,7 +99,7 @@ export default class PaymentService {
     return axios.post(url, filterParams, { headers, responseType: 'blob' as 'json' })
   }
 
-  static getStatementsList (accountId: string, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
+  static getStatementsList (accountId: string | number, filterParams: StatementFilterParams): AxiosPromise<StatementListResponse> {
     const params = new URLSearchParams()
     if (filterParams.pageNumber) {
       params.append('page', filterParams.pageNumber.toString())
@@ -111,11 +111,11 @@ export default class PaymentService {
     return axios.get(url, { params })
   }
 
-  static getStatementSettings (accountId: string): AxiosPromise<StatementSettings> {
+  static getStatementSettings (accountId: string | number): AxiosPromise<StatementSettings> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`)
   }
 
-  static getStatement (accountId: string, statementId: string, type: string): AxiosPromise<any> {
+  static getStatement (accountId: string | number, statementId: string, type: string): AxiosPromise<any> {
     const headers = {
       'Accept': type
     }
@@ -123,15 +123,15 @@ export default class PaymentService {
     return axios.get(url, { headers, responseType: 'blob' as 'json' })
   }
 
-  static updateStatementSettings (accountId: string, updateBody): AxiosPromise<StatementListItem> {
+  static updateStatementSettings (accountId: string | number, updateBody): AxiosPromise<StatementListItem> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/settings`, updateBody)
   }
 
-  static getStatementRecipients (accountId: string): AxiosPromise<StatementNotificationSettings> {
+  static getStatementRecipients (accountId: string | number): AxiosPromise<StatementNotificationSettings> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`)
   }
 
-  static updateStatementNotifications (accountId: string, updateBody): AxiosPromise<StatementNotificationSettings> {
+  static updateStatementNotifications (accountId: string | number, updateBody): AxiosPromise<StatementNotificationSettings> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/statements/notifications`, updateBody)
   }
 
@@ -155,11 +155,11 @@ export default class PaymentService {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/bank-accounts/verifications`, padInfo)
   }
 
-  static getFailedInvoices (accountId: string): AxiosPromise<InvoiceListResponse> {
+  static getFailedInvoices (accountId: string | number): AxiosPromise<InvoiceListResponse> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?status=FAILED`)
   }
 
-  static createAccountPayment (accountId: string) :AxiosPromise<Payment> {
+  static createAccountPayment (accountId: string | number) :AxiosPromise<Payment> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/payments?retryFailedPayment=true`, {})
   }
 
@@ -171,15 +171,15 @@ export default class PaymentService {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/codes/fee_codes`)
   }
 
-  static createAccountFees (accountId: string, accountFeePayload: any): AxiosPromise<any> {
+  static createAccountFees (accountId: string | number, accountFeePayload: any): AxiosPromise<any> {
     return axios.post(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees`, accountFeePayload)
   }
 
-  static getAccountFees (accountId: string): AxiosPromise<any> {
+  static getAccountFees (accountId: string | number): AxiosPromise<any> {
     return axios.get(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}`)
   }
 
-  static updateAccountFees (accountId: string, accountFeePayload: any): AxiosPromise<any> {
+  static updateAccountFees (accountId: string | number, accountFeePayload: any): AxiosPromise<any> {
     const { product } = accountFeePayload
     return axios.put(`${ConfigHelper.getPayAPIURL()}/accounts/${accountId}/fees/${product}`, accountFeePayload)
   }

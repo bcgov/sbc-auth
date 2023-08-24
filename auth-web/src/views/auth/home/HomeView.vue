@@ -142,7 +142,8 @@
               </p>
               <a
                 class="link-w-icon"
-                href="https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/business-registry-faq"
+                href="https://www2.gov.bc.ca/gov/content/employment-business/business/
+                managing-a-business/permits-licences/news-updates/modernization/business-registry-faq"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -171,7 +172,9 @@
                 </li>
                 <li>
                   <span>{{ $t('labelEmail') }}</span>
-                  <a :href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">{{ $t('techSupportEmail') }}</a>
+                  <a :href="'mailto:' + $t('techSupportEmail') + '?subject=' + $t('techSupportEmailSubject')">
+                    {{ $t('techSupportEmail') }}
+                  </a>
                 </li>
               </ul>
               <p class="mb-0">
@@ -187,10 +190,10 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
-import { mapMutations, mapState } from 'vuex'
 import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
@@ -200,6 +203,8 @@ import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import { User } from '@/models/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   name: 'Home',
@@ -210,26 +215,18 @@ import { User } from '@/models/user'
     LoginBCSC,
     SbcAuthMenu,
     TestimonialQuotes
-  },
-  computed: {
-    ...mapState('user', ['userProfile', 'currentUser']),
-    ...mapState('org', ['currentAccountSettings', 'currentMembership'])
-  },
-  methods: {
-    ...mapMutations('org', ['resetCurrentOrganisation'])
   }
 })
 export default class HomeView extends Vue {
-  private readonly userProfile!: User
-  private readonly currentAccountSettings!: AccountSettings
-  private readonly currentMembership!: Member
-  private readonly getUserProfile!: (identifier: string) => User
-  private readonly currentUser!: KCUserProfile
+  @State(useUserStore) readonly userProfile!: User
+  @State(useUserStore) readonly currentUser!: KCUserProfile
+  @State(useOrgStore) readonly currentAccountSettings!: AccountSettings
+  @State(useOrgStore) readonly currentMembership!: Member
   private noPasscodeDialog = false
-  private accountDialog = false
+  accountDialog = false
   private isDirSearchUser: boolean = false
-  private readonly resetCurrentOrganisation!: () => void
-  private readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
+  @Action(useOrgStore) readonly resetCurrentOrganisation!: () => void
+  readonly coopAssocUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/' +
   'managing-a-business/permits-licences/businesses-incorporated-companies/cooperative-associations'
   private get showManageBusinessesBtn (): boolean {
     return this.currentAccountSettings && this.currentMembership?.membershipStatus === MembershipStatus.Active
@@ -239,7 +236,7 @@ export default class HomeView extends Vue {
     return !!this.currentAccountSettings
   }
 
-  private goToManageBusinesses (): void {
+  goToManageBusinesses (): void {
     let manageBusinessUrl = { path: `/${Pages.MAIN}/${this.currentAccountSettings.id}` }
     this.$router.push(manageBusinessUrl)
   }
@@ -249,7 +246,7 @@ export default class HomeView extends Vue {
     this.$router.push(`/${Pages.CREATE_ACCOUNT}`)
   }
 
-  private login () {
+  login () {
     this.$router.push(`/signin/bcsc/${Pages.CREATE_ACCOUNT}`)
   }
 

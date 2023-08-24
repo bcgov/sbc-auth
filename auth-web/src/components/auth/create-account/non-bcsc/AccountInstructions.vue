@@ -69,7 +69,9 @@ export default class AccountInstructions extends Vue {
     {
       number: 1,
       stepTitle: 'Get an identity affidavit notarized',
-      stepDescription: '<p>Visit your local notary or lawyer to have this document notarized. This is to ensure that no one is impersonating you or committing identity theft.</p><p><em>Only account administrators are required to verify their identity with a notary.</em><p>',
+      stepDescription: '<p>Visit your local notary or lawyer to have this document notarized. This is to ensure that ' +
+        'no one is impersonating you or committing identity theft.</p><p><em>Only account administrators are ' +
+        'required to verify their identity with a notary.</em><p>',
       icon: 'mdi-scale-balance'
     },
     {

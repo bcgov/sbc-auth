@@ -2,29 +2,18 @@ import { AccountStatus, Role } from '@/util/constants'
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
 
 import AccountInfo from '@/components/auth/account-settings/account-info/AccountInfo.vue'
-import CodesModule from '@/store/modules/codes'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
 import flushPromises from 'flush-promises'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 document.body.setAttribute('data-app', 'true')
 
 describe('AccountInfo.vue', () => {
   let wrapper: any
-  let store: any
-  let orgModule: any
-  let userModule: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
   localVue.directive('can', can)
   const vuetify = new Vuetify({})
 
@@ -35,59 +24,20 @@ describe('AccountInfo.vue', () => {
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
   beforeEach(() => {
-    orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'testOrg',
-          statusCode: AccountStatus.ACTIVE,
-          orgStatus: AccountStatus.ACTIVE,
-          id: 1234
-        },
-        currentMembership: {},
-        currentOrgAddress: {},
-        permissions: ['CHANGE_ADDRESS', 'CHANGE_ORG_NAME', 'VIEW_ADDRESS', 'VIEW_ADMIN_CONTACT']
-      },
-      actions: {
-        updateOrg: vi.fn(),
-        syncAddress: vi.fn(),
-        syncOrganization: vi.fn()
-      },
-      mutations: {
-        setCurrentOrganizationAddress: vi.fn(),
-        setCurrentOrganization: vi.fn().mockImplementation(() => {
-          orgModule.state.currentOrganization = {
-            name: 'testOrg_suspended',
-            statusCode: AccountStatus.SUSPENDED,
-            orgStatus: AccountStatus.SUSPENDED,
-            id: 1234
-          }
-        })
-      },
-      getters: OrgModule.getters
-    }
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    orgStore.currentOrganization = {
+      name: 'testOrg',
+      statusCode: AccountStatus.ACTIVE,
+      orgStatus: AccountStatus.ACTIVE,
+      id: 1234
+    } as any
+    orgStore.currentMembership = {} as any
+    orgStore.permissions = ['CHANGE_ADDRESS', 'CHANGE_ORG_NAME', 'VIEW_ADDRESS', 'VIEW_ADMIN_CONTACT']
 
-    userModule = {
-      namespaced: true,
-      state: {
-        currentUser: {
-          roles: [Role.Staff, Role.StaffSuspendAccounts]
-        }
-      },
-      actions: UserModule.actions,
-      mutations: UserModule.mutations,
-      getters: UserModule.getters
-    }
-
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule
-      }
-    })
-
+    userStore.currentUser = {
+      roles: [Role.Staff, Role.StaffSuspendAccounts]
+    } as any
     vi.resetModules()
     vi.clearAllMocks()
   })
@@ -98,7 +48,6 @@ describe('AccountInfo.vue', () => {
 
   it('is a Vue instance', () => {
     wrapper = shallowMount(AccountInfo, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable],
@@ -121,7 +70,6 @@ describe('AccountInfo.vue', () => {
 
   it('suspend button click invokes showSuspendAccountDialog method', () => {
     wrapper = shallowMount(AccountInfo, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable],
@@ -147,7 +95,6 @@ describe('AccountInfo.vue', () => {
 
   it('Account status and number displayed properly', async () => {
     wrapper = shallowMount(AccountInfo, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable],
@@ -159,18 +106,23 @@ describe('AccountInfo.vue', () => {
         })
       }
     })
-    expect(wrapper.vm.$store.state.org.currentOrganization.name).toBe('testOrg')
+    const orgStore = useOrgStore()
+    expect(orgStore.currentOrganization.name).toBe('testOrg')
     expect(wrapper.find("[data-test='btn-suspend-account']").text()).toBe('Suspend Account')
-    store.commit('org/setCurrentOrganization')
+    orgStore.setCurrentOrganization({
+      name: 'testOrg_suspended',
+      statusCode: AccountStatus.SUSPENDED,
+      orgStatus: AccountStatus.SUSPENDED,
+      id: 1234
+    })
     await flushPromises()
-    expect(wrapper.vm.$store.state.org.currentOrganization.name).toBe('testOrg_suspended')
+    expect(orgStore.currentOrganization.name).toBe('testOrg_suspended')
     expect(wrapper.find("[data-test='btn-suspend-account']").text()).toBe('Unsuspend Account')
     expect(wrapper.find("[data-test='div-account-number']").text()).toBe('1234')
   })
 
   it('Account Info color code', () => {
     wrapper = shallowMount(AccountInfo, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable],
@@ -182,17 +134,21 @@ describe('AccountInfo.vue', () => {
         })
       }
     })
-    let statusColor = wrapper.vm.getStatusColor(store.state.org.currentOrganization.orgStatus)
+    const orgStore = useOrgStore()
+    let statusColor = wrapper.vm.getStatusColor(orgStore.currentOrganization.orgStatus)
     expect(statusColor).toBe('green')
     let getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(
-      store.state.org.currentOrganization.orgStatus)
+      orgStore.currentOrganization.orgStatus)
     expect(getDialogStatusButtonColor).toBe('error')
-
-    store.commit('org/setCurrentOrganization')
-
-    statusColor = wrapper.vm.getStatusColor(store.state.org.currentOrganization.orgStatus)
+    orgStore.setCurrentOrganization({
+      name: 'testOrg_suspended',
+      statusCode: AccountStatus.SUSPENDED,
+      orgStatus: AccountStatus.SUSPENDED,
+      id: 1234
+    })
+    statusColor = wrapper.vm.getStatusColor(orgStore.currentOrganization.orgStatus)
     expect(statusColor).toBe('error')
-    getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(store.state.org.currentOrganization.orgStatus)
+    getDialogStatusButtonColor = wrapper.vm.getDialogStatusButtonColor(orgStore.currentOrganization.orgStatus)
     expect(getDialogStatusButtonColor).toBe('green')
   })
 
@@ -200,28 +156,7 @@ describe('AccountInfo.vue', () => {
     const MyStub = {
       template: '<div />'
     }
-
-    const codesModule = {
-      namespaced: true,
-      state: {
-      },
-      actions: CodesModule.actions,
-      mutations: CodesModule.mutations,
-      getters: CodesModule.getters
-    }
-
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule,
-        codes: codesModule
-      }
-    })
-
     wrapper = mount(AccountInfo, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable],

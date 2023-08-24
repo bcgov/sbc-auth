@@ -31,7 +31,8 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 export default class DownloadAffidavit extends Vue {
   @Prop({ default: null }) tabNumber: number
   @Prop({ default: 'Download Affidavit' }) title: string
-  @Prop({ default: 'Download the notarized affidavit associated with this account to verify the account creators identity and associated information.' }) subTitle: string
+  @Prop({ default: 'Download the notarized affidavit associated with this account to verify the account creators ' +
+    'identity and associated information.' }) subTitle: string
   @Prop({ default: '' }) affidavitName: string
 }
 </script>

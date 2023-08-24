@@ -289,6 +289,7 @@ import {
   Role,
   SessionStorageKeys
 } from '@/util/constants'
+import { Action, Getter, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import {
   CreateRequestBody,
@@ -310,12 +311,9 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
-
-import { namespace } from 'vuex-class'
-
-const CodesModule = namespace('codes')
-const OrgModule = namespace('org')
-const userModule = namespace('user')
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -332,34 +330,24 @@ export default class AccountInfo extends Mixins(
   AccountChangeMixin,
   AccountMixin
 ) {
-  @CodesModule.State('suspensionReasonCodes')
-  private suspensionReasonCodes!: Code[]
-  @OrgModule.State('currentMembership') public currentMembership!: Organization
-  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
-  @OrgModule.State('permissions') public permissions!: string[]
-  @OrgModule.State('currentOrgPaymentType') public currentOrgPaymentType!: string
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
+  @State(useCodesStore) private suspensionReasonCodes!: Code[]
+  @State(useOrgStore) public currentMembership!: Organization
+  @State(useOrgStore) public currentOrgAddress!: Address
+  @State(useOrgStore) public permissions!: string[]
+  @State(useOrgStore) public currentOrgPaymentType!: string
+  @State(useUserStore) public currentUser!: KCUserProfile
 
-  @OrgModule.Getter('isBusinessAccount') public isBusinessAccount!: boolean
-  @OrgModule.Mutation('setCurrentOrganizationAddress')
-  public setCurrentOrganizationAddress!: (address: Address) => void
+  @Getter(useOrgStore) public isBusinessAccount!: boolean
+  @Action(useOrgStore) public setCurrentOrganizationAddress!: (address: Address) => void
 
-  @OrgModule.Action('updateOrg') public updateOrg!: (
-    requestBody: CreateRequestBody
-  ) => Promise<Organization>
+  @Action(useOrgStore) public updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
 
-  @OrgModule.Action('syncAddress') syncAddress!: () => Address
-  @OrgModule.Action('getOrgPayments') getOrgPayments!: () => any
-  @OrgModule.Action('updateOrganizationAccessType') updateOrganizationAccessType!: (
-    accessType: string
-  ) => Promise<Organization>
+  @Action(useOrgStore) syncAddress!: () => Address
+  @Action(useOrgStore) getOrgPayments!: () => any
+  @Action(useOrgStore) updateOrganizationAccessType!: (accessType: string) => Promise<Organization>
 
-  @OrgModule.Action('syncOrganization') syncOrganization!: (
-    currentAccount: number
-  ) => Promise<Organization>
-  @OrgModule.Action('suspendOrganization') suspendOrganization!: (
-    selectedSuspensionReasonCode: string
-  ) => Promise<Organization>
+  @Action(useOrgStore) syncOrganization!: (currentAccount: number) => Promise<Organization>
+  @Action(useOrgStore) suspendOrganization!: (selectedSuspensionReasonCode: string) => Promise<Organization>
 
   private dialogTitle: string = ''
   private dialogText: string = ''
@@ -367,8 +355,7 @@ export default class AccountInfo extends Mixins(
   private suspensionCompleteDialogText: string = ''
   private isSuspensionReasonFormValid: boolean = false
   private addressChanged = false
-  // private readonly isBusinessAccount!: boolean
-  private originalAddress: Address // store the original address..do not modify it afterwards
+  private originalAddress: Address = null // store the original address..do not modify it afterwards
 
   private errorMessage: string = ''
 
@@ -409,7 +396,8 @@ export default class AccountInfo extends Mixins(
         this.isCompleteAccountInfo = false
         this.errorMessage = this.isAddressEditable
           ? 'Your account info is incomplete. Please enter your address in order to proceed.'
-          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator entered the missing information for this account.'
+          : 'This accounts profile is incomplete. You will not be able to proceed until an account administrator ' +
+            'entered the missing information for this account.'
         this.$refs.editAccountForm?.validate() // validate form fields and show error message
         // SBTODO create a method in child comp
         this.$refs.mailingAddress?.triggerValidate() // validate form fields and show error message for address component from sbc-common-comp
@@ -584,6 +572,7 @@ export default class AccountInfo extends Mixins(
       await this.updateOrg(createRequestBody)
       // FUTURE: change 'staff view other account' flow so it doesn't need to fake load the other account globally
       // if staff updating a user account don't reload header -- causes staff account to get loaded in
+      // Remove Vuex with Vue 3
       if (!(this.isStaff && !this.isStaffAccount)) this.$store.commit('updateHeader')
       this.addressChanged = false
       if (this.baseAddress) {

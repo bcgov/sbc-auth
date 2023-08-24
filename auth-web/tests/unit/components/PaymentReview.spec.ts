@@ -1,15 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import OrgModule from '@/store/modules/org'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('PaymentReview.vue', () => {
   let wrapper: any
@@ -22,30 +15,10 @@ describe('PaymentReview.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {}
-      },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
-
     wrapper = mount(PaymentReview, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable]

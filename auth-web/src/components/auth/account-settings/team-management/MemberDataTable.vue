@@ -234,10 +234,13 @@
 import { AccessType, LoginSource, Permission } from '@/util/constants'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Member, MembershipStatus, MembershipType, Organization, RoleInfo } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 export interface ChangeRolePayload {
   member: Member
@@ -249,19 +252,19 @@ export interface ChangeRolePayload {
     ModalDialog
   },
   computed: {
-    ...mapState('business', ['businesses']),
-    ...mapState('org', [
+    ...mapState(useBusinessStore, ['businesses']),
+    ...mapState(useOrgStore, [
       'activeOrgMembers',
       'currentMembership',
       'currentOrganization',
       'permissions'
     ]),
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'roleInfos'
     ])
   },
   methods: {
-    ...mapActions('user', [
+    ...mapActions(useUserStore, [
       'getRoleInfo',
       'resetOTPAuthenticator'
     ])

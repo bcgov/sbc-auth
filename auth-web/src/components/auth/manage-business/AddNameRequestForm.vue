@@ -88,22 +88,24 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
     HelpDialog
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', [
+    ...mapActions(useBusinessStore, [
       'addNameRequest'
     ])
   }

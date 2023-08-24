@@ -1,16 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import { Account } from '@/util/constants'
-import OrgModule from '@/store/modules/org'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('PaymentMethods.vue', () => {
   let wrapper: any
@@ -23,32 +16,11 @@ describe('PaymentMethods.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
     localVue.directive('can', can)
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {},
-        currentOrgType: Account.BASIC
-      },
-      actions: OrgModule.actions,
-      mutations: OrgModule.mutations,
-      getters: OrgModule.getters
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
-
     wrapper = mount(PaymentMethods, {
-      store,
       localVue,
       vuetify,
       propsData: {

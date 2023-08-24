@@ -129,14 +129,12 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
-
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -144,14 +142,9 @@ const OrgModule = namespace('org')
   }
 })
 export default class ExistingAPIKeys extends Mixins(AccountChangeMixin) {
-  @OrgModule.State('currentOrganization')
-  public currentOrganization!: Organization
-  @OrgModule.Action('getOrgApiKeys') public getOrgApiKeys!: (
-    orgId: any
-  ) => Promise<any>
-  @OrgModule.Action('revokeOrgApiKeys') public revokeOrgApiKeys!: (
-    orgId: any
-  ) => Promise<any>
+  @State(useOrgStore) readonly currentOrganization!: Organization
+  @Action(useOrgStore) readonly getOrgApiKeys!: (orgId: any) => Promise<any>
+  @Action(useOrgStore) readonly revokeOrgApiKeys!: (orgId: any) => Promise<any>
 
   public isLoading = true
   public confirmActionTitle = 'Revoke API Key?'

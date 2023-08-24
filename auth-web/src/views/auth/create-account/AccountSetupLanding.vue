@@ -29,14 +29,16 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { LoginSource, Pages } from '@/util/constants'
 import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
 import { namespace } from 'vuex-class'
+import { useUserStore } from '@/stores/user'
 
-const UserModule = namespace('user')
+// Will be taken out with Vue 3.
 const AuthModule = namespace('auth')
 
 @Component
@@ -47,9 +49,8 @@ export default class AccountSetupLanding extends Vue {
   public displayComponent: any
   public isLoading = true
 
-  @UserModule.State('currentUser') private currentUser!: KCUserProfile
-  @UserModule.Action('getUserAccountSettings')
-  private getUserAccountSettings!: () => Promise<any>
+  @State(useUserStore) private currentUser!: KCUserProfile
+  @Action(useUserStore) private getUserAccountSettings!: () => Promise<any>
 
   @AuthModule.Getter('isAuthenticated') private isAuthenticated!: boolean
 

@@ -100,24 +100,25 @@ import { Account, Pages } from '@/util/constants'
 import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, MembershipType, Organization } from '@/models/Organization'
 import { StatementFilterParams, StatementListItem, StatementListResponse } from '@/models/statement'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
 import StatementsSettings from '@/components/auth/account-settings/statement/StatementsSettings.vue'
 import moment from 'moment'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
     StatementsSettings
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'getStatementsList',
       'getStatement'
     ])
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentMembership'
     ])

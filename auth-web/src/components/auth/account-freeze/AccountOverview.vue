@@ -86,28 +86,26 @@ import { AccessType } from '@/util/constants'
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
-import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization'
     ])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'calculateFailedInvoices'
     ])
   }
 })
 export default class AccountOverview extends Mixins(Steppable) {
-  private orgStore = getModule(OrgModule, this.$store)
   private readonly currentOrganization!: Organization
   private readonly calculateFailedInvoices!: () => FailedInvoice
   private formatDate = CommonUtils.formatDisplayDate

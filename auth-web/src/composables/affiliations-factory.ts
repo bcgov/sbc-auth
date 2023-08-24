@@ -2,7 +2,6 @@
 import { Business } from './../models/business'
 import { AffiliationState, AffiliationFilterParams } from './../models/affiliation'
 import { computed, reactive, ref, Ref, watch } from '@vue/composition-api'
-import { useStore } from 'vuex-composition-helpers'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -11,6 +10,7 @@ import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, L
   AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription,
   GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
+import { useBusinessStore } from '@/stores/business'
 
 const affiliations = (reactive({
   filters: {
@@ -23,8 +23,8 @@ const affiliations = (reactive({
 }) as unknown) as AffiliationState
 
 export const useAffiliations = () => {
-  const store = useStore()
-  const businesses = computed(() => store.state.business.businesses)
+  const businessStore = useBusinessStore()
+  const businesses = computed(() => businessStore.businesses)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
 
   /** Returns true if the affiliation is a Name Request. */

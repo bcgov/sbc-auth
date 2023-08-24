@@ -22,21 +22,22 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'termsOfUse',
       'userProfile',
       'userHasToAcceptTOS'
     ])
   },
   methods: {
-    ...mapActions('user', [
+    ...mapActions(useUserStore, [
       'getTermsOfUse'
     ])
   }

@@ -25,11 +25,9 @@ import AdministrativeBN from '@/components/auth/staff/admin/AdministrativeBN.vue
 import { Component } from 'vue-property-decorator'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
+import { State } from 'pinia-class'
 import Vue from 'vue'
-
-import { namespace } from 'vuex-class'
-
-const userModule = namespace('user')
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -37,9 +35,9 @@ const userModule = namespace('user')
   }
 })
 export default class AdminDashboardView extends Vue {
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
+  @State(useUserStore) currentUser!: KCUserProfile
 
-  private get canEditBn (): boolean {
+  get canEditBn (): boolean {
     return this.currentUser.roles.includes(Role.BnEdit) || this.currentUser.roles.includes(Role.AdminEdit)
   }
 }

@@ -170,7 +170,8 @@
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { SessionStorageKeys, TaskRelationshipStatus, TaskStatus } from '@/util/constants'
 import { Task, TaskFilterParams, TaskList } from '@/models/Task'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
@@ -178,23 +179,22 @@ import { DatePicker } from '@/components'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { ProductCode } from '@/models/Staff'
 import moment from 'moment'
-import { namespace } from 'vuex-class'
-
-const TaskModule = namespace('task')
+import { useStaffStore } from '@/stores/staff'
+import { useTaskStore } from '@/stores/task'
 
 @Component({
   components: {
     DatePicker
   },
   computed: {
-    ...mapState('staff', ['products'])
+    ...mapState(useStaffStore, ['products'])
   },
   methods: {
-    ...mapActions('staff', ['getProducts'])
+    ...mapActions(useStaffStore, ['getProducts'])
   }
 })
 export default class StaffRejectedAccountsTable extends Mixins(PaginationMixin) {
-  @TaskModule.Action('fetchTasks') private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
+  @Action(useTaskStore) private fetchTasks!: (filterParams: TaskFilterParams) => TaskList
   private rejectedTasks: Task[] = []
   private taskFilter: TaskFilterParams
   private totalRejectedTasks = 0

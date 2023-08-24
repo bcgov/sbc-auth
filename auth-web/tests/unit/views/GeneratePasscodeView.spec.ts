@@ -1,18 +1,14 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 document.body.setAttribute('data-app', 'true')
 
 const router = new VueRouter()
@@ -24,17 +20,10 @@ describe('GeneratePasscodeView.vue', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const $t = () => ''
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false
-    })
-
     wrapper = mount(GeneratePasscodeView, {
-      store,
       localVue,
       router,
       vuetify,
