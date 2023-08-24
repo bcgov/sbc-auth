@@ -705,9 +705,10 @@ class TestOrgProductsInfo(dict, Enum):
     org_products_vs = {'subscriptions': [{'productCode': 'VS'}]}
     org_products_business = {'subscriptions': [{'productCode': 'BUSINESS'}]}
     org_products_nds = {'subscriptions': [{'productCode': 'NDS'}]}
-    mhr_qs_lawyer_and_notaries = {'subscriptions': [{'productCode': 'MHR_QSLN', 'externalSourceId': 'ABC123'}]}
-    mhr_qs_home_manufacturers = {'subscriptions': [{'productCode': 'MHR_QSHM', 'externalSourceId': 'ABC123'}]}
-    mhr_qs_home_dealers = {'subscriptions': [{'productCode': 'MHR_QSHD', 'externalSourceId': 'ABC123'}]}
+    mhr = {'subscriptions': [{'productCode': 'MHR'}]}
+    mhr_qs_lawyer_and_notaries = {'subscriptions': [{'productCode': 'MHR_QSLN', 'externalSourceId': 'ABC101'}]}
+    mhr_qs_home_manufacturers = {'subscriptions': [{'productCode': 'MHR_QSHM', 'externalSourceId': 'ABC102'}]}
+    mhr_qs_home_dealers = {'subscriptions': [{'productCode': 'MHR_QSHD', 'externalSourceId': 'ABC103'}]}
 
 
 class TestEntityInfo(dict, Enum):
