@@ -216,6 +216,11 @@ class AffiliationInvitation:
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
         to_org_id = affiliation_invitation_info.get('toOrgId')
+        if to_org_uuid := affiliation_invitation_info.get('toOrgUuid'):
+            to_org: OrgModel = OrgModel.find_by_org_uuid(to_org_uuid)
+            to_org_id = to_org.id
+            affiliation_invitation_info['toOrgId'] = to_org_id
+
         business_identifier = affiliation_invitation_info['businessIdentifier']
         affiliation_invitation_type = AffiliationInvitationType.from_value(affiliation_invitation_info.get('type'))
 

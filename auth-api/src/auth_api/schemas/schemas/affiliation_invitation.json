@@ -11,6 +11,9 @@
     "toOrgId": {
       "type": ["number", "null"]
     },
+    "toOrgUuid": {
+      "type": ["string", "null"]
+    },
     "businessIdentifier": {
       "$id": "#/properties/businessIdentifier",
       "type": "string",
