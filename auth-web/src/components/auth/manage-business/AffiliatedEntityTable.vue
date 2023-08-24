@@ -517,7 +517,7 @@ export default defineComponent({
     }
 
     const getRequestForAuthorizationStatusText = (affiliationInviteInfos: AffiliationInviteInfo[]) => {
-      if (isCurrentOrganization(affiliationInviteInfos[0].toOrg.id)) {
+      if (isCurrentOrganization(affiliationInviteInfos[0]?.toOrg?.id)) {
         // incoming request for access
         const getAlwaysSameOrderArr = affiliationInviteInfos.slice().sort()
         const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
@@ -527,7 +527,7 @@ export default defineComponent({
         // outgoing request for access
         switch (affiliationInviteInfos[0].status) {
           case AffiliationInvitationStatus.Pending:
-            statusText = 'Request sent, pending authorization'
+            statusText = 'Confirmation email sent, pending authorization.'
             break
           case AffiliationInvitationStatus.Accepted:
             statusText = '<strong>Authorized</strong> - you can now manage this business.'
@@ -606,6 +606,10 @@ export default defineComponent({
     }
 
     const getPrimaryAction = (item: Business): string => {
+      const invitationStatus = item?.affiliationInvites?.[0]?.status
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
+        return 'Resend Email'
+      }
       if (isTemporaryBusiness(item)) {
         return 'Resume Draft'
       } else if (isNameRequest(item)) {
@@ -628,6 +632,11 @@ export default defineComponent({
     }
 
     const isOpenExternal = (item: Business): boolean => {
+      const invitationStatus = item?.affiliationInvites?.[0]?.status
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
+        return false
+      }
+
       if (isTemporaryBusiness(item)) {
         return false
       }
@@ -768,6 +777,11 @@ export default defineComponent({
     }
 
     const action = (item: Business): void => {
+      const invitationStatus = item?.affiliationInvites?.[0]?.status
+      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
+        context.emit('resend-affiliation-invitation', item)
+        return
+      }
       if (isShowRemoveAsPrimaryAction(item)) {
         removeBusiness(item)
       } else {

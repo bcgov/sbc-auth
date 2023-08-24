@@ -191,6 +191,7 @@
 
       <search-business-name-request
         v-if="isEnableBusinessNrSearch"
+        :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
@@ -207,6 +208,7 @@
         @add-nr-error="showNRErrorModal()"
         @add-failed-no-nr="showNRNotFoundModal()"
         @show-add-old-nr-modal="showAddNRModal()"
+        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
       />
 
       <template v-if="!isEnableBusinessNrSearch">
@@ -273,6 +275,7 @@
         @remove-business="showConfirmationOptionsModal($event)"
         @remove-affiliation-invitation="removeAffiliationInvitation()"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
+        @resend-affiliation-invitation="resendAffiliationInvitation($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -282,12 +285,15 @@
       />
 
       <!-- Add an Existing Business Dialog -->
+      <!-- Used only when !isEnableBusinessNrSearch, can be removed from here once this goes away -->
       <ManageBusinessDialog
-        :showDialog="showManageBusinessDialog"
+        :orgId="orgId"
+        :showBusinessDialog="showManageBusinessDialog"
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
         @add-success="showAddSuccessModal"
+        @affiliation-invitation-pending="showAuthorizationEmailSentDialogPending"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
@@ -295,6 +301,14 @@
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
         @business-already-added="showBusinessAlreadyAdded($event)"
+        @show-create-affiliation-invitation-error-dialog="showCreateAffiliationInvitationErrorDialog()"
+      />
+
+      <AuthorizationEmailSentDialog
+        :isVisible="isAuthorizationEmailSentDialogVisible"
+        :email="businessContactEmail"
+        @open-help="openHelp"
+        @close-dialog="onAuthorizationEmailSentClose"
       />
 
       <!-- Add Name Request Dialog -- only for BusinessNrSearch -->
@@ -369,6 +383,12 @@
         </template>
       </ModalDialog>
 
+      <HelpDialog
+        ref="helpDialog"
+        :helpDialogBlurb="helpDialogBlurb"
+        :inline="true"
+      />
+
       <!-- Error Dialog -->
       <ModalDialog
         ref="errorDialog"
@@ -392,7 +412,7 @@
             data-test="dialog-ok-button"
             @click="close()"
           >
-            OK
+            Close
           </v-btn>
         </template>
       </ModalDialog>
@@ -428,6 +448,7 @@
             large
             color="primary"
             data-test="dialog-ok-button"
+            @click="resendAffiliationInvitation()"
           >
             Re-send Authorization Email
           </v-btn>
@@ -470,7 +491,7 @@
             data-test="dialog-ok-button"
             @click="closeBusinessUnavailableDialog()"
           >
-            OK
+            Close
           </v-btn>
         </template>
       </ModalDialog>
@@ -499,7 +520,7 @@
             data-test="removed-business-success-button"
             @click="removedBusinessSuccessClose()"
           >
-            OK
+            Close
           </v-btn>
         </template>
       </ModalDialog>
@@ -528,8 +549,12 @@ import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { AffiliationInvitationStatus } from '@/models/affiliation'
+import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
 import { Base64 } from 'js-base64'
+import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
+import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
@@ -550,9 +575,11 @@ const BusinessModule = namespace('business')
     ExpandableHelp,
     ManageBusinessDialog,
     ModalDialog,
+    HelpDialog,
     PasscodeResetOptionsModal,
     SearchBusinessNameRequest,
-    StartNewBusinessHelp
+    StartNewBusinessHelp,
+    AuthorizationEmailSentDialog
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
@@ -570,7 +597,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   // action from business module
   @BusinessModule.Action('isAffiliated')
-  readonly isAffiliated!: (identifier: string) => Promise<boolean>
+  private readonly isAffiliated!: (identifier: string) => Promise<boolean>
 
   // for template
   readonly CorpTypes = CorpTypes
@@ -585,6 +612,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
   showManageBusinessDialog = false
+  isAuthorizationEmailSentDialogVisible = false
+  businessContactEmail = ''
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
@@ -642,22 +671,25 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.setup()
 
     if (this.base64Token && this.base64OrgName) {
-      const decodedToken = Base64.decode(this.base64Token) // Decode the Base64 token
+      const base64TokenObject = this.base64Token.split('.')[0]
+      const decodedToken = Base64.decode(base64TokenObject)
       const token = JSON.parse(decodedToken)
       const legalName = Base64.decode(this.base64OrgName)
-      this.parseUrlAndAddAffiliation(token, legalName)
+      this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
     }
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
-  parseUrlAndAddAffiliation = async (token: any, legalName: string) => {
+  // parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
+  protected async parseUrlAndAddAffiliation (token: any, legalName: string, base64Token: string) {
     if (!this.$route.meta.checkMagicLink) {
       return
     }
     const identifier = token.businessIdentifier
     const invitationId = token.id
+    this.businessIdentifier = token.businessIdentifier
     try {
-      const invitation = await AffiliationInvitationService.getInvitationbyId(invitationId)
+      const invitation = await AffiliationInvitationService.getInvitationById(invitationId)
 
       // 1. Link expired
       if (invitation.data.status === AffiliationInvitationStatus.Expired) {
@@ -673,7 +705,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       }
 
       // 3. Accept invitation
-      const response = await AffiliationInvitationService.acceptInvitation(invitationId, this.base64Token)
+      const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
 
       // 4. Unauthorized
       if (response.status === 401) {
@@ -683,14 +715,43 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
       // 5. Adding magic link success
       if (response.status === 200) {
-        this.showAddSuccessModalbyEmail(identifier)
+        this.showAddSuccessModalByEmail(identifier)
         return
       }
 
       throw new Error('Magic link error')
     } catch (error) {
-      // Handle unexpected errors
       this.showMagicLinkErrorModal()
+    }
+  }
+
+  helpDialogBlurb = async () => {
+    return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+        'please contact us at:'
+  }
+
+  openHelp = async () => {
+    this.$refs.helpDialog.open()
+  }
+
+  resendAffiliationInvitation = async (event) => {
+    let fromOrgId = Number(this.orgId)
+    let businessIdentifier = this.base64OrgName
+    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
+      fromOrgId = event?.affiliationInvites[0].fromOrg.id
+      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
+    try {
+      const payload: CreateAffiliationInvitation = {
+        fromOrgId: fromOrgId,
+        businessIdentifier: businessIdentifier
+      }
+      await AffiliationInvitationService.createInvitation(payload)
+      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
+      this.businessContactEmail = contact?.data?.email
+      this.isAuthorizationEmailSentDialogVisible = true
+    } catch (err) {
+      this.showCreateAffiliationInvitationErrorDialog()
     }
   }
 
@@ -752,10 +813,20 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }, 4000)
   }
 
-  async showAddSuccessModalbyEmail (businessIdentifier: string) {
+  async showAddSuccessModalByEmail (businessIdentifier: string) {
     await this.syncBusinesses()
     this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
     this.snackbarText = 'You can now manage ' + businessIdentifier + '.'
+    this.showSnackbar = true
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
+  async showAuthorizationEmailSentDialogPending (businessIdentifier: string) {
+    await this.syncBusinesses()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.snackbarText = 'Confirmation email sent, pending authorization.'
     this.showSnackbar = true
     setTimeout(() => {
       this.highlightIndex = -1
@@ -774,6 +845,15 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
     this.showSnackbar = true
     this.highlightIndex = nameRequestIndexResponse
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
+  async onAuthorizationEmailSentClose (businessIdentifier: string) {
+    await this.syncBusinesses()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.isAuthorizationEmailSentDialogVisible = false
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
@@ -825,6 +905,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.dialogTitle = 'Unable to Manage Business'
     this.dialogText =
     'The account that requested authorisation does not match your current account. Please log in as the account that initiated the request.'
+    this.$refs.errorDialog.open()
+  }
+
+  showCreateAffiliationInvitationErrorDialog () {
+    this.dialogTitle = 'Error Sending Authorization Email'
+    this.dialogText = 'An error occurred sending authorization email. Please try again.'
     this.$refs.errorDialog.open()
   }
 

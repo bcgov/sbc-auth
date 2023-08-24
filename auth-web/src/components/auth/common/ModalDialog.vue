@@ -57,7 +57,7 @@
             data-test="dialog-ok-button"
             @click="close()"
           >
-            <span>OK</span>
+            <span>Close</span>
           </v-btn>
         </slot>
       </v-card-actions>
