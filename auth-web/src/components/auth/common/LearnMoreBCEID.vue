@@ -47,7 +47,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/mobile-download.jpg"
+                :src="mobileDownloadImageSrc"
                 alt="Download an authenticator app"
               >
                 <template #placeholder>
@@ -73,7 +73,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/create-account.jpg"
+                :src="createAccountImageSrc"
                 alt="Create an account or login with a BCeID"
               >
                 <template #placeholder>
@@ -99,7 +99,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/login-form.jpg"
+                :src="loginFormImageSrc"
                 alt="Create an account or login with a BCeID"
               >
                 <template #placeholder>
@@ -125,7 +125,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/qr-code.jpg"
+                :src="qrCodeImageSrc"
                 alt="Register authenticator"
               >
                 <template #placeholder>
@@ -151,7 +151,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/desktop-code.jpg"
+                :src="desktopCodeImageSrc"
                 alt="Enter a one-time password"
               >
                 <template #placeholder>
@@ -177,7 +177,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/user-profile.jpg"
+                :src="userProfileImageSrc"
                 alt="Agree to terms and create user profile"
               >
                 <template #placeholder>
@@ -203,7 +203,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/success.jpg"
+                :src="successImageSrc"
                 alt="BCeID and 2-factor Authentication Step 7"
               >
                 <template #placeholder>
@@ -245,6 +245,14 @@ import { Component, Emit, Vue } from 'vue-property-decorator'
 @Component({})
 export default class LearnMoreBCEID extends Vue {
   isDialogOpen = false
+
+  readonly mobileDownloadImageSrc = new URL('@/assets/img/learn-more/mobile-download.jpg', import.meta.url).href
+  readonly createAccountImageSrc = new URL('@/assets/img/learn-more/create-account.jpg', import.meta.url).href
+  readonly loginFormImageSrc = new URL('@/assets/img/learn-more/login-form.jpg', import.meta.url).href
+  readonly qrCodeImageSrc = new URL('@/assets/img/learn-more/qr-code.jpg', import.meta.url).href
+  readonly desktopCodeImageSrc = new URL('@/assets/img/learn-more/desktop-code.jpg', import.meta.url).href
+  readonly userProfileImageSrc = new URL('@/assets/img/learn-more/user-profile.jpg', import.meta.url).href
+  readonly successImageSrc = new URL('@/assets/img/learn-more/success.jpg', import.meta.url).href
 
   public open () {
     this.isDialogOpen = true

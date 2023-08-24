@@ -51,7 +51,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/mobile-download.jpg"
+                :src="mobileDownloadImageSrc"
                 alt="Download the BC Services Card app"
               >
                 <template #placeholder>
@@ -78,7 +78,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/bcsc-code.jpg"
+                :src="bcscCodeImageSrc"
                 alt="Scan or enter serial number"
               >
                 <template #placeholder>
@@ -105,7 +105,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/verify-identity.jpg"
+                :src="verifyIdentityImageSrc"
                 alt="Verify your card"
               >
                 <template #placeholder>
@@ -132,7 +132,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/log-in.jpg"
+                :src="loginImageSrc"
                 alt="Log in to BC Registries"
               >
                 <template #placeholder>
@@ -159,7 +159,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/mobile-code.jpg"
+                :src="mobileCodeImageSrc"
                 alt="Choose mobile card and get pairing code"
               >
                 <template #placeholder>
@@ -185,7 +185,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/user-profile.jpg"
+                :src="userProfileImageSrc"
                 alt="Agree to terms and create user profile"
               >
                 <template #placeholder>
@@ -212,7 +212,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/success.jpg"
+                :src="successImageSrc"
                 alt="Continue to system"
               >
                 <template #placeholder>
@@ -247,7 +247,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/person-desk.jpg"
+                :src="personDeskImageSrc"
                 alt="Visit a Service BC Centre"
               >
                 <template #placeholder>
@@ -274,7 +274,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/log-in.jpg"
+                :src="loginImageSrc"
                 alt="Log in to BC Registries"
               >
                 <template #placeholder>
@@ -301,7 +301,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/usb-key.jpg"
+                :src="usbKeyImageSrc"
                 alt="Choose USB Card Reader option"
               >
                 <template #placeholder>
@@ -328,7 +328,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/desktop-download.jpg"
+                :src="desktopDownloadImageSrc"
                 alt="Download and install desktop app"
               >
                 <template #placeholder>
@@ -355,7 +355,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/usb-card.jpg"
+                :src="usbCardImageSrc"
                 alt="Hold card against USB card reader"
               >
                 <template #placeholder>
@@ -382,7 +382,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/desktop-code.jpg"
+                :src="desktopCodeImageSrc"
                 alt="Enter passcode"
               >
                 <template #placeholder>
@@ -408,7 +408,7 @@
             <div class="step-content">
               <v-img
                 class="step-img"
-                src="@/assets/img/learn-more/user-profile.jpg"
+                :src="userProfileImageSrc"
                 alt="Agree to terms and create user profile"
               >
                 <template #placeholder>
@@ -435,7 +435,7 @@
               <v-img
                 contain
                 class="step-img"
-                src="@/assets/img/learn-more/success.jpg"
+                :src="successImageSrc"
                 alt="Continue to system"
               >
                 <template #placeholder>
@@ -477,6 +477,20 @@ import { Component, Emit, Vue } from 'vue-property-decorator'
 @Component({})
 export default class LearnMoreBCSC extends Vue {
   isDialogOpen = false
+
+  readonly mobileDownloadImageSrc = new URL('@/assets/img/learn-more/mobile-download.jpg', import.meta.url)
+  readonly bcscCodeImageSrc = new URL('@/assets/img/learn-more/bcsc-code.jpg', import.meta.url)
+  readonly verifyIdentityImageSrc = new URL('@/assets/img/learn-more/verify-identity.jpg', import.meta.url)
+  readonly logInImageSrc = new URL('@/assets/img/learn-more/log-in.jpg', import.meta.url)
+  readonly mobileCodeImageSrc = new URL('@/assets/img/learn-more/mobile-code.jpg', import.meta.url)
+  readonly userProfileImageSrc = new URL('@/assets/img/learn-more/user-profile.jpg', import.meta.url)
+  readonly successImageSrc = new URL('@/assets/img/learn-more/success.jpg', import.meta.url)
+  readonly personDeskImageSrc = new URL('@/assets/img/learn-more/person-desk.jpg', import.meta.url)
+  readonly loginImageSrc = new URL('@/assets/img/learn-more/login.jpg', import.meta.url)
+  readonly usbKeyImageSrc = new URL('@/assets/img/learn-more/usb-key.jpg', import.meta.url)
+  readonly desktopDownloadImageSrc = new URL('@/assets/img/learn-more/desktop-download.jpg', import.meta.url)
+  readonly usbCardImageSrc = new URL('@/assets/img/learn-more/usb-card.jpg', import.meta.url)
+  readonly desktopCodeImageSrc = new URL('@/assets/img/learn-more/desktop-code.jpg', import.meta.url)
 
   public open () {
     this.isDialogOpen = true

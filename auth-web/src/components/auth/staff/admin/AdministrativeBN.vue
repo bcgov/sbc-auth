@@ -97,7 +97,7 @@
               v-on="on"
             >
               <img
-                src="@/assets/img/business_summary_icon.svg"
+                :src="imageSrc"
                 alt=""
                 class="pa-1"
               >
@@ -247,6 +247,8 @@ export default class AdministrativeBN extends Vue {
     const pattern = /^[0-9]{9}$/
     return (!v || pattern.test(v)) || 'Invalid business number'
   }]
+
+  readonly imageSrc = new URL('@/assets/img/business_summary_icon.svg', import.meta.url).href
 
   private async mounted () {
     const identifier = ConfigHelper.getFromSession(SessionStorageKeys.BusinessIdentifierKey)

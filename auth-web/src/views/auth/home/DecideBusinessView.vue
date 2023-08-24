@@ -53,7 +53,7 @@
           target="_blank"
         >
           <v-img
-            src="@/assets/img/Step1_DecideBusinesswizard_x2.png"
+            :src="imageSrc"
             aspect-ratio="1.2"
             contain
           />
@@ -88,6 +88,7 @@ export default class DecideBusinessView extends Vue {
       icon: `mdi-open-in-new`
     }
   ]
+  readonly imageSrc = new URL('@/assets/img/Step1_DecideBusinesswizard_x2.png', import.meta.url).href
 }
 </script>
 
