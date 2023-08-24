@@ -1,20 +1,17 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import { AutoCompleteResponse } from '@/models/AutoComplete'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
+import { useOrgStore } from '@/stores/org'
 
 const mockSession = {
   'NRO_URL': 'Mock NRO URL',
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 document.body.setAttribute('data-app', 'true')
 
 const router = new VueRouter()
@@ -56,25 +53,11 @@ describe('OrgNameAutoComplete.vue', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const orgModule = {
-      namespaced: true,
-      actions: {
-        getOrgNameAutoComplete: vi.fn().mockResolvedValue(testAutoCompleteResponse)
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.getOrgNameAutoComplete = vi.fn().mockResolvedValue(testAutoCompleteResponse)
 
     wrapper = mount(OrgNameAutoComplete, {
-      store,
       localVue,
       router,
       vuetify

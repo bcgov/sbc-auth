@@ -18,7 +18,11 @@
       <p v-if="action=='resetpassword'">
         A new temporary password has been created for user <strong>{{ createdUsers[0].username |filterLoginSource }}</strong>
       </p>
-      <p>You will need to provide Team Members with their <strong>Username</strong>, <strong>Temporary Password</strong> and the <strong>Login Address</strong> to access this account.</p>
+      <p>
+        You will need to provide Team Members with their
+        <strong>Username</strong>, <strong>Temporary Password</strong> and the <strong>Login Address</strong>
+        to access this account.
+      </p>
     </div>
 
     <div class="mb-3">
@@ -140,13 +144,12 @@
 import { BulkUsersFailed, BulkUsersSuccess } from '@/models/Organization'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import OrgModule from '@/store/modules/org'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'createdUsers',
       'failedUsers'
     ])

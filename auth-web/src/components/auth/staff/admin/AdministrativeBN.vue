@@ -196,6 +196,7 @@
 </template>
 
 <script lang="ts">
+import { Action } from 'pinia-class'
 import { BNRequest } from '@/models/request-tracker'
 import BNRequestManager from '@/components/auth/staff/admin/BNRequestManager.vue'
 import CommonUtils from '@/util/common-util'
@@ -205,9 +206,7 @@ import { LearBusiness } from '@/models/business'
 import { SessionStorageKeys } from '@/util/constants'
 import Vue from 'vue'
 import { mask } from 'vue-the-mask'
-import { namespace } from 'vuex-class'
-
-const BusinessModule = namespace('business')
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {
@@ -221,27 +220,22 @@ export default class AdministrativeBN extends Vue {
     submitBNRequestForm: HTMLFormElement
   }
 
-  @BusinessModule.Action('searchBusiness')
-  private readonly searchBusiness!: (businessIdentifier: string) => Promise<LearBusiness>
-
-  @BusinessModule.Action('createBNRequest')
-  private readonly createBNRequest!: (request: BNRequest) => Promise<any>
-
-  @BusinessModule.Action('downloadBusinessSummary')
-  private readonly downloadBusinessSummary!: (businessIdentifier: string) => Promise<void>
+  @Action(useBusinessStore) readonly searchBusiness!: (businessIdentifier: string) => Promise<LearBusiness>
+  @Action(useBusinessStore) readonly createBNRequest!: (request: BNRequest) => Promise<any>
+  @Action(useBusinessStore) readonly downloadBusinessSummary!: (businessIdentifier: string) => Promise<void>
 
   // local variables
-  protected businessIdentifier = ''
-  protected searchedBusinessIdentifier = ''
-  protected searchActive = false
-  protected errorMessage = ''
-  protected businessDetails: LearBusiness = null
+  businessIdentifier = ''
+  searchedBusinessIdentifier = ''
+  searchActive = false
+  errorMessage = ''
+  businessDetails: LearBusiness = null
 
-  protected requestCRA = false
-  protected businessNumber = ''
-  protected submitActive = false
-  protected submitBNRequestErrorMessage = ''
-  protected requestQueued = false
+  requestCRA = false
+  businessNumber = ''
+  submitActive = false
+  submitBNRequestErrorMessage = ''
+  requestQueued = false
 
   readonly businessIdentifierRules = [
     v => !!v || 'Incorporation Number or Registration Number is required',
@@ -262,11 +256,11 @@ export default class AdministrativeBN extends Vue {
     }
   }
 
-  protected isFormValid (): boolean {
+  isFormValid (): boolean {
     return !!this.businessIdentifier && this.$refs.searchBusinessForm?.validate()
   }
 
-  protected async search () {
+  async search () {
     this.searchActive = true
 
     try {
@@ -282,32 +276,32 @@ export default class AdministrativeBN extends Vue {
     }
   }
 
-  protected resetSearch () {
+  resetSearch () {
     this.businessDetails = null
     this.searchedBusinessIdentifier = null
     this.businessIdentifier = null
     ConfigHelper.removeFromSession(SessionStorageKeys.BusinessIdentifierKey)
   }
 
-  protected reload () {
+  reload () {
     window.location.reload()
   }
 
-  protected formatBusinessIdentifier () {
+  formatBusinessIdentifier () {
     this.businessIdentifier =
       CommonUtils.formatIncorporationNumber(this.businessIdentifier)
   }
 
-  protected canRequestNewBN (): boolean {
+  canRequestNewBN (): boolean {
     return this.businessDetails &&
     (!this.businessDetails.taxId || this.businessDetails.taxId.length < 15)
   }
 
-  protected isBNRequestFormValid (): boolean {
+  isBNRequestFormValid (): boolean {
     return this.requestCRA && this.$refs.submitBNRequestForm?.validate()
   }
 
-  protected async submitBNRequest () {
+  async submitBNRequest () {
     if (this.isBNRequestFormValid()) {
       this.submitActive = true
       this.requestQueued = false

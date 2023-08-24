@@ -1,41 +1,39 @@
 <template>
   <div>
-    <template>
-      <div>
-        <h4>Terms of Service</h4>
-        <p>
-          I confirm, I <strong>{{ userName }}</strong> am an authorized prime admin for this account.<br>
-          I declare that this account <strong>{{ orgName }}</strong> and all team members act as a solicitor,
-          or name search company approved by the Vital Statistics agency.
-        </p>
-      </div>
-      <v-checkbox
-        v-model="termsAccepted"
-        color="primary"
-        class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
-        hide-details
-        required
-        data-test="check-termsAccepted"
-        @change="tosChanged"
-      >
-        <template #label>
-          <span class="label-color ml-2">{{ $t('willsRegistryTosIagree') }}</span>
-        </template>
-      </v-checkbox>
-      <div
-        v-if="istosTouched && !termsAccepted"
-        class="terms-error mt-2"
+    <div>
+      <h4>Terms of Service</h4>
+      <p>
+        I confirm, I <strong>{{ userName }}</strong> am an authorized prime admin for this account.<br>
+        I declare that this account <strong>{{ orgName }}</strong> and all team members act as a solicitor,
+        or name search company approved by the Vital Statistics agency.
+      </p>
+    </div>
+    <v-checkbox
+      v-model="termsAccepted"
+      color="primary"
+      class="terms-checkbox align-checkbox-label--top ma-0 pa-0"
+      hide-details
+      required
+      data-test="check-termsAccepted"
+      @change="tosChanged"
+    >
+      <template #label>
+        <span class="label-color ml-2">{{ $t('willsRegistryTosIagree') }}</span>
+      </template>
+    </v-checkbox>
+    <div
+      v-if="istosTouched && !termsAccepted"
+      class="terms-error mt-2"
+      color="error"
+    >
+      <v-icon
         color="error"
+        class="error-color mr-1"
       >
-        <v-icon
-          color="error"
-          class="error-color mr-1"
-        >
-          mdi-alert-circle
-        </v-icon>
-        <span> Confirm to the terms to request</span>
-      </div>
-    </template>
+        mdi-alert-circle
+      </v-icon>
+      <span> Confirm to the terms to request</span>
+    </div>
   </div>
 </template>
 

@@ -1,15 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import OrgModule from '@/store/modules/org'
-import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
-import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
+import { useOrgStore } from '@/stores/org'
 
 vi.mock('../../../src/services/bcol.services')
 
@@ -25,32 +16,10 @@ describe('CreateAccountInfoForm.vue', () => {
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
   beforeEach(() => {
     localVue = createLocalVue()
-    localVue.use(Vuex)
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-        },
-        organizations: [],
-        orgCreateMessage: 'test'
-      },
-      actions: {
-        createOrg: vi.fn(),
-        syncOrganizations: vi.fn()
-      },
-      mutations: {
-        setOrgCreateMessage: vi.fn()
-      },
-      getters: OrgModule.getters
-    }
-
-    store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
-
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      orgType: 'PREMIUM'
+    } as any
     vi.resetModules()
     vi.clearAllMocks()
   })

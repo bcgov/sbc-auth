@@ -21,7 +21,8 @@ export default defineComponent({
     const quoteIndex = ref(0)
     const quotes = [
       {
-        text: 'We are really excited by the idea of incorporating as a Benefit Company, it really makes sense for us and the way we want to run our business.',
+        text: 'We are really excited by the idea of incorporating as a Benefit Company, ' +
+        'it really makes sense for us and the way we want to run our business.',
         author: 'Business Founder'
       }
     ]

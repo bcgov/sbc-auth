@@ -104,13 +104,15 @@
 import { AccessType, Account, LoginSource, Pages, PaymentTypes, Permission } from '@/util/constants'
 import { Component, Emit, Mixins } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgPaymentDetails, Organization, PADInfo, PADInfoValidation } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Address } from '@/models/address'
 import { BcolProfile } from '@/models/bcol'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -118,24 +120,22 @@ import PaymentMethods from '@/components/auth/common/PaymentMethods.vue'
     ModalDialog
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentOrgPaymentType',
       'currentMembership',
       'permissions',
       'currentOrgAddress'
     ]),
-    ...mapState('user', ['currentUser'])
+    ...mapState(useUserStore, ['currentUser'])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationPaymentType'
-    ]),
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'validatePADInfo',
       'getOrgPayments',
       'updateOrg',
-      'syncAddress'
+      'syncAddress',
+      'setCurrentOrganizationPaymentType'
     ])
   }
 })
@@ -238,7 +238,8 @@ export default class AccountPaymentMethods extends Mixins(AccountChangeMixin) {
 
     if (this.isPaymentViewAllowed) {
       this.savedOrganizationType =
-      ((this.currentOrganization?.orgType === Account.PREMIUM) && !this.currentOrganization?.bcolAccountId && this.currentOrganization?.accessType !== AccessType.GOVM)
+      ((this.currentOrganization?.orgType === Account.PREMIUM) &&
+        !this.currentOrganization?.bcolAccountId && this.currentOrganization?.accessType !== AccessType.GOVM)
         ? Account.UNLINKED_PREMIUM : this.currentOrganization.orgType
       this.selectedPaymentMethod = ''
       const orgPayments: OrgPaymentDetails = await this.getOrgPayments()

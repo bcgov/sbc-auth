@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts">
-
+import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
@@ -62,8 +62,7 @@ import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaym
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import { namespace } from 'vuex-class'
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -74,15 +73,14 @@ const OrgModule = namespace('org')
     ModalDialog,
     GovmContactInfoForm
   }
-
 })
 export default class GovmAccountSetupView extends Vue {
   // private readonly createOrg!: () => Promise<Organization>
-  @OrgModule.Action('createGovmOrg') private createGovmOrg!: () => void
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.State('currentOrgAddress') private currentOrgAddress!: Address
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('syncMembership') private syncMembership!: (orgId: number) => Promise<Member>
+  @Action(useOrgStore) private createGovmOrg!: () => void
+  @State(useOrgStore) private currentOrganization!: Organization
+  @State(useOrgStore) private currentOrgAddress!: Address
+  @Action(useOrgStore) private syncOrganization!: (orgId: number) => Promise<Organization>
+  @Action(useOrgStore) private syncMembership!: (orgId: number) => Promise<Member>
 
   public errorTitle = 'Account creation failed'
   public errorText = ''
@@ -135,6 +133,7 @@ export default class GovmAccountSetupView extends Vue {
       const organization: any = await this.createGovmOrg() // create govm account
       await this.syncOrganization(organization.id)
       await this.syncMembership(organization.id)
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       this.$router.push(Pages.SETUP_GOVM_ACCOUNT_SUCCESS)
       this.isLoading = false

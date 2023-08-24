@@ -1,17 +1,11 @@
-import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
+import { Wrapper, shallowMount } from '@vue/test-utils'
 import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-
-Vue.use(Vuetify)
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
-
-const localVue = createLocalVue()
-localVue.use(Vuex)
 
 const tests = [
   {
@@ -78,37 +72,12 @@ tests.forEach(test => {
     let wrapper: Wrapper<any>
 
     beforeAll(() => {
-      const orgModule = {
-        namespaced: true,
-        state: {
-          currentOrganization: {
-            name: 'new org'
-          }
-        }
+      const orgStore = useOrgStore()
+      orgStore.currentOrganization = {
+        name: 'new org'
       }
-
-      const businessModule = {
-        namespaced: true,
-        state: {
-
-        },
-        action: {
-          addBusiness: vi.fn(),
-          updateBusinessName: vi.fn(),
-          updateFolioNumber: vi.fn()
-        }
-      }
-
-      const store = new Vuex.Store({
-        strict: false,
-        modules: {
-          org: orgModule,
-          business: businessModule
-        }
-      })
 
       wrapper = shallowMount(AddBusinessDialog, {
-        store,
         vuetify,
         propsData: {
           dialog: true,

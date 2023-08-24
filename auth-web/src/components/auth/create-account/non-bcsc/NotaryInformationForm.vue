@@ -49,7 +49,7 @@ export default class NotaryInformationForm extends Vue {
   private isNotaryAddressValid: boolean = false
 
   private notaryAddress: Address = {} as Address
-  private notaryAddressSchema: {} = addressSchema
+  private notaryAddressSchema = addressSchema
 
   $refs: {
     notaryInformationForm: HTMLFormElement,

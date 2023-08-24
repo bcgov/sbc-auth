@@ -279,17 +279,17 @@ import {
   SessionStorageKeys
 } from '@/util/constants'
 import { Business, NameRequest, Names } from '@/models/business'
-import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
-import DateMixin from '@/components/auth/mixins/DateMixin.vue'
 import EntityDetails from './EntityDetails.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgService from '@/services/org.services'
+import { RemoveBusinessPayload } from '@/models/Organization'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
@@ -300,19 +300,15 @@ export default defineComponent({
     highlightIndex: { default: -1 }
   },
   emits: ['add-unknown-error', 'remove-affiliation-invitation'],
-  mixins: [DateMixin],
   setup (props, context: SetupContext) {
     const isloading = false
-    const store = useStore()
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
       getHeaders, headers, type, status, updateFilter, typeDescription,
       isNameRequest, nameRequestType, number, name, canUseNameRequest, tempDescription,
       isTemporaryBusiness } = useAffiliations()
-    const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
-
-    const createNamedBusiness = ({ filingType, business }: { filingType: FilingTypes, business: Business}) => {
-      return store.dispatch('business/createNamedBusiness', { filingType, business })
-    }
+    const businessStore = useBusinessStore()
+    const orgStore = useOrgStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
 
     /** V-model for dropdown menus. */
     const dropdown: Array<boolean> = []
@@ -383,9 +379,10 @@ export default defineComponent({
       let filingResponse = null
 
       if (regTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = await createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
+        filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
       } else if (iaTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = await createNamedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
+        filingResponse = await businessStore.createNamedBusiness({
+          filingType: FilingTypes.INCORPORATION_APPLICATION, business })
       }
 
       if (filingResponse?.errorMsg) {
@@ -430,14 +427,15 @@ export default defineComponent({
     /** Handler for draft IA creation and navigation */
     const useNameRequest = async (item: Business) => {
       switch (item.nameRequest.target) {
-        case NrTargetTypes.LEAR:
-        // Create new IA if the selected item is Name Request
+        case NrTargetTypes.LEAR: {
+          // Create new IA if the selected item is Name Request
           let businessIdentifier = item.businessIdentifier
           if (item.corpType.code === CorpTypes.NAME_REQUEST) {
             businessIdentifier = await createBusinessRecord(item)
           }
           goToDashboard(businessIdentifier)
           break
+        }
         case NrTargetTypes.ONESTOP:
           goToOneStop()
           break
@@ -468,7 +466,7 @@ export default defineComponent({
     }
 
     const isCurrentOrganization = (orgId: number) => {
-      return orgId === store.state.org.currentOrganization.id
+      return orgId === orgStore.currentOrganization.id
     }
 
     const actionHandler = (business: Business) => {

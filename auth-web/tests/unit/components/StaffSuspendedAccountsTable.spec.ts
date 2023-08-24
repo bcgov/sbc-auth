@@ -1,70 +1,34 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import StaffSuspendedAccountsTable from '@/components/auth/staff/account-management/StaffSuspendedAccountsTable.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useStaffStore } from '@/stores/staff'
 
 describe('StaffSuspendedAccountsTable.vue', () => {
   let wrapper: Wrapper<StaffSuspendedAccountsTable>
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const staffModule = {
-      namespaced: true,
-      state: {
-        suspendedStaffOrgs: [
-          {
-            'modified': '2020-12-10T21:05:06.144977+00:00',
-            'name': 'NEW BC ONLINE TECH TEAM',
-            'orgType': 'PREMIUM',
-            'orgStatus': 'NSF_SUSPENDED',
-            'products': [
-              2342,
-              2991
-            ],
-            'statusCode': 'NSF_SUSPENDED',
-            'suspendedOn': '2020-12-01T17:52:03.747200+00:00'
-          }
-        ]
-      },
-      actions: {
-        syncSuspendedStaffOrgs: vi.fn(),
-        searchOrgs: vi.fn()
+    const staffStore = useStaffStore()
+    staffStore.suspendedStaffOrgs = [
+      {
+        'modified': '2020-12-10T21:05:06.144977+00:00',
+        'name': 'NEW BC ONLINE TECH TEAM',
+        'orgType': 'PREMIUM',
+        'orgStatus': 'NSF_SUSPENDED',
+        'products': [
+          2342,
+          2991
+        ],
+        'statusCode': 'NSF_SUSPENDED',
+        'suspendedOn': '2020-12-01T17:52:03.747200+00:00'
       }
-    }
-
-    const orgModule = {
-      namespaced: true,
-      state: {},
-      actions: {
-        syncOrganization: vi.fn(),
-        syncMembership: vi.fn(),
-        addOrgSettings: vi.fn()
-      }
-    }
-
-    const vuetify = new Vuetify({})
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        staff: staffModule,
-        org: orgModule
-      }
-    })
+    ] as any
 
     const $t = () => ''
     wrapper = shallowMount(StaffSuspendedAccountsTable, {
-      store,
       localVue,
-      vuetify,
+      vuetify: new Vuetify({}),
       mocks: { $t }
     })
 

@@ -215,7 +215,6 @@
 </template>
 
 <script lang="ts">
-import { FolioNumberload, LoginPayload } from '@/models/business'
 import { computed, defineComponent, ref, watch } from '@vue/composition-api'
 import BusinessLookup from './BusinessLookup.vue'
 import Certify from './Certify.vue'
@@ -223,8 +222,9 @@ import CommonUtils from '@/util/common-util'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores/business'
 
 export default defineComponent({
   components: {
@@ -252,16 +252,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     // Store and Actions
-    const store = useStore()
-    const addBusiness = async (loginPayload: LoginPayload) => {
-      return store.dispatch('business/addBusiness', loginPayload)
-    }
-    const updateBusinessName = async (businessNumber: string) => {
-      return store.dispatch('business/updateBusinessName', businessNumber)
-    }
-    const updateFolioNumber = async (folioNumberload: FolioNumberload) => {
-      return store.dispatch('business/updateFolioNumber', folioNumberload)
-    }
+    const businessStore = useBusinessStore()
 
     // Local variables
     const businessName = ref('')
@@ -417,19 +408,19 @@ export default defineComponent({
           if (!props.isStaffOrSbcStaff) {
             businessData = { ...businessData, certifiedByName: authorizationName.value, passCode: passcode.value }
           }
-          const addResponse = await addBusiness(businessData)
+          const addResponse = await businessStore.addBusiness(businessData)
           // check if add didn't succeed
           if (addResponse?.status !== StatusCodes.CREATED) {
             emit('add-unknown-error')
           }
           // try to update business name
-          const businessResponse = await updateBusinessName(businessIdentifier.value)
+          const businessResponse = await businessStore.updateBusinessName(businessIdentifier.value)
           // check if update didn't succeed
           if (businessResponse?.status !== StatusCodes.OK) {
             emit('add-unknown-error')
           }
           // update folio number
-          await updateFolioNumber({
+          await businessStore.updateFolioNumber({
             businessIdentifier: businessIdentifier.value,
             folioNumber: folioNumber.value
           })

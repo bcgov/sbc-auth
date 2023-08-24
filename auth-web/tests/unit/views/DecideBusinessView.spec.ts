@@ -1,14 +1,10 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import DecideBusinessView from '@/views/auth/home/DecideBusinessView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
@@ -24,12 +20,8 @@ describe('DecideBusinessView.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({})
 
     wrapper = mount(DecideBusinessView, {
-      store,
       localVue,
       router,
       vuetify

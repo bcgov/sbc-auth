@@ -118,13 +118,16 @@
           </p>
           <ul>
             <li>
-              <strong>Contact Info</strong> - reuse your account contact information from BC Online for your new premium account
+              <strong>Contact Info</strong> - reuse your account contact information from BC Online for your new
+              premium account
             </li>
             <li>
               <strong>Payment</strong> - the option to select your BC Online deposit account as a payment option
             </li>
             <li>
-              <strong>Reporting</strong> - all transactions done by your team in this new application will appear in your BC Online statement reports, provided you choose your BC Online deposit account as your payment option
+              <strong>Reporting</strong> - all transactions done by your team in this new application will appear in
+              your BC Online statement reports, provided you choose your BC Online deposit account as your
+              payment option
             </li>
           </ul>
           <p>
@@ -136,7 +139,8 @@
             </li>
           </ul>
           <p class="pt-2">
-            Linking a BC Online account, requires an existing BC Online account (3-5 days to setup) and the Prime Contact credentials to complete.
+            Linking a BC Online account, requires an existing BC Online account (3-5 days to setup) and the
+            Prime Contact credentials to complete.
           </p>
           <v-btn
             text
@@ -168,13 +172,14 @@
 <script lang="ts">
 
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { Account } from '@/util/constants'
 import AccountCreateBasic from '@/components/auth/create-account/AccountCreateBasic.vue'
 import AccountCreatePremium from '@/components/auth/create-account/AccountCreatePremium.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -182,16 +187,14 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentOrganizationType'
     ])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganizationType'
-    ]),
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
+      'setCurrentOrganizationType',
       'syncMembership',
       'syncOrganization',
       'resetAccountWhileSwitchingPremium'
@@ -219,8 +222,10 @@ export default class PremiumChooser extends Mixins(Steppable) {
   private mounted () {
     this.isBcolSelected = this.readOnly ? 'no' : null
 
-    this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) && this.currentOrganization?.bcolAccountDetails) ? 'yes' : this.isBcolSelected
-    this.isBcolSelected = ((this.currentOrganizationType === Account.UNLINKED_PREMIUM) && this.currentOrganization?.name) ? 'no' : this.isBcolSelected
+    this.isBcolSelected = ((this.currentOrganizationType === Account.PREMIUM) &&
+      this.currentOrganization?.bcolAccountDetails) ? 'yes' : this.isBcolSelected
+    this.isBcolSelected = ((this.currentOrganizationType === Account.UNLINKED_PREMIUM) &&
+      this.currentOrganization?.name) ? 'no' : this.isBcolSelected
     this.loadComponent(false)
   }
 

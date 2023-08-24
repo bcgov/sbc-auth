@@ -1,12 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import SetupGovmAccountForm from '@/components/auth/staff/SetupGovmAccountForm.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(VueRouter)
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 
@@ -17,34 +13,14 @@ const mockSession = {
 
 describe('SetupGovmAccountForm.vue', () => {
   let wrapper: any
-  let store: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
-
-  const orgModule = {
-    namespaced: true,
-    state: {},
-    actions: {
-      createOrgByStaff: vi.fn(),
-      createInvitation: vi.fn()
-    }
-  }
 
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-
-      }
-    })
   })
 
   it('Should have h4 title', () => {
     wrapper = mount(SetupGovmAccountForm, {
-      store,
       vuetify,
       localVue,
       router,

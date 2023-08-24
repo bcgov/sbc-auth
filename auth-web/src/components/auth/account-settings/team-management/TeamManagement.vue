@@ -15,7 +15,8 @@ import { Component, Mixins, Prop } from 'vue-property-decorator'
 import AnonymousUserManagement from '@/components/auth/account-settings/team-management/AnonymousUserManagement.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import UserManagement from '@/components/auth/account-settings/team-management/UserManagement.vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -23,7 +24,7 @@ import { mapState } from 'vuex'
     AnonymousUserManagement
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentMembership',
       'currentOrganization'
     ])

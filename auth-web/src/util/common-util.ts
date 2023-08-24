@@ -20,7 +20,8 @@ export default class CommonUtils {
       // cut,trim and replace special characters from the first part
       let businessIdentifierStr = incorpNum.substring(0, numberFirstIndex).trim()
       businessIdentifierStr = businessIdentifierStr.replace(/[^a-zA-Z]/g, '')
-      // cut, get rid of alpha and special chars, and pad '0's according to the numLength if length is less than numLength, trim to numLength if otherwise
+      // cut, get rid of alpha and special chars, and pad '0's according to the numLength
+      // if length is less than numLength, trim to numLength if otherwise
       let businessIdentifierNumbers = incorpNum.substring(numberFirstIndex)
       businessIdentifierNumbers = parseInt(businessIdentifierNumbers.replace(/[^0-9]/g, '')).toString()
       if (businessIdentifierNumbers.length && businessIdentifierNumbers.length < numLength) {
@@ -91,7 +92,8 @@ export default class CommonUtils {
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date, format?: string) {
     // not working in CI (getting UTC datetime)
-    return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' })).format(format || 'YYYY-MM-DD') : ''
+    return (date) ? moment(date.toLocaleString('en-US', { timeZone: 'America/Vancouver' }))
+      .format(format || 'YYYY-MM-DD') : ''
   }
 
   // Formatting date in the desired format for vue date pickers
@@ -112,7 +114,8 @@ export default class CommonUtils {
       // the URL has been freed."
       window.navigator.msSaveBlob(blob, fileName)
     } else {
-      const blobURL = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob)
+      const blobURL = window.URL?.createObjectURL
+        ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob)
       const tempLink = document.createElement('a')
       tempLink.style.display = 'none'
       tempLink.href = blobURL

@@ -184,20 +184,17 @@
 import { AccessType, Account, AccountStatus, SessionStorageKeys } from '@/util/constants'
 import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { Member, OrgAccountTypes, OrgFilterParams, OrgList, OrgMap, Organization } from '@/models/Organization'
+import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { DataOptions } from 'vuetify'
 import { EnumDictionary } from '@/models/util'
-import OrgModule from '@/store/modules/org'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import debounce from '@/util/debounce'
-import { getModule } from 'vuex-module-decorators'
-import { namespace } from 'vuex-class'
-
-const StaffBinding = namespace('staff')
-const OrgBinding = namespace('org')
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   components: {
@@ -205,12 +202,11 @@ const OrgBinding = namespace('org')
   }
 })
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {
-  @OrgBinding.Action('syncOrganization') protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
-  @OrgBinding.Action('addOrgSettings') protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  @OrgBinding.Action('syncMembership') protected syncMembership!: (orgId: number) => Promise<Member>
-  @StaffBinding.Action('searchOrgs') protected searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
+  @Action(useOrgStore) protected readonly syncOrganization!: (currentAccount: number) => Promise<Organization>
+  @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  @Action(useOrgStore) protected syncMembership!: (orgId: number) => Promise<Member>
+  @Action(useStaffStore) protected searchOrgs!: (filterParams: OrgFilterParams) => Promise<OrgList>
 
-  protected orgStore = getModule(OrgModule, this.$store)
   protected activeOrgs: Organization[] = []
   protected readonly headerAccounts = [
     {

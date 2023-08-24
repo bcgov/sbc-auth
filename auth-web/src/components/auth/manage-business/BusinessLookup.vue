@@ -79,13 +79,12 @@
 
 <script lang="ts">
 import { Component, Emit, Watch } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import { Debounce } from 'vue-debounce-decorator'
 import Vue from 'vue'
-import { namespace } from 'vuex-class'
-
-const BusinessModule = namespace('business')
+import { useBusinessStore } from '@/stores/business'
 
 enum States {
   INITIAL = 'initial',
@@ -104,8 +103,7 @@ export default class BusinessLookup extends Vue {
   readonly States = States
 
   // action from business module
-  @BusinessModule.Action('isAffiliated')
-  private readonly isAffiliated!: (identifier: string) => Promise<boolean>
+  @Action(useBusinessStore) private readonly isAffiliated!: (identifier: string) => Promise<boolean>
 
   /** V-model for search field. */
   searchField = ''

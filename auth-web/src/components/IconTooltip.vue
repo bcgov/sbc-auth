@@ -24,9 +24,18 @@ import { defineComponent } from '@vue/composition-api'
 export default defineComponent({
   name: 'IconTooltip',
   props: {
-    icon: String,
-    iconStyling: Object,
-    maxWidth: String,
+    icon: {
+      type: String,
+      required: true
+    },
+    iconStyling: {
+      type: Object,
+      default: () => ({})
+    },
+    maxWidth: {
+      type: String,
+      default: '300px'
+    },
     colour: {
       type: String,
       default: 'primary'

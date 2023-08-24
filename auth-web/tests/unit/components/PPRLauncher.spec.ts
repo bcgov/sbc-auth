@@ -1,17 +1,12 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import Vue from 'vue'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
+import { useUserStore } from '@/stores/user'
 
 describe('PPRLauncher.vue', () => {
   let wrapper: Wrapper<any>
+  let userStore: any
   const assetLauncherText = 'Register or search for manufactured homes and register or search for legal claims on ' +
       'personal property.'
   const assetLauncherTitle = 'Staff Asset Registries'
@@ -26,26 +21,14 @@ describe('PPRLauncher.vue', () => {
   }
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(config)
 
-  const userModule = {
-    namespaced: true,
-    state: {
-      currentUser: {
-        fullName: 'user2',
-        roles: ['ppr']
-      }
-    }
-  }
-
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const vuetify = new Vuetify({})
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: { user: userModule }
-    })
+    userStore = useUserStore()
+    userStore.currentUser = {
+      fullName: 'user2',
+      roles: ['ppr']
+    } as any
 
     const $t = (val: string) => {
       switch (val) {
@@ -59,7 +42,6 @@ describe('PPRLauncher.vue', () => {
       }
     }
     wrapper = mount(PPRLauncher, {
-      store,
       localVue,
       vuetify,
       mocks: { $t }
@@ -86,7 +68,7 @@ describe('PPRLauncher.vue', () => {
   })
 
   it('renders img, title, text and button as MHR staff', async () => {
-    userModule.state.currentUser.roles = ['mhr']
+    userStore.currentUser.roles = ['mhr']
     await Vue.nextTick()
     expect(wrapper.find('.product-container').exists()).toBe(true)
     expect(wrapper.find('.product-img').exists()).toBe(true)
@@ -98,7 +80,7 @@ describe('PPRLauncher.vue', () => {
   })
 
   it('renders img, title, text and button as Asset staff', async () => {
-    userModule.state.currentUser.roles = ['mhr', 'ppr']
+    userStore.currentUser.roles = ['mhr', 'ppr']
     await Vue.nextTick()
     expect(wrapper.find('.product-container').exists()).toBe(true)
     expect(wrapper.find('.product-img').exists()).toBe(true)

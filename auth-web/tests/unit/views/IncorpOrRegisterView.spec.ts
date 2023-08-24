@@ -2,12 +2,9 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import IncorpOrRegisterView from '@/views/auth/home/IncorpOrRegisterView.vue'
 import LearnMoreButton from '@/components/auth/common/LearnMoreButton.vue'
 import NumberedCompanyTooltip from '@/components/auth/common/NumberedCompanyTooltip.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -22,16 +19,12 @@ describe('IncorpOrRegisterView.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
-
-    const store = new Vuex.Store({})
 
     wrapperFactory = (propsData) => {
       return mount(IncorpOrRegisterView, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {

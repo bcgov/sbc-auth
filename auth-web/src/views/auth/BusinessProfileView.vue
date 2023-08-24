@@ -70,15 +70,15 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Business } from '@/models/business'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import BusinessModule from '@/store/modules/business'
+
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {
@@ -86,14 +86,13 @@ import SupportInfoCard from '@/components/SupportInfoCard.vue'
     SupportInfoCard
   },
   computed: {
-    ...mapState('business', ['currentBusiness'])
+    ...mapState(useBusinessStore, ['currentBusiness'])
   },
   methods: {
-    ...mapActions('business', ['loadBusiness'])
+    ...mapActions(useBusinessStore, ['loadBusiness'])
   }
 })
 export default class BusinessProfileView extends Mixins(AccountChangeMixin, NextPageMixin) {
-  // TODO: Set businessType from current business in store
   private businessType = 'cooperative'
   private editing = false
   private isLoading = true

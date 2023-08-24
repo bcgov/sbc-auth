@@ -157,7 +157,8 @@ export default class AccountAccessType extends Vue {
   public get isChangeButtonEnabled (): boolean {
     // Check access type and orgtype must be premium
     const accessType: any = this.organization.accessType
-    const isAllowedAccessType = this.organization.orgType === Account.PREMIUM && [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
+    const isAllowedAccessType = this.organization.orgType === Account.PREMIUM &&
+      [AccessType.REGULAR, AccessType.EXTRA_PROVINCIAL, AccessType.REGULAR_BCEID].includes(accessType)
     return isAllowedAccessType && this.canChangeAccessType // canChangeAccessType is the role based access pasased as property
   }
 
