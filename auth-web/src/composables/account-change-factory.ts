@@ -6,7 +6,7 @@ export const useAccountChangeHandler = () => {
   const setAccountChangedHandler = (handler: () => any) => {
     unregisterHandler.value = useOrgStore().$onAction(({ name, after }) => {
       after(() => {
-        if (name === 'setCurrentOrganization') {
+        if (['syncOrganization', 'setCurrentOrganization'].includes(name)) {
           handler()
         }
       })

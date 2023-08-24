@@ -12,8 +12,7 @@ export default class AccountChangeMixin extends Vue {
   protected setAccountChangedHandler (handler: () => any) {
     this.unregisterHandler = useOrgStore().$onAction(({ name, after }) => {
       after(() => {
-        // TODO: TEST THIS!!
-        if (name === 'setCurrentOrganization') {
+        if (['syncOrganization', 'setCurrentOrganization'].includes(name)) {
           handler()
         }
       })
