@@ -5,7 +5,7 @@ import path from 'path'
 import postcssNesting from 'postcss-nesting'
 import { createVuePlugin as vue } from 'vite-plugin-vue2'
 
-const packageJson = fs.readFileSync('./package.json') as unknown as string
+const packageJson = fs.readFileSync('./package.json')
 const appName = JSON.parse(packageJson).appName
 const appVersion = JSON.parse(packageJson).version
 const sbcName = JSON.parse(packageJson).sbcName
