@@ -42,7 +42,7 @@ import Vue from 'vue'
 export default class ExpandableHelp extends Vue {
   private helpToggle = false
 
-  @Prop({ default: 'Show Help' }) helpLabel: string
+  @Prop({ default: 'Show Help' }) readonly helpLabel!: string
 }
 </script>
 

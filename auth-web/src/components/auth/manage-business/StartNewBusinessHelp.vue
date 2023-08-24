@@ -52,7 +52,7 @@
             <li>
               If you do not see your Name Request in your table (e.g. if you submitted your Name Request without
               being logged into your BC Registries account), you can add your Name Request manually by looking up
-              your business name or your NR number.
+              your business name or your NR &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;number.
             </li>
             <li>
               You can track the approval status of your Name Request from your table on this screen by clicking the

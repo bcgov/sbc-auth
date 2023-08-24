@@ -181,13 +181,11 @@
         </div>
       </div>
 
-      <div>
-        <ExpandableHelp helpLabel="Help with Starting and Managing a Business">
-          <template #content>
-            <StartNewBusinessHelp class="help-text" />
-          </template>
-        </ExpandableHelp>
-      </div>
+      <ExpandableHelp helpLabel="Help with Starting and Managing a Business">
+        <template #content>
+          <StartNewBusinessHelp class="help-text" />
+        </template>
+      </ExpandableHelp>
 
       <search-business-name-request
         v-if="isEnableBusinessNrSearch"
@@ -1147,10 +1145,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
 .view-header {
   justify-content: space-between;
-
-  h1 {
-    margin-bottom: -30px;
-  }
+  margin-bottom: 0.75rem;
 
   .subtitle {
     font-size: 1rem;
