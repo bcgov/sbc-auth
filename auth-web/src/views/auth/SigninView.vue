@@ -13,7 +13,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SbcSignin from 'sbc-common-components/src/components/SbcSignin.vue'
 import { mapActions } from 'pinia'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   methods: {

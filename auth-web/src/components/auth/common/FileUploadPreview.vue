@@ -31,7 +31,7 @@ import { Component, Emit, Prop } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
 import { mapActions } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

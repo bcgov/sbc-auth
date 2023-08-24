@@ -95,7 +95,7 @@
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { mapState } from 'pinia'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

@@ -93,7 +93,7 @@ import ConfigHelper from '@/util/config-helper'
 import CreateUserProfileLanding from '@/components/auth/CreateUserProfileLanding.vue'
 import { EmptyResponse } from '@/models/global'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

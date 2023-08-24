@@ -1,6 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import CreateAccountInfoForm from '@/components/auth/create-account/CreateAccountInfoForm.vue'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 vi.mock('../../../src/services/bcol.services')
 

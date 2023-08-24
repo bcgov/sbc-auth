@@ -3,6 +3,7 @@
 import { AccountStatus, LoginSource, Pages, Permission, Role, SessionStorageKeys } from '@/util/constants'
 import { Member, MembershipStatus, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
+import { useOrgStore, useUserStore } from '@/stores'
 import { AccountSettings } from '@/models/account-settings'
 import CommonUtils from '@/util/common-util'
 import Component from 'vue-class-component'
@@ -11,8 +12,6 @@ import { Contact } from '@/models/contact'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { User } from '@/models/user'
 import Vue from 'vue'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
 
 @Component({
   computed: {

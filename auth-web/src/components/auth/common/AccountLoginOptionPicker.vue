@@ -76,7 +76,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import LearnMoreBCEID from '@/components/auth/common/LearnMoreBCEID.vue'
 import LearnMoreBCSC from '@/components/auth/common/LearnMoreBCSC.vue'
 import { Organization } from '@/models/Organization'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

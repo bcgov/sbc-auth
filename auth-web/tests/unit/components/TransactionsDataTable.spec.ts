@@ -11,7 +11,7 @@ import flushPromises from 'flush-promises'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
 

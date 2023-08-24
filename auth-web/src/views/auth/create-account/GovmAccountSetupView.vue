@@ -62,7 +62,7 @@ import GovmPaymentMethodSelector from '@/components/auth/create-account/GovmPaym
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Pages } from '@/util/constants'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

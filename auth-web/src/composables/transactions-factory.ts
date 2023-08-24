@@ -4,8 +4,8 @@ import { computed, reactive, ref } from '@vue/composition-api'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import PaymentService from '@/services/payment.services'
 import debounce from 'lodash/throttle'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 const transactions = (reactive({
   filters: {

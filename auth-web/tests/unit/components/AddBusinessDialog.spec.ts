@@ -3,7 +3,7 @@ import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDial
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
 

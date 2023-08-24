@@ -207,9 +207,9 @@ import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 // FUTURE: remove after vue 3 upgrade
 interface StaffDashboardViewI {

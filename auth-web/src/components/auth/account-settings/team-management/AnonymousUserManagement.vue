@@ -302,7 +302,7 @@ import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
 import { User } from '@/models/user'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

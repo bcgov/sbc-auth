@@ -68,8 +68,8 @@ import SelectProductService from '@/components/auth/create-account/SelectProduct
 import UploadAffidavitStep from '@/components/auth/create-account/non-bcsc/UploadAffidavitStep.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

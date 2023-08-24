@@ -84,7 +84,7 @@ import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import { Debounce } from 'vue-debounce-decorator'
 import Vue from 'vue'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 enum States {
   INITIAL = 'initial',

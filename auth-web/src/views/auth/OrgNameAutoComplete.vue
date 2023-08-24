@@ -53,7 +53,7 @@ import { AutoCompleteResponse, AutoCompleteResult } from '@/models/AutoComplete'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Action } from 'pinia-class'
 import { ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT } from '@/util/constants'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({})
 export default class OrgNameAutoComplete extends Vue {

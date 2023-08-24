@@ -15,10 +15,10 @@ import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
-import { getPiniaStore } from './store'
+import { getPiniaStore } from '@/stores'
 import initializeI18n from './plugins/i18n'
 import router from './routes/index'
-import store from './store/vuex'
+import store from '@/stores/vuex'
 import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports

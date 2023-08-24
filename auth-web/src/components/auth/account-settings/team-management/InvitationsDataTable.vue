@@ -59,7 +59,7 @@ import { Component, Emit, Vue } from 'vue-property-decorator'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

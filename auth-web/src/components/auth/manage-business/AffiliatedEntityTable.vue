@@ -288,8 +288,8 @@ import OrgService from '@/services/org.services'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',

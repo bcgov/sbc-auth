@@ -1,5 +1,5 @@
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
-import { useOrgStore, useUserStore } from '@/store'
+import { useOrgStore, useUserStore } from '@/stores'
 import { AccessType } from '@/util/constants'
 import InviteUsersForm from '@/components/auth/account-settings/team-management/InviteUsersForm.vue'
 import Vue from 'vue'

@@ -49,7 +49,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import Vue from 'vue'
 import { mapState } from 'pinia'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {

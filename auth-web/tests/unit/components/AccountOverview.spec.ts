@@ -2,7 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store'
+import { useOrgStore } from '@/stores'
 
 describe('AccountOverview.vue', () => {
   let wrapper: any

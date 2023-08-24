@@ -362,8 +362,8 @@ import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vu
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
   @Component({
     components: {

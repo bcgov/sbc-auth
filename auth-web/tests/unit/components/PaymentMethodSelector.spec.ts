@@ -2,7 +2,7 @@ import { Account, PaymentTypes } from '@/util/constants'
 import { createLocalVue, mount } from '@vue/test-utils'
 import PaymentMethodSelector from '@/components/auth/create-account/PaymentMethodSelector.vue'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 describe('PaymentMethodSelector.vue', () => {
   let wrapper: any

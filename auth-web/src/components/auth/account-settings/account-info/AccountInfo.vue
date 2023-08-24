@@ -311,9 +311,9 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
 import OrgAdminContact from '@/components/auth/account-settings/account-info/OrgAdminContact.vue'
-import { useCodesStore } from '@/store/codes'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

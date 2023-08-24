@@ -1,6 +1,6 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-import { useOrgStore, useUserStore } from '@/store'
+import { useOrgStore, useUserStore } from '@/stores'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'

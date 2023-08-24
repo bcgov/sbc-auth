@@ -3,7 +3,7 @@ import { AccountStatus } from '@/util/constants'
 import AccountTypeSelector from '@/components/auth/create-account/AccountTypeSelector.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 document.body.setAttribute('data-app', 'true')
 

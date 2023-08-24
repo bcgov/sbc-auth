@@ -55,7 +55,7 @@ import { Component, Emit, Prop } from 'vue-property-decorator'
 import { Action } from 'pinia-class'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

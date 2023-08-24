@@ -103,7 +103,7 @@ import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vu
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { User } from '@/models/user'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

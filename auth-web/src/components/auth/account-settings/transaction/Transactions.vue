@@ -112,7 +112,7 @@ import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import moment from 'moment'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'Transactions',

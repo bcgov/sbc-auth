@@ -5,7 +5,7 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 describe('ReviewBankInformation.vue', () => {
   let wrapper: any

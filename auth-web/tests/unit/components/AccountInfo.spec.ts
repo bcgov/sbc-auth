@@ -6,8 +6,8 @@ import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
 import flushPromises from 'flush-promises'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 document.body.setAttribute('data-app', 'true')
 

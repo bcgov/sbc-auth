@@ -96,7 +96,7 @@
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { Action } from 'pinia-class'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   name: 'BcolLogin'

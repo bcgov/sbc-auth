@@ -1,7 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 describe('GLPaymentForm.vue', () => {
   let wrapper: any

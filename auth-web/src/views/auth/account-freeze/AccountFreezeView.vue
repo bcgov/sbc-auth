@@ -41,7 +41,7 @@ import AccountSuspendedView from './AccountSuspendedView.vue'
 import CommonUtils from '@/util/common-util'
 import { Organization } from '@/models/Organization'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

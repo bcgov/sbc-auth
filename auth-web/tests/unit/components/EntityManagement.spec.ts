@@ -1,6 +1,6 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, mount } from '@vue/test-utils'
-import { useOrgStore, useUserStore } from '@/store'
+import { useOrgStore, useUserStore } from '@/stores'
 import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import { RemoveBusinessPayload } from '@/models/Organization'

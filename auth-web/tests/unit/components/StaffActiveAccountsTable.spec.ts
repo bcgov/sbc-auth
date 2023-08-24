@@ -1,7 +1,7 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import StaffActiveAccountsTable from '@/components/auth/staff/account-management/StaffActiveAccountsTable.vue'
 import Vuetify from 'vuetify'
-import { useStaffStore } from '@/store'
+import { useStaffStore } from '@/stores'
 
 describe('StaffActiveAccountsTable.vue', () => {
   let wrapper: Wrapper<StaffActiveAccountsTable>

@@ -5,7 +5,7 @@ import { AccountStatus } from '@/util/constants'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store'
+import { useOrgStore } from '@/stores'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

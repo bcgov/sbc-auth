@@ -157,7 +157,7 @@ import { CreateRequestBody, MembershipType, Organization } from '@/models/Organi
 import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

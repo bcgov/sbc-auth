@@ -1,6 +1,6 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import { useBusinessStore, useOrgStore } from '@/store'
+import { useBusinessStore, useOrgStore } from '@/stores'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BaseVDataTable } from '@/components/datatable'
 import { EntityAlertTypes } from '@/util/constants'

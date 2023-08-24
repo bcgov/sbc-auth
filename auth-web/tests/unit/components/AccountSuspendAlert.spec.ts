@@ -1,7 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 describe('AccountSuspendAlert.vue', () => {
   let wrapper: any

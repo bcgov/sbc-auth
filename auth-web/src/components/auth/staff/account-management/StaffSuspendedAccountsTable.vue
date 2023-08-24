@@ -54,9 +54,9 @@ import CommonUtils from '@/util/common-util'
 import { DataOptions } from 'vuetify'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import { useCodesStore } from '@/store/codes'
-import { useOrgStore } from '@/store/org'
-import { useStaffStore } from '@/store/staff'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({})
 export default class StaffActiveAccountsTable extends Mixins(PaginationMixin) {

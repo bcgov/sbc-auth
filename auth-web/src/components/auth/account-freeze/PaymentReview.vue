@@ -77,7 +77,7 @@ import { Component, Emit, Mixins } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
 

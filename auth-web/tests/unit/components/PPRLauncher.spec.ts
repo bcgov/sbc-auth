@@ -2,7 +2,7 @@ import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 describe('PPRLauncher.vue', () => {
   let wrapper: Wrapper<any>

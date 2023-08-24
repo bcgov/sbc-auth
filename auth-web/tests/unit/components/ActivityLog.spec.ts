@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import { useActivityStore, useOrgStore } from '@/store'
+import { useActivityStore, useOrgStore } from '@/stores'
 import ActivityLog from '@/components/auth/account-settings/activity-log/ActivityLog.vue'
 import Vuetify from 'vuetify'
 

@@ -194,8 +194,8 @@ import { DatePicker } from '@/components'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import { ProductCode } from '@/models/Staff'
 import moment from 'moment'
-import { useStaffStore } from '@/store/staff'
-import { useTaskStore } from '@/store/task'
+import { useStaffStore } from '@/stores/staff'
+import { useTaskStore } from '@/stores/task'
 
 @Component({
   components: {

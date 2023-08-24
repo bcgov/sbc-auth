@@ -34,7 +34,7 @@ import {
 } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { AccessType } from '@/util/constants'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

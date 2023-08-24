@@ -16,9 +16,9 @@ import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
-import store from '@/store/vuex'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import store from '@/stores/vuex'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 Vue.use(Router)
 

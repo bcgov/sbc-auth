@@ -183,8 +183,8 @@ import { OrgBusinessType, Organization } from '@/models/Organization'
 import { Code } from '@/models/Code'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
-import { useCodesStore } from '@/store/codes'
-import { useOrgStore } from '@/store/org'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

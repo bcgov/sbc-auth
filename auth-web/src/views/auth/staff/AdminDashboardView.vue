@@ -27,7 +27,7 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import { State } from 'pinia-class'
 import Vue from 'vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

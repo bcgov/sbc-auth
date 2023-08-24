@@ -67,7 +67,7 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

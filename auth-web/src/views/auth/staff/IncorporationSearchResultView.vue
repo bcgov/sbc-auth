@@ -68,8 +68,8 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

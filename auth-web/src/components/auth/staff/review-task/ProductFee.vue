@@ -69,7 +69,7 @@
 import { AccountFee, AccountFeeDTO, OrgProduct, OrgProductFeeCode } from '@/models/Organization'
 import { computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { ProductStatus } from '@/util/constants'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 // FUTURE: remove this in vue 3
 interface ProductFeeState {

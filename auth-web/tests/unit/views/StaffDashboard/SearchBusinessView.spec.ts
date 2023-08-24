@@ -5,8 +5,8 @@ import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useBusinessStore } from '@/store/business'
-import { useUserStore } from '@/store/user'
+import { useBusinessStore } from '@/stores/business'
+import { useUserStore } from '@/stores/user'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

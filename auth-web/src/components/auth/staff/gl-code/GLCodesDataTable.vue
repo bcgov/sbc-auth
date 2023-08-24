@@ -41,7 +41,7 @@ import CommonUtils from '@/util/common-util'
 import { GLCode } from '@/models/Staff'
 import GLCodeDetailsModal from '@/components/auth/staff/gl-code/GLCodeDetailsModal.vue'
 import { mapActions } from 'pinia'
-import { useStaffStore } from '@/store/staff'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   components: {

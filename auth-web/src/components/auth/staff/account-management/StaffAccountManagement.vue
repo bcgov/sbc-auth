@@ -120,10 +120,10 @@ import StaffCreateAccountModal from '@/components/auth/staff/account-management/
 import StaffPendingAccountInvitationsTable from '@/components/auth/staff/account-management/StaffPendingAccountInvitationsTable.vue'
 import StaffPendingAccountsTable from '@/components/auth/staff/account-management/StaffPendingAccountsTable.vue'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
-import { useCodesStore } from '@/store/codes'
-import { useStaffStore } from '@/store/staff'
-import { useTaskStore } from '@/store/task'
-import { useUserStore } from '@/store/user'
+import { useCodesStore } from '@/stores/codes'
+import { useStaffStore } from '@/stores/staff'
+import { useTaskStore } from '@/stores/task'
+import { useUserStore } from '@/stores/user'
 
 enum TAB_CODE {
     Active = 'active-tab',

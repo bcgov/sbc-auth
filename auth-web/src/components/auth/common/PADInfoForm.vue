@@ -155,7 +155,7 @@ import CommonUtils from '@/util/common-util'
 import { PADInfo } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 // FUTURE: remove this in vue 3
 interface PADInfoFormState {

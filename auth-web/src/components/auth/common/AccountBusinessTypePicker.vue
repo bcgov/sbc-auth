@@ -76,8 +76,8 @@ import {
 import { OrgBusinessType, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import { Code } from '@/models/Code'
-import { useCodesStore } from '@/store/codes'
-import { useOrgStore } from '@/store/org'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {}

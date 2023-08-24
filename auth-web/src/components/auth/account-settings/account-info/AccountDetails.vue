@@ -111,7 +111,7 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } fr
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Code } from '@/models/Code'
 import { OrgBusinessType } from '@/models/Organization'
-import { useCodesStore } from '@/store/codes'
+import { useCodesStore } from '@/stores/codes'
 
 export interface AccountDetailsI {
   orgName: string

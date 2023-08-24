@@ -3,7 +3,7 @@ import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)

@@ -3,7 +3,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 const vuetify = new Vuetify({})
 const router = new VueRouter()

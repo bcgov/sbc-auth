@@ -5,7 +5,7 @@ import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
 

@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuetify from 'vuetify'
 import initialize from '@/plugins/i18n'
 import { mount } from '@vue/test-utils'
-import store from '@/store'
+import store from '@/stores'
 
 // eslint-disable-next-line sort-imports
 import Search from 'fas-ui'

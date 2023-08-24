@@ -278,7 +278,7 @@ import { Component, Emit, Vue } from 'vue-property-decorator'
 import { FilingType, GLCode } from '@/models/Staff'
 import { mapActions } from 'pinia'
 import moment from 'moment'
-import { useStaffStore } from '@/store/staff'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   methods: {

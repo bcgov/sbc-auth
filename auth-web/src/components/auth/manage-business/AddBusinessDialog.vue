@@ -224,7 +224,7 @@ import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import { StatusCodes } from 'http-status-codes'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 export default defineComponent({
   components: {

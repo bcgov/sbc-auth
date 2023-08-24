@@ -2,7 +2,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useCodesStore } from '@/store'
+import { useCodesStore } from '@/stores'
 
 const vuetify = new Vuetify({})
 

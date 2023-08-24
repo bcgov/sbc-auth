@@ -449,9 +449,9 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

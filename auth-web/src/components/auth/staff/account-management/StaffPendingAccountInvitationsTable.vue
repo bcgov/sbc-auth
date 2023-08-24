@@ -101,7 +101,7 @@ import { Invitation } from '@/models/Invitation'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { Organization } from '@/models/Organization'
 import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
-import { useStaffStore } from '@/store/staff'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   components: {

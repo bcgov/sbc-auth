@@ -46,7 +46,7 @@ import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountLoginOptionPicker from '@/components/auth/common/AccountLoginOptionPicker.vue'
 import { LoginSource } from '@/util/constants'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

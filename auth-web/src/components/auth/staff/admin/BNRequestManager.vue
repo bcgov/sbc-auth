@@ -136,7 +136,7 @@ import { Action } from 'pinia-class'
 import { RequestTrackerType } from '@/util/constants'
 import ResubmitRequestDialog from '@/components/auth/staff/admin/ResubmitRequestDialog.vue'
 import Vue from 'vue'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {

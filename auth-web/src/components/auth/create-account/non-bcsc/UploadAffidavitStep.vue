@@ -92,8 +92,8 @@ import NotaryContactForm from '@/components/auth/create-account/non-bcsc/NotaryC
 import NotaryInformationForm from '@/components/auth/create-account/non-bcsc/NotaryInformationForm.vue'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

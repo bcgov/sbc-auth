@@ -94,7 +94,7 @@ import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { PasscodeResetLoad } from '@/models/business'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {

@@ -43,7 +43,7 @@ import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

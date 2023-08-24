@@ -193,8 +193,8 @@ import PaginationMixin from '@/components/auth/mixins/PaginationMixin.vue'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import debounce from '@/util/debounce'
-import { useOrgStore } from '@/store/org'
-import { useStaffStore } from '@/store/staff'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   components: {

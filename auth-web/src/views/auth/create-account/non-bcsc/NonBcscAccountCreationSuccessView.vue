@@ -40,7 +40,7 @@ import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import Vue from 'vue'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

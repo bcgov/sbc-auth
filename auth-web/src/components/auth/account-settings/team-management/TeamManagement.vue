@@ -16,7 +16,7 @@ import AnonymousUserManagement from '@/components/auth/account-settings/team-man
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import UserManagement from '@/components/auth/account-settings/team-management/UserManagement.vue'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

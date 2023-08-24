@@ -2,7 +2,7 @@ import { createLocalVue, mount } from '@vue/test-utils'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
 

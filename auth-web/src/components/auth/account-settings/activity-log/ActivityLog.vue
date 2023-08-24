@@ -52,8 +52,8 @@ import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import CommonUtils from '@/util/common-util'
-import { useActivityStore } from '@/store/activityLog'
-import { useOrgStore } from '@/store/org'
+import { useActivityStore } from '@/stores/activityLog'
+import { useOrgStore } from '@/stores/org'
 
 @Component({})
 export default class ActivityLogs extends Mixins(AccountChangeMixin) {

@@ -3,7 +3,7 @@ import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import { VNode } from 'vue/types'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean

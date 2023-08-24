@@ -78,7 +78,7 @@ import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { mapState } from 'pinia'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

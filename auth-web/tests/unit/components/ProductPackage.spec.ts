@@ -1,8 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import ProductPackage from '@/components/auth/account-settings/product/ProductPackage.vue'
 import Vuetify from 'vuetify'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 const vuetify = new Vuetify({})
 

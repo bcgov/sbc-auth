@@ -36,7 +36,7 @@ import AccountSetupView from '@/views/auth/create-account/AccountSetupView.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NonBcscAccountSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAccountSetupView.vue'
 import { namespace } from 'vuex-class'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 // Will be taken out with Vue 3.
 const AuthModule = namespace('auth')

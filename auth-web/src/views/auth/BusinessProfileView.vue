@@ -78,7 +78,7 @@ import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
 import ConfigHelper from '@/util/config-helper'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {

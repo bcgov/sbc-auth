@@ -1,6 +1,6 @@
 import '@/composition-api-setup'
 import { createLocalVue, mount } from '@vue/test-utils'
-import { useStaffStore, useTaskStore } from '@/store'
+import { useStaffStore, useTaskStore } from '@/stores'
 import ReviewAccountView from '@/views/auth/staff/ReviewAccountView.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'

@@ -2,7 +2,7 @@ import { Member, Organization } from '@/models/Organization'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import Statements from '@/components/auth/account-settings/statement/Statements.vue'
 import VueRouter from 'vue-router'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 const router = new VueRouter()
 

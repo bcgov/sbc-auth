@@ -3,7 +3,7 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import { computed } from '@vue/composition-api'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 export const useAccount = () => {
   const orgStore = useOrgStore()

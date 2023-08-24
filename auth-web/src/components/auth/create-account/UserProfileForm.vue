@@ -374,8 +374,8 @@ import UserService from '@/services/user.services'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import configHelper from '@/util/config-helper'
 import { mask } from 'vue-the-mask'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

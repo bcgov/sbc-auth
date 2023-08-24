@@ -56,7 +56,7 @@ import { Member } from '@/models/Organization'
 import { mapState } from 'pinia'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

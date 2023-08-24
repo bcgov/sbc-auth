@@ -94,8 +94,8 @@ import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { Organization } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {

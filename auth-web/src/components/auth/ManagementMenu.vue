@@ -33,7 +33,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Organization } from '@/models/Organization'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   name: 'ManagementMenu',

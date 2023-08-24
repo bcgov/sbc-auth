@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import { useOrgStore, useUserStore } from '@/store'
+import { useOrgStore, useUserStore } from '@/stores'
 import MemberDataTable from '@/components/auth/account-settings/team-management/MemberDataTable.vue'
 import OrgService from '../../../src/services/org.services'
 import VueRouter from 'vue-router'

@@ -105,8 +105,8 @@ import { OrgWithAddress, Organization } from '@/models/Organization'
 import { Address } from '@/models/address'
 import { Pages } from '@/util/constants'
 import { UserSettings } from '@/models/user'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({})
 export default class DuplicateAccountWarningView extends Vue {

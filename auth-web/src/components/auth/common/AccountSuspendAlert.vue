@@ -55,8 +55,8 @@ import { Code } from '@/models/Code'
 import CommonUtils from '@/util/common-util'
 import { FailedInvoice } from '@/models/invoice'
 import { Organization } from '@/models/Organization'
-import { useCodesStore } from '@/store/codes'
-import { useOrgStore } from '@/store/org'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 @Component
 export default class AccountSuspendAlert extends Vue {

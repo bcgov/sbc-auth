@@ -8,7 +8,7 @@ import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
 

@@ -1,6 +1,6 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessContactForm from '@/components/auth/BusinessContactForm.vue'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 describe('BusinessContactForm.vue', () => {
   let wrapper: Wrapper<BusinessContactForm>

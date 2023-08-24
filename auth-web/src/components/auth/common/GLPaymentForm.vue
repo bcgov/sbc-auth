@@ -117,7 +117,7 @@ import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import { GLInfo } from '@/models/Organization'
 import { mask } from 'vue-the-mask'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   directives: {

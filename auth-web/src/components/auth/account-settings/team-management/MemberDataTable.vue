@@ -238,9 +238,9 @@ import { mapActions, mapState } from 'pinia'
 import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 export interface ChangeRolePayload {
   member: Member

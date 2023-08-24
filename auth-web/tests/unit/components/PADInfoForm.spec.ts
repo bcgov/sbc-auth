@@ -6,8 +6,8 @@ import Vuetify from 'vuetify'
 import { axios } from '@/util/http-util'
 import can from '@/directives/can'
 import sinon from 'sinon'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')

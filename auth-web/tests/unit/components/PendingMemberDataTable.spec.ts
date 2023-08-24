@@ -1,5 +1,5 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-import { useBusinessStore, useOrgStore, useUserStore } from '@/store'
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import PendingMemberDataTable from '@/components/auth/account-settings/team-management/PendingMemberDataTable.vue'
 import Vuetify from 'vuetify'
 

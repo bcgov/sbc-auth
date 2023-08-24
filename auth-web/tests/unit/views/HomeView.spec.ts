@@ -6,7 +6,7 @@ import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
 import flushPromises from 'flush-promises'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')

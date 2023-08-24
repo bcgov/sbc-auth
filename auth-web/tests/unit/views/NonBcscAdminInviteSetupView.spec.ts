@@ -2,7 +2,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import NonBcscAdminInviteSetupView from '@/views/auth/create-account/non-bcsc/NonBcscAdminInviteSetupView.vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 const vuetify = new Vuetify({})
 const router = new VueRouter()

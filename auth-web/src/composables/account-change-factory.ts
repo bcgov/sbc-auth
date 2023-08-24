@@ -1,5 +1,5 @@
 import { Ref, ref } from '@vue/composition-api'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 export const useAccountChangeHandler = () => {
   const unregisterHandler: Ref<() => void> = ref(null)

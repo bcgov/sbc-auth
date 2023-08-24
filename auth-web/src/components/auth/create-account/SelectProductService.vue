@@ -102,8 +102,8 @@ import Product from '@/components/auth/common/Product.vue'
 
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

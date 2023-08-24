@@ -42,8 +42,8 @@ import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { Role } from '@/util/constants'
 import Vue from 'vue'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: { InterimLanding, GovmAccountCreationSuccessView }

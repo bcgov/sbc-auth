@@ -152,10 +152,10 @@ import NotaryInformation from '@/components/auth/staff/review-task/NotaryInforma
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
 import { Task } from '@/models/Task'
-import { useCodesStore } from '@/store/codes'
-import { useOrgStore } from '@/store/org'
-import { useStaffStore } from '@/store/staff'
-import { useTaskStore } from '@/store/task'
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
+import { useTaskStore } from '@/stores/task'
 
 export default defineComponent({
   name: 'ReviewAccountView',

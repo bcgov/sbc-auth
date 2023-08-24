@@ -1,5 +1,5 @@
 import { createLocalVue, mount, shallowMount } from '@vue/test-utils'
-import { useOrgStore, useUserStore } from '@/store'
+import { useOrgStore, useUserStore } from '@/stores'
 import { AccountStatus } from '@/util/constants'
 import DuplicateAccountWarningView from '@/views/auth/create-account/DuplicateAccountWarningView.vue'
 import { OrgWithAddress } from '@/models/Organization'

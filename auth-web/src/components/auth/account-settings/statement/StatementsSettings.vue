@@ -206,7 +206,7 @@ import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 import moment from 'moment'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   methods: {

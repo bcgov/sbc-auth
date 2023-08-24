@@ -114,8 +114,8 @@ import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
 import { mask } from 'vue-the-mask'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   directives: {

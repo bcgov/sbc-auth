@@ -7,8 +7,8 @@ import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import Vue from 'vue'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 @Component({
   name: 'AccountMixin',
   computed: {

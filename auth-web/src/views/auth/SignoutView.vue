@@ -6,7 +6,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import SbcSignout from 'sbc-common-components/src/components/SbcSignout.vue'
-import { resetAllStores } from '@/store'
+import { resetAllStores } from '@/stores'
 
 @Component({
   methods: {

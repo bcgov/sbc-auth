@@ -1,7 +1,7 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import SetupAccountForm from '@/components/auth/staff/SetupAccountForm.vue'
 import Vuetify from 'vuetify'
-import { useStaffStore } from '@/store'
+import { useStaffStore } from '@/stores'
 
 describe('SetupAccountForm.vue', () => {
   let wrapper: Wrapper<SetupAccountForm>

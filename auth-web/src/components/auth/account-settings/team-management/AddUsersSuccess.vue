@@ -145,7 +145,7 @@ import { BulkUsersFailed, BulkUsersSuccess } from '@/models/Organization'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { mapState } from 'pinia'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

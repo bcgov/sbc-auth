@@ -2,7 +2,7 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
 import Vuetify from 'vuetify'
 import can from '@/directives/can'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 describe('PaymentInformation.vue', () => {
   let store: any

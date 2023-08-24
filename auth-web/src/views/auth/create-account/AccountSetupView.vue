@@ -86,8 +86,8 @@ import SelectProductService from '@/components/auth/create-account/SelectProduct
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
 import { namespace } from 'vuex-class'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 // This will be taken out with Vue3.
 const AuthModule = namespace('auth')
 

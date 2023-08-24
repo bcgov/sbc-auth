@@ -206,7 +206,7 @@ import { LearBusiness } from '@/models/business'
 import { SessionStorageKeys } from '@/util/constants'
 import Vue from 'vue'
 import { mask } from 'vue-the-mask'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {

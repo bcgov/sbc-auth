@@ -234,9 +234,9 @@ import PendingMemberDataTable from '@/components/auth/account-settings/team-mana
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
-import { useBusinessStore } from '@/store/business'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

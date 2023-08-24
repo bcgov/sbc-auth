@@ -106,8 +106,8 @@ import { MembershipType, RoleInfo } from '@/models/Organization'
 import CommonUtils from '@/util/common-util'
 import { Invitation } from '@/models/Invitation'
 import TeamManagementMixin from '../../mixins/TeamManagementMixin.vue'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 interface InvitationInfo {
   emailAddress: string

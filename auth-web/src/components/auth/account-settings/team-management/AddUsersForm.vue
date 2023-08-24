@@ -117,8 +117,8 @@ import { Component, Emit, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
-import { useOrgStore } from '@/store/org'
-import { useUserStore } from '@/store/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {

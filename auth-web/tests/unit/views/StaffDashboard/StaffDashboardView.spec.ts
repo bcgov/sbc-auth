@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import { useCodesStore, useOrgStore, useStaffStore, useTaskStore, useUserStore } from '@/store'
+import { useCodesStore, useOrgStore, useStaffStore, useTaskStore, useUserStore } from '@/stores'
 import { BaseVExpansionPanel } from '@/components'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'

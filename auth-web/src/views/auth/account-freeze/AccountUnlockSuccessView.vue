@@ -78,7 +78,7 @@ import { Component, Mixins } from 'vue-property-decorator'
 import { mapActions, mapState } from 'pinia'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Organization } from '@/models/Organization'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {

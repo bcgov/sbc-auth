@@ -10,7 +10,7 @@ import { AffiliationTypes, BusinessState, CorpTypes, NrDisplayStates, NrState, L
   AffidavitNumberStatus } from '@/util/constants'
 import { CorpTypeCd, GetCorpFullDescription,
   GetCorpNumberedDescription } from '@bcrs-shared-components/corp-type-module'
-import { useBusinessStore } from '@/store/business'
+import { useBusinessStore } from '@/stores/business'
 
 const affiliations = (reactive({
   filters: {

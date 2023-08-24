@@ -36,7 +36,7 @@ import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import { State } from 'pinia-class'
 import Vue from 'vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/stores/user'
 
 // FUTURE: import this from shared components once built
 // - this is converted statically from UserProduct.vue in bcgov/bcregistry repo

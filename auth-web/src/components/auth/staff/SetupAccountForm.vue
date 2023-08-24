@@ -176,8 +176,8 @@ import { Component, Vue } from 'vue-property-decorator'
 import { CreateRequestBody, MembershipType, Organization } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { useOrgStore } from '@/store/org'
-import { useStaffStore } from '@/store/staff'
+import { useOrgStore } from '@/stores/org'
+import { useStaffStore } from '@/stores/staff'
 
 @Component({
   computed: {

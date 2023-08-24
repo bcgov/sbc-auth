@@ -1,7 +1,7 @@
 import { DirectiveBinding } from 'vue/types/options'
 import { DirectiveOptions } from 'vue'
 import { DisplayModeValues } from '@/util/constants'
-import { useOrgStore } from '@/store/org'
+import { useOrgStore } from '@/stores/org'
 
 interface CustomHTMLElement extends HTMLElement {
   disabled: boolean
