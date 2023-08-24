@@ -120,39 +120,55 @@ def test_new_dir_search_can_be_returned(client, jwt, session, keycloak_mock):  #
     assert nds_product.get('subscriptionStatus') == 'ACTIVE'
 
 
+def assert_product_parent_and_child_statuses(client, jwt, org_id,
+                                             parent_code, parent_status, child_code, child_status):
+    """Assert that an organizations parent product code and child product code have the expected statuses."""
+    staff_view_account_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_view_accounts_role)
+    rv_products = client.get(f'/api/v1/orgs/{org_id}/products', headers=staff_view_account_headers,
+                             content_type='application/json')
+    list_products = json.loads(rv_products.data)
+
+    mhr_product = next(prod for prod in list_products
+                       if prod.get('code') == child_code)
+
+    parent_mhr_product = next(prod for prod in list_products if prod.get('code') == parent_code)
+
+    assert mhr_product.get('subscriptionStatus') == child_status
+    assert parent_mhr_product.get('subscriptionStatus') == parent_status
+
+
 @pytest.mark.parametrize('org_product_info', [
     TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
     TestOrgProductsInfo.mhr_qs_home_manufacturers,
-    TestOrgProductsInfo.mhr_qs_home_dealers,
+    TestOrgProductsInfo.mhr_qs_home_dealers
 ])
-def test_add_single_org_product_mhr_qualified_supplier(client, jwt, session, keycloak_mock, org_product_info):
-    """Assert that MHR sub products subscriptions can be created."""
+def test_add_single_org_product_mhr_qualified_supplier_approve(client, jwt, session, keycloak_mock, org_product_info):
+    """Assert that MHR sub products subscriptions can be created and approved."""
     # setup user and org
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
-    rv = client.post('/api/v1/users', headers=headers, content_type='application/json')
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=user_headers, content_type='application/json')
     rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
-                     headers=headers, content_type='application/json')
+                     headers=user_headers, content_type='application/json')
     assert rv.status_code == http_status.HTTP_201_CREATED
     dictionary = json.loads(rv.data)
 
     # Create product subscription
     rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
                               data=json.dumps(org_product_info),
-                              headers=headers, content_type='application/json')
+                              headers=user_headers, content_type='application/json')
     assert rv_products.status_code == http_status.HTTP_201_CREATED
     assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
 
     # Fetch org products and validate subscription status
-    rv_products = client.get(f"/api/v1/orgs/{dictionary.get('id')}/products", headers=headers,
-                             content_type='application/json')
-    list_products = json.loads(rv_products.data)
-    mhr_product = next(prod for prod in list_products
-                       if prod.get('code') == org_product_info['subscriptions'][0]['productCode'])
-    assert mhr_product.get('subscriptionStatus') == 'PENDING_STAFF_REVIEW'
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'PENDING_STAFF_REVIEW',
+                                             org_product_info['subscriptions'][0]['productCode'],
+                                             'PENDING_STAFF_REVIEW')
 
     # Should show up as a review task for staff
-    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
-    rv = client.get('/api/v1/tasks', headers=headers, content_type='application/json')
+    rv = client.get('/api/v1/tasks', headers=staff_headers, content_type='application/json')
 
     item_list = rv.json
     assert schema_utils.validate(item_list, 'paged_response')[0]
@@ -168,7 +184,7 @@ def test_add_single_org_product_mhr_qualified_supplier(client, jwt, session, key
     # Approve task
     rv = client.put('/api/v1/tasks/{}'.format(task['id']),
                     data=json.dumps({'relationshipStatus': 'ACTIVE'}),
-                    headers=headers, content_type='application/json')
+                    headers=staff_headers, content_type='application/json')
 
     task = rv.json
     assert rv.status_code == http_status.HTTP_200_OK
@@ -176,3 +192,256 @@ def test_add_single_org_product_mhr_qualified_supplier(client, jwt, session, key
     assert task['relationshipType'] == 'PRODUCT'
     assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
     assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
+
+    # MHR parent and sub product should be active
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'ACTIVE',
+                                             org_product_info['subscriptions'][0]['productCode'], 'ACTIVE')
+
+
+@pytest.mark.parametrize('org_product_info', [
+    TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
+    TestOrgProductsInfo.mhr_qs_home_manufacturers,
+    TestOrgProductsInfo.mhr_qs_home_dealers
+])
+def test_add_single_org_product_mhr_qualified_supplier_reject(client, jwt, session, keycloak_mock, org_product_info):
+    """Assert that MHR sub products subscriptions can be created and rejected with no pre-existing subscriptions."""
+    # setup user and org
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=user_headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
+                     headers=user_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+
+    # Create product subscription
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(org_product_info),
+                              headers=user_headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    # Fetch org products and validate subscription status
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'PENDING_STAFF_REVIEW',
+                                             org_product_info['subscriptions'][0]['productCode'],
+                                             'PENDING_STAFF_REVIEW')
+
+    # Should show up as a review task for staff
+    rv = client.get('/api/v1/tasks', headers=staff_headers, content_type='application/json')
+
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(item_list['tasks']) == 1
+
+    task = item_list['tasks'][0]
+    assert task['relationshipStatus'] == 'PENDING_STAFF_REVIEW'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
+
+    # Reject task
+    rv = client.put('/api/v1/tasks/{}'.format(task['id']),
+                    data=json.dumps({'relationshipStatus': 'REJECTED'}),
+                    headers=staff_headers, content_type='application/json')
+
+    task = rv.json
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert task['relationshipStatus'] == 'REJECTED'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
+
+    # MHR parent and sub product should be rejected
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'REJECTED',
+                                             org_product_info['subscriptions'][0]['productCode'], 'REJECTED')
+
+
+@pytest.mark.parametrize('org_product_info', [
+    TestOrgProductsInfo.mhr_qs_lawyer_and_notaries,
+    TestOrgProductsInfo.mhr_qs_home_manufacturers,
+    TestOrgProductsInfo.mhr_qs_home_dealers
+])
+def test_add_single_org_product_mhr_qualified_supplier_reject2(client, jwt, session, keycloak_mock, org_product_info):
+    """Assert that MHR sub products subscriptions can be created and rejected when a parent product already exists."""
+    # setup user and org
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=user_headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
+                     headers=user_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+
+    # Create parent product subscription
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(TestOrgProductsInfo.mhr),
+                              headers=user_headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    # Fetch org products and validate subscription status
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'ACTIVE',
+                                             org_product_info['subscriptions'][0]['productCode'],
+                                             'NOT_SUBSCRIBED')
+
+    # Create sub product subscription
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(org_product_info),
+                              headers=user_headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    # Fetch org products and validate subscription status
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'ACTIVE',
+                                             org_product_info['subscriptions'][0]['productCode'],
+                                             'PENDING_STAFF_REVIEW')
+
+    # Should show up as a review task for staff
+    rv = client.get('/api/v1/tasks', headers=staff_headers, content_type='application/json')
+
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(item_list['tasks']) == 1
+
+    task = item_list['tasks'][0]
+    assert task['relationshipStatus'] == 'PENDING_STAFF_REVIEW'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
+
+    # Reject task
+    rv = client.put('/api/v1/tasks/{}'.format(task['id']),
+                    data=json.dumps({'relationshipStatus': 'REJECTED'}),
+                    headers=staff_headers, content_type='application/json')
+
+    task = rv.json
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert task['relationshipStatus'] == 'REJECTED'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == org_product_info['subscriptions'][0]['externalSourceId']
+
+    # MHR parent and sub product should be rejected
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'ACTIVE',
+                                             org_product_info['subscriptions'][0]['productCode'], 'REJECTED')
+
+
+def test_add_org_product_mhr_qualified_supplier_reject_approve(client, jwt, session, keycloak_mock):
+    """Assert that MHR sub products subscriptions can be rejected and approved after with a different sub product."""
+    # setup user and org
+    staff_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_role)
+    user_headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.post('/api/v1/users', headers=user_headers, content_type='application/json')
+    rv = client.post('/api/v1/orgs', data=json.dumps(TestOrgInfo.org_premium),
+                     headers=user_headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_201_CREATED
+    dictionary = json.loads(rv.data)
+
+    qsln_product_info = TestOrgProductsInfo.mhr_qs_lawyer_and_notaries
+    qshm_product_info = TestOrgProductsInfo.mhr_qs_home_manufacturers
+
+    # Create first sub product subscription
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(qsln_product_info),
+                              headers=user_headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    # Fetch org products and validate subscription status
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'PENDING_STAFF_REVIEW',
+                                             qsln_product_info['subscriptions'][0]['productCode'],
+                                             'PENDING_STAFF_REVIEW')
+
+    # Should show up as a review task for staff
+    rv = client.get('/api/v1/tasks', headers=staff_headers, content_type='application/json')
+
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(item_list['tasks']) == 1
+
+    task = item_list['tasks'][0]
+    assert task['relationshipStatus'] == 'PENDING_STAFF_REVIEW'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == qsln_product_info['subscriptions'][0]['externalSourceId']
+
+    # Reject task
+    rv = client.put('/api/v1/tasks/{}'.format(task['id']),
+                    data=json.dumps({'relationshipStatus': 'REJECTED'}),
+                    headers=staff_headers, content_type='application/json')
+
+    task = rv.json
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert task['relationshipStatus'] == 'REJECTED'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == qsln_product_info['subscriptions'][0]['externalSourceId']
+
+    # MHR parent and sub product should be rejected
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'REJECTED',
+                                             qsln_product_info['subscriptions'][0]['productCode'], 'REJECTED')
+
+    # Create second sub product subscription
+    rv_products = client.post(f"/api/v1/orgs/{dictionary.get('id')}/products",
+                              data=json.dumps(qshm_product_info),
+                              headers=user_headers, content_type='application/json')
+    assert rv_products.status_code == http_status.HTTP_201_CREATED
+    assert schema_utils.validate(rv_products.json, 'org_product_subscriptions_response')[0]
+
+    # Fetch org products and validate subscription status
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'PENDING_STAFF_REVIEW',
+                                             qshm_product_info['subscriptions'][0]['productCode'],
+                                             'PENDING_STAFF_REVIEW')
+
+    # Should show up as a review task for staff
+    rv = client.get('/api/v1/tasks', headers=staff_headers, content_type='application/json')
+
+    item_list = rv.json
+    assert schema_utils.validate(item_list, 'paged_response')[0]
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert len(item_list['tasks']) == 2
+
+    task = item_list['tasks'][1]
+    assert task['relationshipStatus'] == 'PENDING_STAFF_REVIEW'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == qshm_product_info['subscriptions'][0]['externalSourceId']
+
+    # Approve task
+    rv = client.put('/api/v1/tasks/{}'.format(task['id']),
+                    data=json.dumps({'relationshipStatus': 'ACTIVE'}),
+                    headers=staff_headers, content_type='application/json')
+
+    task = rv.json
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert task['relationshipStatus'] == 'ACTIVE'
+    assert task['relationshipType'] == 'PRODUCT'
+    assert task['action'] == 'QUALIFIED_SUPPLIER_REVIEW'
+    assert task['externalSourceId'] == qshm_product_info['subscriptions'][0]['externalSourceId']
+
+    # MHR parent and sub product should be approved
+    assert_product_parent_and_child_statuses(client, jwt,
+                                             dictionary.get('id'),
+                                             'MHR', 'ACTIVE',
+                                             qshm_product_info['subscriptions'][0]['productCode'], 'ACTIVE')
