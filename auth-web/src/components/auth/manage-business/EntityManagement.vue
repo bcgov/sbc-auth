@@ -554,8 +554,8 @@ import { Base64 } from 'js-base64'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
-import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
@@ -572,14 +572,14 @@ const BusinessModule = namespace('business')
   components: {
     AddNameRequestForm,
     AffiliatedEntityTable,
+    AuthorizationEmailSentDialog,
     ExpandableHelp,
     ManageBusinessDialog,
     ModalDialog,
     HelpDialog,
     PasscodeResetOptionsModal,
     SearchBusinessNameRequest,
-    StartNewBusinessHelp,
-    AuthorizationEmailSentDialog
+    StartNewBusinessHelp
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
