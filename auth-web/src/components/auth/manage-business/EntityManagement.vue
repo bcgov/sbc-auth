@@ -181,6 +181,15 @@
         </div>
       </div>
 
+      <ExpandableHelp
+        class="mb-9"
+        helpLabel="Help with Starting and Managing a Business"
+      >
+        <template #content>
+          <StartNewBusinessHelp class="help-text" />
+        </template>
+      </ExpandableHelp>
+
       <search-business-name-request
         v-if="isEnableBusinessNrSearch"
         :orgId="orgId"
@@ -546,6 +555,7 @@ import { Base64 } from 'js-base64'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
+import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
@@ -553,6 +563,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
+import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { namespace } from 'vuex-class'
 
@@ -560,14 +571,16 @@ const BusinessModule = namespace('business')
 
 @Component({
   components: {
-    ManageBusinessDialog,
     AddNameRequestForm,
     AffiliatedEntityTable,
+    AuthorizationEmailSentDialog,
+    ExpandableHelp,
+    ManageBusinessDialog,
     ModalDialog,
     HelpDialog,
     PasscodeResetOptionsModal,
     SearchBusinessNameRequest,
-    AuthorizationEmailSentDialog
+    StartNewBusinessHelp
   },
   computed: {
     ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
@@ -1135,10 +1148,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
 .view-header {
   justify-content: space-between;
-
-  h1 {
-    margin-bottom: -10px;
-  }
+  margin-bottom: 0.75rem;
 
   .subtitle {
     font-size: 1rem;
@@ -1149,6 +1159,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   .v-btn {
     font-weight: 700;
   }
+}
+
+.help-text {
+  max-width: 75%;
+  margin: 0 auto;
 }
 
 #add-existing-btn {
