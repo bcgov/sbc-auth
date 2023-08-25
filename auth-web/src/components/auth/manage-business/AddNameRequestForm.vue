@@ -42,7 +42,6 @@
               >
                 mdi-close
               </v-icon><!-- spacer icon -->
-              <!-- {{ name.name when BE fix (able to send with status) }} -->
               <span class="names-text">{{ name }}</span>
             </div>
           </div>
