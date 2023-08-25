@@ -9,7 +9,6 @@ export interface NameRequestIF {
   name: string,
   status?: string
 }
-
 export interface NameRequestLookupResultIF {
   names: string[]
   nrNum: string

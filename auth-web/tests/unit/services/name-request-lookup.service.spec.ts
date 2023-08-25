@@ -5,7 +5,7 @@ import sinon from 'sinon'
 describe('Name Request Lookup Services', () => {
   it('returns a result when the name request is found', async () => {
     const result = {
-      // TODO - remove comments when BE ready with status
+      // remove comments when BE ready with status
       // 'names': [
       //   { 'name': 'TEST NAME 1 CORP.', 'status': 'Accepted' },
       //   { 'name': 'TEST NAME 2 INC.', 'status': 'Rejected' },

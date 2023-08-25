@@ -15,7 +15,7 @@
       hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
       :item-text="lookupType === LookupType.NR ? 'nrNum' : 'name'"
       :item-value="lookupType === LookupType.NR ? 'nrNum' : 'identifier'"
-      label="My business name, incorporation, or registration number"
+      :label="lookupType === LookupType.NR ? 'My business name or name request number' : 'My business name, incorporation, or registration number'"
       no-filter
       persistent-hint
       return-object
@@ -34,7 +34,7 @@
 
       <template #no-data>
         <p class="pl-5 font-weight-bold">
-          No active B.C. business found
+          {{ lookupType === LookupType.NR ? 'No Name Request found' : 'No active B.C. business found' }}
         </p>
         <p class="pl-5">
           Ensure you have entered the correct business name or number.
@@ -75,13 +75,13 @@
       >
         <v-row class="business-lookup-result pt-1">
           <v-col
-            cols="2"
+            cols="3"
             class="result-identifier"
           >
             {{ item.nrNum }}
           </v-col>
           <v-col
-            cols="8"
+            cols="7"
             class="result-name"
           >
             <div
