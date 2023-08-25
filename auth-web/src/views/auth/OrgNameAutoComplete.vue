@@ -51,22 +51,21 @@
 <script lang="ts">
 import { AutoCompleteResponse, AutoCompleteResult } from '@/models/AutoComplete'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import { ORG_AUTO_COMPLETE_MAX_RESULTS_COUNT } from '@/util/constants'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({})
 export default class OrgNameAutoComplete extends Vue {
-    @OrgModule.Action('getOrgNameAutoComplete') public getOrgNameAutoComplete!:(searchValue: string) =>Promise<AutoCompleteResponse>
+    @Action(useOrgStore) public getOrgNameAutoComplete!:(searchValue: string) => Promise<AutoCompleteResponse>
     @Prop({ default: false }) private setAutoCompleteIsActive: boolean
     @Prop({ default: '' }) private searchValue: string
 
-    private autoCompleteResults: AutoCompleteResult[] = []
-    private autoCompleteSelectedIndex : number = -1
-    private autoCompleteIsActive: boolean = false
+    autoCompleteResults: AutoCompleteResult[] = []
+    autoCompleteSelectedIndex : number = -1
+    autoCompleteIsActive: boolean = false
 
-    private get showAutoComplete () {
+    get showAutoComplete () {
       return this.autoCompleteResults.length > 0 && this.autoCompleteIsActive
     }
 
@@ -114,7 +113,7 @@ export default class OrgNameAutoComplete extends Vue {
       }
     }
 
-    private getIndexedTag (tag, index): string {
+    getIndexedTag (tag, index): string {
       return `${tag}-${index}`
     }
 }

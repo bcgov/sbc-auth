@@ -30,14 +30,15 @@
 import { Component, Emit, Prop } from 'vue-property-decorator'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
     ModalDialog
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'resetAccountSetupProgress'
     ])
   }

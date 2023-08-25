@@ -69,13 +69,14 @@
 <script lang="ts">
 import { Component, Emit, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource } from '@/util/constants'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import LearnMoreBCEID from '@/components/auth/common/LearnMoreBCEID.vue'
 import LearnMoreBCSC from '@/components/auth/common/LearnMoreBCSC.vue'
 import { Organization } from '@/models/Organization'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -83,17 +84,17 @@ import { Organization } from '@/models/Organization'
     LearnMoreBCSC
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'memberLoginOption'
     ])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'syncMemberLoginOption',
-      'updateLoginOption'
-    ]),
-    ...mapMutations('org', ['setMemberLoginOption'])
+      'updateLoginOption',
+      'setMemberLoginOption'
+    ])
   }
 })
 export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin, AccountMixin) {
@@ -187,7 +188,10 @@ export default class AccountLoginOptionPicker extends Mixins(AccountChangeMixin,
     }
 
     &.active {
-      box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+      box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                  0 3px 1px -2px rgba(0,0,0,.2),
+                  0 2px 2px 0 rgba(0,0,0,.14),
+                  0 1px 5px 0 rgba(0,0,0,.12) !important;
     }
   }
 

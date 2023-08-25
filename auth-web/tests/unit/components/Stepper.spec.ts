@@ -1,28 +1,16 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import Stepper from '@/components/auth/common/stepper/Stepper.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('Stepper.vue', () => {
   let wrapper: any
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      strict: false
-    })
-
     wrapper = mount(Stepper, {
-      store,
       localVue,
       vuetify
     })

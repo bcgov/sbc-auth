@@ -1,14 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import { EntityAlertTypes } from '@/util/constants'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(VueRouter)
-Vue.use(Vuetify)
 document.body.setAttribute('data-app', 'true')
 
 const vuetify = new Vuetify({})
@@ -17,7 +12,6 @@ const router = new VueRouter()
 describe('Entity Details Alert tests', () => {
   let wrapper: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
 
   it('Basic render test', () => {
     wrapper = mount(EntityDetails, {

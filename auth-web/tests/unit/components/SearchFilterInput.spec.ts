@@ -1,13 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import { SearchFilterCodes } from '@/util/constants'
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('SearchFilterInput.vue', () => {
   let wrapper: any
@@ -36,7 +30,6 @@ describe('SearchFilterInput.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(Vuetify)
 
     const vuetify = new Vuetify({})

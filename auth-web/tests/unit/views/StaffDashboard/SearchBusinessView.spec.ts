@@ -5,7 +5,8 @@ import StaffDashboardView from '@/views/auth/staff/StaffDashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useBusinessStore } from '@/stores/business'
+import { useUserStore } from '@/stores/user'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -24,51 +25,32 @@ describe('StaffDashboardView.vue', () => {
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const businessModule = {
-      namespaced: true,
-      state: {
-        currentBusiness: {
-          businessIdentifier: 'CP0000000',
-          businessNumber: 'CP0000000',
-          contacts: [
-            {
-              created: '2019-12-11T04:03:11.830365+00:00',
-              createdBy: 'TEST',
-              email: 'test@gmail.com',
-              modified: '2019-12-11T04:03:11.830395+00:00',
-              phone: '',
-              phoneExtension: ''
-            }
-          ],
-          folioNumber: '22222222222'
+    const businessStore = useBusinessStore()
+    businessStore.currentBusiness = {
+      businessIdentifier: 'CP0000000',
+      businessNumber: 'CP0000000',
+      contacts: [
+        {
+          created: '2019-12-11T04:03:11.830365+00:00',
+          createdBy: 'TEST',
+          email: 'test@gmail.com',
+          modified: '2019-12-11T04:03:11.830395+00:00',
+          phone: '',
+          phoneExtension: ''
         }
-      }
-    }
+      ],
+      folioNumber: '22222222222'
+    } as any
 
-    const userModule = {
-      namespaced: true,
-      state: {
-        currentUser: { 'userName': 'test' }
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        business: businessModule,
-        user: userModule
-      }
-    })
+    const userStore = useUserStore()
+    userStore.currentUser = { 'userName': 'test' } as any
 
     const isFormValid = vi.fn(() => true)
 
     const vuetify = new Vuetify({})
 
     cmp = shallowMount(StaffDashboardView, {
-      store,
       localVue,
       vuetify,
       mocks: { isFormValid }

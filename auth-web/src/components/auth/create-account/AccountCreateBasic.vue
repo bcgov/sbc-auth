@@ -79,16 +79,16 @@
 import { Account, LDFlags, LoginSource } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import OrgModule from '@/store/modules/org'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { addressSchema } from '@/schemas'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -97,22 +97,19 @@ import { getModule } from 'vuex-module-decorators'
     ConfirmCancelButton
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'currentOrgAddress',
       'currentOrganizationType'
     ]),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization', 'setOrgName', 'setCurrentOrganizationAddress'
-    ]),
-    ...mapActions('org', ['syncMembership', 'syncOrganization', 'isOrgNameAvailable'])
+    ...mapActions(useOrgStore, ['syncMembership', 'syncOrganization', 'isOrgNameAvailable', 'setCurrentOrganization',
+      'setCurrentOrganizationAddress'])
   }
 })
 export default class AccountCreateBasic extends Mixins(Steppable) {
-  private orgStore = getModule(OrgModule, this.$store)
   private errorMessage: string = ''
   private saving = false
   private isBasicAccount: boolean = true
@@ -131,7 +128,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   private readonly setCurrentOrganizationAddress!: (address: Address) => void
   private orgBusinessTypeLocal: OrgBusinessType = {}
 
-  private baseAddressSchema: {} = addressSchema
+  private baseAddressSchema = addressSchema
   private isOrgBusinessTypeValid = false
   // Org Id variable to store the current organization ID of the invitation IDIR account
   private orgId: number = null
@@ -177,6 +174,7 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
   }
 
   private get isExtraProvUser () {
+    // Remove Vuex with Vue 3
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
@@ -190,7 +188,10 @@ export default class AccountCreateBasic extends Mixins(Steppable) {
       const checkNameAVailability = (this.orgBusinessTypeLocal.name !== this.currentOrganization?.name)
       // no need to check name if govmAccount
       if (checkNameAVailability && !this.govmAccount) {
-        const available = await this.isOrgNameAvailable({ 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
+        const available = await this.isOrgNameAvailable({
+          'name': this.orgBusinessTypeLocal.name,
+          'branchName': this.orgBusinessTypeLocal.branchName
+        })
         if (!available) {
           this.errorMessage =
                 'An account with this name already exists. Try a different account name.'

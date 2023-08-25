@@ -102,7 +102,7 @@
 
 <script lang="ts">
 import { Account, Pages } from '@/util/constants'
-import { Member, MembershipType, OrgPaymentDetails, Organization } from '@/models/Organization'
+import { MembershipType, OrgPaymentDetails } from '@/models/Organization'
 import { Ref, computed, defineComponent, onBeforeUnmount, onMounted, ref, watch } from '@vue/composition-api'
 import { useAccountChangeHandler, useTransactions } from '@/composables'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
@@ -112,7 +112,7 @@ import { StatusCodes } from 'http-status-codes'
 import TransactionsDataTable from './TransactionsDataTable.vue'
 import { getTransactionTableHeaders } from '@/resources/table-headers'
 import moment from 'moment'
-import { useStore } from 'vuex-composition-helpers'
+import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'Transactions',
@@ -124,12 +124,10 @@ export default defineComponent({
     title: { default: '' }
   },
   setup (props, { root }) {
-    // store stuff
-    const store = useStore()
-    const currentOrgPaymentDetails = computed(() => store.state.org.currentOrgPaymentDetails as OrgPaymentDetails)
-    const getOrgPayments = (orgId?: number) => store.dispatch('org/getOrgPayments', orgId)
-    const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
-    const currentMembership = computed(() => store.state.org.currentMembership as Member)
+    const orgStore = useOrgStore()
+    const currentOrgPaymentDetails = computed(() => orgStore.currentOrgPaymentDetails)
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentMembership = computed(() => orgStore.currentMembership)
 
     const csvErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'
@@ -175,14 +173,15 @@ export default defineComponent({
     const isLoading = ref(false)
 
     const isTransactionsAllowed = computed((): boolean => {
-      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF].includes(currentOrganization.value.orgType as Account) &&
+      return [Account.PREMIUM, Account.STAFF, Account.SBC_STAFF]
+        .includes(currentOrganization.value.orgType as Account) &&
         [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.value.membershipTypeCode)
     })
 
     const getPaymentDetails = async () => {
       const accountId = currentOrgPaymentDetails.value?.accountId
       if (!accountId || Number(accountId) !== currentOrganization.value?.id) {
-        const paymentDetails: OrgPaymentDetails = await getOrgPayments(currentOrganization.value?.id)
+        const paymentDetails: OrgPaymentDetails = await orgStore.getOrgPayments(currentOrganization.value?.id)
         credit.value = Number(paymentDetails?.credit || 0)
       } else {
         credit.value = Number(currentOrgPaymentDetails.value?.credit || 0)
@@ -194,7 +193,7 @@ export default defineComponent({
       else {
         // if the account switing happening when the user is already in the transaction page,
         // redirect to account info if its a basic account
-        root.$router.push(`/${Pages.MAIN}/currentOrganization.id}/settings/account-info`)
+        root.$router.push(`/${Pages.MAIN}/${currentOrganization.value.id}/settings/account-info`)
       }
     }
 

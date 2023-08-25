@@ -1,12 +1,10 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
+import { useOrgStore, useUserStore } from '@/stores'
 import SelectProductService from '@/components/auth/create-account/SelectProductService.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -18,58 +16,38 @@ describe('SelectProductService.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
-    const userModule = {
-      namespaced: true,
-      state: {
-        currentUser: { 'userName': 'user1' }
-      }
-    }
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-        },
-        productList: [
-          {
-            'code': 'PPR',
-            'name': 'Personal Property Registry',
-            'description': 'test',
-            'url': 'https://test.com/ppr',
-            'type': 'INTERNAL',
-            'mdiIcon': 'mdi-image-outline'
-          },
-          {
-            'code': 'VS',
-            'name': 'Wills Registry',
-            'description': 'VS',
-            'url': 'https://test.com/vs',
-            'type': 'PARTNER',
-            'mdiIcon': 'mdi-image-outline'
-          }
-        ],
-        currentSelectedProducts: ['VS']
-      },
-      actions: {
-        getProductList: vi.fn(),
-        addToCurrentSelectedProducts: vi.fn()
-      }
-    }
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        user: userModule
+    const userStore = useUserStore()
+    userStore.currentUser = { 'userName': 'user1' } as any
+
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = { } as any
+    orgStore.productList = [
+      {
+        'code': 'PPR',
+        'name': 'Personal Property Registry',
+        'description': 'test',
+        'url': 'https://test.com/ppr',
+        'type': 'INTERNAL',
+        'mdiIcon': 'mdi-image-outline'
+      },
+      {
+        'code': 'VS',
+        'name': 'Wills Registry',
+        'description': 'VS',
+        'url': 'https://test.com/vs',
+        'type': 'PARTNER',
+        'mdiIcon': 'mdi-image-outline'
       }
-    })
+    ] as any
+    orgStore.currentSelectedProducts = ['VS']
+
     const router = new VueRouter()
 
     wrapperFactory = (propsData) => {
       return shallowMount(SelectProductService, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {

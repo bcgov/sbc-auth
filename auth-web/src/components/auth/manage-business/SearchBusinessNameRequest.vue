@@ -116,7 +116,8 @@ import { LoginPayload } from '@/models/business'
 import { LookupType } from '@/models/business-nr-lookup'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useBusinessStore } from '@/stores'
 
 @Component({
   components: {
@@ -127,7 +128,7 @@ import { mapActions } from 'vuex'
     ModalDialog
   },
   methods: {
-    ...mapActions('business', [
+    ...mapActions(useBusinessStore, [
       'updateBusinessName',
       'updateFolioNumber'
     ])

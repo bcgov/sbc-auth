@@ -1,12 +1,8 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import { GLInfo } from '@/models/Organization'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -32,16 +28,10 @@ describe('PaymentInformation.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(PaymentInformation, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData

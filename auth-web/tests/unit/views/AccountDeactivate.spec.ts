@@ -2,16 +2,10 @@ import '@/composition-api-setup'
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountDeactivate from '@/views/auth/AccountDeactivate.vue'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
-import Vue from 'vue'
-import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import i18n from '@/plugins/i18n'
 
-Vue.use(Vuetify)
-Vue.use(VueI18n)
-Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
@@ -23,24 +17,8 @@ describe('AccountDeactivate.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
 
     wrapper = shallowMount(AccountDeactivate, {
-      store,
       localVue,
       i18n,
       router,

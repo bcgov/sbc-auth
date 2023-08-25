@@ -5,7 +5,6 @@ import DashboardView from '@/views/auth/DashboardView.vue'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
 vi.mock('../../../src/plugins/i18n', () => {})
 
@@ -25,41 +24,8 @@ describe('DashboardView.vue', () => {
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {
-        }
-      },
-      actions: {
-        getUserProfile: vi.fn()
-      }
-    }
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-        }
-      },
-      actions: {
-        syncOrganizations: vi.fn(),
-        syncCurrentOrganization: vi.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        user: userModule,
-        org: orgModule
-      }
-    })
 
     wrapper = mount(DashboardView, {
-      store,
       localVue,
       router,
       stubs: {

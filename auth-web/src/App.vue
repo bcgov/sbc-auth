@@ -65,13 +65,10 @@
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
-import { mapActions, mapGetters, mapMutations, mapState } from 'vuex'
-import ActvityLogModule from '@/store/modules/activityLog'
+import { mapActions, mapState } from 'pinia'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
-import BusinessModule from './store/modules/business'
-import CodesModule from './store/modules/codes'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import { Event } from '@/models/event'
@@ -80,15 +77,14 @@ import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import KeyCloakService from 'sbc-common-components/src/services/keycloak.services'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
-import OrgModule from './store/modules/org'
 import SbcFooter from 'sbc-common-components/src/components/SbcFooter.vue'
 import SbcHeader from 'sbc-common-components/src/components/SbcHeader.vue'
 import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
-import StaffModule from '@/store/modules/staff'
-import TaskModule from '@/store/modules/task'
-import UserModule from './store/modules/user'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { getModule } from 'vuex-module-decorators'
+import { mapGetters } from 'vuex'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -98,35 +94,28 @@ import { getModule } from 'vuex-module-decorators'
     SbcLoader
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentAccountSettings',
       'permissions'
     ]),
-    ...mapState('user', ['currentUser']),
+    ...mapState(useUserStore, ['currentUser']),
     ...mapGetters('auth', ['isAuthenticated'])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization']),
-    ...mapActions('user', ['loadUserInfo'])
+    ...mapActions(useOrgStore, ['setCurrentOrganization']),
+    ...mapActions(useUserStore, ['loadUserInfo'])
   }
 })
 export default class App extends Mixins(NextPageMixin) {
-  // Remove these with Pinia and Vue3.
-  private activityModule = getModule(ActvityLogModule, this.$store)
+  // Remove these with sbc-common-components and Vue3 upgrade.
   private authModule = getModule(AuthModule, this.$store)
-  private businessStore = getModule(BusinessModule, this.$store)
-  private codesStore = getModule(CodesModule, this.$store)
-  private orgStore = getModule(OrgModule, this.$store)
-  private taskStore = getModule(TaskModule, this.$store)
-  private staffStore = getModule(StaffModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
-  private showNotification = false
-  private notificationText = ''
-  private showLoading = true
-  private toastType = 'primary'
-  private toastTimeout = 6000
-  private logoutUrl = ''
+  showNotification = false
+  notificationText = ''
+  showLoading = true
+  toastType = 'primary'
+  toastTimeout = 6000
+  logoutUrl = ''
 
   $refs: {
     header: SbcHeader
@@ -168,17 +157,18 @@ export default class App extends Mixins(NextPageMixin) {
     return import.meta.env.ABOUT_TEXT
   }
 
-  private startAccountSwitch () {
+  startAccountSwitch () {
     this.showLoading = true
   }
 
-  private async completeAccountSwitch () {
+  async completeAccountSwitch () {
     await this.syncUser()
     this.showLoading = false
     this.toastType = 'primary'
     this.notificationText = `Switched to account '${this.currentAccountSettings.label}'`
     this.showNotification = true
 
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
 
     this.accountFreezeRedirect()
@@ -190,6 +180,7 @@ export default class App extends Mixins(NextPageMixin) {
     if (ConfigHelper.getFromSession(SessionStorageKeys.SessionSynced) === 'true' && !CommonUtils.isSigningIn() && !CommonUtils.isSigningOut()) {
       this.loadUserInfo()
       await this.syncUser()
+      // Remove Vuex with Vue 3
       this.$store.commit('loadComplete')
     }
   }
@@ -217,6 +208,8 @@ export default class App extends Mixins(NextPageMixin) {
   }
 
   private setLogOutUrl () {
+    // Auth store, still exists in sbc-common-components v2, uses pinia in Vue 3 version.
+    // Remove Vuex with Vue 3
     this.logoutUrl = (this.$store.getters['auth/currentLoginSource'] === LoginSource.BCROS) ? ConfigHelper.getBcrosURL() : ''
   }
 
@@ -224,8 +217,9 @@ export default class App extends Mixins(NextPageMixin) {
     this.$root.$off('signin-complete')
   }
 
-  private async setup (isSigninComplete?: boolean) {
+  async setup (isSigninComplete?: boolean) {
     // Header added modules to store so can access mapped actions now
+    // Remove Vuex with Vue 3
     if (this.$store.getters['auth/isAuthenticated']) {
       try {
         if (!isSigninComplete) {
@@ -236,11 +230,14 @@ export default class App extends Mixins(NextPageMixin) {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.log('App.vue.setup Error: ' + e)
-        this.$store.dispatch('user/reset')
+        const userStore = useUserStore()
+        await userStore.reset()
+        // Remove Vuex with Vue 3
         this.$store.commit('loadComplete')
         this.$router.push('/home')
       }
     }
+    // Remove Vuex with Vue 3
     this.$store.commit('loadComplete')
   }
 }

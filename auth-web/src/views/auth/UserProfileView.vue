@@ -77,7 +77,8 @@ import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import SupportInfoCard from '@/components/SupportInfoCard.vue'
 import { User } from '@/models/user'
 import UserProfileForm from '@/components/auth/create-account/UserProfileForm.vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -85,7 +86,7 @@ import { mapState } from 'vuex'
     SupportInfoCard
   },
   computed: {
-    ...mapState('user', ['userContact'])
+    ...mapState(useUserStore, ['userContact'])
   }
 })
 export default class UserProfileView extends Mixins(NextPageMixin) {

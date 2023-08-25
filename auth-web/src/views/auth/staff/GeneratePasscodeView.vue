@@ -90,12 +90,11 @@
 </template>
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import { Action } from 'pinia-class'
 import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { PasscodeResetLoad } from '@/models/business'
-import { namespace } from 'vuex-class'
-
-const BusinessModule = namespace('business')
+import { useBusinessStore } from '@/stores/business'
 
 @Component({
   components: {
@@ -107,7 +106,7 @@ export default class GeneratePasscodeView extends Vue {
   private confirmedEmailAddress = ''
   private emailRules = CommonUtils.emailRules()
   @Prop({ default: '' }) businessIdentitifier: string
-  @BusinessModule.Action('resetBusinessPasscode') private resetBusinessPasscode!: (passcodeResetLoad: PasscodeResetLoad) => Promise<any>
+  @Action(useBusinessStore) private resetBusinessPasscode!: (passcodeResetLoad: PasscodeResetLoad) => Promise<any>
 
   $refs: {
     generatePasscodeForm: HTMLFormElement,
@@ -138,7 +137,11 @@ export default class GeneratePasscodeView extends Vue {
   private async generate () {
     try {
       if (this.isFormValid() && this.businessIdentitifier) {
-        await this.resetBusinessPasscode({ businessIdentifier: this.businessIdentitifier, passcodeResetEmail: this.emailAddress, resetPasscode: true })
+        await this.resetBusinessPasscode({
+          businessIdentifier: this.businessIdentitifier,
+          passcodeResetEmail: this.emailAddress,
+          resetPasscode: true
+        })
         this.$refs.generatePasscodeModal.close()
         this.$refs.generatePasscodeSuccessDialog.open()
       }

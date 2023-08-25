@@ -1,11 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import Product from '@/components/auth/common/Product.vue'
 import { ProductStatus } from '@/util/constants'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
 
 describe('Product.vue', () => {
   let wrapperFactory: any
@@ -37,19 +33,12 @@ describe('Product.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false
-
-    })
     wrapperFactory = (propsData) => {
       return mount(Product, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData

@@ -1,10 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import ProductTOS from '@/components/auth/common/ProductTOS.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
 
 describe('ProductTOS.vue', () => {
   let wrapperFactory: any
@@ -12,19 +8,12 @@ describe('ProductTOS.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false
-
-    })
     wrapperFactory = (propsData) => {
       return shallowMount(ProductTOS, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData

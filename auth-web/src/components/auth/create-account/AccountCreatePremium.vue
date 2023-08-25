@@ -145,6 +145,7 @@
 
 <script lang="ts">
 import { Account, LoginSource, PaymentTypes } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CreateRequestBody, Member, OrgBusinessType, Organization } from '@/models/Organization'
@@ -158,10 +159,8 @@ import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import { User } from '@/models/user'
 import { addressSchema } from '@/schemas'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const UserModule = namespace('user')
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -173,48 +172,48 @@ const UserModule = namespace('user')
   }
 })
 export default class AccountCreatePremium extends Mixins(Steppable) {
-  // private orgStore = getModule(OrgModule, this.$store)
-  private username = ''
-  private password = ''
-  private errorMessage: string = ''
+  username = ''
+  password = ''
+  errorMessage: string = ''
   // hav to indroduce a new var since it shud show as an error for text field.
   // the errorMessage field is used for full form and network errors.
-  private bcolDuplicateNameErrorMessage = ''
-  private saving = false
-  private isBaseAddressValid: boolean = true
+  bcolDuplicateNameErrorMessage = ''
+  saving = false
+  isBaseAddressValid: boolean = true
 
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @OrgModule.State('currentOrgAddress') public currentOrgAddress!: Address
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useOrgStore) public currentOrgAddress!: Address
 
-  @UserModule.State('userProfile') public userProfile!: User
-  @UserModule.State('currentUser') public currentUser!: KCUserProfile
+  @State(useUserStore) public userProfile!: User
+  @State(useUserStore) public currentUser!: KCUserProfile
 
-  @OrgModule.Action('syncMembership') private readonly syncMembership!: (orgId: number) => Promise<Member>
-  @OrgModule.Action('syncOrganization') private readonly syncOrganization!: (orgId: number) => Promise<Organization>
-  @OrgModule.Action('isOrgNameAvailable') private readonly isOrgNameAvailable!: (requestBody: CreateRequestBody) => Promise<boolean>
+  @Action(useOrgStore) readonly syncMembership!: (orgId: number) => Promise<Member>
+  @Action(useOrgStore) readonly syncOrganization!: (orgId: number) => Promise<Organization>
+  @Action(useOrgStore) readonly isOrgNameAvailable!: (requestBody: CreateRequestBody) => Promise<boolean>
 
-  @OrgModule.Mutation('setCurrentOrganization') private readonly setCurrentOrganization!: (organization: Organization) => void
-  @OrgModule.Mutation('setCurrentOrganizationAddress') private readonly setCurrentOrganizationAddress!: (address: Address) => void
-  @OrgModule.Mutation('setCurrentOrganizationName') private readonly setCurrentOrganizationName!: (name: string) => void
-  @OrgModule.Mutation('setCurrentOrganizationPaymentType') private readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
-  @OrgModule.Mutation('resetBcolDetails') private readonly resetBcolDetails!: () => void
-  @OrgModule.Mutation('setGrantAccess') private readonly setGrantAccess!: (grantAccess: boolean) => void
-  @OrgModule.Mutation('setCurrentOrganizationBusinessType') private readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
+  @Action(useOrgStore) readonly setCurrentOrganization!: (organization: Organization) => void
+  @Action(useOrgStore) readonly setCurrentOrganizationAddress!: (address: Address) => void
+  @Action(useOrgStore) readonly setCurrentOrganizationName!: (name: string) => void
+  @Action(useOrgStore) readonly setCurrentOrganizationPaymentType!: (paymentType: string) => void
+  @Action(useOrgStore) readonly resetBcolDetails!: () => void
+  @Action(useOrgStore) readonly setGrantAccess!: (grantAccess: boolean) => void
+  @Action(useOrgStore) readonly setCurrentOrganizationBusinessType!: (orgBusinessType: OrgBusinessType) => void
 
   @Prop() cancelUrl: string
   @Prop({ default: false }) readOnly: boolean
 
-  private orgNameReadOnly = true
-  private static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
+  orgNameReadOnly = true
+  static readonly DUPL_ERROR_MESSAGE = 'An account with this name already exists. Try a different account name.'
 
-  private baseAddressSchema: {} = addressSchema
+  baseAddressSchema = addressSchema
 
-  private readonly orgNameRules = [v => !!v || 'An account name is required']
+  readonly orgNameRules = [v => !!v || 'An account name is required']
 
-  private orgBusinessTypeLocal: OrgBusinessType = {}
-  private isOrgBusinessTypeValid = false
+  orgBusinessTypeLocal: OrgBusinessType = {}
+  isOrgBusinessTypeValid = false
 
-  private get isExtraProvUser () {
+  get isExtraProvUser () {
+    // Remove Vuex with Vue 3
     return this.$store.getters['auth/currentLoginSource'] === LoginSource.BCEID
   }
 
@@ -222,8 +221,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     // https://github.com/bcgov/entity/issues/4178
     // TODO once above ticket is in pace , remove the if checks
     const username = this.isExtraProvUser ? '' : `, ${this.currentUser?.fullName},`
-    // on re-upload we will not have currentOrganization?.bcolAccountDetails since we are not making connection call which will be avaialble on saved deteails
-    // so on re-upload check and set account name
+    /* on re-upload we will not have currentOrganization?.bcolAccountDetails since we are not making
+       connection call which will be avaialble on saved deteails
+       so on re-upload check and set account name */
     const accountName = this.readOnly
       ? this.currentOrganization.bcolAccountName
       : (this.currentOrganization?.bcolAccountDetails?.orgName ||
@@ -241,39 +241,39 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     createAccountInfoForm: HTMLFormElement
   }
 
-  private readonly teamNameRules = [v => !!v || 'An account name is required']
+  readonly teamNameRules = [v => !!v || 'An account name is required']
 
-  private isFormValid (): boolean {
+  isFormValid (): boolean {
     return !!this.isOrgBusinessTypeValid && !this.errorMessage && !!this.isBaseAddressValid
   }
 
-  private get address () {
+  get address () {
     return this.currentOrgAddress
   }
 
-  private unlinkAccount () {
+  unlinkAccount () {
     this.resetBcolDetails()
   }
 
-  private get linked () {
+  get linked () {
     return !!this.currentOrganization?.bcolAccountDetails
   }
 
-  private updateAddress (address: Address) {
+  updateAddress (address: Address) {
     this.setCurrentOrganizationAddress(address)
   }
 
-  private updateOrgNameAndClearErrors () {
+  updateOrgNameAndClearErrors () {
     this.bcolDuplicateNameErrorMessage = ''
     this.errorMessage = ''
   }
 
-  private async save () {
+  async save () {
     // TODO Handle edit mode as well here
     this.goNext()
   }
 
-  private async onLink (details: {
+  async onLink (details: {
     bcolProfile: BcolProfile
     bcolAccountDetails: BcolAccountDetails
   }) {
@@ -296,8 +296,9 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     await this.validateAccountNameUnique()
   }
 
-  private async validateAccountNameUnique () {
-    const available = await this.isOrgNameAvailable({ 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
+  async validateAccountNameUnique () {
+    const available = await this.isOrgNameAvailable(
+      { 'name': this.orgBusinessTypeLocal.name, 'branchName': this.orgBusinessTypeLocal.branchName })
     if (!available) {
       this.bcolDuplicateNameErrorMessage = AccountCreatePremium.DUPL_ERROR_MESSAGE
       this.orgNameReadOnly = false
@@ -316,7 +317,7 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     }
   }
 
-  private goBack () {
+  goBack () {
     this.stepBack()
   }
 
@@ -333,16 +334,16 @@ export default class AccountCreatePremium extends Mixins(Steppable) {
     this.$router.push({ path: `/account/${organization.id}/` })
   }
 
-  private checkBaseAddressValidity (isValid) {
+  checkBaseAddressValidity (isValid) {
     this.isBaseAddressValid = !!isValid
   }
 
-  private updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
+  updateOrgBusinessType (orgBusinessType: OrgBusinessType) {
     this.orgBusinessTypeLocal = orgBusinessType
     this.setCurrentOrganizationBusinessType(this.orgBusinessTypeLocal)
   }
 
-  private checkOrgBusinessTypeValid (isValid) {
+  checkOrgBusinessTypeValid (isValid) {
     this.isOrgBusinessTypeValid = !!isValid
   }
 }

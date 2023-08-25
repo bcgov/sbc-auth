@@ -6,6 +6,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import SbcSignout from 'sbc-common-components/src/components/SbcSignout.vue'
+import { resetAllStores } from '@/stores'
 
 @Component({
   methods: {
@@ -28,7 +29,9 @@ export default class SignoutView extends Vue {
   }
 
   async mounted () {
+    // Remove with Vue 3
     this.$store.replaceState({})
+    resetAllStores()
   }
 }
 </script>

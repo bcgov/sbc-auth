@@ -1,15 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
+import { useActivityStore, useOrgStore } from '@/stores'
 import ActivityLog from '@/components/auth/account-settings/activity-log/ActivityLog.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
 
 describe('Account settings ActivityLog.vue', () => {
   let wrapper: any
@@ -36,48 +30,25 @@ describe('Account settings ActivityLog.vue', () => {
   }
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-    const activityLogModule = {
-      namespaced: true,
-      state: {
-        currentOrgActivity: {
-          ...currentActivity
-        }
-      },
-      actions: {
-        getActivityLog: vi.fn(() => {
-          return currentActivity
-        })
-      }
+    const activityStore = useActivityStore()
+    activityStore.currentOrgActivity = {
+      ...currentActivity
+    } as any
+    activityStore.getActivityLog = vi.fn(() => {
+      return currentActivity
+    }) as any
 
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      id: 123,
+      name: 'test org'
     }
-    const orgModule = {
-      namespaced: true,
-      actions: {
-        getActivityLog: vi.fn()
-      },
-      state: {
-        currentOrganization: {
-          id: 123,
-          name: 'test org'
-        },
-        currentMembership: {
-          membershipTypeCode: 'ADMIN'
-        }
-      }
-    }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        activity: activityLogModule
-      }
-    })
+    orgStore.currentMembership = {
+      membershipTypeCode: 'ADMIN'
+    } as any
 
     wrapperFactory = (propsData) => {
       return mount(ActivityLog, {
-        store,
         localVue,
         vuetify,
         mocks: { $t },

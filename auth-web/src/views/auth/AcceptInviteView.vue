@@ -14,23 +14,22 @@
 import { AccessType, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, MembershipStatus, Organization } from '@/models/Organization'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import InterimLanding from '@/components/auth/common/InterimLanding.vue'
 import { Invitation } from '@/models/Invitation'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import { User } from '@/models/user'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState('user', ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
-    ...mapState('org', ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
+    ...mapState(useUserStore, ['userProfile', 'userContact', 'redirectAfterLoginUrl']),
+    ...mapState(useOrgStore, ['currentOrganization', 'currentMembership', 'currentAccountSettings'])
   },
   methods: {
-    ...mapMutations('org', [
-      'setCurrentOrganization', 'setCurrentMembership'
-    ]),
-    ...mapActions('org', ['acceptInvitation']),
-    ...mapActions('user', ['getUserProfile'])
+    ...mapActions(useOrgStore, ['acceptInvitation', 'setCurrentOrganization', 'setCurrentMembership']),
+    ...mapActions(useUserStore, ['getUserProfile'])
   },
   components: { InterimLanding }
 })
@@ -94,6 +93,7 @@ export default class AcceptInviteView extends Mixins(NextPageMixin) {
         } else {
           await this.syncMembership(invitation?.membership[0]?.org?.id)
         }
+        // Remove Vuex with Vue 3
         this.$store.commit('updateHeader')
         this.$router.push(this.getNextPageUrl())
       }

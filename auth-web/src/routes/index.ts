@@ -16,7 +16,9 @@ import Router from 'vue-router'
 import { User } from '@/models/user'
 import Vue from 'vue'
 import { getRoutes } from './router'
-import store from '@/store'
+import store from '@/stores/vuex'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 Vue.use(Router)
 
@@ -55,26 +57,28 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // Enforce navigation guards are checked before navigating anywhere else
-  // If store is not ready, we place a watch on it, then proceed when ready
+  // Remove Vuex with Vue3 upgrade. - Will be replaced by Pinia onAction.
   if (store.getters.loading) {
-    store.watch(
-      (state, getters) => getters.loading,
-      value => {
-        if (value === false) {
-          proceed()
+    await new Promise(resolve => {
+      const unsubscribeFn = store.subscribe(mutation => {
+        if (mutation.type === 'loadComplete') {
+          unsubscribeFn()
+          resolve(null)
         }
       })
-  } else {
-    proceed()
+    })
   }
+  proceed()
 
   function proceed () {
-    const userProfile: User = (store.state as any)?.user?.userProfile
-    const currentAccountSettings: AccountSettings = (store.state as any)?.org.currentAccountSettings
-    const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
-    const currentMembership: Member = (store.state as any)?.org?.currentMembership
-    const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
-    const permissions: string[] = (store.state as any)?.org?.permissions
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const userProfile: User = userStore.userProfile
+    const currentAccountSettings: AccountSettings = orgStore.currentAccountSettings
+    const currentOrganization: Organization = orgStore.currentOrganization
+    const currentMembership: Member = orgStore.currentMembership
+    const currentUser: KCUserProfile = userStore.currentUser
+    const permissions: string[] = orgStore.permissions
     if (to.path === `/${Pages.LOGIN}` && currentUser) {
       // If the user came back from login page and is already logged in
       // redirect to redirect path
@@ -83,9 +87,9 @@ router.beforeEach(async (to, from, next) => {
       })
     } else {
       if (to.matched.some(record => record.meta.isPremiumOnly)) {
-        const currentOrganization: Organization = (store.state as any)?.org?.currentOrganization
-        const currentMembership: Member = (store.state as any)?.org?.currentMembership
-        const currentUser: KCUserProfile = (store.state as any)?.user?.currentUser
+        const currentOrganization: Organization = orgStore.currentOrganization
+        const currentMembership: Member = orgStore.currentMembership
+        const currentUser: KCUserProfile = userStore.currentUser
         // redirect to unauthorized page if the account selected is not Premium
         if (!(currentOrganization?.orgType === Account.PREMIUM &&
           [MembershipType.Admin, MembershipType.Coordinator].includes(currentMembership.membershipTypeCode)) &&
@@ -103,7 +107,7 @@ router.beforeEach(async (to, from, next) => {
             break
           case LoginSource.BCSC:
           case LoginSource.BCROS:
-          case LoginSource.BCEID:
+          case LoginSource.BCEID: {
             // eslint-disable-next-line no-console
             console.log('[Navigation Guard] Redirecting user to TOS since user has not accepted one')
             // if there's redirectUri in query string, keep existing redirectUri, otherwise use current location
@@ -116,6 +120,7 @@ router.beforeEach(async (to, from, next) => {
               path: `/${Pages.USER_PROFILE_TERMS}`,
               query: { redirectUri: `${uriRedirectTo}` }
             })
+          }
           default:
             return next({
               path: '/'
@@ -164,7 +169,7 @@ router.beforeEach(async (to, from, next) => {
           case LoginSource.BCEID:
             return next({ path: `/${Pages.CREATE_NON_BCSC_ACCOUNT}` })
         }
-      } else if (store.getters['org/needMissingBusinessDetailsRedirect']) {
+      } else if (orgStore.needMissingBusinessDetailsRedirect) {
         return next({ path: `/${Pages.UPDATE_ACCOUNT}` })
       }
     }

@@ -1,10 +1,9 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
-
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useBusinessStore } from '@/stores/business'
 
 Vue.use(Vuetify)
 Vue.use(VueRouter)
@@ -23,35 +22,18 @@ describe('BusinessProfileView.vue', () => {
   sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(ob)
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const businessModule = {
-      namespaced: true,
-      state: {
-        currentBusiness: {
-          businessIdentifier: 'CP0001245',
-          businessNumber: '791861073BC0001',
-          created: '2019-08-26T11:50:32.620965+00:00',
-          created_by: 'BCREGTEST Jeong SIX',
-          id: 11,
-          modified: '2019-08-26T11:50:32.620989+00:00',
-          name: 'Foobar, Inc.'
-        }
-      },
-      actions: {
-        loadBusiness: vi.fn()
-      }
-    }
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        business: businessModule
-      }
-    })
+    const businessStore = useBusinessStore()
+    businessStore.currentBusiness = {
+      businessIdentifier: 'CP0001245',
+      businessNumber: '791861073BC0001',
+      created: '2019-08-26T11:50:32.620965+00:00',
+      created_by: 'BCREGTEST Jeong SIX',
+      id: 11,
+      modified: '2019-08-26T11:50:32.620989+00:00',
+      name: 'Foobar, Inc.'
+    } as any
 
     wrapper = mount(BusinessProfileView, {
-      store,
       localVue,
       stubs: {
         BusinessContactForm: true,

@@ -92,6 +92,7 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { OrgProduct, Organization } from '@/models/Organization'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
@@ -101,10 +102,8 @@ import Product from '@/components/auth/common/Product.vue'
 
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const userModule = namespace('user')
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -118,18 +117,18 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
   @Prop({ default: false }) readOnly: boolean
   @Prop({ default: undefined }) orgId: number
 
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
-  @OrgModule.State('productList') public productList!: OrgProduct[]
-  @OrgModule.State('currentSelectedProducts') public currentSelectedProducts!: []
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useUserStore) public currentUser!: KCUserProfile
+  @State(useOrgStore) public productList!: OrgProduct[]
+  @State(useOrgStore) public currentSelectedProducts!: []
 
-  @OrgModule.Action('getProductList') public getProductList!:() =>Promise<OrgProduct>
-  @OrgModule.Action('addToCurrentSelectedProducts') public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
-  @OrgModule.Action('resetoCurrentSelectedProducts') public resetoCurrentSelectedProducts!:() =>Promise<void>
-  @OrgModule.Action('getOrgProducts') public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
-  @OrgModule.Action('setSubscribedProducts') public setSubscribedProducts!:() =>Promise<OrgProduct>
+  @Action(useOrgStore) public getProductList!:() =>Promise<OrgProduct>
+  @Action(useOrgStore) public addToCurrentSelectedProducts!:(productCode:any) =>Promise<void>
+  @Action(useOrgStore) public resetoCurrentSelectedProducts!:() =>Promise<void>
+  @Action(useOrgStore) public getOrgProducts!:(orgId: number) =>Promise<OrgProduct>
+  @Action(useOrgStore) public setSubscribedProducts!:() =>Promise<OrgProduct>
 
-  @OrgModule.Mutation('setResetAccountTypeOnSetupAccount') private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
+  @Action(useOrgStore) private setResetAccountTypeOnSetupAccount!: (resetAccountTypeOnSetupAccount: boolean) => void
 
   public isLoading: boolean = false
   public expandedProductCode: string = ''
@@ -179,7 +178,7 @@ export default class SelectProductService extends Mixins(NextPageMixin, Steppabl
     this.setResetAccountTypeOnSetupAccount(true)
     this.stepForward()
   }
-  private cancel () {
+  cancel () {
     this.$router.push('/')
   }
 }

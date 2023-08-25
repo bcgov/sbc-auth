@@ -95,7 +95,7 @@ export default defineComponent({
 
     const fetchData = async () => {
       const response = await OrgService.getOrganizationsNameAndUuidByAffiliation(props.businessIdentifier)
-      if (response.data && response.data.orgsDetails) {
+      if (response?.data?.orgsDetails) {
         const orgsDetails = response.data.orgsDetails
         orgsDetails.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
         componentState.accounts.splice(0, componentState.accounts.length)

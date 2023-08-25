@@ -1,13 +1,6 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import Signin from '@/views/auth/SigninView.vue'
-import UserModule from '@/store/modules/user'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('Signin.vue', () => {
   let wrapper: Wrapper<Signin>
@@ -21,19 +14,9 @@ describe('Signin.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: UserModule
-      }
-    })
-
     const vuetify = new Vuetify({})
 
     wrapper = shallowMount(Signin, {
-      store,
       vuetify,
       localVue
     })

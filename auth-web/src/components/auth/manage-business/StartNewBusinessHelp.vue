@@ -123,6 +123,14 @@
   </section>
 </template>
 
+<script lang="ts">
+import { defineComponent } from '@vue/composition-api'
+
+export default defineComponent({
+  name: 'StartNewBusinessHelp'
+})
+</script>
+
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
 ol.bold li::marker {

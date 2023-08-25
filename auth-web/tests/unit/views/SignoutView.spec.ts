@@ -1,6 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import SignoutView from '@/views/auth/SignoutView.vue'
-import UserModule from '@/store/modules/user'
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -21,11 +20,10 @@ describe('SignoutView.vue', () => {
     const localVue = createLocalVue()
     localVue.use(Vuex)
 
+    // Requires Vuex, because it clears the store state.
+    // Remove in Vue 3
     const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        user: UserModule
-      }
+      strict: false
     })
 
     wrapper = mount(SignoutView, {

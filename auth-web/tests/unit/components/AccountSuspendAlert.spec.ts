@@ -1,45 +1,25 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useOrgStore } from '@/stores/org'
 
 describe('AccountSuspendAlert.vue', () => {
   let wrapper: any
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const orgModule = {
-      namespaced: true,
-      state: { currentOrganization: {} },
-      actions: {
-        calculateFailedInvoices: vi.fn(() => {
-          return {
-            totalTransactionAmount: 10,
-            totalAmountToPay: 20
-          }
-        })
+    const orgStore = useOrgStore()
+    orgStore.calculateFailedInvoices = vi.fn(() => {
+      return {
+        totalTransactionAmount: 10,
+        totalAmountToPay: 20
       }
-    }
+    }) as any
 
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
-
     const $t = () => ''
     wrapper = shallowMount(AccountSuspendAlert, {
-      store,
       localVue,
       vuetify,
       mocks: { $t }

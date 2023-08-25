@@ -1,9 +1,7 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import AccountSuspendedView from '@/views/auth/account-freeze/AccountSuspendedView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
 const mockSession = {
@@ -11,11 +9,6 @@ const mockSession = {
   'NAME_REQUEST_URL': 'Mock Name Request URL'
 }
 
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 const router = new VueRouter()
 const vuetify = new Vuetify({})
 
@@ -31,7 +24,6 @@ describe('AccountSuspendedView.vue', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     wrapper = shallowMount(AccountSuspendedView, {
       localVue,
       router,

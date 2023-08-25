@@ -1,11 +1,9 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
+import { useOrgStore } from '@/stores/org'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -35,35 +33,18 @@ describe('Account settings ExistingAPIKeys.vue', () => {
   }
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const orgModule = {
-      namespaced: true,
-      actions: {
-        getOrgApiKeys: vi.fn(() => {
-          return apikeyList
-        })
-      },
-      state: {
-        currentOrganization: {
-          id: 123,
-          name: 'test org'
-        }
-
-      }
+    const orgStore = useOrgStore()
+    orgStore.getOrgApiKeys = vi.fn(() => {
+      return apikeyList
+    }) as any
+    orgStore.currentOrganization = {
+      id: 123,
+      name: 'test org'
     }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule
-
-      }
-    })
 
     wrapperFactory = (propsData) => {
       return mount(ExistingAPIKeys, {
-        store,
         localVue,
         vuetify,
         mocks: { $t },

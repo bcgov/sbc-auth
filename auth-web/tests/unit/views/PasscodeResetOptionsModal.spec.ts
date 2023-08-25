@@ -1,21 +1,14 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
 const mockSession = {
   'NAME_REQUEST_URL': 'Mock Name Request URL',
   'NRO_URL': 'Mock NRO URL'
 }
-document.body.setAttribute('data-app', 'true')
 const vuetify = new Vuetify({})
 const router = new VueRouter()
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('PasscodeResetOptionsModal.vue', () => {
   let wrapper: any
@@ -26,7 +19,6 @@ describe('PasscodeResetOptionsModal.vue', () => {
     }
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     wrapper = mount(PasscodeResetOptionsModal, {
       localVue,

@@ -3,14 +3,9 @@ import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import can from '@/directives/can'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useOrgStore } from '@/stores/org'
 
 describe('ReviewBankInformation.vue', () => {
   let wrapper: any
@@ -23,36 +18,14 @@ describe('ReviewBankInformation.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.directive('can', can)
 
     const vuetify = new Vuetify({})
 
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {}
-      },
-      actions: {
-        getOrgPayments: vi.fn(),
-        updateOrg: vi.fn(),
-        updatePadInfo: vi.fn(),
-        validatePADInfo: vi.fn()
-      },
-      mutations: {},
-      getters: {}
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        org: orgModule
-      }
-    })
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {} as any
 
     wrapper = mount(ReviewBankInformation, {
-      store,
       localVue,
       vuetify,
       mixins: [Steppable],

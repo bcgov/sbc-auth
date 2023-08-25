@@ -145,7 +145,6 @@ export default class SearchFilterInput extends Vue {
   }
 
   get colCount () {
-    // TODO: may change later once the filter input design finalized
     return (this.filterParams.length * 2) + 4
   }
 

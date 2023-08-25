@@ -197,19 +197,19 @@
 import { ComputedRef, Ref, computed, defineComponent, reactive, ref, toRefs } from '@vue/composition-api'
 import { LDFlags, Role } from '@/util/constants'
 import { BaseVExpansionPanel } from '@/components'
-import { Business } from '@/models/business'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import GLCodesListView from '@/views/auth/staff/GLCodesListView.vue'
 import IncorporationSearchResultView from '@/views/auth/staff/IncorporationSearchResultView.vue'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { Organization } from '@/models/Organization'
 import PPRLauncher from '@/components/auth/staff/PPRLauncher.vue'
 import SafeEmailView from '@/views/auth/staff/SafeEmailView.vue'
 import StaffAccountManagement from '@/components/auth/staff/account-management/StaffAccountManagement.vue'
 import { Transactions } from '@/components/auth/account-settings/transaction'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 // FUTURE: remove after vue 3 upgrade
 interface StaffDashboardViewI {
@@ -239,24 +239,18 @@ export default defineComponent({
     Transactions
   },
   setup (props, { root }) {
-    // refs
     const searchBusinessForm: Ref<HTMLFormElement> = ref(null)
-    // store
-    const store = useStore()
-    const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
-    const currentUser = computed(() => store.state.user.currentUser as KCUserProfile)
-    const getOrganizationForAffiliate = (): Promise<Organization> => store.dispatch('org/getOrganizationForAffiliate')
-    const loadBusiness = (): Promise<Business> => store.dispatch('business/loadBusiness')
-    const resetCurrentBusiness = (): Promise<Business> => store.dispatch('business/resetCurrentBusiness')
-    const searchBusiness = (businessIdentifier: string) => store.dispatch('business/searchBusiness', businessIdentifier)
+    const businessStore = useBusinessStore()
+    const orgStore = useOrgStore()
+    const userStore = useUserStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const currentUser = computed(() => userStore.currentUser)
 
-    // static vars
     const businessIdentifierRules = [
       v => !!v || 'Incorporation Number or Registration Number is required',
       v => CommonUtils.validateIncorporationNumber(v) || 'Incorporation Number or Registration Number is not valid'
     ]
 
-    // local reactive variables
     const localVars = (reactive({
       businessIdentifier: '',
       searchedBusinessNumber: '',
@@ -280,14 +274,14 @@ export default defineComponent({
     const updateCurrentBusiness = async () => {
       try {
         // Search for business, action will set session storage
-        await loadBusiness()
-        localVars.affiliatedOrg = await getOrganizationForAffiliate()
+        await businessStore.loadBusiness()
+        localVars.affiliatedOrg = await orgStore.getOrganizationForAffiliate()
         localVars.canViewIncorporationSearchResult = true
       } catch (exception) {
         // eslint-disable-next-line no-console
         console.log('Error during search incorporations event!')
         localVars.canViewIncorporationSearchResult = false
-        resetCurrentBusiness()
+        businessStore.resetCurrentBusiness()
       }
     }
 
@@ -297,12 +291,12 @@ export default defineComponent({
 
         try {
           // Search for business, action will set session storage
-          await searchBusiness(localVars.businessIdentifier)
+          await businessStore.searchBusiness(localVars.businessIdentifier)
           localVars.errorMessage = ''
           await updateCurrentBusiness()
         } catch (exception) {
           localVars.searchedBusinessNumber = localVars.businessIdentifier
-          resetCurrentBusiness()
+          businessStore.resetCurrentBusiness()
           // FUTURE: get this from t(noIncorporationNumberFound)
           // having trouble with composition version of $t in the build.
           localVars.errorMessage = 'No match found for Incorporation Number'

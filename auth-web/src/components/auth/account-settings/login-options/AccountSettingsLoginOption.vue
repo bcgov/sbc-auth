@@ -12,7 +12,8 @@
         icon="mdi-information-outline"
         type="info"
       >
-        Changing your authentication method will only affect new users invited to this account. Authentication for administrators and existing users will not be affected.
+        Changing your authentication method will only affect new users invited to this account.
+        Authentication for administrators and existing users will not be affected.
       </v-alert>
     </div>
     <account-login-option-picker
@@ -41,26 +42,27 @@
 
 <script lang="ts">
 import { Component, Mixins } from 'vue-property-decorator'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountLoginOptionPicker from '@/components/auth/common/AccountLoginOptionPicker.vue'
 import { LoginSource } from '@/util/constants'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
     AccountLoginOptionPicker
   },
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization',
       'memberLoginOption'
     ])
   },
   methods: {
-    ...mapActions('org', [
-      'updateLoginOption'
-    ]),
-    ...mapMutations('org', ['setMemberLoginOption'])
+    ...mapActions(useOrgStore, [
+      'updateLoginOption',
+      'setMemberLoginOption'
+    ])
   }
 })
 export default class AccountSettingsLoginOption extends Mixins(AccountChangeMixin) {

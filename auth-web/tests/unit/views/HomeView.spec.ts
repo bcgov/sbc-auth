@@ -3,14 +3,10 @@ import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import HomeView from '@/views/auth/home/HomeView.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useUserStore } from '@/stores/user'
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
@@ -22,51 +18,16 @@ const mockSession = {
 
 describe('HomeView.vue', () => {
   let wrapper: any
-  let userModule: any
 
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
 
     const router = new VueRouter()
     const vuetify = new Vuetify({})
 
-    userModule = {
-      namespaced: true,
-      state: {
-        userProfile: {
-        }
-      },
-      actions: {
-        getUserProfile: vi.fn()
-      }
-    }
-
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-        }
-      },
-      actions: {
-        syncOrganizations: vi.fn(),
-        syncCurrentOrganization: vi.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        user: userModule,
-        org: orgModule
-      }
-    })
-
     wrapper = mount(HomeView, {
-      store,
       localVue,
       router,
       vuetify,
@@ -92,7 +53,10 @@ describe('HomeView.vue', () => {
     expect(wrapper.findComponent(BcscPanel).exists()).toBe(true)
   })
 
-  it('renders the correct buttons when authenticated', () => {
+  it('renders the correct buttons when authenticated', async () => {
+    const userStore = useUserStore()
+    userStore.userProfile = { 'firstname': 'test' } as any
+    await flushPromises()
     const nameRequestBtn = wrapper.find('.btn-name-request')
     const manageBusinessBtn = wrapper.findAll('.cta-btn-auth').at(0)
 
@@ -105,7 +69,8 @@ describe('HomeView.vue', () => {
 
   it('renders the correct buttons when not authenticated', async () => {
     // Render Un-authenticated
-    userModule.state.userProfile = null
+    const userStore = useUserStore()
+    userStore.userProfile = null
     await flushPromises()
     const loginBtn = wrapper.findAll('.cta-btn').at(0)
     const nameRequestBtn = wrapper.find('.btn-name-request')
