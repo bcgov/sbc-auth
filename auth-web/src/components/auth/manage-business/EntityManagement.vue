@@ -444,7 +444,7 @@
           >
             Return to My List
           </v-btn>
-          <!-- TODO - handle by ticket 15769, add @click="reSendEmail()" -->
+          <!-- handle by ticket 15769, add @click="reSendEmail()" -->
           <v-btn
             large
             color="primary"

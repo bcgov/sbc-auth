@@ -9,7 +9,7 @@ export interface NameRequestIF {
   name: string,
   status?: string
 }
-// TODO - comment out when API ready
+// comment out when API ready
 // export interface NameRequestLookupResultIF {
 //   names: NameRequestIF[]
 //   nrNum: string
