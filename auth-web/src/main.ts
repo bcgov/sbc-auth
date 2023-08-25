@@ -22,14 +22,14 @@ import store from '@/stores/vuex'
 import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
-import Search from 'fas-ui'
+// import Search from 'fas-ui'
 // eslint-disable-next-line sort-imports
 import { LDFlags } from '@/util/constants'
 
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
 const i18n = initializeI18n(Vue)
-Vue.use(Search, { store, i18n })
+// Vue.use(Search, { store, i18n })
 Vue.use(VueSanitize)
 
 /**
