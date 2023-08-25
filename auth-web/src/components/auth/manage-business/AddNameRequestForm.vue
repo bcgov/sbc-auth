@@ -83,7 +83,7 @@
         <v-btn
           large
           text
-          class="mr-auto pl-0 help-text"
+          class="mr-auto pl-0 help-text d-flex justify-start"
           data-test="forgot-button"
           @click.stop="openHelp()"
         >
@@ -289,7 +289,6 @@ export default class AddNameRequestForm extends Vue {
   }
 
   .help-text {
-    justify-content: flex-start; // align help button to left
     color: $app-blue;
   }
 
