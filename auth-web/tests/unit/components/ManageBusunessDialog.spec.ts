@@ -1,4 +1,4 @@
-import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import { mount } from '@vue/test-utils'
 
 describe('ManageBusinessDialog.vue', () => {

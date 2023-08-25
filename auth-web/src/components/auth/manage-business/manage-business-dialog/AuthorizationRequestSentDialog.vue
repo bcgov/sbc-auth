@@ -1,6 +1,6 @@
 <template>
   <v-dialog
-    v-model="computedIsVisible"
+    v-model="isVisible"
     attach="#entity-management"
     persistent
     scrollable
@@ -9,14 +9,14 @@
   >
     <v-card>
       <v-card-title>
-        <h1>Authorization Email Sent</h1>
+        <slot name="title">
+          <span>ADD TITLE</span>
+        </slot>
       </v-card-title>
       <v-card-text>
-        <p>An email was sent to <span class="email-address">{{ email }}</span></p>
-        <p>
-          Confirm your access by clicking the link inside. This will add the business to your Business Registry List.
-          The link is valid for 15 minutes.
-        </p>
+        <slot name="content">
+          <p>ADD CONTENT</p>
+        </slot>
       </v-card-text>
       <v-card-actions class="form__btns">
         <span
@@ -31,7 +31,7 @@
         <v-btn
           large
           color="primary"
-          @click="closeAuthEmailSentDialog()"
+          @click="closeDialog()"
         >
           Close
         </v-btn>
@@ -40,36 +40,28 @@
   </v-dialog>
 </template>
 <script lang="ts">
-import { computed, defineComponent } from '@vue/composition-api'
+import { defineComponent } from '@vue/composition-api'
 
 export default defineComponent({
-  name: 'AuthorizationEmailSent',
+  name: 'AuthorizationRequestSentDialog',
   props: {
-    email: {
-      type: String,
-      default: ''
-    },
     isVisible: {
       type: Boolean,
       default: false
     }
   },
-  setup (props, { emit }) {
+  emits: ['open-help', 'close-dialog'],
+  setup (_, { emit }) {
     const openHelp = () => {
       emit('open-help')
     }
-    const closeAuthEmailSentDialog = () => {
+    const closeDialog = () => {
       emit('close-dialog')
     }
 
-    const computedIsVisible = computed(() => {
-      return props.isVisible
-    })
-
     return {
-      computedIsVisible,
       openHelp,
-      closeAuthEmailSentDialog
+      closeDialog
     }
   }
 })
@@ -77,7 +69,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
-@import '@/assets/scss/ModalDialog.scss';
+@import '@/assets/scss/ModalDialog';
 
 .email-address {
   font-weight: 600;
