@@ -31,6 +31,7 @@ from auth_api.auth import jwt
 from auth_api.config import _Config
 from auth_api.extensions import mail
 from auth_api.models import db, ma
+from auth_api.resources import endpoints
 from auth_api.utils.cache import cache
 from auth_api.utils.run_version import get_run_version
 from auth_api.utils.util_logging import setup_logging
@@ -52,19 +53,20 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
                 integrations=[FlaskIntegration()]
             )
 
-    from auth_api.resources import TEST_BLUEPRINT  # pylint: disable=import-outside-toplevel
-    from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
+    # from auth_api.resources import TEST_BLUEPRINT  # pylint: disable=import-outside-toplevel
+    # from auth_api.resources import API_BLUEPRINT, OPS_BLUEPRINT  # pylint: disable=import-outside-toplevel
 
     flags.init_app(app)
     db.init_app(app)
     ma.init_app(app)
     mail.init_app(app)
+    endpoints.init_app(app)
 
-    app.register_blueprint(API_BLUEPRINT)
-    app.register_blueprint(OPS_BLUEPRINT)
+    # app.register_blueprint(API_BLUEPRINT)
+    # app.register_blueprint(OPS_BLUEPRINT)
 
-    if os.getenv('FLASK_ENV', 'production') in ['development', 'testing']:
-        app.register_blueprint(TEST_BLUEPRINT)
+    # if os.getenv('FLASK_ENV', 'production') in ['development', 'testing']:
+    #     app.register_blueprint(TEST_BLUEPRINT)
 
     if os.getenv('FLASK_ENV', 'production') != 'testing':
         setup_jwt_manager(app, jwt)

@@ -15,21 +15,18 @@
 
 Currently this only provides API versioning information
 """
-from flask import jsonify
-from flask_restx import Namespace, Resource
+from flask import Blueprint, jsonify
 
+from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.run_version import get_run_version
 
 
-API = Namespace('Meta', description='Metadata')
+bp = Blueprint('META', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/meta')
 
 
-@API.route('/info')
-class Info(Resource):
-    """Meta information about the overall service."""
-
-    @staticmethod
-    def get():
-        """Return a JSON object with meta information about the Service."""
-        version = get_run_version()
-        return jsonify(API=f'auth_api/{version}')
+@bp.route('/info')
+def get_meta_info():
+    """Return a JSON object with meta information about the Service."""
+    version = get_run_version()
+    return jsonify(
+        API=f'auth_api/{version}')

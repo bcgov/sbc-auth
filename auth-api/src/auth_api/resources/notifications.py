@@ -13,36 +13,33 @@
 # limitations under the License.
 """API endpoints for managing an Notification resource."""
 
-from flask_restx import Namespace, Resource, cors
+from flask import Blueprint
+from flask_cors import cross_origin
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.services import Membership as MembershipService
 from auth_api.tracer import Tracer
+from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
-from auth_api.utils.util import cors_preflight
 
 
-API = Namespace('notifications', description='Endpoints for notification management')
+bp = Blueprint('NOTIFICATIONS', __name__,
+               url_prefix=f'{EndpointEnum.API_V1.value}/users/<string:user_id>/org/<int:org_id>/notifications')
 TRACER = Tracer.get_instance()
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('', methods=['GET', 'OPTIONS'])
-class Notifications(Resource):
-    """Resource for managing the notifications."""
-
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
-    def get(user_id, org_id):  # pylint:disable=unused-argument
-        """Find the count of notification remaining.If any details invalid, it returns zero."""
-        try:
-            # todo use the user_id instead of jwt
-            pending_count = MembershipService.get_pending_member_count_for_org(org_id)
-            response, status = {'count': pending_count}, http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
+@bp.route('', methods=['GET', 'OPTIONS'])
+@TRACER.trace()
+@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.PUBLIC_USER.value])
+def get_notifications(user_id, org_id):  # pylint:disable=unused-argument
+    """Find the count of notification remaining.If any details invalid, it returns zero."""
+    try:
+        # todo use the user_id instead of jwt
+        pending_count = MembershipService.get_pending_member_count_for_org(org_id)
+        response, status = {'count': pending_count}, http_status.HTTP_200_OK
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status

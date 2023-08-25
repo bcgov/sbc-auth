@@ -14,8 +14,8 @@
 """API endpoints for managing a User resource."""
 import json
 
-from flask import g, jsonify
-from flask_restx import Namespace, Resource, cors
+from flask import Blueprint, g, jsonify
+from flask_cors import cross_origin
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
@@ -24,39 +24,34 @@ from auth_api.schemas import UserSettingsSchema
 from auth_api.services.user import User as UserService
 from auth_api.services.user_settings import UserSettings as UserSettingsService
 from auth_api.tracer import Tracer
-from auth_api.utils.util import cors_preflight
+from auth_api.utils.endpoints_enums import EndpointEnum
 
 
-API = Namespace('users', description='Endpoints for user settings management')
+bp = Blueprint('USER_SETTINGS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/users/<string:user_id>/settings')
 TRACER = Tracer.get_instance()
 
 
-@cors_preflight('GET, OPTIONS')
-@API.route('', methods=['GET', 'OPTIONS'])
-class SettingsResource(Resource):  # pylint: disable=too-few-public-methods
-    """Resource for managing a user's settings."""
+@bp.route('', methods=['GET', 'OPTIONS'])
+@TRACER.trace()
+@cross_origin(origin='*')
+@_jwt.requires_auth
+def get_user_settings(user_id):
+    """Get info related to the user.
 
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_jwt.requires_auth
-    def get(user_id):
-        """Get info related to the user.
+    Currently returns the org details associated with the user.But later can be extended to applications etc
+    """
+    token = g.jwt_oidc_token_info
 
-        Currently returns the org details associated with the user.But later can be extended to applications etc
-        """
-        token = g.jwt_oidc_token_info
+    # TODO make this check better.may be read from DB or something
+    if token.get('sub', None) != user_id:
+        return {'message': 'Unauthorized'}, http_status.HTTP_401_UNAUTHORIZED
 
-        # TODO make this check better.may be read from DB or something
-        if token.get('sub', None) != user_id:
-            return {'message': 'Unauthorized'}, http_status.HTTP_401_UNAUTHORIZED
+    try:
+        user = UserService.find_by_jwt_token(silent_mode=True)
+        user_id = user.identifier if user else None
+        all_settings = UserSettingsService.fetch_user_settings(user_id)
+        response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), http_status.HTTP_200_OK
 
-        try:
-            user = UserService.find_by_jwt_token(silent_mode=True)
-            user_id = user.identifier if user else None
-            all_settings = UserSettingsService.fetch_user_settings(user_id)
-            response, status = jsonify(UserSettingsSchema(many=True).dump(all_settings)), http_status.HTTP_200_OK
-
-        except BusinessException:
-            response, status = json.dumps([]), http_status.HTTP_200_OK
-        return response, status
+    except BusinessException:
+        response, status = json.dumps([]), http_status.HTTP_200_OK
+    return response, status
