@@ -10,13 +10,9 @@ import {
 
 import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
 import flushPromises from 'flush-promises'
 import sinon from 'sinon'
-
-Vue.use(Vuetify)
-Vue.use(Vuex)
 
 const vuetify = new Vuetify({})
 

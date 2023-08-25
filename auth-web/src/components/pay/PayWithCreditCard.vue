@@ -27,16 +27,14 @@
       </p>
     </v-card-text>
     <v-card-text class="pt-7 pb-0 px-8">
-      <template>
-        <h3 class="body-1 font-weight-bold mb-3">
-          How to pay with credit card:
-        </h3>
-        <ol class="mb-5">
-          <li>Click on "Pay Now"</li>
-          <li>Complete credit card payment</li>
-          <li>Get confirmation receipt</li>
-        </ol>
-      </template>
+      <h3 class="body-1 font-weight-bold mb-3">
+        How to pay with credit card:
+      </h3>
+      <ol class="mb-5">
+        <li>Click on "Pay Now"</li>
+        <li>Complete credit card payment</li>
+        <li>Get confirmation receipt</li>
+      </ol>
       <v-divider class="my-6" />
     </v-card-text>
   </v-card>

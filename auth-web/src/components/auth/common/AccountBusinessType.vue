@@ -120,58 +120,56 @@
             @keyup="onOrgBusinessTypeChange()"
           />
         </v-expand-transition>
-        <template>
-          <v-expand-transition class="business-account-type-details">
-            <v-row
-              v-if="isBusinessAccount"
-              justify="space-between"
-              data-test="business-account-type-details"
+        <v-expand-transition class="business-account-type-details">
+          <v-row
+            v-if="isBusinessAccount"
+            justify="space-between"
+            data-test="business-account-type-details"
+          >
+            <v-col
+              cols="6"
+              class="py-0"
             >
-              <v-col
-                cols="6"
-                class="py-0"
-              >
-                <v-select
-                  ref="businessType"
-                  v-model="businessType"
-                  filled
-                  label="Business Type"
-                  item-text="desc"
-                  item-value="code"
-                  :items="businessTypeCodes"
-                  data-test="select-business-type"
-                  :rules="orgBusinessTypeRules"
-                  :menu-props="{
-                    bottom: true,
-                    offsetY: true
-                  }"
-                  @change="onOrgBusinessTypeChange()"
-                />
-              </v-col>
-              <v-col
-                cols="6"
-                class="py-0"
-              >
-                <v-select
-                  ref="businessSize"
-                  v-model="businessSize"
-                  filled
-                  label="Business Size"
-                  item-text="desc"
-                  item-value="code"
-                  :items="businessSizeCodes"
-                  data-test="select-business-size"
-                  :rules="orgBusinessSizeRules"
-                  :menu-props="{
-                    bottom: true,
-                    offsetY: true
-                  }"
-                  @change="onOrgBusinessTypeChange()"
-                />
-              </v-col>
-            </v-row>
-          </v-expand-transition>
-        </template>
+              <v-select
+                ref="businessType"
+                v-model="businessType"
+                filled
+                label="Business Type"
+                item-text="desc"
+                item-value="code"
+                :items="businessTypeCodes"
+                data-test="select-business-type"
+                :rules="orgBusinessTypeRules"
+                :menu-props="{
+                  bottom: true,
+                  offsetY: true
+                }"
+                @change="onOrgBusinessTypeChange()"
+              />
+            </v-col>
+            <v-col
+              cols="6"
+              class="py-0"
+            >
+              <v-select
+                ref="businessSize"
+                v-model="businessSize"
+                filled
+                label="Business Size"
+                item-text="desc"
+                item-value="code"
+                :items="businessSizeCodes"
+                data-test="select-business-size"
+                :rules="orgBusinessSizeRules"
+                :menu-props="{
+                  bottom: true,
+                  offsetY: true
+                }"
+                @change="onOrgBusinessTypeChange()"
+              />
+            </v-col>
+          </v-row>
+        </v-expand-transition>
       </v-form>
     </div>
   </v-container>
@@ -179,15 +177,14 @@
 
 <script lang="ts">
 import { Account, LDFlags } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { OrgBusinessType, Organization } from '@/models/Organization'
 import { Code } from '@/models/Code'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import OrgNameAutoComplete from '@/views/auth/OrgNameAutoComplete.vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const CodesModule = namespace('codes')
+import { useCodesStore } from '@/stores/codes'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -203,12 +200,12 @@ export default class AccountBusinessType extends Vue {
   @Prop({ default: false }) orgNameReadOnly: boolean
   @Prop({ default: false }) isEditAccount: boolean // hide some details for update account
 
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
+  @State(useOrgStore) public currentOrganization!: Organization
 
-  @CodesModule.Action('getBusinessSizeCodes') private readonly getBusinessSizeCodes!: () => Promise<Code[]>
-  @CodesModule.Action('getBusinessTypeCodes') private readonly getBusinessTypeCodes!: () => Promise<Code[]>
-  @CodesModule.State('businessSizeCodes') private readonly businessSizeCodes!: Code[]
-  @CodesModule.State('businessTypeCodes') private readonly businessTypeCodes!: Code[]
+  @Action(useCodesStore) private readonly getBusinessSizeCodes!: () => Promise<Code[]>
+  @Action(useCodesStore) private readonly getBusinessTypeCodes!: () => Promise<Code[]>
+  @State(useCodesStore) private readonly businessSizeCodes!: Code[]
+  @State(useCodesStore) private readonly businessTypeCodes!: Code[]
 
   private autoCompleteIsActive: boolean = false
   private autoCompleteSearchValue: string = ''

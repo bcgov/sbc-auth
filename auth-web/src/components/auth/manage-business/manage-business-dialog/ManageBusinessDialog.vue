@@ -281,7 +281,7 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 import { LoginPayload } from '@/models/business'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { StatusCodes } from 'http-status-codes'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores'
 
 export default defineComponent({
   components: {
@@ -327,14 +327,7 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     // Store and Actions
-    const store = useStore()
-    const addBusiness = async (loginPayload: LoginPayload) => {
-      return store.dispatch('business/addBusiness', loginPayload)
-    }
-    const updateBusinessName = async (businessNumber: string) => {
-      return store.dispatch('business/updateBusinessName', businessNumber)
-    }
-
+    const businessStore = useBusinessStore()
     const invitationToAccount = ref({ 'name': null, 'uuid': null })
     const invitationAdditionalMessage = ref('')
     const requestAuthRegistryFormIsValid = ref(false)
@@ -604,13 +597,13 @@ export default defineComponent({
               passCode: isBusinessLegalTypeFirm.value ? proprietorPartnerName.value : passcode.value
             }
           }
-          const addResponse = await addBusiness(businessData)
+          const addResponse = await businessStore.addBusiness(businessData)
           // check if add didn't succeed
           if (addResponse?.status !== StatusCodes.CREATED) {
             emit('add-unknown-error')
           }
           // try to update business name
-          const businessResponse = await updateBusinessName(businessIdentifier.value)
+          const businessResponse = await businessStore.updateBusinessName(businessIdentifier.value)
           // check if update didn't succeed
           if (businessResponse?.status !== StatusCodes.OK) {
             emit('add-unknown-error')

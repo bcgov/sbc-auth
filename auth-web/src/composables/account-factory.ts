@@ -3,11 +3,11 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import { Organization } from '@/models/Organization'
 import { computed } from '@vue/composition-api'
-import { useStore } from 'vuex-composition-helpers'
+import { useOrgStore } from '@/stores/org'
 
 export const useAccount = () => {
-  const store = useStore()
-  const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
+  const orgStore = useOrgStore()
+  const currentOrganization = computed(() => orgStore.currentOrganization as Organization)
 
   const getAccountFromSession = (): AccountSettings => {
     return JSON.parse(ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}'))

@@ -4,4 +4,5 @@ export interface AccountSettings {
   type: string
   urlpath: string
   urlorigin: string
+  accountStatus?: string
 }

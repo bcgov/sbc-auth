@@ -60,6 +60,7 @@
 
 <script lang="ts">
 import { AccessType, Account } from '@/util/constants'
+import { Action, State } from 'pinia-class'
 import { Business, BusinessSearchResultDto } from '@/models/business'
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
@@ -67,10 +68,8 @@ import { AccountSettings } from '@/models/account-settings'
 import ConfigHelper from '@/util/config-helper'
 import GeneratePasscodeView from '@/views/auth/staff/GeneratePasscodeView.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const BusinessModule = namespace('business')
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -78,12 +77,12 @@ const BusinessModule = namespace('business')
   }
 })
 export default class IncorporationSearchResultView extends Vue {
-  @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-  @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
-  @OrgModule.Action('syncOrganization') private syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
-  @OrgModule.Action('syncMembership') private syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
-  @OrgModule.Mutation('setCurrentAccountSettings') private setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
-  @BusinessModule.State('currentBusiness') currentBusiness!: Business
+  @State(useOrgStore) readonly currentOrganization!: Organization
+  @Action(useOrgStore) readonly addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
+  @Action(useOrgStore) readonly syncOrganization!: (affiliatedOrganizationId: number) => Promise<Organization>
+  @Action(useOrgStore) readonly syncMembership!: (affiliatedOrganizationId: number) => Promise<Member>
+  @Action(useOrgStore) readonly setCurrentAccountSettings!: (accountSettings: AccountSettings) => void
+  @State(useBusinessStore) currentBusiness!: Business
 
   @Prop({ default: false }) isVisible: boolean
   @Prop() affiliatedOrg: Organization

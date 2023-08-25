@@ -270,10 +270,12 @@ class AffiliationInvitation:
         affiliation_invitation.save()
 
         if affiliation_invitation.type != AffiliationInvitationType.PASSCODE.value:
-            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
-                                                              business_name=business['business']['legalName'],
-                                                              app_url=f'{invitation_origin}/{context_path}',
-                                                              email_addresses=affiliation_invitation.recipient_email)
+            AffiliationInvitation\
+                .send_affiliation_invitation(affiliation_invitation=affiliation_invitation,
+                                             business_name=business['business']['legalName'],
+                                             app_url=AffiliationInvitation._get_app_url(invitation_origin,
+                                                                                        context_path),
+                                             email_addresses=affiliation_invitation.recipient_email)
         else:
             return AffiliationInvitation.accept_affiliation_invitation(affiliation_invitation.id,
                                                                        user, invitation_origin,
@@ -336,10 +338,12 @@ class AffiliationInvitation:
             business = AffiliationInvitation._get_business_details(entity.business_identifier,
                                                                    RestService.get_service_account_token())
 
-            AffiliationInvitation.send_affiliation_invitation(affiliation_invitation=invitation,
-                                                              business_name=business['business']['legalName'],
-                                                              app_url=f'{invitation_origin}/{context_path}',
-                                                              email_addresses=invitation.recipient_email)
+            AffiliationInvitation\
+                .send_affiliation_invitation(affiliation_invitation=invitation,
+                                             business_name=business['business']['legalName'],
+                                             app_url=AffiliationInvitation._get_app_url(invitation_origin,
+                                                                                        context_path),
+                                             email_addresses=invitation.recipient_email)
         # Expire invitation
         elif new_status == InvitationStatus.EXPIRED.value:
             invitation = self._model.set_status(InvitationStatus.EXPIRED.value)
@@ -405,10 +409,19 @@ class AffiliationInvitation:
         return AffiliationInvitation(invitation)
 
     @staticmethod
+    def _get_app_url(app_url: str, context_path: str = None) -> str:
+        """Get app url concatenated with context_path if it exists."""
+        full_app_url = app_url
+        if context_path:
+            full_app_url = f'{full_app_url}/{context_path}'
+
+        return full_app_url
+
+    @staticmethod
     def _get_token_confirm_path(app_url, org_name, token, query_params=None):
         """Get the config for different email types."""
         escape_url = escape_wam_friendly_url(org_name)
-        path = f'{escape_url}/affiliationInvitation/acceptToken/'
+        path = f'{escape_url}/affiliationInvitation/acceptToken'
         token_confirm_url = f'{app_url}/{path}/{token}'
 
         if query_params:

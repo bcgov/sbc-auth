@@ -542,7 +542,8 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestFormOld.vue'
@@ -565,9 +566,6 @@ import PasscodeResetOptionsModal from '@/components/auth/manage-business/Passcod
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { namespace } from 'vuex-class'
-
-const BusinessModule = namespace('business')
 
 @Component({
   components: {
@@ -583,22 +581,18 @@ const BusinessModule = namespace('business')
     StartNewBusinessHelp
   },
   computed: {
-    ...mapState('org', ['currentOrgAddress', 'currentAccountSettings']),
-    ...mapState('user', ['userProfile', 'currentUser'])
+    ...mapState(useOrgStore, ['currentOrgAddress', 'currentAccountSettings']),
+    ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions('business', ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions('org', ['syncAddress'])
+    ...mapActions(useBusinessStore, ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions(useOrgStore, ['syncAddress'])
   }
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
-
-  // action from business module
-  @BusinessModule.Action('isAffiliated')
-  private readonly isAffiliated!: (identifier: string) => Promise<boolean>
 
   // for template
   readonly CorpTypes = CorpTypes
@@ -699,7 +693,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       }
 
       // 2. business already added
-      const isAdded = await this.isAffiliated(identifier)
+      const isAdded = await useBusinessStore().isAffiliated(identifier)
       if (isAdded) {
         this.showBusinessAlreadyAdded({ name: legalName, identifier })
         return
@@ -835,6 +829,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModalNR (nameRequestNumber: string) {
+    debugger
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'

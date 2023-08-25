@@ -2,14 +2,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import { DateFilterCodes } from '@/util/constants'
 import DateRangeFilter from '@/components/auth/common/DateRangeFilter.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import moment from 'moment'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
 
 describe('DateRangeFilter.vue', () => {
   let wrapper: any
@@ -20,7 +14,6 @@ describe('DateRangeFilter.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(Vuetify)
 
     const vuetify = new Vuetify({})

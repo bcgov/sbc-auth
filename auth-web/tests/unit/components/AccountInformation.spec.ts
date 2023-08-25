@@ -5,17 +5,10 @@ import { getTestAddress, getTestOrg } from '../test-utils'
 import { AccountInformation } from '@/components/auth/staff/review-task'
 import { OrgAccountTypes } from '@/models/Organization'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-Vue.use(VueCompositionAPI)
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
 
 describe('AccountInformation.vue basic tests', () => {
   let wrapper: Wrapper<any>
@@ -42,15 +35,9 @@ describe('AccountInformation.vue basic tests', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapper = mount(AccountInformation, {
       localVue,
-      store,
       vuetify,
       propsData: {
         ...props

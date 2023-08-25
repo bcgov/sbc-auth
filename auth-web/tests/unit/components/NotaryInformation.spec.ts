@@ -1,13 +1,8 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
-
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -36,16 +31,10 @@ describe('NotaryInformation.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(NotaryInformation, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData

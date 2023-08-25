@@ -121,13 +121,14 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
 import { Organization, PADInfo } from '@/models/Organization'
+import { Action } from 'pinia-class'
 import { BcolProfile } from '@/models/bcol'
 import ConfigHelper from '@/util/config-helper'
 import GLPaymentForm from '@/components/auth/common/GLPaymentForm.vue'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import PADInfoForm from '@/components/auth/common/PADInfoForm.vue'
 import { PaymentTypes } from '@/util/constants'
-import { namespace } from 'vuex-class'
+import { useOrgStore } from '@/stores/org'
 
 const PAYMENT_METHODS = {
   [PaymentTypes.CREDIT_CARD]: {
@@ -135,7 +136,8 @@ const PAYMENT_METHODS = {
     icon: 'mdi-credit-card-outline',
     title: 'Credit Card',
     subtitle: 'Pay for transactions individually with your credit card.',
-    description: `You don't need to provide any credit card information with your account. Credit card information will be requested when you are ready to complete a transaction.`,
+    description: `You don't need to provide any credit card information with your account. Credit card information will
+                  be requested when you are ready to complete a transaction.`,
     isSelected: false
   },
   [PaymentTypes.PAD]: {
@@ -173,7 +175,8 @@ const PAYMENT_METHODS = {
           </ul>
         </p>
         <p>
-          Once your account is created, you can use your account number to add BC Registries and Online Services as a payee in your financial institution's online banking system to make payments.
+          Once your account is created, you can use your account number to add BC Registries and Online Services as a
+          payee in your financial institution's online banking system to make payments.
         </p>
         <p class="mb-0">
           BC Registries and Online Services <strong>must receive payment in full</strong> 
@@ -184,8 +187,6 @@ const PAYMENT_METHODS = {
     isSelected: false
   }
 }
-
-const orgModule = namespace('org')
 
 @Component({
   components: {
@@ -205,18 +206,18 @@ export default class PaymentMethods extends Vue {
   @Prop({ default: false }) isInitialTOSAccepted: boolean
   @Prop({ default: false }) isInitialAcknowledged: boolean
 
-  @orgModule.Action('fetchCurrentOrganizationGLInfo') public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
+  @Action(useOrgStore) public fetchCurrentOrganizationGLInfo!:(accountId: number) =>Promise<any>
 
-  private selectedPaymentMethod: string = ''
-  private paymentTypes = PaymentTypes
-  private padInfo: PADInfo = {} as PADInfo
-  private isTouched: boolean = false
-  private ejvPaymentInformationTitle = 'General Ledger Information'
+  selectedPaymentMethod: string = ''
+  paymentTypes = PaymentTypes
+  padInfo: PADInfo = {} as PADInfo
+  isTouched: boolean = false
+  ejvPaymentInformationTitle = 'General Ledger Information'
 
   // this object can define the payment methods allowed for each account tyoes
-  private paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
+  paymentsPerAccountType = ConfigHelper.paymentsAllowedPerAccountType()
 
-  private get allowedPaymentMethods () {
+  get allowedPaymentMethods () {
     const paymentMethods = []
     if (this.currentOrgType) {
       const paymentTypes = this.paymentsPerAccountType[this.currentOrgType]
@@ -229,18 +230,18 @@ export default class PaymentMethods extends Vue {
     return paymentMethods
   }
 
-  private get forceEditModeBCOL () {
+  get forceEditModeBCOL () {
     return this.currentSelectedPaymentMethod === PaymentTypes.BCOL &&
            this.currentOrgPaymentType !== undefined &&
            this.currentOrgPaymentType !== PaymentTypes.BCOL
   }
 
-  private get isPaymentEJV () {
+  get isPaymentEJV () {
     return this.currentSelectedPaymentMethod === PaymentTypes.EJV
   }
 
   // set on change of input only for single allowed payments
-  private isPadInfoTouched (isTouched: boolean) {
+  isPadInfoTouched (isTouched: boolean) {
     this.isTouched = isTouched
   }
 
@@ -251,12 +252,12 @@ export default class PaymentMethods extends Vue {
     }
   }
 
-  private isPaymentSelected (payment) {
+  isPaymentSelected (payment) {
     return (this.selectedPaymentMethod === payment.type)
   }
 
   @Emit()
-  private paymentMethodSelected (payment, isTouched = true) {
+  paymentMethodSelected (payment, isTouched = true) {
     this.selectedPaymentMethod = payment.type
     this.isTouched = isTouched
     // emit touched flag for parent element
@@ -267,18 +268,18 @@ export default class PaymentMethods extends Vue {
   }
 
   @Emit('get-PAD-info')
-  private getPADInfo (padInfo: PADInfo) {
+  getPADInfo (padInfo: PADInfo) {
     this.padInfo = padInfo
     return this.padInfo
   }
 
   @Emit('emit-bcol-info')
-  private setBcolInfo (bcolProfile: BcolProfile) {
+  setBcolInfo (bcolProfile: BcolProfile) {
     return bcolProfile
   }
 
   @Emit('is-pad-valid')
-  private isPADValid (isValid) {
+  isPADValid (isValid) {
     if (isValid) {
       this.paymentMethodSelected({ type: PaymentTypes.PAD }, this.isTouched)
     }
@@ -297,7 +298,10 @@ export default class PaymentMethods extends Vue {
   }
 
   &.selected {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0,0,0,.2),0 2px 2px 0 rgba(0,0,0,.14),0 1px 5px 0 rgba(0,0,0,.12) !important;
+    box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                0 3px 1px -2px rgba(0,0,0,.2),
+                0 2px 2px 0 rgba(0,0,0,.14),
+                0 1px 5px 0 rgba(0,0,0,.12) !important;
   }
 }
 

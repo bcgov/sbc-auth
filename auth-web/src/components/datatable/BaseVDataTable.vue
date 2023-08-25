@@ -147,8 +147,8 @@ export default defineComponent({
   props: {
     clearFiltersTrigger: { default: 1 },
     headerBg: { default: 'white' },
-    height: { type: String },
-    itemKey: { type: String },
+    height: { type: String, default: null },
+    itemKey: { type: String, required: true },
     loading: { default: false },
     loadingText: { default: 'Loading...' },
     noDataText: { default: 'No results found.' },

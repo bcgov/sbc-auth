@@ -53,7 +53,8 @@ import CommonUtils from '@/util/common-util'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import PasswordRequirementAlert from '@/components/auth/common/PasswordRequirementAlert.vue'
 import { User } from '@/models/user'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -63,7 +64,7 @@ import { mapActions } from 'vuex'
   computed: {
   },
   methods: {
-    ...mapActions('org', ['resetPassword'])
+    ...mapActions(useOrgStore, ['resetPassword'])
   }
 })
 export default class PasswordReset extends Vue {

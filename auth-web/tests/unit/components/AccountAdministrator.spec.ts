@@ -1,13 +1,8 @@
 
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
 import AccountAdministrator from '@/components/auth/staff/review-task/AccountAdministrator.vue'
-
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -35,17 +30,10 @@ describe('AccountAdministrator.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
-    const store = new Vuex.Store({
-      strict: false
-
-    })
 
     wrapperFactory = (propsData) => {
       return shallowMount(AccountAdministrator, {
         localVue,
-        store,
         vuetify,
         propsData: {
           ...propsData

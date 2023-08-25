@@ -1,16 +1,10 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
-
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountPaymentMethods from '@/components/auth/account-settings/payment/AccountPaymentMethods.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
 
 // Prevent error redundant navigation.
 const originalPush = VueRouter.prototype.push
@@ -24,56 +18,24 @@ describe('AccountPaymentMethods.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
 
     const router = new VueRouter()
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'new org',
-          orgType: 'STAFF'
-        }
-      },
-      action: {
-        syncAddress: vi.fn()
-      }
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'new org',
+      orgType: 'STAFF'
     }
-    const businessModule = {
-      namespaced: true,
-      state: {
-        businesses: []
-
-      },
-      action: {
-        addBusiness: vi.fn()
-      }
-    }
-
-    const userModule: any = {
-      namespaced: true,
-      state: {
-        currentUser: {
-          firstName: 'Nadia',
-          lastName: 'Woodie'
-        }
-      }
-    }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        business: businessModule,
-        user: userModule
-      }
-    })
-
+    const businessStore = useBusinessStore()
+    businessStore.businesses = []
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      firstName: 'test',
+      lastName: 'test'
+    } as any
     wrapperFactory = (propsData) => {
       return shallowMount(AccountPaymentMethods, {
         localVue,
-        store,
         router,
         vuetify,
         propsData: {

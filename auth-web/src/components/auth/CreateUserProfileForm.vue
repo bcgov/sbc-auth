@@ -207,7 +207,6 @@ export default class CreateUserProfileForm extends Mixins(NextPageMixin) {
           }
         } catch (error) {
           this.isLoading = false
-          // TODO: Handle cases according to the type of the error
           if (error?.response?.data?.code) {
             switch (error.response.data.code) {
               case 'FAILED_ADDING_USER_IN_KEYCLOAK':

@@ -5,13 +5,10 @@ import { Transactions } from '@/components/auth/account-settings/transaction'
 import TransactionsDataTable from '@/components/auth/account-settings/transaction/TransactionsDataTable.vue'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { axios } from '@/util/http-util'
 import sinon from 'sinon'
 import { transactionResponse } from '../test-utils'
-
-Vue.use(Vuetify)
-Vue.use(Vuex)
+import { useOrgStore } from '@/stores/org'
 
 const vuetify = new Vuetify({})
 
@@ -30,17 +27,11 @@ describe('Transactions tests', () => {
 
   beforeEach(async () => {
     const localVue = createLocalVue()
-    // store
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrgPaymentDetails: { accountId: 123 },
-        currentOrganization: { id: 123 },
-        currentMembership: { membershipTypeCode: MembershipType.Admin }
-      },
-      actions: { getOrgPayments: vi.fn(() => { return { credit: 0 } }) }
-    }
-    const store = new Vuex.Store({ strict: false, modules: { org: orgModule } })
+    const orgStore = useOrgStore()
+    orgStore.currentOrgPaymentDetails = { accountId: 123 } as any
+    orgStore.currentOrganization = { id: 123 } as any
+    orgStore.currentMembership = { membershipTypeCode: MembershipType.Admin } as any
+    orgStore.getOrgPayments = vi.fn(() => { return { credit: 0 } }) as any
 
     // stub get transactions get call
     sandbox = sinon.createSandbox()
@@ -49,8 +40,7 @@ describe('Transactions tests', () => {
 
     wrapper = mount(Transactions, {
       localVue,
-      vuetify,
-      store
+      vuetify
     })
   })
 

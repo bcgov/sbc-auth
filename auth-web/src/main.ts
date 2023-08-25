@@ -1,3 +1,4 @@
+
 import './composition-api-setup' // ensure this happens before any imports trigger use of composition-api
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import * as Sentry from '@sentry/vue'
@@ -14,9 +15,10 @@ import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
+import { getPiniaStore } from '@/stores'
 import initializeI18n from './plugins/i18n'
 import router from './routes/index'
-import store from './store'
+import store from '@/stores/vuex'
 import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
@@ -83,7 +85,9 @@ async function syncSession () {
 function renderVue () {
   new Vue({
     router,
+    // We still need Vuex for sbc-common-components.
     store,
+    pinia: getPiniaStore(),
     vuetify,
     i18n,
     render: (h) => h(App)

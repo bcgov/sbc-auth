@@ -1,6 +1,6 @@
 import {
   Affiliation,
-  AffiliationsResponse,
+  AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody
 } from '@/models/affiliation'
@@ -17,7 +17,6 @@ import {
 } from '@/models/Organization'
 
 import { Address } from '@/models/address'
-import { AffidavitInformation } from '@/models/affidavit'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
@@ -79,8 +78,17 @@ export default class OrgService {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`, createRequestBody)
   }
 
-  static async getAffiliatiatedEntities (orgIdentifier: number): Promise<AxiosResponse<AffiliationsResponse>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
+  static async getAffiliatedEntities (orgIdentifier: number): Promise<AffiliationResponse[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations`, { params: { new: true } })
+      if (response?.data?.entities && response?.status === 200) {
+        return response.data.entities
+      } else {
+        throw Error(`Invalid response = ${response}`)
+      }
+    } catch (error) {
+      throw new Error('Error fetching data from API: ' + error.message)
+    }
   }
 
   static async createAffiliation (orgIdentifier: number, affiliation: CreateAffiliationRequestBody):
@@ -106,14 +114,16 @@ export default class OrgService {
   }
 
   static async getAffiliationInvitations (orgIdentifier: number) {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
-      { params: { orgId: orgIdentifier, businessDetails: true } }
-    )
-  }
-
-  // TODO can be remove this since we moved from org to user affidavit
-  static async getAffidavitInfo (orgIdentifier: number): Promise<AxiosResponse<AffidavitInformation>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/admins/affidavits`)
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
+        { params: { orgId: orgIdentifier, businessDetails: true } }
+      )
+      return response.data.affiliationInvitations
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      return null
+    }
   }
 
   static async approvePendingOrg (orgIdentifier: number): Promise<AxiosResponse> {

@@ -6,7 +6,7 @@ import { TaskRelationshipStatus } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class TaskService {
-  public static async getTaskById (taskId: number): Promise<AxiosResponse<Task>> {
+  public static async getTaskById (taskId: number | string): Promise<AxiosResponse<Task>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`)
   }
 

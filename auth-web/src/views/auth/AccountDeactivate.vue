@@ -28,7 +28,7 @@
     </div>
 
     <div>
-      <deactivate-card :org-type="orgType" />
+      <deactivate-card :type="orgType" />
     </div>
     <v-card class="mt-5 py-4 px-4">
       <v-card-title class="font-weight-bold">
@@ -194,6 +194,7 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
@@ -202,9 +203,7 @@ import { DEACTIVATE_ACCOUNT_MESSAGE } from '@/util/constants'
 import DeactivateCard from '@/components/auth/account-deactivate/DeactivateCard.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import Vue from 'vue'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
@@ -214,14 +213,13 @@ const OrgModule = namespace('org')
   }
 })
 export default class AccountDeactivate extends Vue {
-  @OrgModule.State('currentOrganization') public currentOrganization!: Organization
-  @OrgModule.State('currentMembership') public currentMembership!: Member
+  @State(useOrgStore) public currentOrganization!: Organization
+  @State(useOrgStore) public currentMembership!: Member
   @Prop({ default: '' }) private name: string
-  @OrgModule.Action('deactivateOrg') public deactivateOrg!: () => Promise<void>
-  @OrgModule.Action('setCurrentOrganizationFromUserAccountSettings')
-  private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
-  private message = ''
-  private isLoading = false
+  @Action(useOrgStore) public deactivateOrg!: () => Promise<void>
+  @Action(useOrgStore) private setCurrentOrganizationFromUserAccountSettings!: () => Promise<void>
+  message = ''
+  isLoading = false
 
   $refs: {
     confirmModal: InstanceType<typeof ModalDialog>,
@@ -229,7 +227,7 @@ export default class AccountDeactivate extends Vue {
     errorModal: InstanceType<typeof ModalDialog>
 
   }
-  private confirmationsList: { text: string, type?: string, selected: boolean }[] = [
+  confirmationsList: { text: string, type?: string, selected: boolean }[] = [
     {
       text: 'deactivateTeamConfirmation',
       selected: false
@@ -242,11 +240,11 @@ export default class AccountDeactivate extends Vue {
 
   ]
 
-  private async confirm () {
+  async confirm () {
     this.$refs.confirmModal.open()
   }
 
-  private get confirmations () {
+  get confirmations () {
     return this.confirmationsList.filter(obj => !obj.type || obj.type === this.currentOrganization?.orgType)
   }
 
@@ -258,27 +256,28 @@ export default class AccountDeactivate extends Vue {
     }
   }
 
-  private get accountInfoUrl (): string {
+  get accountInfoUrl (): string {
     return `/account/${this.currentOrganization?.id}/settings`
   }
 
-  private async closeConfirmModal () {
+  async closeConfirmModal () {
     this.$refs.confirmModal.close()
   }
 
-  private get orgType (): string {
+  get orgType (): string {
     return this.currentOrganization?.orgType
   }
 
-  private async navigateTohome () {
+  async navigateTohome () {
     this.$refs.successModal.close()
     await this.setCurrentOrganizationFromUserAccountSettings()
     // Update header
+    // Remove with Vue 3
     await this.$store.commit('updateHeader')
     this.$router.push(`/home`)
   }
 
-  private async deactivate () {
+  async deactivate () {
     try {
       this.isLoading = true
       await this.deactivateOrg()
@@ -294,7 +293,7 @@ export default class AccountDeactivate extends Vue {
     }
   }
 
-  private get authorised (): boolean {
+  get authorised (): boolean {
     return this.confirmations.some(obj => obj.selected === false)
   }
 }

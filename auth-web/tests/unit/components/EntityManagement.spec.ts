@@ -1,21 +1,13 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, mount } from '@vue/test-utils'
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import Vue from 'vue'
-import VueCompositionAPI from '@vue/composition-api'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
-
-Vue.use(VueCompositionAPI)
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
 
 const vuetify = new Vuetify({})
 
@@ -44,50 +36,23 @@ describe('Entity Management Component', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     const $t = () => 'test'
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'new org',
-          orgType: 'STAFF'
-        }
-      }
-    }
-    const businessModule = {
-      namespaced: true,
-      state: {
-        businesses: []
 
-      },
-      action: {
-        addBusiness: vi.fn()
-      }
-    }
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'new org',
+      orgType: 'STAFF'
+    } as any
 
-    const userModule: any = {
-      namespaced: true,
-      state: {
-        currentUser: {
-          firstName: 'Nadia',
-          lastName: 'Woodie'
-        }
-      }
-    }
+    const userStore = useUserStore()
+    userStore.currentUser = {
+      firstName: 'Nadia',
+      lastName: 'Woodie'
+    } as any
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        business: businessModule,
-        user: userModule
-      }
-    })
     wrapper = mount(EntityManagement, {
       vuetify,
       localVue,
-      store,
       mocks: { $t },
       computed: {
         enableBcCccUlc () {
@@ -193,6 +158,8 @@ describe('Entity Management Component', () => {
   })
 
   it('renders snackbar visible 1 second after toggled', async () => {
+    const businessStore = useBusinessStore()
+    businessStore.syncBusinesses = vi.fn()
     vi.useFakeTimers()
 
     await wrapper.vm.showAddSuccessModalNR()
@@ -206,6 +173,8 @@ describe('Entity Management Component', () => {
   })
 
   it('renders snackbar invisible 5 seconds after toggled', async () => {
+    const businessStore = useBusinessStore()
+    businessStore.syncBusinesses = vi.fn()
     vi.useFakeTimers()
 
     await wrapper.vm.showAddSuccessModalNR()
@@ -228,7 +197,8 @@ describe('Entity Management Component', () => {
   it('calls the authorization error modal with correct title and message', () => {
     wrapper.vm.showAuthorizationErrorModal()
     expect(wrapper.vm.dialogTitle).toBe('Unable to Manage Business')
-    expect(wrapper.vm.dialogText).toBe('The account that requested authorisation does not match your current account. Please log in as the account that initiated the request.')
+    expect(wrapper.vm.dialogText).toBe('The account that requested authorisation does not match your current account.' +
+    ' Please log in as the account that initiated the request.')
   })
 
   it('calls the magic link error modal with correct title and message', () => {

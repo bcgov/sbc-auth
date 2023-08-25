@@ -1,14 +1,12 @@
 import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import initialize from '@/plugins/i18n'
 import { mount } from '@vue/test-utils'
-import store from '@/store'
+import store from '@/stores'
 
 // eslint-disable-next-line sort-imports
 import Search from 'fas-ui'
 
-Vue.use(Vuetify)
 const i18n = initialize(Vue)
 Vue.use(Search, { store, i18n })
 
@@ -16,19 +14,12 @@ describe('FasSearchComponent.vue', () => {
   let wrapper: any
 
   beforeEach(async () => {
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {}
-    })
-
     const vuetify = new Vuetify({})
 
     sessionStorage['FAS_WEB_URL'] = 'https://fas-dev.apps.silver.devops.gov.bc.ca/'
     sessionStorage['PAY_API_URL'] = 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
 
     wrapper = mount({ template: `<fas-search-component :isLibraryMode='true'/>` }, {
-      store,
       i18n,
       vuetify
     })

@@ -31,22 +31,18 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   name: 'ManagementMenu',
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   }
 })
 export default class ManagementMenu extends Vue {
   @Prop() menu
-  private orgStore = getModule(OrgModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private readonly currentOrganization!: Organization
 }
 </script>

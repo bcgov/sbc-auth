@@ -34,25 +34,25 @@
 import { Component, Watch } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
+import { State } from 'pinia-class'
 import Vue from 'vue'
-import { namespace } from 'vuex-class'
-const userModule = namespace('user')
+import { useUserStore } from '@/stores/user'
 
 // FUTURE: import this from shared components once built
 // - this is converted statically from UserProduct.vue in bcgov/bcregistry repo
 @Component({})
 export default class PPRLauncher extends Vue {
-  @userModule.State('currentUser') public currentUser!: KCUserProfile
+  @State(useUserStore) public currentUser!: KCUserProfile
 
-  private title = ''
-  private text = ''
-  private img = ''
+  title = ''
+  text = ''
+  img = ''
 
-  private get pprUrl (): string {
+  get pprUrl (): string {
     return ConfigHelper.getPPRWebUrl()
   }
 
-  private getImgUrl (img) {
+  getImgUrl (img) {
     return new URL(`/src/assets/img/${img}`, import.meta.url)
   }
 

@@ -117,7 +117,7 @@ import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import NameRequestLookupServices from '@/services/name-request-lookup.services'
 import _ from 'lodash'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores/business'
 
 enum States {
   INITIAL = 'initial',
@@ -151,11 +151,7 @@ export default defineComponent({
         : [] as BusinessLookupResultIF[]
     })
 
-    // store
-    const store = useStore()
-    const isAffiliated = (businessIdentifier: string) => store.dispatch('business/isAffiliated', businessIdentifier)
-    const isAffiliatedNR = (nrNum: string) => store.dispatch('business/isAffiliatedNR', nrNum)
-
+    const businessStore = useBusinessStore()
     const onSearchFieldChanged = _.debounce(async () => {
       // safety check
       if (states.searchField && states.searchField?.length < 3) {
@@ -179,9 +175,9 @@ export default defineComponent({
         // enable or disable items according to whether they have already been added
         for (const result of states.searchResults) {
           if (props.lookupType === LookupType.NR && 'nrNum' in result) {
-            result.disabled = await isAffiliatedNR(result.nrNum)
+            result.disabled = businessStore.isAffiliatedNR(result.nrNum)
           } else if ('identifier' in result) {
-            result.disabled = await isAffiliated(result.identifier)
+            result.disabled = businessStore.isAffiliated(result.identifier)
           }
         }
 
