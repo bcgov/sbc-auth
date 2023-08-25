@@ -13,32 +13,24 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 
-from flask import request
-from flask_restx import Namespace, Resource, cors
-
+from flask import Blueprint, request
+from flask_cors import cross_origin
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
-from auth_api.utils.util import cors_preflight
+from auth_api.utils.endpoints_enums import EndpointEnum
 
-
-API = Namespace('accounts', description='Endpoints for accounts management')
-
+bp = Blueprint('ACCOUNTS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/accounts')
 TRACER = Tracer.get_instance()
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('/<int:account_id>/products/<string:product_code>/authorizations', methods=['GET', 'OPTIONS'])
-class AccountAuthorizations(Resource):
-    """Resource for returning authorizations for a product in an account."""
-
-    @staticmethod
-    @_jwt.requires_auth
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    def get(account_id, product_code):
-        """Return authorizations for a product in an account."""
-        expanded: bool = request.args.get('expanded', False)
-        authorizations = AuthorizationService.get_account_authorizations_for_product(account_id, product_code, expanded)
-        return authorizations, http_status.HTTP_200_OK
+@bp.route('/<int:account_id>/products/<string:product_code>/authorizations', methods=['GET', 'OPTIONS'])
+@_jwt.requires_auth
+@TRACER.trace()
+@cross_origin(origin='*')
+def get_account_product_authorizations(account_id, product_code):
+    """Return authorizations for a product in an account."""
+    expanded: bool = request.args.get('expanded', False)
+    authorizations = AuthorizationService.get_account_authorizations_for_product(account_id, product_code, expanded)
+    return authorizations, http_status.HTTP_200_OK

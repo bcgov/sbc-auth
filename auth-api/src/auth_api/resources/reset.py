@@ -13,35 +13,31 @@
 # limitations under the License.
 """Endpoints to reset test data from database."""
 
-from flask_restx import Namespace, Resource, cors
+from flask import Blueprint
+from flask_cors import cross_origin
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
 from auth_api.services import ResetTestData as ResetService
 from auth_api.tracer import Tracer
+from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
-from auth_api.utils.util import cors_preflight
 
 
-API = Namespace('reset', description='Authentication System - Reset test data')
+bp = Blueprint('RESET', __name__, url_prefix=f'{EndpointEnum.TEST_API.value}/reset')
 TRACER = Tracer.get_instance()
 
 
-@cors_preflight('POST, PUT, OPTIONS')
-@API.route('', methods=['POST', 'PUT', 'OPTIONS'])
-class Reset(Resource):
+@bp.route('', methods=['POST', 'PUT', 'OPTIONS'])
+@TRACER.trace()
+@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.TESTER.value])
+def post_reset():
     """Cleanup test data by the provided token."""
-
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles([Role.TESTER.value])
-    def post():
-        """Cleanup test data by the provided token."""
-        try:
-            ResetService.reset()
-            response, status = '', http_status.HTTP_204_NO_CONTENT
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
+    try:
+        ResetService.reset()
+        response, status = '', http_status.HTTP_204_NO_CONTENT
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
