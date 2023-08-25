@@ -498,8 +498,13 @@ export default defineComponent({
     })
 
     const computedAddressType = computed(() => {
-      return isBusinessLegalTypeCorporation.value ||
-      isBusinessLegalTypeCoOp.value ? 'registered office' : isBusinessLegalTypeFirm.value ? 'business' : ''
+      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+        return 'registered office'
+      } else if (isBusinessLegalTypeFirm.value) {
+        return 'business'
+      } else {
+        return ''
+      }
     })
 
     // Methods
@@ -544,46 +549,54 @@ export default defineComponent({
       emit('show-create-affiliation-invitation-error-dialog')
     }
 
+    const handleAuthBusinessOption = async () => {
+      try {
+        const payload = {
+          fromOrgId: Number(props.orgId),
+          toOrgUuid: invitationToAccount?.value.uuid,
+          businessIdentifier: businessIdentifier.value,
+          type: 'REQUEST',
+          additionalMessage: invitationAdditionalMessage.value
+        }
+        await AffiliationInvitationService.createInvitation(payload)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log(err)
+      } finally {
+        showAuthorizationRequestSentDialog.value = true
+      }
+    }
+
+    const handleAuthorizationEmailOption = async () => {
+      // Sending authorization email
+      try {
+        const payload: CreateAffiliationInvitation = {
+          fromOrgId: Number(props.orgId),
+          businessIdentifier: businessIdentifier.value,
+          // toOrgId has to be null, as this is a bug on the backend
+          toOrgId: null
+        }
+        const affiliationInvitation = await AffiliationInvitationService.createInvitation(payload)
+        if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {
+          emit('affiliation-invitation-pending', affiliationInvitation.data.businessIdentifier)
+        }
+        showAuthorizationEmailSentDialog.value = true
+      } catch (err) {
+        createAffiliationInvitationErrorDialog.value.open()
+      }
+    }
+
     const manageBusiness = async () => {
       if (requestAuthBusinessOption.value) {
-        try {
-          const payload = {
-            fromOrgId: Number(props.orgId),
-            toOrgUuid: invitationToAccount?.value.uuid,
-            businessIdentifier: businessIdentifier.value,
-            type: 'REQUEST',
-            additionalMessage: invitationAdditionalMessage.value
-          }
-
-          await AffiliationInvitationService.createInvitation(payload)
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        } finally {
-          showAuthorizationRequestSentDialog.value = true
-        }
+        await handleAuthBusinessOption()
         return
       }
 
       if (emailOption.value) {
-        // Sending authorization email
-        try {
-          const payload: CreateAffiliationInvitation = {
-            fromOrgId: Number(props.orgId),
-            businessIdentifier: businessIdentifier.value,
-            // toOrgId has to be null, as this is a bug on the backend
-            toOrgId: null
-          }
-          const affiliationInvitation = await AffiliationInvitationService.createInvitation(payload)
-          if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {
-            emit('affiliation-invitation-pending', affiliationInvitation.data.businessIdentifier)
-          }
-          showAuthorizationEmailSentDialog.value = true
-        } catch (err) {
-          createAffiliationInvitationErrorDialog.value.open()
-        }
+        await handleAuthorizationEmailOption()
         return
       }
+
       addBusinessForm.value.validate()
       // Adding business to the list
       if (isFormValid.value) {
