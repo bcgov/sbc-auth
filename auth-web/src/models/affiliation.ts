@@ -3,6 +3,7 @@ import { CorpTypes, NrTargetTypes } from '@/util/constants'
 import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
 import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { AffiliationInvitationOrg } from '@/models/affiliation-invitation'
 
 export interface CreateRequestBody {
   businessIdentifier: string
@@ -28,30 +29,18 @@ export const AffiliationInvitationStatus = {
   Failed: 'FAILED'
 }
 
-export class AffiliationInviteInfo {
+export const AffiliationInvitationType = {
+  MagicLink: 'EMAIL',
+  AccessRequest: 'REQUEST'
+}
+
+export interface AffiliationInviteInfo {
   id: number
   type: string
   status: string
   entity: Business
   fromOrg: OrgNameAndId
   toOrg: OrgNameAndId
-
-  static isFromOrg (affiliationInviteInfo: AffiliationInviteInfo, fromOrgId: number): boolean {
-    return affiliationInviteInfo.fromOrg.id === fromOrgId
-  }
-
-  static isToOrg (affiliationInviteInfo: AffiliationInviteInfo, toOrgId: number): boolean {
-    return affiliationInviteInfo.toOrg.id === toOrgId
-  }
-
-  static isToOrgAndActive (affiliationInviteInfo: AffiliationInviteInfo, toOrgId: number): boolean {
-    return AffiliationInviteInfo.isToOrg(affiliationInviteInfo, toOrgId) &&
-      affiliationInviteInfo.status === AffiliationInvitationStatus.Pending
-  }
-
-  static isAccepted (affiliationInviteInfo: AffiliationInviteInfo): boolean {
-    return affiliationInviteInfo.status === AffiliationInvitationStatus.Accepted
-  }
 }
 
 export interface AffiliationFilter {

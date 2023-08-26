@@ -22,6 +22,10 @@ export interface CorpType {
     desc?: string
 }
 
+export interface AffiliatedEntityTableViewData {
+    isTemporaryAffiliationInvitationRow: boolean
+}
+
 export interface Business {
     businessIdentifier: string
     businessNumber?: string
@@ -40,6 +44,7 @@ export interface Business {
     adminFreeze?: boolean
     dissolved?: boolean
     affiliationInvites?: AffiliationInviteInfo[]
+    affiliatedEntityTableViewData?: AffiliatedEntityTableViewData
 }
 
 export interface BusinessSearchResultDto {

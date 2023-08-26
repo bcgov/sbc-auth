@@ -10,7 +10,7 @@ export interface AffiliationInvitation {
     expiresOn?: string
     fromOrg?: AffiliationInvitationOrg
     toOrg?: AffiliationInvitationOrg
-    receipientEmail?: string
+    recipientEmail?: string
     sentDate?: string
     status: string
     token?: string

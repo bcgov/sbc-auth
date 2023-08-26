@@ -152,31 +152,7 @@
           >
             <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
             <span class="open-action">
-              <v-tooltip
-                top
-                content-class="top-tooltip"
-                :disabled="disableTooltip(item)"
-              >
-                <template #activator="{on}">
-                  <v-btn
-                    small
-                    color="primary"
-                    min-width="5rem"
-                    min-height="2rem"
-                    class="open-action-btn"
-                    v-on="on"
-                    @click="action(item)"
-                  >
-                    {{ getPrimaryAction(item) }}
-                    <v-icon
-                      v-if="isOpenExternal(item)"
-                      class="external-icon pl-1"
-                      small
-                    >mdi-open-in-new</v-icon>
-                  </v-btn>
-                </template>
-                <span>Go to {{ getTooltipTargetDescription(item) }} to access this business</span>
-              </v-tooltip>
+              <MainActionButton :business="item" />
               <!-- More Actions Menu -->
               <span class="more-actions">
                 <v-menu
@@ -271,7 +247,7 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInviteInfo } from '@/models/affiliation'
+import { AffiliationInvitationStatus, AffiliationInvitationType, AffiliationInviteInfo } from '@/models/affiliation'
 import {
   AffiliationTypes,
   CorpTypes,
@@ -296,10 +272,11 @@ import launchdarklyServices from 'sbc-common-components/src/services/launchdarkl
 import { useAffiliations } from '@/composables'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
+import MainActionButton from '@/components/auth/manage-business/action-buttons/MainAction.vue'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
-  components: { EntityDetails, BaseVDataTable },
+  components: { MainActionButton, EntityDetails, BaseVDataTable },
   props: {
     loading: { default: false },
     highlightIndex: { default: -1 }

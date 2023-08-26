@@ -1,5 +1,6 @@
 /* eslint-disable sort-imports */
 import { Business } from './../models/business'
+import * as BusinessUtils from '@/util/business'
 import { AffiliationState, AffiliationFilterParams } from './../models/affiliation'
 import { computed, reactive, ref, Ref, watch } from '@vue/composition-api'
 import { BaseTableHeaderI } from '@/components/datatable/interfaces'
@@ -27,18 +28,15 @@ export const useAffiliations = () => {
   const businesses = computed(() => businessStore.businesses)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
 
-  /** Returns true if the affiliation is a Name Request. */
-  const isNameRequest = (business: Business): boolean => {
-    return (business.corpType?.code === CorpTypes.NAME_REQUEST && !!business.nameRequest)
-  }
+  /**
+   * @deprecated use isNameRequest from utils/Business
+   * */
+  const isNameRequest = BusinessUtils.isNameRequest
 
-  /** Returns true if the affiliation is a temporary business. */
-  const isTemporaryBusiness = (business: Business): boolean => {
-    return (
-      (business.corpType?.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
-      (business.corpType?.code || business.corpType) === CorpTypes.REGISTRATION
-    )
-  }
+  /**
+   * @deprecated use isTemporaryBusiness from utils/Business
+   * */
+  const isTemporaryBusiness = BusinessUtils.isTemporaryBusiness
 
   /** Returns the temp business description. */
   const tempDescription = (business: Business): string => {
@@ -64,27 +62,10 @@ export const useAffiliations = () => {
     return GetCorpFullDescription(code as CorpTypeCd)
   }
 
-  /** Returns the status of the affiliation. */
-  const status = (business: Business): string => {
-    if (isTemporaryBusiness(business)) {
-      return BusinessState.DRAFT
-    }
-    if (isNameRequest(business)) {
-      // Format name request state value
-      const state = NrState[(business.nameRequest.state)?.toUpperCase()]
-      if (!state) return 'Unknown'
-      if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
-      else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION ||
-              business.corpType.code === CorpTypes.REGISTRATION ||
-              state === NrState.DRAFT) {
-        return NrDisplayStates[NrState.HOLD]
-      } else return NrDisplayStates[state] || 'Unknown'
-    }
-    if (business.status) {
-      return business.status.charAt(0)?.toUpperCase() + business.status?.slice(1)?.toLowerCase()
-    }
-    return BusinessState.ACTIVE
-  }
+  /** Returns the status of the affiliation.
+   * @deprecated use entityStatus from utils/Business
+   * */
+  const status = BusinessUtils.entityStatus
 
   /** Returns true if the affiliation is a numbered IA. */
   const isNumberedIncorporationApplication = (item: Business): boolean => {
