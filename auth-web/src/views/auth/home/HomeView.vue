@@ -194,6 +194,7 @@ import { Action, State } from 'pinia-class'
 import { Component, Vue } from 'vue-property-decorator'
 import { LoginSource, Pages } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
+import { useOrgStore, useUserStore } from '@/stores'
 import { AccountSettings } from '@/models/account-settings'
 import BcscPanel from '@/components/auth/home/BcscPanel.vue'
 import InfoStepper from '@/components/auth/home/InfoStepper.vue'
@@ -203,8 +204,6 @@ import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
 import SbcAuthMenu from 'sbc-common-components/src/components/SbcAuthMenu.vue'
 import TestimonialQuotes from '@/components/auth/home/TestimonialQuotes.vue'
 import { User } from '@/models/user'
-import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
 @Component({
   name: 'Home',

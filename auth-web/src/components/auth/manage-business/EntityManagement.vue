@@ -828,7 +828,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModalNR (nameRequestNumber: string) {
-    debugger
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
