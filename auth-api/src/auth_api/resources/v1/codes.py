@@ -32,7 +32,7 @@ def get_codes(code_type):
         if codes is not None:
             response, status = jsonify(codes), http_status.HTTP_200_OK
         else:
-            response, status = {'message': f'The code type ({code_type}) could not be found.'}, \
+            response, status = jsonify({'message': f'The code type ({code_type}) could not be found.'}), \
                 http_status.HTTP_404_NOT_FOUND
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

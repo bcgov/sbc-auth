@@ -14,7 +14,7 @@
 """API endpoints for managing an Invitation resource."""
 from datetime import datetime
 
-from flask import Blueprint, g
+from flask import Blueprint, g, jsonify
 from flask_cors import cross_origin
 
 from auth_api import status as http_status
@@ -78,7 +78,7 @@ def _replace_current_date(doc):
 def get_document_signature_by_name(file_name: str):
     """Return the latest terms of use."""
     try:
-        response, status = MinioService.create_signed_put_url(file_name), http_status.HTTP_200_OK
+        response, status = jsonify(MinioService.create_signed_put_url(file_name)), http_status.HTTP_200_OK
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status
