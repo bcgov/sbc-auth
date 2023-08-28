@@ -154,7 +154,7 @@ def delete_affiliation_invitation(affiliation_invitation_id):
     return response, status
 
 
-@bp.route('/<string:affiliation_invitation_id>/token/<string:affiliation_invitation_token>', methods=['PUT', 'OPTIONS'])
+@bp.route('/<string:affiliation_invitation_id>/token/<string:affiliation_invitation_token>', methods=['PUT'])
 @TRACER.trace()
 @cross_origin(origin='*')
 @_jwt.requires_auth

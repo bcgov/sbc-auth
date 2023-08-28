@@ -29,7 +29,7 @@ bp = Blueprint('RESET', __name__, url_prefix=f'{EndpointEnum.TEST_API.value}/res
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST', 'PUT', 'OPTIONS'])
+@bp.route('', methods=['POST'])
 @TRACER.trace()
 @cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.TESTER.value])

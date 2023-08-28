@@ -29,7 +29,7 @@ bp = Blueprint('BCOL_PROFILES', __name__, url_prefix=f'{EndpointEnum.API_V1.valu
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST', 'OPTIONS'])
+@bp.route('', methods=['POST'])
 @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 @TRACER.trace()
 @cross_origin(origin='*')
