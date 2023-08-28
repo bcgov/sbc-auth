@@ -13,7 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an entity (business) resource."""
 
-from flask import Blueprint, request
+from flask import Blueprint, jsonify, request
 from flask_cors import cross_origin
 
 from auth_api import status as http_status
@@ -120,7 +120,7 @@ def delete_entity(business_identifier):
             entity.delete()
             response, status = {}, http_status.HTTP_204_NO_CONTENT
         else:
-            response, status = {'message': f'A business for {business_identifier} was not found.'}, \
+            response, status = jsonify({'message': f'A business for {business_identifier} was not found.'}), \
                 http_status.HTTP_404_NOT_FOUND
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -139,7 +139,7 @@ def get_entity_contact(business_identifier):
     if ((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
             (contact := entity.get_contact())):
         return ContactService(contact).as_dict(masked_email_only=True), http_status.HTTP_200_OK
-    return {'message': f'Contacts for {business_identifier} was not found.'}, \
+    return jsonify({'message': f'Contacts for {business_identifier} was not found.'}), \
         http_status.HTTP_404_NOT_FOUND
 
 
