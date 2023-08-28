@@ -26,7 +26,6 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
-from auth_api.utils.util import cors_preflight
 
 
 bp = Blueprint('ENTITIES', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/entities')

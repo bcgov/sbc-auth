@@ -379,7 +379,6 @@ def get_organization_affiliations(org_id):
     return response, status
 
 
-
 @bp.route('/affiliation/<string:business_identifier>', methods=['GET', 'OPTIONS'])
 @TRACER.trace()
 @cross_origin(origin='*')
