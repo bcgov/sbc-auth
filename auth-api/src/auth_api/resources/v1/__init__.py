@@ -16,28 +16,28 @@ from typing import Optional
 
 from flask import Flask
 
-from ..account import bp as accounts_bp
-from ..acitivity_log import bp as activity_log_bp
-from ..affiliation_invitation import bp as affiliation_invitation_bp
-from ..bcol_profiles import bp as bcol_profiles_bp
-from ..bulk_user import bp as bulk_user_bp
-from ..codes import bp as codes_bp
-from ..documents import bp as documents_bp
-from ..documents_affidavit import bp as documents_affidavit_bp
-from ..entity import bp as entity_bp
-from ..invitation import bp as invitation_bp
-from ..meta import bp as meta_bp
-from ..notifications import bp as notifications_bp
+from .account import bp as accounts_bp
+from .acitivity_log import bp as activity_log_bp
+from .affiliation_invitation import bp as affiliation_invitation_bp
+from .bcol_profiles import bp as bcol_profiles_bp
+from .bulk_user import bp as bulk_user_bp
+from .codes import bp as codes_bp
+from .documents import bp as documents_bp
+from .documents_affidavit import bp as documents_affidavit_bp
+from .entity import bp as entity_bp
+from .invitation import bp as invitation_bp
+from .meta import bp as meta_bp
+from .notifications import bp as notifications_bp
 from ..ops import bp as ops_bp
-from ..org import bp as org_bp
-from ..org_api_keys import bp as org_api_keys_bp
-from ..org_authorizations import bp as org_authorizations_bp
-from ..org_products import bp as org_products_bp
-from ..permissions import bp as permissions_bp
-from ..products import bp as products_bp
-from ..task import bp as task_bp
-from ..user import bp as user_bp
-from ..user_settings import bp as user_settings_bp
+from .org import bp as org_bp
+from .org_api_keys import bp as org_api_keys_bp
+from .org_authorizations import bp as org_authorizations_bp
+from .org_products import bp as org_products_bp
+from .permissions import bp as permissions_bp
+from .products import bp as products_bp
+from .task import bp as task_bp
+from .user import bp as user_bp
+from .user_settings import bp as user_settings_bp
 
 
 class V1Endpoint:  # pylint: disable=too-few-public-methods,
