@@ -38,7 +38,7 @@ bp = Blueprint('USERS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/users
 TRACER = Tracer.get_instance()
 
 
-@bp.route('/bcros', methods=['POST', 'OPTIONS'])
+@bp.route('/bcros', methods=['POST'])
 @TRACER.trace()
 @cross_origin(origin='*')
 def post_anonymous_user():
@@ -132,7 +132,7 @@ def get_user():
     return response, status
 
 
-@bp.route('/<path:username>/otp', methods=['GET', 'OPTIONS', 'DELETE'])
+@bp.route('/<path:username>/otp', methods=['DELETE'])
 @TRACER.trace()
 @cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])

@@ -31,7 +31,7 @@ bp = Blueprint('INVITATIONS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['GET', 'POST', 'OPTIONS'])
+@bp.route('', methods=['POST'])
 @TRACER.trace()
 @cross_origin(origin='*')
 @_jwt.has_one_of_roles(

@@ -32,7 +32,7 @@ bp = Blueprint('ENTITIES', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/en
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST', 'OPTIONS'])
+@bp.route('', methods=['POST'])
 @_jwt.has_one_of_roles([Role.SYSTEM.value])
 @TRACER.trace()
 @cross_origin(origin='*')
