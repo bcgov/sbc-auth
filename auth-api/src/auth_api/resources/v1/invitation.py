@@ -25,7 +25,6 @@ from auth_api.services import User as UserService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import Role
-from auth_api.utils.util import cors_preflight
 
 
 bp = Blueprint('INVITATIONS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/invitations')
