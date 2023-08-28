@@ -69,7 +69,7 @@ def get_entity(business_identifier):
         if entity is not None:
             response, status = entity.as_dict(), http_status.HTTP_200_OK
         else:
-            response, status = {'message': f'A business for {business_identifier} was not found.'}, \
+            response, status = jsonify({'message': f'A business for {business_identifier} was not found.'}), \
                 http_status.HTTP_404_NOT_FOUND
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
@@ -100,7 +100,7 @@ def patch_entity(business_identifier):
         if entity is not None:
             response, status = entity.as_dict(), http_status.HTTP_200_OK
         else:
-            response, status = {'message': f'A business for {business_identifier} was not found.'}, \
+            response, status = jsonify({'message': f'A business for {business_identifier} was not found.'}), \
                 http_status.HTTP_404_NOT_FOUND
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code

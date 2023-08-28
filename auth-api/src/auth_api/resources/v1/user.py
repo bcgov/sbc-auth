@@ -141,7 +141,7 @@ def delete_user_otp(username):
     try:
         user = UserService.find_by_username(username)
         if user is None:
-            response, status = {'message': f'User {username} does not exist.'}, http_status.HTTP_404_NOT_FOUND
+            response, status = jsonify({'message': f'User {username} does not exist.'}), http_status.HTTP_404_NOT_FOUND
         elif user.as_dict().get('login_source', None) != LoginSource.BCEID.value:
             response, status = {'Only BCEID users has OTP', http_status.HTTP_400_BAD_REQUEST}
         else:
@@ -176,7 +176,7 @@ def delete_by_username(username):
     try:
         user = UserService.find_by_username(username)
         if user is None:
-            response, status = {'message': f'User {username} does not exist.'}, http_status.HTTP_404_NOT_FOUND
+            response, status = jsonify({'message': f'User {username} does not exist.'}), http_status.HTTP_404_NOT_FOUND
         elif user.as_dict().get('type', None) != Role.ANONYMOUS_USER.name:
             response, status = {'Normal users cant be deleted', http_status.HTTP_501_NOT_IMPLEMENTED}
         else:
