@@ -1,5 +1,4 @@
 import {
-  AffiliationInvitationStatus,
   AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody,
@@ -121,21 +120,6 @@ export const useBusinessStore = defineStore('business', () => {
       expirationDate: nr.expirationDate,
       applicants: nr.applicants
     }
-  }
-
-  /* Internal function for sorting affiliations / entities by invites. */
-  function sortEntitiesByInvites (affiliatedEntities: Business[]): Business[] {
-    // bubble the ones with the invitations to the top
-    affiliatedEntities?.sort((a, b) => {
-      if (a.affiliationInvites && !b.affiliationInvites) {
-        return -1
-      }
-      if (!a.affiliationInvites && b.affiliationInvites) {
-        return 1
-      }
-      return 0
-    })
-    return affiliatedEntities
   }
 
   /** This is the function that fetches and updates data for all NRs. */

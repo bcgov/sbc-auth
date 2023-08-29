@@ -187,7 +187,6 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInviteInfo } from '@/models/affiliation'
 import {
   AffiliationTypes,
   CorpTypes,
@@ -205,7 +204,6 @@ import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import EntityDetails from './EntityDetails.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import OrgService from '@/services/org.services'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
