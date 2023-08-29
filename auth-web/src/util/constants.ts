@@ -367,8 +367,37 @@ export enum NrRequestTypeStrings {
 
 export enum BusinessState {
     ACTIVE = 'Active',
-    DRAFT = 'Draft'
+    DRAFT = 'Draft',
+    HISTORICAL = 'Historical'
 }
+
+export const ActionButtonsTexts = {
+    Tooltips: {
+        GO_TO_SOCIETIES_ONLINE_REGISTER: 'Go to Societies Online to register this business',
+        GO_TO_SOCIETIES_ONLINE_ACCESS: 'Go to Societies Online to access this business',
+        GO_TO_CORPORATE_ONLINE_REGISTER: 'Go to Corporate Online to register this business',
+        GO_TO_CORPORATE_ONLINE_ACCESS: 'Go to Corporate Online to access this business'
+    },
+    Actions: {
+        //
+        REMOVE_FROM_TABLE: 'Remove From Table',
+        // NAME REQUEST
+        REGISTER_NOW: 'Register Now',
+        DOWNLOAD_FORM: 'Download Form',
+        AMALGAMATE_NOW: 'Amalgamate Now',
+        CONTINUE_IN_NOW: 'Continue In Now',
+        RESTORE_NOW: 'Restore Now',
+        REINSTATE_NOW: 'Reinstate Now',
+        CHANGE_NAME_NOW: 'Change Name Now',
+        ALTER_NOW: 'Alter Now',
+        OPEN_NAME_REQUEST: 'Open Name Request',
+        // BUSINESS
+        RESUME_DRAFT: 'Resume Draft',
+        MANAGE_BUSINESS: 'Manage Business',
+
+    }
+}
+
 
 export enum AccessType {
     REGULAR = 'REGULAR',

@@ -152,7 +152,7 @@
           >
             <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
             <span class="open-action">
-              <MainActionButton :business="item" />
+             <ActionButtons :business="item" />
               <!-- More Actions Menu -->
               <span class="more-actions">
                 <v-menu
@@ -247,7 +247,7 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInvitationType, AffiliationInviteInfo } from '@/models/affiliation'
+import { AffiliationInvitationStatus, AffiliationInviteInfo } from '@/models/affiliation'
 import {
   AffiliationTypes,
   CorpTypes,
@@ -272,11 +272,11 @@ import launchdarklyServices from 'sbc-common-components/src/services/launchdarkl
 import { useAffiliations } from '@/composables'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
-import MainActionButton from '@/components/auth/manage-business/action-buttons/MainAction.vue'
+import ActionButtons from '@/components/auth/manage-business/action-buttons/ActionButtons.vue'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
-  components: { MainActionButton, EntityDetails, BaseVDataTable },
+  components: { ActionButtons, EntityDetails, BaseVDataTable },
   props: {
     loading: { default: false },
     highlightIndex: { default: -1 }
@@ -485,7 +485,7 @@ export default defineComponent({
         return ''
       }
     }
-    const openNewAffiliationInvite = () => {
+    const openNewAffiliationInvite = (business: Business) => {
       // todo: open modal when modal is created
       // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
       alert('not implemented')
@@ -938,7 +938,7 @@ export default defineComponent({
     text-align: center;
   }
 
-  .actions {
+::v-deep .actions {
     height:30px;
     width: 140px;
 

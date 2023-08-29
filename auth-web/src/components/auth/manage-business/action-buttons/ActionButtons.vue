@@ -2,7 +2,7 @@
   <v-tooltip
       top
       content-class="top-tooltip"
-      :disabled="!hasToolTip"
+      :disabled="!mainActionButton.hasTooltip"
   >
     <template #activator="{on}">
       <v-btn
@@ -12,11 +12,11 @@
           min-height="2rem"
           class="open-action-btn"
           v-on="on"
-          @click="mainActionHandler(business)"
+          @click="mainActionButton.actionHandler(business)"
       >
-        {{ mainActionText }}
+        {{ mainActionButton.actionText }}
         <v-icon
-            v-if="hasExternalIcon"
+            v-if="mainActionButton.hasExternalIcon"
             class="external-icon pl-1"
             small
         >
@@ -24,7 +24,7 @@
         </v-icon>
       </v-btn>
     </template>
-    <span>{{ tooltipText }}</span>
+    <span>{{ mainActionButton.tooltipText }}</span>
   </v-tooltip>
 </template>
 
@@ -36,18 +36,33 @@ import { MainActionButtonClickedEvent } from '@/models/ui-interfaces/manage-busi
 import OrgService from '@/services/org.services'
 import { getFirstPendingAffiliationWithSmallestId } from '@/util/affiliation-invitation'
 import {
-  entityStatus,
+  entityStatus, getType,
   isColinEntity, isForRestore,
-  isModernizedEntity,
-  isNameRequest,
-  isOtherEntities,
-  isSocieties
+  isModernizedEntity, isNameRequest,
+  isOtherEntities, isSocieties, isSupportedRestorationEntities,
+  isTemporaryBusiness
 } from '@/util/business'
-import { NrDisplayStates } from '@/util/constants'
+import {
+  ActionButtonsTexts,
+  ActionButtonTooltips,
+  AffiliationTypes,
+  BusinessState, CorpTypes,
+  NrDisplayStates,
+  NrState
+} from '@/util/constants'
 import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
+import CommonUtils from '@/util/common-util'
+
+interface ActionButtonInfo {
+  actionText: string
+  actionHandler: (business: Business) => Promise<void>
+  hasTooltip: boolean
+  tooltipText: string
+  hasExternalIcon: boolean
+}
 
 export default defineComponent({
-  name: 'MainActionButton',
+  name: 'ActionButtons',
   props: {
     business: {
       type: Object as PropType<Business>,
@@ -57,13 +72,6 @@ export default defineComponent({
   emits: ['main-action-button-clicked'],
   setup (props, { emit }) {
 
-    interface ActionButtonInfo {
-      actionText: string
-      actionHandler: (business: Business) => Promise<void>
-      hasTooltip: boolean
-      tooltipText: string
-      hasExternalIcon: boolean
-    }
 
     const mainActionButton: ActionButtonInfo = {
       actionText: 'Error',
@@ -170,6 +178,10 @@ export default defineComponent({
       // todo:
     }
 
+    const resumeDraft = async (business: Business) => {
+      // todo:
+    }
+
     const updateMainActionButton = (actionText: string,
                                     actionHandler: (business: Business) => Promise<void>,
                                     hasTooltip?: boolean, // false when not provided
@@ -182,7 +194,18 @@ export default defineComponent({
       mainActionButton.tooltipText = !!tooltipText ? tooltipText : ''
       mainActionButton.hasExternalIcon = !!hasExternalIcon
     }
-
+        props.business.corpType.code, "\t",
+        isTemporaryBusiness(props.business), "\t",
+        getType(props.business), "\t",
+        'colin ',
+        isColinEntity(props.business), "\t",
+        'modern ',
+        isModernizedEntity(props.business), "\t",
+        'society ',
+        isSocieties(props.business), "\t",
+        'other ',
+        isOtherEntities(props.business), "\t"
+    )
     // resolve actions and texts
     const isTempAffiliationInvitationRow = props.business.affiliatedEntityTableViewData?.isTemporaryAffiliationInvitationRow
     if (isTempAffiliationInvitationRow) {
@@ -213,91 +236,180 @@ export default defineComponent({
     } else if (isNameRequest(props.business)) {
       // handle name requests
       const nrRequestActionCd = props.business.nameRequest?.requestActionCd
-      const isApproved = entityStatus(props.business) === NrDisplayStates.APPROVED
+      const status = entityStatus(props.business)
+      const isApproved = status === NrDisplayStates.APPROVED
+      const forRestore = (nrRequestActionCd === NrRequestActionCodes.RESTORE && isForRestore(props.business))
+      const isForRemoval = [
+        NrDisplayStates.REJECTED.toUpperCase(),
+        NrDisplayStates.CONSUMED.toUpperCase(),
+        NrDisplayStates.CANCELLED.toUpperCase(),
+        NrDisplayStates.REFUND_REQUESTED.toUpperCase()
+      ].includes(status.toUpperCase())
+
+      mainActionClickedEvent.name = 'HandleNameRequestAction'
 
       // resolve items based on types and statuses
-      if (entityStatus(props.business) === NrDisplayStates.CONSUMED) {
-        updateMainActionButton('Remove from table', removeNameRequestFromTable)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
+      if (isForRemoval) {
+        updateMainActionButton(ActionButtonsTexts.Actions.REMOVE_FROM_TABLE, removeNameRequestFromTable)
 
-      } else if (isModernizedEntity(props.business) && isApproved) {
-        updateMainActionButton( 'Register Now', openIncorporationApplication)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
-
-      } else if (isColinEntity(props.business) && isApproved) {
-        updateMainActionButton('Register Now',
-            redirectToColin,
-            true,
-            'Go to Corporate Online to register this business',
-            false
+      } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.AMALGAMATE) {
+        // MVP redirect to COLIN
+        updateMainActionButton(
+            ActionButtonsTexts.Actions.AMALGAMATE_NOW,
+            startRegularAmalgamation,
+            true, // mvp
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,  // mvp
+            true // mvp
         )
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
 
-      } else if (isSocieties(props.business) && isApproved) {
-        updateMainActionButton('Register Now',
-            redirectToSocietiesOnline,
-            true,
-            'Go to Societies Online to register this business',
-            false
+      } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.MOVE) {
+        // MVP redirect to COLIN
+        updateMainActionButton(
+            ActionButtonsTexts.Actions.CONTINUE_IN_NOW,
+            openContinuationApplication,
+            true, // mvp
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,  // mvp
+            true // mvp
         )
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
 
-      } else if (isOtherEntities(props.business) && isApproved) {
+      } else if (isApproved && (nrRequestActionCd === NrRequestActionCodes.RENEW || forRestore)) {
+        // MVP redirect to COLIN4
+        if (!isSupportedRestorationEntities(props.business)) {
+          updateMainActionButton(
+              ActionButtonsTexts.Actions.RESTORE_NOW,
+              redirectToColin,
+              true,
+              ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+              true
+          )
+        } else {
+          updateMainActionButton(
+              ActionButtonsTexts.Actions.RESTORE_NOW,
+              openBusinessDashboard
+          )
+        }
+
+      } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.RESTORE && !isForRestore(props.business)) {
         // MVP redirect to COLIN
-        updateMainActionButton('Download Form',
-            redirectToColin,
-            true,
-            'Go to Corporate Online to register this business',
-            false
-        )
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
+        if (!isSupportedRestorationEntities(props.business)) {
+          updateMainActionButton(
+              ActionButtonsTexts.Actions.REINSTATE_NOW,
+              redirectToColin,
+              true,
+              ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+              true
+          )
+        } else {
+          updateMainActionButton(
+              ActionButtonsTexts.Actions.REINSTATE_NOW,
+              openBusinessDashboard
+          )
+        }
 
-      } else if (nrRequestActionCd === NrRequestActionCodes.AMALGAMATE) {
+      } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
         // MVP redirect to COLIN
-        updateMainActionButton('Amalgamate Now', startRegularAmalgamation)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
+        updateMainActionButton(isApproved && ActionButtonsTexts.Actions.CHANGE_NAME_NOW, openChangeNameNow)
 
-      } else if (nrRequestActionCd === NrRequestActionCodes.MOVE) {
-        // MVP redirect to COLIN
-        updateMainActionButton('Continue In Now', openContinuationApplication)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
-
-      } else if (nrRequestActionCd === NrRequestActionCodes.RENEW ||
-          (nrRequestActionCd === NrRequestActionCodes.RESTORE && isForRestore(props.business))) {
-        // MVP redirect to COLIN
-        updateMainActionButton('Restore Now', openRestoreNow, null, null, true)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
-
-      } else if (nrRequestActionCd === NrRequestActionCodes.RESTORE && !isForRestore(props.business)) {
-        // MVP redirect to COLIN
-        updateMainActionButton( 'Reinstate Now', openReinstateNow)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
-
-      } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
-        // MVP redirect to COLIN
-        updateMainActionButton('Change Name Now', openChangeNameNow)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
-
-      } else if (nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
+      } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
         // MVP redirect to COLIN
         updateMainActionButton('Alter Now', openConversionNameRequest)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
+
+      } else if (isApproved && isModernizedEntity(props.business)) {
+        updateMainActionButton(ActionButtonsTexts.Actions.REGISTER_NOW, openIncorporationApplication)
+
+      } else if (isApproved && isColinEntity(props.business)) {
+        updateMainActionButton(
+            ActionButtonsTexts.Actions.REGISTER_NOW,
+            redirectToColin,
+            true,
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_REGISTER,
+            true
+        )
+
+      } else if (isApproved && isSocieties(props.business)) {
+        updateMainActionButton(
+            ActionButtonsTexts.Actions.REGISTER_NOW,
+            redirectToSocietiesOnline,
+            true,
+            ActionButtonsTexts.Tooltips.GO_TO_SOCIETIES_ONLINE_REGISTER,
+            true
+        )
+
+      } else if (isApproved && isOtherEntities(props.business)) {
+        // MVP redirect to COLIN
+        updateMainActionButton(
+            ActionButtonsTexts.Actions.DOWNLOAD_FORM,
+            redirectToFormsPage,
+            true,
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_REGISTER,
+            true
+        )
 
       } else {
         updateMainActionButton('Open Name Request', openManageNR)
-        mainActionClickedEvent.name = 'HandleNameRequestAction'
+
       }
     } else {
-      // it is not invitation, nor name request
+      // it is not invitation, nor name request ==> It is regular incorporation stuff
+      const isDraft = isTemporaryBusiness(props.business)
+      const isActive = entityStatus(props.business) === BusinessState.ACTIVE
+      const isHistorical = props.business?.status?.toUpperCase() === BusinessState.HISTORICAL.toUpperCase() // is this OK check?
+      const type = getType(props.business)
+      mainActionClickedEvent.name = 'HandleBusinessAction'
 
+      if (
+          // isDraft &&
+          [AffiliationTypes.INCORPORATION_APPLICATION as string, CorpTypes.INCORPORATION_APPLICATION as string].includes(type)) {
+        updateMainActionButton('Resume Draft', resumeDraft)
+
+      } else if (
+          // isDraft &&
+          [AffiliationTypes.REGISTRATION as string, CorpTypes.REGISTRATION as string].includes(type)) {
+        updateMainActionButton('Resume Draft', resumeDraft)
+
+      } else if (isActive && isModernizedEntity(props.business)) {
+        updateMainActionButton('Manage Business', openBusinessDashboard)
+
+      } else if (isActive && !isModernizedEntity(props.business)) {
+        updateMainActionButton(
+            'Manage Business',
+            redirectToColin,
+            true,
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+            true
+        )
+
+      } else if (isHistorical && isModernizedEntity(props.business)) {
+        updateMainActionButton('Manage Business', openBusinessDashboard)
+
+      } else if (isHistorical && !isModernizedEntity(props.business)) {
+        updateMainActionButton(
+            'Manage Business',
+            redirectToColin,
+            true,
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+            true
+        )
+
+      } else if ((isHistorical || isActive) && isSocieties(props.business)) {
+        updateMainActionButton('Manage Business', redirectToSocietiesOnline, true, 'Go to Societies Online to access this business', true)
+
+      } else if (isHistorical) {
+        updateMainActionButton(
+            'Manage Business',
+            redirectToColin,
+            true,
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+            true
+        )
+      } else {
+        //if all else fails ...
+        updateMainActionButton('Manage Business', openBusinessDashboard)
+      }
     }
 
     return {
-      hasExternalIcon,
-      hasToolTip,
-      tooltipText,
-      mainActionText,
-      mainActionHandler
+      mainActionButton
     }
   }
 })

@@ -50,17 +50,10 @@ export const useAffiliations = () => {
     }
   }
 
-  /** Returns the type of the affiliation. */
-  const type = (business: Business): string => {
-    if (isTemporaryBusiness(business)) {
-      return tempDescription(business)
-    }
-    if (isNameRequest(business)) {
-      return AffiliationTypes.NAME_REQUEST
-    }
-    const code: unknown = business.corpType.code
-    return GetCorpFullDescription(code as CorpTypeCd)
-  }
+  /** Returns the type of the affiliation.
+   * @Deprecated see getType from utils/Business
+   * */
+  const type = BusinessUtils.getType
 
   /** Returns the status of the affiliation.
    * @deprecated use entityStatus from utils/Business

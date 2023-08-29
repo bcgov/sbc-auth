@@ -134,7 +134,7 @@ export const businesses: Business[] = [
         id: 11,
         type: 'RequestAccess',
         status: 'ACTIVE',
-        business: {
+        entity: {
           businessIdentifier: 'RequestAccessSingleTest111',
           name: 'Request Access Single LTD.',
           corpType: { code: CorpTypes.BC_COMPANY }
@@ -156,7 +156,7 @@ export const businesses: Business[] = [
         id: 12,
         type: 'RequestAccess',
         status: 'ACTIVE',
-        business: {
+        entity: {
           businessIdentifier: 'RequestAccessMultiTest111',
           name: 'Request Access Multi LTD.',
           corpType: { code: CorpTypes.BC_COMPANY }
@@ -168,7 +168,7 @@ export const businesses: Business[] = [
         id: 13,
         type: 'RequestAccess',
         status: 'ACTIVE',
-        business: {
+        entity: {
           businessIdentifier: 'RequestAccessMultiTest111',
           name: 'Request Access Multi LTD.',
           corpType: { code: CorpTypes.BC_COMPANY }
@@ -180,7 +180,7 @@ export const businesses: Business[] = [
         id: 14,
         type: 'RequestAccess',
         status: 'ACTIVE',
-        business: {
+        entity: {
           businessIdentifier: 'RequestAccessMultiTest111',
           name: 'Request Access Multi LTD.',
           corpType: { code: CorpTypes.BC_COMPANY }

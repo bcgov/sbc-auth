@@ -1,7 +1,7 @@
+import { AffiliationTypes, BusinessState, CorpTypes, LDFlags, NrDisplayStates, NrState } from '@/util/constants'
+import { CorpTypeCd, GetCorpFullDescription } from '@bcrs-shared-components/corp-type-module'
 import { Business } from '@/models/business'
-import { BusinessState, CorpTypes, LDFlags, NrDisplayStates, NrState } from '@/util/constants'
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
-import { businesses } from '../../tests/unit/test-utils/test-data/affiliations'
 
 /** Returns true if the affiliation is a Name Request.
  *
@@ -17,6 +17,30 @@ export const getEntityType = (item: Business): CorpTypes => {
     entityType = item.nameRequest?.legalType
   }
   return entityType
+}
+
+
+/** Returns the temp business description. */
+const _temporaryBusinessDescription = (business: Business): string => {
+  switch ((business.corpType?.code || business.corpType) as CorpTypes) {
+    case CorpTypes.INCORPORATION_APPLICATION:
+      return AffiliationTypes.INCORPORATION_APPLICATION
+    case CorpTypes.REGISTRATION:
+      return AffiliationTypes.REGISTRATION
+    default:
+      return '' // should never happen
+  }
+}
+
+export const getType = (business: Business): string => {
+  if (isTemporaryBusiness(business) && CorpTypes.INCORPORATION_APPLICATION) {
+    return _temporaryBusinessDescription(business)
+  }
+  if (isNameRequest(business)) {
+    return AffiliationTypes.NAME_REQUEST
+  }
+  const code: unknown = business.corpType.code
+  return GetCorpFullDescription(code as CorpTypeCd)
 }
 
 /**
@@ -77,6 +101,16 @@ export const isColinEntity = (item: Business): boolean => {
   ].includes(entityTpe)
 }
 
+export const isSupportedRestorationEntities = (item: Business): boolean => {
+  const entityType = getEntityType(item)
+  const supportedEntityFlags = launchdarklyServices.getFlag(LDFlags.SupportRestorationEntities)?.split(' ') || []
+  return supportedEntityFlags.includes(entityType)
+}
+
+/**
+ * returns  NrState|BusinessState|NrDisplayStates|'Unknown' or string ...
+ * @param business
+ */
 export const entityStatus = (business: Business): string => {
   if (isTemporaryBusiness(business)) {
     return BusinessState.DRAFT

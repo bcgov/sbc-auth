@@ -158,6 +158,7 @@ export const useBusinessStore = defineStore('business', () => {
       } else if (!business && isFromOrg && !isAccepted) {
         const newBusiness = { ...affiliationInvite.entity, affiliationInvites: [affiliationInvite] }
         affiliatedEntities.push(newBusiness)
+        affiliatedEntityTableViewData: { isTemporaryAffiliationInvitationRow: true }
       }
     }
 
