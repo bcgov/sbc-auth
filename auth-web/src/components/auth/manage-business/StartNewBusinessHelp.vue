@@ -37,7 +37,7 @@
         <li class="mt-10">
           <h4>Request a Business Name or Use a Numbered Company</h4>
           <ul class="mt-4 text-align">
-            <h4 class="mb-5 ml-n6">
+            <h4 class="mb-5 ml-n6 sub-header">
               Request a Business Name
             </h4>
             <li>
@@ -64,7 +64,7 @@
               You can track the approval status of your Name Request from your table on this screen by clicking the
               <strong>"Open Name Request"</strong> button next to your Name Request.
             </li>
-            <h4 class="my-5 ml-n6">
+            <h4 class="my-5 ml-n6 sub-header">
               Use a Numbered Company
             </h4>
             <li>
@@ -156,5 +156,9 @@ ul li::before {
 
 ul ul li {
   margin-bottom: 5px;
+}
+
+.sub-header {
+  color: $gray7;
 }
 </style>
