@@ -17,7 +17,7 @@ from typing import Optional
 from flask import Flask
 
 from .account import bp as accounts_bp
-from .acitivity_log import bp as activity_log_bp
+from .activity_log import bp as activity_log_bp
 from .affiliation_invitation import bp as affiliation_invitation_bp
 from .bcol_profiles import bp as bcol_profiles_bp
 from .bulk_user import bp as bulk_user_bp

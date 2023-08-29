@@ -42,7 +42,6 @@ def get_user_settings(user_id):
     """
     token = g.jwt_oidc_token_info
 
-    # TODO make this check better.may be read from DB or something
     if token.get('sub', None) != user_id:
         return {'message': 'Unauthorized'}, http_status.HTTP_401_UNAUTHORIZED
 

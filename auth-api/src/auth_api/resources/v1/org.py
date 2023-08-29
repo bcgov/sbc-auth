@@ -224,7 +224,6 @@ def post_org_login_options(org_id):
     """Create a new login type for the specified org."""
     request_json = request.get_json()
     login_option_val = request_json.get('loginOption')
-    # TODO may be add validation here
     try:
         login_option = OrgService.add_login_option(org_id, login_option_val)
         response, status = jsonify({'login_option': login_option.login_source}), http_status.HTTP_201_CREATED
@@ -241,7 +240,6 @@ def put_org_login_optjons(org_id):
     """Update a new login type for the specified org."""
     request_json = request.get_json()
     login_option_val = request_json.get('loginOption')
-    # TODO may be add validation here
     try:
         login_option = OrgService.update_login_option(org_id, login_option_val)
         response, status = jsonify({'login_option': login_option.login_source}), http_status.HTTP_201_CREATED

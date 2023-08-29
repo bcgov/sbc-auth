@@ -37,7 +37,6 @@ TRACER = Tracer.get_instance()
 def get_notifications(user_id, org_id):  # pylint:disable=unused-argument
     """Find the count of notification remaining.If any details invalid, it returns zero."""
     try:
-        # todo use the user_id instead of jwt
         pending_count = MembershipService.get_pending_member_count_for_org(org_id)
         response, status = {'count': pending_count}, http_status.HTTP_200_OK
     except BusinessException as exception:
