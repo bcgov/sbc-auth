@@ -13,25 +13,31 @@
 # limitations under the License.
 """API endpoints for managing a Product resource."""
 
-from flask import Blueprint, request
-from flask_cors import cross_origin
+from flask import request
+from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
 from auth_api.auth import jwt as _jwt
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.tracer import Tracer
-from auth_api.utils.endpoints_enums import EndpointEnum
+from auth_api.utils.util import cors_preflight
 
-bp = Blueprint('PERMISSIONS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/orgs/<int:org_id>/authorizations')
+
+API = Namespace('permissions', description='Endpoints for permissions management')
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['GET', 'OPTIONS'])
-@_jwt.requires_auth
-@cross_origin(origin='*')
-def get_organization_permissions(org_id):
-    """Return authorization for the user for the passed business identifier."""
-    expanded: bool = request.args.get('expanded', False)
-    corp_type_code = request.headers.get('Product-Code', None)
-    authorisations = AuthorizationService.get_account_authorizations_for_org(org_id, corp_type_code, expanded)
-    return authorisations, http_status.HTTP_200_OK
+@cors_preflight('GET,OPTIONS')
+@API.route('', methods=['GET', 'OPTIONS'])
+class OrgAuthorizationResource(Resource):
+    """Resource for managing entity authorizations."""
+
+    @staticmethod
+    @_jwt.requires_auth
+    @cors.crossdomain(origin='*')
+    def get(org_id):
+        """Return authorization for the user for the passed business identifier."""
+        expanded: bool = request.args.get('expanded', False)
+        corp_type_code = request.headers.get('Product-Code', None)
+        authorisations = AuthorizationService.get_account_authorizations_for_org(org_id, corp_type_code, expanded)
+        return authorisations, http_status.HTTP_200_OK

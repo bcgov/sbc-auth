@@ -11,37 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Endpoints to reset test data from database."""
-
+"""API endpoints for managing an Invitation resource."""
+from flask import jsonify
 from flask_restx import Namespace, Resource, cors
 
 from auth_api import status as http_status
-from auth_api.auth import jwt as _jwt
 from auth_api.exceptions import BusinessException
-from auth_api.services import ResetTestData as ResetService
-from auth_api.tracer import Tracer
-from auth_api.utils.roles import Role
+from auth_api.services import Codes as CodeService
 from auth_api.utils.util import cors_preflight
 
 
-API = Namespace('reset', description='Authentication System - Reset test data')
-TRACER = Tracer.get_instance()
+API = Namespace('codes', description='Endpoints for get codes from database')
 
 
-@cors_preflight('POST, PUT, OPTIONS')
-@API.route('', methods=['POST', 'PUT', 'OPTIONS'])
-class Reset(Resource):
-    """Cleanup test data by the provided token."""
+@cors_preflight('GET,OPTIONS')
+@API.route('/<string:code_type>', methods=['GET', 'OPTIONS'])
+class Codes(Resource):
+    """Resource for codes."""
 
     @staticmethod
-    @TRACER.trace()
     @cors.crossdomain(origin='*')
-    @_jwt.has_one_of_roles([Role.TESTER.value])
-    def post():
-        """Cleanup test data by the provided token."""
+    def get(code_type):
+        """Return the codes by giving name."""
         try:
-            ResetService.reset()
-            response, status = '', http_status.HTTP_204_NO_CONTENT
+            codes = CodeService.fetch_codes(code_type=code_type)
+            if codes is not None:
+                response, status = jsonify(codes), http_status.HTTP_200_OK
+            else:
+                response, status = {'message': f'The code type ({code_type}) could not be found.'}, \
+                    http_status.HTTP_404_NOT_FOUND
         except BusinessException as exception:
             response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
         return response, status
