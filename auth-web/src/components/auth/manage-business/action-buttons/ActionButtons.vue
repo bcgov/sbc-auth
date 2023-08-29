@@ -2,7 +2,7 @@
   <v-tooltip
       top
       content-class="top-tooltip"
-      :disabled="!mainActionButton.hasTooltip"
+      :disabled="!mainActionButton.tooltipText.trim()"
   >
     <template #activator="{on}">
       <v-btn
@@ -43,8 +43,8 @@ import {
   isTemporaryBusiness
 } from '@/util/business'
 import {
+  ActionButtonsEvents,
   ActionButtonsTexts,
-  ActionButtonTooltips,
   AffiliationTypes,
   BusinessState, CorpTypes,
   NrDisplayStates,
@@ -106,23 +106,23 @@ export default defineComponent({
           errorCode: resp.status
         }
       }
-      emit('main-action-button-clicked', mainActionClickedEvent)
+      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent)
     }
 
     const resendAffiliationInvitationHandler = async (business: Business) => {
       // todo:
-      emit('main-action-button-clicked', mainActionClickedEvent) // todo: add consequence event
+      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent) // todo: add consequence event
     }
 
     const openManageThisBusiness = async (business: Business) => {
       // todo:
 
-      emit('main-action-button-clicked', mainActionClickedEvent) // todo: add consequence event
+      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent) // todo: add consequence event
     }
 
     const openBusinessDashboard = async (business: Business) => {
       // todo:
-      emit('main-action-button-clicked', mainActionClickedEvent) // todo: add consequence event
+      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent) // todo: add consequence event
     }
 
     const openManageNR = async (business: Business) => {
@@ -185,13 +185,11 @@ export default defineComponent({
 
     const updateMainActionButton = (actionText: string,
                                     actionHandler: (business: Business) => Promise<void>,
-                                    hasTooltip?: boolean, // false when not provided
                                     tooltipText?: string, // empty when not provided
                                     hasExternalIcon?: boolean // false when not provided
     ) => {
       mainActionButton.actionText = actionText
       mainActionButton.actionHandler = actionHandler
-      mainActionButton.hasTooltip = !!hasTooltip
       mainActionButton.tooltipText = !!tooltipText ? tooltipText : ''
       mainActionButton.hasExternalIcon = !!hasExternalIcon
     }
@@ -206,17 +204,17 @@ export default defineComponent({
       const isAccessRequest = affiliationInviteInfo?.type === AffiliationInvitationType.AccessRequest
 
       if (isAccessRequest && (affiliationInviteInfo.status === AffiliationInvitationStatus.Pending)) {
-        updateMainActionButton('Cancel', removeAffiliationInvitationHandler)
-        mainActionClickedEvent.name = 'AffiliationInvitation-Cancel'
+        updateMainActionButton(ActionButtonsTexts.Actions.CANCEL, removeAffiliationInvitationHandler)
+        mainActionClickedEvent.name = ActionButtonsEvents.AFFILIATION_INVITATION_CANCEL
 
       } else if (isAccessRequest && (affiliationInviteInfo.status !== AffiliationInvitationStatus.Pending)) {
-        updateMainActionButton('Remove', removeAffiliationInvitationHandler)
-        mainActionClickedEvent.name = 'AffiliationInvitation-Remove'
+        updateMainActionButton(ActionButtonsTexts.Actions.REMOVE, removeAffiliationInvitationHandler)
+        mainActionClickedEvent.name = ActionButtonsEvents.AFFILIATION_INVITATION_REMOVE
 
       } else if (isMagicLink &&
           [AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(affiliationInviteInfo.status)) {
-        updateMainActionButton('Resend', resendAffiliationInvitationHandler)
-        mainActionClickedEvent.name = 'AffiliationInvitation-Resend'
+        updateMainActionButton(ActionButtonsTexts.Actions.RESEND, resendAffiliationInvitationHandler)
+        mainActionClickedEvent.name = ActionButtonsEvents.AFFILIATION_INVITATION_RESEND
       } else {
         // should not happen
         console.error('AffiliatedEntityTable.MainAction.isTempAffiliationInvitationRow',
@@ -236,7 +234,7 @@ export default defineComponent({
         NrDisplayStates.REFUND_REQUESTED.toUpperCase()
       ].includes(status.toUpperCase())
 
-      mainActionClickedEvent.name = 'HandleNameRequestAction'
+      mainActionClickedEvent.name = ActionButtonsEvents.DEFAULT_NAME_REQUEST_ACTION
 
       // resolve items based on types and statuses
       if (isForRemoval) {
@@ -247,7 +245,6 @@ export default defineComponent({
         updateMainActionButton(
             ActionButtonsTexts.Actions.AMALGAMATE_NOW,
             startRegularAmalgamation,
-            true, // mvp
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,  // mvp
             true // mvp
         )
@@ -257,7 +254,6 @@ export default defineComponent({
         updateMainActionButton(
             ActionButtonsTexts.Actions.CONTINUE_IN_NOW,
             openContinuationApplication,
-            true, // mvp
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,  // mvp
             true // mvp
         )
@@ -268,7 +264,6 @@ export default defineComponent({
           updateMainActionButton(
               ActionButtonsTexts.Actions.RESTORE_NOW,
               redirectToColin,
-              true,
               ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
               true
           )
@@ -285,7 +280,6 @@ export default defineComponent({
           updateMainActionButton(
               ActionButtonsTexts.Actions.REINSTATE_NOW,
               redirectToColin,
-              true,
               ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
               true
           )
@@ -302,7 +296,7 @@ export default defineComponent({
 
       } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
         // MVP redirect to COLIN
-        updateMainActionButton('Alter Now', openConversionNameRequest)
+        updateMainActionButton(ActionButtonsTexts.Actions.ALTER_NOW, openConversionNameRequest)
 
       } else if (isApproved && isModernizedEntity(props.business)) {
         updateMainActionButton(ActionButtonsTexts.Actions.REGISTER_NOW, openIncorporationApplication)
@@ -311,7 +305,6 @@ export default defineComponent({
         updateMainActionButton(
             ActionButtonsTexts.Actions.REGISTER_NOW,
             redirectToColin,
-            true,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_REGISTER,
             true
         )
@@ -320,7 +313,6 @@ export default defineComponent({
         updateMainActionButton(
             ActionButtonsTexts.Actions.REGISTER_NOW,
             redirectToSocietiesOnline,
-            true,
             ActionButtonsTexts.Tooltips.GO_TO_SOCIETIES_ONLINE_REGISTER,
             true
         )
@@ -330,13 +322,12 @@ export default defineComponent({
         updateMainActionButton(
             ActionButtonsTexts.Actions.DOWNLOAD_FORM,
             redirectToFormsPage,
-            true,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_REGISTER,
             true
         )
 
       } else {
-        updateMainActionButton('Open Name Request', openManageNR)
+        updateMainActionButton(ActionButtonsTexts.Actions.OPEN_NAME_REQUEST, openManageNR)
 
       }
     } else {
@@ -345,56 +336,58 @@ export default defineComponent({
       const isActive = entityStatus(props.business) === BusinessState.ACTIVE
       const isHistorical = props.business?.status?.toUpperCase() === BusinessState.HISTORICAL.toUpperCase() // is this OK check?
       const type = getType(props.business)
-      mainActionClickedEvent.name = 'HandleBusinessAction'
+      mainActionClickedEvent.name = ActionButtonsEvents.DEFAULT_BUSINESS_ACTION
 
       if (
           // isDraft &&
           [AffiliationTypes.INCORPORATION_APPLICATION as string, CorpTypes.INCORPORATION_APPLICATION as string].includes(type)) {
-        updateMainActionButton('Resume Draft', resumeDraft)
+        updateMainActionButton(ActionButtonsTexts.Actions.RESUME_DRAFT, resumeDraft)
 
       } else if (
           // isDraft &&
           [AffiliationTypes.REGISTRATION as string, CorpTypes.REGISTRATION as string].includes(type)) {
-        updateMainActionButton('Resume Draft', resumeDraft)
+        updateMainActionButton(ActionButtonsTexts.Actions.RESUME_DRAFT, resumeDraft)
 
       } else if (isActive && isModernizedEntity(props.business)) {
-        updateMainActionButton('Manage Business', openBusinessDashboard)
+        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, openBusinessDashboard)
 
       } else if (isActive && !isModernizedEntity(props.business)) {
         updateMainActionButton(
-            'Manage Business',
+            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
             redirectToColin,
-            true,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
             true
         )
 
       } else if (isHistorical && isModernizedEntity(props.business)) {
-        updateMainActionButton('Manage Business', openBusinessDashboard)
+        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, openBusinessDashboard)
 
       } else if (isHistorical && !isModernizedEntity(props.business)) {
         updateMainActionButton(
-            'Manage Business',
+            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
             redirectToColin,
-            true,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
             true
         )
 
       } else if ((isHistorical || isActive) && isSocieties(props.business)) {
-        updateMainActionButton('Manage Business', redirectToSocietiesOnline, true, 'Go to Societies Online to access this business', true)
+        updateMainActionButton(
+            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
+            redirectToSocietiesOnline,
+            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+            true
+        )
 
       } else if (isHistorical) {
         updateMainActionButton(
-            'Manage Business',
+            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
             redirectToColin,
-            true,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
             true
         )
       } else {
         //if all else fails ...
-        updateMainActionButton('Manage Business', openBusinessDashboard)
+        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, openBusinessDashboard)
       }
     }
 

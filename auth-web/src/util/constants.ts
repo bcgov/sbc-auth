@@ -371,6 +371,18 @@ export enum BusinessState {
     HISTORICAL = 'Historical'
 }
 
+export const ActionButtonsEvents = {
+    MAIN_BUTTON_CLICKED: 'main-action-button-clicked',
+
+    DEFAULT_BUSINESS_ACTION: 'HandleBusinessAction',
+    DEFAULT_NAME_REQUEST_ACTION: 'HandleNameRequestAction',
+
+    AFFILIATION_INVITATION_CANCEL : 'AffiliationInvitationAction-cancel',
+    AFFILIATION_INVITATION_REMOVE : 'AffiliationInvitationAction-remove',
+    AFFILIATION_INVITATION_RESEND : 'AffiliationInvitationAction-resend',
+
+} as const
+
 export const ActionButtonsTexts = {
     Tooltips: {
         GO_TO_SOCIETIES_ONLINE_REGISTER: 'Go to Societies Online to register this business',
@@ -379,6 +391,9 @@ export const ActionButtonsTexts = {
         GO_TO_CORPORATE_ONLINE_ACCESS: 'Go to Corporate Online to access this business'
     },
     Actions: {
+        CANCEL: 'Cancel',
+        REMOVE: 'Remove',
+        RESEND: 'Resend',
         //
         REMOVE_FROM_TABLE: 'Remove From Table',
         // NAME REQUEST
@@ -394,9 +409,8 @@ export const ActionButtonsTexts = {
         // BUSINESS
         RESUME_DRAFT: 'Resume Draft',
         MANAGE_BUSINESS: 'Manage Business',
-
     }
-}
+} as const
 
 
 export enum AccessType {
