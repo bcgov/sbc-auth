@@ -1,4 +1,5 @@
 Flask-Caching==2.0.2
+Flask-Cors==3.0.10
 Flask-Mail==0.9.1
 Flask-Migrate==2.7.0
 Flask-Moment==1.0.5
@@ -30,7 +31,6 @@ ecdsa==0.18.0
 expiringdict==1.2.2
 flask-jwt-oidc==0.3.0
 flask-marshmallow==0.11.0
-flask-restx==1.1.0
 frozenlist==1.3.3
 gunicorn==20.1.0
 idna==3.4
