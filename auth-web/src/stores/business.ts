@@ -138,32 +138,6 @@ export const useBusinessStore = defineStore('business', () => {
     return affiliatedEntities
   }
 
-  async function handleAffiliationInvitations (affiliatedEntities: Business[]): Promise<Business[]> {
-    if (!LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) {
-      return affiliatedEntities
-    }
-
-    const pendingAffiliationInvitations = await OrgService.getAffiliationInvitations(currentOrganization.value.id) || []
-
-    for (const affiliationInvite of pendingAffiliationInvitations) {
-      const isFromOrg = affiliationInvite.fromOrg.id === currentOrganization.value.id
-      const isToOrgAndPending = affiliationInvite.toOrg?.id === currentOrganization.value.id &&
-        affiliationInvite.status === AffiliationInvitationStatus.Pending
-      const isAccepted = affiliationInvite.status === AffiliationInvitationStatus.Accepted
-      const business = affiliatedEntities.find(
-        business => business.businessIdentifier === affiliationInvite.entity.businessIdentifier)
-
-      if (business && (isToOrgAndPending || isFromOrg)) {
-        business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInvite])
-      } else if (!business && isFromOrg && !isAccepted) {
-        const newBusiness = { ...affiliationInvite.entity, affiliationInvites: [affiliationInvite] }
-        affiliatedEntities.push(newBusiness)
-      }
-    }
-
-    return sortEntitiesByInvites(affiliatedEntities)
-  }
-
   /** This is the function that fetches and updates data for all NRs. */
   async function syncBusinesses (): Promise<void> {
     state.businesses = []
@@ -175,7 +149,7 @@ export const useBusinessStore = defineStore('business', () => {
 
     // get affiliated entities for this organization
     const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatedEntities(currentOrganization.value.id)
-    let affiliatedEntities: Business[] = []
+    const affiliatedEntities: Business[] = []
 
     entityResponse.forEach((resp) => {
       const entity: Business = buildBusinessObject(resp)
@@ -188,8 +162,6 @@ export const useBusinessStore = defineStore('business', () => {
       }
       affiliatedEntities.push(entity)
     })
-
-    affiliatedEntities = await handleAffiliationInvitations(affiliatedEntities)
 
     // update store with initial results
     state.businesses = [...affiliatedEntities]
