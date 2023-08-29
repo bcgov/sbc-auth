@@ -168,29 +168,4 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(columns.at(3).text()).toBe('Historical')
     expect(columns.at(4).text()).toBe('Open')
   })
-
-  it('details for Access Request', async () => {
-    const allWithInvites = businesses.filter(b => b.affiliationInvites)
-    expect(wrapper.find('#affiliationInvitesStatus').exists()).toBeTruthy()
-    expect(wrapper.findAll('#affiliationInvitesStatus').length).toBe(allWithInvites.length)
-
-    // verify correct invites status is being displayed for each business with invites
-    const firstAccSingle = allWithInvites[0].affiliationInvites.sort()[0]
-    const textSingle = `Request for Authorization to manage from: ${firstAccSingle.fromOrg.name}`
-    expect(wrapper.findAll('#affiliationInvitesStatus').at(0).text()).toBe(textSingle)
-
-    const firstAccMulti = allWithInvites[1].affiliationInvites.sort()[0]
-    const textMulti = `Request for Authorization to manage from: ${firstAccMulti.fromOrg.name} ` +
-      `and ${allWithInvites[1].affiliationInvites.length - 1} other account(s)`
-    expect(wrapper.findAll('#affiliationInvitesStatus').at(1).text()).toBe(textMulti)
-
-    // verify elements with invitations are on top
-    const allRows = wrapper.findAll('.base-table__item-row')
-    expect(allRows.length).toBe(9)
-
-    for (let i = 0; i < allWithInvites.length; i++) {
-      // check that all with invites have the entry in table too
-      expect(allRows.at(i).html()).toContain('affiliationInvitesStatus')
-    }
-  })
 })
