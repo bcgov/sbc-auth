@@ -38,8 +38,6 @@ def get_membership_permissions(org_status, membership_type):
     try:
         case = request.args.get('case')
         permissions = PermissionsService.get_permissions_for_membership(org_status.upper(), membership_type.upper())
-        # TODO Remove this logic once UI part is done.
-        #  UI still expects the value as upper .Rather than touching all UI code , changing this.
         if case == 'lower':
             permissions = [x.lower() for x in permissions]
         elif case == 'upper':
