@@ -13,20 +13,17 @@
 # limitations under the License.
 """Meta information about the service.
 
-Currently this only provides API versioning information
+to support swagger on http
 """
-from flask import Blueprint, jsonify
-
-from auth_api.utils.endpoints_enums import EndpointEnum
-from auth_api.utils.run_version import get_run_version
+from flask import url_for
+from flask_restx import Api as BaseApi
 
 
-bp = Blueprint('META', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/meta')
+class Api(BaseApi):
+    """Monkey patch Swagger API to return HTTPS URLs."""
 
-
-@bp.route('/info')
-def get_meta_info():
-    """Return a JSON object with meta information about the Service."""
-    version = get_run_version()
-    return jsonify(
-        API=f'auth_api/{version}')
+    @property
+    def specs_url(self):
+        """Return URL for endpoint."""
+        scheme = 'http' if '5000' in self.base_url else 'https'
+        return url_for(self.endpoint('specs'), _external=True, _scheme=scheme)
