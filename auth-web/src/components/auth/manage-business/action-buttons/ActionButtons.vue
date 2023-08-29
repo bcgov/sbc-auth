@@ -124,6 +124,7 @@ export default defineComponent({
       // todo:
       emit('main-action-button-clicked', mainActionClickedEvent) // todo: add consequence event
     }
+
     const openManageNR = async (business: Business) => {
       // todo:
     }
@@ -194,18 +195,7 @@ export default defineComponent({
       mainActionButton.tooltipText = !!tooltipText ? tooltipText : ''
       mainActionButton.hasExternalIcon = !!hasExternalIcon
     }
-        props.business.corpType.code, "\t",
-        isTemporaryBusiness(props.business), "\t",
-        getType(props.business), "\t",
-        'colin ',
-        isColinEntity(props.business), "\t",
-        'modern ',
-        isModernizedEntity(props.business), "\t",
-        'society ',
-        isSocieties(props.business), "\t",
-        'other ',
-        isOtherEntities(props.business), "\t"
-    )
+
     // resolve actions and texts
     const isTempAffiliationInvitationRow = props.business.affiliatedEntityTableViewData?.isTemporaryAffiliationInvitationRow
     if (isTempAffiliationInvitationRow) {
