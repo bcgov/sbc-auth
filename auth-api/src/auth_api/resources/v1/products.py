@@ -15,31 +15,27 @@
 
 import json
 
-from flask_restx import Namespace, Resource, cors
+from flask import Blueprint
+from flask_cors import cross_origin
 
 from auth_api import status as http_status
 from auth_api.exceptions import BusinessException
 from auth_api.services import Product as ProductService
 from auth_api.tracer import Tracer
-from auth_api.utils.util import cors_preflight
+from auth_api.utils.endpoints_enums import EndpointEnum
 
 
-API = Namespace('products', description='Endpoints for products management')
+bp = Blueprint('PRODUCTS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/products')
 TRACER = Tracer.get_instance()
 
 
-@cors_preflight('GET,OPTIONS')
-@API.route('', methods=['GET', 'OPTIONS'])
-class Products(Resource):
-    """Resource for managing products."""
-
-    @staticmethod
-    @TRACER.trace()
-    @cors.crossdomain(origin='*')
-    def get():
-        """Get a list of all products."""
-        try:
-            response, status = json.dumps(ProductService.get_products()), http_status.HTTP_200_OK
-        except BusinessException as exception:
-            response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-        return response, status
+@bp.route('', methods=['GET', 'OPTIONS'])
+@TRACER.trace()
+@cross_origin(origin='*')
+def get_products():
+    """Get a list of all products."""
+    try:
+        response, status = json.dumps(ProductService.get_products()), http_status.HTTP_200_OK
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
