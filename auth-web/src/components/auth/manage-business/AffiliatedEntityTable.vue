@@ -69,18 +69,8 @@
             >{{ name(item) }}</b>
           </span>
 
-          <span
-            v-if="!!item.affiliationInvites"
-            id="affiliationInvitesStatus"
-          >
-            <p style="font-size: 12px">
-              <v-icon
-                x-small
-                color="primary"
-              >mdi-account-cog</v-icon>
-              <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
-            </p>
-          </span>
+          <!-- This used to have the span for affiliation invites, but was removed in main, should be there
+               in the feature branch. -->
         </template>
 
         <!-- Number -->
@@ -128,76 +118,7 @@
             :id="`action-menu-${index}`"
             class="actions mx-auto"
           >
-            <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
             <span
-              v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)"
-              class="open-action"
-            >
-              <v-btn
-                small
-                color="primary"
-                min-width="5rem"
-                min-height="3rem"
-                max-width="55%"
-                class="open-action-btn"
-                @click="actionHandler(item)"
-              >
-                <span
-                  class="text-wrap"
-                  v-html="actionButtonText(item)"
-                />
-              </v-btn>
-              <!-- More Actions Menu -->
-              <span class="more-actions">
-                <v-menu
-                  v-model="dropdown[index]"
-                  :attach="`#action-menu-${index}`"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      small
-                      color="primary"
-                      min-height="3rem"
-                      class="more-actions-btn"
-                      v-on="on"
-                    >
-                      <v-icon>{{ dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
-                      v-can:REMOVE_BUSINESS.disable
-                      class="actions-dropdown_item my-1"
-                      data-test="remove-button"
-                      @click="removeBusiness(item)"
-                    >
-                      <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                        <v-icon small>mdi-delete-forever</v-icon>
-                        <span class="pl-1">Delete {{ tempDescription(item) }}</span>
-                      </v-list-item-subtitle>
-                      <v-list-item-subtitle v-else>
-                        <v-icon small>mdi-delete</v-icon>
-                        <span class="pl-1">Remove From Table</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                    <v-list-item
-                      v-else
-                      class="actions-dropdown_item my-1"
-                      @click="openNewAffiliationInvite(item)"
-                    >
-                      <v-list-item-subtitle>
-                        <v-icon small>mdi-file-certificate-outline</v-icon>
-                        <span class="pl-1">New Request</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </span>
-            </span>
-
-            <span
-              v-else
               class="open-action"
             >
               <v-btn
@@ -266,7 +187,6 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInviteInfo } from '@/models/affiliation'
 import {
   AffiliationTypes,
   CorpTypes,
@@ -284,7 +204,6 @@ import { BaseVDataTable } from '@/components'
 import ConfigHelper from '@/util/config-helper'
 import EntityDetails from './EntityDetails.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import OrgService from '@/services/org.services'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { useAffiliations } from '@/composables'
@@ -469,65 +388,6 @@ export default defineComponent({
       return orgId === orgStore.currentOrganization.id
     }
 
-    const actionHandler = (business: Business) => {
-      const affiliationInviteInfo = business.affiliationInvites[0]
-      const invitationStatus = affiliationInviteInfo.status
-      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed].includes(invitationStatus)) {
-        OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
-          .then(() => {
-            context.emit('remove-affiliation-invitation')
-          })
-      } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
-        open(business)
-      } else {
-        // do nothing
-      }
-    }
-    const actionButtonText = (business: Business) => {
-      const invitationStatus = business.affiliationInvites[0].status
-      if (invitationStatus === AffiliationInvitationStatus.Pending) {
-        return 'Cancel<br>Request'
-      } else if (invitationStatus === AffiliationInvitationStatus.Failed) {
-        return 'Remove<br>from list'
-      } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
-        return 'Open'
-      } else {
-        return ''
-      }
-    }
-    const openNewAffiliationInvite = () => {
-      // todo: open modal when modal is created
-      // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
-      alert('not implemented')
-    }
-
-    const getRequestForAuthorizationStatusText = (affiliationInviteInfos: AffiliationInviteInfo[]) => {
-      if (isCurrentOrganization(affiliationInviteInfos[0].toOrg.id)) {
-        // incoming request for access
-        const getAlwaysSameOrderArr = affiliationInviteInfos.slice().sort()
-        const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
-        return `Request for Authorization to manage from: ${getAlwaysSameOrderArr[0].fromOrg.name}${andOtherAccounts}`
-      } else {
-        let statusText = ''
-        // outgoing request for access
-        switch (affiliationInviteInfos[0].status) {
-          case AffiliationInvitationStatus.Pending:
-            statusText = 'Request sent, pending authorization'
-            break
-          case AffiliationInvitationStatus.Accepted:
-            statusText = '<strong>Authorized</strong> - you can now manage this business.'
-            break
-          case AffiliationInvitationStatus.Failed:
-            statusText = '<strong>Not Authorized</strong>. Your request to manage this business has been declined.'
-            break
-          case AffiliationInvitationStatus.Expired:
-          default:
-            statusText = ''
-        }
-        return `Authorization to manage: ${statusText}`
-      }
-    }
-
     watch(() => props.selectedColumns, (newCol: string[]) => {
       getHeaders(newCol)
     })
@@ -538,11 +398,7 @@ export default defineComponent({
     }
 
     return {
-      actionHandler,
-      actionButtonText,
-      openNewAffiliationInvite,
       isCurrentOrganization,
-      getRequestForAuthorizationStatusText,
       clearFiltersTrigger,
       clearFilters,
       isloading,
