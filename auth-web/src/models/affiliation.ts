@@ -41,7 +41,7 @@ export class AffiliationInviteInfo {
   }
 
   static isToOrg (affiliationInviteInfo: AffiliationInviteInfo, toOrgId: number): boolean {
-    return affiliationInviteInfo.toOrg.id === toOrgId
+    return affiliationInviteInfo.toOrg?.id === toOrgId
   }
 
   static isToOrgAndActive (affiliationInviteInfo: AffiliationInviteInfo, toOrgId: number): boolean {

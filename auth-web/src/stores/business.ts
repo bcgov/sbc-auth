@@ -147,7 +147,7 @@ export const useBusinessStore = defineStore('business', () => {
 
     for (const affiliationInvite of pendingAffiliationInvitations) {
       const isFromOrg = affiliationInvite.fromOrg.id === currentOrganization.value.id
-      const isToOrgAndPending = affiliationInvite.toOrg.id === currentOrganization.value.id &&
+      const isToOrgAndPending = affiliationInvite.toOrg?.id === currentOrganization.value.id &&
         affiliationInvite.status === AffiliationInvitationStatus.Pending
       const isAccepted = affiliationInvite.status === AffiliationInvitationStatus.Accepted
       const business = affiliatedEntities.find(

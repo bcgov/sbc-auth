@@ -502,7 +502,7 @@ export default defineComponent({
     }
 
     const getRequestForAuthorizationStatusText = (affiliationInviteInfos: AffiliationInviteInfo[]) => {
-      if (isCurrentOrganization(affiliationInviteInfos[0].toOrg.id)) {
+      if (isCurrentOrganization(affiliationInviteInfos[0].toOrg?.id)) {
         // incoming request for access
         const getAlwaysSameOrderArr = affiliationInviteInfos.slice().sort()
         const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
