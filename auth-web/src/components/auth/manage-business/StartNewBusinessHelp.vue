@@ -15,7 +15,10 @@
               Decide which business structure is the most appropriate for you. A few options are: a sole
               proprietorship, partnership, or corporation. Each structure has different legal and financial
               implications.
-              <a href="https://entity-selection-prod.apps.silver.devops.gov.bc.ca/">
+              <a
+                href="https://entity-selection-prod.apps.silver.devops.gov.bc.ca/"
+                target="_blank"
+              >
                 Use the Business Structures Wizard to help you decide.</a><v-icon
                 color="primary"
                 class="mb-1"
