@@ -18,6 +18,7 @@
               <a
                 href="https://entity-selection-prod.apps.silver.devops.gov.bc.ca/"
                 target="_blank"
+                rel="noopener"
               >
                 Use the Business Structures Wizard to help you decide.</a><v-icon
                 color="primary"
