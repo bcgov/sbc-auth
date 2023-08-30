@@ -372,14 +372,18 @@ export enum BusinessState {
 }
 
 export const ActionButtonsEvents = {
-    MAIN_BUTTON_CLICKED: 'main-action-button-clicked',
+    ACTION_CLICKED: 'action-button-clicked',
+    SECONDARY_ACTION_CLICKED: 'secondary-action-button-clicked',
 
     DEFAULT_BUSINESS_ACTION: 'HandleBusinessAction',
     DEFAULT_NAME_REQUEST_ACTION: 'HandleNameRequestAction',
 
+    REMOVE_FROM_TABLE: 'RemoveFromTable',
+
     AFFILIATION_INVITATION_CANCEL : 'AffiliationInvitationAction-cancel',
     AFFILIATION_INVITATION_REMOVE : 'AffiliationInvitationAction-remove',
     AFFILIATION_INVITATION_RESEND : 'AffiliationInvitationAction-resend',
+    AFFILIATION_INVITATION_ERROR : 'AffiliationInvitationAction-error',
 
 } as const
 
@@ -394,9 +398,11 @@ export const ActionButtonsTexts = {
         CANCEL: 'Cancel',
         REMOVE: 'Remove',
         RESEND: 'Resend',
-        //
+
         REMOVE_FROM_TABLE: 'Remove From Table',
-        // NAME REQUEST
+        DELETE_INCORPORATION_REGISTRATION: 'Delete Incorporation Application',
+        DELETE_REGISTRATION: 'Delete Registration',
+
         REGISTER_NOW: 'Register Now',
         DOWNLOAD_FORM: 'Download Form',
         AMALGAMATE_NOW: 'Amalgamate Now',
@@ -406,7 +412,7 @@ export const ActionButtonsTexts = {
         CHANGE_NAME_NOW: 'Change Name Now',
         ALTER_NOW: 'Alter Now',
         OPEN_NAME_REQUEST: 'Open Name Request',
-        // BUSINESS
+
         RESUME_DRAFT: 'Resume Draft',
         MANAGE_BUSINESS: 'Manage Business',
     }

@@ -17,7 +17,7 @@ export interface EventDetails {
   affiliationInvitation?: AffiliationInviteInfo
 }
 
-export interface MainActionButtonClickedEvent {
+export interface ActionButtonClickedEvent {
   name: string
   isError: boolean
   businessIdentifier: string

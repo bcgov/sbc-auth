@@ -146,100 +146,11 @@
 
         <!-- Actions -->
         <template #item-slot-Actions="{ item, index }">
-          <div
-            :id="`action-menu-${index}`"
-            class="new-actions mx-auto"
-          >
-            <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
-            <span class="open-action">
-             <ActionButtons :business="item" />
-              <!-- More Actions Menu -->
-              <span class="more-actions">
-                <v-menu
-                  v-model="dropdown[index]"
-                  :attach="`#action-menu-${index}`"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      small
-                      color="primary"
-                      min-height="2rem"
-                      class="more-actions-btn"
-                      v-on="on"
-                    >
-                      <v-icon>{{ dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
-                      <v-list-item
-                        v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
-                        v-can:REMOVE_BUSINESS.disable
-                        class="actions-dropdown_item my-1"
-                        data-test="remove-button"
-                        @click="removeBusiness(item)"
-                      >
-                        <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                          <v-icon small>mdi-delete-forever</v-icon>
-                          <span class="pl-1">Delete {{ tempDescription(item) }}</span>
-                        </v-list-item-subtitle>
-                        <v-list-item-subtitle v-else>
-                          <v-icon small>mdi-delete</v-icon>
-                          <span class="pl-1">Remove From Table</span>
-                        </v-list-item-subtitle>
-                      </v-list-item>
-                      <v-list-item
-                        v-else
-                        class="actions-dropdown_item my-1"
-                        @click="openNewAffiliationInvite(item)"
-                      >
-                        <v-list-item-subtitle>
-                          <v-icon small>mdi-file-certificate-outline</v-icon>
-                          <span class="pl-1">New Request</span>
-                        </v-list-item-subtitle>
-                      </v-list-item>
-                    </template>
-                    <v-list-item
-                      v-if="showOpenButton(item)"
-                      class="actions-dropdown_item my-1"
-                      data-test="use-name-request-button"
-                      @click="goToNameRequest(item.nameRequest)"
-                    >
-                      <v-list-item-subtitle>
-                        <v-icon small>mdi-format-list-bulleted-square</v-icon>
-                        <span class="pl-1">Open Name Request</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                    <v-list-item
-                      v-if="showRemoveButton(item)"
-                      class="actions-dropdown_item my-1"
-                      data-test="remove-button"
-                      @click="removeBusiness(item)"
-                    >
-                      <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                        <v-icon small>mdi-delete-forever</v-icon>
-                        <span class="pl-1">Delete {{ tempDescription(item) }}</span>
-                      </v-list-item-subtitle>
-                      <v-list-item-subtitle v-else>
-                        <v-icon small>mdi-delete</v-icon>
-                        <span class="pl-1">Remove From Table</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                    <v-list-item
-                      v-if="showAmalgamateShortForm(item)"
-                      class="actions-dropdown_item my-1"
-                      data-test="use-name-request-button"
-                    >
-                      <v-list-item-subtitle>
-                        <v-icon small>mdi-checkbox-multiple-blank-outline</v-icon>
-                        <span class="pl-1">Amalgamate Now (Short Form)</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </span>
-            </span>
-          </div>
+          <ActionButtons
+              :business="item"
+              :index="index"
+              @action-button-clicked="actionButtonClicked"
+          />
         </template>
       </base-v-data-table>
     </v-card>
@@ -273,6 +184,7 @@ import { useAffiliations } from '@/composables'
 import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
 import ActionButtons from '@/components/auth/manage-business/action-buttons/ActionButtons.vue'
+import { ActionButtonClickedEvent, EventDetails } from '@/models/ui-interfaces/manage-business'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
@@ -809,7 +721,23 @@ export default defineComponent({
       return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
     }
 
+    const actionButtonClicked = (actionButtonClickedEvent: ActionButtonClickedEvent) => {
+      if (actionButtonClickedEvent.isError) {
+        return //todo: fixme: do something with the error
+      }
+
+      const details: EventDetails = actionButtonClickedEvent.details as EventDetails
+      const payload = {
+        orgIdentifier: currentOrganization.value.id,
+        business: actionButtonClickedEvent.details?.entity
+      }
+
+      context.emit('remove-business', payload)
+      return payload
+    }
+
     return {
+      actionButtonClicked,
       selectedColumns,
       columns,
       actionHandler,

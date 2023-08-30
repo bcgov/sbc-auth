@@ -156,9 +156,13 @@ export const useBusinessStore = defineStore('business', () => {
       if (business && (isToOrgAndPending || isFromOrg)) {
         business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInvite])
       } else if (!business && isFromOrg && !isAccepted) {
-        const newBusiness = { ...affiliationInvite.entity, affiliationInvites: [affiliationInvite] }
+        const newBusiness = {
+          ...affiliationInvite.entity,
+          affiliationInvites: [affiliationInvite],
+          affiliatedEntityTableViewData: { isTemporaryAffiliationInvitationRow: true }
+        }
         affiliatedEntities.push(newBusiness)
-        affiliatedEntityTableViewData: { isTemporaryAffiliationInvitationRow: true }
+
       }
     }
 

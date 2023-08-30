@@ -1,38 +1,78 @@
 <template>
-  <v-tooltip
-      top
-      content-class="top-tooltip"
-      :disabled="!mainActionButton.tooltipText.trim()"
+  <div
+      :id="`action-menu-${index}`"
+      class="new-actions mx-auto"
   >
-    <template #activator="{on}">
-      <v-btn
-          small
-          color="primary"
-          min-width="5rem"
-          min-height="2rem"
-          class="open-action-btn"
-          v-on="on"
-          @click="mainActionButton.actionHandler(business)"
+    <!--  tech debt ticket to improve this piece of code. https://github.com/bcgov/entity/issues/17132 -->
+    <span class="open-action">
+      <v-tooltip
+          top
+          content-class="top-tooltip"
+          :disabled="!mainActionButton.tooltipText.trim()"
       >
-        {{ mainActionButton.actionText }}
-        <v-icon
-            v-if="mainActionButton.hasExternalIcon"
-            class="external-icon pl-1"
-            small
+        <template #activator="{on}">
+          <v-btn
+              small
+              color="primary"
+              min-width="5rem"
+              min-height="2rem"
+              class="open-action-btn"
+              v-on="on"
+              @click="mainActionButton.actionHandler(business)"
+          >
+            {{ mainActionButton.actionText }}
+            <v-icon
+                v-if="mainActionButton.hasExternalIcon"
+                class="external-icon pl-1"
+                small
+            >
+              mdi-open-in-new
+            </v-icon>
+          </v-btn>
+        </template>
+        <span>{{ mainActionButton.tooltipText }}</span>
+      </v-tooltip>
+      <!-- More Actions Menu -->
+      <span class="more-actions">
+        <v-menu
+            v-model="isMoreActionsExpanded"
+            :attach="`#action-menu-${index}`"
         >
-          mdi-open-in-new
-        </v-icon>
-      </v-btn>
-    </template>
-    <span>{{ mainActionButton.tooltipText }}</span>
-  </v-tooltip>
+          <template #activator="{ on }">
+            <v-btn
+                small
+                color="primary"
+                min-height="2rem"
+                class="more-actions-btn"
+                v-on="on"
+            >
+              <v-icon>{{ isMoreActionsExpanded ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item
+                v-for="(action, index) in secondaryActionButtons"
+                :key="index"
+                class="actions-dropdown_item my-1"
+                @click="action.actionHandler(business)"
+            >
+              <v-list-item-subtitle>
+                <v-icon small>{{ action.buttonIcon }}</v-icon>
+                <span class="pl-1"> {{ action.actionText }}</span>
+              </v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </span>
+    </span>
+  </div>
 </template>
 
 <script lang="ts">
 import { AffiliationInvitationStatus, AffiliationInvitationType, AffiliationInviteInfo } from '@/models/affiliation'
-import { PropType, defineComponent, ref } from '@vue/composition-api'
+import { PropType, defineComponent, ref, computed } from '@vue/composition-api'
 import { Business } from '@/models/business'
-import { MainActionButtonClickedEvent } from '@/models/ui-interfaces/manage-business'
+import { ActionButtonClickedEvent } from '@/models/ui-interfaces/manage-business'
 import OrgService from '@/services/org.services'
 import { getFirstPendingAffiliationWithSmallestId } from '@/util/affiliation-invitation'
 import {
@@ -48,40 +88,55 @@ import {
   AffiliationTypes,
   BusinessState, CorpTypes,
   NrDisplayStates,
-  NrState
+  NrState, SessionStorageKeys
 } from '@/util/constants'
 import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
-import CommonUtils from '@/util/common-util'
+import ConfigHelper from '@/util/config-helper'
+import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { useOrgStore } from '@/stores'
+import {
+  goToCorpOnline,
+  goToNameRequest,
+  goToBusinessDashboard,
+  goToSocieties
+} from '@/util/entities-table/action-buttons-navigation'
+
 
 interface ActionButtonInfo {
   actionText: string
   actionHandler: (business: Business) => Promise<void>
-  hasTooltip: boolean
-  tooltipText: string
-  hasExternalIcon: boolean
+  tooltipText?: string
+  hasExternalIcon?: boolean
+  buttonIcon?: string // not an external icon, but button label icon
 }
 
 export default defineComponent({
   name: 'ActionButtons',
   props: {
+    index: {
+      // todo: fixme: replace this with business identifier ?
+      type: Number,
+      required: true
+    },
     business: {
       type: Object as PropType<Business>,
       required: true
     }
   },
-  emits: ['main-action-button-clicked'],
+  emits: [ActionButtonsEvents.ACTION_CLICKED],
   setup (props, { emit }) {
-
-
+    const orgStore = useOrgStore()
+    const currentOrganization = computed(() => orgStore.currentOrganization)
+    const isMoreActionsExpanded = ref(false)
+    const secondaryActionButtons: ActionButtonInfo[] = []
     const mainActionButton: ActionButtonInfo = {
       actionText: 'Error',
       actionHandler: () => Promise.resolve(),
-      hasTooltip: false,
       tooltipText: '',
       hasExternalIcon: false
     }
 
-    const mainActionClickedEvent: MainActionButtonClickedEvent = {
+    const mainActionClickedEvent: ActionButtonClickedEvent = {
       name: 'mainActionButtonClick',
       businessIdentifier: props.business.businessIdentifier,
       details: null,
@@ -94,93 +149,36 @@ export default defineComponent({
 
       if (resp.status === 200) {
         mainActionClickedEvent.details = {
-          eventName: 'AffiliationInvitationRemoved',
+          eventName: ActionButtonsEvents.AFFILIATION_INVITATION_REMOVE,
           affiliationInvitation: affiliationInviteInfo
         }
       } else {
         mainActionClickedEvent.details = {
-          errorName: 'AffiliationInvitationRemovalError',
+          errorName: ActionButtonsEvents.AFFILIATION_INVITATION_REMOVE,
           errorDescription: `Error removing affiliation invitation with id:${affiliationInviteInfo.id}`,
           errorSummary: 'Error removing affiliation invitation',
           errorSource: resp,
           errorCode: resp.status
         }
       }
-      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent)
+      emit(ActionButtonsEvents.ACTION_CLICKED, mainActionClickedEvent)
     }
 
     const resendAffiliationInvitationHandler = async (business: Business) => {
-      // todo:
-      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent) // todo: add consequence event
+      const affiliationInviteInfo = getFirstPendingAffiliationWithSmallestId(business.affiliationInvites)
+      mainActionClickedEvent.details = {
+        eventName: ActionButtonsEvents.AFFILIATION_INVITATION_RESEND,
+        affiliationInvitation: affiliationInviteInfo
+      }
+      emit(ActionButtonsEvents.ACTION_CLICKED, mainActionClickedEvent)
     }
 
-    const openManageThisBusiness = async (business: Business) => {
-      // todo:
-
-      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent) // todo: add consequence event
-    }
-
-    const openBusinessDashboard = async (business: Business) => {
-      // todo:
-      emit(ActionButtonsEvents.MAIN_BUTTON_CLICKED, mainActionClickedEvent) // todo: add consequence event
-    }
-
-    const openManageNR = async (business: Business) => {
-      // todo:
-    }
-
-    const openIncorporationApplication = async (business: Business) => {
-      // todo:
-    }
-
-    const redirectToColin = async (business: Business) => {
-      // todo:
-    }
-
-    const redirectToSocietiesOnline = async (business: Business) => {
-      // todo:
-    }
-
-    const redirectToFormsPage = async (business: Business) => {
-      // todo:
-    }
-
-    const startRegularAmalgamation = async (business: Business) => {
-      // MVP, will be done later
-      await redirectToColin(business)
-    }
-
-    const openRestoreNow = async (business: Business) => {
-      // MVP, will be done later
-      await openBusinessDashboard(business)
-    }
-
-    const openReinstateNow = async (business: Business) => {
-      // MVP, will be done later
-      await openBusinessDashboard(business)
-    }
-
-    const openContinuationApplication = async (business: Business) => {
-      // MVP, will be done later
-      await redirectToColin(business)
-    }
-
-    const openChangeNameNow = async (business: Business) => {
-      // MVP, will be done later
-      await openBusinessDashboard(business)
-    }
-
-    const openConversionNameRequest = async (business: Business) => {
-      // MVP, will be done later
-      await openBusinessDashboard(business)
-    }
-
-    const removeNameRequestFromTable = async (business: Business) => {
-      // todo:
-    }
-
-    const resumeDraft = async (business: Business) => {
-      // todo:
+    const removeActionHandler = async (business: Business) => {
+      mainActionClickedEvent.details = {
+        eventName: ActionButtonsEvents.REMOVE_FROM_TABLE,
+        entity: business
+      }
+      emit(ActionButtonsEvents.ACTION_CLICKED, mainActionClickedEvent)
     }
 
     const updateMainActionButton = (actionText: string,
@@ -190,8 +188,32 @@ export default defineComponent({
     ) => {
       mainActionButton.actionText = actionText
       mainActionButton.actionHandler = actionHandler
-      mainActionButton.tooltipText = !!tooltipText ? tooltipText : ''
+      mainActionButton.tooltipText = tooltipText || ''
       mainActionButton.hasExternalIcon = !!hasExternalIcon
+    }
+
+    const secondaryButtonOpenNameRequest = (): ActionButtonInfo => {
+      return {
+        actionHandler: (business) => goToNameRequest(business.nameRequest),
+        actionText: ActionButtonsTexts.Actions.OPEN_NAME_REQUEST
+      }
+    }
+
+    const removeFromTableButton = (isHardDelete?: boolean): ActionButtonInfo => {
+      return {
+        actionHandler: removeActionHandler,
+        actionText: ActionButtonsTexts.Actions.REMOVE_FROM_TABLE,
+        buttonIcon: isHardDelete ? 'mdi-delete-forever' : 'mdi-delete'
+      }
+    }
+
+    const manageBusinessRedirectToColinExternal = () => {
+      updateMainActionButton(
+          ActionButtonsTexts.Actions.MANAGE_BUSINESS,
+          goToCorpOnline,
+          ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
+          true
+      )
     }
 
     // resolve actions and texts
@@ -238,161 +260,177 @@ export default defineComponent({
 
       // resolve items based on types and statuses
       if (isForRemoval) {
-        updateMainActionButton(ActionButtonsTexts.Actions.REMOVE_FROM_TABLE, removeNameRequestFromTable)
+        updateMainActionButton(ActionButtonsTexts.Actions.REMOVE_FROM_TABLE, removeActionHandler)
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest())
 
       } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.AMALGAMATE) {
         // MVP redirect to COLIN
         updateMainActionButton(
             ActionButtonsTexts.Actions.AMALGAMATE_NOW,
-            startRegularAmalgamation,
+            goToCorpOnline,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,  // mvp
             true // mvp
         )
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.MOVE) {
         // MVP redirect to COLIN
         updateMainActionButton(
             ActionButtonsTexts.Actions.CONTINUE_IN_NOW,
-            openContinuationApplication,
+            goToCorpOnline,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,  // mvp
             true // mvp
         )
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && (nrRequestActionCd === NrRequestActionCodes.RENEW || forRestore)) {
-        // MVP redirect to COLIN4
+        // MVP redirect to COLIN
         if (!isSupportedRestorationEntities(props.business)) {
           updateMainActionButton(
               ActionButtonsTexts.Actions.RESTORE_NOW,
-              redirectToColin,
+              goToCorpOnline,
               ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
               true
           )
         } else {
           updateMainActionButton(
               ActionButtonsTexts.Actions.RESTORE_NOW,
-              openBusinessDashboard
+              goToBusinessDashboard
           )
         }
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.RESTORE && !isForRestore(props.business)) {
         // MVP redirect to COLIN
         if (!isSupportedRestorationEntities(props.business)) {
           updateMainActionButton(
               ActionButtonsTexts.Actions.REINSTATE_NOW,
-              redirectToColin,
+              goToCorpOnline,
               ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
               true
           )
         } else {
           updateMainActionButton(
               ActionButtonsTexts.Actions.REINSTATE_NOW,
-              openBusinessDashboard
+              goToBusinessDashboard
           )
         }
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
-        // MVP redirect to COLIN
-        updateMainActionButton(isApproved && ActionButtonsTexts.Actions.CHANGE_NAME_NOW, openChangeNameNow)
+        // MVP redirect to dashboard
+        updateMainActionButton(ActionButtonsTexts.Actions.CHANGE_NAME_NOW, goToBusinessDashboard)
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
-        // MVP redirect to COLIN
-        updateMainActionButton(ActionButtonsTexts.Actions.ALTER_NOW, openConversionNameRequest)
+        // MVP redirect to dashboard
+        updateMainActionButton(ActionButtonsTexts.Actions.ALTER_NOW, goToBusinessDashboard)
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && isModernizedEntity(props.business)) {
-        updateMainActionButton(ActionButtonsTexts.Actions.REGISTER_NOW, openIncorporationApplication)
+        updateMainActionButton(ActionButtonsTexts.Actions.REGISTER_NOW, goToBusinessDashboard)
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && isColinEntity(props.business)) {
         updateMainActionButton(
             ActionButtonsTexts.Actions.REGISTER_NOW,
-            redirectToColin,
+            goToCorpOnline,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_REGISTER,
             true
         )
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && isSocieties(props.business)) {
         updateMainActionButton(
             ActionButtonsTexts.Actions.REGISTER_NOW,
-            redirectToSocietiesOnline,
+            goToSocieties,
             ActionButtonsTexts.Tooltips.GO_TO_SOCIETIES_ONLINE_REGISTER,
             true
         )
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else if (isApproved && isOtherEntities(props.business)) {
         // MVP redirect to COLIN
         updateMainActionButton(
             ActionButtonsTexts.Actions.DOWNLOAD_FORM,
-            redirectToFormsPage,
+            goToCorpOnline,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_REGISTER,
             true
         )
+        secondaryActionButtons.push(secondaryButtonOpenNameRequest(), removeFromTableButton())
 
       } else {
-        updateMainActionButton(ActionButtonsTexts.Actions.OPEN_NAME_REQUEST, openManageNR)
-
+        updateMainActionButton('Open Name Request', (business) => goToNameRequest(business.nameRequest))
+        secondaryActionButtons.push(removeFromTableButton())
       }
     } else {
       // it is not invitation, nor name request ==> It is regular incorporation stuff
-      const isDraft = isTemporaryBusiness(props.business)
       const isActive = entityStatus(props.business) === BusinessState.ACTIVE
       const isHistorical = props.business?.status?.toUpperCase() === BusinessState.HISTORICAL.toUpperCase() // is this OK check?
       const type = getType(props.business)
       mainActionClickedEvent.name = ActionButtonsEvents.DEFAULT_BUSINESS_ACTION
 
-      if (
-          // isDraft &&
-          [AffiliationTypes.INCORPORATION_APPLICATION as string, CorpTypes.INCORPORATION_APPLICATION as string].includes(type)) {
-        updateMainActionButton(ActionButtonsTexts.Actions.RESUME_DRAFT, resumeDraft)
+      if ([AffiliationTypes.INCORPORATION_APPLICATION as string, CorpTypes.INCORPORATION_APPLICATION as string].includes(type)) {
+        // MVP redirect to dashboard
+        updateMainActionButton(ActionButtonsTexts.Actions.RESUME_DRAFT, goToBusinessDashboard)
+        secondaryActionButtons.push({
+          actionHandler: removeActionHandler,
+          actionText: ActionButtonsTexts.Actions.DELETE_INCORPORATION_REGISTRATION,
+          buttonIcon: 'mdi-delete-forever'
+        })
 
-      } else if (
-          // isDraft &&
-          [AffiliationTypes.REGISTRATION as string, CorpTypes.REGISTRATION as string].includes(type)) {
-        updateMainActionButton(ActionButtonsTexts.Actions.RESUME_DRAFT, resumeDraft)
+      } else if ([AffiliationTypes.REGISTRATION as string, CorpTypes.REGISTRATION as string].includes(type)) {
+        // MVP redirect to dashboard
+        updateMainActionButton(ActionButtonsTexts.Actions.RESUME_DRAFT, goToBusinessDashboard)
+        secondaryActionButtons.push(
+            {
+              actionHandler: removeActionHandler,
+              actionText: ActionButtonsTexts.Actions.DELETE_REGISTRATION,
+              buttonIcon: 'mdi-delete-forever'
+            }
+        )
 
       } else if (isActive && isModernizedEntity(props.business)) {
-        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, openBusinessDashboard)
+        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, goToBusinessDashboard)
+        secondaryActionButtons.push(removeFromTableButton())
 
       } else if (isActive && !isModernizedEntity(props.business)) {
-        updateMainActionButton(
-            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
-            redirectToColin,
-            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
-            true
-        )
+        manageBusinessRedirectToColinExternal()
+        secondaryActionButtons.push(removeFromTableButton())
 
       } else if (isHistorical && isModernizedEntity(props.business)) {
-        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, openBusinessDashboard)
+        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, goToBusinessDashboard)
+        secondaryActionButtons.push(removeFromTableButton())
 
       } else if (isHistorical && !isModernizedEntity(props.business)) {
-        updateMainActionButton(
-            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
-            redirectToColin,
-            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
-            true
-        )
+        manageBusinessRedirectToColinExternal()
+        secondaryActionButtons.push(removeFromTableButton())
 
       } else if ((isHistorical || isActive) && isSocieties(props.business)) {
         updateMainActionButton(
             ActionButtonsTexts.Actions.MANAGE_BUSINESS,
-            redirectToSocietiesOnline,
+            goToSocieties,
             ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
             true
         )
+        secondaryActionButtons.push(removeFromTableButton())
 
       } else if (isHistorical) {
-        updateMainActionButton(
-            ActionButtonsTexts.Actions.MANAGE_BUSINESS,
-            redirectToColin,
-            ActionButtonsTexts.Tooltips.GO_TO_CORPORATE_ONLINE_ACCESS,
-            true
-        )
+        manageBusinessRedirectToColinExternal()
+        secondaryActionButtons.push(removeFromTableButton())
+
       } else {
         //if all else fails ...
-        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, openBusinessDashboard)
+        updateMainActionButton(ActionButtonsTexts.Actions.MANAGE_BUSINESS, goToBusinessDashboard)
+        secondaryActionButtons.push(removeFromTableButton())
       }
     }
 
+
     return {
-      mainActionButton
+      isMoreActionsExpanded,
+      mainActionButton,
+      secondaryActionButtons
     }
   }
 })
