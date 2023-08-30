@@ -109,8 +109,13 @@ export default class OrgService {
       { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
   }
 
-  static async removeAffiliationInvitation (affiliationInvitationId: number) {
-    return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}`)
+  static async removeAffiliationInvitation (affiliationInvitationId: number) : Promise<void> {
+    try {
+      await axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}`)
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+    }
   }
 
   static async getAffiliationInvitations (orgIdentifier: number) {

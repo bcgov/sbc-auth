@@ -40,6 +40,10 @@ export const useAffiliations = () => {
     )
   }
 
+  const isBusinessAffiliated = (businessIdentifier: string): boolean => {
+    return affiliations.results.some(business => businessIdentifier === business.businessIdentifier)
+  }
+
   /** Returns the temp business description. */
   const tempDescription = (business: Business): string => {
     switch ((business.corpType?.code || business.corpType) as CorpTypes) {
@@ -268,6 +272,7 @@ export const useAffiliations = () => {
     canUseNameRequest,
     tempDescription,
     isTemporaryBusiness,
-    getEntityType
+    getEntityType,
+    isBusinessAffiliated
   }
 }
