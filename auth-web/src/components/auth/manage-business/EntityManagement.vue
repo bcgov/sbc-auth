@@ -278,6 +278,7 @@
         @remove-business="showConfirmationOptionsModal($event)"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
         @resend-affiliation-invitation="resendAffiliationInvitation($event)"
+        @popup-manage-business-dialog="popupBusinessDialog($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -294,6 +295,7 @@
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
+        :initial-business-identifier="initialBusinessIdentifierManageBusinessDialog"
         @add-success="showAddSuccessModal"
         @affiliation-invitation-pending="showAuthorizationEmailSentDialogPending"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
@@ -565,6 +567,7 @@ import PasscodeResetOptionsModal from '@/components/auth/manage-business/Passcod
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { Business } from '@/models/business'
 
 @Component({
   components: {
@@ -611,6 +614,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
+  initialBusinessIdentifierManageBusinessDialog = null
   highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
@@ -797,6 +801,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
     await this.createNumberedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
     await this.syncBusinesses()
+  }
+
+  async popupBusinessDialog(business:Business) {
+    this.initialBusinessIdentifierManageBusinessDialog = business.businessIdentifier
+    this.showManageBusinessDialog = true
   }
 
   async showAddSuccessModal (businessIdentifier: string) {

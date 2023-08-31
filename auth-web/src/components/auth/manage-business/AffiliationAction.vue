@@ -123,7 +123,7 @@ export default defineComponent({
     item: { type: Object as PropType<Business>, required: true },
     index: { type: Number, required: true }
   },
-  emits: ['add-unknown-error', 'remove-affiliation-invitation', 'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
+  emits: ['popup-manage-business-dialog', 'add-unknown-error', 'remove-affiliation-invitation', 'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
   setup (props, context) {
     const orgStore = useOrgStore()
     const businessStore = useBusinessStore()
@@ -463,10 +463,8 @@ export default defineComponent({
       return false
     }
 
-    const openNewAffiliationInvite = () => {
-      // todo: open modal when modal is created
-      // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
-      alert('not implemented')
+    const openNewAffiliationInvite = (business: Business) => {
+      context.emit('popup-manage-business-dialog', business)
     }
 
     const showOpenButton = (item: Business): boolean => {
