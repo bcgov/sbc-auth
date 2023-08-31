@@ -75,7 +75,7 @@
               v-can:REMOVE_BUSINESS.disable
               class="actions-dropdown_item my-1"
               data-test="remove-button"
-              @click="removeBusiness(item)"
+              @click="removeAffiliationOrInvitation(item)"
             >
               <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
                 <v-icon small>mdi-delete-forever</v-icon>
@@ -264,8 +264,8 @@ export default defineComponent({
       }
     }
 
-    /** Emit business/nr information to be unaffiliated. */
-    const removeBusiness = async (business: Business): Promise<void> => {
+    /** Remove business/nr affiliation or affiliation invitation. */
+    const removeAffiliationOrInvitation = async (business: Business): Promise<void> => {
       if (business.affiliationInvites?.length > 0) {
         const affiliationInviteInfo = business.affiliationInvites[0]
         const invitationStatus = affiliationInviteInfo.status
@@ -329,18 +329,6 @@ export default defineComponent({
     }
 
     // Actions
-    const actionHandler = async (business: Business) => {
-      debugger
-      const affiliationInviteInfo = business.affiliationInvites[0]
-      const invitationStatus = affiliationInviteInfo.status
-      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed].includes(invitationStatus)) {
-        await OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
-        context.emit('remove-affiliation-invitation')
-      } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
-        open(business)
-      }
-    }
-
     const getPrimaryAction = (item: Business): string => {
       const invitationStatus = item?.affiliationInvites?.[0]?.status
       if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
@@ -463,7 +451,7 @@ export default defineComponent({
         return
       }
       if (isShowRemoveAsPrimaryAction(item)) {
-        removeBusiness(item)
+        removeAffiliationOrInvitation(item)
       } else {
         redirect(item)
       }
@@ -494,7 +482,6 @@ export default defineComponent({
     return {
       affiliations,
       action,
-      actionHandler,
       actionButtonText,
       disableTooltip,
       dropdown,
@@ -507,7 +494,7 @@ export default defineComponent({
       open,
       openNewAffiliationInvite,
       redirect,
-      removeBusiness,
+      removeAffiliationOrInvitation,
       showRemoveButton,
       showAmalgamateShortForm,
       tempDescription,
