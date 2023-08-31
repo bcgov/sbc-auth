@@ -555,6 +555,7 @@ export default defineComponent({
 
     const closeCreateAffiliationInvitationErrorDialog = () => {
       emit('show-create-affiliation-invitation-error-dialog')
+      createAffiliationInvitationErrorDialog.value?.close()
     }
 
     const handleAuthBusinessOption = async () => {
