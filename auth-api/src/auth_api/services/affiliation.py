@@ -24,6 +24,7 @@ from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
+from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.entity import Entity
@@ -310,6 +311,10 @@ class Affiliation:
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Could possibly be a single row.
+        for affiliation_invitation in AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id):
+            affiliation_invitation.delete()
 
         if reset_passcode:
             entity.reset_passcode(entity.business_identifier, email_addresses)
