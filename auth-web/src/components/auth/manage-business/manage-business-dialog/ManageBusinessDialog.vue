@@ -173,7 +173,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail"
+                  v-if="showEmailOption"
                   id="manage-business-dialog-email-group"
                   v-model="emailOption"
                 >
@@ -222,7 +222,7 @@
                       <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
                     </template>
                     <div class="list-body">
-                      <!-- Placeholder for RTR-->
+                      <!-- Placeholder for Relationships-->
                     </div>
                   </v-list-group>
                 </template>
@@ -474,13 +474,17 @@ export default defineComponent({
       }
     })
 
+    const isBusinessLegalTypeCorporationOrBenefitOrCoop = computed(() => {
+      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp.value
+    })
+
     const isFormValid = computed(() => {
       let isValid = false
       const hasBusinessIdentifier = !!businessIdentifier.value
       const hasPasscode = !!passcode.value
       const hasCertified = !!isCertified.value
       const isCertifiedBy = !!certifiedBy.value
-      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp.value) {
+      if (isBusinessLegalTypeCorporationOrBenefitOrCoop.value) {
         isValid = hasBusinessIdentifier && hasPasscode
       } else if (isBusinessLegalTypeFirm.value) {
         isValid = hasBusinessIdentifier && !!proprietorPartnerName.value && hasCertified
@@ -502,7 +506,7 @@ export default defineComponent({
     })
 
     const computedAddressType = computed(() => {
-      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp.value) {
+      if (isBusinessLegalTypeCorporationOrBenefitOrCoop.value) {
         return 'registered office'
       } else if (isBusinessLegalTypeFirm.value) {
         return 'business'
@@ -652,6 +656,11 @@ export default defineComponent({
       return helpDialog.value?.isDialogOpen
     })
 
+    const showEmailOption = computed(() => {
+      return (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit.value ||
+        isBusinessLegalTypeCoOp.value || isBusinessLegalTypeFirm.value) && businessContactEmail.value
+    })
+
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
       if (businessIdentifier && newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
@@ -727,7 +736,8 @@ export default defineComponent({
       showHelp,
       showAuthorizationEmailSentDialog,
       createAffiliationInvitationErrorDialog,
-      closeCreateAffiliationInvitationErrorDialog
+      closeCreateAffiliationInvitationErrorDialog,
+      showEmailOption
     }
   }
 })
