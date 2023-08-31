@@ -233,6 +233,14 @@ p {
   }
 }
 
+.result-identifier {
+  min-width: 120px;
+  display: inline-flex;
+}
+.result-name {
+  flex: 1 1;
+}
+
 .result-identifier,
 .result-name {
   font-size: $px-16;

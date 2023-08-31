@@ -214,6 +214,32 @@
                   </div>
                 </v-list-group>
 
+                <v-list-group v-model="requestAuthBusinessRegistryOption">
+                  <template #activator>
+                    <v-list-item-title>Request authorization or get help from the Business Registry</v-list-item-title>
+                  </template>
+                  <div class="list-body">
+                    <p>Contact the Business Registry to request authorization to manage this business.</p>
+                    <p>
+                      <v-icon small>
+                        mdi-phone
+                      </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+                    </p>
+                    <p>
+                      <v-icon small>
+                        mdi-phone
+                      </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+                    </p>
+                    <p>
+                      <v-icon small>
+                        mdi-email
+                      </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
+                    </p>
+                    <h4>Hours of Operation:</h4>
+                    <p>Monday to Friday, 8:30am - 4:30pm Pacific Time</p>
+                  </div>
+                </v-list-group>
+
                 <template v-if="enableDelegationFeature">
                   <v-list-group
                     v-model="requestAuthRegistryOption"
@@ -232,14 +258,14 @@
         </v-card-text>
 
         <v-card-actions class="form__btns">
-          <span
+          <!-- <span
             id="help-button"
             class="pl-2 pr-2 mr-auto"
             @click.stop="openHelp()"
           >
             <v-icon>mdi-help-circle-outline</v-icon>
             Help
-          </span>
+          </span> -->
           <v-btn
             id="cancel-button"
             large
@@ -355,6 +381,7 @@ export default defineComponent({
     const nameOption = ref(false)
     const enableDelegationFeature = ref(false)
     const requestAuthBusinessOption = ref(false)
+    const requestAuthBusinessRegistryOption = ref(false)
     const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
@@ -517,6 +544,7 @@ export default defineComponent({
       nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
+      requestAuthBusinessRegistryOption.value = false
       // staff workflow, doesn't have this function defined
       addBusinessForm.value?.resetValidation()
       isLoading.value = false
@@ -678,6 +706,7 @@ export default defineComponent({
       isManageButtonEnabled,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
+      requestAuthBusinessRegistryOption,
       emailOption,
       nameOption,
       passcodeOption,
