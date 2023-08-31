@@ -525,6 +525,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '@/assets/scss/theme.scss';
+
 .action-cell {
     max-width: 0;
     max-height: 30px !important;
@@ -620,6 +621,14 @@ export default defineComponent({
   border-right: 10px solid transparent !important;
   border-left: 10px solid transparent !important;
   border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
+}
+
+// For the dropdown text color.
+::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
+  color: $app-blue;
+  .v-icon.v-icon {
+    color: $app-blue;
+  }
 }
 
 </style>

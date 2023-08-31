@@ -403,71 +403,6 @@ export default defineComponent({
       }
     }
   }
-
-  .action-cell {
-    max-width: 0;
-    max-height: 30px !important;
-    text-align: center;
-  }
-
-  .actions {
-    height:30px;
-    width: 140px;
-
-    .open-action {
-      border-right: 1px solid $gray1;
-    }
-
-    .open-action-btn {
-      font-size: .875rem;
-      box-shadow: none;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      margin-right: 1px;
-      max-height: 36px !important;
-      min-height: 36px !important;
-    }
-
-    .more-actions-btn {
-      box-shadow: none;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-      max-height: 36px !important;
-      min-height: 36px !important;
-    }
-
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
-  }
-
-  .new-actions {
-    height:30px;
-    width: 240px;
-
-    .open-action {
-      border-right: 1px solid $gray1;
-    }
-
-    .open-action-btn {
-      font-size: .875rem;
-      box-shadow: none;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      margin-right: 1px;
-      width: 170px;
-    }
-
-    .more-actions-btn {
-      box-shadow: none;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
-  }
 }
 
 .text-input-style-above {
@@ -521,13 +456,6 @@ export default defineComponent({
   color: $gray9 !important;
   font-size: 0.875rem;
   z-index: 1;
-}
-
-::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
-  color: $app-blue;
-  .v-icon.v-icon {
-    color: $app-blue;
-  }
 }
 
 ::v-deep label {
