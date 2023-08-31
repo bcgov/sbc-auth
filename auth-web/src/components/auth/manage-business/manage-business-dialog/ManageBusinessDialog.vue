@@ -661,7 +661,7 @@ export default defineComponent({
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
-      if (businessIdentifier && newBusinessIdentifier) {
+      if (businessIdentifier.value && newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName
         try {

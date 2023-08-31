@@ -35,6 +35,7 @@ module.exports = {
     'vue/no-v-for-template-key-on-child': 'warn',
     'vue/no-v-html': 'off',
     'vue/v-on-event-hyphenation': 'off',
+    'vue/no-ref-as-operand': 'error',
     // Off for now, might want to turn on for Vue3.
     'vue/no-v-model-argument': 'off',
     // Some of these can be infered by their default.
