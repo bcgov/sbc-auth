@@ -24,7 +24,7 @@ from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
-from auth_api.models.affiliation_invitation import AffiliationInvitation
+from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.entity import Entity
@@ -314,7 +314,7 @@ class Affiliation:
 
         # Could possibly be a single row.
         [affiliation_invitation.delete() for affiliation_invitation in
-            AffiliationInvitation.find_invitations_by_affiliation(affiliation.id)]
+            AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id)]
 
         if reset_passcode:
             entity.reset_passcode(entity.business_identifier, email_addresses)
