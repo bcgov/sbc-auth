@@ -34,7 +34,7 @@ export class AffiliationInviteInfo {
   status: string
   entity: Business
   fromOrg: OrgNameAndId
-  toOrg: OrgNameAndId
+  toOrg?: OrgNameAndId
 
   static isFromOrg (affiliationInviteInfo: AffiliationInviteInfo, fromOrgId: number): boolean {
     return affiliationInviteInfo.fromOrg.id === fromOrgId
