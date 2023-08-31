@@ -313,8 +313,8 @@ class Affiliation:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
 
         # Could possibly be a single row.
-        [affiliation_invitation.delete() for affiliation_invitation in
-            AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id)]
+        for affiliation_invitation in AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id):
+            affiliation_invitation.delete()
 
         if reset_passcode:
             entity.reset_passcode(entity.business_identifier, email_addresses)
