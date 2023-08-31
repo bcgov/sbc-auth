@@ -441,7 +441,7 @@
             outlined
             color="primary"
             data-test="dialog-ok-button"
-            @click="closeLinkExpireErrorDialog()"
+            @click="linkExpireErrorDialog()"
           >
             Return to My List
           </v-btn>
@@ -541,7 +541,7 @@
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
-import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
+import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
@@ -566,6 +566,8 @@ import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
 import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
+import { Action } from 'pinia-class'
 
 @Component({
   components: {
@@ -593,6 +595,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
+  @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
   private readonly setCurrentOrganizationId!: (id: number) => void
 
   // for template
@@ -684,9 +687,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         })
         await this.syncMembership(Number(this.orgId))
         await this.syncOrganization(Number(this.orgId))
-        // Remove Vuex with Vue 3
         this.$store.commit('updateHeader')
-        console.log('/////', this.currentAccountSettings, this.currentOrganization)
+        await this.addOrgSettings(this.currentOrganization)
       }
       this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
     }
@@ -1098,10 +1100,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   close () {
     this.$refs.errorDialog.close()
-  }
-
-  closeLinkExpireErrorDialog () {
-    this.$refs.linkExpireErrorDialog.close()
   }
 
   closeBusinessUnavailableDialog () {
