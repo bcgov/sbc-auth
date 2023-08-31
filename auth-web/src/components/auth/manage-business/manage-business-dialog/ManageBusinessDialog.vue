@@ -104,7 +104,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp"
+                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -181,7 +181,7 @@
                     <v-list-item-title>
                       Confirm authorization using your {{ computedAddressType }} email address
                       <div
-                        v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp"
+                        v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop"
                         class="subtitle"
                       >
                         (If you forgot or don't have a business {{ passwordText }})
@@ -475,7 +475,7 @@ export default defineComponent({
     })
 
     const isBusinessLegalTypeCorporationOrBenefitOrCoop = computed(() => {
-      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp.value
+      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit.value || isBusinessLegalTypeCoOp.value
     })
 
     const isFormValid = computed(() => {
@@ -737,7 +737,8 @@ export default defineComponent({
       showAuthorizationEmailSentDialog,
       createAffiliationInvitationErrorDialog,
       closeCreateAffiliationInvitationErrorDialog,
-      showEmailOption
+      showEmailOption,
+      isBusinessLegalTypeCorporationOrBenefitOrCoop
     }
   }
 })
