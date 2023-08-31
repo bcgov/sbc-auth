@@ -591,3 +591,7 @@ export enum EntityAlertTypes {
     PROCESSING = 'PROCESSING',
     EXPIRED = 'EXPIRED'
 }
+
+export enum MagicLinkInvitationStatus {
+    EXPIRED_AFFILIATION_INVITATION = 'EXPIRED_AFFILIATION_INVITATION'
+}

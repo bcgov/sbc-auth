@@ -213,6 +213,10 @@ export const useOrgStore = defineStore('org', () => {
     state.currentOrganization.name = name
   }
 
+  function setCurrentOrganizationId (id: number) {
+    state.currentOrganization.id = id
+  }
+
   function setCurrentOrganizationPaymentType (paymentType: string) {
     state.currentOrgPaymentType = paymentType
   }
@@ -1017,6 +1021,7 @@ export const useOrgStore = defineStore('org', () => {
     setCurrentMembership,
     setCurrentOrganizationAddress,
     setCurrentOrganizationName,
+    setCurrentOrganizationId,
     setCurrentOrganizationPaymentType,
     setCurrentOrganizationType,
     setCurrentOrganizationPADInfo,

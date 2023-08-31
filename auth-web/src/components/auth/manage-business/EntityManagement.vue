@@ -540,7 +540,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
+import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
 import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
@@ -564,6 +564,7 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 
@@ -586,13 +587,14 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   },
   methods: {
     ...mapActions(useBusinessStore, ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions(useOrgStore, ['syncAddress'])
+    ...mapActions(useOrgStore, ['syncAddress', 'setCurrentOrganizationId'])
   }
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
+  private readonly setCurrentOrganizationId!: (id: number) => void
 
   // for template
   readonly CorpTypes = CorpTypes
@@ -670,6 +672,23 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       const decodedToken = Base64.decode(base64TokenObject)
       const token = JSON.parse(decodedToken)
       const legalName = Base64.decode(this.base64OrgName)
+      // switch to match the account in the magic link
+      const currentOrgId = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount)).id
+      console.log(currentOrgId, Number(this.orgId), legalName, this.currentAccountSettings.label)
+      if (currentOrgId !== Number(this.orgId)) {
+        this.setCurrentAccountSettings({
+          id: Number(this.orgId),
+          label: legalName,
+          type: 'ACCOUNT',
+          urlpath: '',
+          urlorigin: ''
+        })
+        await this.syncMembership(Number(this.orgId))
+        await this.syncOrganization(Number(this.orgId))
+        // Remove Vuex with Vue 3
+        this.$store.commit('updateHeader')
+        console.log('/////', this.currentAccountSettings, this.currentOrganization)
+      }
       this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
     }
   }
@@ -683,39 +702,32 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     const identifier = token.businessIdentifier
     const invitationId = token.id
     this.businessIdentifier = token.businessIdentifier
+    // 1. check business exists or not
+    const isAdded = await useBusinessStore().isAffiliated(identifier)
+    if (isAdded) {
+      this.showBusinessAlreadyAdded({ name: legalName, identifier })
+      return
+    }
     try {
-      const invitation = await AffiliationInvitationService.getInvitationById(invitationId)
-
-      // 1. Link expired
-      if (invitation.data.status === AffiliationInvitationStatus.Expired) {
-        this.showLinkExpiredModal(identifier)
-        return
-      }
-
-      // 2. business already added
-      const isAdded = await useBusinessStore().isAffiliated(identifier)
-      if (isAdded) {
-        this.showBusinessAlreadyAdded({ name: legalName, identifier })
-        return
-      }
-
-      // 3. Accept invitation
+      // 2. Accept invitation
       const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
 
+      // 3. Adding magic link success
+      if (response.status === 200) {
+        this.showAddSuccessModalByEmail(identifier)
+      }
+    } catch (error) {
       // 4. Unauthorized
-      if (response.status === 401) {
+      if (error.response && error.response.status === 401) {
         this.showAuthorizationErrorModal()
         return
       }
-
-      // 5. Adding magic link success
-      if (response.status === 200) {
-        this.showAddSuccessModalByEmail(identifier)
+      // 5. Expired
+      if (error.response && error.response.status === 400 && error.response.data.code === MagicLinkInvitationStatus.EXPIRED_AFFILIATION_INVITATION) {
+        this.showLinkExpiredModal(identifier)
         return
       }
-
-      throw new Error('Magic link error')
-    } catch (error) {
+      // 6. Error
       this.showMagicLinkErrorModal()
     }
   }
@@ -741,6 +753,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         fromOrgId: fromOrgId,
         businessIdentifier: businessIdentifier
       }
+      console.log(payload)
       await AffiliationInvitationService.createInvitation(payload)
       const contact = await BusinessService.getMaskedContacts(businessIdentifier)
       this.businessContactEmail = contact?.data?.email
