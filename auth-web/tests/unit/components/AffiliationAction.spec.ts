@@ -9,4 +9,7 @@ sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
 
 describe('AffiliationAction.vue', () => {
   // TODO: Fill in - Move content from AffiliatedEntityTable.
+  it('TODO fill in test', () => {
+    expect(true).toBe(true)
+  })
 })
