@@ -1,27 +1,16 @@
 import '../test-utils/composition-api-setup' // important to import this first
-import Vue, { VueConstructor } from 'vue'
+import { EntityAlertTypes, SessionStorageKeys } from '@/util/constants'
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { actions, businesses, moreBusinesses } from './../test-utils/test-data/affiliations'
+import { useBusinessStore, useOrgStore } from '@/stores'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import { BaseVDataTable } from '@/components/datatable'
-import { EntityAlertTypes } from '@/util/constants'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
-import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
-import VueI18n from 'vue-i18n'
-import VueRouter from 'vue-router'
+import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-Vue.use(VueI18n)
-Vue.use(Vuex)
-
-// Prevent the warning "[Vuetify] Unable to locate target [data-app]"
-document.body.setAttribute('data-app', 'true')
 
 vi.mock('../../../src/services/user.services')
 
@@ -41,51 +30,10 @@ businesses.sort((a, b) => {
   return 0
 })
 
-const businessModule = {
-  namespaced: true,
-  state: { businesses },
-  action: {
-    addBusiness: vi.fn(),
-    updateBusinessName: vi.fn(),
-    updateFolioNumber: vi.fn()
-  }
-}
-
-const moreBusinessModule = {
-  namespaced: true,
-  state: { businesses: moreBusinesses },
-  action: {
-    addBusiness: vi.fn(),
-    updateBusinessName: vi.fn(),
-    updateFolioNumber: vi.fn()
-  }
-}
-
-const orgModule = {
-  namespaced: true,
-  state: {
-    currentOrganization: {
-      name: 'TestMeOut B.C. LTD.',
-      id: 3113
-    }
-  }
-}
-
-const oldStore = new Vuex.Store({
-  strict: false,
-  modules: {
-    business: businessModule,
-    org: orgModule
-  }
-})
-
-const newStore = new Vuex.Store({
-  strict: false,
-  modules: {
-    business: moreBusinessModule,
-    org: orgModule
-  }
-})
+sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
+  AUTH_API_URL: 'https://localhost:8080/api/v1/11',
+  PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
+}))
 
 const vuetify = new Vuetify({})
 
@@ -97,11 +45,21 @@ describe('AffiliatedEntityTable.vue', () => {
   const headers = getAffiliationTableHeaders(['Number', 'Type', 'Status'])
 
   beforeEach(async () => {
-    localVue = createLocalVue()
-    sessionStorage.setItem('AUTH_API_CONFIG', JSON.stringify({
-      AUTH_API_URL: 'https://localhost:8080/api/v1/11',
-      PAY_API_URL: 'https://pay-api-dev.apps.silver.devops.gov.bc.ca/api/v1'
-    }))
+    const localVue = createLocalVue()
+    const businessStore = useBusinessStore()
+    businessStore.businesses = businesses
+    const orgStore = useOrgStore()
+    orgStore.currentOrganization = {
+      name: 'TestMeOut B.C. LTD.',
+      id: 3113
+    } as any
+
+    wrapper = mount(AffiliatedEntityTable, {
+      localVue,
+      vuetify,
+      propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
+      mocks: { $t: () => '' }
+    })
   })
 
   afterEach(() => {
@@ -114,7 +72,6 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Renders affiliated entity table with correct contents', async () => {
     wrapper = mount(AffiliatedEntityTable, {
-      store: oldStore,
       localVue,
       vuetify,
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
@@ -220,9 +177,10 @@ describe('AffiliatedEntityTable.vue', () => {
   })
 
   it('Render affiliated entity table with correct actions menu', async () => {
+    const businessStore = useBusinessStore()
+    businessStore.businesses = moreBusinesses
     sessionStorage[SessionStorageKeys.LaunchDarklyFlags] = JSON.stringify({ 'ia-supported-entities': 'BEN', 'supported-restoration-entities': 'BEN' })
     wrapper = mount(AffiliatedEntityTable, {
-      store: newStore,
       localVue,
       vuetify,
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
@@ -268,7 +226,6 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Tooltips exist in affiliated entity table', async () => {
     wrapper = mount(AffiliatedEntityTable, {
-      store: oldStore,
       localVue,
       vuetify,
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },
@@ -280,7 +237,6 @@ describe('AffiliatedEntityTable.vue', () => {
 
   it('Details for Access Request', async () => {
     wrapper = mount(AffiliatedEntityTable, {
-      store: oldStore,
       localVue,
       vuetify,
       propsData: { selectedColumns: ['Number', 'Type', 'Status'] },

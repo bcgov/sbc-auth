@@ -1,5 +1,5 @@
 import { BcolAccountDetails, BcolProfile } from '@/models/bcol'
-
+import { AccountStatus } from '@/util/constants'
 import { Address } from '@/models/address'
 import { Business } from '@/models/business'
 import { Invitation } from '@/models/Invitation'
@@ -42,6 +42,7 @@ export interface Organization {
   name: string;
   affiliatedEntities?: Business[];
   orgType?: string;
+  orgStatus?: AccountStatus
   members?: Member[];
   invitations?: Invitation[];
   accessType?: string;

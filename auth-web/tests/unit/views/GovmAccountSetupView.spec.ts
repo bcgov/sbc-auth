@@ -1,9 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
-
 import GovmAccountSetupView from '@/views/auth/create-account/GovmAccountSetupView.vue'
-// import { AccountStatus } from '@/util/constants'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
@@ -30,6 +27,8 @@ describe('GovmAccountSetupView.vue', () => {
       }
     }
 
+    // Remove with Vue 3 upgrade
+    // We need a store for this one it calls auth/currentLoginSource - which is in sbc-common-components for now.
     const store = new Vuex.Store({
       state: {},
       strict: false,

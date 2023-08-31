@@ -1,11 +1,6 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import NameRequestButton from '@/components/auth/home/NameRequestButton.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-document.body.setAttribute('data-app', 'true')
 
 describe('NameRequestButton.vue', () => {
   let wrapper: any
@@ -13,14 +8,11 @@ describe('NameRequestButton.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
     const vuetify = new Vuetify({})
-    const store = new Vuex.Store({})
 
     wrapperFactory = (props) => {
       return mount(NameRequestButton, {
-        store,
         localVue,
         vuetify,
         propsData: {

@@ -15,7 +15,7 @@
       hint="For example: &quot;Joe's Plumbing Inc.&quot;, &quot;BC1234567&quot;, &quot;FM1234567&quot;"
       :item-text="lookupType === LookupType.NR ? 'nrNum' : 'name'"
       :item-value="lookupType === LookupType.NR ? 'nrNum' : 'identifier'"
-      label="My business name, incorporation, or registration number"
+      :label="lookupType === LookupType.NR ? 'My business name or name request number' : 'My business name, incorporation, or registration number'"
       no-filter
       persistent-hint
       return-object
@@ -34,7 +34,7 @@
 
       <template #no-data>
         <p class="pl-5 font-weight-bold">
-          No active B.C. business found
+          {{ lookupType === LookupType.NR ? 'No Name Request found' : 'No active B.C. business found' }}
         </p>
         <p class="pl-5">
           Ensure you have entered the correct business name or number.
@@ -75,13 +75,13 @@
       >
         <v-row class="business-lookup-result pt-1">
           <v-col
-            cols="2"
+            cols="3"
             class="result-identifier"
           >
             {{ item.nrNum }}
           </v-col>
           <v-col
-            cols="8"
+            cols="7"
             class="result-name"
           >
             <div
@@ -117,7 +117,7 @@ import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
 import NameRequestLookupServices from '@/services/name-request-lookup.services'
 import _ from 'lodash'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores/business'
 
 enum States {
   INITIAL = 'initial',
@@ -151,11 +151,7 @@ export default defineComponent({
         : [] as BusinessLookupResultIF[]
     })
 
-    // store
-    const store = useStore()
-    const isAffiliated = (businessIdentifier: string) => store.dispatch('business/isAffiliated', businessIdentifier)
-    const isAffiliatedNR = (nrNum: string) => store.dispatch('business/isAffiliatedNR', nrNum)
-
+    const businessStore = useBusinessStore()
     const onSearchFieldChanged = _.debounce(async () => {
       // safety check
       if (states.searchField && states.searchField?.length < 3) {
@@ -179,9 +175,9 @@ export default defineComponent({
         // enable or disable items according to whether they have already been added
         for (const result of states.searchResults) {
           if (props.lookupType === LookupType.NR && 'nrNum' in result) {
-            result.disabled = await isAffiliatedNR(result.nrNum)
+            result.disabled = businessStore.isAffiliatedNR(result.nrNum)
           } else if ('identifier' in result) {
-            result.disabled = await isAffiliated(result.identifier)
+            result.disabled = businessStore.isAffiliated(result.identifier)
           }
         }
 

@@ -27,7 +27,8 @@
             <div class="view-header user-profile-header">
               <h1>Director Search Account Access</h1>
               <p class="mb-0">
-                You've been invited to administer the {{ orgName }} Director Search Account at the BC Registry. Create your user profile and log in to access this account
+                You've been invited to administer the {{ orgName }} Director Search Account at the BC Registry.
+                Create your user profile and log in to access this account
               </p>
             </div>
             <v-card

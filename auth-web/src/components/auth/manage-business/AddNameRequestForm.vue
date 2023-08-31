@@ -42,7 +42,6 @@
               >
                 mdi-close
               </v-icon><!-- spacer icon -->
-              <!-- TODO 16722 change to {{ name.name when BE fix (able to send with status) }} -->
               <span class="names-text">{{ name }}</span>
             </div>
           </div>
@@ -59,7 +58,7 @@
           v-model="applicantPhoneNumber"
           filled
           persistent-hint
-          label="Enter the Applicant Phone Number"
+          label="Applicant Phone Number"
           hint="Example: 555-555-5555"
           :rules="applicantPhoneNumberRules"
           type="tel"
@@ -72,7 +71,7 @@
           v-model="applicantEmail"
           filled
           persistent-hint
-          label="Enter the Applicant Email Address"
+          label="Applicant Email Address"
           hint="Example: name@email.com"
           :rules="applicantEmailRules"
           data-test="applicant-email"
@@ -83,7 +82,7 @@
         <v-btn
           large
           text
-          class="pl-2 pr-2 mr-auto"
+          class="mr-auto pl-0 help-text d-flex justify-start"
           data-test="forgot-button"
           @click.stop="openHelp()"
         >
@@ -122,7 +121,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
@@ -130,16 +129,18 @@ import { NameRequestIF } from '@/models/business-nr-lookup'
 import { NrState } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: {
     HelpDialog
   },
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   },
   methods: {
-    ...mapActions('business', [
+    ...mapActions(useBusinessStore, [
       'addNameRequest'
     ])
   }
@@ -284,6 +285,10 @@ export default class AddNameRequestForm extends Vue {
 
   .v-btn + .v-btn {
     margin-left: 0.5rem;
+  }
+
+  .help-text {
+    color: $app-blue;
   }
 
   .v-btn[data-test="cancel-button"],

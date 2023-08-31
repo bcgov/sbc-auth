@@ -5,7 +5,7 @@ import sinon from 'sinon'
 describe('Name Request Lookup Services', () => {
   it('returns a result when the name request is found', async () => {
     const result = {
-      // TODO - remove comments when BE ready with status
+      // remove comments when BE ready with status
       // 'names': [
       //   { 'name': 'TEST NAME 1 CORP.', 'status': 'Accepted' },
       //   { 'name': 'TEST NAME 2 INC.', 'status': 'Rejected' },
@@ -23,7 +23,7 @@ describe('Name Request Lookup Services', () => {
       `?query=${encodeURIComponent('NR 1752813')}` + '&start=0&rows=20'
 
     sinon.stub(axios, 'get').withArgs(url).returns(
-      Promise.resolve({ data: [result]})
+      Promise.resolve({ data: [result] })
     )
 
     // search and look at results
@@ -38,7 +38,7 @@ describe('Name Request Lookup Services', () => {
     `?query=${encodeURIComponent('NR 1752814')}` + '&start=0&rows=20'
 
     sinon.stub(axios, 'get').withArgs(url).returns(
-      Promise.resolve({ data: []})
+      Promise.resolve({ data: [] })
     )
 
     const results = await NameRequestLookupServices.search('NR 1752814')

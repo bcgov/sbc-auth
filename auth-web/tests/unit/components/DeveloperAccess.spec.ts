@@ -3,18 +3,15 @@ import { createLocalVue, shallowMount } from '@vue/test-utils'
 import DeveloperAccess from '@/components/auth/account-settings/advance-settings/DeveloperAccess.vue'
 import ExistingAPIKeys from '@/components/auth/account-settings/advance-settings/ExistingAPIKeys.vue'
 
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
 document.body.setAttribute('data-app', 'true')
 
-describe('GovmPaymentMethodSelector.vue', () => {
+describe('DeveloperAccess.vue', () => {
   let wrapper: any
   let wrapperFactory: any
   const config = {
@@ -27,20 +24,14 @@ describe('GovmPaymentMethodSelector.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
     localVue.use(VueRouter)
     const router = new VueRouter()
 
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {}
-    })
     const $t = () => 'test trans data'
 
     wrapperFactory = (propsData) => {
       return shallowMount(DeveloperAccess, {
         localVue,
-        store,
         router,
         vuetify,
         mocks: { $t },

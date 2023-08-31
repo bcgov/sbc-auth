@@ -71,7 +71,7 @@
 import { AccountStatus, Pages } from '@/util/constants'
 import { Component, Vue } from 'vue-property-decorator'
 import Stepper, { StepConfiguration } from '@/components/auth/common/stepper/Stepper.vue'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountOverview from '@/components/auth/account-freeze/AccountOverview.vue'
 import AccountSuspendedView from './AccountSuspendedView.vue'
 import ConfigHelper from 'sbc-common-components/src/util/config-helper'
@@ -81,6 +81,8 @@ import { Organization } from '@/models/Organization'
 import { Payment } from '@/models/Payment'
 import PaymentReview from '@/components/auth/account-freeze/PaymentReview.vue'
 import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankInformation.vue'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -92,16 +94,16 @@ import ReviewBankInformation from '@/components/auth/account-freeze/ReviewBankIn
     AccountSuspendedView
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'createAccountPayment'
 
     ])
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userContact'
     ]),
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'currentOrganization'
     ])
 

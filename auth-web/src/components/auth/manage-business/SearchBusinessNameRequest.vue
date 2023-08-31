@@ -59,6 +59,7 @@
     <template v-if="isEnableBusinessNrSearch">
       <ManageBusinessDialog
         ref="manageBusinessDialog"
+        :orgId="orgId"
         :businessLegalType="businessLegalType"
         :showBusinessDialog="showManageBusinessDialog"
         :initialBusinessIdentifier="businessIdentifier"
@@ -73,6 +74,7 @@
         @add-unknown-error="showUnknownErrorModal('business')"
         @on-cancel="cancelEvent"
         @on-business-identifier="businessIdentifier = $event"
+        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
       />
     </template>
     <!-- Add Name Request Dialog -->
@@ -107,33 +109,33 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import BusinessLookup from './BusinessLookup.vue'
-import Certify from './Certify.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LDFlags } from '@/util/constants'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import { LookupType } from '@/models/business-nr-lookup'
-import ManageBusinessDialog from '@/components/auth/manage-business/ManageBusinessDialog.vue'
+import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
-import { mapActions } from 'vuex'
+import { mapActions } from 'pinia'
+import { useBusinessStore } from '@/stores'
 
 @Component({
   components: {
     ManageBusinessDialog,
     AddNameRequestForm,
     BusinessLookup,
-    Certify,
     HelpDialog,
     ModalDialog
   },
   methods: {
-    ...mapActions('business', [
+    ...mapActions(useBusinessStore, [
       'updateBusinessName',
       'updateFolioNumber'
     ])
   }
 })
 export default class SearchBusinessNameRequest extends Vue {
+  @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: false }) readonly isGovStaffAccount: boolean
   @Prop({ default: '' }) readonly userFirstName: string
   @Prop({ default: '' }) readonly userLastName: string
@@ -159,6 +161,7 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   showAddSuccessModal (event) {
     this.clearSearch++
+    this.showManageBusinessDialog = false
     this.$emit('add-success', event)
   }
   showInvalidCodeModal (event) {
@@ -199,6 +202,9 @@ export default class SearchBusinessNameRequest extends Vue {
   showAddNRModal () {
     this.$refs.addNRDialog.open()
   }
+  emitOnAuthorizationEmailSentClose (event) {
+    this.$emit('on-authorization-email-sent-close', event)
+  }
 
   async businessEvent (event: { name: string, identifier: string, legalType: string }) {
     this.businessName = event?.name || ''
@@ -234,6 +240,16 @@ export default class SearchBusinessNameRequest extends Vue {
     this.businessName = ''
     // Force a re-render for our BusinessLookup component - to reset it's state.
     this.businessLookupKey++
+  }
+
+  onAuthorizationEmailSentClose (event) {
+    this.showManageBusinessDialog = false
+    this.showNRDialog = false
+    this.businessIdentifier = ''
+    this.businessLegalType = ''
+    this.businessName = ''
+    this.businessLookupKey++
+    this.emitOnAuthorizationEmailSentClose(event)
   }
 
   get isEnableBusinessNrSearch (): boolean {

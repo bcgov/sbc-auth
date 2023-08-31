@@ -9,12 +9,6 @@ export interface NameRequestIF {
   name: string,
   status?: string
 }
-// TODO - comment out when API ready
-// export interface NameRequestLookupResultIF {
-//   names: NameRequestIF[]
-//   nrNum: string
-//   disabled?: boolean // for display in v-autocomplete
-// }
 export interface NameRequestLookupResultIF {
   names: string[]
   nrNum: string

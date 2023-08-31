@@ -61,24 +61,23 @@
 <script lang="ts">
 import { ALLOWED_URIS_FOR_PENDING_ORGS, LoginSource, Pages } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
 import { TermsOfUseDocument } from '@/models/TermsOfUseDocument'
 import { User } from '@/models/user'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import UserModule from '@/store/modules/user'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
     TermsOfUse
   },
   computed: {
-    ...mapState('user', ['termsOfUse'])
+    ...mapState(useUserStore, ['termsOfUse'])
   },
   methods: {
-    ...mapActions('user',
+    ...mapActions(useUserStore,
       [
         'saveUserTerms',
         'updateCurrentUserTerms'
@@ -103,6 +102,7 @@ export default class TermsOfServiceView extends Mixins(NextPageMixin) {
   }
 
   mounted () {
+    // Remove with Vue 3
     this.$store.commit('updateHeader')
     this.isGovmUser = this.isGovmUserLoggedin()
   }

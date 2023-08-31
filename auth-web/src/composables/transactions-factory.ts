@@ -1,12 +1,11 @@
 import { LDFlags, Role } from '@/util/constants'
 import { Transaction, TransactionFilterParams, TransactionState } from '@/models/transaction'
 import { computed, reactive, ref } from '@vue/composition-api'
-import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { Organization } from '@/models/Organization'
 import PaymentService from '@/services/payment.services'
 import debounce from 'lodash/throttle'
-import { useStore } from 'vuex-composition-helpers'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 const transactions = (reactive({
   filters: {
@@ -26,9 +25,10 @@ const transactions = (reactive({
 }) as unknown) as TransactionState
 
 export const useTransactions = () => {
-  const store = useStore()
-  const currentOrganization = computed(() => store.state.org.currentOrganization as Organization)
-  const currentUser = computed(() => store.state.user.currentUser as KCUserProfile)
+  const orgStore = useOrgStore()
+  const userStore = useUserStore()
+  const currentOrganization = computed(() => orgStore.currentOrganization)
+  const currentUser = computed(() => userStore.currentUser)
   const viewAll = ref(false)
   const setViewAll = (val: boolean) => {
     if (val) {
@@ -60,10 +60,10 @@ export const useTransactions = () => {
 
     // Temporary code check in case of performance issues with public users
     if (!(LaunchDarklyService.getFlag(LDFlags.EnableDetailsFilter) || false)) {
-      if (transactions.filters.filterPayload['lineItemsAndDetails']) {
+      if (transactions.filters.filterPayload.lineItemsAndDetails) {
         // remove the filter that also queries details
-        transactions.filters.filterPayload['lineItems'] = transactions.filters.filterPayload['lineItemsAndDetails']
-        delete transactions.filters.filterPayload['lineItemsAndDetails']
+        transactions.filters.filterPayload.lineItems = transactions.filters.filterPayload.lineItemsAndDetails
+        delete transactions.filters.filterPayload.lineItemsAndDetails
       }
     }
 

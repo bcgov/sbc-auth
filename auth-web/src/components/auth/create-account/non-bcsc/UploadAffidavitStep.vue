@@ -83,18 +83,17 @@
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { NotaryContact, NotaryInformation } from '@/models/notary'
-import { mapActions, mapMutations, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { Account } from '@/util/constants'
 import { Address } from '@/models/address'
 import ConfirmCancelButton from '@/components/auth/common/ConfirmCancelButton.vue'
 import FileUploadPreview from '@/components/auth/common/FileUploadPreview.vue'
 import NotaryContactForm from '@/components/auth/create-account/non-bcsc/NotaryContactForm.vue'
 import NotaryInformationForm from '@/components/auth/create-account/non-bcsc/NotaryInformationForm.vue'
-import OrgModule from '@/store/modules/org'
 import { Organization } from '@/models/Organization'
 import Steppable from '@/components/auth/common/stepper/Steppable.vue'
-import UserModule from '@/store/modules/user'
-import { getModule } from 'vuex-module-decorators'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -104,8 +103,8 @@ import { getModule } from 'vuex-module-decorators'
     FileUploadPreview
   },
   computed: {
-    ...mapState('org', ['currentOrganization']),
-    ...mapState('user', [
+    ...mapState(useOrgStore, ['currentOrganization']),
+    ...mapState(useUserStore, [
       'userProfile',
       'currentUser',
       'notaryInformation',
@@ -114,21 +113,16 @@ import { getModule } from 'vuex-module-decorators'
     ])
   },
   methods: {
-    ...mapMutations('org', ['setCurrentOrganization', 'setOrgName']),
-    ...mapMutations('user', ['setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc']),
-    ...mapActions('org', [
-    ]),
-    ...mapActions('user', [
-      'uploadPendingDocsToStorage'
+    ...mapActions(useOrgStore, ['setCurrentOrganization']),
+    ...mapActions(useUserStore, [
+      'uploadPendingDocsToStorage', 'setNotaryInformation', 'setNotaryContact', 'setAffidavitDoc'
     ])
   }
 })
 export default class UploadAffidavitStep extends Mixins(Steppable) {
   @Prop({ default: false }) isAffidavitUpload: boolean
-  private orgStore = getModule(OrgModule, this.$store)
-  private userStore = getModule(UserModule, this.$store)
   private errorMessage: string = ''
-  private saving: boolean = false
+  saving: boolean = false
   private MAX_FILE_SIZE = 10000 // 10 MB in KB
   private isNotaryContactValid: boolean = false
   private isNotaryInformationValid: boolean = false

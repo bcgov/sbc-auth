@@ -57,10 +57,6 @@
 
 <script lang="ts">
 import { Component, Emit, Prop, Vue } from 'vue-property-decorator'
-import { namespace } from 'vuex-class'
-
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-const BusinessModule = namespace('business')
 
 @Component({})
 export default class ResubmitRequest extends Vue {
@@ -75,7 +71,7 @@ export default class ResubmitRequest extends Vue {
   readonly submitActive: boolean
 
   private modifiedXml: string
-  private emitInput (val: string): void {
+  emitInput (val: string): void {
     this.calculateInputHeight()
     this.modifiedXml = val
   }
@@ -104,12 +100,12 @@ export default class ResubmitRequest extends Vue {
   }
 
   @Emit('resubmit')
-  private resubmit (): string {
+  resubmit (): string {
     return this.modifiedXml
   }
 
   @Emit('close')
-  private emitClose (): void { }
+  emitClose (): void { }
 }
 </script>
 

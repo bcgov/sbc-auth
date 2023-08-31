@@ -18,7 +18,10 @@ export interface AffiliationInvitation {
 }
 
 export interface CreateAffiliationInvitation {
-    fromOrgId: string
+    fromOrgId: number
     toOrgId?: string
     businessIdentifier: string
+    toOrgUuid?: string
+    type?: string
+    additionalMessage?: string
 }

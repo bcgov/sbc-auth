@@ -356,29 +356,31 @@
 import { AccountStatus, LDFlags, LoginSource, Pages, Permission, Role } from '@/util/constants'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { Member, Organization } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import AccountSuspendAlert from '@/components/auth/common/AccountSuspendAlert.vue'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
   @Component({
     components: {
       AccountSuspendAlert
     },
     computed: {
-      ...mapState('user', [
+      ...mapState(useUserStore, [
         'currentUser'
       ]),
-      ...mapState('org', [
+      ...mapState(useOrgStore, [
         'currentOrganization',
         'currentMembership',
         'permissions'
       ])
     },
     methods: {
-      ...mapActions('org', [
+      ...mapActions(useOrgStore, [
         'syncOrganization'
       ])
     }
@@ -456,7 +458,10 @@ export default class AccountSettings extends Mixins(AccountMixin) {
 
   // show baner for staff user and account suspended
   private get showAccountFreezeBanner () {
-    return this.isStaff && (this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED || this.currentOrganization?.statusCode === AccountStatus.SUSPENDED)
+    return this.isStaff && (
+      this.currentOrganization?.statusCode === AccountStatus.NSF_SUSPENDED ||
+      this.currentOrganization?.statusCode === AccountStatus.SUSPENDED
+    )
   }
 
   private async mounted () {

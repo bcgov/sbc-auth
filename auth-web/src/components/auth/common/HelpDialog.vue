@@ -6,7 +6,9 @@
     max-width="45rem"
   >
     <v-card>
-      <v-card-title>Need Assistance?</v-card-title>
+      <v-card-title>
+        <h1>Need Help?</h1>
+      </v-card-title>
       <v-card-text>
         <p
           class="mb-7"
@@ -43,7 +45,7 @@
           color="primary"
           @click="close()"
         >
-          OK
+          Close
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -77,3 +79,7 @@ export default class HelpDialog extends Vue {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/ModalDialog.scss';
+</style>

@@ -46,18 +46,18 @@ import { LoginSource, Pages } from '@/util/constants'
 import { Component } from 'vue-property-decorator'
 import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-import UserModule from '@/store/modules/user'
+
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   computed: {
-    ...mapState('user', ['currentUser'])
+    ...mapState(useUserStore, ['currentUser'])
   }
 })
 export default class UnauthorizedView extends Vue {
-  private currentUser!: KCUserProfile
+  currentUser!: KCUserProfile
   errorMessage : string = ''
 
   mounted () {

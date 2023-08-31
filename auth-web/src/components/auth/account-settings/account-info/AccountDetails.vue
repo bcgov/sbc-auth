@@ -111,7 +111,7 @@ import { computed, defineComponent, onMounted, reactive, ref, toRefs, watch } fr
 import AccountBusinessType from '@/components/auth/common/AccountBusinessType.vue'
 import { Code } from '@/models/Code'
 import { OrgBusinessType } from '@/models/Organization'
-import { useStore } from 'vuex-composition-helpers'
+import { useCodesStore } from '@/stores/codes'
 
 export interface AccountDetailsI {
   orgName: string
@@ -125,22 +125,19 @@ export interface AccountDetailsI {
 export default defineComponent({
   name: 'AccountDetails',
   components: { AccountBusinessType },
-  emits: ['update:updateAndSaveAccountDetails', 'update:viewOnlyMode'],
   props: {
     accountDetails: { default: null as OrgBusinessType },
     isBusinessAccount: { default: true },
     nameChangeAllowed: { default: true },
     viewOnlyMode: { default: true }
   },
+  emits: ['update:updateAndSaveAccountDetails', 'update:viewOnlyMode'],
   setup (props, { emit }) {
     // refs
     const editAccountForm = ref(null as HTMLFormElement)
-    // store stuff
-    const store = useStore()
-    const businessSizeCodes = computed(() => store.state.codes.businessSizeCodes as Code[])
-    const businessTypeCodes = computed(() => store.state.codes.businessTypeCodes as Code[])
-    const getBusinessSizeCodes = (): Promise<Code[]> => store.dispatch('codes/getBusinessSizeCodes')
-    const getBusinessTypeCodes = (): Promise<Code[]> => store.dispatch('codes/getBusinessTypeCodes')
+    const codeStore = useCodesStore()
+    const businessSizeCodes = computed(() => codeStore.businessSizeCodes)
+    const businessTypeCodes = computed(() => codeStore.businessTypeCodes)
 
     const localVars = (reactive({
       orgName: '',
@@ -193,8 +190,8 @@ export default defineComponent({
     onMounted(async () => {
       localVars.isLoading = true
       // to show business type value need to get all code
-      await getBusinessTypeCodes()
-      await getBusinessSizeCodes()
+      await codeStore.getBusinessTypeCodes()
+      await codeStore.getBusinessSizeCodes()
       updateAccountDetails()
       localVars.isLoading = false
     })

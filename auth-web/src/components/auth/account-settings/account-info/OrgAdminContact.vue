@@ -13,7 +13,8 @@
             {{ member.user.contacts[0].email }}
           </div>
           <div v-if="member.user.contacts[0].phone">
-            {{ member.user.contacts[0].phone }} <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
+            {{ member.user.contacts[0].phone }}
+            <span v-if="member.user.contacts[0].phoneExtension">ext. {{ member.user.contacts[0].phoneExtension }}</span>
           </div>
         </div>
       </div>
@@ -31,18 +32,19 @@ import {
   MembershipType,
   Organization
 } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import { AccessType } from '@/util/constants'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', [
+    ...mapState(useOrgStore, [
       'activeOrgMembers',
       'currentOrganization'
     ])
   },
   methods: {
-    ...mapActions('org', ['syncActiveOrgMembers'])
+    ...mapActions(useOrgStore, ['syncActiveOrgMembers'])
   }
 
 })

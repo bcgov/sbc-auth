@@ -88,6 +88,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+// Note not using Vuex anymore. leaving this component as IS for now.
 import { mapActions, mapState } from 'vuex'
 import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'

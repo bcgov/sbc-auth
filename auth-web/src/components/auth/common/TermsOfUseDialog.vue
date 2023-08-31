@@ -94,14 +94,15 @@
 <script lang="ts">
 import { Component, Emit, Prop, Vue, Watch } from 'vue-property-decorator'
 import TermsOfUse from '@/components/auth/common/TermsOfUse.vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
     TermsOfUse
   },
   computed: {
-    ...mapState('user', [
+    ...mapState(useUserStore, [
       'userHasToAcceptTOS'
     ])
   }

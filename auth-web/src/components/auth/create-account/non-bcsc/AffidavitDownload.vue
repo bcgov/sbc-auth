@@ -27,7 +27,8 @@
         </ol>
       </div>
       <p class="mb-10">
-        Once you have your affidavit notarized, return to this website and continue to the next step. <span class="lb">You will upload your affidavit later in the account creation process.</span>
+        Once you have your affidavit notarized, return to this website and continue to the next step.
+        <span class="lb">You will upload your affidavit later in the account creation process.</span>
       </p>
       <div class="d-inline-flex flex-column pb-2">
         <v-btn
@@ -128,6 +129,7 @@ import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import CommonUtils from '@/util/common-util'
 import ConfigHelper from '@/util/config-helper'
 import DocumentService from '@/services/document.services'
+// Will be removing these two lines with Vue 3 upgrade.
 import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
 

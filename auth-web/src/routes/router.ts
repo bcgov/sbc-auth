@@ -22,6 +22,7 @@ import AccountUnlockSuccessView from '@/views/auth/account-freeze/AccountUnlockS
 import AdminDashboardView from '@/views/auth/staff/AdminDashboardView.vue'
 import AffidavitDownload from '@/components/auth/create-account/non-bcsc/AffidavitDownload.vue'
 import AuthenticationOptionsView from '@/views/auth/AuthenticationOptionsView.vue'
+import { Base64 } from 'js-base64'
 import BusinessProfileView from '@/views/auth/BusinessProfileView.vue'
 import CcPaymentReturnView from '@/views/pay/CcPaymentReturnView.vue'
 import CcPaymentView from '@/views/pay/CcPaymentView.vue'
@@ -241,18 +242,21 @@ export function getRoutes (): RouteConfig[] {
       ]
     },
     {
-      path: '/:base64OrgName/affiliationInvitation/acceptToken//:base64Token',
+      path: '/:base64OrgName/affiliationInvitation/acceptToken/:base64Token',
       name: 'account-magic-link',
       component: EntityManagement,
       props: route => {
         try {
+          // The :base64Token consists of a token that is divided into three parts, separated by periods.
+          // we extract the first part of the token for decoding.
           const base64Token = route.params.base64Token
-          const decodedToken = atob(base64Token) // Decode the Base64 token
-          const orgId = JSON.parse(decodedToken).fromOrgId // Extract the orgId from the decoded token
+          const base64TokenObject = base64Token.split('.')[0]
+          const decodedToken = Base64.decode(base64TokenObject)
+          const orgId = JSON.parse(decodedToken).fromOrgId.toString()
 
           return {
             orgId: orgId,
-            base64Token: route.params.base64Token,
+            base64Token: base64Token,
             base64OrgName: route.params.base64OrgName
           }
         } catch (error) {

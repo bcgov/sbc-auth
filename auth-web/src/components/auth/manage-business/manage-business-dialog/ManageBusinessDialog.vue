@@ -1,5 +1,31 @@
 <template>
   <div id="manage-business-dialog">
+    <ModalDialog
+      ref="createAffiliationInvitationErrorDialog"
+      title="Error Sending Authorization Email"
+      text="An error occurred sending authorization email. Please try again."
+      dialog-class="notify-dialog"
+      max-width="640"
+    >
+      <template #icon>
+        <v-icon
+          large
+          color="error"
+        >
+          mdi-alert-circle-outline
+        </v-icon>
+      </template>
+      <template #actions>
+        <v-btn
+          large
+          color="primary"
+          data-test="dialog-ok-button"
+          @click="closeCreateAffiliationInvitationErrorDialog()"
+        >
+          Close
+        </v-btn>
+      </template>
+    </ModalDialog>
     <v-dialog
       v-model="isDialogVisible"
       attach="#entity-management"
@@ -15,16 +41,39 @@
         :inline="true"
       />
 
-      <AuthorizationEmailSent
-        v-if="!showHelp && showAuthorizationEmailSentDialog"
-        :email="businessContactEmail"
+      <AuthorizationRequestSentDialog
+        :is-visible="!showHelp && showAuthorizationEmailSentDialog"
         @open-help="openHelp"
-        @close-dialog="onAuthorizationEmailSentClose"
-      />
+        @close-dialog="onAuthorizationRequestSentDialogClose"
+      >
+        <template #title>
+          <h1>Authorization Email Sent</h1>
+        </template>
+        <template #content>
+          <p>An email was sent to <span class="email-address">{{ businessContactEmail }}</span></p>
+          <p>
+            Confirm your access by clicking the link inside. This will add the business to your Business Registry List.
+            The link is valid for 15 minutes.
+          </p>
+        </template>
+      </AuthorizationRequestSentDialog>
 
-      <v-card v-if="!showHelp && !showAuthorizationEmailSentDialog">
+      <AuthorizationRequestSentDialog
+        :is-visible="!showHelp && showAuthorizationRequestSentDialog"
+        @open-help="openHelp"
+        @close-dialog="onAuthorizationRequestSentDialogClose"
+      >
+        <template #title>
+          Request Sent
+        </template>
+        <template #content>
+          <p>Your authorization request has been sent to contacts of <span class="strong">{{ invitationToAccount.name }}</span>.</p>
+        </template>
+      </AuthorizationRequestSentDialog>
+
+      <v-card v-if="!showHelp && !successDialog">
         <v-card-title data-test="dialog-header">
-          <span>Manage a B.C. Business</span>
+          <h2>Manage a B.C. Business</h2>
         </v-card-title>
 
         <v-card-text>
@@ -55,8 +104,8 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="!isBusinessLegalTypeSPorGP"
-                  id="passcode-group"
+                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                  id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
                   eager
@@ -75,12 +124,12 @@
                       :rules="passcodeRules"
                       :maxlength="passcodeMaxLength"
                       autocomplete="off"
-                      type="input"
+                      type="password"
                       class="passcode mt-0 mb-2"
                       :aria-label="passcodeLabel"
                     />
                     <Certify
-                      v-if="isBusinessIdentifierValid && isFirm"
+                      v-if="isBusinessIdentifierValid && isBusinessLegalTypeFirm"
                       :certifiedBy="certifiedBy"
                       entity="registered entity"
                       class="certify"
@@ -91,8 +140,8 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="isBusinessLegalTypeSPorGP"
-                  id="proprietor-partner-name-group"
+                  v-if="isBusinessLegalTypeFirm"
+                  id="manage-business-dialog-proprietor-partner-name-group"
                   v-model="nameOption"
                   class="top-of-list"
                 >
@@ -123,38 +172,50 @@
                   />
                 </v-list-group>
 
-                <v-list-group v-model="emailOption">
+                <v-list-group
+                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail"
+                  id="manage-business-dialog-email-group"
+                  v-model="emailOption"
+                >
                   <template #activator>
                     <v-list-item-title>
-                      Confirm authorization using your registered office email address
-                      <div class="subtitle">
+                      Confirm authorization using your {{ computedAddressType }} email address
+                      <div
+                        v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                        class="subtitle"
+                      >
                         (If you forgot or don't have a business {{ passwordText }})
                       </div>
                     </v-list-item-title>
                   </template>
                   <div class="list-body">
                     <div>
-                      An email will be sent to the registered office contact email of the business:
+                      An email will be sent to the {{ computedAddressType }} contact email of the business:
                     </div>
                     <div><b>{{ businessContactEmail }}</b></div>
                     <div class="mt-1 mr-1 mb-4">
-                      To confirm your access, please click on the link in the email. This will add the business to your Business Registry List. The link is valid for 15 minutes.
+                      To confirm your access, please click on the link in the email. This will add the business to your
+                      Business Registry List. The link is valid for 15 minutes.
                     </div>
                   </div>
                 </v-list-group>
 
-                <template v-if="enableDelegationFeature">
-                  <v-list-group v-model="requestAuthBusinessOption">
-                    <template #activator>
-                      <v-list-item-title>Request authorization from the business</v-list-item-title>
-                    </template>
-                    <div class="list-body">
-                      <!-- Placeholder for RTR -->
-                    </div>
-                  </v-list-group>
+                <v-list-group v-model="requestAuthBusinessOption">
+                  <template #activator>
+                    <v-list-item-title>Request authorization from the business</v-list-item-title>
+                  </template>
+                  <div class="list-body">
+                    <AccountAuthorizationRequest
+                      :business-identifier="initialBusinessIdentifier"
+                      :business-name="initialBusinessName"
+                      @change-request-access-message="invitationAdditionalMessage=$event"
+                      @select-account="selectAccount($event)"
+                    />
+                  </div>
+                </v-list-group>
 
+                <template v-if="enableDelegationFeature">
                   <v-list-group
-                    v-if="enableDelegationFeature"
                     v-model="requestAuthRegistryOption"
                   >
                     <template #activator>
@@ -190,6 +251,7 @@
           </v-btn>
           <v-btn
             id="add-button"
+            :disabled="!isManageButtonEnabled"
             large
             color="primary"
             :loading="isLoading"
@@ -205,24 +267,35 @@
 
 <script lang="ts">
 import { CorpTypes, LDFlags } from '@/util/constants'
-import { computed, defineComponent, ref, watch } from '@vue/composition-api'
-import AuthorizationEmailSent from './AuthorizationEmailSent.vue'
+import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import { AffiliationInvitationStatus } from '@/models/affiliation'
+import AuthorizationRequestSentDialog from '@/components/auth/manage-business/manage-business-dialog/AuthorizationRequestSentDialog.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
+import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
+import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { StatusCodes } from 'http-status-codes'
-import { useStore } from 'vuex-composition-helpers'
+import { useBusinessStore } from '@/stores'
 
 export default defineComponent({
   components: {
-    AuthorizationEmailSent,
+    AuthorizationRequestSentDialog,
+    AccountAuthorizationRequest,
     Certify,
-    HelpDialog
+    HelpDialog,
+    ModalDialog
   },
   props: {
+    orgId: {
+      type: String,
+      default: ''
+    },
     initialBusinessIdentifier: {
       type: String,
       default: ''
@@ -254,14 +327,16 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     // Store and Actions
-    const store = useStore()
-    const addBusiness = async (loginPayload: LoginPayload) => {
-      return store.dispatch('business/addBusiness', loginPayload)
+    const businessStore = useBusinessStore()
+    const invitationToAccount = ref({ 'name': null, 'uuid': null })
+    const invitationAdditionalMessage = ref('')
+    const requestAuthRegistryFormIsValid = ref(false)
+    const selectAccount = (event: { name: string, uuid: string }) => {
+      if (event?.name && event?.uuid) {
+        invitationToAccount.value = event
+        requestAuthRegistryFormIsValid.value = true
+      }
     }
-    const updateBusinessName = async (businessNumber: string) => {
-      return store.dispatch('business/updateBusinessName', businessNumber)
-    }
-
     // Local variables
     const businessName = ref('')
     const businessIdentifier = ref('') // aka incorporation number of registration number
@@ -284,9 +359,30 @@ export default defineComponent({
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
+    const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const showAuthorizationRequestSentDialog = ref(false)
+    const successDialog = computed(() => {
+      return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
+    })
 
-    const isBusinessLegalTypeSPorGP = computed(() => {
+    const isManageButtonEnabled = computed(() => {
+      return (requestAuthBusinessOption.value && requestAuthRegistryFormIsValid.value) ||
+        nameOption.value ||
+        emailOption.value ||
+        passcodeOption.value ||
+        false
+    })
+
+    const isBusinessLegalTypeFirm = computed(() => {
       return props.businessLegalType === CorpTypes.SOLE_PROP || props.businessLegalType === CorpTypes.PARTNERSHIP
+    })
+
+    const isBusinessLegalTypeCorporation = computed(() => {
+      return props.businessLegalType === CorpTypes.BC_COMPANY
+    })
+
+    const isBusinessLegalTypeCoOp = computed(() => {
+      return props.businessLegalType === CorpTypes.COOP
     })
 
     const enableBusinessNrSearch = computed(() => {
@@ -301,12 +397,8 @@ export default defineComponent({
       return CommonUtils.isCooperativeNumber(businessIdentifier.value)
     })
 
-    const isFirm = computed(() => {
-      return CommonUtils.isFirmNumber(businessIdentifier.value)
-    })
-
     const showAuthorization = computed(() => {
-      return isFirm.value && props.isStaffOrSbcStaff
+      return isBusinessLegalTypeFirm.value && props.isStaffOrSbcStaff
     })
 
     const certifiedBy = computed(() => {
@@ -320,19 +412,19 @@ export default defineComponent({
     })
 
     const passcodeLabel = computed(() => {
-      if (isFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
+      if (isBusinessLegalTypeFirm.value) return 'Proprietor or Partner Name (e.g., Last Name, First Name Middlename)'
       if (isCooperative.value) return 'Passcode'
       return 'Password'
     })
 
     const passcodeHint = computed(() => {
-      if (isFirm.value) return 'Name as it appears on the Business Summary or the Statement of Registration'
+      if (isBusinessLegalTypeFirm.value) return 'Name as it appears on the Business Summary or the Statement of Registration'
       if (isCooperative.value) return 'Passcode must be exactly 9 digits'
       return 'Password must be 8 to 15 characters'
     })
 
     const passcodeMaxLength = computed(() => {
-      if (isFirm.value) return 150
+      if (isBusinessLegalTypeFirm.value) return 150
       if (isCooperative.value) return 9
       return 15
     })
@@ -345,7 +437,7 @@ export default defineComponent({
     })
 
     const passcodeRules = computed(() => {
-      if (isFirm.value) {
+      if (isBusinessLegalTypeFirm.value) {
         return [
           (v) => !!v || 'Proprietor or Partner Name is required',
           (v) => v.length <= 150 || 'Maximum 150 characters'
@@ -380,15 +472,19 @@ export default defineComponent({
 
     const isFormValid = computed(() => {
       let isValid = false
-      if (isBusinessLegalTypeSPorGP) {
-        isValid = !!businessIdentifier.value && !!proprietorPartnerName.value && isCertified.value
+      const hasBusinessIdentifier = !!businessIdentifier.value
+      const hasPasscode = !!passcode.value
+      const hasCertified = !!isCertified.value
+      const isCertifiedBy = !!certifiedBy.value
+      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+        isValid = hasBusinessIdentifier && hasPasscode
+      } else if (isBusinessLegalTypeFirm.value) {
+        isValid = hasBusinessIdentifier && !!proprietorPartnerName.value && hasCertified
       } else {
-        isValid =
-          !!businessIdentifier.value &&
-          !!passcode.value &&
-          (!isFirm.value || isCertified.value) &&
-          (!(isBusinessIdentifierValid.value && isFirm.value) || !!certifiedBy.value) &&
-          addBusinessForm.value.validate()
+        const isFirmCertified = !isBusinessLegalTypeFirm.value || hasCertified
+        const isIdentifierValidOrFirmCertified = (!(isBusinessIdentifierValid.value && isBusinessLegalTypeFirm.value)) || isCertifiedBy
+        const isFormValidated = addBusinessForm.value.validate()
+        isValid = hasBusinessIdentifier && hasPasscode && isFirmCertified && isIdentifierValidOrFirmCertified && isFormValidated
       }
       return isValid
     })
@@ -399,6 +495,16 @@ export default defineComponent({
 
     const businessContactEmail = computed(() => {
       return contactInfo.value?.email
+    })
+
+    const computedAddressType = computed(() => {
+      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+        return 'registered office'
+      } else if (isBusinessLegalTypeFirm.value) {
+        return 'business'
+      } else {
+        return ''
+      }
     })
 
     // Methods
@@ -419,8 +525,10 @@ export default defineComponent({
       }
     }
 
-    const onAuthorizationEmailSentClose = () => {
-      emit('on-cancel')
+    const onAuthorizationRequestSentDialogClose = () => {
+      showAuthorizationRequestSentDialog.value = false
+      showAuthorizationEmailSentDialog.value = false
+      emit('on-authorization-email-sent-close', businessIdentifier.value)
     }
 
     const handleException = (exception) => {
@@ -437,43 +545,78 @@ export default defineComponent({
       }
     }
 
-    const manageBusiness = async () => {
-      if (emailOption.value) {
-        try {
-          // TODO will fix this after BE is ready.
-          // const payload: CreateAffiliationInvitation = {
-          //   fromOrgId: number,
-          //   businessIdentifier: businessIdentifier.value,
-          // }
-          // await AffiliationInvitationService.createInvitation()
-        } catch (err) {
-          // eslint-disable-next-line no-console
-          console.log(err)
-        } finally {
-          showAuthorizationEmailSentDialog.value = true
+    const closeCreateAffiliationInvitationErrorDialog = () => {
+      emit('show-create-affiliation-invitation-error-dialog')
+    }
+
+    const handleAuthBusinessOption = async () => {
+      try {
+        const payload = {
+          fromOrgId: Number(props.orgId),
+          toOrgUuid: invitationToAccount?.value.uuid,
+          businessIdentifier: businessIdentifier.value,
+          type: 'REQUEST',
+          additionalMessage: invitationAdditionalMessage.value
         }
+        await AffiliationInvitationService.createInvitation(payload)
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.log(err)
+      } finally {
+        showAuthorizationRequestSentDialog.value = true
+      }
+    }
+
+    const handleAuthorizationEmailOption = async () => {
+      // Sending authorization email
+      try {
+        const payload: CreateAffiliationInvitation = {
+          fromOrgId: Number(props.orgId),
+          businessIdentifier: businessIdentifier.value,
+          // toOrgId has to be null, as this is a bug on the backend
+          toOrgId: null
+        }
+        const affiliationInvitation = await AffiliationInvitationService.createInvitation(payload)
+        if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {
+          emit('affiliation-invitation-pending', affiliationInvitation.data.businessIdentifier)
+        }
+        showAuthorizationEmailSentDialog.value = true
+      } catch (err) {
+        createAffiliationInvitationErrorDialog.value.open()
+      }
+    }
+
+    const manageBusiness = async () => {
+      if (requestAuthBusinessOption.value) {
+        await handleAuthBusinessOption()
         return
       }
+
+      if (emailOption.value) {
+        await handleAuthorizationEmailOption()
+        return
+      }
+
       addBusinessForm.value.validate()
+      // Adding business to the list
       if (isFormValid.value) {
         isLoading.value = true
         try {
-          // try to add business
           let businessData: LoginPayload = { businessIdentifier: businessIdentifier.value }
           if (!props.isStaffOrSbcStaff) {
             businessData = {
               ...businessData,
               certifiedByName: authorizationName.value,
-              passCode: isBusinessLegalTypeSPorGP ? proprietorPartnerName.value : passcode.value
+              passCode: isBusinessLegalTypeFirm.value ? proprietorPartnerName.value : passcode.value
             }
           }
-          const addResponse = await addBusiness(businessData)
+          const addResponse = await businessStore.addBusiness(businessData)
           // check if add didn't succeed
           if (addResponse?.status !== StatusCodes.CREATED) {
             emit('add-unknown-error')
           }
           // try to update business name
-          const businessResponse = await updateBusinessName(businessIdentifier.value)
+          const businessResponse = await businessStore.updateBusinessName(businessIdentifier.value)
           // check if update didn't succeed
           if (businessResponse?.status !== StatusCodes.OK) {
             emit('add-unknown-error')
@@ -506,13 +649,14 @@ export default defineComponent({
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
-      if (businessIdentifier) {
+      if (businessIdentifier && newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName
         try {
           const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
           contactInfo.value = contact?.data
         } catch (err) {
+          contactInfo.value = ''
           // eslint-disable-next-line no-console
           console.error(err)
         }
@@ -526,6 +670,12 @@ export default defineComponent({
 
     // Return the setup data - These will be removed with script setup.
     return {
+      invitationToAccount,
+      invitationAdditionalMessage,
+      selectAccount,
+      showAuthorizationRequestSentDialog,
+      successDialog,
+      isManageButtonEnabled,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
       emailOption,
@@ -544,11 +694,13 @@ export default defineComponent({
       authorizationName,
       authorizationLabel,
       authorizationMaxLength,
-      isBusinessLegalTypeSPorGP,
+      isBusinessLegalTypeFirm,
+      computedAddressType,
+      isBusinessLegalTypeCorporation,
+      isBusinessLegalTypeCoOp,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
       isCooperative,
-      isFirm,
       showAuthorization,
       certifiedBy,
       authorizationRules,
@@ -562,13 +714,15 @@ export default defineComponent({
       isFormValid,
       manageBusiness,
       resetForm,
-      onAuthorizationEmailSentClose,
+      onAuthorizationRequestSentDialogClose,
       formatBusinessIdentifier,
       openHelp,
       businessContactEmail,
       enableDelegationFeature,
       showHelp,
-      showAuthorizationEmailSentDialog
+      showAuthorizationEmailSentDialog,
+      createAffiliationInvitationErrorDialog,
+      closeCreateAffiliationInvitationErrorDialog
     }
   }
 })
@@ -576,155 +730,156 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+@import '$assets/scss/ModalDialog.scss';
 
-#help-button {
-  color: var(--v-primary-base) !important;
-  .v-icon {
-    transform: translate(0, -2px) !important;
+  #help-button {
+    cursor: pointer;
     color: var(--v-primary-base) !important;
-  }
-}
-.list-body {
-  color:#313132;
-}
-
-.v-tooltip__content {
-  background-color: RGBA(73, 80, 87, 0.95) !important;
-  color: white !important;
-  border-radius: 4px;
-  font-size: 12px !important;
-  line-height: 18px !important;
-  padding: 15px !important;
-  letter-spacing: 0;
-  max-width: 270px !important;
-}
-
-.v-tooltip__content:after {
-  content: "" !important;
-  position: absolute !important;
-  top: 50% !important;
-  right: 100% !important;
-  margin-top: -10px !important;
-  border-top: 10px solid transparent !important;
-  border-bottom: 10px solid transparent !important;
-  border-right: 8px solid RGBA(73, 80, 87, .95) !important;
-}
-
-.top-tooltip:after {
-  top: 100% !important;
-  left: 45% !important;
-  margin-top: 0 !important;
-  border-right: 10px solid transparent !important;
-  border-left: 10px solid transparent !important;
-  border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
-}
-
-.add-business-unordered-list {
-  list-style: none;
-  padding-left: 1rem;
-
-  li {
-    margin-left: 1.5rem;
-
-    &::before {
-      content: "\2022";
-      display: inline-block;
-      width: 1.5em;
-      color: $gray9;
-      margin-left: -1.5em;
+    .v-icon {
+      transform: translate(0, -2px) !important;
+      color: var(--v-primary-base) !important;
     }
   }
-}
-
-.underline-dotted {
-  border-bottom: dotted;
-  border-bottom-width: 2px;
-}
-
-dl {
-  line-height: 2rem;
-}
-
-// pair up terms and definitions
-dt {
-  float: left;
-  clear: left;
-}
-
-.form__btns {
-  display: flex;
-  justify-content: flex-end;
-
-  .v-btn + .v-btn {
-    margin-left: 0.5rem;
+  .list-body {
+    color:#313132;
   }
 
-  #cancel-button,
-  #add-button {
-    min-width: 80px !important;
-  }
-
-  // override disabled button color
-  .v-btn[disabled]:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+  .v-tooltip__content {
+    background-color: RGBA(73, 80, 87, 0.95) !important;
     color: white !important;
-    background-color: $app-blue !important;
-    opacity: 0.4;
+    border-radius: 4px;
+    font-size: 12px !important;
+    line-height: 18px !important;
+    padding: 15px !important;
+    letter-spacing: 0;
+    max-width: 270px !important;
   }
-}
 
-// remove whitespace below error message
-.authorization {
-  ::v-deep .v-text-field__details {
-    margin-bottom: 0 !important;
+  .v-tooltip__content:after {
+    content: "" !important;
+    position: absolute !important;
+    top: 50% !important;
+    right: 100% !important;
+    margin-top: -10px !important;
+    border-top: 10px solid transparent !important;
+    border-bottom: 10px solid transparent !important;
+    border-right: 8px solid RGBA(73, 80, 87, .95) !important;
   }
-}
 
-::v-deep {
-
-.v-list-group{
-  border-bottom: 1px solid rgb(228, 228, 228);
-  &.top-of-list{
-    border-top: 1px solid rgb(228, 228, 228);
+  .top-tooltip:after {
+    top: 100% !important;
+    left: 45% !important;
+    margin-top: 0 !important;
+    border-right: 10px solid transparent !important;
+    border-left: 10px solid transparent !important;
+    border-top: 8px solid RGBA(73, 80, 87, 0.95) !important;
   }
-  .item-content{
-    color: #000 !important;
+
+  .add-business-unordered-list {
+    list-style: none;
+    padding-left: 1rem;
+
+    li {
+      margin-left: 1.5rem;
+
+      &::before {
+        content: "\2022";
+        display: inline-block;
+        width: 1.5em;
+        color: $gray9;
+        margin-left: -1.5em;
+      }
+    }
   }
-}
 
-.v-list-item{
-  background: $BCgovInputBG;
-  height: 4rem !important;
-  margin: 0 !important;
-}
-
-.v-list-item--link>
-.v-list-item__title{
-  font-weight: 300 !important;
-  margin-left:-1rem !important;
-  color: var(--v-primary-base) !important;
-  .subtitle {
-    line-height: 1.5rem;
-    font-size: 9pt;
-    color: var(--v-primary-base) !important;
-    font-weight: normal;
+  .underline-dotted {
+    border-bottom: dotted;
+    border-bottom-width: 2px;
   }
-}
 
-.v-list-item--active>
-.v-list-item__title{
-  font-weight: 600 !important;
-  margin-left:-1rem !important;
-  color: #000 !important;
-  .subtitle {
-    line-height: 1.5rem;
-    font-size: 9pt;
-    color: #000 !important;
-    font-weight: normal;
+  dl {
+    line-height: 2rem;
   }
-}
 
-.v-list-item__content{
-  color: #000 !important;
-}
-}
+  // pair up terms and definitions
+  dt {
+    float: left;
+    clear: left;
+  }
+
+  .form__btns {
+    display: flex;
+    justify-content: flex-end;
+
+    .v-btn + .v-btn {
+      margin-left: 0.5rem;
+    }
+
+    #cancel-button,
+    #add-button {
+      min-width: 80px !important;
+    }
+
+    // override disabled button color
+    .v-btn[disabled]:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {
+      color: white !important;
+      background-color: $app-blue !important;
+      opacity: 0.4;
+    }
+  }
+
+  // remove whitespace below error message
+  .authorization {
+    ::v-deep .v-text-field__details {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  ::v-deep {
+    .v-list-group{
+      border-bottom: 1px solid rgb(228, 228, 228);
+      &.top-of-list{
+        border-top: 1px solid rgb(228, 228, 228);
+      }
+      .item-content{
+        color: #000 !important;
+      }
+    }
+
+    .v-list-item{
+      background: $BCgovInputBG;
+      height: 4rem !important;
+      margin: 0 !important;
+    }
+
+    .v-list-item--link>
+    .v-list-item__title {
+      font-weight: 300 !important;
+      margin-left:-1rem !important;
+      color: var(--v-primary-base) !important;
+      .subtitle {
+        line-height: 1.5rem;
+        font-size: 9pt;
+        color: var(--v-primary-base) !important;
+        font-weight: normal;
+      }
+    }
+
+    .v-list-item--active>
+    .v-list-item__title {
+      font-weight: 600 !important;
+      margin-left:-1rem !important;
+      color: #000 !important;
+      .subtitle {
+        line-height: 1.5rem;
+        font-size: 9pt;
+        color: #000 !important;
+        font-weight: normal;
+      }
+    }
+
+    .v-list-item__content{
+      color: #000 !important;
+    }
+  }
 </style>

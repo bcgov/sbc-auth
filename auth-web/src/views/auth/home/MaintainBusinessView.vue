@@ -118,7 +118,9 @@
                       </v-list-item-subtitle>
                       <v-list-item-subtitle>
                         {{ $t('labelEmail') }}
-                        <a :href="'mailto:' + $t('maximusSupportEmail') + '?subject=' + $t('maximusSupportEmailSubject')">{{ $t('maximusSupportEmail') }}</a>
+                        <a :href="'mailto:' + $t('maximusSupportEmail') + '?subject=' + $t('maximusSupportEmailSubject')">
+                          {{ $t('maximusSupportEmail') }}
+                        </a>
                       </v-list-item-subtitle>
                     </v-list-item-content>
                   </v-list-item>
@@ -187,8 +189,10 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 })
 export default class MaintainBusinessView extends Vue {
   contactUsPopover = false
-  readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/permits-licences/news-updates/modernization/coops-services-card'
-  readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/ministries-organizations/ministries/citizens-services/bc-registries-online-services'
+  readonly faqUrl = 'https://www2.gov.bc.ca/gov/content/employment-business/business/managing-a-business/' +
+    'permits-licences/news-updates/modernization/coops-services-card'
+  readonly learnMoreUrl = 'https://www2.gov.bc.ca/gov/content/governments/organizational-structure/' +
+    'ministries-organizations/ministries/citizens-services/bc-registries-online-services'
 
   // For BEN only as feature flag 'EnableBcCccUlc' enabled
   readonly bulletPointsBEN: Array<any> = [

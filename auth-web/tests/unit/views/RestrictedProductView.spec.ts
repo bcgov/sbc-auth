@@ -1,13 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import RestrictedProductView from '@/views/auth/RestrictedProductView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(Vuetify)
-Vue.use(VueRouter)
-const router = new VueRouter()
 const vuetify = new Vuetify({})
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"
@@ -18,8 +13,7 @@ describe('RestrictedProductView.vue', () => {
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
-
+    const router = new VueRouter()
     wrapper = mount(RestrictedProductView, {
       localVue,
       router,

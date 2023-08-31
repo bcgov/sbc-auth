@@ -128,20 +128,19 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { CreateRequestBody, OrgBusinessType, Organization } from '@/models/Organization'
 import AccountBusinessTypePicker from '@/components/auth/common/AccountBusinessTypePicker.vue'
 import { Pages } from '@/util/constants'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   components: { AccountBusinessTypePicker }
 })
 export default class UpdateAccountView extends Vue {
-  @OrgModule.State('currentOrganization') currentOrganization!: Organization
-  @OrgModule.Action('updateOrg') private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
+  @State(useOrgStore) currentOrganization!: Organization
+  @Action(useOrgStore) private updateOrg!: (requestBody: CreateRequestBody) => Promise<Organization>
   errorMessage: string = ''
   isBusinessAccount = null
   canSubmit = false

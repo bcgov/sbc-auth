@@ -1,55 +1,33 @@
 import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import StaffRejectedAccountsTable from '@/components/auth/staff/account-management/StaffRejectedAccountsTable.vue'
-import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
-
-Vue.use(Vuetify)
-Vue.use(VueRouter)
+import { useStaffStore } from '@/stores/staff'
 
 describe('StaffRejectedAccountsTable.vue', () => {
   let wrapper: Wrapper<StaffRejectedAccountsTable>
 
   beforeEach(() => {
     const localVue = createLocalVue()
-    localVue.use(Vuex)
 
-    const staffModule = {
-      namespaced: true,
-      state: {
-        rejectedStaffOrgs: [
-          {
-            'modified': '2020-12-10T22:05:06.144977+00:00',
-            'name': 'NEW BC ONLINE TECH TEAM',
-            'orgType': 'BASIC',
-            'orgStatus': 'ACTIVE',
-            'products': [
-              2341,
-              2992
-            ],
-            'statusCode': 'ACTIVE'
-          }
-        ]
-      },
-      actions: {
-        rejectedStaffOrgs: vi.fn()
+    const staffStore = useStaffStore()
+    staffStore.rejectedStaffOrgs = [
+      {
+        'modified': '2020-12-10T22:05:06.144977+00:00',
+        'name': 'NEW BC ONLINE TECH TEAM',
+        'orgType': 'BASIC',
+        'orgStatus': 'ACTIVE',
+        'products': [
+          2341,
+          2992
+        ],
+        'statusCode': 'ACTIVE'
       }
-    }
+    ] as any
 
     const vuetify = new Vuetify({})
 
-    const store = new Vuex.Store({
-      state: {},
-      strict: false,
-      modules: {
-        staff: staffModule
-      }
-    })
-
     const $t = () => ''
     wrapper = shallowMount(StaffRejectedAccountsTable, {
-      store,
       localVue,
       vuetify,
       mocks: { $t }

@@ -1,12 +1,8 @@
 import { createLocalVue, mount } from '@vue/test-utils'
 import SetupGovmAccountView from '@/views/auth/staff/SetupGovmAccountView.vue'
-import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 
-Vue.use(VueRouter)
-Vue.use(Vuetify)
 const vuetify = new Vuetify({})
 const router = new VueRouter()
 
@@ -22,7 +18,6 @@ describe('SetupGovmAccountView.vue', () => {
   let wrapper: any
   let store: any
   const localVue = createLocalVue()
-  localVue.use(Vuex)
 
   afterEach(() => {
     vi.resetModules()
@@ -31,10 +26,6 @@ describe('SetupGovmAccountView.vue', () => {
   })
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockSession)
-    store = new Vuex.Store({
-      state: {},
-      strict: false
-    })
   })
 
   it('Should have a h1', () => {

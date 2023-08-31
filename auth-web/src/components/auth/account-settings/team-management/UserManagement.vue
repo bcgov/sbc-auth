@@ -221,7 +221,7 @@
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { LoginSource, Pages, SearchFilterCodes } from '@/util/constants'
 import { Member, MembershipStatus } from '@/models/Organization'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState } from 'pinia'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
 import { Invitation } from '@/models/Invitation'
@@ -234,6 +234,9 @@ import PendingMemberDataTable from '@/components/auth/account-settings/team-mana
 import SearchFilterInput from '@/components/auth/common/SearchFilterInput.vue'
 import { SearchFilterParam } from '@/models/searchfilter'
 import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vue'
+import { useBusinessStore } from '@/stores/business'
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -245,17 +248,17 @@ import TeamManagementMixin from '@/components/auth/mixins/TeamManagementMixin.vu
     SearchFilterInput
   },
   computed: {
-    ...mapState('user', ['currentUser']),
-    ...mapState('org', [
+    ...mapState(useUserStore, ['currentUser']),
+    ...mapState(useOrgStore, [
       'resending',
       'sentInvitations',
       'pendingOrgMembers',
       'memberLoginOption'
     ]),
-    ...mapState('business', ['currentBusiness'])
+    ...mapState(useBusinessStore, ['currentBusiness'])
   },
   methods: {
-    ...mapActions('org', [
+    ...mapActions(useOrgStore, [
       'resendInvitation',
       'deleteInvitation',
       'syncPendingOrgInvitations',
@@ -390,6 +393,7 @@ export default class UserManagement extends Mixins(AccountChangeMixin, TeamManag
       memberId: this.memberToBeApproved.id,
       status: MembershipStatus.Active
     })
+    // Remove Vuex with Vue 3
     this.$store.commit('updateHeader')
     this.$refs.confirmActionDialog.close()
   }

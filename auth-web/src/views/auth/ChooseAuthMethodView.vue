@@ -410,6 +410,7 @@ import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constant
 import ConfigHelper from '@/util/config-helper'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+// Remove with Vue3 upgrade.
 import { mapGetters } from 'vuex'
 
 @Component({
@@ -488,7 +489,6 @@ export default class ChooseAuthMethodView extends Vue {
 
   goNext () {
     ConfigHelper.addToSession(SessionStorageKeys.GOVN_USER, (this.isGovNBCSC || this.isGovNBCeID))
-    // TODO might need to set some session variables
     switch (this.authType) {
       case LoginSource.BCEID:
         ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'true')
@@ -496,7 +496,8 @@ export default class ChooseAuthMethodView extends Vue {
         window.scrollTo(0, 0)
         break
       case LoginSource.BCSC:
-        ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false') // this flag shouldnt be used for bcsc users.still setting the right value
+        // this flag shouldnt be used for bcsc users.still setting the right value
+        ConfigHelper.addToSession(SessionStorageKeys.ExtraProvincialUser, 'false')
         if (this.isAuthenticated) {
           if (this.currentLoginSource === LoginSource.BCEID) {
             this.$router.push(`/${Pages.SETUP_ACCOUNT_NON_BCSC}`)
@@ -555,7 +556,10 @@ export default class ChooseAuthMethodView extends Vue {
   }
 
   &.active {
-    box-shadow: 0 0 0 2px inset var(--v-primary-base), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 2px 2px 0 rgba(0, 0, 0, .14), 0 1px 5px 0 rgba(0, 0, 0, .12) !important;
+    box-shadow: 0 0 0 2px inset var(--v-primary-base),
+                0 3px 1px -2px rgba(0, 0, 0, .2),
+                0 2px 2px 0 rgba(0, 0, 0, .14),
+                0 1px 5px 0 rgba(0, 0, 0, .12) !important;
   }
 }
 

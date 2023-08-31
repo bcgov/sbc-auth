@@ -57,11 +57,12 @@
 import { Component } from 'vue-property-decorator'
 import { Pages } from '@/util/constants'
 import Vue from 'vue'
-import { mapState } from 'vuex'
+import { mapState } from 'pinia'
+import { useOrgStore } from '@/stores/org'
 
 @Component({
   computed: {
-    ...mapState('org', ['currentOrganization'])
+    ...mapState(useOrgStore, ['currentOrganization'])
   }
 })
 export default class AccountLoginOptionsInfo extends Vue {

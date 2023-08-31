@@ -155,7 +155,7 @@ import CommonUtils from '@/util/common-util'
 import { PADInfo } from '@/models/Organization'
 import TermsOfUseDialog from '@/components/auth/common/TermsOfUseDialog.vue'
 import { mask } from 'vue-the-mask'
-import { useStore } from 'vuex-composition-helpers'
+import { useOrgStore } from '@/stores/org'
 
 // FUTURE: remove this in vue 3
 interface PADInfoFormState {
@@ -188,10 +188,8 @@ export default defineComponent({
   setup (props, { emit }) {
     // refs
     const preAuthDebitForm = ref(null) as HTMLFormElement
-    // store stuff
-    const store = useStore()
-    const currentOrgPADInfo = computed(() => store.state.org.currentOrgPADInfo as PADInfo)
-    const setCurrentOrganizationPADInfo = (padInfo: PADInfo) => store.dispatch('org/updatePadInfo', padInfo)
+    const orgStore = useOrgStore()
+    const currentOrgPADInfo = computed(() => orgStore.currentOrgPADInfo)
 
     // static vars
     const accountMask = CommonUtils.accountMask()
@@ -217,13 +215,17 @@ export default defineComponent({
       showPremiumPADInfo: computed((): boolean => props.isChangeView),
       acknowledgementLabel: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
-          : 'I understand that this account will not be able to perform any transactions until the mandatory (3) day confirmation period for pre-authorized debit has ended.'
+          ? 'I understand that services will continue to be billed to the linked BC Online account until the mandatory' +
+          ' (3) day confirmation period has ended.'
+          : 'I understand that this account will not be able to perform any transactions until the mandatory' +
+          ' (3) day confirmation period for pre-authorized debit has ended.'
       }),
       padInfoSubtitle: computed((): string => {
         return (state.showPremiumPADInfo)
-          ? 'Services will continue to be billed to the linked BC Online account until the mandatory (3) day confirmation period has ended.'
-          : 'This account will not be able to perform any transactions until the mandatory (3) day confirmation period has ended.'
+          ? 'Services will continue to be billed to the linked BC Online account until the mandatory' +
+          ' (3) day confirmation period has ended.'
+          : 'This account will not be able to perform any transactions until the mandatory' +
+          ' (3) day confirmation period has ended.'
       })
     }) as unknown) as PADInfoFormState
 
@@ -256,7 +258,7 @@ export default defineComponent({
         isAcknowledged: state.isAcknowledged
       }
       emitIsPreAuthDebitFormValid()
-      setCurrentOrganizationPADInfo(padInfo)
+      orgStore.setCurrentOrganizationPADInfo(padInfo)
       state.isTouched = true
       emitIsPadInfoTouched()
       emit('emit-pre-auth-debit-info', padInfo)
@@ -281,12 +283,13 @@ export default defineComponent({
 
     // setup
     onMounted(async () => {
-      const padInfo = (Object.keys(props.padInformation).length) ? props.padInformation : currentOrgPADInfo.value as PADInfo
+      const padInfo = (Object.keys(props.padInformation).length)
+        ? props.padInformation : currentOrgPADInfo.value as PADInfo
       state.accountNumber = padInfo?.bankAccountNumber || ''
       state.institutionNumber = padInfo?.bankInstitutionNumber || ''
       state.transitNumber = padInfo?.bankTransitNumber || ''
       state.isTOSAccepted = props.isInitialTOSAccepted || (padInfo?.isTOSAccepted || false)
-      setCurrentOrganizationPADInfo(padInfo)
+      orgStore.setCurrentOrganizationPADInfo(padInfo)
       await nextTick()
       if (state.isTOSAccepted) emitIsPreAuthDebitFormValid()
       state.ready = true

@@ -99,25 +99,24 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Prop, Vue, Watch } from 'vue-property-decorator'
 import { OrgWithAddress, Organization } from '@/models/Organization'
 import { Address } from '@/models/address'
 import { Pages } from '@/util/constants'
 import { UserSettings } from '@/models/user'
-import { namespace } from 'vuex-class'
-
-const OrgModule = namespace('org')
-const UserModule = namespace('user')
+import { useOrgStore } from '@/stores/org'
+import { useUserStore } from '@/stores/user'
 
 @Component({})
 export default class DuplicateAccountWarningView extends Vue {
-    @UserModule.State('currentUserAccountSettings') private currentUserAccountSettings!: UserSettings[]
-    @UserModule.Action('getUserAccountSettings') private getUserAccountSettings!: () => Promise<any>
+    @State(useUserStore) private currentUserAccountSettings!: UserSettings[]
+    @Action(useUserStore) private getUserAccountSettings!: () => Promise<any>
 
-    @OrgModule.Action('getOrgAdminContact') private getOrgAdminContact!: (orgId: number) => Promise<Address>
-    @OrgModule.State('currentOrganization') private currentOrganization!: Organization
-    @OrgModule.Action('addOrgSettings') private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
-    @OrgModule.Action('syncOrganization') private syncOrganization!: (orgId: number) => Promise<Organization>
+    @Action(useOrgStore) private getOrgAdminContact!: (orgId: number) => Promise<Address>
+    @State(useOrgStore) private currentOrganization!: Organization
+    @Action(useOrgStore) private addOrgSettings!: (currentOrganization: Organization) => Promise<UserSettings>
+    @Action(useOrgStore) private syncOrganization!: (orgId: number) => Promise<Organization>
 
     private orgsOfUser: OrgWithAddress[] = []
     private isLoading: boolean = false
@@ -158,6 +157,7 @@ export default class DuplicateAccountWarningView extends Vue {
     private async navigateToRedirectUrl (accountId: number): Promise<void> {
       await this.syncOrganization(accountId)
       await this.addOrgSettings(this.currentOrganization)
+      // Remove with Vue 3
       this.$store.commit('updateHeader')
       if (this.redirectToUrl) {
         window.location.assign(this.redirectToUrl.toString())

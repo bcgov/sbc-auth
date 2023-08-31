@@ -1,3 +1,4 @@
+
 import './composition-api-setup' // ensure this happens before any imports trigger use of composition-api
 import '@mdi/font/css/materialdesignicons.min.css' // icon library (https://materialdesignicons.com/)
 import * as Sentry from '@sentry/vue'
@@ -10,13 +11,15 @@ import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly
 // eslint-disable-next-line sort-imports
 import './routes/componentHooks'
 import Vue from 'vue'
+import VueCompositionAPI from '@vue/composition-api'
 import VueSanitize from 'vue-sanitize-directive'
 import Vuelidate from 'vuelidate'
 import can from '@/directives/can'
 import displayMode from '@/directives/displayMode'
+import { getPiniaStore } from '@/stores'
 import initializeI18n from './plugins/i18n'
 import router from './routes/index'
-import store from './store'
+import store from '@/stores/vuex'
 import vuetify from './plugins/vuetify'
 
 // eslint-disable-next-line sort-imports
@@ -24,8 +27,13 @@ import Search from 'fas-ui'
 // eslint-disable-next-line sort-imports
 import { LDFlags } from '@/util/constants'
 
+// Important to have this here again, otherwise toRefs gets a weird version from FAS, and doesn't expand .value.
+// Reproducable by taking this import out and clicking on the Manage Business button on the home page.
+// Ultimately when fas-ui, sbc-auth, sbc-common-components get upgraded to Vue 2.7 or Vue 3 this will go away.
+Vue.use(VueCompositionAPI)
 Vue.config.productionTip = false
 Vue.use(Vuelidate)
+
 const i18n = initializeI18n(Vue)
 Vue.use(Search, { store, i18n })
 Vue.use(VueSanitize)
@@ -83,7 +91,9 @@ async function syncSession () {
 function renderVue () {
   new Vue({
     router,
+    // We still need Vuex for sbc-common-components.
     store,
+    pinia: getPiniaStore(),
     vuetify,
     i18n,
     render: (h) => h(App)
