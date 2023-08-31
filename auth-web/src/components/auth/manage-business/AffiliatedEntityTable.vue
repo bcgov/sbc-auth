@@ -286,6 +286,8 @@ export default defineComponent({
             statusText = '<strong>Not Authorized</strong>. Your request to manage this business has been declined.'
             break
           case AffiliationInvitationStatus.Expired:
+            statusText = 'Invitation is <strong>Expired</strong>.'
+            break
           default:
             statusText = ''
         }

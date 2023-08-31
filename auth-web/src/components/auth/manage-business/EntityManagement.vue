@@ -441,7 +441,7 @@
             outlined
             color="primary"
             data-test="dialog-ok-button"
-            @click="close()"
+            @click="closeLinkExpireErrorDialog()"
           >
             Return to My List
           </v-btn>
@@ -555,7 +555,6 @@ import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
 import { Base64 } from 'js-base64'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
-import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
 import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
@@ -720,6 +719,32 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
+  private async resendAffiliationInvitation (event) {
+    let invitationId = ''
+
+    if (this.base64Token && this.base64OrgName) {
+      const base64TokenObject = this.base64Token.split('.')[0]
+      const decodedToken = Base64.decode(base64TokenObject)
+      const token = JSON.parse(decodedToken)
+      invitationId = token.id
+      this.businessIdentifier = this.base64OrgName
+    }
+
+    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
+      this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
+
+    try {
+      const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
+      await AffiliationInvitationService.updateInvitation(affiliationInvitationId)
+      const contact = await BusinessService.getMaskedContacts(this.businessIdentifier)
+      this.businessContactEmail = contact?.data?.email
+      this.isAuthorizationEmailSentDialogVisible = true
+    } catch (err) {
+      this.showCreateAffiliationInvitationErrorDialog()
+    }
+  }
+
   helpDialogBlurb = async () => {
     return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
         'please contact us at:'
@@ -727,27 +752,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   openHelp = async () => {
     this.$refs.helpDialog.open()
-  }
-
-  resendAffiliationInvitation = async (event) => {
-    let fromOrgId = Number(this.orgId)
-    let businessIdentifier = this.base64OrgName
-    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
-      fromOrgId = event?.affiliationInvites[0].fromOrg.id
-      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
-    }
-    try {
-      const payload: CreateAffiliationInvitation = {
-        fromOrgId: fromOrgId,
-        businessIdentifier: businessIdentifier
-      }
-      await AffiliationInvitationService.createInvitation(payload)
-      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
-      this.businessContactEmail = contact?.data?.email
-      this.isAuthorizationEmailSentDialogVisible = true
-    } catch (err) {
-      this.showCreateAffiliationInvitationErrorDialog()
-    }
   }
 
   private async setup (): Promise<void> {
@@ -847,8 +851,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   async onAuthorizationEmailSentClose (businessIdentifier: string) {
     await this.syncBusinesses()
-    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    // This function doesn't always have the businessIdentifier passed to it.
+    const validBusinessIdentifier = businessIdentifier || this.businessIdentifier
+    this.highlightIndex = await this.searchBusinessIndex(validBusinessIdentifier)
+    this.snackbarText = 'Confirmation email sent, pending authorization.'
+    this.showSnackbar = true
     this.isAuthorizationEmailSentDialogVisible = false
+    this.businessIdentifier = null
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
@@ -1073,6 +1082,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   close () {
     this.$refs.errorDialog.close()
+  }
+
+  closeLinkExpireErrorDialog () {
+    this.$refs.linkExpireErrorDialog.close()
   }
 
   closeBusinessUnavailableDialog () {
