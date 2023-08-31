@@ -1,5 +1,6 @@
 import {
   Affiliation,
+  AffiliationInviteInfo,
   AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody
@@ -118,7 +119,7 @@ export default class OrgService {
     }
   }
 
-  static async getAffiliationInvitations (orgIdentifier: number) {
+  static async getAffiliationInvitations (orgIdentifier: number) : Promise<AffiliationInviteInfo[]> {
     try {
       const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
         { params: { orgId: orgIdentifier, businessDetails: true } }
