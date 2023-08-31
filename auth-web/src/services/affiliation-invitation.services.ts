@@ -12,8 +12,8 @@ export default class AffiliationInvitationService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`, payload)
   }
   // Future - Unused for now-  also more to add than this.
-  public static async updateInvitation (): Promise<AxiosResponse<any>> {
-    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`)
+  public static async updateInvitation (id: string): Promise<AxiosResponse<any>> {
+    return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}`, {})
   }
   public static async getInvitationById (id: string): Promise<AxiosResponse<AffiliationInvitation>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}`)

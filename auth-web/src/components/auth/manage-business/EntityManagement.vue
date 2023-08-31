@@ -440,7 +440,7 @@
             outlined
             color="primary"
             data-test="dialog-ok-button"
-            @click="close()"
+            @click="closeLinkExpireErrorDialog()"
           >
             Return to My List
           </v-btn>
@@ -719,6 +719,33 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
+  private async resendAffiliationInvitation (event) {
+    let invitationId = ''
+    let businessIdentifier = ''
+
+    if (this.base64Token && this.base64OrgName) {
+      const base64TokenObject = this.base64Token.split('.')[0]
+      const decodedToken = Base64.decode(base64TokenObject)
+      const token = JSON.parse(decodedToken)
+      invitationId = token.id
+      businessIdentifier = this.base64OrgName
+    }
+
+    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
+      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
+
+    try {
+      const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
+      await AffiliationInvitationService.updateInvitation(affiliationInvitationId)
+      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
+      this.businessContactEmail = contact?.data?.email
+      this.isAuthorizationEmailSentDialogVisible = true
+    } catch (err) {
+      this.showCreateAffiliationInvitationErrorDialog()
+    }
+  }
+
   helpDialogBlurb = async () => {
     return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
         'please contact us at:'
@@ -726,27 +753,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   openHelp = async () => {
     this.$refs.helpDialog.open()
-  }
-
-  resendAffiliationInvitation = async (event) => {
-    let fromOrgId = Number(this.orgId)
-    let businessIdentifier = this.base64OrgName
-    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
-      fromOrgId = event?.affiliationInvites[0].fromOrg.id
-      businessIdentifier = event?.affiliationInvites[0].businessIdentifier
-    }
-    try {
-      const payload: CreateAffiliationInvitation = {
-        fromOrgId: fromOrgId,
-        businessIdentifier: businessIdentifier
-      }
-      await AffiliationInvitationService.createInvitation(payload)
-      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
-      this.businessContactEmail = contact?.data?.email
-      this.isAuthorizationEmailSentDialogVisible = true
-    } catch (err) {
-      this.showCreateAffiliationInvitationErrorDialog()
-    }
   }
 
   private async setup (): Promise<void> {
@@ -1072,6 +1078,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   close () {
     this.$refs.errorDialog.close()
+  }
+
+  closeLinkExpireErrorDialog () {
+    this.$refs.linkExpireErrorDialog.close()
   }
 
   closeBusinessUnavailableDialog () {

@@ -104,7 +104,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -173,7 +173,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail"
+                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail"
                   id="manage-business-dialog-email-group"
                   v-model="emailOption"
                 >
@@ -181,7 +181,7 @@
                     <v-list-item-title>
                       Confirm authorization using your {{ computedAddressType }} email address
                       <div
-                        v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                        v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp"
                         class="subtitle"
                       >
                         (If you forgot or don't have a business {{ passwordText }})
@@ -381,6 +381,10 @@ export default defineComponent({
       return props.businessLegalType === CorpTypes.BC_COMPANY
     })
 
+    const isBusinessLegalTypeBenefit = computed(() => {
+      return props.businessLegalType === CorpTypes.BENEFIT_COMPANY
+    })
+
     const isBusinessLegalTypeCoOp = computed(() => {
       return props.businessLegalType === CorpTypes.COOP
     })
@@ -476,7 +480,7 @@ export default defineComponent({
       const hasPasscode = !!passcode.value
       const hasCertified = !!isCertified.value
       const isCertifiedBy = !!certifiedBy.value
-      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp.value) {
         isValid = hasBusinessIdentifier && hasPasscode
       } else if (isBusinessLegalTypeFirm.value) {
         isValid = hasBusinessIdentifier && !!proprietorPartnerName.value && hasCertified
@@ -498,7 +502,7 @@ export default defineComponent({
     })
 
     const computedAddressType = computed(() => {
-      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp.value) {
         return 'registered office'
       } else if (isBusinessLegalTypeFirm.value) {
         return 'business'
@@ -697,6 +701,7 @@ export default defineComponent({
       isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,
+      isBusinessLegalTypeBenefit,
       isBusinessLegalTypeCoOp,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
