@@ -330,8 +330,9 @@ class AffiliationInvitation:
             invitation = self._model.update_invitation_as_retried(user.identifier)
             entity: EntityModel = invitation.entity
 
-            business = AffiliationInvitation._get_business_details(entity.business_identifier,
-                                                                   RestService.get_service_account_token())
+            token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
+                                                          config_secret='ENTITY_SVC_CLIENT_SECRET')
+            business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
 
             AffiliationInvitation\
                 .send_affiliation_invitation(affiliation_invitation=invitation,
