@@ -288,11 +288,16 @@ export default defineComponent({
     }
 
     const disableTooltip = (item: Business): boolean => {
-      if (isOpenExternal(item) && isNameRequest(item)) {
-        const nrRequestActionCd = item.nameRequest?.requestActionCd
-        return nrRequestActionCd === NrRequestActionCodes.NEW_BUSINESS && isOtherEntities(item)
+      if (isOpenExternal(item)) {
+        if (isNameRequest(item)) {
+          const nrRequestActionCd = item.nameRequest?.requestActionCd
+          if (nrRequestActionCd === NrRequestActionCodes.NEW_BUSINESS && isOtherEntities(item)) {
+            return true
+          }
+        }
+        return false
       }
-      return isOpenExternal(item)
+      return true
     }
 
     const getNrRequestDescription = (item: Business): string => {

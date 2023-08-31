@@ -194,12 +194,10 @@ export default defineComponent({
     const selectedColumns = ['Number', 'Type', 'Status']
     const columns = ['Number', 'Type', 'Status']
 
-    /** Returns true if the name is rejected. */
     const isRejectedName = (name: Names): boolean => {
       return (name.state === NrState.REJECTED)
     }
 
-    /** Returns true if the name is approved. */
     const isApprovedName = (name: Names): boolean => {
       return (name.state === NrState.APPROVED)
     }
@@ -225,11 +223,11 @@ export default defineComponent({
     const isFrozed = (item: Business): boolean => {
       return item.adminFreeze
     }
+
     const isBadstanding = (item: Business) => {
       return !item.goodStanding
     }
 
-    /** Returns true if the business is dissolved. */
     const isDissolution = (item: Business) => {
       return item.dissolved
     }
@@ -251,10 +249,8 @@ export default defineComponent({
       return details
     }
 
-    // clear filters
     const clearFiltersTrigger = ref(0)
     const clearFilters = () => {
-      // clear values in table
       clearFiltersTrigger.value++
       // clear affiliation state filters and trigger search
       clearAllFilters()
@@ -291,7 +287,6 @@ export default defineComponent({
       }
     }
 
-    // feature flags
     const enableNameRequestType = (): boolean => {
       return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
     }
