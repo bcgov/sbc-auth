@@ -104,7 +104,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp) && hasBusinessPassCodePassword"
+                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp) && hasBusinessEmail"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -389,6 +389,7 @@ export default defineComponent({
     const showAuthorizationEmailSentDialog = ref(false)
     const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const showAuthorizationRequestSentDialog = ref(false)
+    const hasBusinessEmail = ref(false)
     const successDialog = computed(() => {
       return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
     })
@@ -401,11 +402,11 @@ export default defineComponent({
         false
     })
 
-    const hasBusinessPassCodePassword = computed(() => {
-      return true
-    })
+    // const hasBusinessEmail = computed(() => {
+    //   return true
+    // })
 
-    const hasBusinessEmail = computed(() => {
+    const hasBusinessPassCodePassword = computed(() => {
       return true
     })
 
@@ -692,6 +693,7 @@ export default defineComponent({
         try {
           const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
           contactInfo.value = contact?.data
+          hasBusinessEmail.value = true
         } catch (err) {
           contactInfo.value = ''
           // eslint-disable-next-line no-console
