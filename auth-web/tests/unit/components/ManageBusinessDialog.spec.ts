@@ -109,6 +109,17 @@ const testCaseList = [
     businessLegalType: 'BC'
   },
   {
+    description: 'Should render for a BEN (Benefit Corporation) Entity',
+    businessIdentifier: 'BC0871457',
+    certifyExists: false,
+    passcodeExists: false,
+    folioNumberExists: false,
+    isStaffOrSbcStaff: true,
+    userFirstName: 'Nadia',
+    userLastName: 'Woodie',
+    businessLegalType: 'BEN'
+  },
+  {
     description: 'Should render for a CP (Co-op) Entity',
     businessIdentifier: 'CP0000901',
     certifyExists: false,
@@ -172,6 +183,7 @@ describe('ManageBusinessDialog Component', () => {
 
     it(test.description, async () => {
       const isBusinessLegalTypeCorporation = test.businessLegalType === CorpTypes.BC_COMPANY
+      const isBusinessLegalTypeBenefit = test.businessLegalType === CorpTypes.BENEFIT_COMPANY
       const isBusinessLegalTypeCoOp = test.businessLegalType === CorpTypes.COOP
       const isBusinessLegalTypeSoleProprietorship = test.businessLegalType === CorpTypes.SOLE_PROP
       const isBusinessLegalTypePartnership = test.businessLegalType === CorpTypes.PARTNERSHIP
@@ -205,7 +217,7 @@ describe('ManageBusinessDialog Component', () => {
         expect(wrapper.find('.authorization').exists())
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
       }
-      if (isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp) {
+      if (isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp) {
         expect(wrapper.find('#manage-business-dialog-passcode-group').exists())
         expect(wrapper.find('#manage-business-dialog-passcode-group').isVisible()).toBe(true)
       } else if (isBusinessLegalTypeFirm) {

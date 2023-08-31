@@ -47,13 +47,13 @@
       >
         <v-row class="business-lookup-result pt-1">
           <v-col
-            cols="2"
+            cols="3"
             class="result-identifier"
           >
             {{ item.identifier }}
           </v-col>
           <v-col
-            cols="8"
+            cols="7"
             class="result-name"
           >
             {{ item.name }}
@@ -66,6 +66,10 @@
               v-if="item.disabled"
               class="added"
             >Added</span>
+            <span
+              v-else
+              class="select"
+            >Select</span>
           </v-col>
         </v-row>
       </template>
