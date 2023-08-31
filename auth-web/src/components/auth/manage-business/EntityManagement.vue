@@ -747,9 +747,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
 
     try {
-      const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
-      await AffiliationInvitationService.updateInvitation(affiliationInvitationId)
-      const contact = await BusinessService.getMaskedContacts(this.businessIdentifier)
+      const payload: CreateAffiliationInvitation = {
+        fromOrgId: fromOrgId,
+        businessIdentifier: businessIdentifier
+      }
+      console.log(payload)
+      await AffiliationInvitationService.createInvitation(payload)
+      const contact = await BusinessService.getMaskedContacts(businessIdentifier)
       this.businessContactEmail = contact?.data?.email
       this.isAuthorizationEmailSentDialogVisible = true
     } catch (err) {
