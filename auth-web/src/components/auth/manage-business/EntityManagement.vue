@@ -273,8 +273,9 @@
       <AffiliatedEntityTable
         :loading="isLoading"
         :highlight-index="highlightIndex"
-        @remove-business="showConfirmationOptionsModal($event)"
+        @add-unknown-error="showUnknownErrorModal('business')"
         @remove-affiliation-invitation="removeAffiliationInvitation()"
+        @remove-business="showConfirmationOptionsModal($event)"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
         @resend-affiliation-invitation="resendAffiliationInvitation($event)"
       />

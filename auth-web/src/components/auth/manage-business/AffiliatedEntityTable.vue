@@ -148,6 +148,11 @@
           <AffiliationAction
             :item="item"
             :index="index"
+            @add-unknown-error="$emit('add-unknown-error', $event)"
+            @remove-affiliation-invitation="$emit('remove-affiliation-invitation', $event)"
+            @remove-business="$emit('remove-business', $event)"
+            @business-unavailable-error="$emit('business-unavailable-error', $event)"
+            @resend-affiliation-invitation="$emit('resend-affiliation-invitation', $event)"
           />
         </template>
       </base-v-data-table>
@@ -181,7 +186,8 @@ export default defineComponent({
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
-  emits: ['add-unknown-error', 'remove-affiliation-invitation'],
+  emits: ['add-unknown-error', 'remove-affiliation-invitation', 'remove-business',
+    'business-unavailable-error', 'resend-affiliation-invitation'],
   setup () {
     const isloading = false
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
