@@ -82,21 +82,19 @@
             lazy-validation
             class="mt-0"
           >
-            <template>
-              <div class="font-weight-bold mr-2 float-left">
-                Business Name:
-              </div>
-              <div>{{ businessName }}</div>
+            <div class="font-weight-bold mr-2 float-left">
+              Business Name:
+            </div>
+            <div>{{ businessName }}</div>
 
-              <div class="font-weight-bold mr-2 float-left">
-                Incorporation Number:
-              </div>
-              <div>{{ businessIdentifier }}</div>
+            <div class="font-weight-bold mr-2 float-left">
+              Incorporation Number:
+            </div>
+            <div>{{ businessIdentifier }}</div>
 
-              <div class="my-2">
-                You must be authorized to manage this business. You can be authorized in one of the following ways:
-              </div>
-            </template>
+            <div class="my-2">
+              You must be authorized to manage this business. You can be authorized in one of the following ways:
+            </div>
 
             <v-card
               class="mx-auto"
