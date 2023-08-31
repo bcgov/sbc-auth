@@ -657,8 +657,7 @@ export default defineComponent({
     })
 
     const showEmailOption = computed(() => {
-      return (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit.value ||
-        isBusinessLegalTypeCoOp.value || isBusinessLegalTypeFirm.value) && businessContactEmail.value
+      return (isBusinessLegalTypeCorporationOrBenefitOrCoop.value || isBusinessLegalTypeFirm.value) && businessContactEmail.value
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
