@@ -104,7 +104,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp) && hasBusinessPassCodePassword"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -173,7 +173,8 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail"
+                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail &&
+                    hasBusinessEmail"
                   id="manage-business-dialog-email-group"
                   v-model="emailOption"
                 >
@@ -398,6 +399,14 @@ export default defineComponent({
         emailOption.value ||
         passcodeOption.value ||
         false
+    })
+
+    const hasBusinessPassCodePassword = computed(() => {
+      return true
+    })
+
+    const hasBusinessEmail = computed(() => {
+      return true
     })
 
     const isBusinessLegalTypeFirm = computed(() => {
@@ -723,6 +732,8 @@ export default defineComponent({
       authorizationName,
       authorizationLabel,
       authorizationMaxLength,
+      hasBusinessEmail,
+      hasBusinessPassCodePassword,
       isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,
