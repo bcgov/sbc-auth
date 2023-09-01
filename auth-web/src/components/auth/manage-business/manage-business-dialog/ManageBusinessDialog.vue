@@ -93,7 +93,9 @@
             <div>{{ businessIdentifier }}</div>
 
             <div class="my-2">
-              You must be authorized to manage this business. You can be authorized in one of the following ways:
+              {{ hasNoEmailAuthenticationAffiliation ?
+                'You can manage this business by one of the following methods:' :
+                'You must be authorized to manage this business. You can be authorized in one of the following ways:' }}
             </div>
 
             <v-card
@@ -102,7 +104,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop"
+                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop && hasBusinessAuthentication"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -198,7 +200,11 @@
                   </div>
                 </v-list-group>
 
-                <v-list-group v-model="requestAuthBusinessOption">
+                <v-list-group
+                  v-if="hasAffiliatedAccount"
+                  id="account-authorization-request"
+                  v-model="requestAuthBusinessOption"
+                >
                   <template #activator>
                     <v-list-item-title>Request authorization from the business</v-list-item-title>
                   </template>
@@ -297,6 +303,7 @@ import AffiliationInvitationService from '@/services/affiliation-invitation.serv
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationRequestSentDialog from '@/components/auth/manage-business/manage-business-dialog/AuthorizationRequestSentDialog.vue'
 import BusinessService from '@/services/business.services'
+import OrgService from '@/services/org.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
 import { CreateAffiliationInvitation } from '@/models/affiliation-invitation'
@@ -387,6 +394,8 @@ export default defineComponent({
     const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const showAuthorizationRequestSentDialog = ref(false)
     const hasBusinessEmail = ref(false)
+    const hasBusinessAuthentication = ref(false)
+    const hasAffiliatedAccount = ref(false)
     const successDialog = computed(() => {
       return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
     })
@@ -397,14 +406,6 @@ export default defineComponent({
         emailOption.value ||
         passcodeOption.value ||
         false
-    })
-
-    // const hasBusinessEmail = computed(() => {
-    //   return true
-    // })
-
-    const hasBusinessPassCodePassword = computed(() => {
-      return true
     })
 
     const isBusinessLegalTypeFirm = computed(() => {
@@ -697,6 +698,15 @@ export default defineComponent({
        hasBusinessEmail.value
     })
 
+    const hasNoEmailAuthenticationAffiliation = computed(() => {
+      const authenticationOption = isBusinessLegalTypeCorporationOrBenefitOrCoop.value && hasBusinessAuthentication.value
+      const nameOption = isBusinessLegalTypeFirm.value
+      const emailOption = showEmailOption.value
+      const authorizationOption = ''
+      const delegationOption = enableDelegationFeature.value
+      return !authenticationOption && !nameOption && !emailOption && !authorizationOption && !delegationOption
+    })
+
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
       if (newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
@@ -706,7 +716,24 @@ export default defineComponent({
           contactInfo.value = contact?.data
           hasBusinessEmail.value = true
         } catch (err) {
+          hasBusinessEmail.value = false
           contactInfo.value = ''
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
+        try {
+          const organization = await OrgService.getOrganizationsNameAndUuidByAffiliation(newBusinessIdentifier)
+          hasAffiliatedAccount.value = organization?.data?.orgsDetails
+        } catch (err) {
+          hasAffiliatedAccount.value = false
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
+        try {
+          const authentication = await BusinessService.getAuthentication(newBusinessIdentifier)
+          hasBusinessAuthentication.value = authentication?.data?.authentication
+        } catch (err) {
+          hasBusinessAuthentication.value = false
           // eslint-disable-next-line no-console
           console.error(err)
         }
@@ -725,6 +752,7 @@ export default defineComponent({
       selectAccount,
       showAuthorizationRequestSentDialog,
       successDialog,
+      hasNoEmailAuthenticationAffiliation,
       isManageButtonEnabled,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
@@ -746,7 +774,7 @@ export default defineComponent({
       authorizationLabel,
       authorizationMaxLength,
       hasBusinessEmail,
-      hasBusinessPassCodePassword,
+      hasBusinessAuthentication,
       isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,
