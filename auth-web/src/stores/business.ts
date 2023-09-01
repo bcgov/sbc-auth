@@ -6,7 +6,7 @@ import {
   NameRequestResponse
 } from '@/models/affiliation'
 import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload,
+import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
   PasscodeResetLoad } from '@/models/business'
 import {
   CorpTypes,
@@ -156,7 +156,11 @@ export const useBusinessStore = defineStore('business', () => {
       if (business && (isToOrgAndPending || isFromOrg)) {
         business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInvite])
       } else if (!business && isFromOrg && !isAccepted) {
-        const newBusiness = { ...affiliationInvite.entity, affiliationInvites: [affiliationInvite] }
+        // This returns corpType: 'BEN' instead of corpType: { code: 'BEN' }.
+        const corpType = affiliationInvite.entity.corpType
+        const newBusiness = { ...affiliationInvite.entity,
+          affiliationInvites: [affiliationInvite],
+          corpType: { code: corpType as string } as CorpType }
         affiliatedEntities.push(newBusiness)
       }
     }
