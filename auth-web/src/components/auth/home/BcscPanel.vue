@@ -102,7 +102,10 @@ export default defineComponent({
     LearnMoreButton
   },
   props: {
-    user: Object as PropType<User>
+    user: {
+      type: Object as PropType<User>,
+      required: true
+    }
   },
   setup () {
     const cardSetUpUrl = 'https://www2.gov.bc.ca/gov/content/governments/government-id/bcservicescardapp/setup'

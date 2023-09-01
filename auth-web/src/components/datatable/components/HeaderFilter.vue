@@ -59,12 +59,12 @@ export default defineComponent({
   props: {
     header: { default: tempHeader as BaseTableHeaderI },
     filtering: { default: false },
-    setFiltering: { type: Function as PropType<(filter?: boolean) => void>, required: false },
+    setFiltering: { type: Function as PropType<(filter?: boolean) => void>, required: true },
     sortedItems: { default: [] as object[] },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
-    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
+    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: true },
     headers: { default: [] as BaseTableHeaderI[] },
-    setSortedItems: { type: Function as PropType<(items: object[], init?: boolean) => void>, required: false }
+    setSortedItems: { type: Function as PropType<(items: object[], init?: boolean) => void>, required: true }
   },
   setup (props) {
     const state = (reactive({
