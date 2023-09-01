@@ -23,9 +23,13 @@ from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.contact import Contact as ContactService
 from auth_api.services.entity import Entity as EntityService
+from auth_api.models.membership import Membership as MembershipModel
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
 from auth_api.utils.util import cors_preflight
+from auth_api.utils.user_context import UserContext, user_context
+from auth_api.services.user import User as UserService
+
 
 
 API = Namespace('entities', description='Entities')
@@ -144,13 +148,20 @@ class ContactResource(Resource):
     @staticmethod
     @_jwt.requires_auth
     @TRACER.trace()
+    @user_context
     @cors.crossdomain(origin='*')
-    def get(business_identifier):
+    def get(business_identifier, **kwargs):
         """Get contact email for the Entity identified by the provided business identifier."""
+        user_is_staff = False
+        user_from_context: UserContext = kwargs['user_context']
+        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
+        if user_from_context.is_staff() or \
+           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+            user_is_staff = True
         # This route allows public users to look at masked email addresses.
         # It's used by the business dashboard for magic link.
-        if ((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
-                (contact := entity.get_contact())):
+        if (((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
+                (contact := entity.get_contact())) or user_is_staff):
             return ContactService(contact).as_dict(masked_email_only=True), http_status.HTTP_200_OK
         return {'message': f'Contacts for {business_identifier} was not found.'}, \
             http_status.HTTP_404_NOT_FOUND
