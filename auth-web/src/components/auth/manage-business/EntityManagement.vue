@@ -548,7 +548,6 @@ import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { AccountSettings } from '@/models/account-settings'
 import { Action } from 'pinia-class'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestFormOld.vue'
 import { Address } from '@/models/address'
@@ -572,7 +571,6 @@ import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { mapActions as mapActionsVuex } from 'vuex'
 
 @Component({
   components: {
@@ -592,9 +590,9 @@ import { mapActions as mapActionsVuex } from 'vuex'
     ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions(useBusinessStore, ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions(useOrgStore, ['syncAddress']),
-    ...mapActionsVuex('account', ['syncCurrentAccount'])
+    ...mapActions(useBusinessStore, ['searchBusinessIndex', 'getBusinessNameByIdentifier', 'searchNRIndex',
+      'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions(useOrgStore, ['syncAddress'])
   }
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
@@ -603,8 +601,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   @Prop({ default: '' }) readonly base64OrgName: string
   // remove Vuex for Pinia with Vue3 upgrade
   @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  readonly syncCurrentAccount!: (userSettings: AccountSettings) => Promise<AccountSettings>
-
   // for template
   readonly CorpTypes = CorpTypes
   private removeBusinessPayload = null
@@ -630,6 +626,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private incorporateNumberedDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
+  readonly getBusinessNameByIdentifier!: (identifier: string) => Promise<string | null>
   readonly searchNRIndex!: (identifier: string) => Promise<number>
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
@@ -696,8 +693,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         urlorigin: ''
       })
       try {
-        // rework following into Pinia for Vue3
-        await this.syncCurrentAccount(this.currentAccountSettings)
+        await this.syncOrganization(this.currentAccountSettings.id)
+        await this.addOrgSettings(this.currentOrganization)
         await this.syncBusinesses()
         this.$store.commit('updateHeader')
         this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
@@ -717,31 +714,34 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     const identifier = token.businessIdentifier
     const invitationId = token.id
     this.businessIdentifier = token.businessIdentifier
-    // 1. check business exists or not
-    const businessStore = useBusinessStore()
-    const isAdded = await businessStore.isAffiliated(identifier)
-    if (isAdded) {
-      this.showBusinessAlreadyAdded({ name: legalName, identifier })
-      return
-    }
+    // grab business name from store
+    const business = await this.getBusinessNameByIdentifier(token.businessIdentifier)
     try {
-      // 2. Accept invitation
+      // 1. Accept invitation
       const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
 
-      // 3. Adding magic link success
+      // 2. Adding magic link success
       if (response.status === 200) {
         this.showAddSuccessModalByEmail(identifier)
       }
     } catch (error) {
-      // 4. Unauthorized
+      console.log(error)
+      // 3. Unauthorized
       if (error.response && error.response?.status === 401) {
         this.showAuthorizationErrorModal()
         return
       }
-      // 5. Expired
+      // 4. Expired
       if (error.response && error.response?.status === 400 &&
         error.response?.data.code === MagicLinkInvitationStatus.EXPIRED_AFFILIATION_INVITATION) {
         this.showLinkExpiredModal(identifier)
+        return
+      }
+
+      // 5. Already Added
+      if (error.response && error.response?.status === 400 &&
+        error.response?.data.code === MagicLinkInvitationStatus.ACTIONED_AFFILIATION_INVITATION) {
+        this.showBusinessAlreadyAdded({ name: business, identifier })
         return
       }
       // 6. Error
