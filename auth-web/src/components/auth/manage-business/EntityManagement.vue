@@ -542,12 +542,14 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
-import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
+import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
+import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { AccountSettings } from '@/models/account-settings'
+import { Action } from 'pinia-class'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestFormOld.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
@@ -566,8 +568,11 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
 import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { mapActions as mapActionsVuex } from 'vuex'
 
 @Component({
   components: {
@@ -588,13 +593,16 @@ import { appendAccountId } from 'sbc-common-components/src/util/common-util'
   },
   methods: {
     ...mapActions(useBusinessStore, ['searchBusinessIndex', 'searchNRIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
-    ...mapActions(useOrgStore, ['syncAddress'])
+    ...mapActions(useOrgStore, ['syncAddress']),
+    ...mapActionsVuex('account', ['syncCurrentAccount'])
   }
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
+  @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  readonly syncCurrentAccount!: (userSettings: AccountSettings) => Promise<AccountSettings>
 
   // for template
   readonly CorpTypes = CorpTypes
@@ -672,12 +680,31 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       const decodedToken = Base64.decode(base64TokenObject)
       const token = JSON.parse(decodedToken)
       const legalName = Base64.decode(this.base64OrgName)
+      // switch to match the account in the magic link
+      const currentOrgId = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount)).id
+      if (currentOrgId !== Number(this.orgId)) {
+        this.setCurrentAccountSettings({
+          id: Number(this.orgId),
+          label: legalName,
+          type: 'ACCOUNT',
+          urlpath: '',
+          urlorigin: ''
+        })
+        try {
+          await this.syncCurrentAccount(this.currentAccountSettings)
+          await this.syncBusinesses()
+          this.$store.commit('updateHeader')
+          this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+          return
+        } catch (error) {
+          this.showAuthorizationErrorModal()
+        }
+      }
       this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
     }
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
-  // parseUrlAndAddAffiliation = async (token: any, legalName: string, base64Token: string) => {
   protected async parseUrlAndAddAffiliation (token: any, legalName: string, base64Token: string) {
     if (!this.$route.meta.checkMagicLink) {
       return
@@ -685,39 +712,33 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     const identifier = token.businessIdentifier
     const invitationId = token.id
     this.businessIdentifier = token.businessIdentifier
+    // 1. check business exists or not
+    const businessStore = useBusinessStore()
+    const isAdded = await businessStore.isAffiliated(identifier)
+    if (isAdded) {
+      this.showBusinessAlreadyAdded({ name: legalName, identifier })
+      return
+    }
     try {
-      const invitation = await AffiliationInvitationService.getInvitationById(invitationId)
-
-      // 1. Link expired
-      if (invitation.data.status === AffiliationInvitationStatus.Expired) {
-        this.showLinkExpiredModal(identifier)
-        return
-      }
-
-      // 2. business already added
-      const isAdded = await useBusinessStore().isAffiliated(identifier)
-      if (isAdded) {
-        this.showBusinessAlreadyAdded({ name: legalName, identifier })
-        return
-      }
-
-      // 3. Accept invitation
+      // 2. Accept invitation
       const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
 
+      // 3. Adding magic link success
+      if (response.status === 200) {
+        this.showAddSuccessModalByEmail(identifier)
+      }
+    } catch (error) {
       // 4. Unauthorized
-      if (response.status === 401) {
+      if (error.response && error.response.status === 401) {
         this.showAuthorizationErrorModal()
         return
       }
-
-      // 5. Adding magic link success
-      if (response.status === 200) {
-        this.showAddSuccessModalByEmail(identifier)
+      // 5. Expired
+      if (error.response && error.response.status === 400 && error.response.data.code === MagicLinkInvitationStatus.EXPIRED_AFFILIATION_INVITATION) {
+        this.showLinkExpiredModal(identifier)
         return
       }
-
-      throw new Error('Magic link error')
-    } catch (error) {
+      // 6. Error
       this.showMagicLinkErrorModal()
     }
   }
