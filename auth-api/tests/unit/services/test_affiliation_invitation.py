@@ -86,8 +86,14 @@ def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):
         assert affiliation_invitation_dictionary['recipient_email'] == affiliation_invitation_info['recipientEmail']
 
 
+@pytest.mark.parametrize(
+    'create_org_with', [
+        'id',
+        'uuid'
+    ]
+)
 def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, business_mock,
-                                       monkeypatch):  # pylint:disable=unused-argument
+                                       monkeypatch, create_org_with):  # pylint:disable=unused-argument
     """Assert that an Affiliation Invitation can be created."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         user = factory_user_model(TestUserInfo.user_test)
@@ -97,7 +103,8 @@ def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
         affiliation_invitation_info = factory_affiliation_invitation(
             from_org_id=from_org_dictionary['id'],
-            to_org_id=to_org_dictionary['id'],
+            to_org_id=to_org_dictionary['id'] if create_org_with == 'id' else None,
+            to_org_uuid=to_org_dictionary['uuid'] if create_org_with == 'uuid' else None,
             business_identifier=entity_dictionary['business_identifier'])
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
