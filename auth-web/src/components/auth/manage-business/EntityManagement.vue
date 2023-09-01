@@ -601,6 +601,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
+  // remove Vuex for Pinia with Vue3 upgrade
   @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
   readonly syncCurrentAccount!: (userSettings: AccountSettings) => Promise<AccountSettings>
 
@@ -680,28 +681,32 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       const decodedToken = Base64.decode(base64TokenObject)
       const token = JSON.parse(decodedToken)
       const legalName = Base64.decode(this.base64OrgName)
-      // switch to match the account in the magic link
-      const currentOrgId = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount)).id
-      if (currentOrgId !== Number(this.orgId)) {
-        this.setCurrentAccountSettings({
-          id: Number(this.orgId),
-          label: legalName,
-          type: 'ACCOUNT',
-          urlpath: '',
-          urlorigin: ''
-        })
-        try {
-          await this.syncCurrentAccount(this.currentAccountSettings)
-          await this.syncBusinesses()
-          this.$store.commit('updateHeader')
-          this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
-          return
-        } catch (error) {
-          this.showAuthorizationErrorModal()
-        }
-      }
-      this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+      await this.handleMagicLink(token, legalName)
     }
+  }
+
+  protected async handleMagicLink (token: any, legalName: string) {
+    const currentOrgId = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount)).id
+    if (currentOrgId !== Number(this.orgId)) {
+      this.setCurrentAccountSettings({
+        id: Number(this.orgId),
+        label: legalName,
+        type: 'ACCOUNT',
+        urlpath: '',
+        urlorigin: ''
+      })
+      try {
+        // rework following into Pinia for Vue3
+        await this.syncCurrentAccount(this.currentAccountSettings)
+        await this.syncBusinesses()
+        this.$store.commit('updateHeader')
+        this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+        return
+      } catch (error) {
+        this.showAuthorizationErrorModal()
+      }
+    }
+    this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
   }
 
   // Function to parse the URL and extract the parameters, used for magic link email
@@ -729,12 +734,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       }
     } catch (error) {
       // 4. Unauthorized
-      if (error.response && error.response.status === 401) {
+      if (error.response && error.response?.status === 401) {
         this.showAuthorizationErrorModal()
         return
       }
       // 5. Expired
-      if (error.response && error.response.status === 400 && error.response.data.code === MagicLinkInvitationStatus.EXPIRED_AFFILIATION_INVITATION) {
+      if (error.response && error.response?.status === 400 &&
+        error.response?.data.code === MagicLinkInvitationStatus.EXPIRED_AFFILIATION_INVITATION) {
         this.showLinkExpiredModal(identifier)
         return
       }
