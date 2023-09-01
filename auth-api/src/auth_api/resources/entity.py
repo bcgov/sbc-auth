@@ -22,7 +22,6 @@ from auth_api.exceptions import BusinessException
 from auth_api.schemas import utils as schema_utils
 from auth_api.services.authorization import Authorization as AuthorizationService
 from auth_api.services.contact import Contact as ContactService
-from auth_api.services.authentication import Authentication as AuthenticationService
 from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
@@ -150,8 +149,12 @@ class AuthenticationResource(Resource):
         # This route allows public users to see if businesses have a form of authentication.
         # It's used by the business dashboard for magic link.
         if ((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
-                (contact := entity.get_contact())):
-            return AuthenticationService(contact).as_dict(), http_status.HTTP_200_OK
+        (contact := entity.get_contact())):
+            has_valid_pass_code = (entity.pass_code_claimed == 'f' and entity.pass_code is not None) or entity.corp_type_code in ['SP','GP']
+            return {
+                'contactEmail': contact.email,
+                'hasValidPassCode': has_valid_pass_code
+                }, http_status.HTTP_200_OK
         return {'message': f'Authentication for {business_identifier} was not found.'}, \
             http_status.HTTP_404_NOT_FOUND
 
