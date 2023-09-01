@@ -219,7 +219,7 @@ class AffiliationInvitation:
             return to_org.id
 
         except DataError as err:
-            raise BusinessException(Error.INVALID_INPUT, err)
+            raise BusinessException(Error.INVALID_INPUT, err) from err
 
     @staticmethod
     @user_context
