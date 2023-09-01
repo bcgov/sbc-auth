@@ -39,7 +39,6 @@ from auth_api.utils.user_context import UserContext, user_context
 from .activity_log_publisher import ActivityLogPublisher
 from .rest_service import RestService
 
-
 @ServiceTracing.trace(ServiceTracing.enable_tracing, ServiceTracing.should_be_tracing)
 class Affiliation:
     """Manages all aspect of Affiliation data.

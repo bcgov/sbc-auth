@@ -229,27 +229,29 @@ export default class SearchBusinessNameRequest extends Vue {
     this.nrNames = event?.names || []
     this.businessIdentifier = event?.nrNum || ''
     if (this.isGovStaffAccount) {
-      try {
-        const requestBody: CreateNRAffiliationRequestBody = {
-          businessIdentifier: this.businessIdentifier
-        }
-        let nrResponse = await this.businessStore.addNameRequest(
-          requestBody
-        )
-        if (nrResponse?.status === 201) {
-          // emit event to let parent know business added
-          this.$emit('add-success-nr', this.businessIdentifier)
-          this.$refs.manageBusinessDialog.resetForm(true)
-        } else {
-          this.$emit('add-unknown-error')
-        }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('Error adding name request: ', err)
-      }
+      await this.addNameRequestForStaffSilently()
     } else {
       this.showNRDialog = true
       this.showAddNRModal()
+    }
+  }
+
+  private async addNameRequestForStaffSilently () {
+    try {
+      const requestBody: CreateNRAffiliationRequestBody = {
+        businessIdentifier: this.businessIdentifier
+      }
+      const nrResponse = await this.businessStore.addNameRequest(requestBody)
+      if (nrResponse?.status === 201) {
+        // emit event to let parent know business added
+        this.$emit('add-success-nr', this.businessIdentifier)
+        this.$refs.manageBusinessDialog.resetForm(true)
+      } else {
+        this.$emit('add-unknown-error')
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error adding name request: ', err)
     }
   }
 

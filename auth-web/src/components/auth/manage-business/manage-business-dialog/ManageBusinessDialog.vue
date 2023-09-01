@@ -660,6 +660,7 @@ export default defineComponent({
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
+      if (props.isStaffOrSbcStaff) { return }
       if (newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName
