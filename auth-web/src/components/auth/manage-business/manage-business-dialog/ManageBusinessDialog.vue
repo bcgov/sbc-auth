@@ -230,14 +230,6 @@
         </v-card-text>
 
         <v-card-actions class="form__btns">
-          <span
-            id="help-button"
-            class="pl-2 pr-2 mr-auto"
-            @click.stop="openHelp()"
-          >
-            <v-icon>mdi-help-circle-outline</v-icon>
-            Help
-          </span>
           <v-btn
             id="cancel-button"
             large
@@ -746,14 +738,6 @@ export default defineComponent({
 @import '$assets/scss/theme.scss';
 @import '$assets/scss/ModalDialog.scss';
 
-  #help-button {
-    cursor: pointer;
-    color: var(--v-primary-base) !important;
-    .v-icon {
-      transform: translate(0, -2px) !important;
-      color: var(--v-primary-base) !important;
-    }
-  }
   .list-body {
     color:#313132;
   }
