@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-template-shadow -->
 <template>
   <v-container id="maintain-info-container">
     <v-row>
