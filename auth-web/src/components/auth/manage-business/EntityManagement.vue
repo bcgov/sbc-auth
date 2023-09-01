@@ -703,6 +703,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         this.showAuthorizationErrorModal()
       }
     }
+    await this.syncBusinesses()
     this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
   }
 
@@ -915,7 +916,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   showBusinessAlreadyAdded (event: { name, identifier }) {
     this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Already Added'
-    this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
+    const businessNameText = event.name ? `${event.name}` : ''
+    this.dialogText = `The business ${businessNameText} with the business number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
