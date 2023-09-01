@@ -49,7 +49,8 @@
           <v-list>
             <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
               <v-list-item
-                v-if="item.affiliationInvites[0].status !== 'ACCEPTED'"
+                v-if="item.affiliationInvites[0].status !== AffiliationInvitationStatus.Accepted &&
+                  item.affiliationInvites[0].type === AffiliationInvitationType.REQUEST"
                 class="actions-dropdown_item my-1"
                 @click="openNewAffiliationInvite(item)"
               >
@@ -108,12 +109,12 @@
 </template>
 
 <script lang='ts'>
+import { AffiliationInvitationStatus, AffiliationInvitationType } from '@/models/affiliation'
 import { CorpTypes, FilingTypes, LDFlags, NrDisplayStates, NrTargetTypes } from '@/util/constants'
 import { PropType, defineComponent } from '@vue/composition-api'
 import { goToCorpOnline, goToDashboard, goToFormPage, goToNameRequest,
   goToOneStop, goToSocieties } from '@/util/navigation'
 import { useBusinessStore, useOrgStore } from '@/stores'
-import { AffiliationInvitationStatus } from '@/models/affiliation'
 import { Business } from '@/models/business'
 import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
 import OrgService from '@/services/org.services'
@@ -127,7 +128,8 @@ export default defineComponent({
     item: { type: Object as PropType<Business>, required: true },
     index: { type: Number, required: true }
   },
-  emits: ['popup-manage-business-dialog', 'add-unknown-error', 'remove-affiliation-invitation', 'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
+  emits: ['popup-manage-business-dialog', 'add-unknown-error', 'remove-affiliation-invitation',
+    'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
   setup (props, context) {
     const orgStore = useOrgStore()
     const businessStore = useBusinessStore()
@@ -508,7 +510,9 @@ export default defineComponent({
       tempDescription,
       useNameRequest,
       showOpenButton,
-      isCurrentOrganization
+      isCurrentOrganization,
+      AffiliationInvitationStatus,
+      AffiliationInvitationType
     }
   }
 })
