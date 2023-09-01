@@ -730,12 +730,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       const decodedToken = Base64.decode(base64TokenObject)
       const token = JSON.parse(decodedToken)
       invitationId = token.id
-      this.businessIdentifier = this.base64OrgName
     }
 
-    if (event?.affiliationInvites[0].status === AffiliationInvitationStatus.Pending) {
-      this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
-    }
+    this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
 
     try {
       const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
@@ -754,6 +751,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   openHelp = async () => {
+    // TODO THIS ISNT WORKING please fix.
     this.$refs.helpDialog.open()
   }
 
