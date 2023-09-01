@@ -82,21 +82,19 @@
             lazy-validation
             class="mt-0"
           >
-            <template>
-              <div class="font-weight-bold mr-2 float-left">
-                Business Name:
-              </div>
-              <div>{{ businessName }}</div>
+            <div class="font-weight-bold mr-2 float-left">
+              Business Name:
+            </div>
+            <div>{{ businessName }}</div>
 
-              <div class="font-weight-bold mr-2 float-left">
-                Incorporation Number:
-              </div>
-              <div>{{ businessIdentifier }}</div>
+            <div class="font-weight-bold mr-2 float-left">
+              Incorporation Number:
+            </div>
+            <div>{{ businessIdentifier }}</div>
 
-              <div class="my-2">
-                You must be authorized to manage this business. You can be authorized in one of the following ways:
-              </div>
-            </template>
+            <div class="my-2">
+              You must be authorized to manage this business. You can be authorized in one of the following ways:
+            </div>
 
             <v-card
               class="mx-auto"
@@ -104,7 +102,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp) && hasBusinessEmail"
+                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -173,8 +171,7 @@
                 </v-list-group>
 
                 <v-list-group
-                  v-if="(isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp || isBusinessLegalTypeFirm) && businessContactEmail &&
-                    hasBusinessEmail"
+                  v-if="showEmailOption"
                   id="manage-business-dialog-email-group"
                   v-model="emailOption"
                 >
@@ -182,7 +179,7 @@
                     <v-list-item-title>
                       Confirm authorization using your {{ computedAddressType }} email address
                       <div
-                        v-if="isBusinessLegalTypeCorporation || isBusinessLegalTypeCoOp"
+                        v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop"
                         class="subtitle"
                       >
                         (If you forgot or don't have a business {{ passwordText }})
@@ -249,7 +246,7 @@
                       <v-list-item-title>Request authorization from the Business Registry</v-list-item-title>
                     </template>
                     <div class="list-body">
-                      <!-- Placeholder for RTR-->
+                      <!-- Placeholder for Relationships-->
                     </div>
                   </v-list-group>
                 </template>
@@ -418,6 +415,10 @@ export default defineComponent({
       return props.businessLegalType === CorpTypes.BC_COMPANY
     })
 
+    const isBusinessLegalTypeBenefit = computed(() => {
+      return props.businessLegalType === CorpTypes.BENEFIT_COMPANY
+    })
+
     const isBusinessLegalTypeCoOp = computed(() => {
       return props.businessLegalType === CorpTypes.COOP
     })
@@ -507,13 +508,17 @@ export default defineComponent({
       }
     })
 
+    const isBusinessLegalTypeCorporationOrBenefitOrCoop = computed(() => {
+      return (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit.value || isBusinessLegalTypeCoOp.value) && hasBusinessEmail.value
+    })
+
     const isFormValid = computed(() => {
       let isValid = false
       const hasBusinessIdentifier = !!businessIdentifier.value
       const hasPasscode = !!passcode.value
       const hasCertified = !!isCertified.value
       const isCertifiedBy = !!certifiedBy.value
-      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+      if (isBusinessLegalTypeCorporationOrBenefitOrCoop.value) {
         isValid = hasBusinessIdentifier && hasPasscode
       } else if (isBusinessLegalTypeFirm.value) {
         isValid = hasBusinessIdentifier && !!proprietorPartnerName.value && hasCertified
@@ -535,7 +540,7 @@ export default defineComponent({
     })
 
     const computedAddressType = computed(() => {
-      if (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeCoOp.value) {
+      if (isBusinessLegalTypeCorporationOrBenefitOrCoop.value) {
         return 'registered office'
       } else if (isBusinessLegalTypeFirm.value) {
         return 'business'
@@ -585,6 +590,7 @@ export default defineComponent({
 
     const closeCreateAffiliationInvitationErrorDialog = () => {
       emit('show-create-affiliation-invitation-error-dialog')
+      createAffiliationInvitationErrorDialog.value?.close()
     }
 
     const handleAuthBusinessOption = async () => {
@@ -686,8 +692,13 @@ export default defineComponent({
       return helpDialog.value?.isDialogOpen
     })
 
+    const showEmailOption = computed(() => {
+      return (isBusinessLegalTypeCorporationOrBenefitOrCoop.value || isBusinessLegalTypeFirm.value) && businessContactEmail.value &&
+       hasBusinessEmail.value
+    })
+
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
-      if (businessIdentifier && newBusinessIdentifier) {
+      if (newBusinessIdentifier) {
         businessIdentifier.value = newBusinessIdentifier
         businessName.value = props.initialBusinessName
         try {
@@ -739,6 +750,7 @@ export default defineComponent({
       isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,
+      isBusinessLegalTypeBenefit,
       isBusinessLegalTypeCoOp,
       enableBusinessNrSearch,
       isBusinessIdentifierValid,
@@ -764,7 +776,9 @@ export default defineComponent({
       showHelp,
       showAuthorizationEmailSentDialog,
       createAffiliationInvitationErrorDialog,
-      closeCreateAffiliationInvitationErrorDialog
+      closeCreateAffiliationInvitationErrorDialog,
+      showEmailOption,
+      isBusinessLegalTypeCorporationOrBenefitOrCoop
     }
   }
 })
