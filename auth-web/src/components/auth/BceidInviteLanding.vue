@@ -123,7 +123,8 @@ export default class BceidInviteLanding extends Vue {
       Download a 2-factor authentication app to your smartphone such as FreeOTP, Google Authenticator or 
       Microsoft Authenticator or Desktop options such as: 
       <a href="https://authy.com/" target="_sbc">Authy</a> or 
-      <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/ilgcnhelpchnceeipipijaljkblbcobl?hl=en" target="_sbc_google">GAuth</a>.</p>`,
+      <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/` +
+      `ilgcnhelpchnceeipipijaljkblbcobl?hl=en" target="_sbc_google">GAuth</a>.</p>`,
       icon: 'mdi-two-factor-authentication'
     }
   ]

@@ -16,7 +16,7 @@
         {{ createdUsers.length }} {{ createdUsers.length > 1 ? 'Team Members have' : 'Team Member has' }} been added to this account.
       </p>
       <p v-if="action=='resetpassword'">
-        A new temporary password has been created for user <strong>{{ createdUsers[0].username |filterLoginSource }}</strong>
+        A new temporary password has been created for user <strong>{{ removeBcrosFromUsername(createdUsers[0].username) }}</strong>
       </p>
       <p>
         You will need to provide Team Members with their
@@ -55,7 +55,7 @@
                     Username
                   </div>
                   <div class="font-weight-bold">
-                    {{ user.username|filterLoginSource }}
+                    {{ removeBcrosFromUsername(user.username) }}
                   </div>
                 </div>
                 <div>
@@ -153,11 +153,6 @@ import { useOrgStore } from '@/stores/org'
       'createdUsers',
       'failedUsers'
     ])
-  },
-  filters: {
-    filterLoginSource (value: string) {
-      return value.replace('bcros/', '')
-    }
   }
 })
 export default class AddUsersSuccess extends Vue {
@@ -168,6 +163,10 @@ export default class AddUsersSuccess extends Vue {
 
   @Emit()
   close () { }
+
+  removeBcrosFromUsername (username: string) : string {
+    return username?.replace('bcros/', '')
+  }
 }
 </script>
 

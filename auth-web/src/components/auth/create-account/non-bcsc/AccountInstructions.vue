@@ -85,7 +85,8 @@ export default class AccountInstructions extends Vue {
       stepTitle: 'Use a 2-factor mobile or desktop authentication app',
       stepDescription: `<p>Mobile options such as: Google or Microsoft Authenticator<br />
       Desktop options such as: <a href="https://authy.com/" target="_sbc">Authy</a> or 
-      <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/ilgcnhelpchnceeipipijaljkblbcobl?hl=en" target="_sbc_google">GAuth</a></p>`,
+      <a href="https://chrome.google.com/webstore/detail/gauth-authenticator/ilgcnhelpchnceeipipijaljkblbcobl?hl=en"` +
+      `target="_sbc_google">GAuth</a></p>`,
       icon: 'mdi-cellphone-arrow-down'
     }
   ]

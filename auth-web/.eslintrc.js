@@ -31,8 +31,8 @@ module.exports = {
     'vue/no-deprecated-filter': 'warn',
     'vue/no-deprecated-slot-scope-attribute': 'warn',
     'vue/no-deprecated-v-bind-sync': 'off', // FUTURE: Fix deprecated v-bind sync
-    'vue/no-deprecated-v-on-native-modifier': 'warn',
-    'vue/no-v-for-template-key-on-child': 'warn',
+    'vue/no-deprecated-v-on-native-modifier': 'off', // Enable for Vue3
+    'vue/no-v-for-template-key-on-child': 'off', // Enable for Vue 3
     'vue/no-v-html': 'off',
     'vue/v-on-event-hyphenation': 'off',
     // Off for now, might want to turn on for Vue3.
