@@ -49,23 +49,7 @@
           <v-list>
             <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
               <v-list-item
-                v-if="item.affiliationInvites[0].status === 'ACCEPTED'"
-                v-can:REMOVE_BUSINESS.disable
-                class="actions-dropdown_item my-1"
-                data-test="remove-button"
-                @click="removeBusiness(item)"
-              >
-                <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                  <v-icon small>mdi-delete-forever</v-icon>
-                  <span class="pl-1">Delete {{ tempDescription(item) }}</span>
-                </v-list-item-subtitle>
-                <v-list-item-subtitle v-else>
-                  <v-icon small>mdi-delete</v-icon>
-                  <span class="pl-1">Remove From Table</span>
-                </v-list-item-subtitle>
-              </v-list-item>
-              <v-list-item
-                v-else
+                v-if="item.affiliationInvites[0].status !== 'ACCEPTED'"
                 class="actions-dropdown_item my-1"
                 @click="openNewAffiliationInvite(item)"
               >
@@ -88,9 +72,10 @@
             </v-list-item>
             <v-list-item
               v-if="showRemoveButton(item)"
+              v-can:REMOVE_BUSINESS.disable
               class="actions-dropdown_item my-1"
               data-test="remove-button"
-              @click="removeBusiness(item)"
+              @click="removeAffiliationOrInvitation(item)"
             >
               <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
                 <v-icon small>mdi-delete-forever</v-icon>
@@ -138,7 +123,7 @@ export default defineComponent({
     item: { type: Object as PropType<Business>, required: true },
     index: { type: Number, required: true }
   },
-  emits: ['add-unknown-error', 'remove-affiliation-invitation', 'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
+  emits: ['popup-manage-business-dialog', 'add-unknown-error', 'remove-affiliation-invitation', 'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
   setup (props, context) {
     const orgStore = useOrgStore()
     const businessStore = useBusinessStore()
@@ -279,8 +264,18 @@ export default defineComponent({
       }
     }
 
-    /** Emit business/nr information to be unaffiliated. */
-    const removeBusiness = (business: Business): void => {
+    /** Remove business/nr affiliation or affiliation invitation. */
+    const removeAffiliationOrInvitation = async (business: Business): Promise<void> => {
+      if (business.affiliationInvites?.length > 0) {
+        const affiliationInviteInfo = business.affiliationInvites[0]
+        const invitationStatus = affiliationInviteInfo.status
+        if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed,
+          AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
+          await OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          context.emit('remove-affiliation-invitation')
+          return
+        }
+      }
       context.emit('remove-business', {
         orgIdentifier: orgStore.currentOrganization.id,
         business
@@ -334,17 +329,6 @@ export default defineComponent({
     }
 
     // Actions
-    const actionHandler = async (business: Business) => {
-      const affiliationInviteInfo = business.affiliationInvites[0]
-      const invitationStatus = affiliationInviteInfo.status
-      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed].includes(invitationStatus)) {
-        await OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
-        context.emit('remove-affiliation-invitation')
-      } else if (invitationStatus === AffiliationInvitationStatus.Accepted) {
-        open(business)
-      }
-    }
-
     const getPrimaryAction = (item: Business): string => {
       const invitationStatus = item?.affiliationInvites?.[0]?.status
       if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
@@ -467,7 +451,7 @@ export default defineComponent({
         return
       }
       if (isShowRemoveAsPrimaryAction(item)) {
-        removeBusiness(item)
+        removeAffiliationOrInvitation(item)
       } else {
         redirect(item)
       }
@@ -479,10 +463,8 @@ export default defineComponent({
       return false
     }
 
-    const openNewAffiliationInvite = () => {
-      // todo: open modal when modal is created
-      // ticket to wrap it up: https://github.com/bcgov/entity/issues/17134
-      alert('not implemented')
+    const openNewAffiliationInvite = (business: Business) => {
+      context.emit('popup-manage-business-dialog', business)
     }
 
     const showOpenButton = (item: Business): boolean => {
@@ -498,7 +480,6 @@ export default defineComponent({
     return {
       affiliations,
       action,
-      actionHandler,
       actionButtonText,
       disableTooltip,
       dropdown,
@@ -511,7 +492,7 @@ export default defineComponent({
       open,
       openNewAffiliationInvite,
       redirect,
-      removeBusiness,
+      removeAffiliationOrInvitation,
       showRemoveButton,
       showAmalgamateShortForm,
       tempDescription,
