@@ -295,7 +295,7 @@
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
-        :initial-business-identifier="initialBusinessIdentifierManageBusinessDialog"
+        :initial-business-identifier="businessIdentifier"
         @add-success="showAddSuccessModal"
         @affiliation-invitation-pending="showAuthorizationEmailSentDialogPending"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
@@ -614,7 +614,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
-  initialBusinessIdentifierManageBusinessDialog = null
   highlightRowIndex = NaN // for newly added NR or Business
 
   /** V-model for dropdown menus. */
@@ -803,8 +802,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     await this.syncBusinesses()
   }
 
-  async popupBusinessDialog (business:Business) {
-    this.initialBusinessIdentifierManageBusinessDialog = business.businessIdentifier
+  async popupBusinessDialog (business: Business) {
+    this.businessIdentifier = business.businessIdentifier
     this.showManageBusinessDialog = true
   }
 
