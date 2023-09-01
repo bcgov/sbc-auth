@@ -171,7 +171,6 @@ export const useBusinessStore = defineStore('business', () => {
   /** This is the function that fetches and updates data for all NRs. */
   async function syncBusinesses (): Promise<void> {
     state.businesses = []
-
     if (!currentOrganization.value) {
       console.log('Invalid organization') // eslint-disable-line no-console
       return
@@ -343,6 +342,11 @@ export const useBusinessStore = defineStore('business', () => {
     return state.businesses.findIndex(business => business.businessIdentifier === identifier)
   }
 
+  async function getBusinessNameByIdentifier (identifier: string): Promise<string | null> {
+    const business = state.businesses.find(business => business.businessIdentifier === identifier)
+    return business ? business.name : null
+  }
+
   async function createBNRequest (request: BNRequest): Promise<any> {
     return BusinessService.createBNRequest(request)
   }
@@ -482,6 +486,7 @@ export const useBusinessStore = defineStore('business', () => {
     createNamedBusiness,
     searchBusiness,
     searchBusinessIndex,
+    getBusinessNameByIdentifier,
     createBNRequest,
     getBNRequests,
     downloadBusinessSummary,
