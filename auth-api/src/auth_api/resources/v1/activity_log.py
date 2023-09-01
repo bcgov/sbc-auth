@@ -30,7 +30,7 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods='GET')
 @TRACER.trace()
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF.value, Role.ACCOUNT_HOLDER.value])
 def get_activities(org_id):

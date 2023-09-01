@@ -35,8 +35,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.STAFF.value])
 def get_tasks():
     """Fetch tasks."""
@@ -63,9 +63,23 @@ def get_tasks():
     return response, status
 
 
-@bp.route('/<int:task_id>', methods=['PUT'])
+@bp.route('/<int:task_id>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.STAFF.value])
+def get_task(task_id):
+    """Fetch task by id."""
+    try:
+        task = TaskService(TaskModel.find_by_task_id(task_id=task_id))
+        response, status = task.as_dict(), http_status.HTTP_200_OK
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route('/<int:task_id>', methods=['PUT'])
+@cross_origin(origins='*')
+@TRACER.trace()
 @_jwt.has_one_of_roles([Role.STAFF.value])
 def put_task(task_id):
     """Update a task."""
@@ -91,20 +105,6 @@ def put_task(task_id):
             response, status = {'message': 'The requested task could not be found.'}, \
                                http_status.HTTP_404_NOT_FOUND
 
-    except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-    return response, status
-
-
-@bp.route('/<int:task_id>', methods=['GET', 'OPTIONS'])
-@TRACER.trace()
-@cross_origin(origin='*')
-@_jwt.has_one_of_roles([Role.STAFF.value])
-def get_task(task_id):
-    """Fetch task by id."""
-    try:
-        task = TaskService(TaskModel.find_by_task_id(task_id=task_id))
-        response, status = task.as_dict(), http_status.HTTP_200_OK
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status

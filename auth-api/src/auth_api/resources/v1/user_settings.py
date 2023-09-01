@@ -32,8 +32,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_user_settings(user_id):
     """Get info related to the user.

@@ -24,7 +24,7 @@ bp = Blueprint('CODES', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/codes
 
 
 @bp.route('/<string:code_type>', methods=['GET', 'OPTIONS'])
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods=['GET'])
 def get_codes(code_type):
     """Return the codes by giving name."""
     try:

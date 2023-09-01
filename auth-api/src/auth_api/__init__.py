@@ -72,7 +72,13 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     def handle_after_request(response):  # pylint: disable=unused-variable
         add_version(response)
         camelize_json(response)
+        set_access_control_header(response)
         return response
+
+    def set_access_control_header(response):
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type, registries-trace-id, ' \
+                                                           'invitation_token'
 
     def add_version(response):
         version = get_run_version()

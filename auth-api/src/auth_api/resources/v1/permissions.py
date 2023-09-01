@@ -30,8 +30,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('/<string:org_status>/<string:membership_type>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_membership_permissions(org_status, membership_type):
     """Get a list of all permissions for the membership."""

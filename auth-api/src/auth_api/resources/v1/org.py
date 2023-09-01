@@ -44,9 +44,55 @@ bp = Blueprint('ORGS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/orgs')
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles(
+    [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+def search_organizations():
+    """Search orgs."""
+    org_search = OrgSearch(
+        request.args.get('name', None),
+        request.args.get('branchName', None),
+        request.args.get('affiliation', None),
+        request.args.getlist('status', None),
+        request.args.getlist('accessType', None),
+        request.args.get('bcolAccountId', None),
+        request.args.get('id', None),
+        request.args.get('decisionMadeBy', None),
+        request.args.get('orgType', None),
+        int(request.args.get('page', 1)),
+        int(request.args.get('limit', 10))
+    )
+    validate_name = request.args.get('validateName', 'False')
+
+    try:
+        token = g.jwt_oidc_token_info
+        if validate_name.upper() == 'TRUE':
+            response, status = OrgService.find_by_org_name(org_name=org_search.name,
+                                                           branch_name=org_search.branch_name), \
+                               http_status.HTTP_200_OK
+        else:
+            response, status = OrgService.search_orgs(org_search), http_status.HTTP_200_OK
+
+        roles = token.get('realm_access').get('roles')
+        # public user can only get status of orgs in search, unless they have special roles.
+        allowed_roles = [Role.STAFF.value, Role.SYSTEM.value, Role.ACCOUNT_IDENTITY]
+        if Role.PUBLIC_USER.value in roles and not set(roles).intersection(set(allowed_roles)):
+            if response and response.get('orgs'):
+                status = http_status.HTTP_200_OK
+            else:
+                status = http_status.HTTP_204_NO_CONTENT
+            response = {}  # Do not return any results if searching by name
+
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route('', methods=['POST'])
+@cross_origin(origins='*')
+@TRACER.trace()
 @validate_roles(allowed_roles=[Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value],
                 not_allowed_roles=[Role.ANONYMOUS_USER.value])
 @_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.SYSTEM.value])
@@ -72,55 +118,9 @@ def post_organization():
     return response, status
 
 
-@bp.route('', methods=['GET', 'OPTIONS'])
-@TRACER.trace()
-@cross_origin(origin='*')
-@_jwt.has_one_of_roles(
-    [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
-def search_organizations():
-    """Search orgs."""
-    org_search = OrgSearch(
-        request.args.get('name', None),
-        request.args.get('branchName', None),
-        request.args.get('affiliation', None),
-        request.args.getlist('status', None),
-        request.args.getlist('accessType', None),
-        request.args.get('bcolAccountId', None),
-        request.args.get('id', None),
-        request.args.get('decisionMadeBy', None),
-        request.args.get('orgType', None),
-        int(request.args.get('page', 1)),
-        int(request.args.get('limit', 10))
-    )
-    validate_name = request.args.get('validateName', 'False')
-
-    try:
-        token = g.jwt_oidc_token_info
-        if validate_name.upper() == 'TRUE':
-            response, status = OrgService.find_by_org_name(org_name=org_search.name,
-                                                           branch_name=org_search.branch_name), \
-                                                                http_status.HTTP_200_OK
-        else:
-            response, status = OrgService.search_orgs(org_search), http_status.HTTP_200_OK
-
-        roles = token.get('realm_access').get('roles')
-        # public user can only get status of orgs in search, unless they have special roles.
-        allowed_roles = [Role.STAFF.value, Role.SYSTEM.value, Role.ACCOUNT_IDENTITY]
-        if Role.PUBLIC_USER.value in roles and not set(roles).intersection(set(allowed_roles)):
-            if response and response.get('orgs'):
-                status = http_status.HTTP_200_OK
-            else:
-                status = http_status.HTTP_204_NO_CONTENT
-            response = {}  # Do not return any results if searching by name
-
-    except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-    return response, status
-
-
 @bp.route('/<int:org_id>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'PUT', 'PATCH', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_organization(org_id):
@@ -135,8 +135,8 @@ def get_organization(org_id):
 
 
 @bp.route('/<int:org_id>', methods=['PUT'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.PUBLIC_USER.value, Role.GOV_ACCOUNT_USER.value, Role.STAFF_MANAGE_ACCOUNTS.value])
 def put_organization(org_id):
@@ -164,8 +164,8 @@ def put_organization(org_id):
 
 
 @bp.route('/<int:org_id>', methods=['DELETE'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def delete_organization(org_id):
     """Inactivates the org if it has no active members or affiliations."""
@@ -178,9 +178,9 @@ def delete_organization(org_id):
 
 
 @bp.route('/<int:org_id>', methods=['PATCH'])
-@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value])
 def patch_organization(org_id):
     """Patch an account."""
     request_json = request.get_json()
@@ -202,8 +202,8 @@ def patch_organization(org_id):
 
 
 @bp.route('/<int:org_id>/login-options', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST', 'PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_org_login_options(org_id):
     """Retrieve the set of payment settings associated with the specified org."""
@@ -218,7 +218,7 @@ def get_org_login_options(org_id):
 
 @bp.route('/<int:org_id>/login-options', methods=['POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.requires_auth
 def post_org_login_options(org_id):
     """Create a new login type for the specified org."""
@@ -234,7 +234,7 @@ def post_org_login_options(org_id):
 
 @bp.route('/<int:org_id>/login-options', methods=['PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.requires_auth
 def put_org_login_optjons(org_id):
     """Update a new login type for the specified org."""
@@ -250,7 +250,7 @@ def put_org_login_optjons(org_id):
 
 @bp.route('/<int:org_id>/contacts', methods=['GET', 'OPTIONS'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get(org_id):
     """Retrieve the set of contacts associated with the specified org."""
@@ -263,7 +263,7 @@ def get(org_id):
 
 @bp.route('/<int:org_id>/contacts', methods=['POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
 def post_organization_contact(org_id):
     """Create a new contact for the specified org."""
@@ -281,7 +281,7 @@ def post_organization_contact(org_id):
 
 @bp.route('/<int:org_id>/contacts', methods=['PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
 def put_organization_contact(org_id):
     """Update an existing contact for the specified org."""
@@ -298,7 +298,7 @@ def put_organization_contact(org_id):
 
 @bp.route('/<int:org_id>/contacts', methods=['DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.PUBLIC_USER.value])
 def delete_organzization_contact(org_id):
     """Delete the contact info for the specified org."""
@@ -309,10 +309,41 @@ def delete_organzization_contact(org_id):
     return response, status
 
 
-@bp.route('/<int:org_id>/affiliations', methods=['POST'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
+@bp.route('/<int:org_id>/affiliations', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['POST', 'GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
+def get_organization_affiliations(org_id):
+    """Get all affiliated entities for the given org."""
+    try:
+        # keep old response until UI is updated
+        if (request.args.get('new', 'false')).lower() != 'true':
+            return jsonify(
+                {'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id)}
+            ), http_status.HTTP_200_OK
+
+        # get affiliation identifiers and the urls for the source data
+        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
+        # Use orjson serializer here, it's quite a bit faster.
+        response, status = current_app.response_class(
+            response=orjson.dumps({'entities': affiliations_details_list}),  # pylint: disable=maybe-no-member
+            status=200,
+            mimetype='application/json'
+        ), http_status.HTTP_200_OK
+
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    except ServiceUnavailableException as exception:
+        response, status = {'message': exception.error}, exception.status_code
+
+    return response, status
+
+
+@bp.route('/<int:org_id>/affiliations', methods=['POST'])
+@cross_origin(origins='*')
+@TRACER.trace()
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def post_organization_affiliation(org_id):
     """Post a new Affiliation for an org using the request body."""
     request_json = request.get_json()
@@ -346,40 +377,9 @@ def post_organization_affiliation(org_id):
     return response, status
 
 
-@bp.route('/<int:org_id>/affiliations', methods=['GET', 'OPTIONS'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
-@TRACER.trace()
-@cross_origin(origin='*')
-def get_organization_affiliations(org_id):
-    """Get all affiliated entities for the given org."""
-    try:
-        # keep old response until UI is updated
-        if (request.args.get('new', 'false')).lower() != 'true':
-            return jsonify(
-                {'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id)}
-            ), http_status.HTTP_200_OK
-
-        # get affiliation identifiers and the urls for the source data
-        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
-        affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
-        # Use orjson serializer here, it's quite a bit faster.
-        response, status = current_app.response_class(
-            response=orjson.dumps({'entities': affiliations_details_list}),  # pylint: disable=maybe-no-member
-            status=200,
-            mimetype='application/json'
-        ), http_status.HTTP_200_OK
-
-    except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-    except ServiceUnavailableException as exception:
-        response, status = {'message': exception.error}, exception.status_code
-
-    return response, status
-
-
 @bp.route('/affiliation/<string:business_identifier>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_details_by_affiliation(business_identifier):
@@ -401,9 +401,9 @@ def get_org_details_by_affiliation(business_identifier):
 
 
 @bp.route('/<int:org_id>/affiliations/<string:business_identifier>', methods=['GET', 'OPTIONS'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
+@cross_origin(origins='*', methods=['GET', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def get_org_affiliation_by_business_identifier(org_id, business_identifier):
     """Get the affiliation by org id and business identifier with authorized user."""
     # Note this is used by LEAR - which passes in the user's token to query for an affiliation for an NR.
@@ -424,9 +424,9 @@ def get_org_affiliation_by_business_identifier(org_id, business_identifier):
 
 
 @bp.route('/<int:org_id>/affiliations/<string:business_identifier>', methods=['DELETE'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
     """Delete an affiliation between an org and an entity."""
     request_json = request.get_json(silent=True) or {}
@@ -446,9 +446,9 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
 
 
 @bp.route('/<int:org_id>/members', methods=['GET', 'OPTIONS'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_organization_members(org_id):
     """Retrieve the set of members for the given org."""
     try:
@@ -471,10 +471,10 @@ def get_organization_members(org_id):
     return response, status
 
 
-@bp.route('/<int:org_id>/members/<int:membership_id>', methods=['PATCH'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+@bp.route('/<int:org_id>/members/<int:membership_id>', methods=['PATCH', 'OPTIONS'])
+@cross_origin(origins='*', methods=['PATCH', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def patch_organization_member(org_id, membership_id):  # pylint:disable=unused-argument
     """Update a membership record with new member role."""
     role = request.get_json().get('role')
@@ -514,9 +514,9 @@ def patch_organization_member(org_id, membership_id):  # pylint:disable=unused-a
 
 
 @bp.route('/<int:org_id>/members/<int:membership_id>', methods=['DELETE'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def delete_organization_member(org_id, membership_id):  # pylint:disable=unused-argument
     """Mark a membership record as inactive.  Membership must match current user token."""
     try:
@@ -535,9 +535,9 @@ def delete_organization_member(org_id, membership_id):  # pylint:disable=unused-
 
 
 @bp.route('/<int:org_id>/invitations', methods=['GET', 'OPTIONS'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_organization_invitations(org_id):
     """Retrieve the set of invitations for the given org."""
     try:
@@ -555,9 +555,9 @@ def get_organization_invitations(org_id):
 
 
 @bp.route('/<int:org_id>/admins/affidavits', methods=['GET', 'OPTIONS'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value])
 def get_org_admin_affidavit(org_id):
     """Get the affidavit for the admin who created the account."""
     try:
@@ -571,8 +571,8 @@ def get_org_admin_affidavit(org_id):
 
 
 @bp.route('/<int:org_id>/payment_info', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_payment_info(org_id):
     """Retrieve the set of payment settings associated with the specified org."""

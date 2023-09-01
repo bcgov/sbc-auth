@@ -30,8 +30,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 def get_affidavit_document():
     """Return the Affidavit."""
     try:

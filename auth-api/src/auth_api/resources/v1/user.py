@@ -33,14 +33,13 @@ from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.enums import LoginSource, Status
 from auth_api.utils.roles import Role
 
-
 bp = Blueprint('USERS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/users')
 TRACER = Tracer.get_instance()
 
 
-@bp.route('/bcros', methods=['POST'])
+@bp.route('/bcros', methods=['POST', 'OPTIONS'])
+@cross_origin(origins='*', methods=['POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
 def post_anonymous_user():
     """Post a new user using the request body who has a proper invitation."""
     try:
@@ -74,9 +73,28 @@ def post_anonymous_user():
     return response, status
 
 
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value])
+def get_user():
+    """Return a set of users based on search query parameters (staff only)."""
+    search_email = request.args.get('email', '')
+    search_first_name = request.args.get('firstname', '')
+    search_last_name = request.args.get('lastname', '')
+
+    users = UserService.find_users(first_name=search_first_name, last_name=search_last_name, email=search_email)
+    collection = []
+    for user in users:
+        collection.append(UserService(user).as_dict())
+    response = jsonify(collection)
+    status = http_status.HTTP_200_OK
+    return response, status
+
+
+@bp.route('', methods=['POST'])
+@cross_origin(origins='*')
+@TRACER.trace()
 @_jwt.requires_auth
 def post_user():
     """Post a new user using the request body (which will contain a JWT).
@@ -113,28 +131,9 @@ def post_user():
     return response, status
 
 
-@bp.route('', methods=['GET', 'OPTIONS'])
+@bp.route('/<path:username>/otp', methods=['DELETE', 'OPTIONS'])
+@cross_origin(origins='*', methods=['DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
-@_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value])
-def get_user():
-    """Return a set of users based on search query parameters (staff only)."""
-    search_email = request.args.get('email', '')
-    search_first_name = request.args.get('firstname', '')
-    search_last_name = request.args.get('lastname', '')
-
-    users = UserService.find_users(first_name=search_first_name, last_name=search_last_name, email=search_email)
-    collection = []
-    for user in users:
-        collection.append(UserService(user).as_dict())
-    response = jsonify(collection)
-    status = http_status.HTTP_200_OK
-    return response, status
-
-
-@bp.route('/<path:username>/otp', methods=['DELETE'])
-@TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
 def delete_user_otp(username):
     """Delete/Reset the OTP of user profile associated with the provided username."""
@@ -154,8 +153,8 @@ def delete_user_otp(username):
 
 
 @bp.route('/<path:username>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'DELETE', 'PATCH'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_by_username(username):
     """Return the user profile associated with the provided username."""
@@ -168,8 +167,8 @@ def get_by_username(username):
 
 
 @bp.route('/<path:username>', methods=['DELETE'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def delete_by_username(username):
     """Delete the user profile associated with the provided username."""
@@ -188,8 +187,8 @@ def delete_by_username(username):
 
 
 @bp.route('/<path:username>', methods=['PATCH'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def patch_by_username(username):
     """Patch the user profile associated with the provided username.
@@ -217,8 +216,8 @@ def patch_by_username(username):
 
 
 @bp.route('/@me', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'PATCH', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_current_user():
     """Return the user profile associated with the JWT in the authorization header."""
@@ -230,8 +229,8 @@ def get_current_user():
 
 
 @bp.route('/@me', methods=['PATCH'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def patch_current_user():
     """Update terms of service for the user."""
@@ -252,8 +251,8 @@ def patch_current_user():
 
 
 @bp.route('/@me', methods=['DELETE'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def delete_current_user():
     """Delete the user profile."""
@@ -266,8 +265,8 @@ def delete_current_user():
 
 
 @bp.route('/contacts', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_user_contacts():
     """Retrieve the set of contacts asociated with the current user identifier by the JWT in the header."""
@@ -283,8 +282,8 @@ def get_user_contacts():
 
 
 @bp.route('/contacts', methods=['POST'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def post_user_contact():
     """Create a new contact for the user associated with the JWT in the authorization header."""
@@ -302,7 +301,7 @@ def post_user_contact():
 
 @bp.route('/contacts', methods=['PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.requires_auth
 def put_user_contact():
     """Update an existing contact for the user associated with the JWT in the authorization header."""
@@ -318,8 +317,8 @@ def put_user_contact():
 
 
 @bp.route('/contacts', methods=['DELETE'])
+@cross_origin(originss='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def delete_user_contact():
     """Delete the contact info for the user associated with the JWT in the authorization header."""
@@ -332,7 +331,7 @@ def delete_user_contact():
 
 @bp.route('/orgs', methods=['GET', 'OPTIONS'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods=['GET'])
 @_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_user_organizations():
     """Get a list of orgs that the current user is associated with."""
@@ -352,8 +351,8 @@ def get_user_organizations():
 
 
 @bp.route('/orgs/<int:org_id>/membership', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @_jwt.has_one_of_roles([Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
-@cross_origin(origin='*')
 def get_user_org_membership(org_id):
     """Get the membership for the given org and user."""
     try:
@@ -369,9 +368,29 @@ def get_user_org_membership(org_id):
     return response, status
 
 
-@bp.route('/<string:user_guid>/affidavits', methods=['POST'])
+@bp.route('/<string:user_guid>/affidavits', methods=['GET', 'OPTIONS'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods=['GET', 'POST'])
+@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
+def get_user_affidavit(user_guid):
+    """Return pending/active affidavit for the user."""
+    token = g.jwt_oidc_token_info
+    affidavit_status = request.args.get('status', None)
+
+    if Role.STAFF.value not in token['realm_access']['roles'] and token.get('sub', None) != user_guid:
+        abort(403)
+
+    try:
+        response, status = AffidavitService.find_affidavit_by_user_guid(user_guid, status=affidavit_status), \
+                           http_status.HTTP_200_OK
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route('/<string:user_guid>/affidavits', methods=['POST'])
+@cross_origin(origins='*')
+@TRACER.trace()
 @_jwt.requires_auth
 def post_user_affidavit(user_guid):
     """Create affidavit record for the user."""
@@ -391,29 +410,9 @@ def post_user_affidavit(user_guid):
     return response, status
 
 
-@bp.route('/<string:user_guid>/affidavits', methods=['GET', 'OPTIONS'])
-@TRACER.trace()
-@cross_origin(origin='*')
-@_jwt.has_one_of_roles([Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
-def get_user_affidavit(user_guid):
-    """Return pending/active affidavit for the user."""
-    token = g.jwt_oidc_token_info
-    affidavit_status = request.args.get('status', None)
-
-    if Role.STAFF.value not in token['realm_access']['roles'] and token.get('sub', None) != user_guid:
-        abort(403)
-
-    try:
-        response, status = AffidavitService.find_affidavit_by_user_guid(user_guid, status=affidavit_status), \
-                           http_status.HTTP_200_OK
-    except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-    return response, status
-
-
 @bp.route('/authorizations', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @_jwt.requires_auth
-@cross_origin(origin='*')
 def get_user_authorizations():
     """Add a new contact for the Entity identified by the provided id."""
     sub = g.jwt_oidc_token_info.get('sub', None)

@@ -31,9 +31,25 @@ bp = Blueprint('ORG_PRODUCTS', __name__, url_prefix=f'{EndpointEnum.API_V1.value
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
+def get_org_product_subscriptions(org_id):
+    """GET a new product subscription to the org using the request body."""
+    try:
+        include_hidden = request.args.get('include_hidden', None) == 'true'  # used by NDS
+        response, status = json.dumps(ProductService.get_all_product_subscription(org_id=org_id,
+                                                                                  include_hidden=include_hidden)
+                                      ), http_status.HTTP_200_OK
+    except BusinessException as exception:
+        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
+    return response, status
+
+
+@bp.route('', methods=['POST'])
+@cross_origin(origins='*')
+@TRACER.trace()
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def post_org_product_subscription(org_id):
     """Post a new product subscription to the org using the request body."""
@@ -46,22 +62,6 @@ def post_org_product_subscription(org_id):
         subscriptions = ProductService.create_product_subscription(org_id, request_json)
         ProductService.update_org_product_keycloak_groups(org_id)
         response, status = {'subscriptions': subscriptions}, http_status.HTTP_201_CREATED
-    except BusinessException as exception:
-        response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
-    return response, status
-
-
-@bp.route('', methods=['GET', 'OPTIONS'])
-@TRACER.trace()
-@cross_origin(origin='*')
-@_jwt.has_one_of_roles([Role.PUBLIC_USER.value, Role.STAFF_VIEW_ACCOUNTS.value])
-def get_org_product_subscriptions(org_id):
-    """GET a new product subscription to the org using the request body."""
-    try:
-        include_hidden = request.args.get('include_hidden', None) == 'true'  # used by NDS
-        response, status = json.dumps(ProductService.get_all_product_subscription(org_id=org_id,
-                                                                                  include_hidden=include_hidden)
-                                      ), http_status.HTTP_200_OK
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
     return response, status

@@ -27,8 +27,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @_jwt.requires_auth
-@cross_origin(origin='*')
 def get_organization_permissions(org_id):
     """Return authorization for the user for the passed business identifier."""
     expanded: bool = request.args.get('expanded', False)

@@ -30,8 +30,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
 def get_organization_api_keys(org_id):
     """Get all API keys for the account."""
@@ -39,8 +39,8 @@ def get_organization_api_keys(org_id):
 
 
 @bp.route('', methods=['POST'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value])
 def post_organization_api_key(org_id):
     """Create new api key for the org."""
@@ -56,9 +56,9 @@ def post_organization_api_key(org_id):
     return response, status
 
 
-@bp.route('/<string:key>', methods=['DELETE'])
+@bp.route('/<string:key>', methods=['DELETE', 'OPTIONS'])
+@cross_origin(origins='*', methods=['DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.ACCOUNT_HOLDER.value])
 def delete_organization_api_key(org_id, key):
     """Revoke API Key."""

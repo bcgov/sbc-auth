@@ -32,8 +32,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('/<string:document_type>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_document_by_type(document_type):
     """Return the latest terms of use."""
@@ -73,7 +73,7 @@ def _replace_current_date(doc):
 
 @bp.route('/<string:file_name>/signatures', methods=['GET', 'OPTIONS'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods=['GET'])
 @_jwt.requires_auth
 def get_document_signature_by_name(file_name: str):
     """Return the latest terms of use."""

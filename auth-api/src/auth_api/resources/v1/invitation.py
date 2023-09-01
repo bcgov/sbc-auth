@@ -31,9 +31,9 @@ bp = Blueprint('INVITATIONS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['POST', 'OPTIONS'])
+@cross_origin(origins='*', methods=['POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def post_invitation():
@@ -53,8 +53,8 @@ def post_invitation():
 
 
 @bp.route('/<string:invitation_id>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'PATCH', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_invitation(invitation_id):
     """Get the invitation specified by the provided id."""
@@ -68,8 +68,8 @@ def get_invitation(invitation_id):
 
 
 @bp.route('/<string:invitation_id>', methods=['PATCH'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def patch_invitation(invitation_id):
     """Update the invitation specified by the provided id as retried."""
@@ -89,7 +89,7 @@ def patch_invitation(invitation_id):
 
 @bp.route('/<string:invitation_id>', methods=['DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def delete_invitation(invitation_id):
@@ -104,7 +104,7 @@ def delete_invitation(invitation_id):
 
 @bp.route('/tokens/<string:invitation_token>', methods=['GET', 'OPTIONS'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*', methods=['GET', 'PUT'])
 def validate_invitation_token(invitation_token):
     """Check whether the passed token is valid."""
     try:
@@ -117,7 +117,7 @@ def validate_invitation_token(invitation_token):
 
 @bp.route('/tokens/<string:invitation_token>', methods=['PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@cross_origin(origins='*')
 @_jwt.requires_auth
 def accept_invitation_token(invitation_token):
     """Check whether the passed token is valid and add user, role and org from invitation to membership."""

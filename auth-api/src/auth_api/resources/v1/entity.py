@@ -33,9 +33,9 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['POST'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value])
+@cross_origin(origins='*', methods=['POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value])
 def post_entity():
     """Post a new Entity using the request body."""
     request_json = request.get_json()
@@ -59,9 +59,9 @@ def post_entity():
 
 
 @bp.route('/<string:business_identifier>', methods=['GET', 'OPTIONS'])
-@_jwt.requires_auth
+@cross_origin(origins='*', methods=['GET', 'PATCH', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.requires_auth
 def get_entity(business_identifier):
     """Get an existing entity by it's business number."""
     try:
@@ -77,8 +77,8 @@ def get_entity(business_identifier):
 
 
 @bp.route('/<string:business_identifier>', methods=['PATCH'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def patch_entity(business_identifier):
     """Update an existing business by it's business number."""
@@ -108,9 +108,9 @@ def patch_entity(business_identifier):
 
 
 @bp.route('/<string:business_identifier>', methods=['DELETE'])
-@_jwt.has_one_of_roles([Role.SYSTEM.value])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.has_one_of_roles([Role.SYSTEM.value])
 def delete_entity(business_identifier):
     """Delete an existing entity by it's business number."""
     try:
@@ -129,9 +129,9 @@ def delete_entity(business_identifier):
 
 
 @bp.route('/<string:business_identifier>/contacts', methods=['GET', 'OPTIONS'])
-@_jwt.requires_auth
+@cross_origin(origins='*', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.requires_auth
 def get_entity_contact(business_identifier):
     """Get contact email for the Entity identified by the provided business identifier."""
     # This route allows public users to look at masked email addresses.
@@ -144,8 +144,8 @@ def get_entity_contact(business_identifier):
 
 
 @bp.route('/<string:business_identifier>/contacts', methods=['POST'])
+@cross_origin(origins='*')
 @_jwt.requires_auth
-@cross_origin(origin='*')
 def post_entity_contact(business_identifier):
     """Add a new contact for the Entity identified by the provided id."""
     request_json = request.get_json()
@@ -167,8 +167,8 @@ def post_entity_contact(business_identifier):
 
 
 @bp.route('/<string:business_identifier>/contacts', methods=['PUT'])
+@cross_origin(origins='*')
 @_jwt.requires_auth
-@cross_origin(origin='*')
 def put_entity_contact(business_identifier):
     """Update the business contact for the Entity identified by the provided id."""
     request_json = request.get_json()
@@ -190,8 +190,8 @@ def put_entity_contact(business_identifier):
 
 
 @bp.route('/<string:business_identifier>/contacts', methods=['DELETE'])
+@cross_origin(origins='*')
 @_jwt.requires_auth
-@cross_origin(origin='*')
 def delete_entity_contact(business_identifier):
     """Delete the business contact for the Entity identified by the provided id."""
     try:
@@ -207,8 +207,8 @@ def delete_entity_contact(business_identifier):
 
 
 @bp.route('/<string:business_identifier>/authorizations', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET'])
 @_jwt.requires_auth
-@cross_origin(origin='*')
 def get_entity_authorizations(business_identifier):
     """Return authorization for the user for the passed business identifier."""
     expanded: bool = request.args.get('expanded', False)

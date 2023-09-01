@@ -29,9 +29,9 @@ bp = Blueprint('BULK_USERS', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/
 TRACER = Tracer.get_instance()
 
 
-@bp.route('', methods=['POST'])
+@bp.route('', methods=['POST', 'OPTIONS'])
+@cross_origin(origins='*', methods=['POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def post_bulk_users():
     """Admin users can post multiple users to his org.Use it for anonymous purpose only."""

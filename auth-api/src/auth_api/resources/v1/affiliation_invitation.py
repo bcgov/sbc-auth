@@ -35,8 +35,8 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'POST'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_affiliation_invitations():
     """Get affiliation invitations."""
@@ -77,8 +77,8 @@ def get_affiliation_invitations():
 
 
 @bp.route('', methods=['POST'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def post_affiliation_invitation():
@@ -100,8 +100,8 @@ def post_affiliation_invitation():
 
 
 @bp.route('/<string:affiliation_invitation_id>', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*', methods=['GET', 'PATCH', 'DELETE'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def get_affiliation_invitation(affiliation_invitation_id):
     """Get the affiliation invitation specified by the provided id."""
@@ -116,10 +116,10 @@ def get_affiliation_invitation(affiliation_invitation_id):
 
 
 @bp.route('/<string:affiliation_invitation_id>', methods=['PATCH'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles([Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
-def patc_affiliation_invitation(affiliation_invitation_id):
+def patch_affiliation_invitation(affiliation_invitation_id):
     """Update the affiliation invitation specified by the provided id."""
     origin = request.environ.get('HTTP_ORIGIN', 'localhost')
     request_json = request.get_json()
@@ -140,8 +140,8 @@ def patc_affiliation_invitation(affiliation_invitation_id):
 
 
 @bp.route('/<string:affiliation_invitation_id>', methods=['DELETE'])
+@cross_origin(origins='*')
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.has_one_of_roles(
     [Role.SYSTEM.value, Role.STAFF_CREATE_ACCOUNTS.value, Role.STAFF_MANAGE_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def delete_affiliation_invitation(affiliation_invitation_id):
@@ -154,9 +154,9 @@ def delete_affiliation_invitation(affiliation_invitation_id):
     return response, status
 
 
-@bp.route('/<string:affiliation_invitation_id>/token/<string:affiliation_invitation_token>', methods=['PUT'])
+@bp.route('/<string:affiliation_invitation_id>/token/<string:affiliation_invitation_token>', methods=['PUT', 'OPTIONS'])
+@cross_origin(origins='*', methods=['PUT'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_invitation_token):
     """Check whether the passed token is valid and add affiliation from the affiliation invitation."""
@@ -180,8 +180,8 @@ def accept_affiliation_invitation_token(affiliation_invitation_id, affiliation_i
 
 
 @bp.route('/<string:affiliation_invitation_id>/authorization/<string:authorize_action>', methods=['PATCH', 'OPTIONS'])
+@cross_origin(origins='*', methods=['PATCH'])
 @TRACER.trace()
-@cross_origin(origin='*')
 @_jwt.requires_auth
 def patch_affiliation_invitation_authorization(affiliation_invitation_id, authorize_action):
     """Check if user is active part of the Org. Authorize/Refuse Authorization invite if he is."""

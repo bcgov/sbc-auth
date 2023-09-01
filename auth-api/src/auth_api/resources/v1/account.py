@@ -26,9 +26,9 @@ TRACER = Tracer.get_instance()
 
 
 @bp.route('/<int:account_id>/products/<string:product_code>/authorizations', methods=['GET', 'OPTIONS'])
-@_jwt.requires_auth
+@cross_origin(origins='*', methods=['GET'])
 @TRACER.trace()
-@cross_origin(origin='*')
+@_jwt.requires_auth
 def get_account_product_authorizations(account_id, product_code):
     """Return authorizations for a product in an account."""
     expanded: bool = request.args.get('expanded', False)
