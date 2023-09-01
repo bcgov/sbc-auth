@@ -54,7 +54,7 @@
                 @click="openNewAffiliationInvite(item)"
               >
                 <v-list-item-subtitle>
-                  <v-icon small>mdi-file-certificate-outline</v-icon>
+                  <v-icon small>mdi-refresh</v-icon>
                   <span class="pl-1">New Request</span>
                 </v-list-item-subtitle>
               </v-list-item>
@@ -80,6 +80,10 @@
               <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
                 <v-icon small>mdi-delete-forever</v-icon>
                 <span class="pl-1">Delete {{ tempDescription(item) }}</span>
+              </v-list-item-subtitle>
+              <v-list-item-subtitle v-else-if="isAffiliationInvitation(item)">
+                <v-icon small>mdi-window-close</v-icon>
+                <span class="pl-1">Cancel Request</span>
               </v-list-item-subtitle>
               <v-list-item-subtitle v-else>
                 <v-icon small>mdi-delete</v-icon>
@@ -477,6 +481,11 @@ export default defineComponent({
       return orgId === orgStore.currentOrganization.id
     }
 
+    const isAffiliationInvitation = (item: Business): boolean => {
+      return item.affiliationInvites?.length > 0 &&
+        item.affiliationInvites[0].status !== AffiliationInvitationStatus.Accepted
+    }
+
     return {
       affiliations,
       action,
@@ -486,6 +495,7 @@ export default defineComponent({
       getPrimaryAction,
       getTooltipTargetDescription,
       goToNameRequest,
+      isAffiliationInvitation,
       isOpenExternal,
       isShowRemoveAsPrimaryAction,
       isTemporaryBusiness,

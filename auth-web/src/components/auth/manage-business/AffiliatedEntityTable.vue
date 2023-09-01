@@ -97,9 +97,14 @@
           >
             <p style="font-size: 12px">
               <v-icon
+                class="pr-1"
                 x-small
-                color="primary"
-              >mdi-account-cog</v-icon>
+                :color="getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                  ? 'red' : 'primary'"
+              >
+                {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                  ? 'mdi-alert' : 'mdi-account-cog' }}
+              </v-icon>
               <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
             </p>
           </span>
@@ -232,7 +237,8 @@ export default defineComponent({
     }
 
     const isBadstanding = (item: Business) => {
-      return !item.goodStanding
+      // Currently affiliation invitations don't return good standing etc.
+      return item?.goodStanding === false
     }
 
     const isDissolution = (item: Business) => {
@@ -287,7 +293,7 @@ export default defineComponent({
             statusText = '<strong>Not Authorized</strong>. Your request to manage this business has been declined.'
             break
           case AffiliationInvitationStatus.Expired:
-            statusText = 'Invitation is <strong>Expired</strong>.'
+            statusText = 'Not authorized. The <strong>confirmation email has expired.</strong>'
             break
           default:
             statusText = ''
@@ -298,6 +304,10 @@ export default defineComponent({
 
     const enableNameRequestType = (): boolean => {
       return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
+    }
+
+    const getAffiliationInvitationStatus = (affiliationInviteInfos: AffiliationInviteInfo[]): string => {
+      return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
 
     return {
@@ -334,7 +344,9 @@ export default defineComponent({
       getDetails,
       isFrozed,
       isBadstanding,
-      isDissolution
+      isDissolution,
+      getAffiliationInvitationStatus,
+      AffiliationInvitationStatus
     }
   }
 })
