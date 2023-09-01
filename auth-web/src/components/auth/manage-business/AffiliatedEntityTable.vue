@@ -99,10 +99,10 @@
               <v-icon
                 class="pr-1"
                 x-small
-                :color="affiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                :color="getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
                   ? 'red' : 'primary'"
               >
-                {{ affiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
                   ? 'mdi-alert' : 'mdi-account-cog' }}
               </v-icon>
               <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
@@ -306,7 +306,7 @@ export default defineComponent({
       return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
     }
 
-    const affiliationInvitationStatus = (affiliationInviteInfos: AffiliationInviteInfo[]): string => {
+    const getAffiliationInvitationStatus = (affiliationInviteInfos: AffiliationInviteInfo[]): string => {
       return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
 
@@ -345,7 +345,7 @@ export default defineComponent({
       isFrozed,
       isBadstanding,
       isDissolution,
-      affiliationInvitationStatus,
+      getAffiliationInvitationStatus,
       AffiliationInvitationStatus
     }
   }
