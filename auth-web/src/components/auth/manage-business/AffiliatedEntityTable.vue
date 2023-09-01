@@ -153,6 +153,7 @@
             @remove-business="$emit('remove-business', $event)"
             @business-unavailable-error="$emit('business-unavailable-error', $event)"
             @resend-affiliation-invitation="$emit('resend-affiliation-invitation', $event)"
+            @popup-manage-business-dialog="$emit('popup-manage-business-dialog', $event)"
           />
         </template>
       </base-v-data-table>
@@ -187,7 +188,7 @@ export default defineComponent({
     highlightIndex: { default: -1 }
   },
   emits: ['add-unknown-error', 'remove-affiliation-invitation', 'remove-business',
-    'business-unavailable-error', 'resend-affiliation-invitation'],
+    'business-unavailable-error', 'resend-affiliation-invitation', 'popup-manage-business-dialog'],
   setup () {
     const isloading = false
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,

@@ -278,6 +278,7 @@
         @remove-business="showConfirmationOptionsModal($event)"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
         @resend-affiliation-invitation="resendAffiliationInvitation($event)"
+        @popup-manage-business-dialog="popupBusinessDialog($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -294,6 +295,7 @@
         :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
         :userLastName="currentUser.lastName"
+        :initial-business-identifier="businessIdentifier"
         @add-success="showAddSuccessModal"
         @affiliation-invitation-pending="showAuthorizationEmailSentDialogPending"
         @add-failed-invalid-code="showInvalidCodeModal($event)"
@@ -553,6 +555,7 @@ import AffiliationInvitationService from '@/services/affiliation-invitation.serv
 import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
 import { Base64 } from 'js-base64'
+import { Business } from '@/models/business'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
@@ -797,6 +800,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
     await this.createNumberedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
     await this.syncBusinesses()
+  }
+
+  async popupBusinessDialog (business: Business) {
+    this.businessIdentifier = business.businessIdentifier
+    this.showManageBusinessDialog = true
   }
 
   async showAddSuccessModal (businessIdentifier: string) {
