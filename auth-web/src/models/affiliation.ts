@@ -21,11 +21,17 @@ export interface Affiliation {
   business: Business
 }
 
+// TODO should be moved to constants.
 export const AffiliationInvitationStatus = {
   Pending: 'PENDING',
   Accepted: 'ACCEPTED',
   Expired: 'EXPIRED',
   Failed: 'FAILED'
+}
+
+export const AffiliationInvitationType = {
+  REQUEST: 'REQUEST',
+  EMAIL: 'EMAIL'
 }
 
 export class AffiliationInviteInfo {
