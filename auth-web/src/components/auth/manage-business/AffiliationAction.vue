@@ -266,6 +266,11 @@ export default defineComponent({
       }
     }
 
+    // Refactor this is duplicated.
+    const isCurrentOrganization = (orgId: number) => {
+      return orgId === orgStore.currentOrganization.id
+    }
+
     const showAffiliationInvitationNewRequestButton = (business: Business): boolean => {
       const affiliationInvitation = business?.affiliationInvites?.[0]
       if (!affiliationInvitation) { return false }
@@ -514,11 +519,6 @@ export default defineComponent({
     const showOpenButton = (item: Business): boolean => {
       return isNameRequest(item) &&
       ![NrDisplayStates.HOLD, NrDisplayStates.EXPIRED, NrDisplayStates.PROCESSING].includes(status(item) as NrDisplayStates)
-    }
-
-    // Refactor this is duplicated.
-    const isCurrentOrganization = (orgId: number) => {
-      return orgId === orgStore.currentOrganization.id
     }
 
     const showAffiliationInvitationCancelRequestButton = (item: Business): boolean => {

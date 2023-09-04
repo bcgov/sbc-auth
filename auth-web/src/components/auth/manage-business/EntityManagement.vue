@@ -553,7 +553,6 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
-import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
 import { Base64 } from 'js-base64'
 import { Business } from '@/models/business'
