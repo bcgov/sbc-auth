@@ -47,19 +47,15 @@
             </v-btn>
           </template>
           <v-list>
-            <template v-if="!!item.affiliationInvites && isCurrentOrganization(item.affiliationInvites[0].fromOrg.id)">
-              <v-list-item
-                v-if="item.affiliationInvites[0].status !== AffiliationInvitationStatus.Accepted &&
-                  item.affiliationInvites[0].type === AffiliationInvitationType.REQUEST"
-                class="actions-dropdown_item my-1"
-                @click="openNewAffiliationInvite(item)"
-              >
-                <v-list-item-subtitle>
-                  <v-icon small>mdi-refresh</v-icon>
-                  <span class="pl-1">New Request</span>
-                </v-list-item-subtitle>
-              </v-list-item>
-            </template>
+            <v-list-item
+              v-if="showAffiliationInvitationNewRequestButton(item)"
+              class="actions-dropdown_item my-1"
+              @click="openNewAffiliationInvite(item)"
+            >
+              <v-list-item-subtitle>
+                <span class="pl-1">New Request</span>
+              </v-list-item-subtitle>
+            </v-list-item>
             <v-list-item
               v-if="showOpenButton(item)"
               class="actions-dropdown_item my-1"
@@ -82,7 +78,7 @@
                 <v-icon small>mdi-delete-forever</v-icon>
                 <span class="pl-1">Delete {{ tempDescription(item) }}</span>
               </v-list-item-subtitle>
-              <v-list-item-subtitle v-else-if="isAffiliationInvitation(item)">
+              <v-list-item-subtitle v-else-if="showAffiliationInvitationCancelRequestButton(item)">
                 <v-icon small>mdi-window-close</v-icon>
                 <span class="pl-1">Cancel Request</span>
               </v-list-item-subtitle>
@@ -270,6 +266,14 @@ export default defineComponent({
       }
     }
 
+    const showAffiliationInvitationNewRequestButton = (business: Business): boolean => {
+      const affiliationInvitation = business?.affiliationInvites?.[0]
+      if (!affiliationInvitation) { return false }
+      return isCurrentOrganization(affiliationInvitation.fromOrg.id) &&
+          business.affiliationInvites[0].status !== AffiliationInvitationStatus.Accepted &&
+          business.affiliationInvites[0].type === AffiliationInvitationType.REQUEST
+    }
+
     /** Remove business/nr affiliation or affiliation invitation. */
     const removeAffiliationOrInvitation = async (business: Business): Promise<void> => {
       if (business.affiliationInvites?.length > 0) {
@@ -323,23 +327,34 @@ export default defineComponent({
       }
     }
 
-    const actionButtonText = (business: Business) => {
-      const affiliationInviteInfo = business.affiliationInvites[0]
-      const invitationStatus = affiliationInviteInfo.status
-      const statusActions = {
-        [AffiliationInvitationStatus.Pending]: 'Cancel<br>Request',
-        [AffiliationInvitationStatus.Failed]: 'Remove<br>from list',
-        [AffiliationInvitationStatus.Accepted]: 'Open'
-      }
-      return statusActions[invitationStatus] || ''
-    }
-
     // Actions
     const getPrimaryAction = (item: Business): string => {
-      const invitationStatus = item?.affiliationInvites?.[0]?.status
-      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
-        return 'Resend Email'
+      const affiliationInviteInfo = item?.affiliationInvites?.[0]
+      if ([AffiliationInvitationStatus.Pending,
+        AffiliationInvitationStatus.Expired,
+        AffiliationInvitationStatus.Failed].includes(affiliationInviteInfo?.status)) {
+        // checks for affiliation invitation
+        switch (true) {
+          case affiliationInviteInfo.type === AffiliationInvitationType.EMAIL &&
+          [AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(affiliationInviteInfo?.status):
+            return 'Resend Email'
+
+          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
+          AffiliationInvitationStatus.Pending === affiliationInviteInfo?.status &&
+          isCurrentOrganization(item.affiliationInvites[0].fromOrg.id) :
+            return 'Cancel Request' // 'Cancel<br>Request'
+
+          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
+          AffiliationInvitationStatus.Pending === affiliationInviteInfo?.status &&
+          !isCurrentOrganization(item.affiliationInvites[0].fromOrg.id) :
+            break
+
+          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
+          AffiliationInvitationStatus.Failed === affiliationInviteInfo?.status:
+            return 'Remove from list' // 'Remove<br>from list'
+        }
       }
+
       if (isTemporaryBusiness(item)) {
         return 'Resume Draft'
       }
@@ -367,7 +382,7 @@ export default defineComponent({
     }
 
     const showRemoveButton = (item: Business): boolean => {
-      return !isShowRemoveAsPrimaryAction(item)
+      return !isShowRemoveAsPrimaryAction(item) && !showAffiliationInvitationNewRequestButton(item)
     }
 
     const handleTemporaryBusinessRedirect = (item): void => {
@@ -450,12 +465,35 @@ export default defineComponent({
       handleBusinessRedirect(item)
     }
 
-    const action = (item: Business): void => {
-      const invitationStatus = item?.affiliationInvites?.[0]?.status
-      if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
-        context.emit('resend-affiliation-invitation', item)
-        return
+    const action = async (item: Business): Promise<void> => {
+      const affiliationInviteInfo = item?.affiliationInvites?.[0]
+      if ([AffiliationInvitationStatus.Pending,
+        AffiliationInvitationStatus.Expired,
+        AffiliationInvitationStatus.Failed].includes(affiliationInviteInfo?.status)) {
+        switch (true) {
+          case affiliationInviteInfo.type === AffiliationInvitationType.EMAIL &&
+          [AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(affiliationInviteInfo?.status):
+            context.emit('resend-affiliation-invitation', item)
+            return
+
+          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
+          AffiliationInvitationStatus.Pending === affiliationInviteInfo?.status &&
+          isCurrentOrganization(item.affiliationInvites[0].fromOrg.id) :
+            await removeAffiliationOrInvitation(item)
+            return
+
+          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
+          AffiliationInvitationStatus.Pending === affiliationInviteInfo?.status &&
+          isCurrentOrganization(item.affiliationInvites[0].toOrg.id) :
+            break
+
+          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
+          AffiliationInvitationStatus.Failed === affiliationInviteInfo?.status:
+            await removeAffiliationOrInvitation(item)
+            return
+        }
       }
+
       if (isShowRemoveAsPrimaryAction(item)) {
         removeAffiliationOrInvitation(item)
       } else {
@@ -483,21 +521,22 @@ export default defineComponent({
       return orgId === orgStore.currentOrganization.id
     }
 
-    const isAffiliationInvitation = (item: Business): boolean => {
+    const showAffiliationInvitationCancelRequestButton = (item: Business): boolean => {
       return item.affiliationInvites?.length > 0 &&
-        item.affiliationInvites[0].status !== AffiliationInvitationStatus.Accepted
+        item.affiliationInvites[0].status !== AffiliationInvitationStatus.Accepted &&
+          item.affiliationInvites[0].type === AffiliationInvitationType.EMAIL
     }
 
     return {
       affiliations,
       action,
-      actionButtonText,
       disableTooltip,
       dropdown,
       getPrimaryAction,
       getTooltipTargetDescription,
       goToNameRequest,
-      isAffiliationInvitation,
+      showAffiliationInvitationCancelRequestButton,
+      showAffiliationInvitationNewRequestButton,
       isOpenExternal,
       isShowRemoveAsPrimaryAction,
       isTemporaryBusiness,
