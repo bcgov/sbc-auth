@@ -26,6 +26,7 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
+from auth_api.utils.util import mask_email
 
 
 bp = Blueprint('ENTITIES', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/entities')
@@ -140,7 +141,7 @@ def get_entity_authentication(business_identifier):
     (contact := entity.get_contact())):
         has_valid_pass_code = (entity.pass_code_claimed == 'f' and entity.pass_code is not None) or entity.corp_type in ['SP','GP']
         return {
-            'contactEmail': contact.email,
+            'contactEmail': mask_email(contact.email),
             'hasValidPassCode': has_valid_pass_code
             }, http_status.HTTP_200_OK
     return jsonify({'message': f'Authentication for {business_identifier} was not found.'}), \

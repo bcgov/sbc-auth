@@ -490,6 +490,13 @@ def test_get_entity_contacts(client, jwt, session):
 
 def test_get_entity_authentication(client, jwt, session):
     """Assert that an entity authentication can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.system_role)
+    rv_create = client.post('/api/v1/entities', data=json.dumps(TestEntityInfo.entity1),
+                            headers=headers, content_type='application/json')
+    assert rv_create.status_code == http_status.HTTP_201_CREATED
+    client.post('/api/v1/entities/{}/contacts'.format(TestEntityInfo.entity1['businessIdentifier']),
+                headers=headers, data=json.dumps(TestContactInfo.contact1), content_type='application/json')
+    
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
     rv = client.get(f'/api/v1/entities/{TestEntityInfo.entity1["businessIdentifier"]}/authentication',
                     headers=headers, content_type='application/json')
@@ -499,3 +506,4 @@ def test_get_entity_authentication(client, jwt, session):
     assert data['contactEmail'] == 'fo*@ba*****'
     assert 'hasValidPassCode' in data
 
+    
