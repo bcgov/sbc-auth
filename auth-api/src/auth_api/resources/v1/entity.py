@@ -128,6 +128,25 @@ def delete_entity(business_identifier):
     return response, status
 
 
+@bp.route('/<string:business_identifier>/authentication', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*')
+@TRACER.trace()
+@_jwt.requires_auth
+def get_entity_authentication(business_identifier):
+    """Get passcode or password for the Entity identified by the provided business identifier."""
+    # This route allows public users to see if businesses have a form of authentication.
+    # It's used by the business dashboard for magic link.
+    if ((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
+    (contact := entity.get_contact())):
+        has_valid_pass_code = (entity.pass_code_claimed == 'f' and entity.pass_code is not None) or entity.corp_type_code in ['SP','GP']
+        return {
+            'contactEmail': contact.email,
+            'hasValidPassCode': has_valid_pass_code
+            }, http_status.HTTP_200_OK
+    return {'message': f'Authentication for {business_identifier} was not found.'}, \
+        http_status.HTTP_404_NOT_FOUND
+
+
 @bp.route('/<string:business_identifier>/contacts', methods=['GET', 'OPTIONS'])
 @cross_origin(origins='*', methods=['GET', 'POST', 'PUT', 'DELETE'])
 @TRACER.trace()
