@@ -486,3 +486,16 @@ def test_get_entity_contacts(client, jwt, session):
     assert data['email'] == 'fo*@ba*****'
     assert 'phone' not in data
     assert 'phone_extension' not in data
+
+
+def test_get_entity_authentication(client, jwt, session):
+    """Assert that an entity authentication can be retrieved."""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.public_user_role)
+    rv = client.get(f'/api/v1/entities/{TestEntityInfo.entity1["businessIdentifier"]}/authentication',
+                    headers=headers, content_type='application/json')
+    assert rv.status_code == http_status.HTTP_200_OK
+    data = json.loads(rv.data)
+    assert data['contactEmail'] != TestContactInfo.contact1['email']
+    assert data['contactEmail'] == 'fo*@ba*****'
+    assert 'hasValidPassCode' in data
+
