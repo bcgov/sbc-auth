@@ -138,7 +138,7 @@ def get_entity_authentication(business_identifier):
     # It's used by the business dashboard for magic link.
     if ((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
     (contact := entity.get_contact())):
-        has_valid_pass_code = (entity.pass_code_claimed == 'f' and entity.pass_code is not None) or entity.corp_type_code in ['SP','GP']
+        has_valid_pass_code = (entity.pass_code_claimed == 'f' and entity.pass_code is not None) or entity.corp_type in ['SP','GP']
         return {
             'contactEmail': contact.email,
             'hasValidPassCode': has_valid_pass_code
