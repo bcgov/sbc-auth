@@ -69,7 +69,7 @@ class Entity:
     def corp_type(self):
         """Return the corp_type_code for this entity."""
         return self._model.corp_type_code
-    
+
     @property
     def pass_code_claimed(self):
         """Return the pass_code_claimed for this entity."""
