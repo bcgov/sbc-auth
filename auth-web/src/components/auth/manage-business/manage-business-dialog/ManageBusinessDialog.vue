@@ -94,7 +94,7 @@
 
             <div class="my-2">
               {{ hasNoEmailAuthenticationAffiliation ?
-                'You can manage this business by one of the following methods:' :
+                'Some required information for this business is missing:' :
                 'You must be authorized to manage this business. You can be authorized in one of the following ways:' }}
             </div>
 
@@ -698,7 +698,6 @@ export default defineComponent({
       const emailOption = showEmailOption.value
       const authorizationOption = ''
       const delegationOption = enableDelegationFeature.value
-      // return true
       return !authenticationOption && !nameOption && !emailOption && !authorizationOption && !delegationOption
     })
 
