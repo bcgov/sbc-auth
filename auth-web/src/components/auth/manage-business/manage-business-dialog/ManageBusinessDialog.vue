@@ -222,23 +222,25 @@
                   <template #activator>
                     <v-list-item-title>Request authorization or get help from the Business Registry</v-list-item-title>
                   </template>
-                  <div class="list-body">
+                  <div class="list-body contact-us">
                     <p>Contact the Business Registry to request authorization to manage this business.</p>
-                    <p>
-                      <v-icon small>
-                        mdi-phone
-                      </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
-                    </p>
-                    <p>
-                      <v-icon small>
-                        mdi-phone
-                      </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
-                    </p>
-                    <p>
-                      <v-icon small>
-                        mdi-email
-                      </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
-                    </p>
+                    <ol>
+                      <li>
+                        <v-icon small>
+                          mdi-phone
+                        </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+                      </li>
+                      <li>
+                        <v-icon small>
+                          mdi-phone
+                        </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+                      </li>
+                      <li>
+                        <v-icon small>
+                          mdi-email
+                        </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
+                      </li>
+                    </ol>
                     <h4>Hours of Operation:</h4>
                     <p>Monday to Friday, 8:30am - 4:30pm Pacific Time</p>
                   </div>
@@ -696,6 +698,7 @@ export default defineComponent({
       const emailOption = showEmailOption.value
       const authorizationOption = ''
       const delegationOption = enableDelegationFeature.value
+      // return true
       return !authenticationOption && !nameOption && !emailOption && !authorizationOption && !delegationOption
     })
 
@@ -723,7 +726,7 @@ export default defineComponent({
         }
         try {
           const authentication = await BusinessService.getAuthentication(newBusinessIdentifier)
-          hasBusinessAuthentication.value = authentication?.data?.authentication
+          hasBusinessAuthentication.value = authentication?.data?.hasValidPassCode
         } catch (err) {
           hasBusinessAuthentication.value = false
           // eslint-disable-next-line no-console
@@ -735,6 +738,12 @@ export default defineComponent({
     // Watchers
     watch(businessIdentifier, (newValue) => {
       emit('on-business-identifier', newValue)
+    }, { immediate: true })
+
+    watch(() => [hasNoEmailAuthenticationAffiliation.value, props.showBusinessDialog], async ([newValue, showBusinessDialog], [oldValue]) => {
+      if (showBusinessDialog && oldValue !== newValue) {
+        requestAuthBusinessRegistryOption.value = newValue
+      }
     }, { immediate: true })
 
     // Return the setup data - These will be removed with script setup.
@@ -767,6 +776,7 @@ export default defineComponent({
       authorizationMaxLength,
       hasBusinessEmail,
       hasBusinessAuthentication,
+      hasAffiliatedAccount,
       isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,

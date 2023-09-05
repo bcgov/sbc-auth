@@ -15,7 +15,7 @@ export default class BusinessService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/entities`, business)
   }
 
-  static async getAuthentication (businessIdentifier: string): Promise<AxiosResponse<Contact>> {
+  static async getAuthentication (businessIdentifier: string): Promise<AxiosResponse<any>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/entities/${businessIdentifier}/authentication`)
   }
 

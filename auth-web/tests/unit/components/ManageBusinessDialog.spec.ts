@@ -106,7 +106,9 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: 'BC'
+    businessLegalType: 'BC',
+    hasBusinessAuthentication: true,
+    hasBusinessEmail: true
   },
   {
     description: 'Should render for a BEN (Benefit Corporation) Entity',
@@ -117,7 +119,9 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: 'BEN'
+    businessLegalType: 'BEN',
+    hasBusinessAuthentication: false,
+    hasBusinessEmail: true
   },
   {
     description: 'Should render for a CP (Co-op) Entity',
@@ -128,7 +132,9 @@ const testCaseList = [
     isStaffOrSbcStaff: true,
     userFirstName: 'Nadia',
     userLastName: 'Woodie',
-    businessLegalType: 'CP'
+    businessLegalType: 'CP',
+    hasBusinessAuthentication: true,
+    hasBusinessEmail: false
   }
 ]
 describe('ManageBusinessDialog Component', () => {
@@ -191,7 +197,9 @@ describe('ManageBusinessDialog Component', () => {
 
       wrapper.setData({
         businessIdentifier: test.businessIdentifier,
-        businessName: 'My Business Inc'
+        businessName: 'My Business Inc',
+        hasBusinessAuthentication: test.hasBusinessAuthentication,
+        hasBusinessEmail: test.hasBusinessEmail
       })
       await flushPromises()
 
@@ -218,8 +226,12 @@ describe('ManageBusinessDialog Component', () => {
         expect(wrapper.find('.authorization').exists()).toBe(test.isStaffOrSbcStaff)
       }
       if (isBusinessLegalTypeCorporation || isBusinessLegalTypeBenefit || isBusinessLegalTypeCoOp) {
-        expect(wrapper.find('#manage-business-dialog-passcode-group').exists())
-        expect(wrapper.find('#manage-business-dialog-passcode-group').isVisible()).toBe(true)
+        if (test.hasBusinessAuthentication && test.hasBusinessEmail) {
+          expect(wrapper.find('#manage-business-dialog-passcode-group').exists())
+          expect(wrapper.find('#manage-business-dialog-passcode-group').isVisible()).toBe(true)
+        } else {
+          expect(wrapper.find('#manage-business-dialog-passcode-group').exists()).toBeFalsy()
+        }
       } else if (isBusinessLegalTypeFirm) {
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').exists())
         expect(wrapper.find('#manage-business-dialog-proprietor-partner-name-group').isVisible()).toBe(true)
