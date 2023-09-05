@@ -350,11 +350,6 @@ export default defineComponent({
             return 'Cancel Request' // 'Cancel<br>Request'
 
           case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
-          AffiliationInvitationStatus.Pending === affiliationInviteInfo?.status &&
-          !isCurrentOrganization(item.affiliationInvites[0].fromOrg.id) :
-            break
-
-          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
           AffiliationInvitationStatus.Failed === affiliationInviteInfo?.status:
             return 'Remove from list' // 'Remove<br>from list'
         }
@@ -486,11 +481,6 @@ export default defineComponent({
           isCurrentOrganization(item.affiliationInvites[0].fromOrg.id) :
             await removeAffiliationOrInvitation(item)
             return
-
-          case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
-          AffiliationInvitationStatus.Pending === affiliationInviteInfo?.status &&
-          isCurrentOrganization(item.affiliationInvites[0].toOrg.id) :
-            break
 
           case affiliationInviteInfo.type === AffiliationInvitationType.REQUEST &&
           AffiliationInvitationStatus.Failed === affiliationInviteInfo?.status:
