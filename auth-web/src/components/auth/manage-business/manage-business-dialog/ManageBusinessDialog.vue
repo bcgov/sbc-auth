@@ -696,7 +696,7 @@ export default defineComponent({
       const authenticationOption = isBusinessLegalTypeCorporationOrBenefitOrCoop.value && hasBusinessAuthentication.value
       const nameOption = isBusinessLegalTypeFirm.value
       const emailOption = showEmailOption.value
-      const authorizationOption = ''
+      const authorizationOption = hasAffiliatedAccount.value
       const delegationOption = enableDelegationFeature.value
       return !authenticationOption && !nameOption && !emailOption && !authorizationOption && !delegationOption
     })
