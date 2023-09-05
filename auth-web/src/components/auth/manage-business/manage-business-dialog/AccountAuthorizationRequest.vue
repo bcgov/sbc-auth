@@ -98,6 +98,8 @@ export default defineComponent({
 
     const fetchData = async () => {
       const response = await OrgService.getOrganizationsNameAndUuidByAffiliation(props.businessIdentifier)
+        .catch((error) => error)
+
       if (response?.data?.orgsDetails) {
         const orgsDetails = response.data.orgsDetails
         orgsDetails.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)

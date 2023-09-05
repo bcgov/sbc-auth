@@ -28,7 +28,7 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
 
-  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: number): Promise<AxiosResponse> {
+  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: string): Promise<AxiosResponse> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
   }
 

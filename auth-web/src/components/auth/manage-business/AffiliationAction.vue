@@ -53,6 +53,7 @@
               @click="openNewAffiliationInvite(item)"
             >
               <v-list-item-subtitle>
+                <v-icon small>mdi-refresh</v-icon>
                 <span class="pl-1">New Request</span>
               </v-list-item-subtitle>
             </v-list-item>
