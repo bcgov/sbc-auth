@@ -143,7 +143,7 @@ def get_entity_authentication(business_identifier):
             'contactEmail': contact.email,
             'hasValidPassCode': has_valid_pass_code
             }, http_status.HTTP_200_OK
-    return {'message': f'Authentication for {business_identifier} was not found.'}, \
+    return jsonify({'message': f'Authentication for {business_identifier} was not found.'}), \
         http_status.HTTP_404_NOT_FOUND
 
 
