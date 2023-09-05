@@ -93,7 +93,7 @@
             <div>{{ businessIdentifier }}</div>
 
             <div class="my-2">
-              {{ hasNoEmailAuthenticationAffiliation ?
+              {{ businessHasNoEmailAndNoAuthenticationAndNoAffiliation ?
                 'Some required information for this business is missing:' :
                 'You must be authorized to manage this business. You can be authorized in one of the following ways:' }}
             </div>
@@ -692,13 +692,10 @@ export default defineComponent({
        hasBusinessEmail.value
     })
 
-    const hasNoEmailAuthenticationAffiliation = computed(() => {
-      const authenticationOption = isBusinessLegalTypeCorporationOrBenefitOrCoop.value && hasBusinessAuthentication.value
-      const nameOption = isBusinessLegalTypeFirm.value
-      const emailOption = showEmailOption.value
-      const authorizationOption = hasAffiliatedAccount.value
-      const delegationOption = enableDelegationFeature.value
-      return !authenticationOption && !nameOption && !emailOption && !authorizationOption && !delegationOption
+    const businessHasNoEmailAndNoAuthenticationAndNoAffiliation = computed(() => {
+      const hasAuthenticationOption = isBusinessLegalTypeCorporationOrBenefitOrCoop.value && hasBusinessAuthentication.value
+      return !hasAuthenticationOption && !isBusinessLegalTypeFirm.value && !showEmailOption.value && !hasAffiliatedAccount.value &&
+      !enableDelegationFeature.value
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
@@ -727,7 +724,7 @@ export default defineComponent({
           const authentication = await BusinessService.getAuthentication(newBusinessIdentifier)
           hasBusinessAuthentication.value = authentication?.data?.hasValidPassCode
         } catch (err) {
-          hasBusinessAuthentication.value = false
+          hasBusinessAuthentication.value = true
           // eslint-disable-next-line no-console
           console.error(err)
         }
@@ -739,13 +736,12 @@ export default defineComponent({
       emit('on-business-identifier', newValue)
     }, { immediate: true })
 
-    watch(() => [hasNoEmailAuthenticationAffiliation.value, props.showBusinessDialog], async ([newValue, showBusinessDialog], [oldValue]) => {
-      if (showBusinessDialog && oldValue !== newValue) {
-        requestAuthBusinessRegistryOption.value = newValue
-      } else {
-        requestAuthBusinessRegistryOption.value = false
-      }
-    }, { immediate: true })
+    watch(() => [businessHasNoEmailAndNoAuthenticationAndNoAffiliation.value, props.showBusinessDialog],
+      async ([newValue, showBusinessDialog], [oldValue]) => {
+        if (showBusinessDialog && oldValue !== newValue) {
+          requestAuthBusinessRegistryOption.value = newValue
+        }
+      }, { immediate: true })
 
     // Return the setup data - These will be removed with script setup.
     return {
@@ -754,7 +750,7 @@ export default defineComponent({
       selectAccount,
       showAuthorizationRequestSentDialog,
       successDialog,
-      hasNoEmailAuthenticationAffiliation,
+      businessHasNoEmailAndNoAuthenticationAndNoAffiliation,
       isManageButtonEnabled,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
