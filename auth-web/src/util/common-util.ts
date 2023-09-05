@@ -1,6 +1,6 @@
 import { Address, BaseAddressModel } from '@/models/address'
-import { NrRequestTypeStrings, Permission } from '@/util/constants'
-import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
+import { NrRequestActionStrings, NrRequestTypeStrings, Permission } from '@/util/constants'
 import moment from 'moment'
 
 /**
@@ -271,6 +271,11 @@ export default class CommonUtils {
   // trim last slas from URL
   static trimTrailingSlashURL (url) {
     return (url) ? url.trim().replace(/\/+$/, '') : ''
+  }
+
+  /** use NR request action code to get NR type from enum */
+  static mapRequestActionCdToNrType (requestActionCd: NrRequestActionCodes): string {
+    return NrRequestActionStrings[requestActionCd] as string
   }
 
   /** use NR request type code to get NR type from enum */
