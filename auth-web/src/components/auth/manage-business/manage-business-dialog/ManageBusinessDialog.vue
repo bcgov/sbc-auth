@@ -717,7 +717,7 @@ export default defineComponent({
         }
         try {
           const organization = await OrgService.getOrganizationsNameAndUuidByAffiliation(newBusinessIdentifier)
-          hasAffiliatedAccount.value = organization?.data?.orgsDetails
+          hasAffiliatedAccount.value = organization?.data?.orgsDetails.length > 0
         } catch (err) {
           hasAffiliatedAccount.value = false
           // eslint-disable-next-line no-console
@@ -742,6 +742,8 @@ export default defineComponent({
     watch(() => [hasNoEmailAuthenticationAffiliation.value, props.showBusinessDialog], async ([newValue, showBusinessDialog], [oldValue]) => {
       if (showBusinessDialog && oldValue !== newValue) {
         requestAuthBusinessRegistryOption.value = newValue
+      } else {
+        requestAuthBusinessRegistryOption.value = false
       }
     }, { immediate: true })
 
