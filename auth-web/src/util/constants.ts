@@ -249,9 +249,9 @@ export enum NrEntityType {
 }
 
 export enum NrRequestActionStrings {
-  // Can add other NrRequestActionCodes here to use the action code instead of the NrRequestTypeCd. 
-  // Must ensure that the action code does not have several potential types 
-  // Example: the NEW action code can be for Incorporate or Register, so we cannot use it for the NR type
+  // Can add other NrRequestActionCodes here to use the action code instead of the NrRequestTypeCd.
+  // Must ensure that the action code does not have several potential types
+  // Example: the NEW action code can be for Incorporation or Registration, so we cannot use it for the NR type
   AML = 'Amalgamation',
 }
 

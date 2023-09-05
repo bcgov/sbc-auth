@@ -162,7 +162,7 @@ export const useAffiliations = () => {
     if (isNameRequest(business)) {
       // Try action code first, and if not found in the enum then use type code
       let nrType = CommonUtils.mapRequestActionCdToNrType(business.nameRequest?.requestActionCd)
-      nrType = nrType ? nrType : CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
+      nrType = nrType || CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
       if (nrType) {
         const emDash = '—' // ALT + 0151
         return `${emDash} ${nrType}`
