@@ -1,6 +1,6 @@
 import { Address, BaseAddressModel } from '@/models/address'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
-import { NrRequestActionStrings, NrRequestTypeStrings, Permission } from '@/util/constants'
+import { NrRequestTypeStrings, Permission } from '@/util/constants'
 import moment from 'moment'
 
 /**
@@ -275,7 +275,11 @@ export default class CommonUtils {
 
   /** use NR request action code to get NR type from enum */
   static mapRequestActionCdToNrType (requestActionCd: NrRequestActionCodes): string {
-    return NrRequestActionStrings[requestActionCd] as string
+    // Can add other NrRequestActionCodes here to use the action code instead of the NrRequestTypeCd.
+    // Must ensure that the action code does not have several potential types
+    // Example: the NEW action code can be for Incorporation or Registration, so we cannot use it for the NR type
+    if (requestActionCd === NrRequestActionCodes.AMALGAMATE) { return 'Amalgamation' }
+    return ''
   }
 
   /** use NR request type code to get NR type from enum */
