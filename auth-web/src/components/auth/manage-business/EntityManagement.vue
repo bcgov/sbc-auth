@@ -203,7 +203,6 @@
         @business-already-added="showBusinessAlreadyAdded($event)"
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
-        @on-cancel-nr="cancelAddNameRequest()"
         @add-success-nr="showAddSuccessModalNR"
         @add-nr-error="showNRErrorModal()"
         @add-failed-no-nr="showNRNotFoundModal()"
@@ -493,9 +492,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   // for template
   readonly CorpTypes = CorpTypes
   private removeBusinessPayload = null
-  private dialogTitle = ''
-  private dialogText = ''
-  private isLoading = -1 // truthy
+  dialogTitle = ''
+  dialogText = ''
+  isLoading = -1 // truthy
   businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
@@ -527,7 +526,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   $refs: {
     successDialog: InstanceType<typeof ModalDialog>
     errorDialog: InstanceType<typeof ModalDialog>
-    addNRDialog: InstanceType<typeof ModalDialog>
     passcodeResetOptionsModal: PasscodeResetOptionsModal
     removedBusinessSuccessDialog: InstanceType<typeof ModalDialog>
     removalConfirmDialog: InstanceType<typeof ModalDialog>
@@ -639,7 +637,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
-  async resendAffiliationInvitation (event) {
+  async resendAffiliationInvitation (event = null) {
     let invitationId = ''
 
     if (this.base64Token && this.base64OrgName) {
@@ -649,7 +647,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       invitationId = token.id
     }
 
-    this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    if (event?.affiliationInvites[0].businessIdentifier) {
+      this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
 
     try {
       const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
@@ -746,7 +746,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModalNR (nameRequestNumber: string) {
-    this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
 
@@ -799,14 +798,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   showNRNotFoundModal () {
-    this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Not Found'
     this.dialogText = 'The specified name request was not found.'
     this.$refs.errorDialog.open()
   }
 
   showNRErrorModal () {
-    this.$refs.addNRDialog.close()
     this.dialogTitle = 'Error Adding Name Request'
     this.dialogText =
     'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
@@ -853,7 +850,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       this.dialogTitle = 'Error Adding Existing Business'
       this.dialogText = 'An error occurred adding your business. Please try again.'
     } else if (type === 'nr') {
-      this.$refs.addNRDialog.close()
       this.dialogTitle = 'Error Adding Existing Name Request'
       this.dialogText = 'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
     }
@@ -866,7 +862,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showAddNRModal () {
     this.dialogTitle = 'Add an Existing Name Request'
-    this.$refs.addNRDialog.open()
   }
 
   async removeAffiliationInvitation () {
@@ -968,10 +963,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   cancelAddBusiness () {
     this.showManageBusinessDialog = false
-  }
-
-  cancelAddNameRequest () {
-    this.$refs.addNRDialog.close()
   }
 
   async remove (resetPasscodeEmail: string, resetPasscode = true, dialogTitleKey = 'removeBusiness', dialogTextKey = 'removedBusinessSuccessText') {

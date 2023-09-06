@@ -21,7 +21,6 @@
           Log in with BC Services Card
         </template>
       </sbc-header>
-      <!--- Generic error dialog TODO --->
       <v-snackbar
         v-model="showNotification"
         bottom
@@ -111,7 +110,6 @@ export default class App extends Mixins(NextPageMixin) {
   // Remove these with sbc-common-components and Vue3 upgrade.
   private authModule = getModule(AuthModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
-
   @Action(useAppStore) dismissError!: () => void
   @State(useAppStore) errorMessage!: string
   showNotification = false
@@ -247,7 +245,7 @@ export default class App extends Mixins(NextPageMixin) {
 
   @Watch('errorMessage')
   onErrorMessage () {
-    // Show dialog.
+    // Show dialog, should be wired to services etc, that way we can handle generic errors.
   }
 }
 </script>

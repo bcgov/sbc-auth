@@ -112,10 +112,9 @@ import { PropType, defineComponent } from '@vue/composition-api'
 import { goToCorpOnline, goToDashboard, goToFormPage, goToNameRequest,
   goToOneStop, goToSocieties } from '@/util/navigation'
 import { useBusinessStore, useOrgStore } from '@/stores'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { Business } from '@/models/business'
 import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
-import OrgService from '@/services/org.services'
-
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 
@@ -287,7 +286,7 @@ export default defineComponent({
         const invitationStatus = affiliationInviteInfo.status
         if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed,
           AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
-          await OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          await AffiliationInvitationService.removeAffiliationInvitation(affiliationInviteInfo.id)
           context.emit('remove-affiliation-invitation')
           return
         }

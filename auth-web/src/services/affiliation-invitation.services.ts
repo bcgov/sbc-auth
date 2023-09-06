@@ -1,24 +1,40 @@
 import { AffiliationInvitation, CreateAffiliationInvitation } from '@/models/affiliation-invitation'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { axios } from '@/util/http-util'
 
-// For Magic Link and Delegation. UNTESTED until backend is finalized.
 export default class AffiliationInvitationService {
-  public static async getInvitations (orgId: string): Promise<AxiosResponse<AffiliationInvitation>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations?orgId=${orgId}`)
+  static async getAffiliationInvitations (orgIdentifier: number) : Promise<AffiliationInviteInfo[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
+        { params: { orgId: orgIdentifier, businessDetails: true } }
+      )
+      return response.data.affiliationInvitations
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      return null
+    }
   }
-  public static async createInvitation (payload: CreateAffiliationInvitation): Promise<AxiosResponse<any>> {
+  static async removeAffiliationInvitation (affiliationInvitationId: number) : Promise<void> {
+    try {
+      await axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}`)
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+    }
+  }
+  static async createInvitation (payload: CreateAffiliationInvitation): Promise<AxiosResponse<any>> {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`, payload)
   }
-  // Future - Unused for now-  also more to add than this.
-  public static async updateInvitation (id: string): Promise<AxiosResponse<any>> {
+  static async updateInvitation (id: string): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}`, {})
   }
-  public static async getInvitationById (id: string): Promise<AxiosResponse<AffiliationInvitation>> {
+  static async getInvitationById (id: string): Promise<AxiosResponse<AffiliationInvitation>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}`)
   }
-  public static async acceptInvitation (id: string, invitationToken: string): Promise<AxiosResponse<AffiliationInvitation>> {
+  static async acceptInvitation (id: string, invitationToken: string): Promise<AxiosResponse<AffiliationInvitation>> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}/token/${invitationToken}`)
   }
 }
