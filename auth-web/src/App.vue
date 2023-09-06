@@ -21,6 +21,7 @@
           Log in with BC Services Card
         </template>
       </sbc-header>
+      <!--- Generic error dialog TODO --->
       <v-snackbar
         v-model="showNotification"
         bottom
@@ -63,9 +64,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Action, State } from 'pinia-class'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
+import { useMainStore, useOrgStore, useUserStore } from '@/stores'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
@@ -83,8 +86,6 @@ import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
-import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -110,6 +111,9 @@ export default class App extends Mixins(NextPageMixin) {
   // Remove these with sbc-common-components and Vue3 upgrade.
   private authModule = getModule(AuthModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
+
+  @Action(useMainStore) dismissError!: () => void
+  @State(useMainStore) errorMessage!: string
   showNotification = false
   notificationText = ''
   showLoading = true
@@ -240,8 +244,12 @@ export default class App extends Mixins(NextPageMixin) {
     // Remove Vuex with Vue 3
     this.$store.commit('loadComplete')
   }
-}
 
+  @Watch('errorMessage')
+  onErrorMessage () {
+    // Show dialog.
+  }
+}
 </script>
 
 <style lang="scss">

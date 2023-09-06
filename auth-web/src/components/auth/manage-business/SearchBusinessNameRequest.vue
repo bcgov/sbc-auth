@@ -29,15 +29,12 @@
           lazy-validation
           class="mt-6"
         >
-          <template>
-            <!-- Search for business identifier or name -->
-            <!-- NB: use v-if to re-mount component between instances -->
-            <BusinessLookup
-              :key="businessLookupKey"
-              :lookupType="lookupType.BUSINESS"
-              @business="businessEvent"
-            />
-          </template>
+          <!-- Search for business identifier or name -->
+          <BusinessLookup
+            :key="businessLookupKey"
+            :lookupType="lookupType.BUSINESS"
+            @business="businessEvent"
+          />
         </v-form>
         <v-form
           v-else
@@ -45,63 +42,57 @@
           lazy-validation
           class="mt-6"
         >
-          <template>
-            <BusinessLookup
-              :key="businessLookupKey"
-              :lookupType="lookupType.NR"
-              @nameRequest="nameRequestEvent"
-            />
-          </template>
+          <BusinessLookup
+            :key="businessLookupKey"
+            :lookupType="lookupType.NR"
+            @nameRequest="nameRequestEvent"
+          />
         </v-form>
       </v-col>
     </v-row>
 
-    <template v-if="isEnableBusinessNrSearch">
-      <ManageBusinessDialog
-        ref="manageBusinessDialog"
-        :orgId="orgId"
-        :businessLegalType="businessLegalType"
-        :showBusinessDialog="showManageBusinessDialog"
-        :initialBusinessIdentifier="businessIdentifier"
-        :initialBusinessName="businessName"
-        :isStaffOrSbcStaff="isGovStaffAccount"
-        :userFirstName="userFirstName"
-        :userLastName="userLastName"
-        @add-success="showAddSuccessModal"
-        @add-failed-invalid-code="showInvalidCodeModal($event)"
-        @add-failed-no-entity="showEntityNotFoundModal()"
-        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="cancelEvent"
-        @on-business-identifier="businessIdentifier = $event"
-        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
-      />
-    </template>
+    <ManageBusinessDialog
+      ref="manageBusinessDialog"
+      :orgId="orgId"
+      :businessLegalType="businessLegalType"
+      :showBusinessDialog="showManageBusinessDialog"
+      :initialBusinessIdentifier="businessIdentifier"
+      :initialBusinessName="businessName"
+      :isStaffOrSbcStaff="isGovStaffAccount"
+      :userFirstName="userFirstName"
+      :userLastName="userLastName"
+      @add-success="showAddSuccessModal"
+      @add-failed-invalid-code="showInvalidCodeModal($event)"
+      @add-failed-no-entity="showEntityNotFoundModal()"
+      @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+      @add-unknown-error="showUnknownErrorModal('business')"
+      @on-cancel="cancelEvent"
+      @on-business-identifier="businessIdentifier = $event"
+      @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
+    />
     <!-- Add Name Request Dialog -->
-    <template v-if="isEnableBusinessNrSearch">
-      <ModalDialog
-        ref="addNRDialog"
-        :showNRDialog="showNRDialog"
-        :is-persistent="true"
-        title="Manage a Name Request"
-        :show-icon="false"
-        :show-actions="false"
-        max-width="640"
-        data-test-tag="add-name-request"
-      >
-        <template #text>
-          <AddNameRequestForm
-            :businessIdentifier="businessIdentifier"
-            :requestNames="nrNames"
-            @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success-nr="showAddSuccessModalNR"
-            @add-failed-show-msg="showNRErrorModal()"
-            @add-failed-no-nr="showNRNotFoundModal()"
-            @add-unknown-error="showUnknownErrorModal('nr')"
-          />
-        </template>
-      </ModalDialog>
-    </template>
+    <ModalDialog
+      ref="addNRDialog"
+      :showNRDialog="showNRDialog"
+      :is-persistent="true"
+      title="Manage a Name Request"
+      :show-icon="false"
+      :show-actions="false"
+      max-width="640"
+      data-test-tag="add-name-request"
+    >
+      <template #text>
+        <AddNameRequestForm
+          :businessIdentifier="businessIdentifier"
+          :requestNames="nrNames"
+          @close-add-nr-modal="cancelAddNameRequest()"
+          @add-success-nr="showAddSuccessModalNR"
+          @add-failed-show-msg="showNRErrorModal()"
+          @add-failed-no-nr="showNRNotFoundModal()"
+          @add-unknown-error="showUnknownErrorModal('nr')"
+        />
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -252,9 +243,6 @@ export default class SearchBusinessNameRequest extends Vue {
     this.emitOnAuthorizationEmailSentClose(event)
   }
 
-  get isEnableBusinessNrSearch (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
-  }
 }
 </script>
 

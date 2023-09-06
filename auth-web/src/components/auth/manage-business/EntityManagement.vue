@@ -191,7 +191,6 @@
       </ExpandableHelp>
 
       <search-business-name-request
-        v-if="isEnableBusinessNrSearch"
         :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
@@ -203,7 +202,7 @@
         @add-unknown-error="showUnknownErrorModal"
         @business-already-added="showBusinessAlreadyAdded($event)"
         @on-cancel="cancelAddBusiness()"
-        @on-business-identifier="businessIdentifier = $event"
+        @on-business-identifier="setBusinessIdentifier($event)"
         @on-cancel-nr="cancelAddNameRequest()"
         @add-success-nr="showAddSuccessModalNR"
         @add-nr-error="showNRErrorModal()"
@@ -211,64 +210,6 @@
         @show-add-old-nr-modal="showAddNRModal()"
         @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
       />
-
-      <template v-if="!isEnableBusinessNrSearch">
-        <!-- Add Existing Name Request or Business Button-->
-        <v-menu
-          v-model="addAffiliationDropdown"
-        >
-          <template #activator="{ on: onExistingMenu }">
-            <v-tooltip
-              top
-              content-class="top-tooltip"
-            >
-              <template #activator="{ on: onExistingTooltip }">
-                <v-btn
-                  id="add-existing-btn"
-                  class="mt-2 mr-4 mb-4"
-                  color="primary"
-                  dark
-                  large
-                  v-on="{ ...onExistingMenu, ...onExistingTooltip }"
-                  @click="addAffiliationDropdown = !addAffiliationDropdown"
-                >
-                  <v-icon>mdi-plus</v-icon>
-                  <span><strong>Add an Existing Business or Name Request</strong></span>
-                  <v-icon class="ml-2 mr-n2">
-                    {{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
-                  </v-icon>
-                </v-btn>
-              </template>
-              <span>
-                To view and manage existing businesses and Name Requests,
-                you can manually add them to your table.
-              </span>
-            </v-tooltip>
-          </template>
-          <v-list>
-            <v-list-item>
-              <v-list-item-title class="d-inline-flex">
-                <v-icon>mdi-plus</v-icon>
-                <div class="ml-1 mt-1 add-existing-title">
-                  Add an Existing...
-                </div>
-              </v-list-item-title>
-            </v-list-item>
-            <v-list-item
-              class="add-existing-item"
-              @click="showAddBusinessModal()"
-            >
-              Business
-            </v-list-item>
-            <v-list-item
-              class="add-existing-item"
-              @click="showAddNRModal()"
-            >
-              Name Request
-            </v-list-item>
-          </v-list>
-        </v-menu>
-      </template>
 
       <AffiliatedEntityTable
         :loading="isLoading"
@@ -287,60 +228,12 @@
         @confirm-passcode-reset-options="remove($event)"
       />
 
-      <!-- Add an Existing Business Dialog -->
-      <!-- Used only when !isEnableBusinessNrSearch, can be removed from here once this goes away -->
-      <ManageBusinessDialog
-        :orgId="orgId"
-        :showBusinessDialog="showManageBusinessDialog"
-        :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
-        :userFirstName="currentUser.firstName"
-        :userLastName="currentUser.lastName"
-        :initial-business-identifier="businessIdentifier"
-        @add-success="showAddSuccessModal"
-        @affiliation-invitation-pending="showAuthorizationEmailSentDialogPending"
-        @add-failed-invalid-code="showInvalidCodeModal($event)"
-        @add-failed-no-entity="showEntityNotFoundModal()"
-        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="cancelAddBusiness()"
-        @on-business-identifier="businessIdentifier = $event"
-        @business-already-added="showBusinessAlreadyAdded($event)"
-        @show-create-affiliation-invitation-error-dialog="showCreateAffiliationInvitationErrorDialog()"
-      />
-
       <AuthorizationEmailSentDialog
         :isVisible="isAuthorizationEmailSentDialogVisible"
         :email="businessContactEmail"
         @open-help="openHelp"
         @close-dialog="onAuthorizationEmailSentClose"
       />
-
-      <!-- Add Name Request Dialog -- only for BusinessNrSearch -->
-      <ModalDialog
-        ref="addNRDialog"
-        :is-persistent="true"
-        :title="dialogTitle"
-        :show-icon="false"
-        :show-actions="false"
-        max-width="640"
-        data-test-tag="add-name-request"
-      >
-        <template #text>
-          <p>
-            Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone number
-            OR applicant email that were used when the name was requested.
-          </p>
-          <AddNameRequestForm
-            class="mt-6"
-            @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success="showAddSuccessModalNR"
-            @add-failed-show-msg="showNRErrorModal()"
-            @add-failed-no-entity="showNRNotFoundModal()"
-            @add-unknown-error="showUnknownErrorModal('nr')"
-            @on-cancel="cancelAddNameRequest()"
-          />
-        </template>
-      </ModalDialog>
 
       <!-- Success Dialog -->
       <ModalDialog
@@ -541,6 +434,7 @@
 </template>
 
 <script lang="ts">
+import { Action, State } from 'pinia-class'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -548,8 +442,6 @@ import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Action } from 'pinia-class'
-import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestFormOld.vue'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
@@ -570,10 +462,10 @@ import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+import { useManageBusinessStore } from '@/stores/manageBusiness'
 
 @Component({
   components: {
-    AddNameRequestForm,
     AffiliatedEntityTable,
     AuthorizationEmailSentDialog,
     ExpandableHelp,
@@ -598,15 +490,15 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
-  // remove Vuex for Pinia with Vue3 upgrade
+  @State(useManageBusinessStore) businessIdentifier: string
   @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
+  @Action(useManageBusinessStore) setBusinessIdentifier!: (businessIdentifier: string) => void
   // for template
   readonly CorpTypes = CorpTypes
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
   private isLoading = -1 // truthy
-  businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
   private primaryBtnHandler: () => void = undefined
@@ -713,7 +605,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
     const identifier = token.businessIdentifier
     const invitationId = token.id
-    this.businessIdentifier = token.businessIdentifier
+    this.setBusinessIdentifier(token.businessIdentifier)
     // grab business name from store
     const business = await this.getBusinessNameByIdentifier(token.businessIdentifier)
     try {
@@ -759,7 +651,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       invitationId = token.id
     }
 
-    this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    this.setBusinessIdentifier(event?.affiliationInvites[0].businessIdentifier)
 
     try {
       const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
@@ -817,7 +709,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   /** Creates a numbered IA filing (temp business). */
-  protected async startNumberedCompany (corpType: CorpTypes): Promise<void> {
+  async startNumberedCompany (corpType: CorpTypes): Promise<void> {
     const business = {
       nameRequest: {
         legalType: corpType
@@ -828,7 +720,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async popupBusinessDialog (business: Business) {
-    this.businessIdentifier = business.businessIdentifier
+    this.setBusinessIdentifier(business.businessIdentifier)
     this.showManageBusinessDialog = true
   }
 
@@ -890,7 +782,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.snackbarText = 'Confirmation email sent, pending authorization.'
     this.showSnackbar = true
     this.isAuthorizationEmailSentDialogVisible = false
-    this.businessIdentifier = null
+    this.setBusinessIdentifier(null)
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
@@ -1126,9 +1018,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.businessUnavailableDialog.close()
   }
 
-  get isEnableBusinessNrSearch (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
-  }
 }
 </script>
 

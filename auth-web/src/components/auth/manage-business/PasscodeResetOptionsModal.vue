@@ -101,17 +101,17 @@ import ModalDialog from '@/components/auth/common/ModalDialog.vue'
   }
 })
 export default class PasscodeResetOptionsModal extends Vue {
-  private isResetPasscode: boolean = false
-  private emailAddress = ''
-  private confirmedEmailAddress = ''
-  private emailRules = CommonUtils.emailRules()
+  isResetPasscode: boolean = false
+  emailAddress = ''
+  confirmedEmailAddress = ''
+  emailRules = CommonUtils.emailRules()
 
   $refs: {
     passcodeResetEmailForm: HTMLFormElement,
     passcodeResetOptionsDialog: InstanceType<typeof ModalDialog>
   }
 
-  private emailMustMatch (): string {
+  emailMustMatch (): string {
     return (this.emailAddress === this.confirmedEmailAddress) ? '' : 'Email addresses must match'
   }
 
@@ -127,7 +127,7 @@ export default class PasscodeResetOptionsModal extends Vue {
     return this.$refs.passcodeResetEmailForm?.validate() && !this.emailMustMatch()
   }
 
-  private confirmPasscodeResetOptions () {
+  confirmPasscodeResetOptions () {
     if (this.isResetPasscode) {
       if (this.isFormValid()) {
         this.$emit('confirm-passcode-reset-options', this.emailAddress)

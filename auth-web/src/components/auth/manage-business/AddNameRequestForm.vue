@@ -148,7 +148,6 @@ import { useOrgStore } from '@/stores/org'
 export default class AddNameRequestForm extends Vue {
   @Prop({ default: '' }) readonly requestNames: NameRequestIF[]
   @Prop({ default: '' }) readonly businessIdentifier: string
-  @Prop({ default: false }) readonly isEnableBusinessNrSearch: boolean
 
   readonly currentOrganization!: Organization
   readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
