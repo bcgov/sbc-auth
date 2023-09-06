@@ -505,4 +505,3 @@ def test_get_entity_authentication(client, jwt, session):
     assert data['contactEmail'] != TestContactInfo.contact1['email']
     assert data['contactEmail'] == 'fo*@ba*****'
     assert 'hasValidPassCode' in data
-
