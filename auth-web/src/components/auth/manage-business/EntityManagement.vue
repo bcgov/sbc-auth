@@ -190,7 +190,7 @@
         </template>
       </ExpandableHelp>
 
-      <search-business-name-request
+      <SearchBusinessNameRequest
         :orgId="orgId"
         :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
         :userFirstName="currentUser.firstName"
