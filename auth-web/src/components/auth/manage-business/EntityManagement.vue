@@ -745,16 +745,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }, 4000)
   }
 
-  async showAuthorizationEmailSentDialogPending (businessIdentifier: string) {
-    await this.syncBusinesses()
-    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
-    this.snackbarText = 'Confirmation email sent, pending authorization.'
-    this.showSnackbar = true
-    setTimeout(() => {
-      this.highlightIndex = -1
-    }, 4000)
-  }
-
   async showAddSuccessModalNR (nameRequestNumber: string) {
     this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Added'
