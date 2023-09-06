@@ -1,6 +1,5 @@
 import {
   Affiliation,
-  AffiliationInviteInfo,
   AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody
