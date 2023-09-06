@@ -157,10 +157,12 @@ export const useAffiliations = () => {
     )
   }
 
-  /** Returns the Name Request type using the NR type code */
+  /** Returns the Name Request type using the NR action code or the NR type code */
   const nameRequestType = (business: Business): string => {
     if (isNameRequest(business)) {
-      const nrType = CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
+      // Try action code first, and if not found in the enum then use type code
+      let nrType: string = CommonUtils.mapRequestActionCdToNrType(business.nameRequest?.requestActionCd)
+      nrType = nrType || CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
       if (nrType) {
         const emDash = '—' // ALT + 0151
         return `${emDash} ${nrType}`

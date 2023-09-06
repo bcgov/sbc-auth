@@ -1,8 +1,8 @@
 import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
 import { CorpTypes, NrTargetTypes } from '@/util/constants'
+import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
-import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 
 export interface CreateRequestBody {
   businessIdentifier: string
@@ -98,6 +98,7 @@ export interface NameRequestResponse {
   target?: NrTargetTypes
   entityTypeCd?: string
   requestTypeCd?: NrRequestTypeCodes
+  requestActionCd?: NrRequestActionCodes
   natureOfBusiness?: string
   expirationDate?: Date
   nrNum?: string
