@@ -202,7 +202,7 @@
         @add-unknown-error="showUnknownErrorModal"
         @business-already-added="showBusinessAlreadyAdded($event)"
         @on-cancel="cancelAddBusiness()"
-        @on-business-identifier="setBusinessIdentifier($event)"
+        @on-business-identifier="businessIdentifier = $event"
         @on-cancel-nr="cancelAddNameRequest()"
         @add-success-nr="showAddSuccessModalNR"
         @add-nr-error="showNRErrorModal()"
@@ -434,7 +434,6 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
@@ -442,6 +441,7 @@ import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
+import { Action } from 'pinia-class'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
@@ -462,7 +462,6 @@ import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
 import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
 import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { useManageBusinessStore } from '@/stores/manageBusiness'
 
 @Component({
   components: {
@@ -490,15 +489,14 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   @Prop({ default: '' }) readonly orgId: string
   @Prop({ default: '' }) readonly base64Token: string
   @Prop({ default: '' }) readonly base64OrgName: string
-  @State(useManageBusinessStore) businessIdentifier: string
   @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
-  @Action(useManageBusinessStore) setBusinessIdentifier!: (businessIdentifier: string) => void
   // for template
   readonly CorpTypes = CorpTypes
   private removeBusinessPayload = null
   private dialogTitle = ''
   private dialogText = ''
   private isLoading = -1 // truthy
+  businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
   private primaryBtnHandler: () => void = undefined
@@ -605,7 +603,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
     const identifier = token.businessIdentifier
     const invitationId = token.id
-    this.setBusinessIdentifier(token.businessIdentifier)
+    this.businessIdentifier = token.businessIdentifier
     // grab business name from store
     const business = await this.getBusinessNameByIdentifier(token.businessIdentifier)
     try {
@@ -641,7 +639,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
-  private async resendAffiliationInvitation (event) {
+  async resendAffiliationInvitation (event) {
     let invitationId = ''
 
     if (this.base64Token && this.base64OrgName) {
@@ -651,7 +649,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       invitationId = token.id
     }
 
-    this.setBusinessIdentifier(event?.affiliationInvites[0].businessIdentifier)
+    this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
 
     try {
       const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
@@ -720,7 +718,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async popupBusinessDialog (business: Business) {
-    this.setBusinessIdentifier(business.businessIdentifier)
+    this.businessIdentifier = business.businessIdentifier
     this.showManageBusinessDialog = true
   }
 
@@ -782,7 +780,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.snackbarText = 'Confirmation email sent, pending authorization.'
     this.showSnackbar = true
     this.isAuthorizationEmailSentDialogVisible = false
-    this.setBusinessIdentifier(null)
+    this.businessIdentifier = null
     setTimeout(() => {
       this.highlightIndex = -1
     }, 4000)
@@ -1017,7 +1015,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   closeBusinessUnavailableDialog () {
     this.$refs.businessUnavailableDialog.close()
   }
-
 }
 </script>
 

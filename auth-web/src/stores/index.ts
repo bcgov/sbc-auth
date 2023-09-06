@@ -17,11 +17,11 @@ export function getPiniaStore () {
   return createPinia()
 }
 
+export * from './app'
 export * from './activityLog'
 export * from './business'
 export * from './codes'
 export * from './org'
-export * from './main'
 export * from './staff'
 export * from './task'
 export * from './user'

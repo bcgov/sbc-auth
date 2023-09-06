@@ -19,7 +19,7 @@ headache in the long term. Depending on the circumstances, there are various alt
   without the interim component needing to get involved.
 - Global state management, such as Pinia.
 */
-export const useMainStore = defineStore('main', () => {
+export const useAppStore = defineStore('app', () => {
   const state = reactive({
     errorMessage: '', // Unused for now
     refreshKey: 0, // Unused for now
