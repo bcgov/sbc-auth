@@ -26,6 +26,7 @@ from auth_api.services.entity import Entity as EntityService
 from auth_api.tracer import Tracer
 from auth_api.utils.endpoints_enums import EndpointEnum
 from auth_api.utils.roles import ALL_ALLOWED_ROLES, CLIENT_AUTH_ROLES, Role
+from auth_api.utils.util import mask_email
 
 
 bp = Blueprint('ENTITIES', __name__, url_prefix=f'{EndpointEnum.API_V1.value}/entities')
@@ -126,6 +127,26 @@ def delete_entity(business_identifier):
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
     return response, status
+
+
+@bp.route('/<string:business_identifier>/authentication', methods=['GET', 'OPTIONS'])
+@cross_origin(origins='*')
+@TRACER.trace()
+@_jwt.requires_auth
+def get_entity_authentication(business_identifier):
+    """Get passcode or password for the Entity identified by the provided business identifier."""
+    # This route allows public users to see if businesses have a form of authentication.
+    # It's used by the business dashboard for magic link.
+    if ((entity := EntityService.find_by_business_identifier(business_identifier, skip_auth=True)) and
+            (contact := entity.get_contact())):
+        has_valid_pass_code = (entity.pass_code_claimed == 'f' and entity.pass_code is not None) or \
+            entity.corp_type in ['SP', 'GP']
+        return {
+                'contactEmail': mask_email(contact.email),
+                'hasValidPassCode': has_valid_pass_code
+        }, http_status.HTTP_200_OK
+    return jsonify({'message': f'Authentication for {business_identifier} was not found.'}), \
+        http_status.HTTP_404_NOT_FOUND
 
 
 @bp.route('/<string:business_identifier>/contacts', methods=['GET', 'OPTIONS'])
