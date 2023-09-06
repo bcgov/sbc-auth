@@ -860,10 +860,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.showManageBusinessDialog = true
   }
 
-  showAddNRModal () {
-    this.dialogTitle = 'Add an Existing Name Request'
-  }
-
   async removeAffiliationInvitation () {
     await this.syncBusinesses()
   }
