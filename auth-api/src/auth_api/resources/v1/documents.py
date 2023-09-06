@@ -62,7 +62,6 @@ def get_document_by_type(document_type):
     return response, status
 
 
-@staticmethod
 def _replace_current_date(doc):
     """Replace any dynamic contents."""
     today = datetime.today()
