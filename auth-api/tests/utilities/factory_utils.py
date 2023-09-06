@@ -346,6 +346,11 @@ def get_tos_latest_version():
     return '5'
 
 
+def get_tos_pad_latest_version():
+    """Return latest tos pad version."""
+    return 'p1'
+
+
 def patch_pay_account_post(monkeypatch):
     """Patch pay account post success (200 or 201)."""
     class MockPayResponse:
