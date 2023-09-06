@@ -22,6 +22,7 @@ from itsdangerous import URLSafeTimedSerializer
 from jinja2 import Environment, FileSystemLoader
 from requests.exceptions import HTTPError
 from sbc_common_components.tracing.service_tracing import ServiceTracing  # noqa: I001
+from sqlalchemy.exc import DataError
 
 from auth_api.config import get_named_config
 from auth_api.exceptions import BusinessException, ServiceUnavailableException
@@ -208,6 +209,19 @@ class AffiliationInvitation:
         return affiliation_invitation_info.get('recipientEmail', None)
 
     @staticmethod
+    def _get_org_id_from_org_uuid(to_org_uuid):
+        try:
+            to_org: OrgModel = OrgModel.find_by_org_uuid(to_org_uuid)
+
+            if not to_org:
+                raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+            return to_org.id
+
+        except DataError as err:
+            raise BusinessException(Error.INVALID_INPUT, err) from err
+
+    @staticmethod
     @user_context
     def create_affiliation_invitation(affiliation_invitation_info: Dict,
                                       # pylint:disable=unused-argument,too-many-locals
@@ -215,11 +229,9 @@ class AffiliationInvitation:
         """Create a new affiliation invitation."""
         context_path = CONFIG.AUTH_WEB_TOKEN_CONFIRM_PATH
         from_org_id = affiliation_invitation_info['fromOrgId']
-        to_org_id = affiliation_invitation_info.get('toOrgId')
         if to_org_uuid := affiliation_invitation_info.get('toOrgUuid'):
-            to_org: OrgModel = OrgModel.find_by_org_uuid(to_org_uuid)
-            to_org_id = to_org.id
-            affiliation_invitation_info['toOrgId'] = to_org_id
+            affiliation_invitation_info['toOrgId'] = AffiliationInvitation._get_org_id_from_org_uuid(to_org_uuid)
+        to_org_id = affiliation_invitation_info.get('toOrgId')
 
         business_identifier = affiliation_invitation_info['businessIdentifier']
         affiliation_invitation_type = AffiliationInvitationType.from_value(affiliation_invitation_info.get('type'))
@@ -335,8 +347,9 @@ class AffiliationInvitation:
             invitation = self._model.update_invitation_as_retried(user.identifier)
             entity: EntityModel = invitation.entity
 
-            business = AffiliationInvitation._get_business_details(entity.business_identifier,
-                                                                   RestService.get_service_account_token())
+            token = RestService.get_service_account_token(config_id='ENTITY_SVC_CLIENT_ID',
+                                                          config_secret='ENTITY_SVC_CLIENT_SECRET')
+            business = AffiliationInvitation._get_business_details(entity.business_identifier, token)
 
             AffiliationInvitation\
                 .send_affiliation_invitation(affiliation_invitation=invitation,

@@ -2,8 +2,8 @@
   <div id="manage-business-dialog">
     <ModalDialog
       ref="createAffiliationInvitationErrorDialog"
-      title="Error Sending Authorization Email"
-      text="An error occurred sending authorization email. Please try again."
+      :title="createAffiliationInvitationErrorTitle"
+      :text="createAffiliationInvitationErrorText"
       dialog-class="notify-dialog"
       max-width="640"
     >
@@ -350,6 +350,8 @@ export default defineComponent({
     const authorizationMaxLength = 100
     const showAuthorizationEmailSentDialog = ref(false)
     const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const createAffiliationInvitationErrorTitle = ref('')
+    const createAffiliationInvitationErrorText = ref('')
     const showAuthorizationRequestSentDialog = ref(false)
     const successDialog = computed(() => {
       return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
@@ -558,11 +560,11 @@ export default defineComponent({
           additionalMessage: invitationAdditionalMessage.value
         }
         await AffiliationInvitationService.createInvitation(payload)
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.log(err)
-      } finally {
         showAuthorizationRequestSentDialog.value = true
+      } catch (err) {
+        createAffiliationInvitationErrorTitle.value = 'Error creating authorization invitation request'
+        createAffiliationInvitationErrorText.value = 'An error occurred creating authorization invitation.<br/> Please try again later.'
+        createAffiliationInvitationErrorDialog.value.open()
       }
     }
 
@@ -581,6 +583,8 @@ export default defineComponent({
         }
         showAuthorizationEmailSentDialog.value = true
       } catch (err) {
+        createAffiliationInvitationErrorTitle.value = 'Error Sending Authorization Email'
+        createAffiliationInvitationErrorText.value = 'An error occurred sending authorization email. Please try again.'
         createAffiliationInvitationErrorDialog.value.open()
       }
     }
@@ -726,6 +730,8 @@ export default defineComponent({
       showHelp,
       showAuthorizationEmailSentDialog,
       createAffiliationInvitationErrorDialog,
+      createAffiliationInvitationErrorTitle,
+      createAffiliationInvitationErrorText,
       closeCreateAffiliationInvitationErrorDialog,
       showEmailOption,
       isBusinessLegalTypeCorporationOrBenefitOrCoop
