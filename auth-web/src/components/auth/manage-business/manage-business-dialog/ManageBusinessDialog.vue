@@ -93,7 +93,9 @@
             <div>{{ businessIdentifier }}</div>
 
             <div class="my-2">
-              You must be authorized to manage this business. You can be authorized in one of the following ways:
+              {{ businessHasNoEmailAndNoAuthenticationAndNoAffiliation ?
+                'Some required information for this business is missing:' :
+                'You must be authorized to manage this business. You can be authorized in one of the following ways:' }}
             </div>
 
             <v-card
@@ -102,7 +104,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop"
+                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop && hasBusinessAuthentication"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -198,7 +200,11 @@
                   </div>
                 </v-list-group>
 
-                <v-list-group v-model="requestAuthBusinessOption">
+                <v-list-group
+                  v-if="hasAffiliatedAccount"
+                  id="account-authorization-request"
+                  v-model="requestAuthBusinessOption"
+                >
                   <template #activator>
                     <v-list-item-title>Request authorization from the business</v-list-item-title>
                   </template>
@@ -209,6 +215,34 @@
                       @change-request-access-message="invitationAdditionalMessage=$event"
                       @select-account="selectAccount($event)"
                     />
+                  </div>
+                </v-list-group>
+
+                <v-list-group v-model="requestAuthBusinessRegistryOption">
+                  <template #activator>
+                    <v-list-item-title>Request authorization or get help from the Business Registry</v-list-item-title>
+                  </template>
+                  <div class="list-body contact-us">
+                    <p>Contact the Business Registry to request authorization to manage this business.</p>
+                    <ol>
+                      <li>
+                        <v-icon small>
+                          mdi-phone
+                        </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+                      </li>
+                      <li>
+                        <v-icon small>
+                          mdi-phone
+                        </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+                      </li>
+                      <li>
+                        <v-icon small>
+                          mdi-email
+                        </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
+                      </li>
+                    </ol>
+                    <h4>Hours of Operation:</h4>
+                    <p>Monday to Friday, 8:30am - 4:30pm Pacific Time</p>
                   </div>
                 </v-list-group>
 
@@ -270,6 +304,7 @@ import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
+import OrgService from '@/services/org.services'
 import { StatusCodes } from 'http-status-codes'
 import { useBusinessStore } from '@/stores'
 
@@ -345,6 +380,7 @@ export default defineComponent({
     const nameOption = ref(false)
     const enableDelegationFeature = ref(false)
     const requestAuthBusinessOption = ref(false)
+    const requestAuthBusinessRegistryOption = ref(false)
     const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
@@ -353,6 +389,9 @@ export default defineComponent({
     const createAffiliationInvitationErrorTitle = ref('')
     const createAffiliationInvitationErrorText = ref('')
     const showAuthorizationRequestSentDialog = ref(false)
+    const hasBusinessEmail = ref(false)
+    const hasBusinessAuthentication = ref(false)
+    const hasAffiliatedAccount = ref(false)
     const successDialog = computed(() => {
       return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
     })
@@ -467,7 +506,7 @@ export default defineComponent({
     })
 
     const isBusinessLegalTypeCorporationOrBenefitOrCoop = computed(() => {
-      return isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit.value || isBusinessLegalTypeCoOp.value
+      return (isBusinessLegalTypeCorporation.value || isBusinessLegalTypeBenefit.value || isBusinessLegalTypeCoOp.value) && hasBusinessEmail.value
     })
 
     const isFormValid = computed(() => {
@@ -517,6 +556,7 @@ export default defineComponent({
       nameOption.value = false
       requestAuthBusinessOption.value = false
       requestAuthRegistryOption.value = false
+      requestAuthBusinessRegistryOption.value = false
       // staff workflow, doesn't have this function defined
       addBusinessForm.value?.resetValidation()
       isLoading.value = false
@@ -652,7 +692,14 @@ export default defineComponent({
     })
 
     const showEmailOption = computed(() => {
-      return (isBusinessLegalTypeCorporationOrBenefitOrCoop.value || isBusinessLegalTypeFirm.value) && businessContactEmail.value
+      return (isBusinessLegalTypeCorporationOrBenefitOrCoop.value || isBusinessLegalTypeFirm.value) && businessContactEmail.value &&
+       hasBusinessEmail.value
+    })
+
+    const businessHasNoEmailAndNoAuthenticationAndNoAffiliation = computed(() => {
+      const hasAuthenticationOption = isBusinessLegalTypeCorporationOrBenefitOrCoop.value && hasBusinessAuthentication.value
+      return !hasAuthenticationOption && !isBusinessLegalTypeFirm.value && !showEmailOption.value && !hasAffiliatedAccount.value &&
+      !enableDelegationFeature.value
     })
 
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
@@ -662,8 +709,26 @@ export default defineComponent({
         try {
           const contact = await BusinessService.getMaskedContacts(newBusinessIdentifier)
           contactInfo.value = contact?.data
+          hasBusinessEmail.value = true
         } catch (err) {
+          hasBusinessEmail.value = false
           contactInfo.value = ''
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
+        try {
+          const organization = await OrgService.getOrganizationsNameAndUuidByAffiliation(newBusinessIdentifier)
+          hasAffiliatedAccount.value = organization?.data?.orgsDetails.length > 0
+        } catch (err) {
+          hasAffiliatedAccount.value = false
+          // eslint-disable-next-line no-console
+          console.error(err)
+        }
+        try {
+          const authentication = await BusinessService.getAuthentication(newBusinessIdentifier)
+          hasBusinessAuthentication.value = authentication?.data?.hasValidPassCode
+        } catch (err) {
+          hasBusinessAuthentication.value = true
           // eslint-disable-next-line no-console
           console.error(err)
         }
@@ -675,6 +740,13 @@ export default defineComponent({
       emit('on-business-identifier', newValue)
     }, { immediate: true })
 
+    watch(() => [businessHasNoEmailAndNoAuthenticationAndNoAffiliation.value, props.showBusinessDialog],
+      async ([newValue, showBusinessDialog], [oldValue]) => {
+        if (showBusinessDialog && oldValue !== newValue) {
+          requestAuthBusinessRegistryOption.value = newValue
+        }
+      }, { immediate: true })
+
     // Return the setup data - These will be removed with script setup.
     return {
       invitationToAccount,
@@ -682,9 +754,11 @@ export default defineComponent({
       selectAccount,
       showAuthorizationRequestSentDialog,
       successDialog,
+      businessHasNoEmailAndNoAuthenticationAndNoAffiliation,
       isManageButtonEnabled,
       requestAuthRegistryOption,
       requestAuthBusinessOption,
+      requestAuthBusinessRegistryOption,
       emailOption,
       nameOption,
       passcodeOption,
@@ -701,6 +775,9 @@ export default defineComponent({
       authorizationName,
       authorizationLabel,
       authorizationMaxLength,
+      hasBusinessEmail,
+      hasBusinessAuthentication,
+      hasAffiliatedAccount,
       isBusinessLegalTypeFirm,
       computedAddressType,
       isBusinessLegalTypeCorporation,

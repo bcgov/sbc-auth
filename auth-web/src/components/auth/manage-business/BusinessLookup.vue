@@ -48,13 +48,13 @@
         <v-row class="business-lookup-result pt-1">
           <v-col
             cols="3"
-            class="result-identifier"
+            class="result-identifier d-inline-flex"
           >
             {{ item.identifier }}
           </v-col>
           <v-col
             cols="7"
-            class="result-name"
+            class="result-name flex-1-1"
           >
             {{ item.name }}
           </v-col>
@@ -80,13 +80,13 @@
         <v-row class="business-lookup-result pt-1">
           <v-col
             cols="3"
-            class="result-identifier"
+            class="result-identifier d-inline-flex"
           >
             {{ item.nrNum }}
           </v-col>
           <v-col
             cols="7"
-            class="result-name"
+            class="result-name flex-1-1"
           >
             <div
               v-for="(name, index) in item.names"
@@ -235,6 +235,10 @@ p {
     background-color: $gray1;
     color: $app-blue;
   }
+}
+
+.result-identifier {
+  min-width: 120px;
 }
 
 .result-identifier,

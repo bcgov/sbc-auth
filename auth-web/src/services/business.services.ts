@@ -15,6 +15,10 @@ export default class BusinessService {
     return axios.post(`${ConfigHelper.getAuthAPIUrl()}/entities`, business)
   }
 
+  static async getAuthentication (businessIdentifier: string): Promise<AxiosResponse<any>> {
+    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/entities/${businessIdentifier}/authentication`)
+  }
+
   static async getMaskedContacts (businessIdentifier: string): Promise<AxiosResponse<Contact>> {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/entities/${businessIdentifier}/contacts`)
   }
