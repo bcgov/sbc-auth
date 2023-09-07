@@ -146,7 +146,7 @@ export default class SearchBusinessNameRequest extends Vue {
     manageBusinessDialog: InstanceType<typeof ManageBusinessDialog>
   }
   addBusinessToList = async (loginPayload: LoginPayload) => {
-    return this.$store.dispatch('business/addBusiness', loginPayload)
+    await useBusinessStore().addBusiness(loginPayload)
   }
   showAddSuccessModal (event) {
     this.clearSearch++
