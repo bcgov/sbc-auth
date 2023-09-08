@@ -187,12 +187,9 @@ class Affiliation:
 
     @staticmethod
     @user_context
-    def is_authorized(entity: Entity, pass_code: str, **kwargs) -> bool:
+    def is_authorized(entity: Entity, pass_code: str) -> bool:
         """Return True if user is authorized to create an affiliation."""
-        user_from_context: UserContext = kwargs['user_context']
-        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
-        if user_from_context.is_staff() or \
-           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+        if Affiliation.is_staff_or_sbc_staff():
             return True
         if entity.corp_type in ['SP', 'GP']:
             if not pass_code:
@@ -210,17 +207,11 @@ class Affiliation:
     @user_context
     def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
                                         business_identifier=None, email=None, phone=None, certified_by_name=None,
-                                        bearer_token: str = None, **kwargs):
+                                        bearer_token: str = None):
         """Initiate a new incorporation."""
 
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-        user_is_staff = False
-        user_from_context: UserContext = kwargs['user_context']
-        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
-        if user_from_context.is_staff() or \
-           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
-            user_is_staff = True
-
+        user_is_staff = Affiliation.is_staff_or_sbc_staff()
         if (not email and not phone) and not user_is_staff:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
@@ -492,4 +483,15 @@ class Affiliation:
 
             if party_name_str.upper() == party_name.upper():
                 return True
+        return False
+
+    @staticmethod
+    @user_context
+    def is_staff_or_sbc_staff(**kwargs):
+        """Return True if user is staff or sbc staff."""
+        user_from_context: UserContext = kwargs['user_context']
+        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
+        if user_from_context.is_staff() or \
+           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+            return True
         return False
