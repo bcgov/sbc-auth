@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -207,13 +207,21 @@ class Affiliation:
         return True
 
     @staticmethod
+    @user_context
     def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
                                         business_identifier=None, email=None, phone=None, certified_by_name=None,
-                                        bearer_token: str = None):
+                                        bearer_token: str = None, **kwargs):
         """Initiate a new incorporation."""
-        current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
 
-        if not email and not phone:
+        current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
+        user_is_staff = False
+        user_from_context: UserContext = kwargs['user_context']
+        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
+        if user_from_context.is_staff() or \
+           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+            user_is_staff = True
+
+        if (not email and not phone) and not user_is_staff:
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Validate if org_id is valid by calling Org Service.
@@ -245,7 +253,7 @@ class Affiliation:
             if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
                 raise BusinessException(Error.NR_NOT_APPROVED, None)
 
-            if (phone and phone != nr_phone) or (email and email.casefold() != nr_email.casefold()):
+            if ((phone and phone != nr_phone) or (email and email.casefold() != nr_email.casefold())) and not user_is_staff:
                 raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
             # Create an entity with the Name from NR if entity doesn't exist
