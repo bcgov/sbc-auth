@@ -43,7 +43,10 @@ import { useI18n } from 'vue-i18n-composable'
 export default defineComponent({
   name: 'DeactivateCard',
   props: {
-    type: String as PropType<Account>
+    type: {
+      type: String as PropType<Account>,
+      default: Account.BASIC
+    }
   },
   setup (props) {
     const { t } = useI18n()

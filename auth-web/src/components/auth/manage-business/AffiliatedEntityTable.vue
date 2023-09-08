@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-template-shadow -->
 <template>
   <div id="affiliated-entity-section">
     <v-card flat>
@@ -105,7 +106,7 @@
                 {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
                   ? 'mdi-alert' : 'mdi-account-cog' }}
               </v-icon>
-              <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
+              <span v-sanitize="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
             </p>
           </span>
         </template>

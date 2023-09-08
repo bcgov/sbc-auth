@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ from auth_api.exceptions import BusinessException, ServiceUnavailableException
 from auth_api.exceptions.errors import Error
 from auth_api.models import db
 from auth_api.models.affiliation import Affiliation as AffiliationModel
+from auth_api.models.affiliation_invitation import AffiliationInvitation as AffiliationInvitationModel
 from auth_api.models.contact_link import ContactLink
 from auth_api.models.dataclass import Activity
 from auth_api.models.entity import Entity
@@ -185,13 +186,9 @@ class Affiliation:
         return Affiliation(affiliation)
 
     @staticmethod
-    @user_context
-    def is_authorized(entity: Entity, pass_code: str, **kwargs) -> bool:
+    def is_authorized(entity: Entity, pass_code: str) -> bool:
         """Return True if user is authorized to create an affiliation."""
-        user_from_context: UserContext = kwargs['user_context']
-        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
-        if user_from_context.is_staff() or \
-           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+        if Affiliation.is_staff_or_sbc_staff():
             return True
         if entity.corp_type in ['SP', 'GP']:
             if not pass_code:
@@ -211,8 +208,8 @@ class Affiliation:
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
-
-        if not email and not phone:
+        user_is_staff = Affiliation.is_staff_or_sbc_staff()
+        if not user_is_staff and (not email and not phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Validate if org_id is valid by calling Org Service.
@@ -244,7 +241,8 @@ class Affiliation:
             if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
                 raise BusinessException(Error.NR_NOT_APPROVED, None)
 
-            if (phone and phone != nr_phone) or (email and email.casefold() != nr_email.casefold()):
+            if not user_is_staff and ((phone and phone != nr_phone) or
+                                      (email and email.casefold() != nr_email.casefold())):
                 raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
             # Create an entity with the Name from NR if entity doesn't exist
@@ -310,6 +308,10 @@ class Affiliation:
         affiliation = AffiliationModel.find_affiliation_by_org_and_entity_ids(org_id=org_id, entity_id=entity_id)
         if affiliation is None:
             raise BusinessException(Error.DATA_NOT_FOUND, None)
+
+        # Could possibly be a single row.
+        for affiliation_invitation in AffiliationInvitationModel.find_invitations_by_affiliation(affiliation.id):
+            affiliation_invitation.delete()
 
         if reset_passcode:
             entity.reset_passcode(entity.business_identifier, email_addresses)
@@ -479,4 +481,15 @@ class Affiliation:
 
             if party_name_str.upper() == party_name.upper():
                 return True
+        return False
+
+    @staticmethod
+    @user_context
+    def is_staff_or_sbc_staff(**kwargs):
+        """Return True if user is staff or sbc staff."""
+        user_from_context: UserContext = kwargs['user_context']
+        current_user: UserService = UserService.find_by_jwt_token(silent_mode=True)
+        if user_from_context.is_staff() or \
+           (current_user and MembershipModel.check_if_sbc_staff(current_user.identifier)):
+            return True
         return False

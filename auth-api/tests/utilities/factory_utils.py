@@ -194,16 +194,22 @@ def factory_affiliation_service(entity_id, org_id):
 
 
 def factory_affiliation_invitation(from_org_id,
-                                   to_org_id,
                                    business_identifier,
+                                   to_org_id=None,
+                                   to_org_uuid=None,
                                    affiliation_invitation_type='EMAIL'):
     """Produce an affiliation invitation for the given from/to org, business and email."""
-    return {
+    affiliation_invitation_dict = {
         'fromOrgId': from_org_id,
         'toOrgId': to_org_id,
         'businessIdentifier': business_identifier,
         'type': affiliation_invitation_type
     }
+
+    if to_org_uuid:
+        affiliation_invitation_dict['toOrgUuid'] = to_org_uuid
+
+    return affiliation_invitation_dict
 
 
 def factory_contact_model(contact_info: dict = TestContactInfo.contact1):
@@ -338,6 +344,11 @@ def patch_token_info(claims, monkeypatch):
 def get_tos_latest_version():
     """Return latest tos version."""
     return '5'
+
+
+def get_tos_pad_latest_version():
+    """Return latest tos pad version."""
+    return 'p1'
 
 
 def patch_pay_account_post(monkeypatch):

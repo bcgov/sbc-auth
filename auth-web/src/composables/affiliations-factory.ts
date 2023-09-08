@@ -26,6 +26,8 @@ export const useAffiliations = () => {
   const businessStore = useBusinessStore()
   const businesses = computed(() => businessStore.businesses)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
+  /** V-model for dropdown menus of affiliation actions. */
+  const actionDropdown: Ref<boolean[]> = ref([])
 
   /** Returns true if the affiliation is a Name Request. */
   const isNameRequest = (business: Business): boolean => {
@@ -161,10 +163,12 @@ export const useAffiliations = () => {
     )
   }
 
-  /** Returns the Name Request type using the NR type code */
+  /** Returns the Name Request type using the NR action code or the NR type code */
   const nameRequestType = (business: Business): string => {
     if (isNameRequest(business)) {
-      const nrType = CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
+      // Try action code first, and if not found in the enum then use type code
+      let nrType: string = CommonUtils.mapRequestActionCdToNrType(business.nameRequest?.requestActionCd)
+      nrType = nrType || CommonUtils.mapRequestTypeCdToNrType(business.nameRequest?.requestTypeCd)
       if (nrType) {
         const emDash = '—' // ALT + 0151
         return `${emDash} ${nrType}`
@@ -239,11 +243,13 @@ export const useAffiliations = () => {
     } else {
       affiliations.filters.isActive = true
     }
+    actionDropdown.value = []
   }
 
   const clearAllFilters = () => {
     affiliations.filters.filterPayload = {}
     affiliations.filters.isActive = false
+    actionDropdown.value = []
   }
 
   const getEntityType = (item: Business): CorpTypes => {
@@ -273,6 +279,7 @@ export const useAffiliations = () => {
     tempDescription,
     isTemporaryBusiness,
     getEntityType,
-    isBusinessAffiliated
+    isBusinessAffiliated,
+    actionDropdown
   }
 }

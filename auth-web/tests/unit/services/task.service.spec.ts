@@ -20,6 +20,11 @@ const mockTask: Task[] = [{
   'type': 'Wills Registry'
 }]
 
+const mocks = vi.hoisted(() => ({
+  get: vi.fn().mockReturnValue(mockTask),
+  put: vi.fn().mockReturnValue(mockTask)
+}))
+
 describe('Task service', () => {
   beforeEach(() => {
     sessionStorage['AUTH_API_CONFIG'] = JSON.stringify(mockob)
@@ -27,12 +32,8 @@ describe('Task service', () => {
       return {
         create: () => {
           return {
-            get: () => {
-              return mockTask
-            },
-            put: () => {
-              return mockTask
-            },
+            get: mocks.get,
+            put: mocks.put,
             interceptors: {
               request: { eject: vi.fn(), use: vi.fn() },
               response: { eject: vi.fn(), use: vi.fn() }
@@ -41,6 +42,7 @@ describe('Task service', () => {
         }
       }
     })
+    vi.clearAllMocks()
   })
 
   it('call getTaskById() for task Details ', () => {

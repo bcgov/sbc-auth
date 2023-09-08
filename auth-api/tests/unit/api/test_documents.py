@@ -20,7 +20,8 @@ Test-Suite to ensure that the /documents endpoint is working as expected.
 from auth_api import status as http_status
 from auth_api.schemas import utils as schema_utils
 from tests.utilities.factory_scenarios import TestJwtClaims
-from tests.utilities.factory_utils import factory_auth_header, factory_document_model, get_tos_latest_version
+from tests.utilities.factory_utils import (
+    factory_auth_header, factory_document_model, get_tos_latest_version, get_tos_pad_latest_version)
 
 
 def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-argument
@@ -31,12 +32,22 @@ def test_documents_returns_200(client, jwt, session):  # pylint:disable=unused-a
     assert rv.status_code == http_status.HTTP_200_OK
     assert rv.json.get('versionId') == get_tos_latest_version()
 
+    rv = client.get('/api/v1/documents/termsofuse_pad', headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('versionId') == get_tos_pad_latest_version()
+
     headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.anonymous_bcros_role)
     rv = client.get('/api/v1/documents/termsofuse', headers=headers, content_type='application/json')
 
     assert rv.status_code == http_status.HTTP_200_OK
     assert schema_utils.validate(rv.json, 'document')[0]
     assert rv.json.get('versionId') == 'd1'
+
+    rv = client.get('/api/v1/documents/termsofuse_pad', headers=headers, content_type='application/json')
+
+    assert rv.status_code == http_status.HTTP_200_OK
+    assert rv.json.get('versionId') == get_tos_pad_latest_version()
 
 
 def test_invalid_documents_returns_404(client, jwt, session):  # pylint:disable=unused-argument

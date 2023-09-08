@@ -1,4 +1,4 @@
-# Copyright © 2019 Province of British Columbia
+# Copyright © 2023 Province of British Columbia
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the resource endpoints mounted in Flask-Blueprint style.
+"""Enum definitions for endpoints."""
+from enum import Enum
 
-Uses restplus namespaces to mount individual api endpoints into the service.
 
-All services have 2 defaults sets of endpoints:
- - ops
- - meta
-That are used to expose operational health information about the service, and meta information.
-"""
-from .endpoints import endpoints
+class EndpointEnum(str, Enum):
+    """Endpoint route url paths."""
+
+    API_V1 = '/api/v1'
+    API = '/api'
+    TEST_API = '/test'
+    DEFAULT_API = API_V1
