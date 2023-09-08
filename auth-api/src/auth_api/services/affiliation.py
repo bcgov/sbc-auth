@@ -209,7 +209,6 @@ class Affiliation:
                                         business_identifier=None, email=None, phone=None, certified_by_name=None,
                                         bearer_token: str = None):
         """Initiate a new incorporation."""
-
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         user_is_staff = Affiliation.is_staff_or_sbc_staff()
         if (not email and not phone) and not user_is_staff:
@@ -244,7 +243,8 @@ class Affiliation:
             if status == NRStatus.CONDITIONAL.value and nr_json.get('consentFlag', None) not in (None, 'R', 'N'):
                 raise BusinessException(Error.NR_NOT_APPROVED, None)
 
-            if ((phone and phone != nr_phone) or (email and email.casefold() != nr_email.casefold())) and not user_is_staff:
+            if not user_is_staff and ((phone and phone != nr_phone) or
+                                      (email and email.casefold() != nr_email.casefold())):
                 raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
             # Create an entity with the Name from NR if entity doesn't exist
