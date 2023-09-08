@@ -95,7 +95,8 @@ export default class CommonUtils {
     const cleaned = ('' + phoneNumber).replace(/\D/g, '')
 
     // Check if the input is of correct length
-    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/)
+    const regex = /^(\d{3})(\d{3})(\d{4})$/
+    const match = regex.exec(cleaned)
 
     if (match) {
       return '(' + match[1] + ') ' + match[2] + '-' + match[3]

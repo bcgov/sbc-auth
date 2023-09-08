@@ -1,7 +1,7 @@
 import { QualifiedSupplierRequirementsConfig } from '@/models/external'
 import { TaskType } from '@/util/constants'
 
-export const userAccessRequirements: Record<TaskType | any, QualifiedSupplierRequirementsConfig[]> = {
+export const userAccessRequirements: Partial<Record<TaskType, QualifiedSupplierRequirementsConfig[]>> = {
   [TaskType.MHR_LAWYER_NOTARY]: [
     {
       boldText: `An active B.C. lawyer or notary in good standing will be on this account.`,

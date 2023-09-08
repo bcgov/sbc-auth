@@ -167,11 +167,11 @@
 
 <script lang="ts">
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { QualifiedSupplierApplicant, QualifiedSupplierRequirementsConfig } from '@/models/external'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
 import { Organization } from '@/models/Organization'
-import { QualifiedSupplierApplicant } from '@/models/external'
 import { Task } from '@/models/Task'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
@@ -194,13 +194,14 @@ export default defineComponent({
   setup (props) {
     const localState = reactive({
       qsApplicantData: null as QualifiedSupplierApplicant,
-      qsApplicationTypeDisplay: computed(() => {
-        return props.taskDetails?.type.replace(/.*–\s*/, '')
+      qsApplicationTypeDisplay: computed((): string => {
+        const type = props.taskDetails?.type || ''
+        return type.replace(/^.*–\s*/, '').trim()
       }),
-      qsApplicantPhone: computed(() => {
+      qsApplicantPhone: computed((): string => {
         return CommonUtils.toDisplayPhone(localState.qsApplicantData?.phoneNumber)
       }),
-      qsRequirements: computed(() => {
+      qsRequirements: computed((): QualifiedSupplierRequirementsConfig[] => {
         return userAccessRequirements[props.taskDetails?.type]
       })
     })
