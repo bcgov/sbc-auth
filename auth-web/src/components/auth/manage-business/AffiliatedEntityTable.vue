@@ -185,6 +185,7 @@ import EntityDetails from './EntityDetails.vue'
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
+import CommonUtils from '@/util/common-util'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
@@ -275,15 +276,15 @@ export default defineComponent({
     }
 
     const getRequestForAuthorizationStatusText = (affiliationInviteInfos: AffiliationInviteInfo[]) => {
-      if (isCurrentOrganization(affiliationInviteInfos[0]?.toOrg?.id)) {
+      const affiliationWithSmallestId = CommonUtils.getElementWithSmallestId<AffiliationInviteInfo>(affiliationInviteInfos)
+      if (isCurrentOrganization(affiliationWithSmallestId.toOrg?.id)) {
         // incoming request for access
-        const getAlwaysSameOrderArr = affiliationInviteInfos.slice().sort()
         const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
-        return `Request for Authorization to manage from: ${getAlwaysSameOrderArr[0].fromOrg.name}${andOtherAccounts}`
+        return `Request for Authorization to manage from: ${affiliationWithSmallestId.fromOrg.name}${andOtherAccounts}`
       } else {
         let statusText = ''
         // outgoing request for access
-        switch (affiliationInviteInfos[0].status) {
+        switch (affiliationWithSmallestId.status) {
           case AffiliationInvitationStatus.Pending:
             statusText = 'Confirmation email sent, pending authorization.'
             break
