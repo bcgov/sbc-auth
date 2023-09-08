@@ -94,6 +94,10 @@ strong {
   letter-spacing: -0.01rem;
 }
 
+.fs-14 {
+  font-size: 0.875rem;
+}
+
 .v-application {
   font-family: 'BCSans', Verdana, Arial, sans-serif; // BC Government Font
 
@@ -183,4 +187,9 @@ legend {
 
 .gray-9 {
   color: $gray9;
+}
+
+.icon-text {
+  display: flex;
+  align-items: flex-start;
 }

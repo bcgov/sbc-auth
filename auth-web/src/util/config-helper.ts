@@ -143,6 +143,14 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_PPR_WEB_URL}`
   }
 
+  static getMhrAPIUrl () {
+    return `${import.meta.env.VUE_APP_MHR_API_URL}` + `${import.meta.env.VUE_APP_MHR_API_VERSION}`
+  }
+
+  static getMhrAPIKey () {
+    return `${import.meta.env.VUE_APP_MHR_API_KEY}`
+  }
+
   static getSiteminderLogoutUrl () {
     return `${import.meta.env.VUE_APP_SITEMINDER_LOGOUT_URL}`
   }

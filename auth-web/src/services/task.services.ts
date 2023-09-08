@@ -2,7 +2,7 @@ import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import { TaskRelationshipStatus } from '@/util/constants'
+import {SessionStorageKeys, TaskRelationshipStatus} from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class TaskService {
@@ -58,5 +58,14 @@ export default class TaskService {
   static async onHoldPendingTask (taskId, remarks:string[]): Promise<AxiosResponse> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
       { status: TaskRelationshipStatus.HOLD, remarks, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
+  }
+
+  public static async getQsApplicantForTaskReview (accountId: number | string): Promise<AxiosResponse> {
+    const apiKey = ConfigHelper.getMhrAPIKey()
+    const headers = {
+      'x-apikey': apiKey,
+      'Account-Id': accountId
+    }
+    return axios.get(`${ConfigHelper.getMhrAPIUrl()}/qualified-suppliers`, { headers })
   }
 }

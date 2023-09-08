@@ -515,7 +515,10 @@ export enum TaskType {
     NEW_ACCOUNT_STAFF_REVIEW = 'New Account',
     GOVM_REVIEW = 'GovM',
     GOVN_REVIEW = 'GovN',
-    BCEID_ADMIN_REVIEW = 'BCeID Admin'
+    BCEID_ADMIN_REVIEW = 'BCeID Admin',
+    MHR_LAWYER_NOTARY = 'Manufactured Home Registry – Lawyers and Notaries',
+    MHR_MANUFACTURERS = 'Manufactured Home Registry – Manufacturers',
+    MHR_DEALERS = 'Manufactured Home Registry – Home Dealers'
 }
 
 export enum TaskAction {

@@ -89,6 +89,19 @@ export default class CommonUtils {
     return VALID_PASSWORD_FORMAT.test(value)
   }
 
+  // Formatting phone number in the desired format for displaying in the template eg: (123) 456-7890
+  static toDisplayPhone (phoneNumber: string): string {
+    // Filter only numbers from the input
+    const cleaned = ('' + phoneNumber).replace(/\D/g, '')
+
+    // Check if the input is of correct length
+    const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/)
+
+    if (match) {
+      return '(' + match[1] + ') ' + match[2] + '-' + match[3]
+    } else return phoneNumber
+  }
+
   // Formatting date in the desired format for displaying in the template
   static formatDisplayDate (date: Date, format?: string) {
     // not working in CI (getting UTC datetime)
