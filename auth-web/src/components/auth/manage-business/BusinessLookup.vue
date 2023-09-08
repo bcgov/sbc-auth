@@ -164,34 +164,35 @@ export default defineComponent({
     }
 
     const checkForSearching = async () => {
-      if (states.searchField?.length >= 3) {
-        states.state = States.SEARCHING
-        const searchStatus = null // search all (ACTIVE + HISTORICAL)
-        const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
-        // Use appropriate service based on lookupType
-        const searchService = (props.lookupType === LookupType.NR)
-          ? NameRequestLookupServices.search
-          : (query) => BusinessLookupServices.search(query, legalType, searchStatus)
-
-        try {
-          states.searchResults = await searchService(states.searchField)
-        } catch (error) {
-          console.error('Error occurred while searching:', error)
-          states.searchResults = []
-        }
-
-        // enable or disable items according to whether they have already been added
-        for (const result of states.searchResults) {
-          if (props.lookupType === LookupType.NR && 'nrNum' in result) {
-            result.disabled = businessStore.isAffiliatedNR(result.nrNum)
-          } else if ('identifier' in result) {
-            result.disabled = businessStore.isAffiliated(result.identifier)
-          }
-        }
-
-        // display appropriate section
-        states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
+      if (!states.searchField || states.searchField?.length <= 2) {
+        return
       }
+      states.state = States.SEARCHING
+      const searchStatus = null // search all (ACTIVE + HISTORICAL)
+      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
+      // Use appropriate service based on lookupType
+      const searchService = (props.lookupType === LookupType.NR)
+        ? NameRequestLookupServices.search
+        : (query) => BusinessLookupServices.search(query, legalType, searchStatus)
+
+      try {
+        states.searchResults = await searchService(states.searchField)
+      } catch (error) {
+        console.error('Error occurred while searching:', error)
+        states.searchResults = []
+      }
+
+      // enable or disable items according to whether they have already been added
+      for (const result of states.searchResults) {
+        if (props.lookupType === LookupType.NR && 'nrNum' in result) {
+          result.disabled = businessStore.isAffiliatedNR(result.nrNum)
+        } else if ('identifier' in result) {
+          result.disabled = businessStore.isAffiliated(result.identifier)
+        }
+      }
+
+      // display appropriate section
+      states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
     }
 
     const checkForEmptySearch = () => {
