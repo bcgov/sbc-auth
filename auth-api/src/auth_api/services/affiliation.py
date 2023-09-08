@@ -209,7 +209,7 @@ class Affiliation:
         """Initiate a new incorporation."""
         current_app.logger.info(f'<create_affiliation org_id:{org_id} business_identifier:{business_identifier}')
         user_is_staff = Affiliation.is_staff_or_sbc_staff()
-        if (not email and not phone) and not user_is_staff:
+        if not user_is_staff and (not email and not phone):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Validate if org_id is valid by calling Org Service.
