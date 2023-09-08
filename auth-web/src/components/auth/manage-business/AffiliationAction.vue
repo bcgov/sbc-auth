@@ -32,7 +32,7 @@
       <!-- More Actions Menu -->
       <span class="more-actions">
         <v-menu
-          v-model="dropdown[index]"
+          v-model="actionDropdown[index]"
           :attach="`#action-menu-${index}`"
         >
           <template #activator="{ on }">
@@ -43,7 +43,7 @@
               class="more-actions-btn"
               v-on="on"
             >
-              <v-icon>{{ dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
+              <v-icon>{{ actionDropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
             </v-btn>
           </template>
           <v-list>
@@ -132,10 +132,7 @@ export default defineComponent({
     const businessStore = useBusinessStore()
 
     const { affiliations, status, isBusinessAffiliated, isNameRequest,
-      isTemporaryBusiness, getEntityType, tempDescription } = useAffiliations()
-
-    /** V-model for dropdown menus. */
-    const dropdown: Array<boolean> = []
+      isTemporaryBusiness, getEntityType, tempDescription, actionDropdown } = useAffiliations()
 
     /** Create a business record in LEAR. */
     const createBusinessRecord = async (business: Business): Promise<string> => {
@@ -522,7 +519,7 @@ export default defineComponent({
       affiliations,
       action,
       disableTooltip,
-      dropdown,
+      actionDropdown,
       getPrimaryAction,
       getTooltipTargetDescription,
       goToNameRequest,

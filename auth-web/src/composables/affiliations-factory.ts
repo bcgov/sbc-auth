@@ -26,6 +26,8 @@ export const useAffiliations = () => {
   const businessStore = useBusinessStore()
   const businesses = computed(() => businessStore.businesses)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
+  /** V-model for dropdown menus of affiliation actions. */
+  const actionDropdown: Ref<boolean[]> = ref([])
 
   /** Returns true if the affiliation is a Name Request. */
   const isNameRequest = (business: Business): boolean => {
@@ -239,11 +241,13 @@ export const useAffiliations = () => {
     } else {
       affiliations.filters.isActive = true
     }
+    actionDropdown.value = []
   }
 
   const clearAllFilters = () => {
     affiliations.filters.filterPayload = {}
     affiliations.filters.isActive = false
+    actionDropdown.value = []
   }
 
   const getEntityType = (item: Business): CorpTypes => {
@@ -273,6 +277,7 @@ export const useAffiliations = () => {
     tempDescription,
     isTemporaryBusiness,
     getEntityType,
-    isBusinessAffiliated
+    isBusinessAffiliated,
+    actionDropdown
   }
 }
