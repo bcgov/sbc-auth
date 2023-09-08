@@ -1,5 +1,5 @@
 <template>
-  <section v-if="accountUnderReview">
+  <section id="qs-application">
     <h2 class="mb-4">
       {{ `${tabNumber !== null ? `${tabNumber}. ` : ''}${title}` }}
     </h2>

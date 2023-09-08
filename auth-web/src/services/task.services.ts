@@ -2,7 +2,7 @@ import { Task, TaskFilterParams, TaskList } from '@/models/Task'
 
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
-import {SessionStorageKeys, TaskRelationshipStatus} from '@/util/constants'
+import { TaskRelationshipStatus } from '@/util/constants'
 import { axios } from '@/util/http-util'
 
 export default class TaskService {

@@ -434,7 +434,6 @@ export default defineComponent({
 
     const componentList = computed(() => {
       const taskType = task.value?.type
-      console.log(task.value)
       switch (taskType) {
         case TaskType.GOVM_REVIEW:
           return [
