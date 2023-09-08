@@ -11,6 +11,8 @@ import Vuetify from 'vuetify'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
+import CommonUtils from '@/util/common-util'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 
 vi.mock('../../../src/services/user.services')
 
@@ -248,11 +250,11 @@ describe('AffiliatedEntityTable.vue', () => {
     expect(wrapper.findAll('#affiliationInvitesStatus').length).toBe(allWithInvites.length)
 
     // verify correct invites status is being displayed for each business with invites
-    const firstAccSingle = allWithInvites[0].affiliationInvites.sort()[0]
+    const firstAccSingle = CommonUtils.getElementWithSmallestId<AffiliationInviteInfo>(allWithInvites[0].affiliationInvites)
     const textSingle = `Request for Authorization to manage from: ${firstAccSingle.fromOrg.name}`
     expect(wrapper.findAll('#affiliationInvitesStatus').at(0).text()).toBe(textSingle)
 
-    const firstAccMulti = allWithInvites[1].affiliationInvites.sort()[0]
+    const firstAccMulti = CommonUtils.getElementWithSmallestId<AffiliationInviteInfo>(allWithInvites[1].affiliationInvites)
     const textMulti = `Request for Authorization to manage from: ${firstAccMulti.fromOrg.name} ` +
       `and ${allWithInvites[1].affiliationInvites.length - 1} other account(s)`
     expect(wrapper.findAll('#affiliationInvitesStatus').at(1).text()).toBe(textMulti)
