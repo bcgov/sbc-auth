@@ -119,8 +119,10 @@ import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-look
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
+import { LDFlags } from '@/util/constants'
 import NameRequestLookupServices from '@/services/name-request-lookup.services'
 import _ from 'lodash'
+import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useBusinessStore } from '@/stores/business'
 
 enum States {
@@ -150,9 +152,7 @@ export default defineComponent({
     const states = reactive({
       state: States.INITIAL,
       searchField: '',
-      searchResults: (props.lookupType === LookupType.NR)
-        ? [] as NameRequestLookupResultIF[]
-        : [] as BusinessLookupResultIF[]
+      searchResults: [] as NameRequestLookupResultIF[] | BusinessLookupResultIF[]
     })
 
     const businessStore = useBusinessStore()
@@ -163,11 +163,11 @@ export default defineComponent({
       } else if (states.searchField && states.searchField?.length > 2) {
         states.state = States.SEARCHING
         const searchStatus = null // search all (ACTIVE + HISTORICAL)
-
+        const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
         // Use appropriate service based on lookupType
         const searchService = (props.lookupType === LookupType.NR)
           ? NameRequestLookupServices.search
-          : (query) => BusinessLookupServices.search(query, searchStatus)
+          : (query) => BusinessLookupServices.search(query, legalType, searchStatus)
 
         try {
           states.searchResults = await searchService(states.searchField)
