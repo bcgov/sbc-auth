@@ -298,7 +298,7 @@ export default defineComponent({
             statusText = 'Not authorized. The <strong>confirmation email has expired.</strong>'
             break
           default:
-            statusText = ''
+            break
         }
         return `Authorization to manage: ${statusText}`
       }

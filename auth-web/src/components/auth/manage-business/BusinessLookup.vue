@@ -156,11 +156,15 @@ export default defineComponent({
     })
 
     const businessStore = useBusinessStore()
-    const onSearchFieldChanged = _.debounce(async () => {
-      // safety check
-      if (states.searchField && states.searchField?.length < 3) {
+
+    const checkForTyping = () => {
+      if (states.searchField?.length <= 2) {
         states.state = States.TYPING
-      } else if (states.searchField && states.searchField?.length > 2) {
+      }
+    }
+
+    const checkForSearching = async () => {
+      if (states.searchField?.length >= 3) {
         states.state = States.SEARCHING
         const searchStatus = null // search all (ACTIVE + HISTORICAL)
         const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
@@ -187,11 +191,20 @@ export default defineComponent({
 
         // display appropriate section
         states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
-      } else {
+      }
+    }
+
+    const checkForEmptySearch = () => {
+      if (!states.searchField) {
         // reset variables
         states.searchResults = []
         states.state = States.INITIAL
       }
+    }
+    const onSearchFieldChanged = _.debounce(async () => {
+      checkForTyping()
+      await checkForSearching()
+      checkForEmptySearch()
     }, 600)
 
     watch(() => states.searchField, onSearchFieldChanged)

@@ -424,13 +424,11 @@ export default defineComponent({
           case NrRequestActionCodes.RENEW: {
             if (!isSupportedRestorationEntities(item)) {
               goToCorpOnline()
+            } else if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
+              goToDashboard(item.nameRequest?.corpNum)
             } else {
-              if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
-                goToDashboard(item.nameRequest?.corpNum)
-              } else {
-                const action = isForRestore(item) ? 'restore' : 'reinstate'
-                context.emit('business-unavailable-error', action)
-              }
+              const action = isForRestore(item) ? 'restore' : 'reinstate'
+              context.emit('business-unavailable-error', action)
             }
             break
           }
