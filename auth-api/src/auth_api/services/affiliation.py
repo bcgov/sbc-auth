@@ -203,7 +203,6 @@ class Affiliation:
         return True
 
     @staticmethod
-    @user_context
     def create_new_business_affiliation(org_id,  # pylint: disable=too-many-arguments, too-many-locals
                                         business_identifier=None, email=None, phone=None, certified_by_name=None,
                                         bearer_token: str = None):
