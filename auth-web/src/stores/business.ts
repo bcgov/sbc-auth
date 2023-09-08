@@ -117,6 +117,7 @@ export const useBusinessStore = defineStore('business', () => {
       target: getTarget(nr),
       entityTypeCd: nr.entityTypeCd,
       requestTypeCd: nr.requestTypeCd,
+      requestActionCd: nr.requestActionCd,
       natureOfBusiness: nr.natureBusinessInfo,
       expirationDate: nr.expirationDate,
       applicants: nr.applicants

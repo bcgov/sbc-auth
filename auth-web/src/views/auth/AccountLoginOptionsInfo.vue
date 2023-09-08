@@ -78,8 +78,8 @@ export default class AccountLoginOptionsInfo extends Vue {
       number: 2,
       stepTitle: 'Team Member Login Methods',
       stepDescription: `As the preferred method of authentication, your team members do not need to remember passwords with the BC Services Card. 
-                          Alternatively you can choose to have them login with a BCeID username and password, combined with a third-party authenticator app. 
-                          These options are explained on the following page.`,
+                          Alternatively you can choose to have them login with a BCeID username and password,` +
+                          ` combined with a third-party authenticator app. These options are explained on the following page.`,
       icon: 'mdi-account-group-outline'
     },
     {

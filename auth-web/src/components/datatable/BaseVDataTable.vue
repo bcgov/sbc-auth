@@ -155,13 +155,13 @@ export default defineComponent({
     setItems: { default: [] as object[] },
     setHeaders: { default: [] as BaseTableHeaderI[] },
     setTableDataOptions: { default: () => _.cloneDeep(DEFAULT_DATA_OPTIONS) as DataOptions },
-    totalItems: { type: Number },
+    totalItems: { type: Number, required: true },
     pageHide: { default: false },
-    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: false },
+    updateFilter: { type: Function as PropType<(filterField?: string, value?: any) => void>, required: true },
     filters: { default: { isActive: false, filterPayload: {} }, required: false },
     customPagination: { default: false },
     highlightIndex: { default: -1 },
-    highlightClass: { type: String }
+    highlightClass: { type: String, default: '' }
   },
   emits: ['update-table-options'],
   setup (props, { emit }) {

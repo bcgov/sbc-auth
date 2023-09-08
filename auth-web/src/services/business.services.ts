@@ -32,19 +32,19 @@ export default class BusinessService {
   }
 
   static async searchBusiness (businessIdentifier: string): Promise<AxiosResponse<any>> {
-    return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessIdentifier}`)
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/businesses/${businessIdentifier}`)
   }
 
   static async createDraftFiling (filingBody: BusinessRequest): Promise<AxiosResponse<any>> {
-    return axios.post(`${ConfigHelper.getLegalAPIUrl()}/businesses?draft=true`, filingBody)
+    return axios.post(`${ConfigHelper.getLegalAPIV2Url()}/businesses?draft=true`, filingBody)
   }
 
   static async deleteBusinessFiling (businessRegNumber: string, filingId: string): Promise<AxiosResponse<any>> {
-    return axios.delete(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings/${filingId}`)
+    return axios.delete(`${ConfigHelper.getLegalAPIV2Url()}/businesses/${businessRegNumber}/filings/${filingId}`)
   }
 
   static async getFilings (businessRegNumber: string): Promise<AxiosResponse<any>> {
-    return axios.get(`${ConfigHelper.getLegalAPIUrl()}/businesses/${businessRegNumber}/filings`)
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/businesses/${businessRegNumber}/filings`)
   }
 
   static async updateFolioNumber (folioNumber: FolioNumberload): Promise<AxiosResponse<any>> {
@@ -65,7 +65,7 @@ export default class BusinessService {
   }
 
   static async getNrData (nrNumber: string): Promise<AxiosResponse<any>> {
-    return axios.get(`${ConfigHelper.getLegalAPIUrl()}/nameRequests/${nrNumber}`)
+    return axios.get(`${ConfigHelper.getLegalAPIV2Url()}/nameRequests/${nrNumber}`)
   }
 
   static async createBNRequest (request: BNRequest): Promise<AxiosResponse<any>> {

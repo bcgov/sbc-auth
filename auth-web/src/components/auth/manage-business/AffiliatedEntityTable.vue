@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-template-shadow -->
 <template>
   <div id="affiliated-entity-section">
     <v-card flat>
