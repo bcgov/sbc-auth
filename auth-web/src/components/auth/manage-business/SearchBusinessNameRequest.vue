@@ -29,15 +29,13 @@
           lazy-validation
           class="mt-6"
         >
-          <template>
-            <!-- Search for business identifier or name -->
-            <!-- NB: use v-if to re-mount component between instances -->
-            <BusinessLookup
-              :key="businessLookupKey"
-              :lookupType="lookupType.BUSINESS"
-              @business="businessEvent"
-            />
-          </template>
+          <!-- Search for business identifier or name -->
+          <!-- NB: use v-if to re-mount component between instances -->
+          <BusinessLookup
+            :key="businessLookupKey"
+            :lookupType="lookupType.BUSINESS"
+            @business="businessEvent"
+          />
         </v-form>
         <v-form
           v-else
@@ -45,13 +43,11 @@
           lazy-validation
           class="mt-6"
         >
-          <template>
-            <BusinessLookup
-              :key="businessLookupKey"
-              :lookupType="lookupType.NR"
-              @nameRequest="nameRequestEvent"
-            />
-          </template>
+          <BusinessLookup
+            :key="businessLookupKey"
+            :lookupType="lookupType.NR"
+            @nameRequest="nameRequestEvent"
+          />
         </v-form>
       </v-col>
     </v-row>

@@ -180,12 +180,12 @@ import { Business, Names } from '@/models/business'
 import { defineComponent, ref } from '@vue/composition-api'
 import AffiliationAction from '@/components/auth/manage-business/AffiliationAction.vue'
 import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
 
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 import { useOrgStore } from '@/stores/org'
-import CommonUtils from '@/util/common-util'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',

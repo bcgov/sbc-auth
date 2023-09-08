@@ -4,15 +4,15 @@ import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
 import { actions, businesses, moreBusinesses } from './../test-utils/test-data/affiliations'
 import { useBusinessStore, useOrgStore } from '@/stores'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components/datatable'
+import CommonUtils from '@/util/common-util'
 import EntityDetails from '@/components/auth/manage-business/EntityDetails.vue'
 import { VueConstructor } from 'vue'
 import Vuetify from 'vuetify'
 import { baseVdataTable } from './../test-utils/test-data/baseVdata'
 import { getAffiliationTableHeaders } from '@/resources/table-headers'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
-import CommonUtils from '@/util/common-util'
-import { AffiliationInviteInfo } from '@/models/affiliation'
 
 vi.mock('../../../src/services/user.services')
 
