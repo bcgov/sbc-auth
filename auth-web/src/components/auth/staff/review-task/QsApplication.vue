@@ -12,7 +12,12 @@
     </v-row>
     <v-row>
       <v-col class="cols-12 py-2 icon-text">
-        <v-icon class="pr-2" color="success">mdi-check</v-icon>
+        <v-icon
+          class="pr-2"
+          color="success"
+        >
+          mdi-check
+        </v-icon>
         I have read, understood and agree to the terms and conditions of the
         Qualified Suppliers’ Agreement for the Manufactured Home Registry.
       </v-col>
@@ -28,7 +33,10 @@
       <v-col class="cols-12 col-sm-3 py-2 pr-2">
         Qualified Supplier Name
       </v-col>
-      <v-col class="py-2" data-test="qs-org-name">
+      <v-col
+        class="py-2"
+        data-test="qs-org-name"
+      >
         {{ qsApplicantData && qsApplicantData.businessName }}
       </v-col>
     </v-row>
@@ -36,7 +44,10 @@
       <v-col class="cols-12 col-sm-3 py-2">
         Phone Number
       </v-col>
-      <v-col class="py-2" data-test="qs-phone">
+      <v-col
+        class="py-2"
+        data-test="qs-phone"
+      >
         {{ qsApplicantData && qsApplicantPhone }}
       </v-col>
     </v-row>
@@ -64,7 +75,10 @@
       <v-col class="cols-12 col-sm-3 py-2 pr-2">
         Username
       </v-col>
-      <v-col class="py-2" data-test="qs-username">
+      <v-col
+        class="py-2"
+        data-test="qs-username"
+      >
         {{ accountUnderReviewAdmin.firstname }} {{ accountUnderReviewAdmin.lastname }}
       </v-col>
     </v-row>
@@ -80,7 +94,10 @@
       <v-col class="cols-12 col-sm-3 py-2">
         Phone Number
       </v-col>
-      <v-col class="py-2" data-test="qs-phone">
+      <v-col
+        class="py-2"
+        data-test="qs-phone"
+      >
         {{ accountUnderReviewAdminContact.phone }}
       </v-col>
     </v-row>
@@ -88,7 +105,10 @@
       <v-col class="cols-12 col-sm-3 py-2">
         Email Address
       </v-col>
-      <v-col class="py-2" data-test="qs-email">
+      <v-col
+        class="py-2"
+        data-test="qs-email"
+      >
         {{ accountUnderReviewAdminContact.email }}
       </v-col>
     </v-row>
@@ -114,7 +134,10 @@
     <v-row>
       <v-col class="pa-2">
         <ol>
-          <li v-for="(requirement, index) in qsRequirements" :key="index">
+          <li
+            v-for="(requirement, index) in qsRequirements"
+            :key="index"
+          >
             <p class="pl-1">
               <b>{{ requirement.boldText }}</b>
               {{ requirement.regularText }}
@@ -125,7 +148,12 @@
     </v-row>
     <v-row>
       <v-col class="cols-12 py-2 icon-text">
-        <v-icon class="pr-2" color="success">mdi-check</v-icon>
+        <v-icon
+          class="pr-2"
+          color="success"
+        >
+          mdi-check
+        </v-icon>
         I confirm and agree to all of the above requirements.
       </v-col>
     </v-row>
@@ -144,7 +172,12 @@
     </v-row>
     <v-row>
       <v-col class="py-2 icon-text">
-        <v-icon class="pr-2" color="success">mdi-check</v-icon>
+        <v-icon
+          class="pr-2"
+          color="success"
+        >
+          mdi-check
+        </v-icon>
         <span>
           <b>{{ qsApplicantData && qsApplicantData.authorizationName }}</b> certifies that they have relevant knowledge
           of the Qualified Supplier and is authorized to submit this application.
@@ -166,8 +199,8 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { QualifiedSupplierApplicant, QualifiedSupplierRequirementsConfig } from '@/models/external'
+import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
