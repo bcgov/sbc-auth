@@ -186,7 +186,6 @@ class Affiliation:
         return Affiliation(affiliation)
 
     @staticmethod
-    @user_context
     def is_authorized(entity: Entity, pass_code: str) -> bool:
         """Return True if user is authorized to create an affiliation."""
         if Affiliation.is_staff_or_sbc_staff():
