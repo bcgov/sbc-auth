@@ -84,7 +84,7 @@ def test_as_dict(session, auth_mock, keycloak_mock, business_mock, monkeypatch):
             business_identifier=entity_dictionary['business_identifier'])
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                            User(user), '')
+                                                                                            User(user), '', 'test')
         affiliation_invitation_dictionary = affiliation_invitation.as_dict()
         assert affiliation_invitation_dictionary['recipient_email'] == affiliation_invitation_info['recipientEmail']
 
@@ -111,7 +111,7 @@ def test_create_affiliation_invitation(session, auth_mock, keycloak_mock, busine
             business_identifier=entity_dictionary['business_identifier'])
 
         affiliation_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                            User(user), '')
+                                                                                            User(user), '', 'test')
         invitation_dictionary = affiliation_invitation.as_dict()
         assert invitation_dictionary['recipient_email'] == affiliation_invitation_info['recipientEmail']
         assert invitation_dictionary['id']
@@ -132,7 +132,7 @@ def test_find_affiliation_invitation_by_id(session, auth_mock, keycloak_mock, bu
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '').as_dict()
+                                                                                    User(user), '', 'test').as_dict()
         invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation['id']).as_dict()
 
         assert invitation
@@ -159,7 +159,7 @@ def test_delete_affiliation_invitation(session, auth_mock, keycloak_mock, busine
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '').as_dict()
+                                                                                    User(user), '', 'test').as_dict()
         AffiliationInvitationService.delete_affiliation_invitation(new_invitation['id'])
         invitation = AffiliationInvitationService.find_affiliation_invitation_by_id(new_invitation['id'])
         assert invitation is None
@@ -215,7 +215,7 @@ def test_update_affiliation_invitation(session, auth_mock, keycloak_mock, busine
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '')
+                                                                                    User(user), '', 'test')
         updated_invitation = new_invitation.update_affiliation_invitation(User(user), '', {}).as_dict()
         assert updated_invitation['status'] == 'PENDING'
 
@@ -234,7 +234,7 @@ def test_update_invitation_verify_different_tokens(session, auth_mock, keycloak_
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user), '')
+                                                                                    User(user), '', 'test')
         old_token = new_invitation.as_dict().get('token')
         with freeze_time(
                 lambda: datetime.now() + timedelta(seconds=1)):  # to give time difference..or else token will be same..
@@ -265,14 +265,15 @@ def test_validate_token_accepted(session, auth_mock, keycloak_mock, business_moc
             business_identifier=entity_dictionary['business_identifier'])
 
         new_invitation = AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info,
-                                                                                    User(user_invitee), '').as_dict()
+                                                                                    User(user_invitee), '',
+                                                                                    'test').as_dict()
         token = AffiliationInvitationService\
             .generate_confirmation_token(new_invitation['id'],
                                          new_invitation['from_org']['id'],
                                          new_invitation['to_org']['id'],
                                          entity_dictionary['business_identifier'])
 
-        AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '')
+        AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '', 'test')
 
         with pytest.raises(BusinessException) as exception:
             AffiliationInvitationService.validate_token(token, new_invitation['id'])
@@ -293,6 +294,7 @@ def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, busine
     """Accept the affiliation invitation and add the affiliation from the invitation."""
     with patch.object(AffiliationInvitationService, 'send_affiliation_invitation', return_value=None):
         with patch.object(auth, 'check_auth', return_value=True):
+            env = 'test'
             user_with_token = TestUserInfo.user_test
             user_with_token['keycloak_guid'] = TestJwtClaims.public_user_role['sub']
             user_with_token['idp_userid'] = TestJwtClaims.public_user_role['idp_userid']
@@ -312,14 +314,14 @@ def test_accept_affiliation_invitation(session, auth_mock, keycloak_mock, busine
 
             new_invitation = AffiliationInvitationService \
                 .create_affiliation_invitation(affiliation_invitation_info,
-                                               User(user_invitee), '').as_dict()
+                                               User(user_invitee), '', env).as_dict()
 
             invitation = AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'],
                                                                                     User(user_invitee),
-                                                                                    '').as_dict()
+                                                                                    '', env).as_dict()
             patch_token_info(TestJwtClaims.public_user_role, monkeypatch)
             affiliation = AffiliationService.find_affiliation(new_invitation['from_org']['id'],
-                                                              entity_dictionary['business_identifier'])
+                                                              entity_dictionary['business_identifier'], env)
             assert affiliation
             assert invitation
             assert affiliation['id'] == invitation['affiliation_id']
@@ -343,20 +345,22 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, busines
 
             # Accepting a non-existent invitation should raise not found exception
             with pytest.raises(BusinessException) as exception:
-                AffiliationInvitationService.accept_affiliation_invitation(None, User(user_invitee), '')
+                AffiliationInvitationService.accept_affiliation_invitation(None, User(user_invitee), '', 'test')
 
             assert exception.value.code == Error.DATA_NOT_FOUND.name
 
             # Accepting an invitation multiple times should raise actioned invitation exception
             new_invitation = AffiliationInvitationService \
                 .create_affiliation_invitation(affiliation_invitation_info,
-                                               User(user_invitee), '').as_dict()
+                                               User(user_invitee), '', 'test').as_dict()
 
-            AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '')
+            AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'], User(user_invitee), '',
+                                                                       'test')
 
             with pytest.raises(BusinessException) as exception:
                 AffiliationInvitationService.accept_affiliation_invitation(new_invitation['id'],
-                                                                           User(user_invitee), '')
+                                                                           User(user_invitee), '',
+                                                                           'test')
 
             assert exception.value.code == Error.ACTIONED_AFFILIATION_INVITATION.name
 
@@ -368,7 +372,7 @@ def test_accept_invitation_exceptions(session, auth_mock, keycloak_mock, busines
                 expired_invitation.save()
                 AffiliationInvitationService.accept_affiliation_invitation(expired_invitation.id,
                                                                            User(user_invitee),
-                                                                           '')
+                                                                           '', 'test')
             assert exception.value.code == Error.EXPIRED_AFFILIATION_INVITATION.name
 
 
@@ -390,7 +394,7 @@ def test_get_invitations_by_from_org_id(session, auth_mock, keycloak_mock, busin
             to_org_id=to_org_id,
             business_identifier=entity_dictionary['business_identifier'])
 
-        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '')
+        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '', 'test')
 
         invitations: list = AffiliationInvitationService \
             .search_invitations(AffiliationInvitationSearch(from_org_id=from_org_id,
@@ -417,7 +421,7 @@ def test_get_invitations_by_to_org_id(session, auth_mock, keycloak_mock, busines
             to_org_id=to_org_id,
             business_identifier=entity_dictionary['business_identifier'])
 
-        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '')
+        AffiliationInvitationService.create_affiliation_invitation(affiliation_invitation_info, User(user), '', 'test')
 
         invitations: list = AffiliationInvitationService \
             .search_invitations(

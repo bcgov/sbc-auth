@@ -53,7 +53,7 @@ def factory_org_model(name):
 
 def factory_affiliation_model(entity_id, org_id):
     """Produce a templated affiliation model."""
-    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id)
+    affiliation = AffiliationModel(entity_id=entity_id, org_id=org_id, environment='test')
     affiliation.save()
     return affiliation
 
@@ -67,6 +67,7 @@ def test_affiliation(session):  # pylint:disable=unused-argument
     assert entity.id is not None
     assert org.id is not None
     assert affiliation.id is not None
+    assert affiliation.environment is not None
 
 
 def test_find_affiliation_by_ids(session):  # pylint:disable=unused-argument
@@ -85,7 +86,7 @@ def test_find_affiliations_by_org_id(session):  # pylint:disable=unused-argument
     org = factory_org_model(name='My Test Org')
     affiliation = factory_affiliation_model(entity.id, org.id)
 
-    result_affiliation = affiliation.find_affiliations_by_org_id(org_id=org.id)
+    result_affiliation = affiliation.find_affiliations_by_org_id(org_id=org.id, environment='test')
     assert result_affiliation is not None
 
 
@@ -95,7 +96,8 @@ def test_find_affiliation_by_org_and_entity_ids(session):  # pylint:disable=unus
     org = factory_org_model(name='My Test Org')
     affiliation = factory_affiliation_model(entity.id, org.id)
 
-    result_affiliations = affiliation.find_affiliation_by_org_and_entity_ids(org_id=org.id, entity_id=entity.id)
+    result_affiliations = affiliation.find_affiliation_by_org_and_entity_ids(org_id=org.id, entity_id=entity.id,
+                                                                             environment='test')
     assert result_affiliations is not None
 
 
@@ -106,5 +108,6 @@ def test_find_affiliation_by_org_id_and_business_identifier(session):  # pylint:
     affiliation = factory_affiliation_model(entity.id, org.id)
 
     result_affiliations = affiliation.find_affiliation_by_org_id_and_business_identifier(org.id,
-                                                                                         entity.business_identifier)
+                                                                                         entity.business_identifier,
+                                                                                         environment='test')
     assert result_affiliations is not None

@@ -38,6 +38,7 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
     entity_id = Column(ForeignKey('entities.id'), nullable=False, index=True)
     org_id = Column(ForeignKey('orgs.id'), nullable=False)
     certified_by_name = Column(String(100), nullable=True)
+    environment = Column(String(20), nullable=False, index=True)
 
     entity = relationship('Entity', foreign_keys=[entity_id], lazy='select')
     org = relationship('Org', foreign_keys=[org_id], lazy='select')
@@ -51,14 +52,17 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
         return current_app.config.get('LEAR_AFFILIATION_DETAILS_URL')
 
     @classmethod
-    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id) -> Affiliation:
+    def find_affiliation_by_org_and_entity_ids(cls, org_id, entity_id, environment=None) -> Affiliation:
         """Return an affiliation for the provided org and entity ids."""
-        return cls.query.filter_by(org_id=org_id, entity_id=entity_id).one_or_none()
+        query = cls.query.filter_by(org_id=org_id, entity_id=entity_id)
+        if environment:
+            query = query.filter_by(environment=environment)
+        return query.one_or_none()
 
     @classmethod
-    def find_affiliations_by_entity_id(cls, entity_id) -> List[Affiliation]:
+    def find_affiliations_by_entity_id(cls, entity_id, environment) -> List[Affiliation]:
         """Return affiliations for the provided entity id."""
-        return cls.query.filter_by(entity_id=entity_id).all()
+        return cls.query.filter_by(entity_id=entity_id, environment=environment).all()
 
     @classmethod
     def find_affiliation_by_ids(cls, org_id: int, affiliation_id: int) -> Affiliation:
@@ -66,26 +70,31 @@ class Affiliation(VersionedModel):  # pylint: disable=too-few-public-methods # T
         return cls.query.filter_by(org_id=org_id).filter_by(id=affiliation_id).one_or_none()
 
     @classmethod
-    def find_affiliations_by_org_id(cls, org_id: int) -> List[Affiliation]:
+    def find_affiliations_by_org_id(cls, org_id: int, environment: str = None) -> List[Affiliation]:
         """Return the affiliations with the provided org id."""
-        return db.session.query(Affiliation).join(EntityModel) \
+        query = db.session.query(Affiliation).join(EntityModel) \
             .options(contains_eager(Affiliation.entity).load_only(
                 EntityModel.business_identifier, EntityModel.corp_type_code)) \
-            .filter(Affiliation.org_id == org_id) \
-            .order_by(Affiliation.created.desc()).all()
+            .filter(Affiliation.org_id == org_id)
+        if environment:
+            query = query.filter(Affiliation.environment == environment)
+        return query.order_by(Affiliation.created.desc()).all()
 
     @classmethod
-    def find_affiliations_by_business_identifier(cls, business_identifier: str):
+    def find_affiliations_by_business_identifier(cls, business_identifier: str, environment: str):
         """Return the affiliations with the provided business identifier."""
-        return cls.query.join(EntityModel).filter(EntityModel.business_identifier == business_identifier).all()
+        return cls.query.filter_by(environment=environment).\
+            join(EntityModel).filter(EntityModel.business_identifier == business_identifier).all()
 
     @classmethod
     def find_affiliation_by_org_id_and_business_identifier(cls,
                                                            org_id: int,
-                                                           business_identifier: str) -> Affiliation:
+                                                           business_identifier: str,
+                                                           environment: str) -> Affiliation:
         """Return the affiliations with the provided org id and business identifier."""
         return db.session.query(Affiliation).join(EntityModel) \
             .options(contains_eager(Affiliation.entity).load_only(
                 EntityModel.business_identifier, EntityModel.corp_type_code)) \
             .filter(Affiliation.org_id == org_id) \
+            .filter(Affiliation.environment == environment) \
             .filter(EntityModel.business_identifier == business_identifier).first()

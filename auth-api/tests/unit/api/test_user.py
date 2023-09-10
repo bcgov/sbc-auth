@@ -705,7 +705,7 @@ def test_delete_user_as_only_admin_returns_400(client, jwt, session, keycloak_mo
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment='test')
     affiliation.save()
 
     headers = factory_auth_header(jwt=jwt, claims=claims)
@@ -742,7 +742,7 @@ def test_delete_user_is_member_returns_204(client, jwt, session, keycloak_mock,
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment='test')
     affiliation.save()
 
     membership = MembershipModel(org_id=org_id, user_id=user_model2.id, membership_type_code='USER',

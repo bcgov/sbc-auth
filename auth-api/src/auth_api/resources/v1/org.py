@@ -13,6 +13,7 @@
 # limitations under the License.
 """API endpoints for managing an Org resource."""
 import asyncio
+import os
 
 from flask import Blueprint, current_app, g, jsonify, request
 from flask_cors import cross_origin
@@ -51,6 +52,7 @@ TRACER = Tracer.get_instance()
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def search_organizations():
     """Search orgs."""
+    env = _get_environment()
     org_search = OrgSearch(
         request.args.get('name', None),
         request.args.get('branchName', None),
@@ -65,7 +67,6 @@ def search_organizations():
         int(request.args.get('limit', 10))
     )
     validate_name = request.args.get('validateName', 'False')
-
     try:
         token = g.jwt_oidc_token_info
         if validate_name.upper() == 'TRUE':
@@ -73,7 +74,7 @@ def search_organizations():
                                                            branch_name=org_search.branch_name), \
                                http_status.HTTP_200_OK
         else:
-            response, status = OrgService.search_orgs(org_search), http_status.HTTP_200_OK
+            response, status = OrgService.search_orgs(org_search, env), http_status.HTTP_200_OK
 
         roles = token.get('realm_access').get('roles')
         # public user can only get status of orgs in search, unless they have special roles.
@@ -316,14 +317,15 @@ def delete_organzization_contact(org_id):
 def get_organization_affiliations(org_id):
     """Get all affiliated entities for the given org."""
     try:
+        env = _get_environment()
         # keep old response until UI is updated
         if (request.args.get('new', 'false')).lower() != 'true':
             return jsonify(
-                {'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id)}
+                {'entities': AffiliationService.find_visible_affiliations_by_org_id(org_id, env)}
             ), http_status.HTTP_200_OK
 
         # get affiliation identifiers and the urls for the source data
-        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id)
+        affiliations = AffiliationModel.find_affiliations_by_org_id(org_id, env)
         affiliations_details_list = asyncio.run(AffiliationService.get_affiliation_details(affiliations))
         # Use orjson serializer here, it's quite a bit faster.
         response, status = current_app.response_class(
@@ -346,6 +348,7 @@ def get_organization_affiliations(org_id):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def post_organization_affiliation(org_id):
     """Post a new Affiliation for an org using the request body."""
+    env = _get_environment()
     request_json = request.get_json()
     valid_format, errors = schema_utils.validate(request_json, 'affiliation')
     bearer_token = request.headers['Authorization'].replace('Bearer ', '')
@@ -359,22 +362,32 @@ def post_organization_affiliation(org_id):
     try:
         if is_new_business:
             response, status = AffiliationService.create_new_business_affiliation(
-                org_id, business_identifier, request_json.get('email'),
+                org_id, env, business_identifier, request_json.get('email'),
                 request_json.get('phone'), request_json.get('certifiedByName'),
                 bearer_token=bearer_token).as_dict(), http_status.HTTP_201_CREATED
         else:
             response, status = AffiliationService.create_affiliation(
-                org_id, business_identifier, request_json.get('passCode'),
+                org_id, business_identifier, env, request_json.get('passCode'),
                 request_json.get('certifiedByName')).\
                                    as_dict(), http_status.HTTP_201_CREATED
 
         entity_details = request_json.get('entityDetails', None)
         if entity_details:
-            AffiliationService.fix_stale_affiliations(org_id, entity_details)
+            AffiliationService.fix_stale_affiliations(org_id, entity_details, env)
     except BusinessException as exception:
         response, status = {'code': exception.code, 'message': exception.message}, exception.status_code
 
     return response, status
+
+
+def _get_environment():
+    env = os.getenv('FLASK_ENV')
+    sandbox_host = current_app.config['SANDBOX_HOST_NAME']
+    if env == 'production':
+        host_url = request.host_url
+        if sandbox_host in host_url:
+            env = 'sandbox'
+    return env
 
 
 @bp.route('/affiliation/<string:business_identifier>', methods=['GET', 'OPTIONS'])
@@ -384,13 +397,14 @@ def post_organization_affiliation(org_id):
     [Role.SYSTEM.value, Role.STAFF_VIEW_ACCOUNTS.value, Role.PUBLIC_USER.value])
 def get_org_details_by_affiliation(business_identifier):
     """Search orgs by BusinessIdentifier and return org Name and UUID."""
+    environment = _get_environment()
     pagination_info = PaginationInfo(
         limit=int(request.args.get('limit', 10)),
         page=int(request.args.get('page', 1))
     )
 
     try:
-        data = OrgService.search_orgs_by_affiliation(business_identifier, pagination_info)
+        data = OrgService.search_orgs_by_affiliation(business_identifier, pagination_info, environment)
 
         org_details = [{'name': org.name, 'uuid': org.uuid} for org in data['orgs']]
         response, status = {'orgs_details': org_details}, http_status.HTTP_200_OK
@@ -409,9 +423,10 @@ def get_org_affiliation_by_business_identifier(org_id, business_identifier):
     # Note this is used by LEAR - which passes in the user's token to query for an affiliation for an NR.
     try:
         if AuthorizationService.get_user_authorizations_for_entity(business_identifier):
+            environment = _get_environment()
             # get affiliation
             response, status = AffiliationService.find_affiliation(
-                org_id, business_identifier), http_status.HTTP_200_OK
+                org_id, business_identifier, environment), http_status.HTTP_200_OK
         else:
             response, status = {'message': 'Not authorized to perform this action'}, \
                                http_status.HTTP_401_UNAUTHORIZED
@@ -429,6 +444,7 @@ def get_org_affiliation_by_business_identifier(org_id, business_identifier):
 @_jwt.has_one_of_roles([Role.SYSTEM.value, Role.STAFF_MANAGE_BUSINESS.value, Role.PUBLIC_USER.value])
 def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
     """Delete an affiliation between an org and an entity."""
+    env = _get_environment()
     request_json = request.get_json(silent=True) or {}
     email_addresses = request_json.get('passcodeResetEmail')
     reset_passcode = request_json.get('resetPasscode', False)
@@ -436,7 +452,7 @@ def delete_org_affiliation_by_business_identifier(org_id, business_identifier):
 
     try:
         AffiliationService.delete_affiliation(org_id, business_identifier, email_addresses,
-                                              reset_passcode, log_delete_draft)
+                                              reset_passcode, log_delete_draft, env)
         response, status = {}, http_status.HTTP_200_OK
 
     except BusinessException as exception:

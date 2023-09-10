@@ -708,7 +708,7 @@ def test_delete_user_where_org_has_affiliations(session, auth_mock, keycloak_moc
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
 
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment='test')
     affiliation.save()
     with pytest.raises(BusinessException) as exception:
         UserService.delete_user()
@@ -741,7 +741,7 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment='test')
     affiliation.save()
 
     # Create another user and add membership to the above org
@@ -769,7 +769,7 @@ def test_delete_user_where_user_is_member_on_org(session, auth_mock, keycloak_mo
 
 
 def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mock,
-                                                 monkeypatch):  # pylint:disable=unused-argument
+                                                 monkeypatch, env='test'):  # pylint:disable=unused-argument
     """Assert that a user can be deleted."""
     # Create a user and org
     user_model = factory_user_model(user_info=TestUserInfo.user_test)
@@ -786,7 +786,7 @@ def test_delete_user_where_org_has_another_owner(session, auth_mock, keycloak_mo
     org_id = org_dictionary['id']
 
     entity = factory_entity_model(entity_info=TestEntityInfo.entity_lear_mock)
-    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id)
+    affiliation = AffiliationModel(org_id=org_id, entity_id=entity.id, environment=env)
     affiliation.save()
 
     # Create another user and add membership to the above org

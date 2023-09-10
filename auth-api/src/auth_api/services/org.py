@@ -699,7 +699,7 @@ class Org:  # pylint: disable=too-many-public-methods
         return MembershipModel.find_orgs_for_user(user_id, valid_statuses)
 
     @staticmethod
-    def search_orgs(search: OrgSearch):  # pylint: disable=too-many-locals
+    def search_orgs(search: OrgSearch, environment):  # pylint: disable=too-many-locals
         """Search for orgs based on input parameters."""
         orgs_result = {
             'orgs': [],
@@ -716,7 +716,7 @@ class Org:  # pylint: disable=too-many-public-methods
             org_models, orgs_result['total'] = OrgModel.search_pending_activation_orgs(name=search.name)
             include_invitations = True
         else:
-            org_models, orgs_result['total'] = OrgModel.search_org(search)
+            org_models, orgs_result['total'] = OrgModel.search_org(search, environment)
 
         for org in org_models:
             orgs_result['orgs'].append({
@@ -732,9 +732,9 @@ class Org:  # pylint: disable=too-many-public-methods
 
     @staticmethod
     def search_orgs_by_affiliation(business_identifier,
-                                   pagination_info: PaginationInfo):
+                                   pagination_info: PaginationInfo, environment):
         """Search for orgs based on input parameters."""
-        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info)
+        orgs, total = OrgModel.search_orgs_by_business_identifier(business_identifier, pagination_info, environment)
 
         return {
             'orgs': orgs,
