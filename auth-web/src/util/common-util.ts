@@ -1,6 +1,6 @@
 import { Address, BaseAddressModel } from '@/models/address'
+import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { NrRequestTypeStrings, Permission } from '@/util/constants'
-import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import moment from 'moment'
 
 /**
@@ -273,8 +273,24 @@ export default class CommonUtils {
     return (url) ? url.trim().replace(/\/+$/, '') : ''
   }
 
+  /** use NR request action code to get NR type from enum */
+  static mapRequestActionCdToNrType (requestActionCd: NrRequestActionCodes): string {
+    // Can add other NrRequestActionCodes here to use the action code instead of the NrRequestTypeCd.
+    // Must ensure that the action code does not have several potential types
+    // Example: the NEW action code can be for Incorporation or Registration, so we cannot use it for the NR type
+    if (requestActionCd === NrRequestActionCodes.AMALGAMATE) { return 'Amalgamation' }
+    return ''
+  }
+
   /** use NR request type code to get NR type from enum */
   static mapRequestTypeCdToNrType (requestTypeCd: NrRequestTypeCodes): string {
     return NrRequestTypeStrings[requestTypeCd] as string
+  }
+
+  static getElementWithSmallestId<Type extends {id:number}> (arrayToSearch: Type[]): Type | undefined {
+    return arrayToSearch?.reduce(
+      (currentMin, curr) => (currentMin.id <= curr.id) ? currentMin : curr,
+      arrayToSearch.length > 0 ? arrayToSearch[0] : undefined
+    )
   }
 }

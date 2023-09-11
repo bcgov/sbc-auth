@@ -3,6 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
+import VueSanitize from 'vue-sanitize-directive'
 import VueTheMask from 'vue-the-mask'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
@@ -14,6 +15,7 @@ Vue.use(VueRouter)
 Vue.use(Vuetify)
 Vue.use(VueI18n)
 Vue.use(VueRouter)
+Vue.use(VueSanitize)
 Vue.directive('can', can)
 
 // Prevent the warning "[Vuetify] Unable to locate target [data-app]"

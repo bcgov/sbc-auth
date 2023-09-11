@@ -100,6 +100,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
 import BusinessLookup from './BusinessLookup.vue'
+import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import { LoginPayload } from '@/models/business'
 import { LookupType } from '@/models/business-nr-lookup'
@@ -140,14 +141,13 @@ export default class SearchBusinessNameRequest extends Vue {
   showNRDialog = false
   businessLookupKey = 0 // force re-mount of BusinessLookup component
   lookupType = LookupType
+  businessStore = useBusinessStore()
 
   $refs: {
     addNRDialog: InstanceType<typeof ModalDialog>
     manageBusinessDialog: InstanceType<typeof ManageBusinessDialog>
   }
-  addBusinessToList = async (loginPayload: LoginPayload) => {
-    await useBusinessStore().addBusiness(loginPayload)
-  }
+
   showAddSuccessModal (event) {
     this.clearSearch++
     this.showManageBusinessDialog = false
@@ -202,7 +202,7 @@ export default class SearchBusinessNameRequest extends Vue {
     if (this.isGovStaffAccount) {
       try {
         let businessData: LoginPayload = { businessIdentifier: this.businessIdentifier }
-        await this.addBusinessToList(businessData)
+        await this.businessStore.addBusiness(businessData)
         this.$emit('add-success', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {
@@ -217,8 +217,32 @@ export default class SearchBusinessNameRequest extends Vue {
   async nameRequestEvent (event: { names: string[], nrNum: string }) {
     this.nrNames = event?.names || []
     this.businessIdentifier = event?.nrNum || ''
-    this.showNRDialog = true
-    this.showAddNRModal()
+    if (this.isGovStaffAccount) {
+      await this.addNameRequestForStaffSilently()
+    } else {
+      this.showNRDialog = true
+      this.showAddNRModal()
+    }
+  }
+
+  private async addNameRequestForStaffSilently () {
+    try {
+      const requestBody: CreateNRAffiliationRequestBody = {
+        businessIdentifier: this.businessIdentifier
+      }
+      const nrResponse = await this.businessStore.addNameRequest(requestBody)
+      if (nrResponse?.status === 201) {
+        // emit event to let parent know business added
+        this.$emit('add-success-nr', this.businessIdentifier)
+        this.$refs.manageBusinessDialog.resetForm(true)
+      } else {
+        this.$emit('add-unknown-error', 'nr')
+      }
+    } catch (err) {
+      this.$emit('add-unknown-error', 'nr')
+      // eslint-disable-next-line no-console
+      console.error('Error adding name request: ', err)
+    }
   }
 
   cancelEvent () {

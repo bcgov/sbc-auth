@@ -119,8 +119,10 @@ import { LookupType, NameRequestLookupResultIF } from '@/models/business-nr-look
 import { PropType, defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import { BusinessLookupResultIF } from '@/models'
 import BusinessLookupServices from '@/services/business-lookup.services'
+import { LDFlags } from '@/util/constants'
 import NameRequestLookupServices from '@/services/name-request-lookup.services'
 import _ from 'lodash'
+import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useBusinessStore } from '@/stores/business'
 
 enum States {
@@ -150,48 +152,60 @@ export default defineComponent({
     const states = reactive({
       state: States.INITIAL,
       searchField: '',
-      searchResults: (props.lookupType === LookupType.NR)
-        ? [] as NameRequestLookupResultIF[]
-        : [] as BusinessLookupResultIF[]
+      searchResults: [] as NameRequestLookupResultIF[] | BusinessLookupResultIF[]
     })
 
     const businessStore = useBusinessStore()
-    const onSearchFieldChanged = _.debounce(async () => {
-      // safety check
-      if (states.searchField && states.searchField?.length < 3) {
+
+    const checkForTyping = () => {
+      if (states.searchField?.length <= 2) {
         states.state = States.TYPING
-      } else if (states.searchField && states.searchField?.length > 2) {
-        states.state = States.SEARCHING
-        const searchStatus = null // search all (ACTIVE + HISTORICAL)
+      }
+    }
 
-        // Use appropriate service based on lookupType
-        const searchService = (props.lookupType === LookupType.NR)
-          ? NameRequestLookupServices.search
-          : (query) => BusinessLookupServices.search(query, searchStatus)
+    const checkForSearching = async () => {
+      if (!states.searchField || states.searchField?.length <= 2) {
+        return
+      }
+      states.state = States.SEARCHING
+      const searchStatus = null // search all (ACTIVE + HISTORICAL)
+      const legalType = launchdarklyServices.getFlag(LDFlags.AllowableBusinessSearchTypes)
+      // Use appropriate service based on lookupType
+      const searchService = (props.lookupType === LookupType.NR)
+        ? NameRequestLookupServices.search
+        : (query) => BusinessLookupServices.search(query, legalType, searchStatus)
 
-        try {
-          states.searchResults = await searchService(states.searchField)
-        } catch (error) {
-          console.error('Error occurred while searching:', error)
-          states.searchResults = []
+      try {
+        states.searchResults = await searchService(states.searchField)
+      } catch (error) {
+        console.error('Error occurred while searching:', error)
+        states.searchResults = []
+      }
+
+      // enable or disable items according to whether they have already been added
+      for (const result of states.searchResults) {
+        if (props.lookupType === LookupType.NR && 'nrNum' in result) {
+          result.disabled = businessStore.isAffiliatedNR(result.nrNum)
+        } else if ('identifier' in result) {
+          result.disabled = businessStore.isAffiliated(result.identifier)
         }
+      }
 
-        // enable or disable items according to whether they have already been added
-        for (const result of states.searchResults) {
-          if (props.lookupType === LookupType.NR && 'nrNum' in result) {
-            result.disabled = businessStore.isAffiliatedNR(result.nrNum)
-          } else if ('identifier' in result) {
-            result.disabled = businessStore.isAffiliated(result.identifier)
-          }
-        }
+      // display appropriate section
+      states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
+    }
 
-        // display appropriate section
-        states.state = (states.searchResults.length > 0) ? States.SHOW_RESULTS : States.NO_RESULTS
-      } else {
+    const checkForEmptySearch = () => {
+      if (!states.searchField) {
         // reset variables
         states.searchResults = []
         states.state = States.INITIAL
       }
+    }
+    const onSearchFieldChanged = _.debounce(async () => {
+      checkForTyping()
+      await checkForSearching()
+      checkForEmptySearch()
     }, 600)
 
     watch(() => states.searchField, onSearchFieldChanged)

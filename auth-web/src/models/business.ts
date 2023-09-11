@@ -1,7 +1,7 @@
 import { CorpTypes, FilingTypes, LearFilingTypes, NrTargetTypes } from '@/util/constants'
+import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { AffiliationInviteInfo } from '@/models/affiliation'
 import { Contact } from './contact'
-import { NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 
 export interface LoginPayload {
     businessIdentifier: string
@@ -78,6 +78,7 @@ export interface NameRequest {
     target?: NrTargetTypes
     entityTypeCd?: string
     requestTypeCd?: NrRequestTypeCodes
+    requestActionCd?: NrRequestActionCodes
     natureOfBusiness?: string
     expirationDate?: Date
     nrNum?: string

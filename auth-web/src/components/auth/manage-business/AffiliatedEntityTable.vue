@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/no-template-shadow -->
 <template>
   <div id="affiliated-entity-section">
     <v-card flat>
@@ -105,7 +106,7 @@
                 {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
                   ? 'mdi-alert' : 'mdi-account-cog' }}
               </v-icon>
-              <span v-html="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
+              <span v-sanitize="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
             </p>
           </span>
         </template>
@@ -179,6 +180,7 @@ import { Business, Names } from '@/models/business'
 import { defineComponent, ref } from '@vue/composition-api'
 import AffiliationAction from '@/components/auth/manage-business/AffiliationAction.vue'
 import { BaseVDataTable } from '@/components'
+import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
 
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
@@ -274,15 +276,15 @@ export default defineComponent({
     }
 
     const getRequestForAuthorizationStatusText = (affiliationInviteInfos: AffiliationInviteInfo[]) => {
-      if (isCurrentOrganization(affiliationInviteInfos[0]?.toOrg?.id)) {
+      const affiliationWithSmallestId = CommonUtils.getElementWithSmallestId<AffiliationInviteInfo>(affiliationInviteInfos)
+      if (isCurrentOrganization(affiliationWithSmallestId.toOrg?.id)) {
         // incoming request for access
-        const getAlwaysSameOrderArr = affiliationInviteInfos.slice().sort()
         const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
-        return `Request for Authorization to manage from: ${getAlwaysSameOrderArr[0].fromOrg.name}${andOtherAccounts}`
+        return `Request for Authorization to manage from: ${affiliationWithSmallestId.fromOrg.name}${andOtherAccounts}`
       } else {
         let statusText = ''
         // outgoing request for access
-        switch (affiliationInviteInfos[0].status) {
+        switch (affiliationWithSmallestId.status) {
           case AffiliationInvitationStatus.Pending:
             statusText = 'Confirmation email sent, pending authorization.'
             break
@@ -296,7 +298,7 @@ export default defineComponent({
             statusText = 'Not authorized. The <strong>confirmation email has expired.</strong>'
             break
           default:
-            statusText = ''
+            break
         }
         return `Authorization to manage: ${statusText}`
       }

@@ -852,6 +852,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     } else if (type === 'nr') {
       this.dialogTitle = 'Error Adding Existing Name Request'
       this.dialogText = 'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    } else {
+      this.dialogTitle = 'Something Went Wrong'
+      this.dialogText = 'An error occurred, please try again. If this error persists, please contact us.'
     }
     this.$refs.errorDialog.open()
   }

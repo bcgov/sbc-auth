@@ -19,7 +19,7 @@
       <!-- Breadcrumbs / Back Navigation -->
       <nav class="crumbs py-6">
         <div>
-          <router-link :to="task.relationshipStatus === TaskRelationshipStatusEnum.REJECTED ? pagesEnum.STAFF_DASHBOARD_REJECTED: pagesEnum.STAFF_DASHBOARD_REVIEW">
+          <router-link :to="determinePage">
             <v-icon
               small
               color="primary"
@@ -595,6 +595,11 @@ export default defineComponent({
       instance.proxy.$router.push(pagesEnum.STAFF_DASHBOARD)
     }
 
+    const determinePage = computed(() => {
+      return task.value.relationshipStatus === TaskRelationshipStatusEnum.REJECTED
+        ? pagesEnum.STAFF_DASHBOARD_REJECTED : pagesEnum.STAFF_DASHBOARD_REVIEW
+    })
+
     return {
       isLoading,
       isSaving,
@@ -642,7 +647,8 @@ export default defineComponent({
       componentList,
       openModal,
       saveSelection,
-      goBack
+      goBack,
+      determinePage
     }
   }
 })
