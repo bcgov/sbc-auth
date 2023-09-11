@@ -715,8 +715,10 @@ export default defineComponent({
         } catch (err) {
           hasBusinessEmail.value = false
           contactInfo.value = ''
-          // eslint-disable-next-line no-console
-          console.error(err)
+          if (err.response?.status !== StatusCodes.NOT_FOUND) {
+            // eslint-disable-next-line no-console
+            console.error(err)
+          }
         }
         try {
           const orgsDetails = await OrgService.getOrganizationsNameAndUuidByAffiliation(newBusinessIdentifier)
@@ -731,8 +733,10 @@ export default defineComponent({
           hasBusinessAuthentication.value = authentication?.data?.hasValidPassCode
         } catch (err) {
           hasBusinessAuthentication.value = true
-          // eslint-disable-next-line no-console
-          console.error(err)
+          if (err.response?.status !== StatusCodes.NOT_FOUND) {
+            // eslint-disable-next-line no-console
+            console.error(err)
+          }
         }
       }
     })
