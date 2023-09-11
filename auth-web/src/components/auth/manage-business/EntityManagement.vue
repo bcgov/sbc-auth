@@ -281,7 +281,6 @@
       <HelpDialog
         ref="helpDialog"
         :helpDialogBlurb="helpDialogBlurb"
-        :inline="true"
       />
 
       <!-- Error Dialog -->
@@ -662,7 +661,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
   }
 
-  helpDialogBlurb = async () => {
+  get helpDialogBlurb (): string {
     return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
         'please contact us at:'
   }
