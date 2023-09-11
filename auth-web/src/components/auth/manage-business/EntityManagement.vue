@@ -975,6 +975,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       await this.syncBusinesses()
       this.$refs.removedBusinessSuccessDialog.open()
     } catch (ex) {
+      this.showUnknownErrorModal(null)
       // eslint-disable-next-line no-console
       console.log('Error during remove organization affiliations event !')
     }
