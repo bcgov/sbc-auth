@@ -1,6 +1,5 @@
 import {
   Affiliation,
-  AffiliationInviteInfo,
   AffiliationResponse,
   CreateRequestBody as CreateAffiliationRequestBody,
   CreateNRAffiliationRequestBody
@@ -21,6 +20,7 @@ import { Address } from '@/models/address'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
+import { OrgsDetails } from '@/models/affiliation-invitation'
 import { axios } from '@/util/http-util'
 
 export default class OrgService {
@@ -28,8 +28,15 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
 
-  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: string): Promise<AxiosResponse> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
+  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: string): Promise<OrgsDetails[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
+      return response.data?.orgsDetails
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      return null
+    }
   }
 
   public static async getContactForOrg (orgId: number): Promise<Address> {
@@ -108,28 +115,6 @@ export default class OrgService {
   ): Promise<AxiosResponse<void>> {
     return axios.delete(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgIdentifier}/affiliations/${incorporationNumber}`,
       { data: { passcodeResetEmail: passcodeResetEmail, resetPasscode: resetPasscode, logDeleteDraft: true } })
-  }
-
-  static async removeAffiliationInvitation (affiliationInvitationId: number) : Promise<void> {
-    try {
-      await axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}`)
-    } catch (err) {
-      // eslint-disable-line no-console
-      console.log(err)
-    }
-  }
-
-  static async getAffiliationInvitations (orgIdentifier: number) : Promise<AffiliationInviteInfo[]> {
-    try {
-      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations`,
-        { params: { orgId: orgIdentifier, businessDetails: true } }
-      )
-      return response.data.affiliationInvitations
-    } catch (err) {
-      // eslint-disable-line no-console
-      console.log(err)
-      return null
-    }
   }
 
   static async approvePendingOrg (orgIdentifier: number): Promise<AxiosResponse> {

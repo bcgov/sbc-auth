@@ -1,31 +1,31 @@
 <template>
   <div class="pa-5">
     <div
-      v-if="!!componentState.isLoading"
+      v-if="!!isLoading"
       class="loading-inner-container"
     >
       <v-progress-circular
         size="50"
         width="5"
         color="primary"
-        :indeterminate="!!componentState.isLoading"
+        :indeterminate="!!isLoading"
       />
     </div>
 
-    <div v-else-if="!componentState.isLoading && componentState.accounts && componentState.accounts.length > 0">
+    <div v-else-if="!isLoading && accounts && accounts.length > 0">
       <span>Select the account you want to perform Registries activities for <strong>{{ businessName }}</strong></span>
       <v-select
         id="account-authorization-request-request-account-select"
-        v-model="componentState.selectedAccount"
+        v-model="selectedAccount"
         filled
         req
         persistent-hint
         validate-on-blur
         label="Select authorizing account"
         aria-label="Select Authorizing account"
-        :disabled="componentState.accounts.length < 2"
+        :disabled="accounts.length < 2"
         class="business-identifier mb-n2"
-        :items="componentState.accounts"
+        :items="accounts"
         item-text="name"
         item-value="uuid"
         @change="emitSelected"
@@ -33,14 +33,14 @@
       <span>You can add a message that will be included as part of your authorization request. </span>
       <v-textarea
         id="account-authorization-request-additional-message-textarea"
-        v-model.trim="componentState.requestAccessMessage"
+        v-model.trim="requestAccessMessage"
         class="mb-n2"
         filled
         label="Request access additional message"
         aria-label="Request access additional message"
         maxlength="400"
         counter="400"
-        @change="$emit('change-request-access-message', componentState.requestAccessMessage)"
+        @change="$emit('change-request-access-message', requestAccessMessage)"
       />
     </div>
     <div
@@ -58,8 +58,9 @@
 </template>
 
 <script lang='ts'>
-import { defineComponent, reactive, watch } from '@vue/composition-api'
+import { defineComponent, reactive, toRefs, watch } from '@vue/composition-api'
 import OrgService from '@/services/org.services'
+import { OrgsDetails } from '@/models/affiliation-invitation'
 
 export default defineComponent({
   name: 'AccountAuthorizationRequest',
@@ -73,47 +74,35 @@ export default defineComponent({
       required: true
     }
   },
-  emits: ['change-request-access-message', 'select-account'],
+  emits: ['change-request-access-message', 'select-account', 'unknown-error'],
   setup (props, { emit }) {
-    // Will remove this after Vue upgrade.
-    interface ComponentState {
-      accounts: any[];
-      selectedAccount: string;
-      requestAccessMessage: string;
-      isLoading: boolean;
-    }
-
-    const componentState = reactive({
-      accounts: [],
+    const state = reactive({
+      accounts: [] as OrgsDetails[],
       selectedAccount: '',
       requestAccessMessage: '',
       isLoading: true
-    }) as ComponentState
+    })
 
     const emitSelected = () => {
-      const selectedAcc = componentState.accounts.find(acc => acc.uuid === componentState.selectedAccount)
+      const selectedAcc = state.accounts.find(acc => acc.uuid === state.selectedAccount)
       emit('select-account', selectedAcc)
-      // emitSelectedAccount(selectedAcc)
     }
 
     const fetchData = async () => {
-      const response = await OrgService.getOrganizationsNameAndUuidByAffiliation(props.businessIdentifier)
-        .catch((error) => error)
-
-      if (response?.data?.orgsDetails) {
-        const orgsDetails = response.data.orgsDetails
+      const orgsDetails = await OrgService.getOrganizationsNameAndUuidByAffiliation(props.businessIdentifier)
+      if (orgsDetails) {
         orgsDetails.sort((a, b) => (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : -1)
-        componentState.accounts.splice(0, componentState.accounts.length)
-        orgsDetails.forEach((el: string) => componentState.accounts.push(el))
-
-        if (componentState.accounts.length === 1) {
-          componentState.selectedAccount = componentState.accounts[0].uuid
+        state.accounts.splice(0, state.accounts.length)
+        orgsDetails.forEach((el) => state.accounts.push(el))
+        if (state.accounts.length === 1) {
+          state.selectedAccount = state.accounts[0].uuid
           emitSelected()
         }
       } else {
-        console.error('OrgService.getOrganizationsNameAndUuidByAffiliation', response.status)
+        // Show a generic unknown error.
+        emit('unknown-error')
       }
-      componentState.isLoading = false
+      state.isLoading = false
     }
 
     watch(() => props.businessIdentifier, (newValue: string) => {
@@ -125,8 +114,8 @@ export default defineComponent({
     { immediate: true })
 
     return {
-      emitSelected,
-      componentState
+      ...toRefs(state),
+      emitSelected
     }
   }
 })

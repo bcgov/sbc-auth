@@ -25,3 +25,8 @@ export interface CreateAffiliationInvitation {
     type?: string
     additionalMessage?: string
 }
+
+export interface OrgsDetails {
+    name: string
+    uuid: string
+}

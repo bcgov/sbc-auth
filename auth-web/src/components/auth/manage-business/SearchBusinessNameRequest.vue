@@ -30,7 +30,6 @@
           class="mt-6"
         >
           <!-- Search for business identifier or name -->
-          <!-- NB: use v-if to re-mount component between instances -->
           <BusinessLookup
             :key="businessLookupKey"
             :lookupType="lookupType.BUSINESS"
@@ -52,52 +51,48 @@
       </v-col>
     </v-row>
 
-    <template v-if="isEnableBusinessNrSearch">
-      <ManageBusinessDialog
-        ref="manageBusinessDialog"
-        :orgId="orgId"
-        :businessLegalType="businessLegalType"
-        :showBusinessDialog="showManageBusinessDialog"
-        :initialBusinessIdentifier="businessIdentifier"
-        :initialBusinessName="businessName"
-        :isStaffOrSbcStaff="isGovStaffAccount"
-        :userFirstName="userFirstName"
-        :userLastName="userLastName"
-        @add-success="showAddSuccessModal"
-        @add-failed-invalid-code="showInvalidCodeModal($event)"
-        @add-failed-no-entity="showEntityNotFoundModal()"
-        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="cancelEvent"
-        @on-business-identifier="businessIdentifier = $event"
-        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
-      />
-    </template>
+    <ManageBusinessDialog
+      ref="manageBusinessDialog"
+      :orgId="orgId"
+      :businessLegalType="businessLegalType"
+      :showBusinessDialog="showManageBusinessDialog"
+      :initialBusinessIdentifier="businessIdentifier"
+      :initialBusinessName="businessName"
+      :isStaffOrSbcStaff="isGovStaffAccount"
+      :userFirstName="userFirstName"
+      :userLastName="userLastName"
+      @add-success="showAddSuccessModal"
+      @add-failed-invalid-code="showInvalidCodeModal($event)"
+      @add-failed-no-entity="showEntityNotFoundModal()"
+      @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+      @unknown-error="showUnknownErrorModal('business')"
+      @on-cancel="cancelEvent"
+      @on-business-identifier="businessIdentifier = $event"
+      @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
+    />
     <!-- Add Name Request Dialog -->
-    <template v-if="isEnableBusinessNrSearch">
-      <ModalDialog
-        ref="addNRDialog"
-        :showNRDialog="showNRDialog"
-        :is-persistent="true"
-        title="Manage a Name Request"
-        :show-icon="false"
-        :show-actions="false"
-        max-width="640"
-        data-test-tag="add-name-request"
-      >
-        <template #text>
-          <AddNameRequestForm
-            :businessIdentifier="businessIdentifier"
-            :requestNames="nrNames"
-            @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success-nr="showAddSuccessModalNR"
-            @add-failed-show-msg="showNRErrorModal()"
-            @add-failed-no-nr="showNRNotFoundModal()"
-            @add-unknown-error="showUnknownErrorModal('nr')"
-          />
-        </template>
-      </ModalDialog>
-    </template>
+    <ModalDialog
+      ref="addNRDialog"
+      :showNRDialog="showNRDialog"
+      :is-persistent="true"
+      title="Manage a Name Request"
+      :show-icon="false"
+      :show-actions="false"
+      max-width="640"
+      data-test-tag="add-name-request"
+    >
+      <template #text>
+        <AddNameRequestForm
+          :businessIdentifier="businessIdentifier"
+          :requestNames="nrNames"
+          @close-add-nr-modal="cancelAddNameRequest()"
+          @add-success-nr="showAddSuccessModalNR"
+          @add-failed-show-msg="showNRErrorModal()"
+          @add-failed-no-nr="showNRNotFoundModal()"
+          @unknown-error="showUnknownErrorModal('nr')"
+        />
+      </template>
+    </ModalDialog>
   </div>
 </template>
 
@@ -107,8 +102,6 @@ import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequest
 import BusinessLookup from './BusinessLookup.vue'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
-import { LDFlags } from '@/util/constants'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
 import { LoginPayload } from '@/models/business'
 import { LookupType } from '@/models/business-nr-lookup'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
@@ -170,7 +163,7 @@ export default class SearchBusinessNameRequest extends Vue {
     this.$emit('add-failed-passcode-claimed')
   }
   showUnknownErrorModal (event) {
-    this.$emit('add-unknown-error', event)
+    this.$emit('unknown-error', event)
   }
   showBusinessAlreadyAdded (event) {
     this.$emit('business-already-added', event)
@@ -213,6 +206,7 @@ export default class SearchBusinessNameRequest extends Vue {
         this.$emit('add-success', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {
+        this.$emit('unknown-error', 'business')
         // eslint-disable-next-line no-console
         console.error('Error adding business: ', err)
       }
@@ -243,10 +237,10 @@ export default class SearchBusinessNameRequest extends Vue {
         this.$emit('add-success-nr', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } else {
-        this.$emit('add-unknown-error', 'nr')
+        this.$emit('unknown-error', 'nr')
       }
     } catch (err) {
-      this.$emit('add-unknown-error', 'nr')
+      this.$emit('unknown-error', 'nr')
       // eslint-disable-next-line no-console
       console.error('Error adding name request: ', err)
     }
@@ -270,10 +264,6 @@ export default class SearchBusinessNameRequest extends Vue {
     this.businessName = ''
     this.businessLookupKey++
     this.emitOnAuthorizationEmailSentClose(event)
-  }
-
-  get isEnableBusinessNrSearch (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBusinessNrSearch) || false
   }
 }
 </script>
