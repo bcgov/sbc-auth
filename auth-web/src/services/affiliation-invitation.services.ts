@@ -33,9 +33,6 @@ export default class AffiliationInvitationService {
   static async updateInvitation (id: string): Promise<AxiosResponse<any>> {
     return axios.patch(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}`, {})
   }
-  static async getInvitationById (id: string): Promise<AxiosResponse<AffiliationInvitation>> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}`)
-  }
   static async acceptInvitation (id: string, invitationToken: string): Promise<AxiosResponse<AffiliationInvitation>> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${id}/token/${invitationToken}`)
   }

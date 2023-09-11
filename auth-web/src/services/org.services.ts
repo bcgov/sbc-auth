@@ -20,6 +20,7 @@ import { Address } from '@/models/address'
 import { AxiosResponse } from 'axios'
 import ConfigHelper from '@/util/config-helper'
 import { Invitations } from '@/models/Invitation'
+import { OrgsDetails } from '@/models/affiliation-invitation'
 import { axios } from '@/util/http-util'
 
 export default class OrgService {
@@ -27,8 +28,15 @@ export default class OrgService {
     return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/${orgId}`)
   }
 
-  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: string): Promise<AxiosResponse> {
-    return axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
+  public static async getOrganizationsNameAndUuidByAffiliation (businessIdentifier: string): Promise<OrgsDetails[]> {
+    try {
+      const response = await axios.get(`${ConfigHelper.getAuthAPIUrl()}/orgs/affiliation/${businessIdentifier}`)
+      return response.data?.orgsDetails
+    } catch (err) {
+      // eslint-disable-line no-console
+      console.log(err)
+      return null
+    }
   }
 
   public static async getContactForOrg (orgId: number): Promise<Address> {

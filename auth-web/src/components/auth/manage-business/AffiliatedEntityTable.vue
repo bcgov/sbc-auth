@@ -154,7 +154,7 @@
           <AffiliationAction
             :item="item"
             :index="index"
-            @add-unknown-error="$emit('add-unknown-error', $event)"
+            @unknown-error="$emit('unknown-error', $event)"
             @remove-affiliation-invitation="$emit('remove-affiliation-invitation', $event)"
             @remove-business="$emit('remove-business', $event)"
             @business-unavailable-error="$emit('business-unavailable-error', $event)"
@@ -194,7 +194,7 @@ export default defineComponent({
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
-  emits: ['add-unknown-error', 'remove-affiliation-invitation', 'remove-business',
+  emits: ['unknown-error', 'remove-affiliation-invitation', 'remove-business',
     'business-unavailable-error', 'resend-affiliation-invitation', 'popup-manage-business-dialog'],
   setup () {
     const isloading = false

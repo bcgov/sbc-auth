@@ -65,7 +65,7 @@
       @add-failed-invalid-code="showInvalidCodeModal($event)"
       @add-failed-no-entity="showEntityNotFoundModal()"
       @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-      @add-unknown-error="showUnknownErrorModal('business')"
+      @unknown-error="showUnknownErrorModal('business')"
       @on-cancel="cancelEvent"
       @on-business-identifier="businessIdentifier = $event"
       @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
@@ -89,7 +89,7 @@
           @add-success-nr="showAddSuccessModalNR"
           @add-failed-show-msg="showNRErrorModal()"
           @add-failed-no-nr="showNRNotFoundModal()"
-          @add-unknown-error="showUnknownErrorModal('nr')"
+          @unknown-error="showUnknownErrorModal('nr')"
         />
       </template>
     </ModalDialog>
@@ -163,7 +163,7 @@ export default class SearchBusinessNameRequest extends Vue {
     this.$emit('add-failed-passcode-claimed')
   }
   showUnknownErrorModal (event) {
-    this.$emit('add-unknown-error', event)
+    this.$emit('unknown-error', event)
   }
   showBusinessAlreadyAdded (event) {
     this.$emit('business-already-added', event)
@@ -206,7 +206,7 @@ export default class SearchBusinessNameRequest extends Vue {
         this.$emit('add-success', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } catch (err) {
-        this.$emit('add-unknown-error', 'business')
+        this.$emit('unknown-error', 'business')
         // eslint-disable-next-line no-console
         console.error('Error adding business: ', err)
       }
@@ -237,10 +237,10 @@ export default class SearchBusinessNameRequest extends Vue {
         this.$emit('add-success-nr', this.businessIdentifier)
         this.$refs.manageBusinessDialog.resetForm(true)
       } else {
-        this.$emit('add-unknown-error', 'nr')
+        this.$emit('unknown-error', 'nr')
       }
     } catch (err) {
-      this.$emit('add-unknown-error', 'nr')
+      this.$emit('unknown-error', 'nr')
       // eslint-disable-next-line no-console
       console.error('Error adding name request: ', err)
     }

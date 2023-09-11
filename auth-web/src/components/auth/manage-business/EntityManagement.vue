@@ -199,7 +199,7 @@
         @add-failed-invalid-code="showInvalidCodeModal($event)"
         @add-failed-no-entity="showEntityNotFoundModal()"
         @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal"
+        @unknown-error="showUnknownErrorModal"
         @business-already-added="showBusinessAlreadyAdded($event)"
         @on-cancel="cancelAddBusiness()"
         @on-business-identifier="businessIdentifier = $event"
@@ -213,7 +213,7 @@
       <AffiliatedEntityTable
         :loading="isLoading"
         :highlight-index="highlightIndex"
-        @add-unknown-error="showUnknownErrorModal('business')"
+        @unknown-error="showUnknownErrorModal('business')"
         @remove-affiliation-invitation="removeAffiliationInvitation()"
         @remove-business="showConfirmationOptionsModal($event)"
         @business-unavailable-error="showBusinessUnavailableModal($event)"
