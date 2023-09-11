@@ -63,11 +63,10 @@
 </template>
 
 <script lang="ts">
-import { Action, State } from 'pinia-class'
-import { Component, Mixins, Watch } from 'vue-property-decorator'
+import { Component, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
-import { useAppStore, useOrgStore, useUserStore } from '@/stores'
+import { useOrgStore, useUserStore } from '@/stores'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
