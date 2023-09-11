@@ -162,7 +162,7 @@ export const useBusinessStore = defineStore('business', () => {
         const corpType = affiliationInvite.entity.corpType
         const newBusiness = { ...affiliationInvite.entity,
           affiliationInvites: [affiliationInvite],
-          corpType: { code: corpType as string } as CorpType }
+          corpType: { code: corpType as unknown as string } as CorpType }
         affiliatedEntities.push(newBusiness)
       }
     }

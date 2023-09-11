@@ -17,12 +17,14 @@ export default class AffiliationInvitationService {
       return null
     }
   }
-  static async removeAffiliationInvitation (affiliationInvitationId: number) : Promise<void> {
+  static async removeAffiliationInvitation (affiliationInvitationId: number) : Promise<boolean> {
     try {
       await axios.delete(`${ConfigHelper.getAuthAPIUrl()}/affiliationInvitations/${affiliationInvitationId}`)
+      return true
     } catch (err) {
       // eslint-disable-line no-console
       console.log(err)
+      return false
     }
   }
   static async createInvitation (payload: CreateAffiliationInvitation): Promise<AxiosResponse<any>> {

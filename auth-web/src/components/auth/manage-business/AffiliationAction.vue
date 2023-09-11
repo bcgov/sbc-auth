@@ -283,7 +283,10 @@ export default defineComponent({
         const invitationStatus = affiliationInviteInfo.status
         if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed,
           AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
-          await AffiliationInvitationService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          const success = await AffiliationInvitationService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          if (!success) {
+            context.emit('add-unknown-error')
+          }
           context.emit('remove-affiliation-invitation')
           return
         }
