@@ -597,3 +597,15 @@ export enum MagicLinkInvitationStatus {
     EXPIRED_AFFILIATION_INVITATION = 'EXPIRED_AFFILIATION_INVITATION',
     ACTIONED_AFFILIATION_INVITATION = 'ACTIONED_AFFILIATION_INVITATION'
 }
+
+export enum AffiliationInvitationStatus {
+  Pending = 'PENDING',
+  Accepted = 'ACCEPTED',
+  Expired = 'EXPIRED',
+  Failed = 'FAILED'
+}
+
+export enum AffiliationInvitationType {
+  REQUEST = 'REQUEST',
+  EMAIL = 'EMAIL'
+}

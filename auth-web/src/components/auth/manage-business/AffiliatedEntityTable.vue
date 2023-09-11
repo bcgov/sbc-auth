@@ -168,8 +168,8 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInviteInfo } from '@/models/affiliation'
 import {
+  AffiliationInvitationStatus,
   AffiliationTypes,
   EntityAlertTypes,
   LDFlags,
@@ -179,6 +179,7 @@ import {
 import { Business, Names } from '@/models/business'
 import { defineComponent, ref } from '@vue/composition-api'
 import AffiliationAction from '@/components/auth/manage-business/AffiliationAction.vue'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'

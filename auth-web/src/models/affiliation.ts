@@ -1,5 +1,5 @@
 import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
-import { CorpTypes, NrTargetTypes } from '@/util/constants'
+import { AffiliationInvitationStatus, CorpTypes, NrTargetTypes } from '@/util/constants'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
@@ -19,19 +19,6 @@ export interface CreateNRAffiliationRequestBody {
 export interface Affiliation {
   organization: Organization
   business: Business
-}
-
-// TODO should be moved to constants.
-export const AffiliationInvitationStatus = {
-  Pending: 'PENDING',
-  Accepted: 'ACCEPTED',
-  Expired: 'EXPIRED',
-  Failed: 'FAILED'
-}
-
-export const AffiliationInvitationType = {
-  REQUEST: 'REQUEST',
-  EMAIL: 'EMAIL'
 }
 
 export class AffiliationInviteInfo {

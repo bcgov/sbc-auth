@@ -54,6 +54,7 @@ export default defineComponent({
       default: false
     }
   },
+  emits: ['open-help', 'close-dialog'],
   setup (props, { emit }) {
     const openHelp = () => {
       emit('open-help')

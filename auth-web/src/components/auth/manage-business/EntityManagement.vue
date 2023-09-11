@@ -206,7 +206,6 @@
         @add-success-nr="showAddSuccessModalNR"
         @add-nr-error="showNRErrorModal()"
         @add-failed-no-nr="showNRNotFoundModal()"
-        @show-add-old-nr-modal="showAddNRModal()"
         @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
       />
 
@@ -531,6 +530,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     removalConfirmDialog: InstanceType<typeof ModalDialog>
     businessUnavailableDialog: InstanceType<typeof ModalDialog>
     linkExpireErrorDialog: InstanceType<typeof ModalDialog>
+    helpDialog: InstanceType<typeof ModalDialog>
   }
 
   private async mounted () {
@@ -558,7 +558,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
 
     this.setAccountChangedHandler(this.setup)
-    this.setup()
+    await this.setup()
 
     if (this.base64Token && this.base64OrgName) {
       const base64TokenObject = this.base64Token.split('.')[0]
@@ -667,8 +667,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         'please contact us at:'
   }
 
-  openHelp = async () => {
-    // TODO THIS ISNT WORKING please fix.
+  openHelp () {
     this.$refs.helpDialog.open()
   }
 

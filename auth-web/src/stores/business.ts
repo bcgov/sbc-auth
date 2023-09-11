@@ -1,14 +1,5 @@
 import {
   AffiliationInvitationStatus,
-  AffiliationResponse,
-  CreateRequestBody as CreateAffiliationRequestBody,
-  CreateNRAffiliationRequestBody,
-  NameRequestResponse
-} from '@/models/affiliation'
-import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
-  PasscodeResetLoad } from '@/models/business'
-import {
   CorpTypes,
   FilingTypes,
   LDFlags,
@@ -19,6 +10,15 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
+import {
+  AffiliationResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody,
+  NameRequestResponse
+} from '@/models/affiliation'
+import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
+import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
+  PasscodeResetLoad } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'

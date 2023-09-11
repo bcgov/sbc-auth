@@ -291,11 +291,10 @@
 </template>
 
 <script lang="ts">
-import { CorpTypes, LDFlags } from '@/util/constants'
+import { AffiliationInvitationStatus, CorpTypes, LDFlags } from '@/util/constants'
 import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
-import { AffiliationInvitationStatus } from '@/models/affiliation'
 import AuthorizationRequestSentDialog from '@/components/auth/manage-business/manage-business-dialog/AuthorizationRequestSentDialog.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
