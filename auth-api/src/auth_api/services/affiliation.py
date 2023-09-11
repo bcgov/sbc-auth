@@ -224,11 +224,15 @@ class Affiliation:
 
         if nr_json:
             status = nr_json.get('state')
-            nr_phone = nr_json.get('applicants').get('phoneNumber')
-            nr_email = nr_json.get('applicants').get('emailAddress')
 
             if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value, NRStatus.DRAFT.value):
                 raise BusinessException(Error.NR_INVALID_STATUS, None)
+
+            if not nr_json.get('applicants'):
+                raise BusinessException(Error.NR_INVALID_APPLICANTS, None)
+
+            nr_phone = nr_json.get('applicants').get('phoneNumber')
+            nr_email = nr_json.get('applicants').get('emailAddress')
 
             if status == NRStatus.DRAFT.value:
                 invoices = Affiliation.get_nr_payment_details(business_identifier)

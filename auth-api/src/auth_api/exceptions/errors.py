@@ -81,6 +81,9 @@ class Error(Enum):
     NR_INVALID_CONTACT = 'Invalid email or phone number.', http_status.HTTP_400_BAD_REQUEST
     NR_INVALID_CORP_TYPE = 'The business type associated with this name request is not yet supported.', \
                            http_status.HTTP_400_BAD_REQUEST
+    NR_INVALID_APPLICANTS = 'The specified name request must have at least one applicant. Please contact staff ' + \
+        'to fix this name request.', \
+        http_status.HTTP_400_BAD_REQUEST
 
     ENTITY_DELETE_FAILED = 'Cannot delete entity due to related records.', http_status.HTTP_400_BAD_REQUEST
 
