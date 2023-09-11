@@ -110,8 +110,6 @@ export default class App extends Mixins(NextPageMixin) {
   // Remove these with sbc-common-components and Vue3 upgrade.
   private authModule = getModule(AuthModule, this.$store)
   private readonly loadUserInfo!: () => KCUserProfile
-  @Action(useAppStore) dismissError!: () => void
-  @State(useAppStore) errorMessage!: string
   showNotification = false
   notificationText = ''
   showLoading = true
@@ -241,11 +239,6 @@ export default class App extends Mixins(NextPageMixin) {
     }
     // Remove Vuex with Vue 3
     this.$store.commit('loadComplete')
-  }
-
-  @Watch('errorMessage')
-  onErrorMessage () {
-    // Show dialog, should be wired to services etc, that way we can handle generic errors.
   }
 }
 </script>
