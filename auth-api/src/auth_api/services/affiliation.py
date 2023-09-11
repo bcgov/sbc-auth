@@ -246,7 +246,7 @@ class Affiliation:
             raise BusinessException(Error.NR_NOT_APPROVED, None)
 
         if not user_is_staff and ((phone and phone != nr_phone) or
-                                    (email and email.casefold() != nr_email.casefold())):
+                                  (email and email.casefold() != nr_email.casefold())):
             raise BusinessException(Error.NR_INVALID_CONTACT, None)
 
         # Create an entity with the Name from NR if entity doesn't exist
@@ -256,7 +256,7 @@ class Affiliation:
             nr_name_state = NRNameStatus.APPROVED.value if status == NRStatus.APPROVED.value \
                 else NRNameStatus.CONDITION.value
             name = next((name.get('name') for name in nr_json.get('names') if
-                            name.get('state', None) == nr_name_state), None)
+                        name.get('state', None) == nr_name_state), None)
 
             entity = EntityService.save_entity({
                 'businessIdentifier': business_identifier,
@@ -274,7 +274,7 @@ class Affiliation:
 
             if entity.corp_type not in [CorpType.RTMP.value, CorpType.TMP.value]:
                 ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.CREATE_AFFILIATION.value,
-                                                                name=entity.name, id=entity.business_identifier))
+                                                               name=entity.name, id=entity.business_identifier))
         affiliation_model.certified_by_name = certified_by_name
         affiliation_model.save()
         entity.set_pass_code_claimed(True)
