@@ -687,8 +687,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       return
     }
 
-    this.lastSyncBusinesses = Date.now()
     await this.syncBusinessesAndToggleLoading()
+    this.lastSyncBusinesses = Date.now()
   }
 
   private get enableMandatoryAddress (): boolean {
