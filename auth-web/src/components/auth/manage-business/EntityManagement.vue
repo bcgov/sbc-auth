@@ -492,7 +492,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private removeBusinessPayload = null
   dialogTitle = ''
   dialogText = ''
-  isLoading = -1 // truthy
+  isLoading: boolean = false // truthy
   businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
@@ -581,9 +581,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       try {
         await this.syncOrganization(this.currentAccountSettings.id)
         await this.addOrgSettings(this.currentOrganization)
-        this.isLoading = 1 // truthy
+        this.isLoading = true // truthy
         await this.syncBusinesses()
-        this.isLoading = 0 // falshy
+        this.isLoading = false // falshy
         this.$store.commit('updateHeader')
         this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
         return
@@ -591,9 +591,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         this.showAuthorizationErrorModal()
       }
     }
-    this.isLoading = 1 // truthy
+    this.isLoading = true // truthy
     await this.syncBusinesses()
-    this.isLoading = 0 // falshy
+    this.isLoading = false // falshy
     this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
   }
 
@@ -676,7 +676,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   private async setup (): Promise<void> {
     // ensure syncBusinesses isn't already running
-    if (this.isLoading === 1) {
+    if (this.isLoading === true) {
       return
     }
 
@@ -685,10 +685,10 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       return
     }
 
-    this.isLoading = 1 // truthy
+    this.isLoading = true // truthy
     await this.syncBusinesses()
     this.lastSyncBusinesses = Date.now()
-    this.isLoading = 0 // falsy
+    this.isLoading = false // falsy
   }
 
   private get enableMandatoryAddress (): boolean {
@@ -750,9 +750,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   async showAddSuccessModalNR (nameRequestNumber: string) {
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
-    this.isLoading = 1 // truthy
+    this.isLoading = true // truthy
     await this.syncBusinesses()
-    this.isLoading = 0 // falshy
+    this.isLoading = false // falshy
     const nameRequestIndexResponse = await this.searchNRIndex(nameRequestNumber)
 
     this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
@@ -764,9 +764,9 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async onAuthorizationEmailSentClose (businessIdentifier: string) {
-    this.isLoading = 1 // truthy
+    this.isLoading = true // truthy
     await this.syncBusinesses()
-    this.isLoading = 0 // falshy
+    this.isLoading = false // falshy
     // This function doesn't always have the businessIdentifier passed to it.
     const validBusinessIdentifier = businessIdentifier || this.businessIdentifier
     this.highlightIndex = await this.searchBusinessIndex(validBusinessIdentifier)
