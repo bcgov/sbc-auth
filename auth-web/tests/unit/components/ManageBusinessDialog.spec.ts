@@ -2,12 +2,9 @@ import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
 import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
-
-Vue.use(Vuetify)
 
 const vuetify = new Vuetify({})
 
@@ -180,8 +177,7 @@ describe('ManageBusinessDialog Component', () => {
           businessLegalType: test.businessLegalType
         }
       })
-    }
-    )
+    })
 
     afterAll(() => {
       wrapper.destroy()
@@ -242,5 +238,54 @@ describe('ManageBusinessDialog Component', () => {
         expect(wrapper.find('#manage-business-dialog-passcode-group').exists()).toBeFalsy()
       }
     })
+  })
+  let wrapper: Wrapper<any>
+
+  beforeAll(() => {
+    const orgModule = {
+      namespaced: true,
+      state: {
+        currentOrganization: {
+          name: 'new org'
+        }
+      }
+    }
+
+    const businessModule = {
+      namespaced: true,
+      state: {
+      },
+      action: {
+        addBusiness: vi.fn(),
+        updateBusinessName: vi.fn(),
+        updateFolioNumber: vi.fn()
+      }
+    }
+
+    const store = new Vuex.Store({
+      strict: false,
+      modules: {
+        org: orgModule,
+        business: businessModule
+      }
+    })
+
+    wrapper = shallowMount(ManageBusinessDialog, {
+      store,
+      vuetify,
+      propsData: {
+        userFirstName: 'Nadia',
+        userLastName: 'Woodie'
+      }
+    })
+  })
+  afterAll(() => {
+    wrapper.destroy()
+  })
+  it('Should compute the right boolean for isDialogVisible()', async () => {
+    await wrapper.setProps({ showBusinessDialog: true })
+    expect(wrapper.vm.isDialogVisible).toBe(true)
+    await wrapper.setProps({ showBusinessDialog: false })
+    expect(wrapper.vm.isDialogVisible).toBe(false)
   })
 })

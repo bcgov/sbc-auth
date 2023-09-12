@@ -35,40 +35,70 @@
       data-test-tag="add-business"
       @keydown.esc="resetForm(true)"
     >
-      <HelpDialog
-        ref="helpDialog"
-        :helpDialogBlurb="helpDialogBlurb"
-      />
-
-      <AuthorizationRequestSentDialog
-        :is-visible="!showHelp && showAuthorizationEmailSentDialog"
+      <ModalDialog
+        ref="authorizationRequestSentDialog"
+        dialog-class="notify-dialog"
+        max-width="640"
+        :show-icon="false"
         @open-help="openHelp"
-        @close-dialog="onAuthorizationRequestSentDialogClose"
       >
         <template #title>
-          <h1>Authorization Email Sent</h1>
+          <h1 class="text-left">
+            Authorization Email Sent
+          </h1>
         </template>
-        <template #content>
-          <p>An email was sent to <span class="email-address">{{ businessContactEmail }}</span></p>
-          <p>
+        <template #text>
+          <p class="text-left">
+            An email was sent to <span class="font-weight-black">{{ businessContactEmail }}</span>
+          </p>
+          <p class="text-left">
             Confirm your access by clicking the link inside. This will add the business to your Business Registry List.
             The link is valid for 15 minutes.
           </p>
         </template>
-      </AuthorizationRequestSentDialog>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="onAuthorizationRequestSentDialogClose()"
+          >
+            Close
+          </v-btn>
+        </template>
+      </ModalDialog>
 
-      <AuthorizationRequestSentDialog
-        :is-visible="!showHelp && showAuthorizationRequestSentDialog"
+      <ModalDialog
+        ref="invitationRequestSentDialog"
+        dialog-class="notify-dialog"
+        max-width="640"
+        :show-icon="false"
         @open-help="openHelp"
-        @close-dialog="onAuthorizationRequestSentDialogClose"
       >
         <template #title>
-          Request Sent
+          <h1 class="text-left">
+            Request Sent
+          </h1>
         </template>
-        <template #content>
+        <template #text>
           <p>Your authorization request has been sent to contacts of <span class="strong">{{ invitationToAccount.name }}</span>.</p>
         </template>
-      </AuthorizationRequestSentDialog>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="onAuthorizationRequestSentDialogClose()"
+          >
+            Close
+          </v-btn>
+        </template>
+      </ModalDialog>
+
+      <HelpDialog
+        ref="helpDialog"
+        :helpDialogBlurb="helpDialogBlurb"
+      />
 
       <v-card v-if="!showHelp && !successDialog">
         <v-card-title data-test="dialog-header">
@@ -294,7 +324,6 @@ import { AffiliationInvitationStatus, CorpTypes, LDFlags } from '@/util/constant
 import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
-import AuthorizationRequestSentDialog from '@/components/auth/manage-business/manage-business-dialog/AuthorizationRequestSentDialog.vue'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
@@ -309,7 +338,6 @@ import { useBusinessStore } from '@/stores'
 
 export default defineComponent({
   components: {
-    AuthorizationRequestSentDialog,
     AccountAuthorizationRequest,
     Certify,
     HelpDialog,
@@ -383,16 +411,17 @@ export default defineComponent({
     const requestAuthRegistryOption = ref(false)
     const authorizationLabel = 'Legal name of Authorized Person (e.g., Last Name, First Name)'
     const authorizationMaxLength = 100
-    const showAuthorizationEmailSentDialog = ref(false)
     const createAffiliationInvitationErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const authorizationRequestSentDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
+    const invitationRequestSentDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const createAffiliationInvitationErrorTitle = ref('')
     const createAffiliationInvitationErrorText = ref('')
-    const showAuthorizationRequestSentDialog = ref(false)
     const hasBusinessEmail = ref(false)
     const hasBusinessAuthentication = ref(false)
     const hasAffiliatedAccount = ref(false)
+
     const successDialog = computed(() => {
-      return showAuthorizationRequestSentDialog.value || showAuthorizationEmailSentDialog.value
+      return invitationRequestSentDialog.value?.isOpen || authorizationRequestSentDialog.value?.isOpen
     })
 
     const isManageButtonEnabled = computed(() => {
@@ -433,6 +462,11 @@ export default defineComponent({
 
     const showAuthorization = computed(() => {
       return isBusinessLegalTypeFirm.value && props.isStaffOrSbcStaff
+    })
+
+    const isAuthorizationRequestSentDialogOpen = computed(() => {
+      console.log('fire')
+      return authorizationRequestSentDialog.value?.isOpen
     })
 
     const certifiedBy = computed(() => {
@@ -546,6 +580,10 @@ export default defineComponent({
     })
 
     // Methods
+    const closeAuthorizationRequestSentDialog = () => {
+      authorizationRequestSentDialog.value?.close()
+    }
+
     const resetForm = (emitCancel = false) => {
       passcode.value = ''
       proprietorPartnerName.value = ''
@@ -565,8 +603,8 @@ export default defineComponent({
     }
 
     const onAuthorizationRequestSentDialogClose = () => {
-      showAuthorizationRequestSentDialog.value = false
-      showAuthorizationEmailSentDialog.value = false
+      invitationRequestSentDialog.value?.close()
+      authorizationRequestSentDialog.value?.close()
       emit('on-authorization-email-sent-close', businessIdentifier.value)
     }
 
@@ -599,7 +637,7 @@ export default defineComponent({
           additionalMessage: invitationAdditionalMessage.value
         }
         await AffiliationInvitationService.createInvitation(payload)
-        showAuthorizationRequestSentDialog.value = true
+        invitationRequestSentDialog.value?.open()
       } catch (err) {
         createAffiliationInvitationErrorTitle.value = 'Error creating authorization invitation request'
         createAffiliationInvitationErrorText.value = 'An error occurred creating authorization invitation.<br/> Please try again later.'
@@ -620,7 +658,7 @@ export default defineComponent({
         if (affiliationInvitation.data.status === AffiliationInvitationStatus.Pending) {
           emit('affiliation-invitation-pending', affiliationInvitation.data.businessIdentifier)
         }
-        showAuthorizationEmailSentDialog.value = true
+        authorizationRequestSentDialog.value?.open()
       } catch (err) {
         createAffiliationInvitationErrorTitle.value = 'Error Sending Authorization Email'
         createAffiliationInvitationErrorText.value = 'An error occurred sending authorization email. Please try again.'
@@ -756,7 +794,6 @@ export default defineComponent({
       invitationToAccount,
       invitationAdditionalMessage,
       selectAccount,
-      showAuthorizationRequestSentDialog,
       successDialog,
       businessHasNoEmailAndNoAuthenticationAndNoAffiliation,
       isManageButtonEnabled,
@@ -791,6 +828,7 @@ export default defineComponent({
       isBusinessIdentifierValid,
       isCooperative,
       showAuthorization,
+      isAuthorizationRequestSentDialogOpen,
       certifiedBy,
       authorizationRules,
       passcodeLabel,
@@ -802,6 +840,7 @@ export default defineComponent({
       helpDialogBlurb,
       isFormValid,
       manageBusiness,
+      closeAuthorizationRequestSentDialog,
       resetForm,
       onAuthorizationRequestSentDialogClose,
       formatBusinessIdentifier,
@@ -809,7 +848,8 @@ export default defineComponent({
       businessContactEmail,
       enableDelegationFeature,
       showHelp,
-      showAuthorizationEmailSentDialog,
+      invitationRequestSentDialog,
+      authorizationRequestSentDialog,
       createAffiliationInvitationErrorDialog,
       createAffiliationInvitationErrorTitle,
       createAffiliationInvitationErrorText,
