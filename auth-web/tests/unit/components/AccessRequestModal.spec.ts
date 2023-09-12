@@ -77,14 +77,14 @@ describe('AccessRequestModal.vue', () => {
 
   it('show Approval modal on open', async () => {
     await accessRequest.vm.open()
-    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Account Creation Request ?`)
+    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Account Creation Request?`)
   })
 
   it('Should show reject modal on open when isRejectModal is true', async () => {
     await wrapper.setProps({ isRejectModal: true })
     await accessRequest.vm.open()
 
-    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Account Creation Request ?`)
+    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Account Creation Request?`)
   })
 
   it('Should show on Hold modal on open when isOnHoldModal is true', async () => {
@@ -98,14 +98,14 @@ describe('AccessRequestModal.vue', () => {
     await wrapper.setProps({ isOnHoldModal: false, isRejectModal: false, accountType: 'PRODUCT' })
     await accessRequest.vm.open()
 
-    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Access Request ?`)
+    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Approve Access Request?`)
   })
 
   it('Should show Reject modal for product ', async () => {
     await wrapper.setProps({ isOnHoldModal: false, isRejectModal: true, accountType: 'PRODUCT' })
     await accessRequest.vm.open()
 
-    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Access Request ?`)
+    expect(wrapper.find('[data-test="dialog-header"]').text()).toBe(`Reject Access Request?`)
   })
 
   it('render on hold reasons properly ', async () => {
@@ -132,7 +132,7 @@ describe('AccessRequestModal.vue', () => {
     const remarks = 'Affidavit is missing seal'
     const select = wrapper.find('[data-test="hold-reason-type"]')
     await select.setValue(remarks)
-    expect(wrapper.vm.onholdReasons).toBe(remarks)
+    expect(wrapper.vm.onHoldOrRejectReasons).toBe(remarks)
 
     const rejectFormMock = {
       validate: () => true

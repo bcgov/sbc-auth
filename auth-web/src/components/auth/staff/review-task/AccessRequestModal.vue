@@ -30,6 +30,21 @@
             v-html="getModalData.text"
           />
           <v-form
+            v-if="isRejectModal && isMhrSubProductReview"
+            ref="rejectForm"
+          >
+            <v-textarea
+              id="rejection-reason-text-area"
+              v-model="otherRejectReasonText"
+              class="mb-n2"
+              filled
+              label="Reason for Rejection"
+              aria-label="Reason for Rejection"
+              counter="250"
+              :rules="onholdOrRejectReasonRules"
+            />
+          </v-form>
+          <v-form
             v-if="isOnHoldModal"
             ref="rejectForm"
             lazy-validation
@@ -76,7 +91,7 @@
             </v-row>
             <v-select
               v-if="accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD"
-              v-model="onholdReasons"
+              v-model="onHoldOrRejectReasons"
               filled
               label="Reason(s) why account is on hold "
               :items="onholdReasonCodes"
@@ -84,7 +99,7 @@
               item-value="desc"
               data-test="hold-reason-type"
               class="my-0"
-              :rules="onholdReasonRules"
+              :rules="onholdOrRejectReasonRules"
               multiple
             >
               <template #selection="{ item, index }">
@@ -93,7 +108,7 @@
                   v-if="index === 1"
                   class="grey--text text-caption"
                 >
-                  (+{{ onholdReasons.length - 1 }} {{ onholdReasons.length > 2 ? 'others' : 'other' }})
+                  (+{{ onHoldOrRejectReasons.length - 1 }} {{ onHoldOrRejectReasons.length > 2 ? 'others' : 'other' }})
                 </span>
               </template>
             </v-select>
@@ -145,7 +160,7 @@
                 class="pa-0"
               >
                 <v-text-field
-                  v-model="otherReasonText"
+                  v-model="otherRejectReasonText"
                   filled
                   label="Reason will be displayed in the email sent to user"
                   req
@@ -220,10 +235,11 @@
 
 <script lang="ts">
 import { OnholdOrRejectCode, TaskRelationshipType } from '@/util/constants'
-import { PropType, Ref, computed, defineComponent, onMounted, ref } from '@vue/composition-api'
+import { PropType, Ref, computed, defineComponent, onMounted, reactive, ref, toRefs } from '@vue/composition-api'
 import { Code } from '@/models/Code'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import { useI18n } from 'vue-i18n-composable'
+import { userAccessDisplayNames } from '@/resources/QualifiedSupplierAccessResource'
 
 export default defineComponent({
   name: 'AccessRequestModal',
@@ -255,6 +271,10 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    isMhrSubProductReview: { // For Mhr sub-product review tasks
+      type: Boolean,
+      default: false
+    },
     orgName: {
       type: String,
       default: ''
@@ -274,15 +294,23 @@ export default defineComponent({
   },
   setup (props, { emit }) {
     const { t } = useI18n()
-    const onholdReasons: Ref<string[]> = ref([])
+    const onHoldOrRejectReasons: Ref<string[]> = ref([])
     const accountToBeOnholdOrRejected: Ref<string> = ref('')
     const accessRequest: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const accessRequestConfirmationDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const rejectForm: Ref<HTMLFormElement> = ref(null)
-    const otherReasonText: Ref<string> = ref('')
+    const otherRejectReasonText: Ref<string> = ref('')
 
-    const onholdReasonRules = [
-      (v) => v.length > 0 || 'This field is required'
+    const localState = reactive({
+      mhrRejectionReason: '',
+      mhrSubProductAccessText: computed((): string =>
+        `Qualified Supplier - ${userAccessDisplayNames[props.taskName]} access to Manufactured Home Registry.`
+      )
+    })
+
+    const onholdOrRejectReasonRules = [
+      (v) => v.length > 0 || `${props.isMhrSubProductReview ? '' : 'This field is required'}`,
+      (v) => (!props.isMhrSubProductReview || v.length <= 250) || 'Maximum 250 characters'
     ]
     const accountToBeOnholdOrRejectedRules = [
       (v) => !!v || 'Choose reject or on hold to proceed.'
@@ -303,43 +331,49 @@ export default defineComponent({
 
     function callAction () {
       let isValidForm = true
-      let accountToBeOnholdOrRejected
+      let accountToBeOnHoldOrRejected
 
       if (props.isOnHoldModal) {
         isValidForm = rejectForm.value.validate()
       } else if (props.isMoveToPendingModal) {
-        accountToBeOnholdOrRejected = OnholdOrRejectCode.ONHOLD
+        accountToBeOnHoldOrRejected = OnholdOrRejectCode.ONHOLD
       }
 
-      if (props.isMoveToPendingModal && otherReasonText.value) {
-        onholdReasons.value.push(otherReasonText.value)
+      if (props.isMoveToPendingModal && otherRejectReasonText.value) {
+        onHoldOrRejectReasons.value.push(otherRejectReasonText.value)
+      }
+
+      if (props.isMhrSubProductReview && props.isRejectModal) {
+        isValidForm = rejectForm.value.validate()
+
+        if (isValidForm) onHoldOrRejectReasons.value.push(otherRejectReasonText.value)
       }
 
       emit('approve-reject-action', {
         isValidForm,
-        accountToBeOnholdOrRejected,
-        onholdReasons: onholdReasons.value
+        accountToBeOnHoldOrRejected,
+        onHoldOrRejectReasons: onHoldOrRejectReasons.value
       })
     }
 
     const getTitle = (isProductApproval: boolean) => {
       if (isProductApproval) {
-        if (props.isTaskRejected) return 'Re-approve Access Request ?'
-        else return 'Approve Access Request ?'
+        if (props.isTaskRejected) return 'Re-approve Access Request?'
+        else return 'Approve Access Request?'
       } else {
-        return 'Approve Account Creation Request ?'
+        return 'Approve Account Creation Request?'
       }
     }
 
     const getText = (isProductApproval: boolean) => {
       if (isProductApproval) {
-        if (props.isTaskRejected) {
-          return `By re-approving the request, this account will have access to  ${props.taskName}`
-        } else {
-          return `By approving the request, this account will have access to  ${props.taskName}`
-        }
+        let baseText = `By ${props.isTaskRejected ? 're-approving' : 'approving'} the request, this account will have`
+
+        return props.isMhrSubProductReview
+          ? `${baseText} ${localState.mhrSubProductAccessText}`
+          : `${baseText} access to ${props.taskName}.`
       }
-      return `Approving the request will activate this account`
+      return `Approving the request will activate this account.`
     }
 
     const getIcon = (isRejectModal: boolean) => {
@@ -365,12 +399,18 @@ export default defineComponent({
 
       if (props.isRejectModal) {
         title = isProductApproval
-          ? 'Reject Access Request ?'
-          : 'Reject Account Creation Request ?'
+          ? 'Reject Access Request?'
+          : 'Reject Account Creation Request?'
+
+        const rejectionDescText = props.isMhrSubProductReview
+          ? `${localState.mhrSubProductAccessText} Enter your reason(s) for this decision. (Reasons will appear in the
+            applicant's notification email).`
+          : `access to ${props.taskName}.`
 
         text = isProductApproval // eslint-disable-next-line no-irregular-whitespace
-          ? `By rejecting the request, this account won't have access to ${props.taskName}`
+          ? `By rejecting the request, this account will not have ${rejectionDescText}`
           : 'Rejecting the request will not activate this account'
+
         btnLabel = isProductApproval ? 'Reject' : 'Yes, Reject Account'
       } else if (props.isOnHoldModal) {
         // if we need to show on hold modal
@@ -396,8 +436,13 @@ export default defineComponent({
         ? `Request has been Approved`
         : `Account has been Approved`
 
+      const baseText = `The account <strong>${props.orgName}</strong> has been approved`
+      const productText = props.isMhrSubProductReview
+        ? `for ${localState.mhrSubProductAccessText}`
+        : `to access ${props.taskName}`
+
       let text = isProductApproval
-        ? `The account <strong>${props.orgName}</strong> has been approved to access ${props.taskName}`
+        ? `${baseText} ${productText}`
         : `Account creation request has been approved`
 
       if (props.isRejectModal) {
@@ -406,7 +451,7 @@ export default defineComponent({
           : `Account has been Rejected`
         // eslint-disable-next-line no-irregular-whitespace
         text = isProductApproval
-          ? `The account <strong>${props.orgName}</strong> has been rejected to access ${props.taskName}`
+          ? `The account <strong>${props.orgName}</strong> has been rejected ${productText}`
           : `Account creation request has been rejected`
       } else if (props.isOnHoldModal || props.isMoveToPendingModal) {
         title = 'Request is On Hold'
@@ -417,24 +462,32 @@ export default defineComponent({
       return { title, text }
     })
 
+    const resetRejectForm = () => {
+      onHoldOrRejectReasons.value = []
+      otherRejectReasonText.value = ''
+      rejectForm.value?.resetValidation()
+    }
+
     const open = () => {
       accessRequest.value.open()
     }
 
     const close = () => {
+      // Clear local rejection reasons on dialog close
+      resetRejectForm()
       accessRequest.value.close()
     }
 
     const toggleReason = (reason: string) => {
-      if (onholdReasons.value.includes(reason)) {
-        onholdReasons.value = onholdReasons.value.filter((r) => r !== reason)
+      if (onHoldOrRejectReasons.value.includes(reason)) {
+        onHoldOrRejectReasons.value = onHoldOrRejectReasons.value.filter((r) => r !== reason)
       } else {
-        onholdReasons.value.push(reason)
+        onHoldOrRejectReasons.value.push(reason)
       }
     }
 
     onMounted(() => {
-      if (!props.isOnHoldModal) { onholdReasons.value = [] }
+      if (!props.isOnHoldModal) { onHoldOrRejectReasons.value = [] }
     })
 
     return {
@@ -448,20 +501,21 @@ export default defineComponent({
       closeConfirm,
       getConfirmModalData,
       getModalData,
-      onholdReasonRules,
-      onholdReasons,
+      onholdOrRejectReasonRules,
+      onHoldOrRejectReasons,
       onConfirmCloseClick,
       open,
       openConfirm,
-      otherReasonText,
+      otherRejectReasonText,
       rejectForm,
-      toggleReason
+      toggleReason,
+      ...toRefs(localState)
     }
   }
 })
 </script>
 
-<style lang="scss" >
+<style lang="scss" scoped>
   @import '$assets/scss/theme.scss';
   .reject-form{
     margin-bottom: -30px !important;
@@ -471,18 +525,24 @@ export default defineComponent({
     caret-color: var(--v-error-darken2) !important;
   }
   .text-color {
-    color: $TextColorGray;
+    color: $gray7;
   }
   .text-size {
-    font-size: 1.7142rem !important;
+    font-size: 1.75rem !important;
   }
   .sub-text-size {
-    font-size: 1.1428rem !important;
+    font-size: 1rem !important;
   }
   .align-items-center {
     align-self: center !important;
   }
   .error-size {
     font-size: 16px;
+  }
+  ::v-deep {
+    .v-textarea textarea {
+      color: $gray9 !important;
+      font-size: 1rem;
+    }
   }
 </style>

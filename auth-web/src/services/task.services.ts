@@ -50,13 +50,22 @@ export default class TaskService {
       { relationshipStatus: TaskRelationshipStatus.ACTIVE })
   }
 
-  static async rejectPendingTask (taskId:any): Promise<AxiosResponse> {
+  static async rejectPendingTask (taskId:any, remarks:string[] = []): Promise<AxiosResponse> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
-      { relationshipStatus: TaskRelationshipStatus.REJECTED })
+      { remarks, relationshipStatus: TaskRelationshipStatus.REJECTED })
   }
 
   static async onHoldPendingTask (taskId, remarks:string[]): Promise<AxiosResponse> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
       { status: TaskRelationshipStatus.HOLD, remarks, relationshipStatus: TaskRelationshipStatus.PENDING_STAFF_REVIEW })
+  }
+
+  public static async getQsApplicantForTaskReview (accountId: number | string): Promise<AxiosResponse> {
+    const apiKey = ConfigHelper.getMhrAPIKey()
+    const headers = {
+      'x-apikey': apiKey,
+      'Account-Id': accountId
+    }
+    return axios.get(`${ConfigHelper.getMhrAPIUrl()}/qualified-suppliers`, { headers })
   }
 }
