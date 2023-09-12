@@ -87,7 +87,7 @@
                     <span v-else>Reject</span>
                   </v-btn>
                   <v-btn
-                    v-else
+                    v-else-if="!isMhrSubProductReview"
                     large
                     outlined
                     color="primary"
@@ -109,6 +109,7 @@
             />
             <div class="flex-grow-1">
               <AccountStatusTab
+                :title="statusTitle"
                 :taskDetails="task"
                 :isPendingReviewPage="isPendingReviewPage"
               />
@@ -128,6 +129,7 @@
           :accountType="taskRelationshipType"
           :taskName="task.type"
           :onholdReasonCodes="onholdReasonCodes"
+          :isMhrSubProductReview="isMhrSubProductReview"
           @approve-reject-action="saveSelection"
           @after-confirm-action="goBack()"
         />
@@ -151,6 +153,7 @@ import DownloadAffidavit from '@/components/auth/staff/review-task/DownloadAffid
 import NotaryInformation from '@/components/auth/staff/review-task/NotaryInformation.vue'
 import PaymentInformation from '@/components/auth/staff/review-task/PaymentInformation.vue'
 import ProductFee from '@/components/auth/staff/review-task/ProductFee.vue'
+import QsApplication from '@/components/auth/staff/review-task/QsApplication.vue'
 import { Task } from '@/models/Task'
 import { useCodesStore } from '@/stores/codes'
 import { useOrgStore } from '@/stores/org'
@@ -252,6 +255,11 @@ export default defineComponent({
       return task.value.type === TaskType.GOVN_REVIEW
     })
 
+    const isMhrSubProductReview = computed(() => {
+      return [TaskType.MHR_LAWYER_NOTARY, TaskType.MHR_MANUFACTURERS, TaskType.MHR_DEALERS]
+        .includes(task.value?.type as TaskType)
+    })
+
     const title = computed(() => {
       let title = 'Review Account'
       if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
@@ -261,6 +269,10 @@ export default defineComponent({
         title = 'Review BCeID Admin'
       }
       return title
+    })
+
+    const statusTitle = computed(() => {
+      return isMhrSubProductReview.value ? 'Access Request Status' : 'Account Status'
     })
 
     const accountNotaryContact = (): Contact => {
@@ -399,6 +411,22 @@ export default defineComponent({
       )
     }
 
+    const componentQualifiedSupplierApplication = (tabNumber:number = 1) => {
+      return formattedComponent(
+        tabNumber,
+        `qualified-supplier-application-${tabNumber}`,
+        QsApplication,
+        {
+          title: 'Qualified Supplier Application',
+          taskDetails: task.value,
+          accountUnderReview: accountUnderReview.value,
+          accountUnderReviewAdmin: accountUnderReviewAdmin.value,
+          accountUnderReviewAdminContact: accountUnderReviewAdminContact.value
+
+        }
+      )
+    }
+
     /*
       5 types of Tasks:
       1. New BCeId Account -> TaskType.NEW_ACCOUNT_STAFF_REVIEW and TaskRelationshipType.ORG and AFFIDAVIT_REVIEW action
@@ -454,6 +482,14 @@ export default defineComponent({
           if (accountInfoAccessType.value === AccessType.REGULAR) list.pop()
           return list
         }
+        case TaskType.MHR_LAWYER_NOTARY:
+        case TaskType.MHR_MANUFACTURERS:
+        case TaskType.MHR_DEALERS:
+          return [
+            { ...componentAccountInformation(1) },
+            { ...componentAccountAdministrator(2) },
+            { ...componentQualifiedSupplierApplication(3) }
+          ]
         default:
           // Since task of Product type has variable Task Type (eg, Wills Registry, PPR ) we specify in default.
           // Also, we double check by task relationship type
@@ -551,14 +587,14 @@ export default defineComponent({
     }
 
     const saveSelection = async (reason) => {
-      const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
+      const { isValidForm, accountToBeOnHoldOrRejected, onHoldOrRejectReasons } = reason
 
       if (!isValidForm) return
 
       isSaving.value = true
       const isApprove = !isRejectModal.value && !isOnHoldModal.value && !isMoveToPendingModal.value
-      const isRejecting = isRejectModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
-      const isMoveToPending = isMoveToPendingModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
+      const isRejecting = isRejectModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.REJECTED
+      const isMoveToPending = isMoveToPendingModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.ONHOLD
 
       try {
         if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
@@ -572,7 +608,11 @@ export default defineComponent({
         if (isApprove) {
           await staffStore.approveAccountUnderReview(task.value)
         } else {
-          await staffStore.rejectorOnHoldAccountUnderReview({ task: task.value, isRejecting, remarks: onholdReasons })
+          await staffStore.rejectorOnHoldAccountUnderReview({
+            task: task.value,
+            isRejecting,
+            remarks: onHoldOrRejectReasons
+          })
         }
         const taskType: any = task.value.type
 
@@ -632,6 +672,7 @@ export default defineComponent({
       isAffidavitReview,
       isGovNAccountReview,
       title,
+      statusTitle,
       accountNotaryContact,
       productFeeChange,
       canEdit,
@@ -648,7 +689,9 @@ export default defineComponent({
       openModal,
       saveSelection,
       goBack,
-      determinePage
+      determinePage,
+      onholdReasonCodes,
+      isMhrSubProductReview
     }
   }
 })

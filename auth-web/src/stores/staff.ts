@@ -177,7 +177,7 @@ export const useStaffStore = defineStore('staff', () => {
       const taskId = task.id
       let newTask = null
       if (isRejecting) {
-        const response = await TaskService.rejectPendingTask(taskId)
+        const response = await TaskService.rejectPendingTask(taskId, remarks)
         newTask = response.data || task
       } else {
         const response = await TaskService.onHoldPendingTask(taskId, remarks)
