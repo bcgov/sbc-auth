@@ -581,9 +581,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       try {
         await this.syncOrganization(this.currentAccountSettings.id)
         await this.addOrgSettings(this.currentOrganization)
-        this.isLoading = true // truthy
-        await this.syncBusinesses()
-        this.isLoading = false // falshy
+        await this.syncBusinessesAndToggleLoading()
         this.$store.commit('updateHeader')
         this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
         return
@@ -591,9 +589,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         this.showAuthorizationErrorModal()
       }
     }
-    this.isLoading = true // truthy
-    await this.syncBusinesses()
-    this.isLoading = false // falshy
+    await this.syncBusinessesAndToggleLoading()
     this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
   }
 
@@ -670,6 +666,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
         'please contact us at:'
   }
 
+  async syncBusinessesAndToggleLoading () {
+    this.isLoading = true
+    await this.syncBusinesses()
+    this.isLoading = false
+  }
+
   openHelp () {
     this.$refs.helpDialog.open()
   }
@@ -685,10 +687,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       return
     }
 
-    this.isLoading = true // truthy
-    await this.syncBusinesses()
     this.lastSyncBusinesses = Date.now()
-    this.isLoading = false // falsy
+    await this.syncBusinessesAndToggleLoading()
   }
 
   private get enableMandatoryAddress (): boolean {
@@ -716,7 +716,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       }
     }
     await this.createNumberedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
-    await this.syncBusinesses()
+    await this.syncBusinessesAndToggleLoading()
   }
 
   async popupBusinessDialog (business: Business) {
@@ -728,7 +728,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
-    await this.syncBusinesses()
+    await this.syncBusinessesAndToggleLoading()
     this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
     this.snackbarText = businessIdentifier + ' was successfully added to your table.'
     this.showSnackbar = true
@@ -738,7 +738,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async showAddSuccessModalByEmail (businessIdentifier: string) {
-    await this.syncBusinesses()
+    await this.syncBusinessesAndToggleLoading()
     this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
     this.snackbarText = 'You can now manage ' + businessIdentifier + '.'
     this.showSnackbar = true
@@ -750,9 +750,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   async showAddSuccessModalNR (nameRequestNumber: string) {
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
-    this.isLoading = true // truthy
-    await this.syncBusinesses()
-    this.isLoading = false // falshy
+    await this.syncBusinessesAndToggleLoading()
     const nameRequestIndexResponse = await this.searchNRIndex(nameRequestNumber)
 
     this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
@@ -764,15 +762,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async onAuthorizationEmailSentClose (businessIdentifier: string) {
-    this.isLoading = true // truthy
-    await this.syncBusinesses()
-    this.isLoading = false // falshy
+    this.isAuthorizationEmailSentDialogVisible = false
+    await this.syncBusinessesAndToggleLoading()
     // This function doesn't always have the businessIdentifier passed to it.
     const validBusinessIdentifier = businessIdentifier || this.businessIdentifier
     this.highlightIndex = await this.searchBusinessIndex(validBusinessIdentifier)
     this.snackbarText = 'Confirmation email sent, pending authorization.'
     this.showSnackbar = true
-    this.isAuthorizationEmailSentDialogVisible = false
     this.businessIdentifier = null
     setTimeout(() => {
       this.highlightIndex = -1
@@ -811,6 +807,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.dialogTitle = 'Error Adding Name Request'
     this.dialogText =
     'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    this.$refs.errorDialog.open()
+  }
+
+  showNRBadStatusErrorModal () {
+    this.dialogTitle = 'Invalid Status for Name Request'
+    this.dialogText =
+    'This name request was in an invalid status. The specified name request cannot be used.'
     this.$refs.errorDialog.open()
   }
 
@@ -868,7 +871,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   async removeAffiliationInvitation () {
-    await this.syncBusinesses()
+    await this.syncBusinessesAndToggleLoading()
   }
 
   showConfirmationOptionsModal (removeBusinessPayload: RemoveBusinessPayload) {
@@ -976,7 +979,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       await this.removeBusiness(this.removeBusinessPayload)
       this.dialogText = this.$t(dialogTextKey).toString()
       this.dialogTitle = this.$t(dialogTitleKey).toString()
-      await this.syncBusinesses()
+      await this.syncBusinessesAndToggleLoading()
       this.$refs.removedBusinessSuccessDialog.open()
     } catch (ex) {
       this.showUnknownErrorModal(null)
