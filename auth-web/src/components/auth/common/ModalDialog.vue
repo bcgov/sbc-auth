@@ -50,6 +50,14 @@
 
       <!-- actions -->
       <v-card-actions v-if="showActions">
+        <span
+          id="help-button"
+          class="pl-2 pr-2 mr-auto"
+          @click.stop="openHelp()"
+        >
+          <v-icon>mdi-help-circle-outline</v-icon>
+          Help
+        </span>
         <slot name="actions">
           <v-btn
             large
@@ -82,13 +90,20 @@ export default defineComponent({
     maxWidth: { type: String, default: '' },
     showCloseIcon: { type: Boolean, default: false }
   },
-  setup () {
+  setup (_, { emit }) {
     const isOpen = ref(false)
+
+    const openHelp = () => {
+      emit('open-help')
+      isOpen.value = false
+    }
+    const closeDialog = () => {
+      emit('close-dialog')
+    }
 
     const open = () => {
       isOpen.value = true
     }
-
     const close = () => {
       isOpen.value = false
     }
@@ -96,17 +111,29 @@ export default defineComponent({
     return {
       open,
       close,
-      isOpen
+      isOpen,
+      openHelp,
+      closeDialog
     }
   }
 })
 </script>
 
 <style lang="scss" scoped>
+@import '@/assets/scss/ModalDialog';
+  #help-button {
+    cursor: pointer;
+    color: var(--v-primary-base) !important;
+    .v-icon {
+      transform: translate(0, -2px) !important;
+      color: var(--v-primary-base) !important;
+    }
+  }
   .notify-dialog {
     background: red;
   }
   .modal-dialog-title {
+    width: 100%;
     text-align: center;
     word-break: break-word;
     font-size: var(--FONT_SIZE_TITLE);
