@@ -36,8 +36,7 @@
             <v-textarea
               id="rejection-reason-text-area"
               v-model="otherRejectReasonText"
-              class="mb-n2 sub-text-size gray-9"
-              content-class="sub-text-size gray-9"
+              class="mb-n2"
               filled
               label="Reason for Rejection"
               aria-label="Reason for Rejection"

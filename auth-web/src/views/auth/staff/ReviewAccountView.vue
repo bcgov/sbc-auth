@@ -596,9 +596,6 @@ export default defineComponent({
       const isRejecting = isRejectModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.REJECTED
       const isMoveToPending = isMoveToPendingModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.ONHOLD
 
-      // isSaving.value = false
-      // if ((1 + 1) === 2) return
-
       try {
         if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
           const success = await orgStore.updateOrganizationAccessType({
