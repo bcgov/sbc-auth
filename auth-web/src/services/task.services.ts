@@ -50,9 +50,9 @@ export default class TaskService {
       { relationshipStatus: TaskRelationshipStatus.ACTIVE })
   }
 
-  static async rejectPendingTask (taskId:any): Promise<AxiosResponse> {
+  static async rejectPendingTask (taskId:any, remarks:string[] = []): Promise<AxiosResponse> {
     return axios.put(`${ConfigHelper.getAuthAPIUrl()}/tasks/${taskId}`,
-      { relationshipStatus: TaskRelationshipStatus.REJECTED })
+      { remarks, relationshipStatus: TaskRelationshipStatus.REJECTED })
   }
 
   static async onHoldPendingTask (taskId, remarks:string[]): Promise<AxiosResponse> {

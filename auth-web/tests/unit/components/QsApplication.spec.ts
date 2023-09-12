@@ -1,5 +1,6 @@
 import { createLocalVue, shallowMount } from '@vue/test-utils'
 import QsApplication from '@/components/auth/staff/review-task/QsApplication.vue'
+import { TaskType } from '@/util/constants'
 import Vuetify from 'vuetify'
 
 // Mocked props
@@ -7,7 +8,7 @@ const mockProps = {
   tabNumber: 1,
   title: 'Test Application',
   taskDetails: {
-    type: 'Test - Task',
+    type: TaskType.MHR_LAWYER_NOTARY,
     created: new Date()
   },
   accountUnderReview: {
@@ -70,7 +71,7 @@ describe('QsApplication.vue', () => {
 
   it('displays the correct task type', () => {
     const taskType = wrapper.findAll('h3').at(1).text()
-    expect(taskType).toContain('Task')
+    expect(taskType).toBe('Qualified Supplier (Lawyers and Notaries) Information')
   })
 
   it('displays the correct applicant organization name', () => {

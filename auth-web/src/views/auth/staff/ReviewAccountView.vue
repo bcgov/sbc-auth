@@ -87,7 +87,7 @@
                     <span v-else>Reject</span>
                   </v-btn>
                   <v-btn
-                    v-else
+                    v-else-if="!isMhrSubProductReview"
                     large
                     outlined
                     color="primary"
@@ -129,6 +129,7 @@
           :accountType="taskRelationshipType"
           :taskName="task.type"
           :onholdReasonCodes="onholdReasonCodes"
+          :isMhrSubProductReview="isMhrSubProductReview"
           @approve-reject-action="saveSelection"
           @after-confirm-action="goBack()"
         />
@@ -254,6 +255,11 @@ export default defineComponent({
       return task.value.type === TaskType.GOVN_REVIEW
     })
 
+    const isMhrSubProductReview = computed(() => {
+      return [TaskType.MHR_LAWYER_NOTARY, TaskType.MHR_MANUFACTURERS, TaskType.MHR_DEALERS]
+        .includes(task.value?.type as TaskType)
+    })
+
     const title = computed(() => {
       let title = 'Review Account'
       if (taskRelationshipType.value === TaskRelationshipType.PRODUCT) {
@@ -266,8 +272,7 @@ export default defineComponent({
     })
 
     const statusTitle = computed(() => {
-      return [TaskType.MHR_LAWYER_NOTARY, TaskType.MHR_MANUFACTURERS, TaskType.MHR_DEALERS]
-        .includes(task.value?.type as TaskType) ? 'Access Request Status' : 'Account Status'
+      return isMhrSubProductReview.value ? 'Access Request Status' : 'Account Status'
     })
 
     const accountNotaryContact = (): Contact => {
@@ -582,14 +587,17 @@ export default defineComponent({
     }
 
     const saveSelection = async (reason) => {
-      const { isValidForm, accountToBeOnholdOrRejected, onholdReasons } = reason
+      const { isValidForm, accountToBeOnHoldOrRejected, onHoldOrRejectReasons } = reason
 
       if (!isValidForm) return
 
       isSaving.value = true
       const isApprove = !isRejectModal.value && !isOnHoldModal.value && !isMoveToPendingModal.value
-      const isRejecting = isRejectModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.REJECTED
-      const isMoveToPending = isMoveToPendingModal.value || accountToBeOnholdOrRejected === OnholdOrRejectCode.ONHOLD
+      const isRejecting = isRejectModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.REJECTED
+      const isMoveToPending = isMoveToPendingModal.value || accountToBeOnHoldOrRejected === OnholdOrRejectCode.ONHOLD
+
+      // isSaving.value = false
+      // if ((1 + 1) === 2) return
 
       try {
         if (accountInfoAccessType.value && accountInfoAccessType.value !== accountUnderReview.value.accessType) {
@@ -603,7 +611,11 @@ export default defineComponent({
         if (isApprove) {
           await staffStore.approveAccountUnderReview(task.value)
         } else {
-          await staffStore.rejectorOnHoldAccountUnderReview({ task: task.value, isRejecting, remarks: onholdReasons })
+          await staffStore.rejectorOnHoldAccountUnderReview({
+            task: task.value,
+            isRejecting,
+            remarks: onHoldOrRejectReasons
+          })
         }
         const taskType: any = task.value.type
 
@@ -681,7 +693,8 @@ export default defineComponent({
       saveSelection,
       goBack,
       determinePage,
-      onholdReasonCodes
+      onholdReasonCodes,
+      isMhrSubProductReview
     }
   }
 })

@@ -201,6 +201,7 @@
 <script lang="ts">
 import { QualifiedSupplierApplicant, QualifiedSupplierRequirementsConfig } from '@/models/external'
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
+import { userAccessDisplayNames, userAccessRequirements } from '@/resources/QualifiedSupplierAccessResource'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
@@ -209,7 +210,6 @@ import { Task } from '@/models/Task'
 import TaskService from '@/services/task.services'
 import { User } from '@/models/user'
 import moment from 'moment/moment'
-import { userAccessRequirements } from '@/resources/QualifiedSupplierAccessResource'
 
 export default defineComponent({
   name: 'QsApplication',
@@ -228,8 +228,7 @@ export default defineComponent({
     const localState = reactive({
       qsApplicantData: null as QualifiedSupplierApplicant,
       qsApplicationTypeDisplay: computed((): string => {
-        const type = props.taskDetails?.type || ''
-        return type.replace(/^.*–\s*/, '').trim()
+        return userAccessDisplayNames[props.taskDetails?.type]
       }),
       qsApplicantPhone: computed((): string => {
         return CommonUtils.toDisplayPhone(localState.qsApplicantData?.phoneNumber)

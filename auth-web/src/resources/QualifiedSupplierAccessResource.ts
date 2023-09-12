@@ -17,3 +17,9 @@ export const userAccessRequirements: Partial<Record<TaskType, QualifiedSupplierR
   [TaskType.MHR_MANUFACTURERS]: [],
   [TaskType.MHR_DEALERS]: []
 }
+
+export const userAccessDisplayNames: Partial<Record<TaskType, string>> = {
+  [TaskType.MHR_LAWYER_NOTARY]: 'Lawyers and Notaries',
+  [TaskType.MHR_MANUFACTURERS]: 'Manufacturers',
+  [TaskType.MHR_DEALERS]: 'Home Dealers'
+}

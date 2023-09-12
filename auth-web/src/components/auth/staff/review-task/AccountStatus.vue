@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="account-status">
     <h2 class="mb-5">
       {{ `${tabNumber !==null ? `${tabNumber}.` : ''} ${title}` }}
     </h2>
@@ -9,7 +9,7 @@
       </v-col>
       <v-col
         class="py-2"
-        :class="{'error--text font-weight-bold': (taskDetails.relationshipStatus===TaskRelationshipStatusEnum.REJECTED) }"
+        :class="{'error--text font-weight-bold': (isTaskRejected) }"
       >
         {{ statusLabel }}
       </v-col>
@@ -40,7 +40,7 @@
     <v-row v-if="!isPendingReviewPage">
       <v-col class="col-12 col-sm-5 py-2">
         <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIVE">Approved By</span>
-        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.REJECTED">Rejected By</span>
+        <span v-if="isTaskRejected">Rejected By</span>
       </v-col>
       <v-col
         v-if="!isPendingReviewPage"
@@ -48,6 +48,14 @@
       >
         {{ taskDetails.modifiedBy }}<br>
         {{ formatDate(taskDetails.modified) }}
+      </v-col>
+    </v-row>
+    <v-row v-if="accountOnHoldRemarks && isTaskRejected">
+      <v-col cols="5" class="py-2">
+        Reason(s)
+      </v-col>
+      <v-col cols="7" class="py-2">
+        <span>{{ accountOnHoldRemarks && accountOnHoldRemarks[0] }}</span>
       </v-col>
     </v-row>
     <v-row>
@@ -96,6 +104,10 @@ export default class AccountStatusTab extends Vue {
     return this.taskDetails.status === TaskStatus.HOLD
   }
 
+  private get isTaskRejected (): boolean {
+    return this.taskDetails.relationshipStatus === this.TaskRelationshipStatusEnum.REJECTED
+  }
+
   private get accountOnHoldRemarks (): string {
     return this.taskDetails?.remarks
   }
@@ -110,6 +122,9 @@ export default class AccountStatusTab extends Vue {
 }
 </script>
 <style lang="scss" scoped>
+  #account-status {
+    max-width: 23.75rem;
+  }
   .remark-display {
     list-style-type: none;
   }
