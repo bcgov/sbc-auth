@@ -154,7 +154,7 @@
           <AffiliationAction
             :item="item"
             :index="index"
-            @add-unknown-error="$emit('add-unknown-error', $event)"
+            @unknown-error="$emit('unknown-error', $event)"
             @remove-affiliation-invitation="$emit('remove-affiliation-invitation', $event)"
             @remove-business="$emit('remove-business', $event)"
             @business-unavailable-error="$emit('business-unavailable-error', $event)"
@@ -168,8 +168,8 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInviteInfo } from '@/models/affiliation'
 import {
+  AffiliationInvitationStatus,
   AffiliationTypes,
   EntityAlertTypes,
   LDFlags,
@@ -179,6 +179,7 @@ import {
 import { Business, Names } from '@/models/business'
 import { defineComponent, ref } from '@vue/composition-api'
 import AffiliationAction from '@/components/auth/manage-business/AffiliationAction.vue'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components'
 import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
@@ -194,7 +195,7 @@ export default defineComponent({
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
-  emits: ['add-unknown-error', 'remove-affiliation-invitation', 'remove-business',
+  emits: ['unknown-error', 'remove-affiliation-invitation', 'remove-business',
     'business-unavailable-error', 'resend-affiliation-invitation', 'popup-manage-business-dialog'],
   setup () {
     const isloading = false

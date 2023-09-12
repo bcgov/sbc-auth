@@ -106,16 +106,15 @@
 </template>
 
 <script lang='ts'>
-import { AffiliationInvitationStatus, AffiliationInvitationType } from '@/models/affiliation'
-import { CorpTypes, FilingTypes, LDFlags, NrDisplayStates, NrTargetTypes } from '@/util/constants'
+import { AffiliationInvitationStatus, AffiliationInvitationType, CorpTypes, FilingTypes, LDFlags,
+  NrDisplayStates, NrTargetTypes } from '@/util/constants'
 import { PropType, defineComponent } from '@vue/composition-api'
 import { goToCorpOnline, goToDashboard, goToFormPage, goToNameRequest,
   goToOneStop, goToSocieties } from '@/util/navigation'
 import { useBusinessStore, useOrgStore } from '@/stores'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import { Business } from '@/models/business'
 import { NrRequestActionCodes } from '@bcrs-shared-components/enums'
-import OrgService from '@/services/org.services'
-
 import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
 
@@ -125,7 +124,7 @@ export default defineComponent({
     item: { type: Object as PropType<Business>, required: true },
     index: { type: Number, required: true }
   },
-  emits: ['popup-manage-business-dialog', 'add-unknown-error', 'remove-affiliation-invitation',
+  emits: ['popup-manage-business-dialog', 'unknown-error', 'remove-affiliation-invitation',
     'remove-business', 'business-unavailable-error', 'resend-affiliation-invitation'],
   setup (props, context) {
     const orgStore = useOrgStore()
@@ -149,7 +148,7 @@ export default defineComponent({
       }
 
       if (filingResponse?.errorMsg) {
-        context.emit('add-unknown-error')
+        context.emit('unknown-error')
         return ''
       }
       return filingResponse.data.filing.business.identifier
@@ -284,7 +283,10 @@ export default defineComponent({
         const invitationStatus = affiliationInviteInfo.status
         if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed,
           AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
-          await OrgService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          const success = await AffiliationInvitationService.removeAffiliationInvitation(affiliationInviteInfo.id)
+          if (!success) {
+            context.emit('unknown-error')
+          }
           context.emit('remove-affiliation-invitation')
           return
         }
@@ -389,57 +391,67 @@ export default defineComponent({
       }
     }
 
-    const handleNameRequestRedirect = (item): void => {
+    const handleApprovedNameRequestRenew = (item: Business): void => {
+      if (!isSupportedRestorationEntities(item)) {
+        goToCorpOnline()
+      } else if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
+        goToDashboard(item.nameRequest?.corpNum)
+      } else {
+        const action = isForRestore(item) ? 'restore' : 'reinstate'
+        context.emit('business-unavailable-error', action)
+      }
+    }
+
+    const handleApprovedNameRequestChangeName = (item: Business, nrRequestActionCd: NrRequestActionCodes): void => {
+      if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
+        goToDashboard(item.nameRequest?.corpNum)
+      } else {
+        let action = ''
+        if (nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
+          action = 'alter'
+        } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
+          action = 'change name'
+        }
+        context.emit('business-unavailable-error', action)
+      }
+    }
+
+    const handleApprovedNameRequest = (item: Business, nrRequestActionCd: NrRequestActionCodes): void => {
+      switch (nrRequestActionCd) {
+        case NrRequestActionCodes.AMALGAMATE:
+          // For now, go to COLIN with external link + icon + matching hover text
+          // Future gotoAmagamate
+          goToCorpOnline()
+          break
+        case NrRequestActionCodes.MOVE:
+          // Future - Relocate - Continue In
+          goToCorpOnline()
+          break
+        case NrRequestActionCodes.CONVERSION:
+        case NrRequestActionCodes.CHANGE_NAME:
+          handleApprovedNameRequestChangeName(item, nrRequestActionCd)
+          break
+        case NrRequestActionCodes.RESTORE:
+        case NrRequestActionCodes.RENEW:
+          handleApprovedNameRequestRenew(item)
+          break
+        case NrRequestActionCodes.NEW_BUSINESS: {
+          goToRegister(item)
+          break
+        }
+        default:
+          goToNameRequest(item.nameRequest)
+          break
+      }
+    }
+
+    const handleNameRequestRedirect = (item: Business): void => {
       if (!isNameRequest(item)) {
         return
       }
       if (status(item) === NrDisplayStates.APPROVED) {
         const nrRequestActionCd = item.nameRequest?.requestActionCd
-        switch (nrRequestActionCd) {
-          case NrRequestActionCodes.AMALGAMATE:
-            // For now, go to COLIN with external link + icon + matching hover text
-            // Future gotoAmagamate
-            goToCorpOnline()
-            break
-          case NrRequestActionCodes.MOVE:
-            // Future - Relocate - Continue In
-            goToCorpOnline()
-            break
-          case NrRequestActionCodes.CONVERSION:
-          case NrRequestActionCodes.CHANGE_NAME: {
-            if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
-              goToDashboard(item.nameRequest?.corpNum)
-            } else {
-              let action = ''
-              if (nrRequestActionCd === NrRequestActionCodes.CONVERSION) {
-                action = 'alter'
-              } else if (nrRequestActionCd === NrRequestActionCodes.CHANGE_NAME) {
-                action = 'change name'
-              }
-              context.emit('business-unavailable-error', action)
-            }
-            break
-          }
-          case NrRequestActionCodes.RESTORE:
-          case NrRequestActionCodes.RENEW: {
-            if (!isSupportedRestorationEntities(item)) {
-              goToCorpOnline()
-            } else if (isBusinessAffiliated(item.nameRequest?.corpNum)) {
-              goToDashboard(item.nameRequest?.corpNum)
-            } else {
-              const action = isForRestore(item) ? 'restore' : 'reinstate'
-              context.emit('business-unavailable-error', action)
-            }
-            break
-          }
-          case NrRequestActionCodes.NEW_BUSINESS: {
-            goToRegister(item)
-            break
-          }
-          default:
-            goToNameRequest(item.nameRequest)
-            break
-        }
+        handleApprovedNameRequest(item, nrRequestActionCd)
       } else {
         goToNameRequest(item.nameRequest)
       }
@@ -465,10 +477,11 @@ export default defineComponent({
       const affiliationInviteInfo = item?.affiliationInvites?.[0]
       if ([AffiliationInvitationStatus.Pending,
         AffiliationInvitationStatus.Expired,
-        AffiliationInvitationStatus.Failed].includes(affiliationInviteInfo?.status)) {
+        AffiliationInvitationStatus.Failed].includes(affiliationInviteInfo?.status as AffiliationInvitationStatus)) {
         switch (true) {
           case affiliationInviteInfo.type === AffiliationInvitationType.EMAIL &&
-          [AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired].includes(affiliationInviteInfo?.status):
+          [AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Expired]
+            .includes(affiliationInviteInfo?.status as AffiliationInvitationStatus):
             context.emit('resend-affiliation-invitation', item)
             return
 

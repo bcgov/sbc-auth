@@ -148,7 +148,6 @@ import { useOrgStore } from '@/stores/org'
 export default class AddNameRequestForm extends Vue {
   @Prop({ default: '' }) readonly requestNames: NameRequestIF[]
   @Prop({ default: '' }) readonly businessIdentifier: string
-  @Prop({ default: false }) readonly isEnableBusinessNrSearch: boolean
 
   readonly currentOrganization!: Organization
   readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
@@ -235,7 +234,7 @@ export default class AddNameRequestForm extends Vue {
           // emit event to let parent know business added
           this.$emit('add-success-nr', this.nrNumber)
         } else {
-          this.$emit('add-unknown-error')
+          this.$emit('unknown-error')
         }
       } catch (exception) {
         if (exception.response?.status === StatusCodes.BAD_REQUEST) {
@@ -243,7 +242,7 @@ export default class AddNameRequestForm extends Vue {
         } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
           this.$emit('add-failed-no-nr')
         } else {
-          this.$emit('add-unknown-error')
+          this.$emit('unknown-error')
         }
       } finally {
         this.resetForm('')

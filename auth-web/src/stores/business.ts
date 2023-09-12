@@ -1,14 +1,5 @@
 import {
   AffiliationInvitationStatus,
-  AffiliationResponse,
-  CreateRequestBody as CreateAffiliationRequestBody,
-  CreateNRAffiliationRequestBody,
-  NameRequestResponse
-} from '@/models/affiliation'
-import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
-  PasscodeResetLoad } from '@/models/business'
-import {
   CorpTypes,
   FilingTypes,
   LDFlags,
@@ -19,8 +10,18 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
+import {
+  AffiliationResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody,
+  NameRequestResponse
+} from '@/models/affiliation'
+import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
+import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
+  PasscodeResetLoad } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -144,7 +145,7 @@ export const useBusinessStore = defineStore('business', () => {
       return affiliatedEntities
     }
 
-    const pendingAffiliationInvitations = await OrgService.getAffiliationInvitations(currentOrganization.value.id) || []
+    const pendingAffiliationInvitations = await AffiliationInvitationService.getAffiliationInvitations(currentOrganization.value.id) || []
 
     for (const affiliationInvite of pendingAffiliationInvitations) {
       const isFromOrg = affiliationInvite.fromOrg.id === currentOrganization.value.id
@@ -161,7 +162,7 @@ export const useBusinessStore = defineStore('business', () => {
         const corpType = affiliationInvite.entity.corpType
         const newBusiness = { ...affiliationInvite.entity,
           affiliationInvites: [affiliationInvite],
-          corpType: { code: corpType as string } as CorpType }
+          corpType: { code: corpType as unknown as string } as CorpType }
         affiliatedEntities.push(newBusiness)
       }
     }

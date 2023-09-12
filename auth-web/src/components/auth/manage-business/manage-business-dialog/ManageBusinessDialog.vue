@@ -244,6 +244,7 @@
                       :business-name="initialBusinessName"
                       @change-request-access-message="invitationAdditionalMessage=$event"
                       @select-account="selectAccount($event)"
+                      @unknown-error="$emit('unknown-error')"
                     />
                   </div>
                 </v-list-group>
@@ -320,11 +321,10 @@
 </template>
 
 <script lang="ts">
-import { CorpTypes, LDFlags } from '@/util/constants'
+import { AffiliationInvitationStatus, CorpTypes, LDFlags } from '@/util/constants'
 import { Ref, computed, defineComponent, ref, watch } from '@vue/composition-api'
 import AccountAuthorizationRequest from '@/components/auth/manage-business/manage-business-dialog/AccountAuthorizationRequest.vue'
 import AffiliationInvitationService from '@/services/affiliation-invitation.services'
-import { AffiliationInvitationStatus } from '@/models/affiliation'
 import BusinessService from '@/services/business.services'
 import Certify from './Certify.vue'
 import CommonUtils from '@/util/common-util'
@@ -619,7 +619,7 @@ export default defineComponent({
       } else if (exception.response?.status === StatusCodes.BAD_REQUEST) {
         emit('business-already-added', { name: businessName.value, identifier: businessIdentifier.value })
       } else {
-        emit('add-unknown-error')
+        emit('unknown-error')
       }
     }
 
@@ -694,13 +694,13 @@ export default defineComponent({
           const addResponse = await businessStore.addBusiness(businessData)
           // check if add didn't succeed
           if (addResponse?.status !== StatusCodes.CREATED) {
-            emit('add-unknown-error')
+            emit('unknown-error')
           }
           // try to update business name
           const businessResponse = await businessStore.updateBusinessName(businessIdentifier.value)
           // check if update didn't succeed
           if (businessResponse?.status !== StatusCodes.OK) {
-            emit('add-unknown-error')
+            emit('unknown-error')
           }
           // let parent know that add was successful
           emit('add-success', businessIdentifier.value)
@@ -752,12 +752,14 @@ export default defineComponent({
         } catch (err) {
           hasBusinessEmail.value = false
           contactInfo.value = ''
-          // eslint-disable-next-line no-console
-          console.error(err)
+          if (err.response?.status !== StatusCodes.NOT_FOUND) {
+            // eslint-disable-next-line no-console
+            console.error(err)
+          }
         }
         try {
-          const organization = await OrgService.getOrganizationsNameAndUuidByAffiliation(newBusinessIdentifier)
-          hasAffiliatedAccount.value = organization?.data?.orgsDetails.length > 0
+          const orgsDetails = await OrgService.getOrganizationsNameAndUuidByAffiliation(newBusinessIdentifier)
+          hasAffiliatedAccount.value = orgsDetails.length > 0
         } catch (err) {
           hasAffiliatedAccount.value = false
           // eslint-disable-next-line no-console
@@ -768,8 +770,10 @@ export default defineComponent({
           hasBusinessAuthentication.value = authentication?.data?.hasValidPassCode
         } catch (err) {
           hasBusinessAuthentication.value = true
-          // eslint-disable-next-line no-console
-          console.error(err)
+          if (err.response?.status !== StatusCodes.NOT_FOUND) {
+            // eslint-disable-next-line no-console
+            console.error(err)
+          }
         }
       }
     })
