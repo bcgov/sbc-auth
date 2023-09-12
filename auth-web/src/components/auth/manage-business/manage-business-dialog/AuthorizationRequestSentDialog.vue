@@ -21,7 +21,7 @@
       <v-card-actions class="form__btns">
         <span
           id="help-button"
-          class="pl-2 pr-2 mr-auto"
+          class="mr-auto pl-0 help-text d-flex justify-start"
           @click.stop="openHelp()"
         >
           <v-icon>mdi-help-circle-outline</v-icon>

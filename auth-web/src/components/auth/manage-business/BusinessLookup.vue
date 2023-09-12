@@ -210,7 +210,7 @@ export default defineComponent({
 
     watch(() => states.searchField, onSearchFieldChanged)
 
-    const onItemSelected = (input: BusinessLookupResultIF) => {
+    const onItemSelected = (input: BusinessLookupResultIF | NameRequestLookupResultIF) => {
       if (input) {
         emit(props.lookupType, input)
       } else {
