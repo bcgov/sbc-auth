@@ -38,7 +38,6 @@
       <HelpDialog
         ref="helpDialog"
         :helpDialogBlurb="helpDialogBlurb"
-        :inline="true"
       />
 
       <AuthorizationRequestSentDialog

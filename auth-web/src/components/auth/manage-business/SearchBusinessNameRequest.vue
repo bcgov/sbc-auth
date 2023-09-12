@@ -85,7 +85,7 @@
         <AddNameRequestForm
           :businessIdentifier="businessIdentifier"
           :requestNames="nrNames"
-          @close-add-nr-modal="cancelAddNameRequest()"
+          @close-add-nr-modal="cancelEvent"
           @add-success-nr="showAddSuccessModalNR"
           @add-failed-show-msg="showNRErrorModal()"
           @add-failed-no-nr="showNRNotFoundModal()"
@@ -173,7 +173,6 @@ export default class SearchBusinessNameRequest extends Vue {
   }
   cancelAddNameRequest () {
     this.$refs.addNRDialog.close()
-    this.$emit('on-cancel-nr')
   }
   showAddSuccessModalNR (event) {
     this.clearSearch++
@@ -247,6 +246,7 @@ export default class SearchBusinessNameRequest extends Vue {
   }
 
   cancelEvent () {
+    this.$refs.addNRDialog.close()
     this.showManageBusinessDialog = false
     this.showNRDialog = false
     this.businessIdentifier = ''
