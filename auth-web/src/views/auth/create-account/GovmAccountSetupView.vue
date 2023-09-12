@@ -87,7 +87,7 @@ export default class GovmAccountSetupView extends Vue {
   public isLoading: boolean = false
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   public stepperConfig: Array<StepConfiguration> =

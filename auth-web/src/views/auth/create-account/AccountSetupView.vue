@@ -151,7 +151,7 @@ export default class AccountSetupView extends Vue {
   @Action(useUserStore) readonly getUserAccountSettings!: () => Promise<any>
 
   $refs: {
-    errorDialog: ModalDialog
+    errorDialog: InstanceType<typeof ModalDialog>
   }
 
   private stepperConfig: Array<StepConfiguration> =

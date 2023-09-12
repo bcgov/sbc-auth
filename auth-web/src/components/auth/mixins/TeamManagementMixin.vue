@@ -47,7 +47,7 @@ export default class TeamManagementMixin extends Vue {
   protected primaryActionType: string = ''
   protected secondaryActionText = 'Cancel'
 
-  protected confirmHandler: (modal:ModalDialog) => void = undefined
+  protected confirmHandler: (modal: InstanceType<typeof ModalDialog>) => void = undefined
 
   protected readonly currentMembership!: Member
   protected readonly currentOrganization!: Organization
@@ -58,9 +58,9 @@ export default class TeamManagementMixin extends Vue {
   protected readonly currentUser!: KCUserProfile
 
   private notifyUser = true
-  private modal: ModalDialog
+  private modal: InstanceType<typeof ModalDialog>
 
-  protected showConfirmRemoveModal (member: Member, confirmActionDialog: ModalDialog) {
+  protected showConfirmRemoveModal (member: Member, confirmActionDialog: InstanceType<typeof ModalDialog>) {
     this.modal = confirmActionDialog
     if (member.membershipStatus === MembershipStatus.Pending) {
       this.confirmActionTitle = this.$t('confirmDenyMemberTitle').toString()
@@ -81,7 +81,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialog.open()
   }
 
-  protected showConfirmChangeRoleModal (payload: ChangeRolePayload, confirmActionDialogWithQuestion: ModalDialog) {
+  protected showConfirmChangeRoleModal (payload: ChangeRolePayload, confirmActionDialogWithQuestion: InstanceType<typeof ModalDialog>) {
     if (payload.member.membershipTypeCode.toString() === payload.targetRole.toString()) {
       return
     }
@@ -96,7 +96,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialogWithQuestion.open()
   }
 
-  protected showConfirmLeaveTeamModal (confirmActionDialog: ModalDialog) {
+  protected showConfirmLeaveTeamModal (confirmActionDialog: InstanceType<typeof ModalDialog>) {
     this.modal = confirmActionDialog
     this.confirmActionTitle = this.$t('confirmLeaveTeamTitle').toString()
     this.confirmActionText = this.$t('confirmLeaveTeamText').toString()
@@ -105,7 +105,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialog.open()
   }
 
-  protected showConfirmDissolveModal (confirmActionDialog: ModalDialog) {
+  protected showConfirmDissolveModal (confirmActionDialog: InstanceType<typeof ModalDialog>) {
     this.modal = confirmActionDialog
     this.confirmActionTitle = this.$t('confirmDissolveTeamTitle').toString()
     this.confirmActionText = this.$t('confirmDissolveTeamText').toString()
@@ -114,7 +114,7 @@ export default class TeamManagementMixin extends Vue {
     confirmActionDialog.open()
   }
 
-  protected showSingleOwnerErrorModal (errorDialog: ModalDialog) {
+  protected showSingleOwnerErrorModal (errorDialog: InstanceType<typeof ModalDialog>) {
     this.modal = errorDialog
     this.errorTitle = this.$t('singleOwnerErrorTitle').toString()
     this.errorText = this.$t('singleOwnerErrorText').toString()
@@ -129,7 +129,7 @@ export default class TeamManagementMixin extends Vue {
     return this.isAccountGovM ? this.$t('inviteUsersFormTextGovM').toString() : this.$t('inviteUsersFormText').toString()
   }
 
-  protected close (modal: ModalDialog) {
+  protected close (modal: InstanceType<typeof ModalDialog>) {
     modal.close()
   }
 

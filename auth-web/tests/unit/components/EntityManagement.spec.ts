@@ -1,11 +1,12 @@
 import '../test-utils/composition-api-setup' // important to import this first
 import { createLocalVue, mount } from '@vue/test-utils'
-import { useOrgStore, useUserStore } from '@/stores'
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import { CorpTypes } from '@/util/constants'
 import EntityManagement from '@/components/auth/manage-business/EntityManagement.vue'
 import { RemoveBusinessPayload } from '@/models/Organization'
 import Vue from 'vue'
 import Vuetify from 'vuetify'
+import flushPromises from 'flush-promises'
 import { setupIntersectionObserverMock } from '../util/helper-functions'
 
 const vuetify = new Vuetify({})
@@ -78,6 +79,11 @@ describe('Entity Management Component', () => {
     expect(modal.exists()).toBe(true)
   })
 
+  it('EntityManagement contains businessUnavailableDialog modal', () => {
+    const modal = wrapper.find({ ref: 'businessUnavailableDialog' })
+    expect(modal.exists()).toBe(true)
+  })
+
   it('calls the nr open modal with correct buttons', async () => {
     const removeNRPayload = getPayLoad('NR')
     wrapper.vm.showConfirmationOptionsModal(removeNRPayload)
@@ -114,20 +120,6 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.primaryBtnText).toBe('Remove Registration')
     expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
   })
-  it('all buttons, tooltips and v-menu selections exist', async () => {
-    // All buttons exist
-    expect(wrapper.find('#add-existing-btn').exists()).toBe(true)
-    expect(wrapper.find('#add-name-request-btn').exists()).toBe(true)
-    expect(wrapper.find('#incorporate-numbered-btn').exists()).toBe(true)
-
-    // Existing Business or NameRequest menu selections
-    wrapper.find('#add-existing-btn').trigger('click')
-    await Vue.nextTick()
-    expect(wrapper.findAll('.add-existing-item').length).toBe(2)
-
-    // tooltips exist
-    expect(wrapper.findAll('.top-tooltip').length).toBe(2)
-  })
 
   it('all incorporate numbered businesses btns exist', async () => {
     // Enter the Incorporate a Numbered BC Company drop down.
@@ -139,5 +131,79 @@ describe('Entity Management Component', () => {
     expect(wrapper.find('#incorporate-numbered-limited-btn').exists()).toBe(true)
     expect(wrapper.find('#incorporate-numbered-unlimited-btn').exists()).toBe(true)
     expect(wrapper.find('#incorporate-numbered-ccc-btn').exists()).toBe(true)
+  })
+
+  it('calls the nr success modal', async () => {
+    const mockedSyncBusinesses = vi.fn()
+    wrapper.vm.syncBusinesses = mockedSyncBusinesses
+    const mockedSearchNRIndex = vi.fn().mockReturnValue(0)
+    wrapper.vm.searchNRIndex = mockedSearchNRIndex
+    wrapper.vm.showAddSuccessModalNR('NR 1111111')
+    await flushPromises()
+
+    expect(mockedSyncBusinesses).toHaveBeenCalled()
+    expect(mockedSearchNRIndex).toHaveBeenCalled()
+    expect(wrapper.vm.snackbarText).toBe('NR 1111111 was successfully added to your table.')
+  })
+
+  it('calls the nr error modal', async () => {
+    const mockedNrErrorMethod = vi.fn()
+    wrapper.vm.$refs.errorDialog.open = mockedNrErrorMethod
+    wrapper.vm.showNRErrorModal()
+    expect(wrapper.vm.dialogTitle).toBe('Error Adding Name Request')
+    expect(wrapper.vm.dialogText).toBe(
+      'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    )
+    expect(mockedNrErrorMethod).toHaveBeenCalled()
+  })
+
+  it('renders snackbar visible 1 second after toggled', async () => {
+    const businessStore = useBusinessStore()
+    businessStore.syncBusinesses = vi.fn()
+    vi.useFakeTimers()
+
+    await wrapper.vm.showAddSuccessModalNR()
+    vi.advanceTimersByTime(1000)
+    await Vue.nextTick()
+
+    expect(wrapper.find('#success-nr-business-snackbar').exists()).toBe(true)
+    expect(wrapper.vm.showSnackbar).toBe(true)
+
+    vi.clearAllTimers()
+  })
+
+  it('renders snackbar invisible 5 seconds after toggled', async () => {
+    const businessStore = useBusinessStore()
+    businessStore.syncBusinesses = vi.fn()
+    vi.useFakeTimers()
+
+    await wrapper.vm.showAddSuccessModalNR()
+    vi.advanceTimersByTime(5000)
+    await Vue.nextTick()
+
+    expect(wrapper.find('#success-nr-business-snackbar').exists()).toBe(true)
+    expect(wrapper.vm.showSnackbar).toBe(false)
+
+    vi.clearAllTimers()
+  })
+
+  it('calls the link expired modal with correct title and message', () => {
+    const name = 'Test Business'
+    wrapper.vm.showLinkExpiredModal(name)
+    expect(wrapper.vm.dialogTitle).toBe('Link Expired')
+    expect(wrapper.vm.dialogText).toBe(`Your authorization request to manage ${name} has expired. Please try again.`)
+  })
+
+  it('calls the authorization error modal with correct title and message', () => {
+    wrapper.vm.showAuthorizationErrorModal()
+    expect(wrapper.vm.dialogTitle).toBe('Unable to Manage Business')
+    expect(wrapper.vm.dialogText).toBe('The account that requested authorisation does not match your current account.' +
+    ' Please log in as the account that initiated the request.')
+  })
+
+  it('calls the magic link error modal with correct title and message', () => {
+    wrapper.vm.showMagicLinkErrorModal()
+    expect(wrapper.vm.dialogTitle).toBe('Error Adding a Business to Your Account')
+    expect(wrapper.vm.dialogText).toBe('An error occurred adding your business. Please try again.')
   })
 })

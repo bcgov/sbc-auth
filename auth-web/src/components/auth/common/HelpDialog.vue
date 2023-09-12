@@ -1,10 +1,14 @@
 <template>
-  <v-dialog
+  <component
+    :is="componentType"
+    v-if="isDialogOpen"
     v-model="isDialogOpen"
     max-width="45rem"
   >
     <v-card>
-      <v-card-title>Need Assistance?</v-card-title>
+      <v-card-title>
+        <h1>Need Help?</h1>
+      </v-card-title>
       <v-card-text>
         <p
           class="mb-7"
@@ -41,11 +45,11 @@
           color="primary"
           @click="close()"
         >
-          OK
+          Close
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-dialog>
+  </component>
 </template>
 
 <script lang="ts">
@@ -53,9 +57,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 
 @Component({})
 export default class HelpDialog extends Vue {
-  private isDialogOpen = false
+  isDialogOpen = false
 
   @Prop({ default: '' }) readonly helpDialogBlurb: string
+  @Prop({ default: false }) readonly inline: boolean
 
   public open () {
     this.isDialogOpen = true
@@ -64,5 +69,17 @@ export default class HelpDialog extends Vue {
   public close () {
     this.isDialogOpen = false
   }
+
+  get componentType (): string {
+    if (this.inline) {
+      return 'div'
+    } else {
+      return 'v-dialog'
+    }
+  }
 }
 </script>
+
+<style lang="scss" scoped>
+@import '@/assets/scss/ModalDialog.scss';
+</style>

@@ -21,88 +21,6 @@
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
-          <v-btn
-            id="add-name-request-btn"
-            class="font-weight-regular"
-            color="primary"
-            outlined
-            dark
-            large
-            @click="goToNameRequest()"
-          >
-            <span>Request a BC Business Name</span>
-            <v-icon
-              small
-              class="ml-2"
-            >
-              mdi-open-in-new
-            </v-icon>
-          </v-btn>
-        </div>
-      </div>
-
-      <v-row
-        id="dashboard-actions"
-        no-gutters
-        class="mb-n3"
-      >
-        <v-col cols="auto">
-          <!-- Add Existing Name Request or Business -->
-          <v-menu
-            v-model="addAffiliationDropdown"
-          >
-            <template #activator="{ on: onExistingMenu }">
-              <v-tooltip
-                top
-                content-class="top-tooltip"
-              >
-                <template #activator="{ on: onExistingTooltip }">
-                  <v-btn
-                    id="add-existing-btn"
-                    class="mt-2 mr-4"
-                    color="primary"
-                    dark
-                    large
-                    v-on="{ ...onExistingMenu, ...onExistingTooltip }"
-                    @click="addAffiliationDropdown = !addAffiliationDropdown"
-                  >
-                    <v-icon>mdi-plus</v-icon>
-                    <span><strong>Add an Existing Business or Name Request</strong></span>
-                    <v-icon class="ml-2 mr-n2">
-                      {{ addAffiliationDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <span>
-                  To view and manage existing businesses and Name Requests,
-                  you can manually add them to your table.
-                </span>
-              </v-tooltip>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title class="d-inline-flex">
-                  <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">
-                    Add an Existing...
-                  </div>
-                </v-list-item-title>
-              </v-list-item>
-              <v-list-item
-                class="add-existing-item"
-                @click="showAddBusinessModal()"
-              >
-                Business
-              </v-list-item>
-              <v-list-item
-                class="add-existing-item"
-                @click="showAddNRModal()"
-              >
-                Name Request
-              </v-list-item>
-            </v-list>
-          </v-menu>
-
           <!-- Incorporate a Numbered BC Company or Business -->
           <v-menu v-model="incorporateNumberedDropdown">
             <template #activator="{ on: onNumberedMenu }">
@@ -113,7 +31,7 @@
                 <template #activator="{ on: onNumberedTooltip }">
                   <v-btn
                     id="incorporate-numbered-btn"
-                    class="mt-2 mr-4"
+                    class="mt-0 mr-4 font-weight-regular"
                     color="primary"
                     outlined
                     dark
@@ -121,8 +39,7 @@
                     v-on="{ ...onNumberedMenu, ...onNumberedTooltip }"
                     @click="incorporateNumberedDropdown = !incorporateNumberedDropdown"
                   >
-                    <v-icon>mdi-plus</v-icon>
-                    <span><strong>Incorporate a Numbered BC Company</strong></span>
+                    <span>Incorporate a Numbered BC Company</span>
                     <v-icon class="ml-2 mr-n2">
                       {{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
                     </v-icon>
@@ -244,29 +161,63 @@
               </div>
             </v-list>
           </v-menu>
-        </v-col>
-        <v-col>
-          <v-select
-            v-model="selectedColumns"
-            dense
-            filled
-            multiple
-            class="column-selector"
-            label="Columns to Show"
-            :items="columns"
-            :menu-props="{ bottom: true, offsetY: true }"
+          <v-btn
+            id="add-name-request-btn"
+            class="font-weight-regular"
+            color="primary"
+            outlined
+            dark
+            large
+            @click="goToNameRequest()"
           >
-            <template #selection />
-          </v-select>
-        </v-col>
-      </v-row>
+            <span>Request a BC Business Name</span>
+            <v-icon
+              small
+              class="ml-2"
+            >
+              mdi-open-in-new
+            </v-icon>
+          </v-btn>
+        </div>
+      </div>
+
+      <ExpandableHelp
+        class="mb-9"
+        helpLabel="Help with Starting and Managing a Business"
+      >
+        <template #content>
+          <StartNewBusinessHelp class="help-text" />
+        </template>
+      </ExpandableHelp>
+
+      <SearchBusinessNameRequest
+        :orgId="orgId"
+        :isGovStaffAccount="isStaffAccount || isSbcStaffAccount"
+        :userFirstName="currentUser.firstName"
+        :userLastName="currentUser.lastName"
+        @add-success="showAddSuccessModal"
+        @add-failed-invalid-code="showInvalidCodeModal($event)"
+        @add-failed-no-entity="showEntityNotFoundModal()"
+        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
+        @unknown-error="showUnknownErrorModal"
+        @business-already-added="showBusinessAlreadyAdded($event)"
+        @on-cancel="cancelAddBusiness()"
+        @on-business-identifier="businessIdentifier = $event"
+        @add-success-nr="showAddSuccessModalNR"
+        @add-nr-error="showNRErrorModal()"
+        @add-failed-no-nr="showNRNotFoundModal()"
+        @on-authorization-email-sent-close="onAuthorizationEmailSentClose($event)"
+      />
 
       <AffiliatedEntityTable
-        :selectedColumns="selectedColumns"
         :loading="isLoading"
         :highlight-index="highlightIndex"
-        @remove-business="showConfirmationOptionsModal($event)"
+        @unknown-error="showUnknownErrorModal('business')"
         @remove-affiliation-invitation="removeAffiliationInvitation()"
+        @remove-business="showConfirmationOptionsModal($event)"
+        @business-unavailable-error="showBusinessUnavailableModal($event)"
+        @resend-affiliation-invitation="resendAffiliationInvitation($event)"
+        @popup-manage-business-dialog="popupBusinessDialog($event)"
       />
 
       <PasscodeResetOptionsModal
@@ -275,48 +226,12 @@
         @confirm-passcode-reset-options="remove($event)"
       />
 
-      <!-- Add an Existing Business Dialog -->
-      <AddBusinessDialog
-        :dialog="addBusinessDialog"
-        :isStaffOrSbcStaff="isStaffAccount || isSbcStaffAccount"
-        :userFirstName="currentUser.firstName"
-        :userLastName="currentUser.lastName"
-        @add-success="showAddSuccessModal"
-        @add-failed-invalid-code="showInvalidCodeModal($event)"
-        @add-failed-no-entity="showEntityNotFoundModal()"
-        @add-failed-passcode-claimed="showPasscodeClaimedModal()"
-        @add-unknown-error="showUnknownErrorModal('business')"
-        @on-cancel="cancelAddBusiness()"
-        @on-business-identifier="businessIdentifier = $event"
-        @business-already-added="showBusinessAlreadyAdded($event)"
+      <AuthorizationEmailSentDialog
+        :isVisible="isAuthorizationEmailSentDialogVisible"
+        :email="businessContactEmail"
+        @open-help="openHelp"
+        @close-dialog="onAuthorizationEmailSentClose"
       />
-
-      <!-- Add Name Request Dialog -->
-      <ModalDialog
-        ref="addNRDialog"
-        :is-persistent="true"
-        :title="dialogTitle"
-        :show-icon="false"
-        :show-actions="false"
-        max-width="640"
-        data-test-tag="add-name-request"
-      >
-        <template #text>
-          <p>
-            Enter the Name Request Number (e.g., NR 1234567) and either the applicant phone number
-            OR applicant email that were used when the name was requested.
-          </p>
-          <AddNameRequestForm
-            class="mt-6"
-            @close-add-nr-modal="cancelAddNameRequest()"
-            @add-success="showAddSuccessModalNR()"
-            @add-failed-show-msg="showNRErrorModal()"
-            @add-failed-no-entity="showNRNotFoundModal()"
-            @add-unknown-error="showUnknownErrorModal('nr')"
-            @on-cancel="cancelAddNameRequest()"
-          />
-        </template>
-      </ModalDialog>
 
       <!-- Success Dialog -->
       <ModalDialog
@@ -363,6 +278,11 @@
         </template>
       </ModalDialog>
 
+      <HelpDialog
+        ref="helpDialog"
+        :helpDialogBlurb="helpDialogBlurb"
+      />
+
       <!-- Error Dialog -->
       <ModalDialog
         ref="errorDialog"
@@ -386,7 +306,85 @@
             data-test="dialog-ok-button"
             @click="close()"
           >
-            OK
+            Close
+          </v-btn>
+        </template>
+      </ModalDialog>
+
+      <!-- Link Expire Error Dialog -->
+      <ModalDialog
+        ref="linkExpireErrorDialog"
+        :title="dialogTitle"
+        :text="dialogText"
+        dialog-class="notify-dialog"
+        max-width="640"
+      >
+        <template #icon>
+          <v-icon
+            large
+            color="error"
+          >
+            mdi-alert-circle-outline
+          </v-icon>
+        </template>
+        <template #actions>
+          <v-btn
+            large
+            outlined
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="closeLinkExpireErrorDialog()"
+          >
+            Return to My List
+          </v-btn>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="resendAffiliationInvitation()"
+          >
+            Re-send Authorization Email
+          </v-btn>
+        </template>
+      </ModalDialog>
+
+      <!-- Business Unavailable Dialog for unaffiliated business-->
+      <ModalDialog
+        ref="businessUnavailableDialog"
+        class="business-unavailable-dialog"
+        :title="dialogTitle"
+        max-width="640"
+        dialog-class="info-dialog"
+        :showIcon="false"
+        :showCloseIcon="true"
+      >
+        <template #text>
+          <p>{{ dialogText }}</p>
+          <p><br>Please contact us if you require assistance.</p>
+          <p>
+            <br><v-icon small>
+              mdi-phone
+            </v-icon>  Canada and U.S. Toll Free: <a href="tel:+1877-526-1526">1-877-526-1526</a>
+          </p>
+          <p>
+            <v-icon small>
+              mdi-phone
+            </v-icon>  Victoria Office: <a href="tel:250-952-0568">250-952-0568</a>
+          </p>
+          <p>
+            <v-icon small>
+              mdi-email
+            </v-icon>  Email: <a href="mailto:BCRegistries@gov.bc.ca">BCRegistries@gov.bc.ca</a>
+          </p>
+        </template>
+        <template #actions>
+          <v-btn
+            large
+            color="primary"
+            data-test="dialog-ok-button"
+            @click="closeBusinessUnavailableDialog()"
+          >
+            Close
           </v-btn>
         </template>
       </ModalDialog>
@@ -415,11 +413,11 @@
             data-test="removed-business-success-button"
             @click="removedBusinessSuccessClose()"
           >
-            OK
+            Close
           </v-btn>
         </template>
       </ModalDialog>
-
+      <!-- Message for successfully adding business or name request -->
       <v-snackbar
         id="success-nr-business-snackbar"
         v-model="showSnackbar"
@@ -434,59 +432,76 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpTypes, FilingTypes, LDFlags, LoginSource, Pages } from '@/util/constants'
-import { MembershipStatus, RemoveBusinessPayload } from '@/models/Organization'
+import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
+import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
+import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
 import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import AddBusinessDialog from '@/components/auth/manage-business/AddBusinessDialog.vue'
-import AddNameRequestForm from '@/components/auth/manage-business/AddNameRequestForm.vue'
+import { Action } from 'pinia-class'
 import { Address } from '@/models/address'
 import AffiliatedEntityTable from '@/components/auth/manage-business/AffiliatedEntityTable.vue'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
+import AuthorizationEmailSentDialog from './AuthorizationEmailSentDialog.vue'
+import { Base64 } from 'js-base64'
+import { Business } from '@/models/business'
+import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
+import ExpandableHelp from '@/components/auth/common/ExpandableHelp.vue'
+import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
+import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import ModalDialog from '@/components/auth/common/ModalDialog.vue'
 import NextPageMixin from '@/components/auth/mixins/NextPageMixin.vue'
 import PasscodeResetOptionsModal from '@/components/auth/manage-business/PasscodeResetOptionsModal.vue'
+import SearchBusinessNameRequest from './SearchBusinessNameRequest.vue'
+import { SessionStorageKeys } from 'sbc-common-components/src/util/constants'
+import StartNewBusinessHelp from '@/components/auth/manage-business/StartNewBusinessHelp.vue'
+import { UserSettings } from 'sbc-common-components/src/models/userSettings'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
-import { useBusinessStore } from '@/stores/business'
-import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
-    AddBusinessDialog,
-    AddNameRequestForm,
     AffiliatedEntityTable,
+    AuthorizationEmailSentDialog,
+    ExpandableHelp,
+    ManageBusinessDialog,
     ModalDialog,
-    PasscodeResetOptionsModal
+    HelpDialog,
+    PasscodeResetOptionsModal,
+    SearchBusinessNameRequest,
+    StartNewBusinessHelp
   },
   computed: {
     ...mapState(useOrgStore, ['currentOrgAddress', 'currentAccountSettings']),
     ...mapState(useUserStore, ['userProfile', 'currentUser'])
   },
   methods: {
-    ...mapActions(useBusinessStore, ['searchBusinessIndex', 'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
+    ...mapActions(useBusinessStore, ['searchBusinessIndex', 'getBusinessNameByIdentifier', 'searchNRIndex',
+      'syncBusinesses', 'removeBusiness', 'createNumberedBusiness']),
     ...mapActions(useOrgStore, ['syncAddress'])
   }
 })
 export default class EntityManagement extends Mixins(AccountMixin, AccountChangeMixin, NextPageMixin) {
   @Prop({ default: '' }) readonly orgId: string
-
+  @Prop({ default: '' }) readonly base64Token: string
+  @Prop({ default: '' }) readonly base64OrgName: string
+  @Action(useOrgStore) protected addOrgSettings!: (org: Organization) => Promise<UserSettings>
   // for template
   readonly CorpTypes = CorpTypes
-
   private removeBusinessPayload = null
-  private dialogTitle = ''
-  private dialogText = ''
-  private isLoading = -1 // truthy
+  dialogTitle = ''
+  dialogText = ''
+  isLoading = -1 // truthy
   businessIdentifier: string = null
   private primaryBtnText = ''
   private secondaryBtnText = ''
   private primaryBtnHandler: () => void = undefined
   private secondaryBtnHandler: () => void = undefined
   private lastSyncBusinesses = 0
-  protected addBusinessDialog = false
+  showManageBusinessDialog = false
+  isAuthorizationEmailSentDialogVisible = false
+  businessContactEmail = ''
   snackbarText: string = null
   showSnackbar = false
   timeoutMs = 4000
@@ -497,22 +512,24 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   private incorporateNumberedDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
+  readonly getBusinessNameByIdentifier!: (identifier: string) => Promise<string | null>
+  readonly searchNRIndex!: (identifier: string) => Promise<number>
   private readonly syncBusinesses!: () => Promise<void>
   private readonly removeBusiness!: (removeBusinessPayload: RemoveBusinessPayload) => Promise<void>
   private readonly createNumberedBusiness!: ({ filingType, business }) => Promise<void>
   private readonly currentOrgAddress!: Address
   private readonly syncAddress!: () => Address
-  private selectedColumns = ['Number', 'Type', 'Status']
-  private columns = ['Number', 'Type', 'Status']
   highlightIndex = -1
 
   $refs: {
-    successDialog: ModalDialog
-    errorDialog: ModalDialog
-    addNRDialog: ModalDialog
-    passcodeResetOptionsModal: PasscodeResetOptionsModal,
-    removedBusinessSuccessDialog: ModalDialog,
-    removalConfirmDialog: ModalDialog
+    successDialog: InstanceType<typeof ModalDialog>
+    errorDialog: InstanceType<typeof ModalDialog>
+    passcodeResetOptionsModal: PasscodeResetOptionsModal
+    removedBusinessSuccessDialog: InstanceType<typeof ModalDialog>
+    removalConfirmDialog: InstanceType<typeof ModalDialog>
+    businessUnavailableDialog: InstanceType<typeof ModalDialog>
+    linkExpireErrorDialog: InstanceType<typeof ModalDialog>
+    helpDialog: InstanceType<typeof ModalDialog>
   }
 
   private async mounted () {
@@ -540,7 +557,117 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }
 
     this.setAccountChangedHandler(this.setup)
-    this.setup()
+    await this.setup()
+
+    if (this.base64Token && this.base64OrgName) {
+      const base64TokenObject = this.base64Token.split('.')[0]
+      const decodedToken = Base64.decode(base64TokenObject)
+      const token = JSON.parse(decodedToken)
+      const legalName = Base64.decode(this.base64OrgName)
+      await this.handleMagicLink(token, legalName)
+    }
+  }
+
+  protected async handleMagicLink (token: any, legalName: string) {
+    const currentOrgId = JSON.parse(sessionStorage.getItem(SessionStorageKeys.CurrentAccount)).id
+    if (currentOrgId !== Number(this.orgId)) {
+      this.setCurrentAccountSettings({
+        id: Number(this.orgId),
+        label: legalName,
+        type: 'ACCOUNT',
+        urlpath: '',
+        urlorigin: ''
+      })
+      try {
+        await this.syncOrganization(this.currentAccountSettings.id)
+        await this.addOrgSettings(this.currentOrganization)
+        await this.syncBusinesses()
+        this.$store.commit('updateHeader')
+        this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+        return
+      } catch (error) {
+        this.showAuthorizationErrorModal()
+      }
+    }
+    await this.syncBusinesses()
+    this.parseUrlAndAddAffiliation(token, legalName, this.base64Token)
+  }
+
+  // Function to parse the URL and extract the parameters, used for magic link email
+  protected async parseUrlAndAddAffiliation (token: any, legalName: string, base64Token: string) {
+    if (!this.$route.meta.checkMagicLink) {
+      return
+    }
+    const identifier = token.businessIdentifier
+    const invitationId = token.id
+    this.businessIdentifier = token.businessIdentifier
+    // grab business name from store
+    const business = await this.getBusinessNameByIdentifier(token.businessIdentifier)
+    try {
+      // 1. Accept invitation
+      const response = await AffiliationInvitationService.acceptInvitation(invitationId, base64Token)
+
+      // 2. Adding magic link success
+      if (response.status === 200) {
+        this.showAddSuccessModalByEmail(identifier)
+      }
+    } catch (error) {
+      console.log(error)
+      // 3. Unauthorized
+      if (error.response && error.response?.status === 401) {
+        this.showAuthorizationErrorModal()
+        return
+      }
+      // 4. Expired
+      if (error.response && error.response?.status === 400 &&
+        error.response?.data.code === MagicLinkInvitationStatus.EXPIRED_AFFILIATION_INVITATION) {
+        this.showLinkExpiredModal(identifier)
+        return
+      }
+
+      // 5. Already Added
+      if (error.response && error.response?.status === 400 &&
+        error.response?.data.code === MagicLinkInvitationStatus.ACTIONED_AFFILIATION_INVITATION) {
+        this.showBusinessAlreadyAdded({ name: business, identifier })
+        return
+      }
+      // 6. Error
+      this.showMagicLinkErrorModal()
+    }
+  }
+
+  async resendAffiliationInvitation (event = null) {
+    let invitationId = ''
+
+    if (this.base64Token && this.base64OrgName) {
+      const base64TokenObject = this.base64Token.split('.')[0]
+      const decodedToken = Base64.decode(base64TokenObject)
+      const token = JSON.parse(decodedToken)
+      invitationId = token.id
+    }
+
+    if (event?.affiliationInvites[0].businessIdentifier) {
+      this.businessIdentifier = event?.affiliationInvites[0].businessIdentifier
+    }
+
+    try {
+      const affiliationInvitationId = invitationId || event?.affiliationInvites[0].id
+      await AffiliationInvitationService.updateInvitation(affiliationInvitationId)
+      const contact = await BusinessService.getMaskedContacts(this.businessIdentifier)
+      this.businessContactEmail = contact?.data?.email
+      this.isAuthorizationEmailSentDialogVisible = true
+    } catch (err) {
+      this.showCreateAffiliationInvitationErrorDialog()
+    }
+  }
+
+  get helpDialogBlurb (): string {
+    return 'If you have not received your Access Letter from BC Registries, or have lost your Passcode, ' +
+        'please contact us at:'
+  }
+
+  openHelp () {
+    this.$refs.helpDialog.open()
   }
 
   private async setup (): Promise<void> {
@@ -578,7 +705,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   /** Creates a numbered IA filing (temp business). */
-  protected async startNumberedCompany (corpType: CorpTypes): Promise<void> {
+  async startNumberedCompany (corpType: CorpTypes): Promise<void> {
     const business = {
       nameRequest: {
         legalType: corpType
@@ -588,8 +715,13 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     await this.syncBusinesses()
   }
 
+  async popupBusinessDialog (business: Business) {
+    this.businessIdentifier = business.businessIdentifier
+    this.showManageBusinessDialog = true
+  }
+
   async showAddSuccessModal (businessIdentifier: string) {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Added'
     this.dialogText = 'You have successfully added a business'
     await this.syncBusinesses()
@@ -601,52 +733,110 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     }, 4000)
   }
 
-  async showAddSuccessModalNR () {
-    this.$refs.addNRDialog.close()
+  async showAddSuccessModalByEmail (businessIdentifier: string) {
+    await this.syncBusinesses()
+    this.highlightIndex = await this.searchBusinessIndex(businessIdentifier)
+    this.snackbarText = 'You can now manage ' + businessIdentifier + '.'
+    this.showSnackbar = true
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
+  async showAddSuccessModalNR (nameRequestNumber: string) {
     this.dialogTitle = 'Name Request Added'
     this.dialogText = 'You have successfully added a name request'
+
     await this.syncBusinesses()
-    this.$refs.successDialog.open()
+
+    const nameRequestIndexResponse = await this.searchNRIndex(nameRequestNumber)
+
+    this.snackbarText = `${nameRequestNumber} was successfully added to your table.`
+    this.showSnackbar = true
+    this.highlightIndex = nameRequestIndexResponse
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
+  }
+
+  async onAuthorizationEmailSentClose (businessIdentifier: string) {
+    await this.syncBusinesses()
+    // This function doesn't always have the businessIdentifier passed to it.
+    const validBusinessIdentifier = businessIdentifier || this.businessIdentifier
+    this.highlightIndex = await this.searchBusinessIndex(validBusinessIdentifier)
+    this.snackbarText = 'Confirmation email sent, pending authorization.'
+    this.showSnackbar = true
+    this.isAuthorizationEmailSentDialogVisible = false
+    this.businessIdentifier = null
+    setTimeout(() => {
+      this.highlightIndex = -1
+    }, 4000)
   }
 
   showInvalidCodeModal (label: string) {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = `Invalid ${label}`
-    this.dialogText = `Unable to add the business. The provided ${label} is invalid.`
+    this.dialogText = `Unable to add the business. The provided ${label.toLowerCase()} is invalid.`
     this.$refs.errorDialog.open()
   }
 
   showEntityNotFoundModal () {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Not Found'
     this.dialogText = 'The specified business was not found.'
     this.$refs.errorDialog.open()
   }
 
   showBusinessAlreadyAdded (event: { name, identifier }) {
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Business Already Added'
-    this.dialogText = `The business ${event.name} with the business number ${event.identifier} is already in your Business Registry List.`
+    const businessNameText = event.name ? `${event.name}` : ''
+    this.dialogText = `The business ${businessNameText} with the business number ${event.identifier} is already in your Business Registry List.`
     this.$refs.errorDialog.open()
   }
 
   showNRNotFoundModal () {
-    this.$refs.addNRDialog.close()
     this.dialogTitle = 'Name Request Not Found'
     this.dialogText = 'The specified name request was not found.'
     this.$refs.errorDialog.open()
   }
 
   showNRErrorModal () {
-    this.$refs.addNRDialog.close()
     this.dialogTitle = 'Error Adding Name Request'
-    this.dialogText = ''
+    this.dialogText =
+    'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    this.$refs.errorDialog.open()
+  }
+
+  showLinkExpiredModal (name: string) {
+    this.dialogTitle = `Link Expired`
+    this.dialogText = `Your authorization request to manage ${name} has expired. Please try again.`
+    this.$refs.linkExpireErrorDialog.open()
+  }
+
+  showAuthorizationErrorModal () {
+    this.dialogTitle = 'Unable to Manage Business'
+    this.dialogText =
+    'The account that requested authorisation does not match your current account. Please log in as the account that initiated the request.'
+    this.$refs.errorDialog.open()
+  }
+
+  showCreateAffiliationInvitationErrorDialog () {
+    this.dialogTitle = 'Error Sending Authorization Email'
+    this.dialogText = 'An error occurred sending authorization email. Please try again.'
+    this.$refs.errorDialog.open()
+  }
+
+  showMagicLinkErrorModal () {
+    this.dialogTitle = 'Error Adding a Business to Your Account'
+    this.dialogText =
+    'An error occurred adding your business. Please try again.'
     this.$refs.errorDialog.open()
   }
 
   showPasscodeClaimedModal () {
     const contactNumber = this.$t('techSupportTollFree').toString()
-    this.addBusinessDialog = false
+    this.showManageBusinessDialog = false
     this.dialogTitle = 'Passcode Already Claimed'
     this.dialogText = `This passcode has already been claimed. If you have questions, please call ${contactNumber}`
     this.$refs.errorDialog.open()
@@ -654,24 +844,21 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   showUnknownErrorModal (type: string) {
     if (type === 'business') {
-      this.addBusinessDialog = false
+      this.showManageBusinessDialog = false
       this.dialogTitle = 'Error Adding Existing Business'
       this.dialogText = 'An error occurred adding your business. Please try again.'
     } else if (type === 'nr') {
-      this.$refs.addNRDialog.close()
       this.dialogTitle = 'Error Adding Existing Name Request'
-      this.dialogText = 'An error occurred adding your name request. Please try again.'
+      this.dialogText = 'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    } else {
+      this.dialogTitle = 'Something Went Wrong'
+      this.dialogText = 'An error occurred, please try again. If this error persists, please contact us.'
     }
     this.$refs.errorDialog.open()
   }
 
   showAddBusinessModal () {
-    this.addBusinessDialog = true
-  }
-
-  showAddNRModal () {
-    this.dialogTitle = 'Add an Existing Name Request'
-    this.$refs.addNRDialog.open()
+    this.showManageBusinessDialog = true
   }
 
   async removeAffiliationInvitation () {
@@ -698,6 +885,18 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     } else {
       this.$refs.passcodeResetOptionsModal.open()
     }
+  }
+
+  showBusinessUnavailableModal (action: string) {
+    this.dialogTitle = 'Business unavailable'
+    this.dialogText = 'You are not authorized to access the business'
+    if (action === 'change name') {
+      this.dialogText += ' to change its name'
+    } else {
+      this.dialogText += ' you wish to ' + action
+    }
+    this.dialogText += '. Please add this business to your table to continue.'
+    this.$refs.businessUnavailableDialog.open()
   }
 
   private populateNRmodalValues () {
@@ -760,11 +959,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 
   cancelAddBusiness () {
-    this.addBusinessDialog = false
-  }
-
-  cancelAddNameRequest () {
-    this.$refs.addNRDialog.close()
+    this.showManageBusinessDialog = false
   }
 
   async remove (resetPasscodeEmail: string, resetPasscode = true, dialogTitleKey = 'removeBusiness', dialogTextKey = 'removedBusinessSuccessText') {
@@ -778,6 +973,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
       await this.syncBusinesses()
       this.$refs.removedBusinessSuccessDialog.open()
     } catch (ex) {
+      this.showUnknownErrorModal(null)
       // eslint-disable-next-line no-console
       console.log('Error during remove organization affiliations event !')
     }
@@ -790,11 +986,23 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   close () {
     this.$refs.errorDialog.close()
   }
+
+  closeLinkExpireErrorDialog () {
+    this.$refs.linkExpireErrorDialog.close()
+  }
+
+  closeBusinessUnavailableDialog () {
+    this.$refs.businessUnavailableDialog.close()
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 @import '$assets/scss/theme.scss';
+
+.v-icon.v-icon {
+  color: $app-dk-blue;
+}
 
 .loading-container.grayed-out {
   // these are the same styles as dialog overlay:
@@ -846,10 +1054,7 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
 .view-header {
   justify-content: space-between;
-
-  h1 {
-    margin-bottom: -10px;
-  }
+  margin-bottom: 0.75rem;
 
   .subtitle {
     font-size: 1rem;
@@ -860,6 +1065,11 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   .v-btn {
     font-weight: 700;
   }
+}
+
+.help-text {
+  max-width: 75%;
+  margin: 0 auto;
 }
 
 #add-existing-btn {
@@ -881,21 +1091,8 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
   }
 }
 
-.column-selector {
-  float: right;
-  width: 200px;
-}
-
 // Vuetify Overrides
 ::v-deep {
-  #dashboard-actions {
-    .v-input .v-label {
-      transform: translateY(-10px) scale(1);
-      top: 30px;
-      color: $gray7;
-      font-size: .875rem;
-    }
-  }
 
   .v-data-table td {
     padding-top: 1rem;

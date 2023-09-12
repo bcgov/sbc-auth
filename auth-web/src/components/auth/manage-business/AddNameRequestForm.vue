@@ -8,24 +8,57 @@
         <legend hidden>
           Name Request Number and Applicant Phone Number or Email Address
         </legend>
+        <div class="d-flex align-items-center">
+          <div class="font-weight-bold mr-2">
+            Requested Name(s):
+          </div>
+          <div>
+            <div
+              v-for="(name, i) in requestNames"
+              :key="`nrName: ${i}`"
+              class="pb-1 names-block d-flex align-items-center"
+            >
+              <v-icon
+                v-if="isRejectedName(name)"
+                color="red"
+                class="names-text pr-1"
+                small
+              >
+                mdi-close
+              </v-icon>
+              <v-icon
+                v-else-if="isApprovedName(name)"
+                color="green"
+                class="names-text pr-1"
+                small
+              >
+                mdi-check
+              </v-icon>
+              <v-icon
+                v-else
+                color="transparent"
+                class="names-text pr-1"
+                small
+              >
+                mdi-close
+              </v-icon><!-- spacer icon -->
+              <span class="names-text">{{ name }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="font-weight-bold mr-2 float-left">
+          Name Request Number:
+        </div>
+        <div>{{ businessIdentifier }}</div><br>
+        <div class="my-4">
+          Enter either the applicant phone number OR applicant email that were used when the name was requested:
+        </div>
         <v-text-field
-          ref="nrNumber"
           :key="nrNumberKey"
-          filled
-          persistent-hint
-          label="Enter a Name Request Number"
-          hint="Example: NR 1234567"
-          :rules="nrNumberRules"
-          :value="nrNumber"
-          data-test="nr-number"
-          autofocus
-          @input="nrNumber = formatNrNumber($event)"
-        />
-        <v-text-field
           v-model="applicantPhoneNumber"
           filled
           persistent-hint
-          label="Enter the Applicant Phone Number"
+          label="Applicant Phone Number"
           hint="Example: 555-555-5555"
           :rules="applicantPhoneNumberRules"
           type="tel"
@@ -38,7 +71,7 @@
           v-model="applicantEmail"
           filled
           persistent-hint
-          label="Enter the Applicant Email Address"
+          label="Applicant Email Address"
           hint="Example: name@email.com"
           :rules="applicantEmailRules"
           data-test="applicant-email"
@@ -49,19 +82,19 @@
         <v-btn
           large
           text
-          class="pl-2 pr-2 mr-auto"
+          class="mr-auto pl-0 help-text d-flex justify-start"
           data-test="forgot-button"
           @click.stop="openHelp()"
         >
           <v-icon>mdi-help-circle-outline</v-icon>
-          <span>I lost or forgot my Name Request (NR) Number</span>
+          <span>Help</span>
         </v-btn>
         <v-btn
           large
           outlined
           color="primary"
           data-test="cancel-button"
-          @click="resetForm('on-cancel')"
+          @click="resetForm('close-add-nr-modal')"
         >
           <span>Cancel</span>
         </v-btn>
@@ -69,12 +102,12 @@
           large
           color="primary"
           data-test="add-button"
-          max-width="100"
+          min-width="80"
           :disabled="!isFormValid()"
           :loading="isLoading"
           @click="add()"
         >
-          <span>Add</span>
+          <span>Manage This Name Request</span>
         </v-btn>
       </div>
     </v-form>
@@ -87,11 +120,13 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Prop, Vue } from 'vue-property-decorator'
 import { mapActions, mapState } from 'pinia'
 import CommonUtils from '@/util/common-util'
 import { CreateNRAffiliationRequestBody } from '@/models/affiliation'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
+import { NameRequestIF } from '@/models/business-nr-lookup'
+import { NrState } from '@/util/constants'
 import { Organization } from '@/models/Organization'
 import { StatusCodes } from 'http-status-codes'
 import { useBusinessStore } from '@/stores/business'
@@ -111,6 +146,9 @@ import { useOrgStore } from '@/stores/org'
   }
 })
 export default class AddNameRequestForm extends Vue {
+  @Prop({ default: '' }) readonly requestNames: NameRequestIF[]
+  @Prop({ default: '' }) readonly businessIdentifier: string
+
   readonly currentOrganization!: Organization
   readonly addNameRequest!: (requestBody: CreateNRAffiliationRequestBody) => any
 
@@ -134,11 +172,14 @@ export default class AddNameRequestForm extends Vue {
 
   VALID_NR_FORMAT = new RegExp(/^(NR)?\s*(\d{7})$/)
 
-  nrNumber = ''
   nrNumberKey = 0
   applicantPhoneNumber = ''
   applicantEmail = ''
   isLoading = false
+
+  get nrNumber () {
+    return this.businessIdentifier
+  }
 
   formatNrNumber (value): string {
     let formattedNrNumber = value?.toUpperCase()
@@ -159,9 +200,9 @@ export default class AddNameRequestForm extends Vue {
   }
 
   isFormValid (): boolean {
-    return !!this.nrNumber &&
-      (!!this.applicantPhoneNumber || !!this.applicantEmail) &&
-      this.isValidNrNumber(this.nrNumber)
+    const phoneValid = this.applicantPhoneNumber && CommonUtils.validatePhoneNumber(this.applicantPhoneNumber)
+    const emailValid = this.applicantEmail && CommonUtils.validateEmailFormat(this.applicantEmail)
+    return phoneValid || emailValid
   }
 
   isInputEntered (value: any, inputType: string): boolean {
@@ -191,17 +232,17 @@ export default class AddNameRequestForm extends Vue {
         })
         if (nrResponse?.status === 201) {
           // emit event to let parent know business added
-          this.$emit('add-success')
+          this.$emit('add-success-nr', this.nrNumber)
         } else {
-          this.$emit('add-unknown-error')
+          this.$emit('unknown-error')
         }
       } catch (exception) {
         if (exception.response?.status === StatusCodes.BAD_REQUEST) {
           this.$emit('add-failed-show-msg', exception.response?.data?.message || '')
         } else if (exception.response?.status === StatusCodes.NOT_FOUND) {
-          this.$emit('add-failed-no-entity')
+          this.$emit('add-failed-no-nr')
         } else {
-          this.$emit('add-unknown-error')
+          this.$emit('unknown-error')
         }
       } finally {
         this.resetForm('')
@@ -210,18 +251,27 @@ export default class AddNameRequestForm extends Vue {
   }
 
   resetForm (event: string): void {
-    this.nrNumber = ''
     this.applicantEmail = ''
     this.applicantPhoneNumber = ''
     this.$refs.addNRForm.resetValidation()
     this.isLoading = false
     if (event) {
-      this.$emit('on-cancel')
+      this.$emit('close-add-nr-modal')
     }
   }
 
   openHelp (): void {
     this.$refs.helpDialog.open()
+  }
+
+  /** Returns true if the name is rejected. */
+  isRejectedName = (name: NameRequestIF): boolean => {
+    return (name.status === NrState.REJECTED)
+  }
+
+  /** Returns true if the name is approved. */
+  isApprovedName = (name: NameRequestIF): boolean => {
+    return (name.status === NrState.APPROVED)
   }
 }
 </script>
@@ -231,16 +281,18 @@ export default class AddNameRequestForm extends Vue {
 
 .form__btns {
   display: flex;
-  justify-content: flex-end;
 
   .v-btn + .v-btn {
     margin-left: 0.5rem;
   }
 
+  .help-text {
+    color: $app-blue;
+  }
+
   .v-btn[data-test="cancel-button"],
   .v-btn[data-test="add-button"] {
-    min-width: unset !important;
-    width: 100px;
+    min-width: 80px !important;
   }
 
   .v-btn[disabled]:not(.v-btn--flat):not(.v-btn--text):not(.v-btn--outlined) {

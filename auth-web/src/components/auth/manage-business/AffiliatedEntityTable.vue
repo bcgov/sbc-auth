@@ -3,7 +3,29 @@
   <div id="affiliated-entity-section">
     <v-card flat>
       <div class="table-header">
-        <label><strong>My List </strong>({{ entityCount }})</label>
+        <v-row
+          no-gutters
+          class="mb-n8"
+        >
+          <v-col class="pt-3 pl-1">
+            <label><strong>My List </strong>({{ entityCount }})</label>
+          </v-col>
+          <v-col class="column-actions">
+            <v-select
+              v-model="selectedColumns"
+              dense
+              multiple
+              class="column-selector pb-2 pr-2"
+              background-color="white"
+              label="Columns to Show"
+              :items="columns"
+              :menu-props="{ bottom: true, offsetY: true }"
+              @change="getHeaders($event)"
+            >
+              <template #selection />
+            </v-select>
+          </v-col>
+        </v-row>
       </div>
       <base-v-data-table
         id="affiliated-entity-table"
@@ -70,8 +92,23 @@
             >{{ name(item) }}</b>
           </span>
 
-          <!-- This used to have the span for affiliation invites, but was removed in main, should be there
-               in the feature branch. -->
+          <span
+            v-if="!!item.affiliationInvites"
+            id="affiliationInvitesStatus"
+          >
+            <p style="font-size: 12px">
+              <v-icon
+                class="pr-1"
+                x-small
+                :color="getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                  ? 'red' : 'primary'"
+              >
+                {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                  ? 'mdi-alert' : 'mdi-account-cog' }}
+              </v-icon>
+              <span v-sanitize="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
+            </p>
+          </span>
         </template>
 
         <!-- Number -->
@@ -112,75 +149,18 @@
             :details="[EntityAlertTypes.PROCESSING]"
           />
         </template>
-
         <!-- Actions -->
         <template #item-slot-Actions="{ item, index }">
-          <div
-            :id="`action-menu-${index}`"
-            class="actions mx-auto"
-          >
-            <span
-              class="open-action"
-            >
-              <v-btn
-                small
-                color="primary"
-                min-width="5rem"
-                min-height="2rem"
-                class="open-action-btn"
-                @click="open(item)"
-              >
-                Open
-              </v-btn>
-              <!-- More Actions Menu -->
-              <span class="more-actions">
-                <v-menu
-                  v-model="dropdown[index]"
-                  :attach="`#action-menu-${index}`"
-                >
-                  <template #activator="{ on }">
-                    <v-btn
-                      small
-                      color="primary"
-                      min-height="2rem"
-                      class="more-actions-btn"
-                      v-on="on"
-                    >
-                      <v-icon>{{ dropdown[index] ? 'mdi-menu-up' : 'mdi-menu-down' }}</v-icon>
-                    </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-if="canUseNameRequest(item)"
-                      class="actions-dropdown_item my-1"
-                      data-test="use-name-request-button"
-                      @click="useNameRequest(item)"
-                    >
-                      <v-list-item-subtitle>
-                        <v-icon small>mdi-file-certificate-outline</v-icon>
-                        <span class="pl-1">Use this Name Request Now</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                    <v-list-item
-                      v-can:REMOVE_BUSINESS.disable
-                      class="actions-dropdown_item my-1"
-                      data-test="remove-button"
-                      @click="removeBusiness(item)"
-                    >
-                      <v-list-item-subtitle v-if="isTemporaryBusiness(item)">
-                        <v-icon small>mdi-delete-forever</v-icon>
-                        <span class="pl-1">Delete {{ tempDescription(item) }}</span>
-                      </v-list-item-subtitle>
-                      <v-list-item-subtitle v-else>
-                        <v-icon small>mdi-delete</v-icon>
-                        <span class="pl-1">Remove From Table</span>
-                      </v-list-item-subtitle>
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </span>
-            </span>
-          </div>
+          <AffiliationAction
+            :item="item"
+            :index="index"
+            @unknown-error="$emit('unknown-error', $event)"
+            @remove-affiliation-invitation="$emit('remove-affiliation-invitation', $event)"
+            @remove-business="$emit('remove-business', $event)"
+            @business-unavailable-error="$emit('business-unavailable-error', $event)"
+            @resend-affiliation-invitation="$emit('resend-affiliation-invitation', $event)"
+            @popup-manage-business-dialog="$emit('popup-manage-business-dialog', $event)"
+          />
         </template>
       </base-v-data-table>
     </v-card>
@@ -189,56 +169,50 @@
 
 <script lang='ts'>
 import {
+  AffiliationInvitationStatus,
   AffiliationTypes,
-  CorpTypes,
   EntityAlertTypes,
-  FilingTypes,
   LDFlags,
   NrDisplayStates,
-  NrState,
-  NrTargetTypes,
-  SessionStorageKeys
+  NrState
 } from '@/util/constants'
-import { Business, NameRequest, Names } from '@/models/business'
-import { SetupContext, computed, defineComponent, ref, watch } from '@vue/composition-api'
+import { Business, Names } from '@/models/business'
+import { defineComponent, ref } from '@vue/composition-api'
+import AffiliationAction from '@/components/auth/manage-business/AffiliationAction.vue'
+import { AffiliationInviteInfo } from '@/models/affiliation'
 import { BaseVDataTable } from '@/components'
-import ConfigHelper from '@/util/config-helper'
+import CommonUtils from '@/util/common-util'
 import EntityDetails from './EntityDetails.vue'
-import LaunchDarklyService from 'sbc-common-components/src/services/launchdarkly.services'
-import { RemoveBusinessPayload } from '@/models/Organization'
-import { appendAccountId } from 'sbc-common-components/src/util/common-util'
+
+import launchdarklyServices from 'sbc-common-components/src/services/launchdarkly.services'
 import { useAffiliations } from '@/composables'
-import { useBusinessStore } from '@/stores/business'
 import { useOrgStore } from '@/stores/org'
 
 export default defineComponent({
   name: 'AffiliatedEntityTable',
-  components: { EntityDetails, BaseVDataTable },
+  components: { AffiliationAction, EntityDetails, BaseVDataTable },
   props: {
-    selectedColumns: { default: [] as string[] },
     loading: { default: false },
     highlightIndex: { default: -1 }
   },
-  emits: ['add-unknown-error', 'remove-affiliation-invitation'],
-  setup (props, context: SetupContext) {
+  emits: ['unknown-error', 'remove-affiliation-invitation', 'remove-business',
+    'business-unavailable-error', 'resend-affiliation-invitation', 'popup-manage-business-dialog'],
+  setup () {
     const isloading = false
     const { loadAffiliations, affiliations, entityCount, clearAllFilters,
       getHeaders, headers, type, status, updateFilter, typeDescription,
-      isNameRequest, nameRequestType, number, name, canUseNameRequest, tempDescription,
+      isNameRequest, nameRequestType, number, name, canUseNameRequest,
       isTemporaryBusiness } = useAffiliations()
-    const businessStore = useBusinessStore()
+
     const orgStore = useOrgStore()
-    const currentOrganization = computed(() => orgStore.currentOrganization)
 
-    /** V-model for dropdown menus. */
-    const dropdown: Array<boolean> = []
+    const selectedColumns = ['Number', 'Type', 'Status']
+    const columns = ['Number', 'Type', 'Status']
 
-    /** Returns true if the name is rejected. */
     const isRejectedName = (name: Names): boolean => {
       return (name.state === NrState.REJECTED)
     }
 
-    /** Returns true if the name is approved. */
     const isApprovedName = (name: Names): boolean => {
       return (name.state === NrState.APPROVED)
     }
@@ -264,11 +238,12 @@ export default defineComponent({
     const isFrozed = (item: Business): boolean => {
       return item.adminFreeze
     }
+
     const isBadstanding = (item: Business) => {
-      return !item.goodStanding
+      // Currently affiliation invitations don't return good standing etc.
+      return item?.goodStanding === false
     }
 
-    /** Returns true if the business is dissolved. */
     const isDissolution = (item: Business) => {
       return item.dissolved
     }
@@ -290,96 +265,8 @@ export default defineComponent({
       return details
     }
 
-    /** Create a business record in LEAR. */
-    const createBusinessRecord = async (business: Business): Promise<string> => {
-      const regTypes = [CorpTypes.SOLE_PROP, CorpTypes.PARTNERSHIP]
-      const iaTypes = [CorpTypes.BENEFIT_COMPANY, CorpTypes.COOP, CorpTypes.BC_CCC, CorpTypes.BC_COMPANY,
-        CorpTypes.BC_ULC_COMPANY]
-
-      let filingResponse = null
-
-      if (regTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = await businessStore.createNamedBusiness({ filingType: FilingTypes.REGISTRATION, business })
-      } else if (iaTypes.includes(business.nameRequest?.legalType)) {
-        filingResponse = await businessStore.createNamedBusiness({
-          filingType: FilingTypes.INCORPORATION_APPLICATION, business })
-      }
-
-      if (filingResponse?.errorMsg) {
-        context.emit('add-unknown-error')
-        return ''
-      }
-      return filingResponse.data.filing.business.identifier
-    }
-
-    /** Navigation handler for entities dashboard. */
-    const goToDashboard = (businessIdentifier: string): void => {
-      ConfigHelper.addToSession(SessionStorageKeys.BusinessIdentifierKey, businessIdentifier)
-      let redirectURL = `${ConfigHelper.getBusinessURL()}${businessIdentifier}`
-      window.location.href = appendAccountId(decodeURIComponent(redirectURL))
-    }
-
-    /** Navigation handler for Name Request application. */
-    const goToNameRequest = (nameRequest: NameRequest): void => {
-      ConfigHelper.setNrCredentials(nameRequest)
-      window.location.href = appendAccountId(`${ConfigHelper.getNameRequestUrl()}nr/${nameRequest.id}`)
-    }
-
-    /** Handler for open action */
-    const open = (item: Business): void => {
-      if ((item.corpType?.code || item.corpType) === CorpTypes.NAME_REQUEST) {
-        goToNameRequest(item.nameRequest)
-      } else {
-        goToDashboard(item.businessIdentifier)
-      }
-    }
-
-    /** Navigation handler for OneStop application */
-    const goToOneStop = (): void => {
-      window.location.href = appendAccountId(ConfigHelper.getOneStopUrl())
-    }
-
-    /** Navigation handler for Corporate Online application */
-    const goToCorpOnline = (): void => {
-      window.location.href = appendAccountId(ConfigHelper.getCorporateOnlineUrl())
-    }
-
-    /** Handler for draft IA creation and navigation */
-    const useNameRequest = async (item: Business) => {
-      switch (item.nameRequest.target) {
-        case NrTargetTypes.LEAR: {
-          // Create new IA if the selected item is Name Request
-          let businessIdentifier = item.businessIdentifier
-          if (item.corpType.code === CorpTypes.NAME_REQUEST) {
-            businessIdentifier = await createBusinessRecord(item)
-          }
-          goToDashboard(businessIdentifier)
-          break
-        }
-        case NrTargetTypes.ONESTOP:
-          goToOneStop()
-          break
-        case NrTargetTypes.COLIN:
-          goToCorpOnline()
-          break
-      }
-    }
-
-    /** Emit business/nr information to be unaffiliated. */
-    const removeBusiness = (business: Business): RemoveBusinessPayload => {
-      const payload = {
-        orgIdentifier: currentOrganization.value.id,
-        business
-      }
-
-      context.emit('remove-business', payload)
-      return payload
-    }
-
-    // clear filters
     const clearFiltersTrigger = ref(0)
     const clearFilters = () => {
-      // clear values in table
       clearFiltersTrigger.value++
       // clear affiliation state filters and trigger search
       clearAllFilters()
@@ -389,17 +276,48 @@ export default defineComponent({
       return orgId === orgStore.currentOrganization.id
     }
 
-    watch(() => props.selectedColumns, (newCol: string[]) => {
-      getHeaders(newCol)
-    })
+    const getRequestForAuthorizationStatusText = (affiliationInviteInfos: AffiliationInviteInfo[]) => {
+      const affiliationWithSmallestId = CommonUtils.getElementWithSmallestId<AffiliationInviteInfo>(affiliationInviteInfos)
+      if (isCurrentOrganization(affiliationWithSmallestId.toOrg?.id)) {
+        // incoming request for access
+        const andOtherAccounts = affiliationInviteInfos.length > 1 ? ` and ${affiliationInviteInfos.length - 1} other account(s)` : ''
+        return `Request for Authorization to manage from: ${affiliationWithSmallestId.fromOrg.name}${andOtherAccounts}`
+      } else {
+        let statusText = ''
+        // outgoing request for access
+        switch (affiliationWithSmallestId.status) {
+          case AffiliationInvitationStatus.Pending:
+            statusText = 'Confirmation email sent, pending authorization.'
+            break
+          case AffiliationInvitationStatus.Accepted:
+            statusText = '<strong>Authorized</strong> - you can now manage this business.'
+            break
+          case AffiliationInvitationStatus.Failed:
+            statusText = '<strong>Not Authorized</strong>. Your request to manage this business has been declined.'
+            break
+          case AffiliationInvitationStatus.Expired:
+            statusText = 'Not authorized. The <strong>confirmation email has expired.</strong>'
+            break
+          default:
+            break
+        }
+        return `Authorization to manage: ${statusText}`
+      }
+    }
 
-    // feature flags
     const enableNameRequestType = (): boolean => {
-      return LaunchDarklyService.getFlag(LDFlags.EnableNameRequestType) || false
+      return launchdarklyServices.getFlag(LDFlags.EnableNameRequestType) || false
+    }
+
+    const getAffiliationInvitationStatus = (affiliationInviteInfos: AffiliationInviteInfo[]): string => {
+      return affiliationInviteInfos.length > 0 && affiliationInviteInfos[0].status
     }
 
     return {
+      selectedColumns,
+      columns,
       isCurrentOrganization,
+      getRequestForAuthorizationStatusText,
       clearFiltersTrigger,
       clearFilters,
       isloading,
@@ -407,6 +325,7 @@ export default defineComponent({
       affiliations,
       entityCount,
       enableNameRequestType,
+      getHeaders,
       isNameRequest,
       isRejectedName,
       isApprovedName,
@@ -421,18 +340,16 @@ export default defineComponent({
       typeDescription,
       loadAffiliations,
       updateFilter,
-      dropdown,
       canUseNameRequest,
-      useNameRequest,
-      removeBusiness,
       isTemporaryBusiness,
-      tempDescription,
       EntityAlertTypes,
       isExpired,
       getDetails,
       isFrozed,
       isBadstanding,
-      isDissolution
+      isDissolution,
+      getAffiliationInvitationStatus,
+      AffiliationInvitationStatus
     }
   }
 })
@@ -443,6 +360,11 @@ export default defineComponent({
 @import '@/assets/scss/theme.scss';
 
 #affiliated-entity-section {
+  .column-selector {
+    float: right;
+    width: 200px;
+    border-radius: 4px;
+  }
   .table-header {
     display: flex;
     background-color: $app-lt-blue;
@@ -499,42 +421,46 @@ export default defineComponent({
       }
     }
   }
+}
 
-  .action-cell {
-    max-width: 0;
-    max-height: 30px !important;
-    text-align: center;
+.text-input-style-above {
+  label {
+    font-size: 0.875rem !important;
+    color: $gray7 !important;
+    padding-left: 6px;
   }
-
-  .actions {
-    height:30px;
-    width: 140px;
-
-    .open-action {
-      border-right: 1px solid $gray1;
-    }
-
-    .open-action-btn {
-      font-size: .875rem;
-      box-shadow: none;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      margin-right: 1px;
-    }
-
-    .more-actions-btn {
-      box-shadow: none;
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-
-    .v-btn + .v-btn {
-      margin-left: 0.5rem;
-    }
+  span {
+    padding-left: 6px;
+    font-size: 14px;
+    color: $gray7;
   }
 }
 
+#table-title {
+  font-size: 1rem;
+}
+
+.column-selector {
+  width: 200px;
+  height: 10% !important;
+  z-index: 1;
+}
+
 // Vuetify Overrides
+::v-deep {
+  .column-actions {
+    .v-input__slot {
+      height: 42px !important;
+      min-height: 42px !important;
+    }
+    .v-input .v-label {
+      transform: translateX(10px) translateY(-25px) scale(1);
+      top: 30px;
+      color: $gray7;
+      font-size: .875rem;
+    }
+  }
+}
 ::v-deep .theme--light.v-list-item:not(.v-list-item--active):not(.v-list-item--disabled) {
   &:hover {
     background-color: $app-background-blue;
@@ -548,13 +474,6 @@ export default defineComponent({
   color: $gray9 !important;
   font-size: 0.875rem;
   z-index: 1;
-}
-
-::v-deep .theme--light.v-list-item .v-list-item__action-text, .theme--light.v-list-item .v-list-item__subtitle {
-  color: $app-blue;
-  .v-icon.v-icon {
-    color: $app-blue;
-  }
 }
 
 ::v-deep label {
@@ -605,4 +524,5 @@ export default defineComponent({
     background-color: lightgray;
   }
 }
+
 </style>

@@ -26,6 +26,8 @@ export const useAffiliations = () => {
   const businessStore = useBusinessStore()
   const businesses = computed(() => businessStore.businesses)
   const headers: Ref<BaseTableHeaderI[]> = ref([])
+  /** V-model for dropdown menus of affiliation actions. */
+  const actionDropdown: Ref<boolean[]> = ref([])
 
   /** Returns true if the affiliation is a Name Request. */
   const isNameRequest = (business: Business): boolean => {
@@ -38,6 +40,10 @@ export const useAffiliations = () => {
       (business.corpType?.code || business.corpType) === CorpTypes.INCORPORATION_APPLICATION ||
       (business.corpType?.code || business.corpType) === CorpTypes.REGISTRATION
     )
+  }
+
+  const isBusinessAffiliated = (businessIdentifier: string): boolean => {
+    return affiliations.results.some(business => businessIdentifier === business.businessIdentifier)
   }
 
   /** Returns the temp business description. */
@@ -237,11 +243,21 @@ export const useAffiliations = () => {
     } else {
       affiliations.filters.isActive = true
     }
+    actionDropdown.value = []
   }
 
   const clearAllFilters = () => {
     affiliations.filters.filterPayload = {}
     affiliations.filters.isActive = false
+    actionDropdown.value = []
+  }
+
+  const getEntityType = (item: Business): CorpTypes => {
+    let entityType = item.corpType.code
+    if (isNameRequest(item)) {
+      entityType = item.nameRequest?.legalType
+    }
+    return entityType
   }
 
   return {
@@ -261,6 +277,9 @@ export const useAffiliations = () => {
     name,
     canUseNameRequest,
     tempDescription,
-    isTemporaryBusiness
+    isTemporaryBusiness,
+    getEntityType,
+    isBusinessAffiliated,
+    actionDropdown
   }
 }

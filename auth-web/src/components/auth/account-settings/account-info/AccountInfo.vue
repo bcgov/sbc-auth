@@ -286,8 +286,7 @@ import {
   AccountStatus,
   Pages,
   Permission,
-  Role,
-  SessionStorageKeys
+  Role
 } from '@/util/constants'
 import { Action, Getter, State } from 'pinia-class'
 import { Component, Mixins } from 'vue-property-decorator'
@@ -303,10 +302,8 @@ import AccountChangeMixin from '@/components/auth/mixins/AccountChangeMixin.vue'
 import AccountDetails from '@/components/auth/account-settings/account-info/AccountDetails.vue'
 import AccountMailingAddress from '@/components/auth/account-settings/account-info/AccountMailingAddress.vue'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { AccountSettings } from '@/models/account-settings'
 import { Address } from '@/models/address'
 import { Code } from '@/models/Code'
-import ConfigHelper from '@/util/config-helper'
 import { KCUserProfile } from 'sbc-common-components/src/models/KCUserProfile'
 import LinkedBCOLBanner from '@/components/auth/common/LinkedBCOLBanner.vue'
 import ModalDialog from '../../common/ModalDialog.vue'
@@ -369,8 +366,8 @@ export default class AccountInfo extends Mixins(
   $refs: {
     editAccountForm: HTMLFormElement
     mailingAddress: HTMLFormElement
-    suspendAccountDialog: ModalDialog
-    suspensionCompleteDialog: ModalDialog
+    suspendAccountDialog: InstanceType<typeof ModalDialog>
+    suspensionCompleteDialog: InstanceType<typeof ModalDialog>
     suspensionReasonForm: HTMLFormElement
     accountBusinessTypePickerRef: HTMLFormElement
   }
@@ -527,12 +524,6 @@ export default class AccountInfo extends Mixins(
 
   private closeSuspensionCompleteDialog () {
     this.$refs.suspensionCompleteDialog.close()
-  }
-
-  protected getAccountFromSession (): AccountSettings {
-    return JSON.parse(
-      ConfigHelper.getFromSession(SessionStorageKeys.CurrentAccount || '{}')
-    )
   }
 
   private async updateDetails () {
