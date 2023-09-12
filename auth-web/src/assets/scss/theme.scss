@@ -1,3 +1,13 @@
+:root {
+    // Monochrome Palette
+    --COLOR_GRAY7: #495057;
+    --COLOR_GRAY9: #212529;
+
+    // Font Sizes
+    --FONT_SIZE_TITLE: 24px;
+    --FONT_SIZE_TEXT: 16px;
+}
+
 // Gray Palette
 $gray0: #f8f9fa;
 $gray1: #f1f3f5;
@@ -80,3 +90,9 @@ $px-12: 0.75rem;
 $px-13: 0.8125rem;
 $px-14: 0.8750rem;
 $px-16: 1.0000rem;
+$px-17: 1.0625rem;
+$px-18: 1.1250rem;
+$px-20: 1.2500rem;
+$px-22: 1.3750rem;
+$px-24: 1.5000rem;
+$px-32: 2.0000rem;

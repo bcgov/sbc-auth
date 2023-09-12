@@ -17,6 +17,7 @@ export function getPiniaStore () {
   return createPinia()
 }
 
+export * from './app'
 export * from './activityLog'
 export * from './business'
 export * from './codes'

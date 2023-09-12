@@ -1,5 +1,5 @@
 import { Wrapper, createLocalVue, mount } from '@vue/test-utils'
-import Certify from '@/components/auth/manage-business/Certify.vue'
+import Certify from '@/components/auth/manage-business/manage-business-dialog/Certify.vue'
 import Vuetify from 'vuetify'
 
 describe('Add Business Form', () => {

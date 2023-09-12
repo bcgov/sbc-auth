@@ -61,7 +61,6 @@
 
 import { Component, Mixins } from 'vue-property-decorator'
 import AccountMixin from '@/components/auth/mixins/AccountMixin.vue'
-import { Organization } from '@/models/Organization'
 import { Pages } from '@/util/constants'
 import { mapState } from 'pinia'
 import { useOrgStore } from '@/stores/org'
@@ -72,8 +71,6 @@ import { useOrgStore } from '@/stores/org'
   }
 })
 export default class AccountCreationSuccessView extends Mixins(AccountMixin) {
-  protected readonly currentOrganization!: Organization
-
   goTo (page) {
     switch (page) {
       case 'home': this.$router.push('/')

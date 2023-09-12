@@ -129,7 +129,7 @@ export default defineComponent({
     const currentOrganization = computed(() => orgStore.currentOrganization)
     const currentMembership = computed(() => orgStore.currentMembership)
 
-    const csvErrorDialog: Ref<ModalDialog> = ref(null)
+    const csvErrorDialog: Ref<InstanceType<typeof ModalDialog>> = ref(null)
     const csvErrorTextBasic = 'We were unable to process your CSV export. Please try again later.'
     const csvErrorTextMaxExceeded = 'You have exceeded the maximum of 60,000 records for your CSV export. Please refine your search and try again.'
     const csvErrorDialogText = ref(csvErrorTextBasic)

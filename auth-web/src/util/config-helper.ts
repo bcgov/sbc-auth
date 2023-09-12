@@ -127,6 +127,14 @@ export default class ConfigHelper {
     return `${import.meta.env.VUE_APP_CORPORATE_ONLINE_URL}`
   }
 
+  static getSocietiesUrl () {
+    return `${process.env.VUE_APP_SOCIETIES_URL}`
+  }
+
+  static getCorpFormsUrl () {
+    return `${process.env.VUE_APP_CORP_FORMS_URL}`
+  }
+
   static getFasWebUrl () {
     return `${import.meta.env.VUE_APP_FAS_WEB_URL}`
   }

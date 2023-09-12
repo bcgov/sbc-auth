@@ -2,8 +2,6 @@ import BusinessLookupServices from '@/services/business-lookup.services'
 import { axios } from '@/util/http-util'
 import sinon from 'sinon'
 
-const BUSINESS_SEARCH_URL = 'https://bcregistry-dev.apigee.net/registry-search/api/v1/'
-
 describe('Business Lookup Services', () => {
   it('returns a result when the business is found', async () => {
     const result = {
@@ -15,10 +13,11 @@ describe('Business Lookup Services', () => {
       status: 'ACTIVE'
     }
 
-    // mock successsful search
-    const args = `${BUSINESS_SEARCH_URL}businesses/search/facets?start=0&rows=20&categories=legalType:` +
-      `A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS&query=value:FM1000002`
-    sinon.stub(axios, 'get').withArgs(args).returns(
+    const url = BusinessLookupServices.registriesSearchApiUrl + 'businesses/search/facets?start=0&rows=20' +
+      '&categories=legalType:A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS' +
+      `&query=value:${encodeURIComponent('FM1000002')}`
+
+    sinon.stub(axios, 'get').withArgs(url).returns(
       Promise.resolve({ data: { searchResults: { results: [result] } } })
     )
 
@@ -32,13 +31,14 @@ describe('Business Lookup Services', () => {
 
   it('does not return a result when the business is not found', async () => {
     // mock unsuccesssful search
-    const args = `${BUSINESS_SEARCH_URL}businesses/search/facets?start=0&rows=20&categories=legalType:` +
-      `A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS&query=value:FM1000003`
-    sinon.stub(axios, 'get').withArgs(args).returns(
+    const url = BusinessLookupServices.registriesSearchApiUrl + 'businesses/search/facets?start=0&rows=20' +
+      '&categories=legalType:A,BC,BEN,C,CC,CP,CUL,FI,GP,LL,LLC,LP,PA,S,SP,ULC,XCP,XL,XP,XS' +
+      `&query=value:${encodeURIComponent('FM1000003')}`
+
+    sinon.stub(axios, 'get').withArgs(url).returns(
       Promise.resolve({ data: { searchResults: { results: [] } } })
     )
 
-    // search and look at results
     const results = await BusinessLookupServices.search('FM1000003')
     expect(results.length).toBe(0)
 

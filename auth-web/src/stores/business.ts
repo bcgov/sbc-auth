@@ -1,13 +1,5 @@
 import {
-  AffiliationResponse,
-  CreateRequestBody as CreateAffiliationRequestBody,
-  CreateNRAffiliationRequestBody,
-  NameRequestResponse
-} from '@/models/affiliation'
-import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
-import { Business, BusinessRequest, FolioNumberload, LearBusiness, LoginPayload,
-  PasscodeResetLoad } from '@/models/business'
-import {
+  AffiliationInvitationStatus,
   CorpTypes,
   FilingTypes,
   LDFlags,
@@ -18,8 +10,18 @@ import {
   NrTargetTypes,
   SessionStorageKeys
 } from '@/util/constants'
+import {
+  AffiliationResponse,
+  CreateRequestBody as CreateAffiliationRequestBody,
+  CreateNRAffiliationRequestBody,
+  NameRequestResponse
+} from '@/models/affiliation'
+import { BNRequest, RequestTracker, ResubmitBNRequest } from '@/models/request-tracker'
+import { Business, BusinessRequest, CorpType, FolioNumberload, LearBusiness, LoginPayload,
+  PasscodeResetLoad } from '@/models/business'
 import { Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { computed, reactive, toRefs } from '@vue/composition-api'
+import AffiliationInvitationService from '@/services/affiliation-invitation.services'
 import BusinessService from '@/services/business.services'
 import ConfigHelper from '@/util/config-helper'
 import { Contact } from '@/models/contact'
@@ -123,10 +125,54 @@ export const useBusinessStore = defineStore('business', () => {
     }
   }
 
+  /* Internal function for sorting affiliations / entities by invites. */
+  function sortEntitiesByInvites (affiliatedEntities: Business[]): Business[] {
+    // bubble the ones with the invitations to the top
+    affiliatedEntities?.sort((a, b) => {
+      if (a.affiliationInvites && !b.affiliationInvites) {
+        return -1
+      }
+      if (!a.affiliationInvites && b.affiliationInvites) {
+        return 1
+      }
+      return 0
+    })
+    return affiliatedEntities
+  }
+
+  async function handleAffiliationInvitations (affiliatedEntities: Business[]): Promise<Business[]> {
+    if (!LaunchDarklyService.getFlag(LDFlags.AffiliationInvitationRequestAccess)) {
+      return affiliatedEntities
+    }
+
+    const pendingAffiliationInvitations = await AffiliationInvitationService.getAffiliationInvitations(currentOrganization.value.id) || []
+
+    for (const affiliationInvite of pendingAffiliationInvitations) {
+      const isFromOrg = affiliationInvite.fromOrg.id === currentOrganization.value.id
+      const isToOrgAndPending = affiliationInvite.toOrg?.id === currentOrganization.value.id &&
+        affiliationInvite.status === AffiliationInvitationStatus.Pending
+      const isAccepted = affiliationInvite.status === AffiliationInvitationStatus.Accepted
+      const business = affiliatedEntities.find(
+        business => business.businessIdentifier === affiliationInvite.entity.businessIdentifier)
+
+      if (business && (isToOrgAndPending || isFromOrg)) {
+        business.affiliationInvites = (business.affiliationInvites || []).concat([affiliationInvite])
+      } else if (!business && isFromOrg && !isAccepted) {
+        // This returns corpType: 'BEN' instead of corpType: { code: 'BEN' }.
+        const corpType = affiliationInvite.entity.corpType
+        const newBusiness = { ...affiliationInvite.entity,
+          affiliationInvites: [affiliationInvite],
+          corpType: { code: corpType as unknown as string } as CorpType }
+        affiliatedEntities.push(newBusiness)
+      }
+    }
+
+    return sortEntitiesByInvites(affiliatedEntities)
+  }
+
   /** This is the function that fetches and updates data for all NRs. */
   async function syncBusinesses (): Promise<void> {
     state.businesses = []
-
     if (!currentOrganization.value) {
       console.log('Invalid organization') // eslint-disable-line no-console
       return
@@ -134,7 +180,7 @@ export const useBusinessStore = defineStore('business', () => {
 
     // get affiliated entities for this organization
     const entityResponse: AffiliationResponse[] = await OrgService.getAffiliatedEntities(currentOrganization.value.id)
-    const affiliatedEntities: Business[] = []
+    let affiliatedEntities: Business[] = []
 
     entityResponse.forEach((resp) => {
       const entity: Business = buildBusinessObject(resp)
@@ -147,6 +193,8 @@ export const useBusinessStore = defineStore('business', () => {
       }
       affiliatedEntities.push(entity)
     })
+
+    affiliatedEntities = await handleAffiliationInvitations(affiliatedEntities)
 
     // update store with initial results
     state.businesses = [...affiliatedEntities]
@@ -296,8 +344,17 @@ export const useBusinessStore = defineStore('business', () => {
     return state.businesses.findIndex(business => business.businessIdentifier === identifier)
   }
 
+  async function getBusinessNameByIdentifier (identifier: string): Promise<string | null> {
+    const business = state.businesses.find(business => business.businessIdentifier === identifier)
+    return business ? business.name : null
+  }
+
   async function createBNRequest (request: BNRequest): Promise<any> {
     return BusinessService.createBNRequest(request)
+  }
+
+  async function searchNRIndex (identifier: string): number {
+    return this.businesses.findIndex(business => business.nrNumber === identifier)
   }
 
   async function getBNRequests (businessIdentifier: string): Promise<RequestTracker[]> {
@@ -325,8 +382,12 @@ export const useBusinessStore = defineStore('business', () => {
     return null
   }
 
-  async function isAffiliated (identifier: string): Promise<boolean> {
+  function isAffiliated (identifier: string): boolean {
     return state.businesses.some(business => business.businessIdentifier === identifier)
+  }
+
+  function isAffiliatedNR (nrNum: string): boolean {
+    return this.businesses.some(business => business.nrNumber === nrNum)
   }
 
   async function createNumberedBusiness ({ filingType, business }): Promise<void> {
@@ -427,18 +488,21 @@ export const useBusinessStore = defineStore('business', () => {
     createNamedBusiness,
     searchBusiness,
     searchBusinessIndex,
+    getBusinessNameByIdentifier,
     createBNRequest,
     getBNRequests,
     downloadBusinessSummary,
     resubmitBNRequest,
     getRequestTracker,
     isAffiliated,
+    isAffiliatedNR,
     createNumberedBusiness,
     removeBusiness,
     saveContact,
     updateFolioNumber,
     resetCurrentBusiness,
     resetBusinessPasscode,
+    searchNRIndex,
     $reset
   }
 })

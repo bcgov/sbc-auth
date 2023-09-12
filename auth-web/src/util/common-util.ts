@@ -286,4 +286,11 @@ export default class CommonUtils {
   static mapRequestTypeCdToNrType (requestTypeCd: NrRequestTypeCodes): string {
     return NrRequestTypeStrings[requestTypeCd] as string
   }
+
+  static getElementWithSmallestId<Type extends {id:number}> (arrayToSearch: Type[]): Type | undefined {
+    return arrayToSearch?.reduce(
+      (currentMin, curr) => (currentMin.id <= curr.id) ? currentMin : curr,
+      arrayToSearch.length > 0 ? arrayToSearch[0] : undefined
+    )
+  }
 }

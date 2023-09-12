@@ -66,6 +66,7 @@
 import { Component, Mixins } from 'vue-property-decorator'
 import { LDFlags, LoginSource, Pages, SessionStorageKeys } from '@/util/constants'
 import { mapActions, mapState } from 'pinia'
+import { useOrgStore, useUserStore } from '@/stores'
 import AuthModule from 'sbc-common-components/src/store/modules/auth'
 import { BreadCrumb } from '@bcrs-shared-components/bread-crumb'
 import { BreadcrumbIF } from '@bcrs-shared-components/interfaces'
@@ -83,8 +84,6 @@ import SbcLoader from 'sbc-common-components/src/components/SbcLoader.vue'
 import { appendAccountId } from 'sbc-common-components/src/util/common-util'
 import { getModule } from 'vuex-module-decorators'
 import { mapGetters } from 'vuex'
-import { useOrgStore } from '@/stores/org'
-import { useUserStore } from '@/stores/user'
 
 @Component({
   components: {
@@ -241,7 +240,6 @@ export default class App extends Mixins(NextPageMixin) {
     this.$store.commit('loadComplete')
   }
 }
-
 </script>
 
 <style lang="scss">

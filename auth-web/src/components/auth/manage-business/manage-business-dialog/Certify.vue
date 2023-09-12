@@ -37,7 +37,7 @@ export default class Certify extends Vue {
   /** The trimmed "Certified By" string (may be falsy). */
   get trimmedCertifiedBy (): string {
     // remove repeated inline whitespace, and leading/trailing whitespace
-    return this.certifiedBy && this.certifiedBy.replace(/\s+/g, ' ').trim()
+    return this.certifiedBy?.replace(/\s+/g, ' ').trim()
   }
 
   /** Emits an event to update the Is Certified prop. */
@@ -47,7 +47,7 @@ export default class Certify extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import '@/assets/styles/theme.scss';
+@import '@/assets/styles/theme';
 
 // checkbox shows red on error (per its validation)
 // this also set its label color to red

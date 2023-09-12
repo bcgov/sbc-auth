@@ -144,7 +144,7 @@ export default class NonBcscAccountSetupView extends Vue {
   private isAffidavitAlreadyApproved = false
 
   $refs: {
-    errorDialog: ModalDialog,
+    errorDialog: InstanceType<typeof ModalDialog>,
     stepper: HTMLFormElement,
   }
 

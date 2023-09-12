@@ -435,10 +435,10 @@ export default class UserProfileForm extends Mixins(NextPageMixin, Steppable) {
     @Prop({ default: false }) clearForm: boolean
 
     $refs: {
-      deactivateUserConfirmationDialog: ModalDialog,
-      deactivateUserFailureDialog: ModalDialog,
-      resetDialog: ModalDialog,
-      resetFailureDialog: ModalDialog,
+      deactivateUserConfirmationDialog: InstanceType<typeof ModalDialog>,
+      deactivateUserFailureDialog: InstanceType<typeof ModalDialog>,
+      resetDialog: InstanceType<typeof ModalDialog>,
+      resetFailureDialog: InstanceType<typeof ModalDialog>,
       form: HTMLFormElement
     }
 

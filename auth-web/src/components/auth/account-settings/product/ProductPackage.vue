@@ -162,7 +162,7 @@ export default class ProductPackage extends Mixins(AccountChangeMixin) {
   public isProductActionCompleted: boolean = false
 
   $refs: {
-      confirmDialog: ModalDialog
+      confirmDialog: InstanceType<typeof ModalDialog>
   }
 
   public async setSelectedProduct (productDetails) {

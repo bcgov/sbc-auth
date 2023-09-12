@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - feature-business-registry-dashboard-updates
     paths:
       - "auth-web/**"
 

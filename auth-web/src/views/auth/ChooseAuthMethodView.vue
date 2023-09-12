@@ -437,7 +437,7 @@ export default class ChooseAuthMethodView extends Vue {
   govnAccountDescription = this.$t('govnAccountDescription')
 
   $refs: {
-    govnConfirmModal: ModalDialog
+    govnConfirmModal: InstanceType<typeof ModalDialog>
   }
 
   get serviceCardURL (): string {

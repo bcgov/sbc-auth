@@ -1,5 +1,5 @@
 import { Action, Applicant, Business, CorpType, Names } from '@/models/business'
-import { CorpTypes, NrTargetTypes } from '@/util/constants'
+import { AffiliationInvitationStatus, CorpTypes, NrTargetTypes } from '@/util/constants'
 import { NrRequestActionCodes, NrRequestTypeCodes } from '@bcrs-shared-components/enums'
 import { OrgNameAndId, Organization } from '@/models/Organization'
 import { Contact } from './contact'
@@ -21,20 +21,13 @@ export interface Affiliation {
   business: Business
 }
 
-export const AffiliationInvitationStatus = {
-  Pending: 'PENDING',
-  Accepted: 'ACCEPTED',
-  Expired: 'EXPIRED',
-  Failed: 'FAILED'
-}
-
 export class AffiliationInviteInfo {
   id: number
   type: string
   status: string
   entity: Business
   fromOrg: OrgNameAndId
-  toOrg: OrgNameAndId
+  toOrg?: OrgNameAndId
 
   static isFromOrg (affiliationInviteInfo: AffiliationInviteInfo, fromOrgId: number): boolean {
     return affiliationInviteInfo.fromOrg.id === fromOrgId
@@ -102,9 +95,11 @@ export interface NameRequestResponse {
   natureOfBusiness?: string
   expirationDate?: Date
   nrNum?: string
+  requestActionCd?: string
   stateCd?: string
   natureBusinessInfo?: string
   applicants?: Array<Applicant>
+  corpNum?: string
 }
 
 export interface AffiliationsResponse {
