@@ -11,6 +11,7 @@
     "lint": "eslint . --ext ts,vue --fix src",
     "lint:nofix": "eslint . --ext ts,vue --no-fix",
     "test:unit": "vitest run",
+    "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
