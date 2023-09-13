@@ -342,3 +342,13 @@ class KeycloakGroupActions(Enum):
 
     ADD_TO_GROUP = 'ADD_TO_GROUP'
     REMOVE_FROM_GROUP = 'REMOVE_FROM_GROUP'
+
+
+class NotificationTypes(Enum):
+    """Account mailer notification types."""
+
+    DEFAULT_APPROVED_PRODUCT = 'prodPackageApprovedNotification'
+    DEFAULT_REJECTED_PRODUCT = 'prodPackageRejectedNotification'
+    DETAILED_CONFIRMATION_PRODUCT = 'productConfirmationNotificationDetailed'
+    DETAILED_APPROVED_PRODUCT = 'productApprovedNotificationDetailed'
+    DETAILED_REJECTED_PRODUCT = 'productRejectedNotificationDetailed'
