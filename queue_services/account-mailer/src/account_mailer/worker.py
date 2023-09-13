@@ -219,6 +219,25 @@ async def process_event(event_message: dict, flask_app):
                     'is_authorized': email_msg.get('isAuthorized', None),
                     'additional_message': email_msg.get('additionalMessage', None)
                 })
+        elif message_type in {MessageType.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value,
+                              MessageType.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value}:
+            subject_descriptor = email_msg.get('subjectDescriptor')
+            subject_type = SubjectType[MessageType(message_type).name].value
+            email_dict = common_mailer.process(
+                **{
+                    'org_id': None,
+                    'recipients': email_msg.get('emailAddresses'),
+                    'template_name': TemplateType[f'{MessageType(message_type).name}_TEMPLATE_NAME'].value,
+                    'subject': subject_type.format(subject_descriptor=subject_descriptor),
+                    'logo_url': logo_url,
+                    'product_access_descriptor': email_msg.get('productAccessDescriptor'),
+                    'category_descriptor': email_msg.get('categoryDescriptor'),
+                    'is_reapproved': email_msg.get('isReapproved', None),
+                    'product_name': email_msg.get('productName', None),
+                    'access_disclaimer': email_msg.get('accessDisclaimer', None),
+                    'remarks': email_msg.get('remarks', None),
+                    'contact_type': email_msg.get('contactType', None)
+                })
 
         else:
             if any(x for x in MessageType if x.value == message_type):

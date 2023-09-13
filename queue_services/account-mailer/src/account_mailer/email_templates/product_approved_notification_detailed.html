@@ -1,0 +1,11 @@
+# You've been approved for {{ product_access_descriptor }} access to {{ category_descriptor }}.
+
+{% if is_reapproved %}
+BC Registries staff have reviewed your previously-rejected application to have {{ product_name }} access to {{ category_descriptor}}, and you have been approved.
+
+{% else %}
+BC Registries staff have reviewed your application to have {{ product_name }} access to {{ category_descriptor}}, and you have been approved.
+
+{% endif %}
+
+[Log in to access {{ category_descriptor }}]({{ url }})
