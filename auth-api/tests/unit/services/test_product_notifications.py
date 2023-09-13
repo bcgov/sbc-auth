@@ -32,7 +32,7 @@ from auth_api.utils.enums import (
     LoginSource, NotificationTypes, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus)
 from auth_api.utils.notifications import ProductAccessDescriptor, ProductCategoryDescriptor, ProductSubjectDescriptor
 from tests.utilities.factory_scenarios import TestJwtClaims, TestOrgInfo, TestOrgProductsInfo, TestUserInfo
-from tests.utilities.factory_utils import factory_user_model, patch_token_info, factory_user_model_with_contact
+from tests.utilities.factory_utils import factory_user_model_with_contact, patch_token_info
 
 
 @pytest.mark.parametrize('org_product_info', [

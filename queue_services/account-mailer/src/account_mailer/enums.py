@@ -103,9 +103,9 @@ class SubjectType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                          'Your Product Request {product_name} Has Been Rejected'
     PRODUCT_APPROVED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
-                                                  'Access Has Been Approved'
+                                             'Access Has Been Approved'
     PRODUCT_REJECTED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
-                                                  'Access Has Been Rejected'
+                                             'Access Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                       'Update your information.'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
