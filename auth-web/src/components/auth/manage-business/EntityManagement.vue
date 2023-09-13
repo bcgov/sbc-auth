@@ -810,13 +810,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     this.$refs.errorDialog.open()
   }
 
-  showNRBadStatusErrorModal () {
-    this.dialogTitle = 'Invalid Status for Name Request'
-    this.dialogText =
-    'This name request was in an invalid status. The specified name request cannot be used.'
-    this.$refs.errorDialog.open()
-  }
-
   showLinkExpiredModal (name: string) {
     this.dialogTitle = `Link Expired`
     this.dialogText = `Your authorization request to manage ${name} has expired. Please try again.`
