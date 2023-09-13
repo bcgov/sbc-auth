@@ -140,15 +140,11 @@ class Task:  # pylint: disable=too-many-instance-attributes
             product_subscription_id = task_model.relationship_id
             account_id = task_model.account_id
 
-            task_remarks = None
-            if task_model.remarks and len(task_model.remarks) > 0:
-                task_remarks = task_model.remarks[0]
-
             self._update_product_subscription(ProductSubscriptionInfo(is_approved=is_approved,
                                                                       is_hold=is_hold,
                                                                       product_subscription_id=product_subscription_id,
                                                                       org_id=account_id,
-                                                                      task_remarks=task_remarks))
+                                                                      task_remarks=Task.get_task_remark(task_model)))
 
         elif task_model.relationship_type == TaskRelationshipType.USER.value:
             user_id = task_model.relationship_id
@@ -167,6 +163,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
             task_model.user.save()
 
         current_app.logger.debug('>update_task_relationship ')
+
+    @staticmethod
+    def get_task_remark(task_model: TaskModel):
+        """Check and return the task remarks."""
+        if task_model.remarks and len(task_model.remarks) > 0:
+            return task_model.remarks[0]
+        return None
 
     @staticmethod
     def _notify_admin_about_hold(task_model, org: OrgModel = None, is_new_bceid_admin_request: bool = False,
