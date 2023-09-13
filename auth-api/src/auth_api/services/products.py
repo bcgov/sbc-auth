@@ -280,7 +280,7 @@ class Product:
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
 
-        is_reapproved = product_subscription.status_code == ProductSubscriptionStatus.REJECTED.value and is_approved
+        is_reapproved = Product.is_reapproved(product_subscription.status_code, is_approved)
 
         if is_approved:
             product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
@@ -337,7 +337,7 @@ class Product:
         if status == ProductSubscriptionStatus.ACTIVE.value:
             return
 
-        is_reapproved = status == ProductSubscriptionStatus.REJECTED.value and is_approved
+        is_reapproved = Product.is_reapproved(status, is_approved)
 
         if is_approved:
             product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
@@ -366,6 +366,11 @@ class Product:
             ActivityLogPublisher.publish_activity(Activity(org_id, ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                                            name=product_model.description))
         current_app.logger.debug('>approve_reject_parent_subscription ')
+
+    @staticmethod
+    def is_reapproved(product_sub_status: str, is_approved: str) -> bool:
+        """Determine if the product subscriptions is re-approved."""
+        return product_sub_status == ProductSubscriptionStatus.REJECTED.value and is_approved
 
     @staticmethod
     def send_product_subscription_notification(product_notification_info: ProductNotificationInfo):
