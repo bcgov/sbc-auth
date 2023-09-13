@@ -29,12 +29,14 @@ from auth_api.models import Org as OrgModel
 from auth_api.models import Task as TaskModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.models.dataclass import TaskSearch
 from auth_api.schemas import TaskSchema
 from auth_api.services.user import User as UserService
 from auth_api.utils.account_mailer import publish_to_mailer
-from auth_api.utils.enums import Status, TaskRelationshipStatus, TaskRelationshipType, TaskStatus, TaskAction
+from auth_api.utils.enums import Status, TaskAction, TaskRelationshipStatus, TaskRelationshipType, TaskStatus
+from auth_api.utils.notifications import ProductSubscriptionInfo
 from auth_api.utils.util import camelback2snake  # noqa: I005
-from auth_api.models.dataclass import TaskSearch
+
 
 ENV = Environment(loader=FileSystemLoader('.'), autoescape=True)
 
@@ -137,8 +139,12 @@ class Task:  # pylint: disable=too-many-instance-attributes
             # Update Product relationship
             product_subscription_id = task_model.relationship_id
             account_id = task_model.account_id
-            self._update_product_subscription(is_approved=is_approved, product_subscription_id=product_subscription_id,
-                                              org_id=account_id)
+
+            self._update_product_subscription(ProductSubscriptionInfo(is_approved=is_approved,
+                                                                      is_hold=is_hold,
+                                                                      product_subscription_id=product_subscription_id,
+                                                                      org_id=account_id,
+                                                                      task_remarks=Task.get_task_remark(task_model)))
 
         elif task_model.relationship_type == TaskRelationshipType.USER.value:
             user_id = task_model.relationship_id
@@ -157,6 +163,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
             task_model.user.save()
 
         current_app.logger.debug('>update_task_relationship ')
+
+    @staticmethod
+    def get_task_remark(task_model: TaskModel):
+        """Check and return the task remarks."""
+        if task_model.remarks and len(task_model.remarks) > 0:
+            return task_model.remarks[0]
+        return None
 
     @staticmethod
     def _notify_admin_about_hold(task_model, org: OrgModel = None, is_new_bceid_admin_request: bool = False,
@@ -230,14 +243,13 @@ class Task:  # pylint: disable=too-many-instance-attributes
         current_app.logger.debug('>update_bceid_admin_to_org ')
 
     @staticmethod
-    def _update_product_subscription(is_approved: bool, product_subscription_id: int, org_id: int):
+    def _update_product_subscription(product_sub_info: ProductSubscriptionInfo):
         """Review Product Subscription."""
         current_app.logger.debug('<_update_product_subscription ')
         from auth_api.services import Product as ProductService  # pylint:disable=cyclic-import, import-outside-toplevel
 
         # Approve/Reject Product subscription
-        ProductService.update_product_subscription(product_subscription_id=product_subscription_id,
-                                                   is_approved=is_approved, org_id=org_id, is_new_transaction=False)
+        ProductService.update_product_subscription(product_sub_info=product_sub_info, is_new_transaction=False)
         current_app.logger.debug('>_update_product_subscription ')
 
     @staticmethod

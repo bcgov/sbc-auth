@@ -31,6 +31,7 @@ from auth_api.services import User as UserService
 from auth_api.services.activity_log_publisher import ActivityLogPublisher
 
 from auth_api.utils.enums import ActivityAction, KeycloakGroupActions, ProductCode, ProductSubscriptionStatus, Status
+from auth_api.utils.notifications import ProductSubscriptionInfo
 from tests.utilities.factory_scenarios import KeycloakScenario, TestOrgInfo, TestUserInfo
 from tests.utilities.factory_utils import (
     factory_membership_model, factory_product_model, factory_user_model, patch_token_info)
@@ -69,10 +70,17 @@ def test_update_product_subscription(session, keycloak_mock, monkeypatch, test_n
     with patch.object(ActivityLogPublisher, 'publish_activity', return_value=None) as mock_alp:
         if has_contact:
             with patch.object(ContactLinkModel, 'find_by_user_id', return_value=MockPerson(contact=MockContact())):
-                ProductService.update_product_subscription(product_subscription.id, True, org._model.id)
+                ProductService.update_product_subscription(
+                    ProductSubscriptionInfo(product_subscription_id=product_subscription.id,
+                                            is_approved=True,
+                                            org_id=org._model.id))
+
         else:
             assert UserService.get_admin_emails_for_org(org.as_dict()['id']) == ''
-            ProductService.update_product_subscription(product_subscription.id, True, org._model.id)
+            ProductService.update_product_subscription(
+                ProductSubscriptionInfo(product_subscription_id=product_subscription.id,
+                                        is_approved=True,
+                                        org_id=org._model.id))
 
         mock_alp.assert_called_with(Activity(action=ActivityAction.ADD_PRODUCT_AND_SERVICE.value,
                                              org_id=ANY, value=ANY, id=ANY, name='Personal Property Registry'))

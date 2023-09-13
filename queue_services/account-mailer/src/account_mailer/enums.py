@@ -53,6 +53,8 @@ class MessageType(Enum):
     GOVM_REJECTED_NOTIFICATION = 'bc.registry.auth.govmRejectedNotification'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'bc.registry.auth.prodPackageApprovedNotification'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'bc.registry.auth.productApprovedNotificationDetailed'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'bc.registry.auth.productRejectedNotificationDetailed'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
     AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
@@ -100,6 +102,10 @@ class SubjectType(Enum):
                                          '{product_name} Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                          'Your Product Request {product_name} Has Been Rejected'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
+                                             'Access Has Been Approved'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
+                                             'Access Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                       'Update your information.'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
@@ -129,6 +135,8 @@ class TitleType(Enum):
     GOVM_REJECTED_NOTIFICATION = 'Your BC Registries Account Has Been Rejected'
     PROD_PACKAGE_APPROVED_NOTIFICATION = 'Your Product Request Has Been Approved'
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Approved'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Rejected'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'Your Account Creation Request is On hold '
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
     AFFILIATION_INVITATION = 'Invitation to manage a business with your account.'
@@ -170,6 +178,8 @@ class TemplateType(Enum):
     GOVM_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'govm_rejected_notification'
     PROD_PACKAGE_APPROVED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_approved_notification'
     PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
+    PRODUCT_APPROVED_NOTIFICATION_DETAILED_TEMPLATE_NAME = 'product_approved_notification_detailed'
+    PRODUCT_REJECTED_NOTIFICATION_DETAILED_TEMPLATE_NAME = 'product_rejected_notification_detailed'
     RESUBMIT_BCEID_ORG_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_org'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
     AFFILIATION_INVITATION_REQUEST_TEMPLATE_NAME = 'affiliation_invitation_request'
