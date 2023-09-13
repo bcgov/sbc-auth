@@ -466,7 +466,6 @@ export default defineComponent({
     })
 
     const isAuthorizationRequestSentDialogOpen = computed(() => {
-      console.log('fire')
       return authorizationRequestSentDialog.value?.isOpen
     })
 
