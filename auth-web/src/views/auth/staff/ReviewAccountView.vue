@@ -648,7 +648,8 @@ export default defineComponent({
       openModal,
       saveSelection,
       goBack,
-      determinePage
+      determinePage,
+      onholdReasonCodes
     }
   }
 })
