@@ -51,10 +51,16 @@
       </v-col>
     </v-row>
     <v-row v-if="accountOnHoldRemarks && isTaskRejected">
-      <v-col cols="5" class="py-2">
+      <v-col
+        cols="5"
+        class="py-2"
+      >
         Reason(s)
       </v-col>
-      <v-col cols="7" class="py-2">
+      <v-col
+        cols="7"
+        class="py-2"
+      >
         <span>{{ accountOnHoldRemarks && accountOnHoldRemarks[0] }}</span>
       </v-col>
     </v-row>
