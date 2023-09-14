@@ -121,16 +121,8 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
   })
 
-  it('all incorporate numbered businesses btns exist', async () => {
-    // Enter the Incorporate a Numbered BC Company drop down.
-    const incorporateNumberedBtn = wrapper.find('#incorporate-numbered-btn')
-    incorporateNumberedBtn.trigger('click')
-    await Vue.nextTick()
-
-    expect(wrapper.find('#incorporate-numbered-ben-btn').exists()).toBe(true)
-    expect(wrapper.find('#incorporate-numbered-limited-btn').exists()).toBe(true)
-    expect(wrapper.find('#incorporate-numbered-unlimited-btn').exists()).toBe(true)
-    expect(wrapper.find('#incorporate-numbered-ccc-btn').exists()).toBe(true)
+  it('Should render the #get-started-button element', async () => {
+    expect(wrapper.find('#get-started-button').exists()).toBe(true)
   })
 
   it('calls the nr success modal', async () => {

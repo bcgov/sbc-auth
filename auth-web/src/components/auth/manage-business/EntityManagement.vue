@@ -27,7 +27,7 @@
           >
             <template #activator="{ on: onGetStartedTooltip }">
               <v-btn
-                id="incorporate-numbered-btn"
+                id="get-started-button"
                 class="mt-0 mr-4 font-weight-regular"
                 color="primary"
                 outlined
@@ -44,7 +44,7 @@
                 <span>Get Started with a B.C.- based business</span>
               </v-btn>
             </template>
-            <span>Go to Name Request to get started with a named or numbered business</span>
+            <span id="tooltip">Go to Name Request to get started with a named or numbered business</span>
           </v-tooltip>
         </div>
       </div>
