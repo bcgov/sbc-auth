@@ -21,163 +21,31 @@
           <span class="subtitle">{{ $t('myBusinessDashSubtitle') }}</span>
         </h1>
         <div class="view-header__actions">
-          <!-- Incorporate a Numbered BC Company or Business -->
-          <v-menu v-model="incorporateNumberedDropdown">
-            <template #activator="{ on: onNumberedMenu }">
-              <v-tooltip
-                top
-                content-class="top-tooltip"
-              >
-                <template #activator="{ on: onNumberedTooltip }">
-                  <v-btn
-                    id="incorporate-numbered-btn"
-                    class="mt-0 mr-4 font-weight-regular"
-                    color="primary"
-                    outlined
-                    dark
-                    large
-                    v-on="{ ...onNumberedMenu, ...onNumberedTooltip }"
-                    @click="incorporateNumberedDropdown = !incorporateNumberedDropdown"
-                  >
-                    <span>Incorporate a Numbered BC Company</span>
-                    <v-icon class="ml-2 mr-n2">
-                      {{ incorporateNumberedDropdown ? 'mdi-menu-up' : 'mdi-menu-down' }}
-                    </v-icon>
-                  </v-btn>
-                </template>
-                <span>Start an incorporation application for a numbered company in B.C.</span>
-              </v-tooltip>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-list-item-title class="d-inline-flex">
-                  <v-icon>mdi-plus</v-icon>
-                  <div class="ml-1 mt-1 add-existing-title">
-                    Incorporate a...
-                  </div>
-                </v-list-item-title>
-              </v-list-item>
-              <v-tooltip
-                right
-                content-class="right-tooltip"
-              >
-                <template #activator="{ on, attrs }">
-                  <v-list-item
-                    v-bind="attrs"
-                    id="incorporate-numbered-ben-btn"
-                    class="add-existing-item"
-                    v-on="on"
-                    @click="startNumberedCompany(CorpTypes.BENEFIT_COMPANY)"
-                  >
-                    Numbered Benefit Company
-                  </v-list-item>
-                </template>
-                <div>
-                  A type of corporation with special commitments to conduct business in a responsible and
-                  sustainable way.
-                  <ul>
-                    <li>Must publish and post an audited annual benefit report</li>
-                    <li>Reported as Corporate tax</li>
-                    <li>Has name protection in BC</li>
-                  </ul>
-                </div>
-              </v-tooltip>
-              <!-- Feature Flagged Buttons -->
-              <div v-if="enableBcCccUlc">
-                <v-tooltip
-                  right
-                  content-class="right-tooltip"
-                >
-                  <template #activator="{ on, attrs }">
-                    <v-list-item
-                      v-bind="attrs"
-                      id="incorporate-numbered-limited-btn"
-                      class="add-existing-item"
-                      v-on="on"
-                      @click="startNumberedCompany(CorpTypes.BC_COMPANY)"
-                    >
-                      Numbered Limited Company
-                    </v-list-item>
-                  </template>
-                  <div>
-                    A company that may have one or more people who own shares with some personal responsibility for debt
-                    and liabilities.
-                    <ul>
-                      <li>Has many of the same rights of an individual</li>
-                      <li>Reported separately as Corporate tax</li>
-                      <li>Has name protection in BC</li>
-                    </ul>
-                  </div>
-                </v-tooltip>
-                <v-tooltip
-                  right
-                  content-class="right-tooltip"
-                >
-                  <template #activator="{ on, attrs }">
-                    <v-list-item
-                      v-bind="attrs"
-                      id="incorporate-numbered-unlimited-btn"
-                      class="add-existing-item"
-                      v-on="on"
-                      @click="startNumberedCompany(CorpTypes.BC_ULC_COMPANY)"
-                    >
-                      Numbered Unlimited Liability Company
-                    </v-list-item>
-                  </template>
-                  <div>
-                    A type of corporation that is often used by American corporations as a Canadian subsidiary or to hold
-                    Canadian assets.
-                    <ul>
-                      <li>Shareholders liable for debts and liabilities</li>
-                      <li>Reported separately as Canadian Corporate tax</li>
-                      <li>Has name protection in BC</li>
-                    </ul>
-                  </div>
-                </v-tooltip>
-                <v-tooltip
-                  right
-                  content-class="right-tooltip"
-                >
-                  <template #activator="{ on, attrs }">
-                    <v-list-item
-                      v-bind="attrs"
-                      id="incorporate-numbered-ccc-btn"
-                      class="add-existing-item"
-                      v-on="on"
-                      @click="startNumberedCompany(CorpTypes.BC_CCC)"
-                    >
-                      Numbered Community Contribution Company
-                    </v-list-item>
-                  </template>
-                  <div>
-                    A type of corporation that has a benefit to the community. It is intended to bridge the gap between
-                    for-profit and non-profit companies.
-                    <ul>
-                      <li>Reported as Corporate tax</li>
-                      <li>Has name protection in BC</li>
-                    </ul>
-                  </div>
-                </v-tooltip>
-              </div>
-            </v-list>
-          </v-menu>
-          <v-btn
-            id="add-name-request-btn"
-            class="font-weight-regular"
-            color="primary"
-            outlined
-            dark
-            large
-            @click="goToNameRequest()"
+          <v-tooltip
+            top
+            content-class="top-tooltip"
           >
-            <span>Request a BC Business Name</span>
-            <v-icon
-              small
-              class="ml-2"
-            >
-              mdi-open-in-new
-            </v-icon>
-          </v-btn>
+            <template #activator="{ on: onGetStartedTooltip }">
+              <v-btn
+                id="incorporate-numbered-btn"
+                class="mt-0 mr-4 font-weight-regular"
+                color="primary"
+                outlined
+                dark
+                large
+                v-on="{ ...onGetStartedTooltip }"
+                @click="onClickGoToNameRequest()"
+              >
+                <v-icon
+                  small
+                >
+                  mdi-arrow-right-drop-circle
+                </v-icon>
+                <span>Get Started with a B.C.- based business</span>
+              </v-btn>
+            </template>
+            <span>Go to Name Request to get started with a named or numbered business</span>
+          </v-tooltip>
         </div>
       </div>
 
@@ -432,7 +300,7 @@
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
-import { CorpTypes, FilingTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
+import { CorpTypes, LDFlags, LoginSource, MagicLinkInvitationStatus, Pages } from '@/util/constants'
 import { MembershipStatus, Organization, RemoveBusinessPayload } from '@/models/Organization'
 import { mapActions, mapState } from 'pinia'
 import { useBusinessStore, useOrgStore, useUserStore } from '@/stores'
@@ -509,7 +377,6 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
 
   /** V-model for dropdown menus. */
   private addAffiliationDropdown: boolean = false
-  private incorporateNumberedDropdown: boolean = false
 
   readonly searchBusinessIndex!: (identifier: string) => Promise<number>
   readonly getBusinessNameByIdentifier!: (identifier: string) => Promise<string | null>
@@ -695,28 +562,12 @@ export default class EntityManagement extends Mixins(AccountMixin, AccountChange
     return LaunchDarklyService.getFlag(LDFlags.EnableMandatoryAddress) || false
   }
 
-  get enableBcCccUlc (): boolean {
-    return LaunchDarklyService.getFlag(LDFlags.EnableBcCccUlc) || false
-  }
-
   get viewTitle (): string {
     return this.isStaffAccount ? 'My Staff Business Registry' : 'My Business Registry'
   }
 
-  // open Name Request
-  private goToNameRequest (): void {
+  private onClickGoToNameRequest (): void {
     window.location.href = appendAccountId(ConfigHelper.getNameRequestUrl())
-  }
-
-  /** Creates a numbered IA filing (temp business). */
-  async startNumberedCompany (corpType: CorpTypes): Promise<void> {
-    const business = {
-      nameRequest: {
-        legalType: corpType
-      }
-    }
-    await this.createNumberedBusiness({ filingType: FilingTypes.INCORPORATION_APPLICATION, business })
-    await this.syncBusinessesAndToggleLoading()
   }
 
   async popupBusinessDialog (business: Business) {
