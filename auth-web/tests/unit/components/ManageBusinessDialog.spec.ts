@@ -7,9 +7,7 @@ import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
 const vuetify = new Vuetify({})
-
 const localVue = createLocalVue()
-localVue.use(Vuex)
 
 const testCaseList = [
   {
@@ -139,36 +137,8 @@ describe('ManageBusinessDialog Component', () => {
     let wrapper: Wrapper<any>
 
     beforeAll(() => {
-      const orgModule = {
-        namespaced: true,
-        state: {
-          currentOrganization: {
-            name: 'new org'
-          }
-        }
-      }
-
-      const businessModule = {
-        namespaced: true,
-        state: {
-        },
-        action: {
-          addBusiness: vi.fn(),
-          updateBusinessName: vi.fn(),
-          updateFolioNumber: vi.fn()
-        }
-      }
-
-      const store = new Vuex.Store({
-        strict: false,
-        modules: {
-          org: orgModule,
-          business: businessModule
-        }
-      })
-
       wrapper = shallowMount(ManageBusinessDialog, {
-        store,
+        localVue,
         vuetify,
         propsData: {
           isStaffOrSbcStaff: test.isStaffOrSbcStaff,
@@ -242,36 +212,7 @@ describe('ManageBusinessDialog Component', () => {
   let wrapper: Wrapper<any>
 
   beforeAll(() => {
-    const orgModule = {
-      namespaced: true,
-      state: {
-        currentOrganization: {
-          name: 'new org'
-        }
-      }
-    }
-
-    const businessModule = {
-      namespaced: true,
-      state: {
-      },
-      action: {
-        addBusiness: vi.fn(),
-        updateBusinessName: vi.fn(),
-        updateFolioNumber: vi.fn()
-      }
-    }
-
-    const store = new Vuex.Store({
-      strict: false,
-      modules: {
-        org: orgModule,
-        business: businessModule
-      }
-    })
-
     wrapper = shallowMount(ManageBusinessDialog, {
-      store,
       vuetify,
       propsData: {
         userFirstName: 'Nadia',

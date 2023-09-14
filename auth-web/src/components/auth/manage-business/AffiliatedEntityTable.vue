@@ -61,7 +61,7 @@
         </template>
         <!-- Name Request Name(s) / Business Name -->
         <template #item-slot-Name="{ item }">
-          <span>
+          <span class="d-block">
             <b
               v-if="isNameRequest(item)"
               class="col-wide gray-9"
@@ -95,17 +95,19 @@
           <span
             v-if="!!item.affiliationInvites"
             id="affiliationInvitesStatus"
+            class="d-flex align-start"
           >
+            <v-icon
+              class="pr-1 status-icon"
+              style="margin-top: 2px;"
+              small
+              :color="getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                ? 'red' : 'primary'"
+            >
+              {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
+                ? 'mdi-alert' : 'mdi-account-cog' }}
+            </v-icon>
             <p style="font-size: 12px">
-              <v-icon
-                class="pr-1"
-                x-small
-                :color="getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
-                  ? 'red' : 'primary'"
-              >
-                {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
-                  ? 'mdi-alert' : 'mdi-account-cog' }}
-              </v-icon>
               <span v-sanitize="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
             </p>
           </span>
@@ -421,6 +423,10 @@ export default defineComponent({
       }
     }
   }
+}
+
+.status-icon {
+  margin-top: 2px;
 }
 
 .text-input-style-above {
