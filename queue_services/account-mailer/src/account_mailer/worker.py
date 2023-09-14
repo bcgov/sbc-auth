@@ -40,11 +40,11 @@ from flask import Flask  # pylint: disable=wrong-import-order
 
 from account_mailer import config  # pylint: disable=wrong-import-order
 from account_mailer.auth_utils import get_member_emails
-from account_mailer.email_processors import common_mailer  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import ejv_failures  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import pad_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import payment_completed  # pylint: disable=wrong-import-order
 from account_mailer.email_processors import refund_requested  # pylint: disable=wrong-import-order
+from account_mailer.email_processors import common_mailer, product_confirmation  # pylint: disable=wrong-import-order
 from account_mailer.enums import Constants, MessageType, SubjectType, TemplateType, TitleType
 from account_mailer.services import minio_service  # pylint: disable=wrong-import-order
 from account_mailer.services import notification_service  # pylint: disable=wrong-import-order
@@ -220,9 +220,11 @@ async def process_event(event_message: dict, flask_app):
                     'additional_message': email_msg.get('additionalMessage', None)
                 })
         elif message_type in {MessageType.PRODUCT_APPROVED_NOTIFICATION_DETAILED.value,
-                              MessageType.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value}:
+                              MessageType.PRODUCT_REJECTED_NOTIFICATION_DETAILED.value,
+                              MessageType.PRODUCT_CONFIRMATION_NOTIFICATION.value}:
             subject_descriptor = email_msg.get('subjectDescriptor')
             subject_type = SubjectType[MessageType(message_type).name].value
+            attachment_type = email_msg.get('attachmentType', None)
             email_dict = common_mailer.process(
                 **{
                     'org_id': None,
@@ -236,8 +238,12 @@ async def process_event(event_message: dict, flask_app):
                     'product_name': email_msg.get('productName', None),
                     'access_disclaimer': email_msg.get('accessDisclaimer', None),
                     'remarks': email_msg.get('remarks', None),
-                    'contact_type': email_msg.get('contactType', None)
+                    'contact_type': email_msg.get('contactType', None),
+                    'has_agreement_attachment': email_msg.get('hasAgreementAttachment', None),
+                    'attachment_type': attachment_type
                 })
+
+            email_dict = product_confirmation.process_attachment(email_dict, attachment_type)
 
         else:
             if any(x for x in MessageType if x.value == message_type):

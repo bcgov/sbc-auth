@@ -138,6 +138,8 @@ class _Config():  # pylint: disable=too-few-public-methods
     AUTH_WEB_TOKEN_CONFIRM_PATH = os.getenv('AUTH_WEB_TOKEN_CONFIRM_PATH')
     # PAD TOS PDF file name.
     PAD_TOS_FILE = os.getenv('PAD_TOS_FILE', 'BCROS-Business-Pre-Authorized-Debit-Agreement.pdf')
+    # MHR QUALIFIED SUPPLIER PDF File name
+    MHR_QS_AGREEMENT_FILE = os.getenv('MHR_QS_AGREEMENT_FILE', 'MHR_QualifiedSuppliersAgreement.pdf')
 
     # If any value is present in this flag, starts up a keycloak docker
     USE_TEST_KEYCLOAK_DOCKER = os.getenv('USE_TEST_KEYCLOAK_DOCKER', None)

@@ -137,6 +137,11 @@ class Product:
                                                                   user_id=user.id,
                                                                   external_source_id=external_source_id
                                                                   ))
+                    Product._send_product_subscription_confirmation(ProductNotificationInfo(
+                        product_model=product_model,
+                        product_sub_model=product_subscription,
+                        is_confirmation=True
+                    ), org.id)
 
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -145,6 +150,13 @@ class Product:
             db.session.commit()
 
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
+
+    @staticmethod
+    def _send_product_subscription_confirmation(product_notification_info: ProductNotificationInfo, org_id: int):
+        admin_emails = UserService.get_admin_emails_for_org(org_id)
+        product_notification_info.recipient_emails = admin_emails
+
+        Product.send_product_subscription_notification(product_notification_info)
 
     @staticmethod
     def _update_parent_subscription(org_id, sub_product_model, subscription_status):
