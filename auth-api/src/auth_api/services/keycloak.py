@@ -16,6 +16,7 @@
 import asyncio
 import json
 from typing import Dict, List
+from string import Template
 import aiohttp
 
 import requests
@@ -94,7 +95,7 @@ class KeycloakService:
         return KeycloakService.get_user_by_username(user.user_name, admin_token)
 
     @staticmethod
-    def get_user_by_username(username, admin_token=None) -> KeycloakUser:
+    def get_user_by_username(username: str, admin_token=None) -> KeycloakUser:
         """Get user from Keycloak by username."""
         user = None
         base_url = current_app.config.get('KEYCLOAK_BCROS_BASE_URL')
@@ -109,7 +110,8 @@ class KeycloakService:
         }
 
         # Get the user and return
-        query_user_url = f'{base_url}/auth/admin/realms/{realm}/users?username={username}'
+        query_user_url = Template(f'{base_url}/auth/admin/realms/{realm}/users?username=$username') \
+            .substitute(username=username)
         response = requests.get(query_user_url, headers=headers, timeout=timeout)
         response.raise_for_status()
         if len(response.json()) == 1:
