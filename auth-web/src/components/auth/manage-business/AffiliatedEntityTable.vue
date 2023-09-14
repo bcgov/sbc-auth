@@ -107,7 +107,10 @@
               {{ getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
                 ? 'mdi-alert' : 'mdi-account-cog' }}
             </v-icon>
-            <p style="font-size: 12px">
+            <p
+              style="font-size: 12px"
+              class="mb-0"
+            >
               <span v-sanitize="getRequestForAuthorizationStatusText(item.affiliationInvites)" />
             </p>
           </span>
