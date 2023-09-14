@@ -3,7 +3,6 @@ import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
 const vuetify = new Vuetify({})
