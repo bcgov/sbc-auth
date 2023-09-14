@@ -45,7 +45,7 @@ def process_attachment(email_dict: dict, attachment_type: str) -> dict:
 
 
 def _get_attachment_name(attachment_type: str) -> str:
-    if attachment_type == AttachmentTypes.QUALIFIED_SUPPLIER:
+    if attachment_type == AttachmentTypes.QUALIFIED_SUPPLIER.value:
         return current_app.config['MHR_QS_AGREEMENT_FILE']
 
     return None
