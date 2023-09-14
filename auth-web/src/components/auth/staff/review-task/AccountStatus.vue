@@ -97,7 +97,7 @@ export default defineComponent({
       isTaskRejected: computed(() => props.taskDetails?.relationshipStatus === TaskRelationshipStatus.REJECTED),
       accountOnHoldRemarks: computed(() => props.taskDetails?.remarks),
       statusLabel: computed((): string => {
-        switch (props.taskDetails.relationshipStatus) {
+        switch (props.taskDetails?.relationshipStatus) {
           case TaskRelationshipStatus.ACTIVE:
             return 'Approved'
           case TaskRelationshipStatus.REJECTED:
