@@ -44,9 +44,10 @@ class ProductNotificationInfo:
 
     product_model: ProductCodeModel
     product_sub_model: ProductSubscriptionModel
-    recipient_emails: str
+    recipient_emails: Optional[str] = None
     remarks: Optional[str] = None
     is_reapproved: Optional[bool] = False
+    is_confirmation: Optional[bool] = False
 
 
 # e.g [BC Registries and Online Services] Your {{MHR_QUALIFIED_SUPPLIER}} Access Has Been Approved
@@ -70,10 +71,17 @@ class ProductCategoryDescriptor(Enum):
     MHR = 'the Manufactured Home Registry'
 
 
+class NotificationAttachmentType(Enum):
+    """Notification attachment type."""
+
+    MHR_QS = 'QUALIFIED_SUPPLIER'
+
+
 def get_product_notification_type(product_notification_info: ProductNotificationInfo):
     """Get the appropriate product notification type."""
     product_model = product_notification_info.product_model
     is_reapproved = product_notification_info.is_reapproved
+    is_confirmation = product_notification_info.is_confirmation
     subscription_status_code = product_notification_info.product_sub_model.status_code
 
     # Use detailed version of product subscription notification templates
@@ -83,6 +91,9 @@ def get_product_notification_type(product_notification_info: ProductNotification
 
         if subscription_status_code == ProductSubscriptionStatus.REJECTED.value:
             return NotificationTypes.DETAILED_REJECTED_PRODUCT.value
+
+        if is_confirmation:
+            return NotificationTypes.DETAILED_CONFIRMATION_PRODUCT.value
 
     # Use default product subscription notification templates
     if subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
@@ -99,11 +110,15 @@ def get_product_notification_data(product_notification_info: ProductNotification
     product_model = product_notification_info.product_model
     recipient_emails = product_notification_info.recipient_emails
     is_reapproved = product_notification_info.is_reapproved
+    is_confirmation = product_notification_info.is_confirmation
     subscription_status_code = product_notification_info.product_sub_model.status_code
     remarks = product_notification_info.remarks
 
     if product_model.code not in DETAILED_MHR_NOTIFICATIONS:
         return get_default_product_notification_data(product_model, recipient_emails)
+
+    if is_confirmation:
+        return get_mhr_qs_confirmation_data(product_model, recipient_emails)
 
     if is_reapproved or subscription_status_code == ProductSubscriptionStatus.ACTIVE.value:
         return get_mhr_qs_approval_data(product_model, recipient_emails, is_reapproved)
@@ -138,7 +153,6 @@ def get_mhr_qs_approval_data(product_model: ProductCodeModel, recipient_emails: 
 
 def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: str, reject_reason: str = None):
     """Get the mhr qualified supplier product rejected notification data."""
-    contact_type = 'BCOL' if product_model.code == ProductCode.MHR_QSLN.value else 'BCREG'
     data = {
         'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
         'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
@@ -147,6 +161,26 @@ def get_mhr_qs_rejected_data(product_model: ProductCodeModel, recipient_emails: 
         'productName': product_model.description,
         'emailAddresses': recipient_emails,
         'remarks': reject_reason,
-        'contactType': contact_type
+        'contactType': get_notification_contact_type(product_model.code)
     }
     return data
+
+
+def get_mhr_qs_confirmation_data(product_model: ProductCodeModel, recipient_emails: str):
+    """Get the mhr qualified supplier product confirmation notification data."""
+    data = {
+        'subjectDescriptor': ProductSubjectDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        'productAccessDescriptor': ProductAccessDescriptor.MHR_QUALIFIED_SUPPLIER.value,
+        'categoryDescriptor': ProductCategoryDescriptor.MHR.value,
+        'productName': product_model.description,
+        'emailAddresses': recipient_emails,
+        'contactType': get_notification_contact_type(product_model.code),
+        'hasAgreementAttachment': True,
+        'attachmentType': NotificationAttachmentType.MHR_QS.value,
+    }
+    return data
+
+
+def get_notification_contact_type(product_code: str) -> str:
+    """Get the notification contact type for a product."""
+    return 'BCOL' if product_code == ProductCode.MHR_QSLN.value else 'BCREG'
