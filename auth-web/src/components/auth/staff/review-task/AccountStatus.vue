@@ -27,11 +27,11 @@
           >
             <span
               class="font-weight-bold"
-              :data-test="getIndexedTag('text-number', index)"
+              :data-test="`text-number-${index}`"
             > {{ formatNumberToTwoPlaces(index+1) }}. </span>
             <span
               class="pl-1"
-              :data-test="getIndexedTag('text-remark', index)"
+              :data-test="`text-remark-${index}`"
             > {{ remark }} </span>
           </li>
         </ul>
@@ -39,7 +39,7 @@
     </v-row>
     <v-row v-if="!isPendingReviewPage">
       <v-col class="col-12 col-sm-5 py-2">
-        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatusEnum.ACTIVE">Approved By</span>
+        <span v-if="taskDetails.relationshipStatus === TaskRelationshipStatus.ACTIVE">Approved By</span>
         <span v-if="isTaskRejected">Rejected By</span>
       </v-col>
       <v-col
@@ -76,56 +76,52 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
 import { TaskRelationshipStatus, TaskStatus } from '@/util/constants'
+import { computed, defineComponent, reactive, toRefs } from '@vue/composition-api'
 import CommonUtils from '@/util/common-util'
 import { Task } from '@/models/Task'
 import moment from 'moment'
 
-@Component({})
-export default class AccountStatusTab extends Vue {
-  @Prop({ default: null }) private tabNumber: number
-  @Prop({ default: false }) private isPendingReviewPage: boolean
-  @Prop({ default: 'Account Status' }) private title: string
-  @Prop({ default: {} }) taskDetails: Task
-  public TaskRelationshipStatusEnum = TaskRelationshipStatus
+export default defineComponent({
+  name: 'AccountStatusTab',
+  props: {
+    tabNumber: { type: Number, default: null },
+    isPendingReviewPage: { type: Boolean, required: false },
+    title: { type: String, default: 'Account Status' },
+    taskDetails: { type: Object as () => Task, default: () => null }
+  },
+  setup (props) {
+    const formatNumberToTwoPlaces = CommonUtils.formatNumberToTwoPlaces
+    const localState = reactive({
+      isAccountOnHold: computed(() => props.taskDetails?.status === TaskStatus.HOLD),
+      isTaskRejected: computed(() => props.taskDetails?.relationshipStatus === TaskRelationshipStatus.REJECTED),
+      accountOnHoldRemarks: computed(() => props.taskDetails?.remarks),
+      statusLabel: computed((): string => {
+        switch (props.taskDetails.relationshipStatus) {
+          case TaskRelationshipStatus.ACTIVE:
+            return 'Approved'
+          case TaskRelationshipStatus.REJECTED:
+            return 'Rejected'
+          case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
+            // Eg, If the task for BCEID account review is on hold then we display the status as "on hold" else "pending"
+            return localState.isAccountOnHold ? 'On Hold' : 'Pending'
+          default:
+            return ''
+        }
+      })
+    })
+    const formatDate = (date: Date): string => {
+      return moment(date).format('MMM DD, YYYY')
+    }
 
-  public formatNumberToTwoPlaces = CommonUtils.formatNumberToTwoPlaces
-
-  private get statusLabel (): string {
-    switch (this.taskDetails.relationshipStatus) {
-      case TaskRelationshipStatus.ACTIVE:
-        return 'Approved'
-      case TaskRelationshipStatus.REJECTED:
-        return 'Rejected'
-      case TaskRelationshipStatus.PENDING_STAFF_REVIEW:
-        // Eg, If the task for BCEID account review is on hold then we display the status as "on hold" else "pending"
-        return this.isAccountOnHold ? 'On Hold' : 'Pending'
-      default:
-        return ''
+    return {
+      formatDate,
+      formatNumberToTwoPlaces,
+      TaskRelationshipStatus,
+      ...toRefs(localState)
     }
   }
-
-  private get isAccountOnHold (): boolean {
-    return this.taskDetails.status === TaskStatus.HOLD
-  }
-
-  private get isTaskRejected (): boolean {
-    return this.taskDetails.relationshipStatus === this.TaskRelationshipStatusEnum.REJECTED
-  }
-
-  private get accountOnHoldRemarks (): string {
-    return this.taskDetails?.remarks
-  }
-
-  private getIndexedTag (tag, index): string {
-    return `${tag}-${index}`
-  }
-
-  private formatDate (date: Date): string {
-    return moment(date).format('MMM DD, YYYY')
-  }
-}
+})
 </script>
 <style lang="scss" scoped>
   #account-status {
