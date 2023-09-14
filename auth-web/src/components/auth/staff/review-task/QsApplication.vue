@@ -7,7 +7,7 @@
     <!-- Service Agreement -->
     <v-row>
       <v-col class="cols-12 py-2">
-        <h3>Service Agreement</h3>
+        <h3>Qualified Suppliers' Agreement</h3>
       </v-col>
     </v-row>
     <v-row>
@@ -60,7 +60,7 @@
           v-if="qsApplicantData"
           :schema="null"
           :editing="false"
-          :address="qsApplicantData.address"
+          :address="formatAddress(qsApplicantData.address)"
         />
       </v-col>
     </v-row>
@@ -120,7 +120,7 @@
         <BaseAddressForm
           :schema="null"
           :editing="false"
-          :address="accountUnderReview.mailingAddress"
+          :address="formatAddress(accountUnderReview.mailingAddress)"
         />
       </v-col>
     </v-row>
@@ -202,6 +202,7 @@
 import { QualifiedSupplierApplicant, QualifiedSupplierRequirementsConfig } from '@/models/external'
 import { computed, defineComponent, onMounted, reactive, toRefs } from '@vue/composition-api'
 import { userAccessDisplayNames, userAccessRequirements } from '@/resources/QualifiedSupplierAccessResource'
+import { Address } from '@/models/address'
 import BaseAddressForm from '@/components/auth/common/BaseAddressForm.vue'
 import CommonUtils from '@/util/common-util'
 import { Contact } from '@/models/contact'
@@ -251,10 +252,30 @@ export default defineComponent({
       return moment(date).format('MMM DD, YYYY')
     }
 
+    const formatAddress = (address: Address): Address => {
+      address && Object.keys(address).forEach(key => {
+        if (['city', 'street'].includes(key)) {
+          address[key] = address[key].toLowerCase()
+        }
+      })
+      return address
+    }
+
     return {
       formatDate,
+      formatAddress,
       ...toRefs(localState)
     }
   }
 })
 </script>
+<style lang="scss" scoped>
+@import "$assets/scss/theme.scss";
+
+::v-deep {
+  .address-block__info-row {
+    color: $gray9;
+    text-transform: capitalize;
+  }
+}
+</style>
