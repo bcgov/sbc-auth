@@ -187,7 +187,7 @@
                       hint="Name as it appears on the Business Summary or the Statement of Registration"
                       persistent-hint
                       :rules="proprietorPartnerNameRules"
-                      maxlength="150"
+                      maxlength="151"
                       autocomplete="off"
                       aria-label="Proprietor or Parter Name (e.g., Last Name, First Name Middlename)"
                     />
