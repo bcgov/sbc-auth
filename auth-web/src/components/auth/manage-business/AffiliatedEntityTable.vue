@@ -99,7 +99,6 @@
           >
             <v-icon
               class="pr-1 status-icon"
-              style="margin-top: 2px;"
               small
               :color="getAffiliationInvitationStatus(item.affiliationInvites) === AffiliationInvitationStatus.Expired
                 ? 'red' : 'primary'"
