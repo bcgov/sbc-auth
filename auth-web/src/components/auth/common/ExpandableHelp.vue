@@ -2,19 +2,14 @@
   <div>
     <div
       class="help-btn top mb-8"
-      @click="helpToggle = !helpToggle"
     >
       <v-icon color="primary">
         mdi-help-circle-outline
       </v-icon>
       <span
-        v-if="!helpToggle"
-        class="pl-2"
-      >{{ helpLabel }}</span>
-      <span
-        v-else
-        class="pl-2"
-      >Hide Help</span>
+        class="pl-2 help-label"
+        @click="helpToggle = !helpToggle"
+      >{{ !helpToggle ? helpLabel : 'Hide Help' }}</span>
     </div>
 
     <v-expand-transition>
@@ -49,8 +44,11 @@ export default class ExpandableHelp extends Vue {
 <style lang="scss" scoped>
 @import '@/assets/styles/theme.scss';
 
-.help-btn {
+.help-label {
   cursor: pointer;
+}
+
+.help-btn {
   color: $app-blue;
 }
 
