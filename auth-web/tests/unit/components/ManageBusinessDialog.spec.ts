@@ -2,17 +2,11 @@ import { Wrapper, createLocalVue, shallowMount } from '@vue/test-utils'
 import { CorpTypes } from '@/util/constants'
 import HelpDialog from '@/components/auth/common/HelpDialog.vue'
 import ManageBusinessDialog from '@/components/auth/manage-business/manage-business-dialog/ManageBusinessDialog.vue'
-import Vue from 'vue'
 import Vuetify from 'vuetify'
-import Vuex from 'vuex'
 import flushPromises from 'flush-promises'
 
-Vue.use(Vuetify)
-
 const vuetify = new Vuetify({})
-
 const localVue = createLocalVue()
-localVue.use(Vuex)
 
 const testCaseList = [
   {
@@ -142,36 +136,8 @@ describe('ManageBusinessDialog Component', () => {
     let wrapper: Wrapper<any>
 
     beforeAll(() => {
-      const orgModule = {
-        namespaced: true,
-        state: {
-          currentOrganization: {
-            name: 'new org'
-          }
-        }
-      }
-
-      const businessModule = {
-        namespaced: true,
-        state: {
-        },
-        action: {
-          addBusiness: vi.fn(),
-          updateBusinessName: vi.fn(),
-          updateFolioNumber: vi.fn()
-        }
-      }
-
-      const store = new Vuex.Store({
-        strict: false,
-        modules: {
-          org: orgModule,
-          business: businessModule
-        }
-      })
-
       wrapper = shallowMount(ManageBusinessDialog, {
-        store,
+        localVue,
         vuetify,
         propsData: {
           isStaffOrSbcStaff: test.isStaffOrSbcStaff,
@@ -180,8 +146,7 @@ describe('ManageBusinessDialog Component', () => {
           businessLegalType: test.businessLegalType
         }
       })
-    }
-    )
+    })
 
     afterAll(() => {
       wrapper.destroy()
@@ -242,5 +207,75 @@ describe('ManageBusinessDialog Component', () => {
         expect(wrapper.find('#manage-business-dialog-passcode-group').exists()).toBeFalsy()
       }
     })
+  })
+  let wrapper: Wrapper<any>
+
+  beforeAll(() => {
+    wrapper = shallowMount(ManageBusinessDialog, {
+      vuetify,
+      propsData: {
+        userFirstName: 'Nadia',
+        userLastName: 'Woodie'
+      }
+    })
+  })
+  afterAll(() => {
+    wrapper.destroy()
+  })
+  it('Should compute the correct boolean for isDialogVisible()', async () => {
+    await wrapper.setProps({ showBusinessDialog: true })
+    expect(wrapper.vm.isDialogVisible).toBe(true)
+    await wrapper.setProps({ showBusinessDialog: false })
+    expect(wrapper.vm.isDialogVisible).toBe(false)
+  })
+  it('Should compute the correct boolean for isBusinessLegalTypeFirm()', async () => {
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    expect(wrapper.vm.isBusinessLegalTypeFirm).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.PARTNERSHIP })
+    expect(wrapper.vm.isBusinessLegalTypeFirm).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
+    expect(wrapper.vm.isBusinessLegalTypeFirm).toBe(false)
+  })
+  it('Should compute the correct boolean for isBusinessLegalTypeCorporation()', async () => {
+    await wrapper.setProps({ businessLegalType: CorpTypes.BC_COMPANY })
+    expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(false)
+  })
+  it('Should compute the correct boolean for isBusinessLegalTypeBenefit()', async () => {
+    await wrapper.setProps({ businessLegalType: CorpTypes.BENEFIT_COMPANY })
+    expect(wrapper.vm.isBusinessLegalTypeBenefit).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(false)
+  })
+  it('Should compute the correct boolean for isBusinessLegalTypeCoOp()', async () => {
+    await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
+    expect(wrapper.vm.isBusinessLegalTypeCoOp).toBe(true)
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    expect(wrapper.vm.isBusinessLegalTypeCorporation).toBe(false)
+  })
+  it('Should compute the correct boolean for showAuthorization()', async () => {
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    await wrapper.setProps({ isStaffOrSbcStaff: true })
+    expect(wrapper.vm.showAuthorization).toBe(true)
+    await wrapper.setProps({ isStaffOrSbcStaff: false })
+    expect(wrapper.vm.showAuthorization).toBe(false)
+    await wrapper.setProps({ businessLegalType: CorpTypes.COOP })
+    await wrapper.setProps({ isStaffOrSbcStaff: true })
+    expect(wrapper.vm.showAuthorization).toBe(false)
+  })
+  it('Should compute the correct value for passcodeLabel(), passcodeHint() and passcodeMaxLength()', async () => {
+    await wrapper.setProps({ businessLegalType: CorpTypes.SOLE_PROP })
+    expect(wrapper.vm.passcodeLabel).toBe('Proprietor or Partner Name (e.g., Last Name, First Name Middlename)')
+    expect(wrapper.vm.passcodeHint).toBe('Name as it appears on the Business Summary or the Statement of Registration')
+    expect(wrapper.vm.passcodeMaxLength).toBe(150)
+    await wrapper.setProps({ businessLegalType: undefined })
+    expect(wrapper.vm.passcodeLabel).toBe('Password')
+    expect(wrapper.vm.passcodeHint).toBe('Password must be 8 to 15 characters')
+    expect(wrapper.vm.passcodeMaxLength).toBe(15)
+  })
+  it('Should compute the correct value for certifiedBy()', async () => {
+    await wrapper.setProps({ isStaffOrSbcStaff: false })
+    expect(wrapper.vm.certifiedBy).toBe('Woodie, Nadia')
   })
 })
