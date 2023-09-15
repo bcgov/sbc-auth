@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-row class="mx-0 mt-n4">
-      Find an existing incorporated or registered business or Name Request to manage it:
+      Retrieve an existing business or Name Request to manage:
     </v-row>
     <v-row class="mx-0 mt-n2">
       <v-radio-group
