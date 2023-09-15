@@ -39,12 +39,12 @@
                 <v-icon
                   small
                 >
-                  mdi-arrow-right-drop-circle
+                  mdi-domain
                 </v-icon>
-                <span>Get Started with a B.C.- based business</span>
+                <span>Get Started with a B.C. Based Business</span>
               </v-btn>
             </template>
-            <span id="tooltip">Go to Name Request to get started with a named or numbered business</span>
+            <span id="tooltip">Go to Name Request to get started with a named or numbered business.</span>
           </v-tooltip>
         </div>
       </div>
