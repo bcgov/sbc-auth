@@ -458,6 +458,9 @@ export default defineComponent({
     }
 
     const handleBusinessRedirect = (item): void => {
+      if (isNameRequest(item)) {
+        return
+      }
       if (isModernizedEntity(item)) {
         goToDashboard(item.businessIdentifier)
       } else if (isSocieties(item)) {
@@ -518,9 +521,9 @@ export default defineComponent({
     const showOpenButton = (item: Business): boolean => {
       return isNameRequest(item) &&
       ![NrDisplayStates.HOLD,
-       NrDisplayStates.EXPIRED,
-       NrDisplayStates.PROCESSING,
-       NrDisplayStates.DRAFT].includes(status(item) as NrDisplayStates)
+        NrDisplayStates.EXPIRED,
+        NrDisplayStates.PROCESSING,
+        NrDisplayStates.DRAFT].includes(status(item) as NrDisplayStates)
     }
 
     const showAffiliationInvitationCancelRequestButton = (item: Business): boolean => {
