@@ -179,7 +179,7 @@ class Entity:
         """Reset the entity passcode and send email."""
         user_from_context: UserContext = kwargs['user_context']
         check_auth(one_of_roles=ALL_ALLOWED_ROLES, business_identifier=business_identifier)
-        current_app.logger.debug(f'reset passcode identifier:{business_identifier}')
+        current_app.logger.debug('reset passcode')
         entity: EntityModel = EntityModel.find_by_business_identifier(business_identifier)
         # generate passcode and set
         new_pass_code = ''.join(secrets.choice(string.digits) for i in range(9))

@@ -79,6 +79,7 @@ export const useAffiliations = () => {
       // Format name request state value
       const state = NrState[(business.nameRequest.state)?.toUpperCase()]
       if (!state) return 'Unknown'
+      if (state === NrState.INPROGRESS) return NrDisplayStates.DRAFT
       if (state === NrState.APPROVED && (!business.nameRequest.expirationDate)) return NrDisplayStates.PROCESSING
       else if (business.corpType.code === CorpTypes.INCORPORATION_APPLICATION ||
               business.corpType.code === CorpTypes.REGISTRATION ||
