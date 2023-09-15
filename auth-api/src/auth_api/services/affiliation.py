@@ -225,7 +225,8 @@ class Affiliation:
 
         status = nr_json.get('state')
 
-        if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value, NRStatus.DRAFT.value):
+        if status not in (NRStatus.APPROVED.value, NRStatus.CONDITIONAL.value,
+                          NRStatus.DRAFT.value, NRStatus.INPROGRESS.value):
             raise BusinessException(Error.NR_INVALID_STATUS, None)
 
         if not nr_json.get('applicants'):

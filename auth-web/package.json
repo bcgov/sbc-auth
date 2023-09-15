@@ -1,6 +1,6 @@
 {
   "name": "auth-web",
-  "version": "2.4.12",
+  "version": "2.4.14",
   "appName": "Auth Web",
   "sbcName": "SBC Common Components",
   "private": true,
@@ -11,6 +11,7 @@
     "lint": "eslint . --ext ts,vue --fix src",
     "lint:nofix": "eslint . --ext ts,vue --no-fix",
     "test:unit": "vitest run",
+    "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {

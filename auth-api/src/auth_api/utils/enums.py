@@ -113,6 +113,7 @@ class NRStatus(Enum):
     CONDITIONAL = 'CONDITIONAL'
     DRAFT = 'DRAFT'
     CONSUMED = 'CONSUMED'
+    INPROGRESS = 'INPROGRESS'
 
 
 class NRNameStatus(Enum):
@@ -349,6 +350,6 @@ class NotificationTypes(Enum):
 
     DEFAULT_APPROVED_PRODUCT = 'prodPackageApprovedNotification'
     DEFAULT_REJECTED_PRODUCT = 'prodPackageRejectedNotification'
-    DETAILED_CONFIRMATION_PRODUCT = 'productConfirmationNotificationDetailed'
+    DETAILED_CONFIRMATION_PRODUCT = 'productConfirmationNotification'
     DETAILED_APPROVED_PRODUCT = 'productApprovedNotificationDetailed'
     DETAILED_REJECTED_PRODUCT = 'productRejectedNotificationDetailed'

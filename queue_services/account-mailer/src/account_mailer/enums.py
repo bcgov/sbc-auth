@@ -55,6 +55,7 @@ class MessageType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'bc.registry.auth.prodPackageRejectedNotification'
     PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'bc.registry.auth.productApprovedNotificationDetailed'
     PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'bc.registry.auth.productRejectedNotificationDetailed'
+    PRODUCT_CONFIRMATION_NOTIFICATION = 'bc.registry.auth.productConfirmationNotification'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'bc.registry.auth.resubmitBceidOrg'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'bc.registry.auth.resubmitBceidAdmin'
     AFFILIATION_INVITATION_REQUEST = 'bc.registry.auth.affiliationInvitationRequest'
@@ -106,6 +107,8 @@ class SubjectType(Enum):
                                              'Access Has Been Approved'
     PRODUCT_REJECTED_NOTIFICATION_DETAILED = '[BC Registries and Online Services] Your {subject_descriptor} ' \
                                              'Access Has Been Rejected'
+    PRODUCT_CONFIRMATION_NOTIFICATION = '[BC Registries and Online Services] {subject_descriptor} ' \
+                                        'Application Confirmation'
     RESUBMIT_BCEID_ORG_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
                                       'Update your information.'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = '[BC Registries and Online Services] YOUR ACTION REQUIRED: ' \
@@ -137,6 +140,7 @@ class TitleType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION = 'Your Product Request Has Been Rejected'
     PRODUCT_APPROVED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Approved'
     PRODUCT_REJECTED_NOTIFICATION_DETAILED = 'Your Product Request Has Been Rejected'
+    PRODUCT_CONFIRMATION_NOTIFICATION = 'Your Product Request Application Has Been Received'
     RESUBMIT_BCEID_ORG_NOTIFICATION = 'Your Account Creation Request is On hold '
     RESUBMIT_BCEID_ADMIN_NOTIFICATION = 'Your Team Member Request is On hold '
     AFFILIATION_INVITATION = 'Invitation to manage a business with your account.'
@@ -180,6 +184,7 @@ class TemplateType(Enum):
     PROD_PACKAGE_REJECTED_NOTIFICATION_TEMPLATE_NAME = 'prod_package_rejected_notification'
     PRODUCT_APPROVED_NOTIFICATION_DETAILED_TEMPLATE_NAME = 'product_approved_notification_detailed'
     PRODUCT_REJECTED_NOTIFICATION_DETAILED_TEMPLATE_NAME = 'product_rejected_notification_detailed'
+    PRODUCT_CONFIRMATION_NOTIFICATION_TEMPLATE_NAME = 'product_confirmation_notification'
     RESUBMIT_BCEID_ORG_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_org'
     RESUBMIT_BCEID_ADMIN_NOTIFICATION_TEMPLATE_NAME = 'resubmit_bceid_admin'
     AFFILIATION_INVITATION_REQUEST_TEMPLATE_NAME = 'affiliation_invitation_request'
@@ -190,3 +195,9 @@ class Constants(Enum):
     """Constants."""
 
     RESET_PASSCODE_HEADER = 'BC Registries have generated a new passcode for your business.'
+
+
+class AttachmentTypes(Enum):
+    """Notification Attachment Types."""
+
+    QUALIFIED_SUPPLIER = 'QUALIFIED_SUPPLIER'

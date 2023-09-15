@@ -23,9 +23,12 @@
         > {{ getModalData.title }} </span>
       </template>
       <template #text>
-        <div class="mx-8">
+        <div
+          class="mx-8 text-color"
+          :class="{ 'text-left' : isRejectModal && isMhrSubProductReview }"
+        >
           <p
-            class="mb-4 text-color sub-text-size text-justify"
+            class="mb-4 sub-text-size"
             data-test="p-modal-text"
             v-html="getModalData.text"
           />
@@ -358,7 +361,7 @@ export default defineComponent({
 
     const getTitle = (isProductApproval: boolean) => {
       if (isProductApproval) {
-        if (props.isTaskRejected) return 'Re-approve Access Request?'
+        if (props.isTaskRejected) return 'Re-Approve Access Request?'
         else return 'Approve Access Request?'
       } else {
         return 'Approve Account Creation Request?'
@@ -395,7 +398,7 @@ export default defineComponent({
 
       let icon = getIcon(props.isRejectModal)
       let color = getColor(props.isRejectModal)
-      let btnLabel = props.isTaskRejected ? 'Re-approve' : 'Approve'
+      let btnLabel = props.isTaskRejected ? 'Re-Approve' : 'Approve'
 
       if (props.isRejectModal) {
         title = isProductApproval
@@ -540,6 +543,9 @@ export default defineComponent({
     font-size: 16px;
   }
   ::v-deep {
+    .v-input .v-label {
+      color: $gray7;
+    }
     .v-textarea textarea {
       color: $gray9 !important;
       font-size: 1rem;
