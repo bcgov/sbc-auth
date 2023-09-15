@@ -19,17 +19,17 @@ from flask import current_app
 from sqlalchemy import and_, case, func, literal, or_
 from sqlalchemy.exc import SQLAlchemyError
 
-from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.exceptions import BusinessException
 from auth_api.exceptions.errors import Error
-from auth_api.services.keycloak import KeycloakService
 from auth_api.models import Membership as MembershipModel
 from auth_api.models import Org as OrgModel
 from auth_api.models import ProductCode as ProductCodeModel
 from auth_api.models import ProductSubscription as ProductSubscriptionModel
 from auth_api.models import User as UserModel
 from auth_api.models import db
+from auth_api.models.dataclass import Activity, KeycloakGroupSubscription, ProductReviewTask
 from auth_api.schemas import ProductCodeSchema
+from auth_api.services.keycloak import KeycloakService
 from auth_api.services.user import User as UserService
 from auth_api.utils.constants import BCOL_PROFILE_PRODUCT_MAP
 from auth_api.utils.enums import (
@@ -39,10 +39,13 @@ from auth_api.utils.user_context import UserContext, user_context
 
 from ..utils.account_mailer import publish_to_mailer
 from ..utils.cache import cache
+from ..utils.notifications import (
+    ProductNotificationInfo, ProductSubscriptionInfo, get_product_notification_data, get_product_notification_type)
 from ..utils.roles import CLIENT_ADMIN_ROLES, CLIENT_AUTH_ROLES, PREMIUM_ORG_TYPES, STAFF
 from .activity_log_publisher import ActivityLogPublisher
 from .authorization import check_auth
 from .task import Task as TaskService
+
 
 QUALIFIED_SUPPLIER_PRODUCT_CODES = [ProductCode.MHR_QSLN.value, ProductCode.MHR_QSHD.value,
                                     ProductCode.MHR_QSHM.value]
@@ -134,6 +137,11 @@ class Product:
                                                                   user_id=user.id,
                                                                   external_source_id=external_source_id
                                                                   ))
+                    Product._send_product_subscription_confirmation(ProductNotificationInfo(
+                        product_model=product_model,
+                        product_sub_model=product_subscription,
+                        is_confirmation=True
+                    ), org.id)
 
             else:
                 raise BusinessException(Error.DATA_NOT_FOUND, None)
@@ -142,6 +150,13 @@ class Product:
             db.session.commit()
 
         return Product.get_all_product_subscription(org_id=org_id, skip_auth=True)
+
+    @staticmethod
+    def _send_product_subscription_confirmation(product_notification_info: ProductNotificationInfo, org_id: int):
+        admin_emails = UserService.get_admin_emails_for_org(org_id)
+        product_notification_info.recipient_emails = admin_emails
+
+        Product.send_product_subscription_notification(product_notification_info)
 
     @staticmethod
     def _update_parent_subscription(org_id, sub_product_model, subscription_status):
@@ -265,15 +280,24 @@ class Product:
         return products
 
     @staticmethod
-    def update_product_subscription(product_subscription_id: int, is_approved: bool, org_id: int,
-                                    is_new_transaction: bool = True):
+    def update_product_subscription(product_sub_info: ProductSubscriptionInfo, is_new_transaction: bool = True):
         """Update Product Subscription."""
-        current_app.logger.debug('<update_task_product ')
+        current_app.logger.debug('<update_product_subscription ')
+
+        product_subscription_id = product_sub_info.product_subscription_id
+        is_approved = product_sub_info.is_approved
+        is_hold = product_sub_info.is_hold
+        org_id = product_sub_info.org_id
+
         # Approve/Reject Product subscription
         product_subscription: ProductSubscriptionModel = ProductSubscriptionModel.find_by_id(product_subscription_id)
 
+        is_reapproved = Product.is_reapproved(product_subscription.status_code, is_approved)
+
         if is_approved:
             product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
+        elif is_hold:
+            product_subscription.status_code = ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
         else:
             product_subscription.status_code = ProductSubscriptionStatus.REJECTED.value
         product_subscription.flush()
@@ -283,9 +307,14 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(product_subscription.product_code)
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
-        if admin_emails != '':
-            Product.send_approved_product_subscription_notification(admin_emails, product_model.description,
-                                                                    product_subscription.status_code)
+        if admin_emails != '' and not is_hold:
+            Product.send_product_subscription_notification(
+                ProductNotificationInfo(recipient_emails=admin_emails,
+                                        product_model=product_model,
+                                        product_sub_model=product_subscription,
+                                        is_reapproved=is_reapproved,
+                                        remarks=product_sub_info.task_remarks))
+
         else:
             # continue but log error
             current_app.logger.error('No admin email record for org id %s', org_id)
@@ -294,14 +323,14 @@ class Product:
                                                            name=product_model.description))
 
         if product_model.parent_code:
-            Product.approve_reject_parent_subscription(product_model.parent_code, is_approved, org_id,
-                                                       is_new_transaction)
+            Product.approve_reject_parent_subscription(product_model.parent_code, is_approved, is_hold,
+                                                       org_id, is_new_transaction)
 
-        current_app.logger.debug('>update_task_product ')
+        current_app.logger.debug('>update_product_subscription ')
 
     @staticmethod
-    def approve_reject_parent_subscription(parent_product_code: int, is_approved: bool, org_id: int,
-                                           is_new_transaction: bool = True):
+    def approve_reject_parent_subscription(parent_product_code: int, is_approved: bool, is_hold: bool,
+                                           org_id: int, is_new_transaction: bool = True):
         """Approve or reject Parent Product Subscription."""
         current_app.logger.debug('<approve_reject_parent_subscription ')
 
@@ -320,8 +349,12 @@ class Product:
         if status == ProductSubscriptionStatus.ACTIVE.value:
             return
 
+        is_reapproved = Product.is_reapproved(status, is_approved)
+
         if is_approved:
             product_subscription.status_code = ProductSubscriptionStatus.ACTIVE.value
+        elif is_hold:
+            product_subscription.status_code = ProductSubscriptionStatus.PENDING_STAFF_REVIEW.value
         else:
             product_subscription.status_code = ProductSubscriptionStatus.REJECTED.value
 
@@ -332,9 +365,12 @@ class Product:
         product_model: ProductCodeModel = ProductCodeModel.find_by_code(parent_product_code)
         # Find admin email addresses
         admin_emails = UserService.get_admin_emails_for_org(org_id)
-        if admin_emails != '':
-            Product.send_approved_product_subscription_notification(admin_emails, product_model.description,
-                                                                    status)
+        if admin_emails != '' and not is_hold:
+            Product.send_product_subscription_notification(
+                ProductNotificationInfo(recipient_emails=admin_emails,
+                                        product_model=product_model,
+                                        product_sub_model=product_subscription,
+                                        is_reapproved=is_reapproved))
         else:
             # continue but log error
             current_app.logger.error('No admin email record for org id %s', org_id)
@@ -344,24 +380,28 @@ class Product:
         current_app.logger.debug('>approve_reject_parent_subscription ')
 
     @staticmethod
-    def send_approved_product_subscription_notification(receipt_admin_emails, product_name,
-                                                        product_subscription_status: ProductSubscriptionStatus):
-        """Send Approved product subscription notification to the user."""
-        current_app.logger.debug('<send_approved_prod_subscription_notification')
+    def is_reapproved(product_sub_status: str, is_approved: str) -> bool:
+        """Determine if the product subscriptions is re-approved."""
+        return product_sub_status == ProductSubscriptionStatus.REJECTED.value and is_approved
 
-        if product_subscription_status == ProductSubscriptionStatus.ACTIVE.value:
-            notification_type = 'prodPackageApprovedNotification'
-        else:
-            notification_type = 'prodPackageRejectedNotification'
-        data = {
-            'productName': product_name,
-            'emailAddresses': receipt_admin_emails
-        }
+    @staticmethod
+    def send_product_subscription_notification(product_notification_info: ProductNotificationInfo):
+        """Send Approved product subscription notification to the user."""
+        current_app.logger.debug('<send_prod_subscription_notification')
+
+        notification_type = get_product_notification_type(product_notification_info)
+
+        # There is no defined notification type to handle the current state
+        if notification_type is None:
+            return
+
+        data = get_product_notification_data(product_notification_info)
+
         try:
             publish_to_mailer(notification_type, data=data)
-            current_app.logger.debug('<send_approved_prod_subscription_notification>')
+            current_app.logger.debug('<send_prod_subscription_notification>')
         except Exception as e:  # noqa=B901
-            current_app.logger.error('<send_approved_prod_subscription_notification failed')
+            current_app.logger.error('<send_prod_subscription_notification failed')
             raise BusinessException(Error.FAILED_NOTIFICATION, None) from e
 
     @staticmethod

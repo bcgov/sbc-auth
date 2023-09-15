@@ -282,7 +282,7 @@ export default defineComponent({
         const affiliationInviteInfo = business.affiliationInvites[0]
         const invitationStatus = affiliationInviteInfo.status
         if ([AffiliationInvitationStatus.Pending, AffiliationInvitationStatus.Failed,
-          AffiliationInvitationStatus.Expired].includes(invitationStatus)) {
+          AffiliationInvitationStatus.Expired].includes(invitationStatus as AffiliationInvitationStatus)) {
           const success = await AffiliationInvitationService.removeAffiliationInvitation(affiliationInviteInfo.id)
           if (!success) {
             context.emit('unknown-error')
@@ -517,7 +517,10 @@ export default defineComponent({
 
     const showOpenButton = (item: Business): boolean => {
       return isNameRequest(item) &&
-      ![NrDisplayStates.HOLD, NrDisplayStates.EXPIRED, NrDisplayStates.PROCESSING].includes(status(item) as NrDisplayStates)
+      ![NrDisplayStates.HOLD,
+       NrDisplayStates.EXPIRED,
+       NrDisplayStates.PROCESSING,
+       NrDisplayStates.DRAFT].includes(status(item) as NrDisplayStates)
     }
 
     const showAffiliationInvitationCancelRequestButton = (item: Business): boolean => {

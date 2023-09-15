@@ -215,7 +215,8 @@ export enum NrState {
     CANCELLED = 'CANCELLED',
     EXPIRED = 'EXPIRED',
     CONSUMED = 'CONSUMED',
-    PROCESSING = 'PROCESSING'
+    PROCESSING = 'PROCESSING',
+    INPROGRESS = 'INPROGRESS'
 }
 
 export enum NrDisplayStates {
