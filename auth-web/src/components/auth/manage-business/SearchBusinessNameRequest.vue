@@ -9,7 +9,7 @@
         row
       >
         <v-radio
-          label="Incorporated or Registered business"
+          label="Existing business"
           value="Incorporated"
         />
         <v-radio
