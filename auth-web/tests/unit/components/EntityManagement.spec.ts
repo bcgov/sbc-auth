@@ -198,4 +198,115 @@ describe('Entity Management Component', () => {
     expect(wrapper.vm.dialogTitle).toBe('Error Adding a Business to Your Account')
     expect(wrapper.vm.dialogText).toBe('An error occurred adding your business. Please try again.')
   })
+
+  it('Should set the correct values when showNRNotFoundModal(label) is called', () => {
+    const label = 'Password'
+    wrapper.vm.showInvalidCodeModal(label)
+    expect(wrapper.vm.showManageBusinessDialog).toBe(false)
+    expect(wrapper.vm.dialogTitle).toBe(`Invalid ${label}`)
+    expect(wrapper.vm.dialogText).toBe(`Unable to add the business. The provided ${label.toLowerCase()} is invalid.`)
+  })
+
+  it('Should set the correct values when showEntityNotFoundModal(label) is called', () => {
+    const label = 'Password'
+    wrapper.vm.showEntityNotFoundModal(label)
+    expect(wrapper.vm.showManageBusinessDialog).toBe(false)
+    expect(wrapper.vm.dialogTitle).toBe('Business Not Found')
+    expect(wrapper.vm.dialogText).toBe('The specified business was not found.')
+  })
+
+  it('Should set the correct values when showBusinessAlreadyAdded(event) is called', () => {
+    const event = {
+      name: 'test',
+      identifier: 'test'
+    }
+    const businessNameText = event.name ? `${event.name}` : ''
+    wrapper.vm.showBusinessAlreadyAdded(event)
+    expect(wrapper.vm.showManageBusinessDialog).toBe(false)
+    expect(wrapper.vm.dialogTitle).toBe('Business Already Added')
+    expect(wrapper.vm.dialogText).toBe(
+      `The business ${businessNameText} with the business number ${event.identifier} is already in your Business Registry List.`
+    )
+  })
+
+  it('Should set the correct values when showPasscodeClaimedModal() is called', () => {
+    const contactNumber = 'test'
+    wrapper.vm.showPasscodeClaimedModal()
+    expect(wrapper.vm.dialogTitle).toBe('Passcode Already Claimed')
+    expect(wrapper.vm.dialogText).toBe(`This passcode has already been claimed. If you have questions, please call ${contactNumber}`)
+  })
+
+  it('Should set the correct values when showUnknownErrorModal(type) is called', () => {
+    let type = 'business'
+    wrapper.vm.showUnknownErrorModal(type)
+    expect(wrapper.vm.showManageBusinessDialog).toBe(false)
+    expect(wrapper.vm.dialogTitle).toBe('Error Adding Existing Business')
+    expect(wrapper.vm.dialogText).toBe('An error occurred adding your business. Please try again.')
+    type = 'nr'
+    wrapper.vm.showUnknownErrorModal(type)
+    expect(wrapper.vm.dialogTitle).toBe('Error Adding Existing Name Request')
+    expect(wrapper.vm.dialogText).toBe(
+      'We couldn\'t find a name request associated with the phone number or email address you entered. Please try again.'
+    )
+    type = 'other'
+    wrapper.vm.showUnknownErrorModal(type)
+    expect(wrapper.vm.dialogTitle).toBe('Something Went Wrong')
+    expect(wrapper.vm.dialogText).toBe('An error occurred, please try again. If this error persists, please contact us.')
+  })
+
+  it('Should set the correct values when showNRNotFoundModal() is called', () => {
+    wrapper.vm.showNRNotFoundModal()
+    expect(wrapper.vm.dialogTitle).toBe('Name Request Not Found')
+    expect(wrapper.vm.dialogText).toBe('The specified name request was not found.')
+  })
+
+  it('Should set the correct values when showCreateAffiliationInvitationErrorDialog() is called', () => {
+    wrapper.vm.showCreateAffiliationInvitationErrorDialog()
+    expect(wrapper.vm.dialogTitle).toBe('Error Sending Authorization Email')
+    expect(wrapper.vm.dialogText).toBe('An error occurred sending authorization email. Please try again.')
+  })
+
+  it('Should set the correct values when showBusinessUnavailableModal(action) is called', () => {
+    let action = 'test'
+    wrapper.vm.showBusinessUnavailableModal(action)
+    expect(wrapper.vm.dialogTitle).toBe('Business unavailable')
+    expect(wrapper.vm.dialogText).toBe(
+      'You are not authorized to access the business you wish to test. Please add this business to your table to continue.'
+    )
+    action = 'change name'
+    wrapper.vm.showBusinessUnavailableModal(action)
+    expect(wrapper.vm.dialogTitle).toBe('Business unavailable')
+    expect(wrapper.vm.dialogText).toBe(
+      'You are not authorized to access the business to change its name. Please add this business to your table to continue.'
+    )
+  })
+
+  it('Should set the correct values when showAddBusinessModal() is called', () => {
+    wrapper.vm.showAddBusinessModal()
+    expect(wrapper.vm.showManageBusinessDialog).toBe(true)
+  })
+
+  it('Should set the correct values when populateNRmodalValues() is called', () => {
+    wrapper.vm.populateNRmodalValues()
+    expect(wrapper.vm.primaryBtnText).toBe('Remove Name Request')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Name Request')
+  })
+
+  it('Should set the correct values when populateIAmodalValues() is called', () => {
+    wrapper.vm.populateIAmodalValues()
+    expect(wrapper.vm.primaryBtnText).toBe('Delete Incorporation Application')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Incorporation Application')
+  })
+
+  it('Should set the correct values when populateRegistrationModalValues() is called', () => {
+    wrapper.vm.populateRegistrationModalValues()
+    expect(wrapper.vm.primaryBtnText).toBe('Delete Registration')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
+  })
+
+  it('Should set the correct values when populateFirmModalValues() is called', () => {
+    wrapper.vm.populateFirmModalValues()
+    expect(wrapper.vm.primaryBtnText).toBe('Remove Registration')
+    expect(wrapper.vm.secondaryBtnText).toBe('Keep Registration')
+  })
 })
