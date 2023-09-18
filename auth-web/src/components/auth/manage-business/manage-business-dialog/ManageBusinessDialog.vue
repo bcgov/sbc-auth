@@ -4,6 +4,7 @@
       ref="createAffiliationInvitationErrorDialog"
       :title="createAffiliationInvitationErrorTitle"
       :text="createAffiliationInvitationErrorText"
+      :show-help="true"
       dialog-class="notify-dialog"
       max-width="640"
     >
@@ -40,6 +41,7 @@
         dialog-class="notify-dialog"
         max-width="640"
         :show-icon="false"
+        :show-help="true"
         @open-help="openHelp"
       >
         <template #title>
@@ -133,7 +135,7 @@
             >
               <v-list class="mr-2">
                 <v-list-group
-                  v-if="isBusinessLegalTypeCorporationOrBenefitOrCoop && hasBusinessAuthentication"
+                  v-if="showPasscodeOption"
                   id="manage-business-dialog-passcode-group"
                   v-model="passcodeOption"
                   class="top-of-list"
@@ -377,6 +379,10 @@ export default defineComponent({
       default: ''
     }
   },
+  emits: ['hide-manage-business-dialog', 'on-authorization-email-sent-close', 'add-failed-invalid-code',
+    'add-failed-no-entity', 'add-failed-passcode-claimed', 'business-already-added', 'unknown-error',
+    'show-create-affiliation-invitation-error-dialog', 'affiliation-invitation-pending', 'add-success',
+    'on-business-identifier'],
   setup (props, { emit }) {
     // Store and Actions
     const businessStore = useBusinessStore()
@@ -597,7 +603,7 @@ export default defineComponent({
       addBusinessForm.value?.resetValidation()
       isLoading.value = false
       if (emitCancel) {
-        emit('on-cancel')
+        emit('hide-manage-business-dialog')
       }
     }
 
@@ -738,6 +744,11 @@ export default defineComponent({
       !enableDelegationFeature.value
     })
 
+    const showPasscodeOption = computed(() => {
+      const allowableBusinessPasscodeTypes: string = LaunchDarklyService.getFlag(LDFlags.AllowableBusinessPasscodeTypes) || 'BC,SP,GP'
+      return allowableBusinessPasscodeTypes.includes(props.businessLegalType) && hasBusinessAuthentication.value
+    })
+
     watch(() => props.initialBusinessIdentifier, async (newBusinessIdentifier: string) => {
       if (props.isStaffOrSbcStaff) { return }
       if (newBusinessIdentifier) {
@@ -854,7 +865,8 @@ export default defineComponent({
       createAffiliationInvitationErrorText,
       closeCreateAffiliationInvitationErrorDialog,
       showEmailOption,
-      isBusinessLegalTypeCorporationOrBenefitOrCoop
+      isBusinessLegalTypeCorporationOrBenefitOrCoop,
+      showPasscodeOption
     }
   }
 })

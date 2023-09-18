@@ -434,7 +434,8 @@ export enum LDFlags {
     ProductWillsStatus = 'product-VS-status',
     SentryEnable = 'sentry-enable',
     SupportRestorationEntities = 'supported-restoration-entities',
-    AllowableBusinessSearchTypes = 'allowable-business-search-types'
+    AllowableBusinessSearchTypes = 'allowable-business-search-types',
+    AllowableBusinessPasscodeTypes = 'allowable-business-passcode-types'
 }
 
 export enum DateFilterCodes {
